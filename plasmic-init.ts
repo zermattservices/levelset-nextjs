@@ -15,6 +15,7 @@ import { EmailSignInForm } from "./components/CodeComponents/auth/EmailSignInFor
 import { UserProfile } from "./components/CodeComponents/auth/UserProfile";
 import { ProtectedRoute } from "./components/CodeComponents/auth/ProtectedRoute";
 import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
+import { UserProfileDisplay } from "./components/CodeComponents/UserProfileDisplay";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
 const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";

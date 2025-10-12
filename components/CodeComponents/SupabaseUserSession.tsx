@@ -105,11 +105,28 @@ export function SupabaseUserSession({
     return subscription.unsubscribe;
   }, [fetchAppUserData]);
 
-  // Combined user data object for Plasmic
-  const userData: UserWithAppData = {
-    auth: currentUser,
-    appUser: appUser,
+  // Flatten the data structure for Plasmic dynamic values
+  const userData = {
+    // Basic auth data
+    email: currentUser?.email || '',
+    id: currentUser?.id || '',
     isLoaded: isLoaded,
+    
+    // App user data (flattened)
+    first_name: appUser?.first_name || '',
+    last_name: appUser?.last_name || '',
+    full_name: appUser?.full_name || '',
+    role: appUser?.role || '',
+    org_id: appUser?.org_id || '',
+    location_id: appUser?.location_id || '',
+    employee_id: appUser?.employee_id || '',
+    phone: appUser?.phone || '',
+    hire_date: appUser?.hire_date || '',
+    active: appUser?.active || false,
+    
+    // Full objects for components that need them
+    authUser: currentUser,
+    appUser: appUser,
   };
 
   return (
