@@ -69,7 +69,28 @@ PLASMIC.registerComponent(DisciplineTable, {
   name: "DisciplineTable",
   displayName: "Discipline Table",
   props: {
-    className: "string"
+    orgId: {
+      type: "string",
+      defaultValue: "default-org",
+      description: "Organization ID for filtering discipline data"
+    },
+    locationId: {
+      type: "string", 
+      defaultValue: "default-location",
+      description: "Location ID for filtering discipline data"
+    },
+    className: "string",
+    density: {
+      type: "choice",
+      options: ["comfortable", "compact"],
+      defaultValue: "comfortable",
+      description: "Table density/spacing"
+    },
+    showActions: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Whether to show action buttons"
+    }
   },
   importPath: "./components/CodeComponents/DisciplineTable",
 });
@@ -124,8 +145,24 @@ PLASMIC.registerComponent(ScoreboardTable, {
   name: "ScoreboardTable",
   displayName: "Scoreboard Table",
   props: {
+    bundleUrl: {
+      type: "string",
+      defaultValue: "https://storage.googleapis.com/trainingapp-assets/snapshots/buda/all.json",
+      description: "URL to the scoreboard data bundle"
+    },
+    currentTab: {
+      type: "choice",
+      options: ["FOH", "BOH"],
+      defaultValue: "FOH",
+      description: "Currently active tab"
+    },
+    activeGroup: {
+      type: "choice",
+      options: ["FOH", "BOH"], 
+      defaultValue: "FOH",
+      description: "Active group filter"
+    },
     className: "string",
-    bundleUrl: "string",
   },
   importPath: "./components/CodeComponents/ScoreboardTable",
 });
