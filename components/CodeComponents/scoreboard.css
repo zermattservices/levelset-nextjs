@@ -516,7 +516,7 @@ td.v-red, th.v-red {
   height: 24px;
   border-radius: 50%;
   border: 1px solid #6b7280; /* Dark gray border */
-  background: transparent;
+  background: #ffffff; /* White background */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -524,26 +524,34 @@ td.v-red, th.v-red {
   transition: all 0.2s ease;
   padding: 0;
   margin: 0;
+  outline: none; /* Remove any default outline */
+  box-shadow: none; /* Remove any box shadow */
 }
 
 .actions-button:hover {
-  background-color: #f3f4f6;
-  border-color: #374151;
+  background-color: #f8f9fa;
+  border-color: #4b5563;
 }
 
 .actions-button:active {
-  background-color: #e5e7eb;
+  background-color: #f1f3f4;
   transform: scale(0.95);
+}
+
+.actions-button:focus {
+  outline: none; /* Remove focus outline */
+  box-shadow: none; /* Remove focus shadow */
 }
 
 .actions-button svg {
   width: 12px;
   height: 12px;
   color: #6b7280; /* Dark gray icon */
+  stroke-width: 1.5; /* Ensure clean icon rendering */
 }
 
 .actions-button:hover svg {
-  color: #374151; /* Darker gray on hover */
+  color: #4b5563; /* Darker gray on hover */
 }
 
 /* Specific button types */
