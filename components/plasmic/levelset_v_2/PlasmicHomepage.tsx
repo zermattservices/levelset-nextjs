@@ -142,16 +142,61 @@ function PlasmicHomepage__RenderFunc(props: {
         initFunc: ({ $props, $state, $queries, $ctx }) => "Buda FSU"
       },
       {
-        path: "menuNavigation.userName",
+        path: "menuNavigation.firstName",
         type: "private",
         variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "Default User"
+        initFunc: ({ $props, $state, $queries, $ctx }) =>
+          (() => {
+            try {
+              return $ctx.auth.first_name;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return undefined;
+              }
+              throw e;
+            }
+          })()
       },
       {
         path: "menuNavigation.userRole",
         type: "private",
         variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "Test Role"
+        initFunc: ({ $props, $state, $queries, $ctx }) =>
+          (() => {
+            try {
+              return $ctx.auth.role;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return undefined;
+              }
+              throw e;
+            }
+          })()
+      },
+      {
+        path: "menuNavigation.lastName",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) =>
+          (() => {
+            try {
+              return $ctx.auth.last_name;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return undefined;
+              }
+              throw e;
+            }
+          })()
       }
     ],
     [$props, $ctx, $refs]
@@ -206,14 +251,22 @@ function PlasmicHomepage__RenderFunc(props: {
           data-plasmic-name={"menuNavigation"}
           data-plasmic-override={overrides.menuNavigation}
           className={classNames("__wab_instance", sty.menuNavigation)}
+          firstName={generateStateValueProp($state, [
+            "menuNavigation",
+            "firstName"
+          ])}
+          lastName={generateStateValueProp($state, [
+            "menuNavigation",
+            "lastName"
+          ])}
           locationName={generateStateValueProp($state, [
             "menuNavigation",
             "locationName"
           ])}
-          onLocationNameChange={async (...eventArgs: any) => {
+          onFirstNameChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
               "menuNavigation",
-              "locationName"
+              "firstName"
             ]).apply(null, eventArgs);
 
             if (
@@ -224,10 +277,24 @@ function PlasmicHomepage__RenderFunc(props: {
               return;
             }
           }}
-          onUserNameChange={async (...eventArgs: any) => {
+          onLastNameChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
               "menuNavigation",
-              "userName"
+              "lastName"
+            ]).apply(null, eventArgs);
+
+            if (
+              eventArgs.length > 1 &&
+              eventArgs[1] &&
+              eventArgs[1]._plasmic_state_init_
+            ) {
+              return;
+            }
+          }}
+          onLocationNameChange={async (...eventArgs: any) => {
+            generateStateOnChangeProp($state, [
+              "menuNavigation",
+              "locationName"
             ]).apply(null, eventArgs);
 
             if (
@@ -252,10 +319,6 @@ function PlasmicHomepage__RenderFunc(props: {
               return;
             }
           }}
-          userName={generateStateValueProp($state, [
-            "menuNavigation",
-            "userName"
-          ])}
           userRole={generateStateValueProp($state, [
             "menuNavigation",
             "userRole"
