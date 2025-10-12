@@ -16,6 +16,7 @@ import { UserProfile } from "./components/CodeComponents/auth/UserProfile";
 import { ProtectedRoute } from "./components/CodeComponents/auth/ProtectedRoute";
 import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
 import { LogoutButton } from "./components/CodeComponents/auth/LogoutButton";
+import { SupabaseUserLogOut } from "./components/CodeComponents/auth/SupabaseUserLogOut";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
 const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
@@ -282,4 +283,20 @@ PLASMIC.registerComponent(LogoutButton, {
     }
   },
   importPath: "./components/CodeComponents/auth/LogoutButton",
+});
+
+// Register SupabaseUserLogOut component
+PLASMIC.registerComponent(SupabaseUserLogOut, {
+  name: "SupabaseUserLogOut",
+  displayName: "Supabase User Log Out",
+  props: {
+    children: "slot",
+    className: "string",
+    onSuccess: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Action to perform after successful logout"
+    }
+  },
+  importPath: "./components/CodeComponents/auth/SupabaseUserLogOut",
 });
