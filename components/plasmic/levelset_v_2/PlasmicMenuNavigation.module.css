@@ -86,7 +86,6 @@
   min-width: 0;
 }
 .freeBox__xTe9W {
-  display: flex;
   flex-direction: row;
   position: relative;
   align-items: stretch;
@@ -94,6 +93,7 @@
   width: auto;
   height: auto;
   max-width: 100%;
+  display: none;
   padding: 8px;
 }
 .freeBox__sltyv {
@@ -217,8 +217,13 @@
   flex-direction: row;
   min-width: 100px;
   flex-shrink: 0;
+  column-gap: 4px;
 }
 .slotTargetChildren3 {
+  font-weight: 600;
+  font-size: var(--token-7z5Kw5B89TZR);
+}
+.slotTargetChildren4 {
   font-weight: 600;
   font-size: var(--token-7z5Kw5B89TZR);
 }

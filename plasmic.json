@@ -604,6 +604,11 @@
           "id": "toHk5so5hjnw",
           "name": "placeholder 2",
           "filePath": "../public/plasmic/levelset_v_2/images/placeholder2.svg"
+        },
+        {
+          "id": "PRmgS5757J8M",
+          "name": "Circle C CFA.png",
+          "filePath": "../public/plasmic/levelset_v_2/images/circleCCfaPng.png"
         }
       ],
       "indirect": false,

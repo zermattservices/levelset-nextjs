@@ -141,16 +141,61 @@ function PlasmicDiscipline__RenderFunc(props: {
         initFunc: ({ $props, $state, $queries, $ctx }) => "Buda FSU"
       },
       {
-        path: "menuNavigation.userName",
+        path: "menuNavigation.firstName",
         type: "private",
         variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "Default User"
+        initFunc: ({ $props, $state, $queries, $ctx }) =>
+          (() => {
+            try {
+              return $ctx.auth.first_name;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return undefined;
+              }
+              throw e;
+            }
+          })()
       },
       {
         path: "menuNavigation.userRole",
         type: "private",
         variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "Test Role"
+        initFunc: ({ $props, $state, $queries, $ctx }) =>
+          (() => {
+            try {
+              return $ctx.auth.role;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return undefined;
+              }
+              throw e;
+            }
+          })()
+      },
+      {
+        path: "menuNavigation.lastName",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) =>
+          (() => {
+            try {
+              return $ctx.auth.last_name;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return undefined;
+              }
+              throw e;
+            }
+          })()
       }
     ],
     [$props, $ctx, $refs]
@@ -205,14 +250,22 @@ function PlasmicDiscipline__RenderFunc(props: {
           data-plasmic-name={"menuNavigation"}
           data-plasmic-override={overrides.menuNavigation}
           className={classNames("__wab_instance", sty.menuNavigation)}
+          firstName={generateStateValueProp($state, [
+            "menuNavigation",
+            "firstName"
+          ])}
+          lastName={generateStateValueProp($state, [
+            "menuNavigation",
+            "lastName"
+          ])}
           locationName={generateStateValueProp($state, [
             "menuNavigation",
             "locationName"
           ])}
-          onLocationNameChange={async (...eventArgs: any) => {
+          onFirstNameChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
               "menuNavigation",
-              "locationName"
+              "firstName"
             ]).apply(null, eventArgs);
 
             if (
@@ -223,10 +276,24 @@ function PlasmicDiscipline__RenderFunc(props: {
               return;
             }
           }}
-          onUserNameChange={async (...eventArgs: any) => {
+          onLastNameChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
               "menuNavigation",
-              "userName"
+              "lastName"
+            ]).apply(null, eventArgs);
+
+            if (
+              eventArgs.length > 1 &&
+              eventArgs[1] &&
+              eventArgs[1]._plasmic_state_init_
+            ) {
+              return;
+            }
+          }}
+          onLocationNameChange={async (...eventArgs: any) => {
+            generateStateOnChangeProp($state, [
+              "menuNavigation",
+              "locationName"
             ]).apply(null, eventArgs);
 
             if (
@@ -251,10 +318,6 @@ function PlasmicDiscipline__RenderFunc(props: {
               return;
             }
           }}
-          userName={generateStateValueProp($state, [
-            "menuNavigation",
-            "userName"
-          ])}
           userRole={generateStateValueProp($state, [
             "menuNavigation",
             "userRole"
@@ -311,6 +374,10 @@ function PlasmicDiscipline__RenderFunc(props: {
                 data-plasmic-name={"disciplineTable"}
                 data-plasmic-override={overrides.disciplineTable}
                 className={classNames("__wab_instance", sty.disciplineTable)}
+                density={"comfortable"}
+                locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                showActions={true}
               />
             </div>
             <div
@@ -334,8 +401,10 @@ function PlasmicDiscipline__RenderFunc(props: {
                   "__wab_instance",
                   sty.disciplineActionsTable
                 )}
+                density={"comfortable"}
                 locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
                 orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                showActions={false}
               />
             </div>
           </div>

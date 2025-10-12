@@ -90,13 +90,16 @@ export const PlasmicMenuNavigation__VariantProps = new Array<VariantPropType>(
 export type PlasmicMenuNavigation__ArgsType = {
   locationName?: string;
   onLocationNameChange?: (val: string) => void;
-  userName?: string;
-  onUserNameChange?: (val: string) => void;
+  firstName?: string;
+  onFirstNameChange?: (val: string) => void;
   userRole?: string;
   onUserRoleChange?: (val: string) => void;
   logoutShown?: boolean;
+  lastName?: string;
+  onLastNameChange?: (val: string) => void;
   children2?: React.ReactNode;
   children3?: React.ReactNode;
+  children4?: React.ReactNode;
   slot3?: React.ReactNode;
   children?: React.ReactNode;
 };
@@ -104,13 +107,16 @@ type ArgPropType = keyof PlasmicMenuNavigation__ArgsType;
 export const PlasmicMenuNavigation__ArgProps = new Array<ArgPropType>(
   "locationName",
   "onLocationNameChange",
-  "userName",
-  "onUserNameChange",
+  "firstName",
+  "onFirstNameChange",
   "userRole",
   "onUserRoleChange",
   "logoutShown",
+  "lastName",
+  "onLastNameChange",
   "children2",
   "children3",
+  "children4",
   "slot3",
   "children"
 );
@@ -124,13 +130,16 @@ export type PlasmicMenuNavigation__OverridesType = {
 export interface DefaultMenuNavigationProps {
   locationName?: string;
   onLocationNameChange?: (val: string) => void;
-  userName?: string;
-  onUserNameChange?: (val: string) => void;
+  firstName?: string;
+  onFirstNameChange?: (val: string) => void;
   userRole?: string;
   onUserRoleChange?: (val: string) => void;
   logoutShown?: boolean;
+  lastName?: string;
+  onLastNameChange?: (val: string) => void;
   children2?: React.ReactNode;
   children3?: React.ReactNode;
+  children4?: React.ReactNode;
   slot3?: React.ReactNode;
   children?: React.ReactNode;
   dashboardOpen?: SingleBooleanChoiceArg<"dashboardOpen">;
@@ -189,12 +198,12 @@ function PlasmicMenuNavigation__RenderFunc(props: {
         onChangeProp: "onLocationNameChange"
       },
       {
-        path: "userName",
+        path: "firstName",
         type: "writable",
         variableType: "text",
 
-        valueProp: "userName",
-        onChangeProp: "onUserNameChange"
+        valueProp: "firstName",
+        onChangeProp: "onFirstNameChange"
       },
       {
         path: "userRole",
@@ -215,6 +224,14 @@ function PlasmicMenuNavigation__RenderFunc(props: {
         type: "private",
         variableType: "boolean",
         initFunc: ({ $props, $state, $queries, $ctx }) => false
+      },
+      {
+        path: "lastName",
+        type: "writable",
+        variableType: "text",
+
+        valueProp: "lastName",
+        onChangeProp: "onLastNameChange"
       }
     ],
     [$props, $ctx, $refs]
@@ -415,9 +432,9 @@ function PlasmicMenuNavigation__RenderFunc(props: {
               displayWidth={"40px"}
               loading={"lazy"}
               src={{
-                src: "/plasmic/levelset_v_2/images/avatar.jpg",
-                fullWidth: 108,
-                fullHeight: 109,
+                src: "/plasmic/levelset_v_2/images/circleCCfaPng.png",
+                fullWidth: 4167,
+                fullHeight: 4167,
                 aspectRatio: undefined
               }}
             />
@@ -429,7 +446,7 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                     <React.Fragment>
                       {(() => {
                         try {
-                          return $state.userName;
+                          return $state.firstName;
                         } catch (e) {
                           if (
                             e instanceof TypeError ||
@@ -444,6 +461,27 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                   ),
                   value: args.children3,
                   className: classNames(sty.slotTargetChildren3)
+                })}
+                {renderPlasmicSlot({
+                  defaultContents: (
+                    <React.Fragment>
+                      {(() => {
+                        try {
+                          return $state.lastName;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return "Reece Howard";
+                          }
+                          throw e;
+                        }
+                      })()}
+                    </React.Fragment>
+                  ),
+                  value: args.children4,
+                  className: classNames(sty.slotTargetChildren4)
                 })}
               </div>
               <div className={classNames(projectcss.all, sty.freeBox__cxGXx)}>
