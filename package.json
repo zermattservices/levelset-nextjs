@@ -9,8 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.0",
+    "@ant-design/pro-components": "^2.6.4",
     "@plasmicapp/loader-nextjs": "^1.0.441",
     "@plasmicapp/react-web": "^0.2.404",
+    "@plasmicpkgs/antd5": "^0.0.306",
+    "@plasmicpkgs/plasmic-basic-components": "^0.0.255",
+    "@plasmicpkgs/plasmic-embed-css": "^0.1.212",
+    "@plasmicpkgs/plasmic-nav": "^0.0.197",
+    "@plasmicpkgs/plasmic-rich-components": "^1.0.223",
+    "@plasmicpkgs/react-aria": "^0.0.154",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.48.0",
     "next": "^14.2.5",

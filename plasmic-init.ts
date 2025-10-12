@@ -16,8 +16,8 @@ import { UserProfile } from "./components/CodeComponents/auth/UserProfile";
 import { ProtectedRoute } from "./components/CodeComponents/auth/ProtectedRoute";
 import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
 
-const plasmicProjectId = (process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx").trim();
-const plasmicApiToken = (process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg").trim();
+const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
+const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
 
 export const PLASMIC = initPlasmicLoader({
   projects: [
@@ -28,7 +28,7 @@ export const PLASMIC = initPlasmicLoader({
   ],
   // Fetches the latest revisions, whether or not they were unpublished!
   // Disable for production to ensure you render only published changes.
-  preview: process.env.NODE_ENV === "development",
+  preview: true,
 });
 
 // Register SupabaseUserSession global context

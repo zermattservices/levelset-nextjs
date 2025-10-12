@@ -75,3 +75,41 @@ Import trace for requested module:
  ✓ Compiled in 275ms (402 modules)
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/server-development/0.pack.gz_' -> '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/server-development/0.pack.gz'
  ✓ Compiled in 271ms (402 modules)
+ ✓ Compiled in 154ms (402 modules)
+2025-10-12T20:47:45.001Z: Project eNCsaJXBZ9ykYnmvxCb8Zx updated to version 2.1.0
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/client-development/0.pack.gz_' -> '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/client-development/0.pack.gz'
+ ✓ Compiled in 350ms (402 modules)
+ ✓ Compiled in 203ms (402 modules)
+ ✓ Compiled in 112ms (402 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from /Users/andrewdyar/levelset-nextjs/.next/cache/webpack/client-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from /Users/andrewdyar/levelset-nextjs/.next/cache/webpack/server-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/client-development/0.pack.gz_' -> '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/client-development/0.pack.gz'
+ ⚠ Failed to reload dynamic routes: Error: You cannot define a route with the same specificity as a optional catch-all route ("/" and "/[[...catchall]]").
+    at UrlNode._smoosh (/Users/andrewdyar/levelset-nextjs/node_modules/next/dist/shared/lib/router/utils/sorted-routes.js:42:23)
+    at UrlNode.smoosh (/Users/andrewdyar/levelset-nextjs/node_modules/next/dist/shared/lib/router/utils/sorted-routes.js:16:21)
+    at getSortedRoutes (/Users/andrewdyar/levelset-nextjs/node_modules/next/dist/shared/lib/router/utils/sorted-routes.js:167:17)
+    at Watchpack.<anonymous> (/Users/andrewdyar/levelset-nextjs/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js:558:65)
+ ✓ Compiled in 162ms (402 modules)
+ ⚠ Failed to reload dynamic routes: Error: You cannot define a route with the same specificity as a optional catch-all route ("/" and "/[[...catchall]]").
+    at UrlNode._smoosh (/Users/andrewdyar/levelset-nextjs/node_modules/next/dist/shared/lib/router/utils/sorted-routes.js:42:23)
+    at UrlNode.smoosh (/Users/andrewdyar/levelset-nextjs/node_modules/next/dist/shared/lib/router/utils/sorted-routes.js:16:21)
+    at getSortedRoutes (/Users/andrewdyar/levelset-nextjs/node_modules/next/dist/shared/lib/router/utils/sorted-routes.js:167:17)
+    at Watchpack.<anonymous> (/Users/andrewdyar/levelset-nextjs/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js:558:65)
+ ⚠ ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[1]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[2]!./components/CodeComponents/scoreboard.css
+Warning
+
+(109:3) autoprefixer: start value has mixed support, consider using flex-start instead
+
+Import trace for requested module:
+./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[1]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[2]!./components/CodeComponents/scoreboard.css
+./components/CodeComponents/scoreboard.css
+<w> [webpack.cache.PackFileCacheStrategy] Skipped not serializable cache item 'Compilation/modules|/Users/andrewdyar/levelset-nextjs/node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[1]!/Users/andrewdyar/levelset-nextjs/node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[2]!/Users/andrewdyar/levelset-nextjs/components/CodeComponents/scoreboard.css': No serializer registered for Warning
+<w> while serializing webpack/lib/cache/PackFileCacheStrategy.PackContentItems -> webpack/lib/NormalModule -> Array { 1 items } -> webpack/lib/ModuleWarning -> Warning
+ ⚠ ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[1]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[2]!./components/CodeComponents/scoreboard.css
+Warning
+
+(109:3) autoprefixer: start value has mixed support, consider using flex-start instead
+
+Import trace for requested module:
+./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[1]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[2]!./components/CodeComponents/scoreboard.css
+./components/CodeComponents/scoreboard.css
