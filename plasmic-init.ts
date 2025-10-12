@@ -2,11 +2,22 @@ import { initPlasmicLoader } from "@plasmicapp/loader-nextjs";
 import { SupabaseUserSession } from "./components/CodeComponents/SupabaseUserSession";
 import { RedirectIf } from "./components/CodeComponents/RedirectIf";
 import { DisciplineTable } from "./components/CodeComponents/DisciplineTable";
+import { DisciplineActionsTable } from "./components/CodeComponents/DisciplineActionsTable";
+import { RosterTable } from "./components/CodeComponents/RosterTable";
 import { FohBohSlider } from "./components/CodeComponents/FohBohSlider";
+import { Scoreboard } from "./components/CodeComponents/Scoreboard";
+import { ScoreboardTable } from "./components/CodeComponents/ScoreboardTable";
+import { PEARubric } from "./components/CodeComponents/PEARubric";
+import { PositionButtons } from "./components/CodeComponents/PositionButtons";
 import { LoginPageForm } from "./components/CodeComponents/auth/LoginPageForm";
+import { GoogleSignInButton } from "./components/CodeComponents/auth/GoogleSignInButton";
+import { EmailSignInForm } from "./components/CodeComponents/auth/EmailSignInForm";
+import { UserProfile } from "./components/CodeComponents/auth/UserProfile";
+import { ProtectedRoute } from "./components/CodeComponents/auth/ProtectedRoute";
+import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
 
-const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
-const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
+const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "";
+const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "";
 
 export const PLASMIC = initPlasmicLoader({
   projects: [
@@ -20,65 +31,203 @@ export const PLASMIC = initPlasmicLoader({
   preview: true,
 });
 
-// Register SupabaseUserSession global context
 PLASMIC.registerGlobalContext(SupabaseUserSession, {
   name: "SupabaseUserSession",
-  providesData: true,
-  props: {
-    staticToken: {
-      type: "string",
-      description: "Static token for preview in Plasmic Studio"
-    }
-  },
   importPath: "./components/CodeComponents/SupabaseUserSession",
+  providesData: true,
+  props: { staticToken: "string" },
 });
 
-// Register RedirectIf component
 PLASMIC.registerComponent(RedirectIf, {
   name: "RedirectIf",
-  displayName: "Redirect If",
   props: {
     children: "slot",
-    condition: {
-      type: "boolean",
-      description: "If false, will trigger onFalse callback"
-    },
     onFalse: {
       type: "eventHandler",
       argTypes: [],
-      description: "Action to perform when condition is false"
     },
-    className: "string"
+    condition: "exprEditor",
   },
-  importPath: "./components/CodeComponents/RedirectIf",
 });
 
-// Register DisciplineTable component
 PLASMIC.registerComponent(DisciplineTable, {
   name: "DisciplineTable",
-  displayName: "Discipline Table",
   props: {
     className: "string"
   },
-  importPath: "./components/CodeComponents/DisciplineTable",
 });
 
-// Register FohBohSlider component
 PLASMIC.registerComponent(FohBohSlider, {
   name: "FohBohSlider",
-  displayName: "Foh Boh Slider",
   props: {
     className: "string"
   },
-  importPath: "./components/CodeComponents/FohBohSlider",
 });
 
-// Register LoginPageForm component
 PLASMIC.registerComponent(LoginPageForm, {
   name: "LoginPageForm",
-  displayName: "Login Page Form",
   props: {
     className: "string"
   },
-  importPath: "./components/CodeComponents/auth/LoginPageForm",
+});
+
+PLASMIC.registerComponent(RosterTable, {
+  name: "RosterTable",
+  props: {
+    orgId: "string",
+    locationId: "string",
+    className: "string",
+    density: {
+      type: "choice",
+      options: ["comfortable", "compact"],
+    },
+    showActions: "boolean",
+    tableClass: "string",
+    headerRowClass: "string",
+    headerCellClass: "string",
+    rowClass: "string",
+    cellClass: "string",
+    actionCellClass: "string",
+    rolesBadgeClass: "string",
+    actionsCellClass: "string",
+  },
+});
+
+PLASMIC.registerComponent(DisciplineActionsTable, {
+  name: "DisciplineActionsTable",
+  props: {
+    orgId: "string",
+    locationId: "string",
+    className: "string",
+    density: {
+      type: "choice",
+      options: ["comfortable", "compact"],
+    },
+    showActions: "boolean",
+    tableClass: "string",
+    headerRowClass: "string",
+    headerCellClass: "string",
+    rowClass: "string",
+    cellClass: "string",
+    actionCellClass: "string",
+    pointsBadgeClass: "string",
+    actionsCellClass: "string",
+  },
+});
+
+PLASMIC.registerComponent(Scoreboard, {
+  name: "Scoreboard",
+  props: {
+    className: "string",
+    bundleUrl: "string",
+    defaultGroup: {
+      type: "choice",
+      options: ["FOH", "BOH"],
+    },
+    defaultMode: {
+      type: "choice",
+      options: ["Position", "Leadership"],
+    },
+    defaultPosition: "string",
+  },
+});
+
+PLASMIC.registerComponent(ScoreboardTable, {
+  name: "ScoreboardTable",
+  props: {
+    className: "string",
+    bundleUrl: "string",
+    defaultGroup: {
+      type: "choice",
+      options: ["FOH", "BOH"],
+    },
+    defaultMode: {
+      type: "choice",
+      options: ["Position", "Leadership"],
+    },
+    defaultPosition: "string",
+  },
+});
+
+PLASMIC.registerComponent(PEARubric, {
+  name: "PEARubric",
+  props: {
+    className: "string",
+  },
+});
+
+PLASMIC.registerComponent(PositionButtons, {
+  name: "PositionButtons",
+  props: {
+    group: {
+      type: "choice",
+      options: ["FOH", "BOH"],
+    },
+    selectedPosition: "string",
+    onPositionChange: {
+      type: "eventHandler",
+      argTypes: [{ name: "position", type: "string" }],
+    },
+    className: "string",
+  },
+});
+
+PLASMIC.registerComponent(GoogleSignInButton, {
+  name: "GoogleSignInButton",
+  props: {
+    className: "string",
+    children: "slot",
+    onSuccess: {
+      type: "eventHandler",
+      argTypes: [],
+    },
+    onError: {
+      type: "eventHandler",
+      argTypes: [{ name: "error", type: "string" }],
+    },
+    disabled: "boolean",
+  },
+});
+
+PLASMIC.registerComponent(EmailSignInForm, {
+  name: "EmailSignInForm",
+  props: {
+    className: "string",
+    onSuccess: {
+      type: "eventHandler",
+      argTypes: [],
+    },
+    onError: {
+      type: "eventHandler",
+      argTypes: [{ name: "error", type: "string" }],
+    },
+    mode: {
+      type: "choice",
+      options: ["signin", "signup"],
+    },
+    showSignUp: "boolean",
+    showForgotPassword: "boolean",
+  },
+});
+
+PLASMIC.registerComponent(UserProfile, {
+  name: "UserProfile",
+  props: {
+    className: "string",
+    showSignOut: "boolean",
+  },
+});
+
+PLASMIC.registerComponent(ProtectedRoute, {
+  name: "ProtectedRoute",
+  props: {
+    children: "slot",
+    fallback: "slot",
+  },
+});
+
+PLASMIC.registerGlobalContext(AuthProvider, {
+  name: "AuthProvider",
+  providesData: true,
+  props: {},
 });

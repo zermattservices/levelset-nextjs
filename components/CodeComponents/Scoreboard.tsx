@@ -1,5 +1,4 @@
 import * as React from "react";
-import "../scoreboard.css";
 
 type Payload = { header: (string|number)[]; rows: (string|number)[][]; sheetName: string; updated: string };
 type Bundle = { tabs: Record<string, Payload> };

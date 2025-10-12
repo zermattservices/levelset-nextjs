@@ -1,9 +1,9 @@
 import { PLASMIC } from "../plasmic-init";
 import "../styles/globals.css";
+import "../components/CodeComponents/scoreboard.css";
 import "../components/CodeComponents/RosterTable.css";
-import type { AppProps } from "next/app";
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps }) {
   return PLASMIC && <Component {...pageProps} />;
 }
 
