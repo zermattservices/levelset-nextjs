@@ -576,12 +576,19 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                         const actionArgs = {
                           customFunction: async () => {
                             return async () => {
-                              const { getSupabaseClient } = await import(
-                                "~/lib/supabase-client"
-                              );
-                              const supabase = getSupabaseClient();
-                              await supabase.auth.signOut();
-                              window.location.href = "/auth/login";
+                              try {
+                                const supabase = createSupabaseClient();
+                                const { error } = await supabase.auth.signOut();
+
+                                if (error) {
+                                  console.error("Logout error:", error);
+                                  return;
+                                }
+
+                                window.location.href = "/auth/login";
+                              } catch (err) {
+                                console.error("Logout error:", err);
+                              }
                             };
                           }
                         };
