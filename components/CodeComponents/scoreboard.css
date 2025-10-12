@@ -510,13 +510,12 @@ td.v-red, th.v-red {
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
 }
 
-/* Action Button Styles - Circular buttons matching Figma design */
+/* Action Button Styles - Icon-only buttons matching Figma design */
 .actions-button {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
-  border: 1px solid #6b7280; /* Dark gray border */
-  background: #ffffff; /* White background */
+  border: none; /* No border at all */
+  background: transparent; /* No background */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -524,30 +523,29 @@ td.v-red, th.v-red {
   transition: all 0.2s ease;
   padding: 0;
   margin: 0;
-  outline: none; /* Remove any default outline */
-  box-shadow: none; /* Remove any box shadow */
+  outline: none;
+  box-shadow: none;
 }
 
 .actions-button:hover {
-  background-color: #f8f9fa;
-  border-color: #4b5563;
+  background-color: rgba(0, 0, 0, 0.05); /* Very subtle hover background */
 }
 
 .actions-button:active {
-  background-color: #f1f3f4;
+  background-color: rgba(0, 0, 0, 0.1);
   transform: scale(0.95);
 }
 
 .actions-button:focus {
-  outline: none; /* Remove focus outline */
-  box-shadow: none; /* Remove focus shadow */
+  outline: none;
+  box-shadow: none;
 }
 
 .actions-button svg {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   color: #6b7280; /* Dark gray icon */
-  stroke-width: 1.5; /* Ensure clean icon rendering */
+  stroke-width: 1.5;
 }
 
 .actions-button:hover svg {
