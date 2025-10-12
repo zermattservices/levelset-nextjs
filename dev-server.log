@@ -243,3 +243,15 @@ Import trace for requested module:
 ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[1]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[2]!./components/CodeComponents/scoreboard.css
 ./components/CodeComponents/scoreboard.css
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/client-development/0.pack.gz_' -> '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/client-development/0.pack.gz'
+2025-10-12T23:40:44.724Z: Project eNCsaJXBZ9ykYnmvxCb8Zx updated to revision 1136
+2025-10-12T23:40:55.559Z: Project eNCsaJXBZ9ykYnmvxCb8Zx updated to version 3.0.2
+2025-10-12T23:46:43.022Z: Project eNCsaJXBZ9ykYnmvxCb8Zx updated to revision 1137
+2025-10-12T23:46:52.914Z: Project eNCsaJXBZ9ykYnmvxCb8Zx updated to revision 1138
+ ⚠ ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[1]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[2]!./components/CodeComponents/scoreboard.css
+Warning
+
+(109:3) autoprefixer: start value has mixed support, consider using flex-start instead
+
+Import trace for requested module:
+./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[1]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[6].oneOf[14].use[2]!./components/CodeComponents/scoreboard.css
+./components/CodeComponents/scoreboard.css

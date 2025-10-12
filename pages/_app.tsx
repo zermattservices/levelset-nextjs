@@ -4,6 +4,7 @@ import Head from "next/head";
 import "../styles/globals.css";
 import "../components/CodeComponents/scoreboard.css";
 import "../components/CodeComponents/RosterTable.css";
+import "../lib/logout"; // Initialize global logout function
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
