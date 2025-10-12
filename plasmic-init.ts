@@ -16,8 +16,8 @@ import { UserProfile } from "./components/CodeComponents/auth/UserProfile";
 import { ProtectedRoute } from "./components/CodeComponents/auth/ProtectedRoute";
 import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
 
-const plasmicProjectId = (process.env.PLASMIC_PROJECT_ID ?? "").trim();
-const plasmicApiToken = (process.env.PLASMIC_API_TOKEN ?? "").trim();
+const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "";
+const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "";
 
 export const PLASMIC = initPlasmicLoader({
   projects: [
