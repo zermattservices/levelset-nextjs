@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@plasmicapp/loader-nextjs": "^1.0.410",
+    "@plasmicapp/loader-nextjs": "^1.0.441",
     "@plasmicapp/react-web": "^0.2.404",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.48.0",
