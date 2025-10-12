@@ -53,7 +53,7 @@ export function SupabaseUserSession({
 
     try {
       const { data, error } = await supabase
-        .from('appUsers')
+        .from('app_users')
         .select('*')
         .eq('auth_user_id', authUser.id)
         .single();
