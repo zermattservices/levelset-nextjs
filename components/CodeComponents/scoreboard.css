@@ -510,3 +510,50 @@ td.v-red, th.v-red {
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
 }
 
+/* Action Button Styles - Circular buttons matching Figma design */
+.actions-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid #6b7280; /* Dark gray border */
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  margin: 0;
+}
+
+.actions-button:hover {
+  background-color: #f3f4f6;
+  border-color: #374151;
+}
+
+.actions-button:active {
+  background-color: #e5e7eb;
+  transform: scale(0.95);
+}
+
+.actions-button svg {
+  width: 12px;
+  height: 12px;
+  color: #6b7280; /* Dark gray icon */
+}
+
+.actions-button:hover svg {
+  color: #374151; /* Darker gray on hover */
+}
+
+/* Specific button types */
+.arrow-button svg {
+  /* Right arrow icon for DisciplineTable */
+  transform: none;
+}
+
+.edit-button svg {
+  /* Pencil/edit icon for DisciplineActionsTable */
+  transform: none;
+}
+

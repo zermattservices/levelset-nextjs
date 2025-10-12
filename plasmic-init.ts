@@ -110,9 +110,28 @@ PLASMIC.registerComponent(DisciplineActionsTable, {
   name: "DisciplineActionsTable",
   displayName: "Discipline Actions Table",
   props: {
-    orgId: "string",
-    locationId: "string",
+    orgId: {
+      type: "string",
+      defaultValue: "default-org",
+      description: "Organization ID for filtering discipline actions"
+    },
+    locationId: {
+      type: "string", 
+      defaultValue: "default-location",
+      description: "Location ID for filtering discipline actions"
+    },
     className: "string",
+    density: {
+      type: "choice",
+      options: ["comfortable", "compact"],
+      defaultValue: "comfortable",
+      description: "Table density/spacing"
+    },
+    showActions: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Whether to show action buttons"
+    }
   },
   importPath: "./components/CodeComponents/DisciplineActionsTable",
 });
