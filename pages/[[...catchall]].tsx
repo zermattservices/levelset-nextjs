@@ -18,7 +18,13 @@ export default function PlasmicLoaderPage(props: {
   const router = useRouter();
   
   if (!plasmicData || plasmicData.entryCompMetas.length === 0) {
-    return <Error statusCode={404} />;
+    // Show a loading state instead of 404 when Plasmic API fails
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h1>Loading...</h1>
+        <p>If this persists, please check your Plasmic configuration.</p>
+      </div>
+    );
   }
   const pageMeta = plasmicData.entryCompMetas[0];
   return (
@@ -37,34 +43,50 @@ export default function PlasmicLoaderPage(props: {
 export const getStaticProps: GetStaticProps = async (context) => {
   const { catchall } = context.params ?? {};
   const plasmicPath = typeof catchall === 'string' ? catchall : Array.isArray(catchall) ? `/${catchall.join('/')}` : '/';
-  const plasmicData = await PLASMIC.maybeFetchComponentData(plasmicPath);
-  if (!plasmicData) {
-    // non-Plasmic catch-all
+  
+  try {
+    const plasmicData = await PLASMIC.maybeFetchComponentData(plasmicPath);
+    if (!plasmicData) {
+      // non-Plasmic catch-all
+      return { props: {} };
+    }
+    const pageMeta = plasmicData.entryCompMetas[0];
+    // Cache the necessary data fetched for the page
+    const queryCache = await extractPlasmicQueryData(
+      <PlasmicRootProvider
+        loader={PLASMIC}
+        prefetchedData={plasmicData}
+        pageParams={pageMeta.params}
+      >
+        <PlasmicComponent component={pageMeta.displayName} />
+      </PlasmicRootProvider>
+    );
+    // Use revalidate if you want incremental static regeneration
+    return { props: { plasmicData, queryCache }, revalidate: 60 };
+  } catch (error) {
+    console.error("Error fetching Plasmic data:", error);
+    // Return empty props so the page can still render
     return { props: {} };
   }
-  const pageMeta = plasmicData.entryCompMetas[0];
-  // Cache the necessary data fetched for the page
-  const queryCache = await extractPlasmicQueryData(
-    <PlasmicRootProvider
-      loader={PLASMIC}
-      prefetchedData={plasmicData}
-      pageParams={pageMeta.params}
-    >
-      <PlasmicComponent component={pageMeta.displayName} />
-    </PlasmicRootProvider>
-  );
-  // Use revalidate if you want incremental static regeneration
-  return { props: { plasmicData, queryCache }, revalidate: 60 };
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const pageModules = await PLASMIC.fetchPages();
-  return {
-    paths: pageModules.map((mod) => ({
-      params: {
-        catchall: mod.path.substring(1).split("/"),
-      },
-    })),
-    fallback: "blocking",
-  };
+  try {
+    const pageModules = await PLASMIC.fetchPages();
+    return {
+      paths: pageModules.map((mod) => ({
+        params: {
+          catchall: mod.path.substring(1).split("/"),
+        },
+      })),
+      fallback: "blocking",
+    };
+  } catch (error) {
+    console.error("Error fetching Plasmic pages:", error);
+    // Return empty paths and rely on fallback: "blocking" for on-demand generation
+    return {
+      paths: [],
+      fallback: "blocking",
+    };
+  }
 }
