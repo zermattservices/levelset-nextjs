@@ -12,23 +12,13 @@ import { PLASMIC } from "../plasmic-init";
  * Use fetchPages() to fetch list of pages that have been created in Plasmic
  */
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const pages = await PLASMIC.fetchPages();
-    return {
-      paths: pages.map((page) => ({
-        params: { catchall: page.path.substring(1).split("/") },
-      })),
-      fallback: "blocking",
-    };
-  } catch (error) {
-    // If Plasmic API fails during build, return empty paths
-    // Pages will be generated on-demand with fallback: "blocking"
-    console.error("Error fetching Plasmic pages:", error);
-    return {
-      paths: [],
-      fallback: "blocking",
-    };
-  }
+  const pages = await PLASMIC.fetchPages();
+  return {
+    paths: pages.map((page) => ({
+      params: { catchall: page.path.substring(1).split("/") },
+    })),
+    fallback: "blocking",
+  };
 };
 
 /**
