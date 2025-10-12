@@ -94,8 +94,8 @@ const pointsBadge = (points: number, disciplineActions: any[], customClass?: str
 };
 
 export function DisciplineTable({
-  orgId,
-  locationId,
+  orgId = "default-org",
+  locationId = "default-location",
   className = "",
   density = "comfortable",
   showActions = true,

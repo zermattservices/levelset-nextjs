@@ -42,17 +42,17 @@ function lastNonEmptyIndex(arr: any[]) {
 }
 
 export interface ScoreboardTableProps {
-  bundleUrl: string;
-  currentTab: string;
-  activeGroup: "FOH" | "BOH";
+  bundleUrl?: string;
+  currentTab?: string;
+  activeGroup?: "FOH" | "BOH";
   onTabChange?: (tab: string) => void;
   className?: string;
 }
 
 export function ScoreboardTable({ 
-  bundleUrl, 
-  currentTab, 
-  activeGroup, 
+  bundleUrl = "https://storage.googleapis.com/trainingapp-assets/snapshots/buda/all.json",
+  currentTab = "FOH",
+  activeGroup = "FOH", 
   onTabChange,
   className = "" 
 }: ScoreboardTableProps) {
