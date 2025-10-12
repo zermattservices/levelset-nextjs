@@ -2,8 +2,19 @@ import { initPlasmicLoader } from "@plasmicapp/loader-nextjs";
 import { SupabaseUserSession } from "./components/CodeComponents/SupabaseUserSession";
 import { RedirectIf } from "./components/CodeComponents/RedirectIf";
 import { DisciplineTable } from "./components/CodeComponents/DisciplineTable";
+import { DisciplineActionsTable } from "./components/CodeComponents/DisciplineActionsTable";
+import { RosterTable } from "./components/CodeComponents/RosterTable";
 import { FohBohSlider } from "./components/CodeComponents/FohBohSlider";
+import { Scoreboard } from "./components/CodeComponents/Scoreboard";
+import { ScoreboardTable } from "./components/CodeComponents/ScoreboardTable";
+import { PEARubric } from "./components/CodeComponents/PEARubric";
+import { PositionButtons } from "./components/CodeComponents/PositionButtons";
 import { LoginPageForm } from "./components/CodeComponents/auth/LoginPageForm";
+import { GoogleSignInButton } from "./components/CodeComponents/auth/GoogleSignInButton";
+import { EmailSignInForm } from "./components/CodeComponents/auth/EmailSignInForm";
+import { UserProfile } from "./components/CodeComponents/auth/UserProfile";
+import { ProtectedRoute } from "./components/CodeComponents/auth/ProtectedRoute";
+import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
 
 const plasmicProjectId = (process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx").trim();
 const plasmicApiToken = (process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg").trim();
@@ -73,6 +84,72 @@ PLASMIC.registerComponent(FohBohSlider, {
   importPath: "./components/CodeComponents/FohBohSlider",
 });
 
+// Register DisciplineActionsTable component
+PLASMIC.registerComponent(DisciplineActionsTable, {
+  name: "DisciplineActionsTable",
+  displayName: "Discipline Actions Table",
+  props: {
+    orgId: "string",
+    locationId: "string",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DisciplineActionsTable",
+});
+
+// Register RosterTable component
+PLASMIC.registerComponent(RosterTable, {
+  name: "RosterTable",
+  displayName: "Roster Table",
+  props: {
+    orgId: "string",
+    locationId: "string",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/RosterTable",
+});
+
+// Register Scoreboard component
+PLASMIC.registerComponent(Scoreboard, {
+  name: "Scoreboard",
+  displayName: "Scoreboard",
+  props: {
+    className: "string",
+    bundleUrl: "string",
+  },
+  importPath: "./components/CodeComponents/Scoreboard",
+});
+
+// Register ScoreboardTable component
+PLASMIC.registerComponent(ScoreboardTable, {
+  name: "ScoreboardTable",
+  displayName: "Scoreboard Table",
+  props: {
+    className: "string",
+    bundleUrl: "string",
+  },
+  importPath: "./components/CodeComponents/ScoreboardTable",
+});
+
+// Register PEARubric component
+PLASMIC.registerComponent(PEARubric, {
+  name: "PEARubric",
+  displayName: "PEA Rubric",
+  props: {
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/PEARubric",
+});
+
+// Register PositionButtons component
+PLASMIC.registerComponent(PositionButtons, {
+  name: "PositionButtons",
+  displayName: "Position Buttons",
+  props: {
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/PositionButtons",
+});
+
 // Register LoginPageForm component
 PLASMIC.registerComponent(LoginPageForm, {
   name: "LoginPageForm",
@@ -81,4 +158,55 @@ PLASMIC.registerComponent(LoginPageForm, {
     className: "string"
   },
   importPath: "./components/CodeComponents/auth/LoginPageForm",
+});
+
+// Register GoogleSignInButton component
+PLASMIC.registerComponent(GoogleSignInButton, {
+  name: "GoogleSignInButton",
+  displayName: "Google Sign In Button",
+  props: {
+    children: "slot",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/auth/GoogleSignInButton",
+});
+
+// Register EmailSignInForm component
+PLASMIC.registerComponent(EmailSignInForm, {
+  name: "EmailSignInForm",
+  displayName: "Email Sign In Form",
+  props: {
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/auth/EmailSignInForm",
+});
+
+// Register UserProfile component
+PLASMIC.registerComponent(UserProfile, {
+  name: "UserProfile",
+  displayName: "User Profile",
+  props: {
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/auth/UserProfile",
+});
+
+// Register ProtectedRoute component
+PLASMIC.registerComponent(ProtectedRoute, {
+  name: "ProtectedRoute",
+  displayName: "Protected Route",
+  props: {
+    children: "slot",
+  },
+  importPath: "./components/CodeComponents/auth/ProtectedRoute",
+});
+
+// Register AuthProvider component
+PLASMIC.registerComponent(AuthProvider, {
+  name: "AuthProvider",
+  displayName: "Auth Provider",
+  props: {
+    children: "slot",
+  },
+  importPath: "./components/CodeComponents/auth/AuthProvider",
 });
