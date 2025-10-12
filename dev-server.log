@@ -61,3 +61,6 @@ Import trace for requested module:
  ✓ Compiled in 168ms (402 modules)
 2025-10-12T20:19:06.359Z: Project eNCsaJXBZ9ykYnmvxCb8Zx updated to revision 1096
  ✓ Compiled in 119ms (380 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/server-development/1.pack.gz_' -> '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/server-development/1.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/client-development/0.pack.gz_' -> '/Users/andrewdyar/levelset-nextjs/.next/cache/webpack/client-development/0.pack.gz'
+ ✓ Compiled in 133ms (380 modules)

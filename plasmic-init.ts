@@ -5,8 +5,8 @@ import { DisciplineTable } from "./components/CodeComponents/DisciplineTable";
 import { FohBohSlider } from "./components/CodeComponents/FohBohSlider";
 import { LoginPageForm } from "./components/CodeComponents/auth/LoginPageForm";
 
-const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
-const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
+const plasmicProjectId = (process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx").trim();
+const plasmicApiToken = (process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg").trim();
 
 export const PLASMIC = initPlasmicLoader({
   projects: [
