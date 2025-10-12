@@ -26,208 +26,34 @@ export const PLASMIC = initPlasmicLoader({
       token: plasmicApiToken,
     },
   ],
-  // Fetches the latest revisions, whether or not they were unpublished!
-  // Disable for production to ensure you render only published changes.
+  // By default Plasmic will use the last published version of your project.
+  // For development, you can set preview to true, which will use the unpublished
+  // project, allowing you to see your designs without publishing.  Please
+  // only use this for development, as this is significantly slower.
   preview: true,
 });
 
-PLASMIC.registerGlobalContext(SupabaseUserSession, {
-  name: "SupabaseUserSession",
-  importPath: "./components/CodeComponents/SupabaseUserSession",
-  providesData: true,
-  props: { staticToken: "string" },
-});
+// Use substituteComponent like the Supabase example
+PLASMIC.substituteComponent(SupabaseUserSession, "SupabaseUserSession");
+PLASMIC.substituteComponent(RedirectIf, "RedirectIf");
+PLASMIC.substituteComponent(DisciplineTable, "DisciplineTable");
+PLASMIC.substituteComponent(DisciplineActionsTable, "DisciplineActionsTable");
+PLASMIC.substituteComponent(RosterTable, "RosterTable");
+PLASMIC.substituteComponent(FohBohSlider, "FohBohSlider");
+PLASMIC.substituteComponent(Scoreboard, "Scoreboard");
+PLASMIC.substituteComponent(ScoreboardTable, "ScoreboardTable");
+PLASMIC.substituteComponent(PEARubric, "PEARubric");
+PLASMIC.substituteComponent(PositionButtons, "PositionButtons");
+PLASMIC.substituteComponent(LoginPageForm, "LoginPageForm");
+PLASMIC.substituteComponent(GoogleSignInButton, "GoogleSignInButton");
+PLASMIC.substituteComponent(EmailSignInForm, "EmailSignInForm");
+PLASMIC.substituteComponent(UserProfile, "UserProfile");
+PLASMIC.substituteComponent(ProtectedRoute, "ProtectedRoute");
+PLASMIC.substituteComponent(AuthProvider, "AuthProvider");
 
-PLASMIC.registerComponent(RedirectIf, {
-  name: "RedirectIf",
-  props: {
-    children: "slot",
-    onFalse: {
-      type: "eventHandler",
-      argTypes: [],
-    },
-    condition: "exprEditor",
-  },
-});
-
-PLASMIC.registerComponent(DisciplineTable, {
-  name: "DisciplineTable",
-  props: {
-    className: "string"
-  },
-});
-
-PLASMIC.registerComponent(FohBohSlider, {
-  name: "FohBohSlider",
-  props: {
-    className: "string"
-  },
-});
-
-PLASMIC.registerComponent(LoginPageForm, {
-  name: "LoginPageForm",
-  props: {
-    className: "string"
-  },
-});
-
-PLASMIC.registerComponent(RosterTable, {
-  name: "RosterTable",
-  props: {
-    orgId: "string",
-    locationId: "string",
-    className: "string",
-    density: {
-      type: "choice",
-      options: ["comfortable", "compact"],
-    },
-    showActions: "boolean",
-    tableClass: "string",
-    headerRowClass: "string",
-    headerCellClass: "string",
-    rowClass: "string",
-    cellClass: "string",
-    actionCellClass: "string",
-    rolesBadgeClass: "string",
-    actionsCellClass: "string",
-  },
-});
-
-PLASMIC.registerComponent(DisciplineActionsTable, {
-  name: "DisciplineActionsTable",
-  props: {
-    orgId: "string",
-    locationId: "string",
-    className: "string",
-    density: {
-      type: "choice",
-      options: ["comfortable", "compact"],
-    },
-    showActions: "boolean",
-    tableClass: "string",
-    headerRowClass: "string",
-    headerCellClass: "string",
-    rowClass: "string",
-    cellClass: "string",
-    actionCellClass: "string",
-    pointsBadgeClass: "string",
-    actionsCellClass: "string",
-  },
-});
-
-PLASMIC.registerComponent(Scoreboard, {
-  name: "Scoreboard",
-  props: {
-    className: "string",
-    bundleUrl: "string",
-    defaultGroup: {
-      type: "choice",
-      options: ["FOH", "BOH"],
-    },
-    defaultMode: {
-      type: "choice",
-      options: ["Position", "Leadership"],
-    },
-    defaultPosition: "string",
-  },
-});
-
-PLASMIC.registerComponent(ScoreboardTable, {
-  name: "ScoreboardTable",
-  props: {
-    className: "string",
-    bundleUrl: "string",
-    defaultGroup: {
-      type: "choice",
-      options: ["FOH", "BOH"],
-    },
-    defaultMode: {
-      type: "choice",
-      options: ["Position", "Leadership"],
-    },
-    defaultPosition: "string",
-  },
-});
-
-PLASMIC.registerComponent(PEARubric, {
-  name: "PEARubric",
-  props: {
-    className: "string",
-  },
-});
-
-PLASMIC.registerComponent(PositionButtons, {
-  name: "PositionButtons",
-  props: {
-    group: {
-      type: "choice",
-      options: ["FOH", "BOH"],
-    },
-    selectedPosition: "string",
-    onPositionChange: {
-      type: "eventHandler",
-      argTypes: [{ name: "position", type: "string" }],
-    },
-    className: "string",
-  },
-});
-
-PLASMIC.registerComponent(GoogleSignInButton, {
-  name: "GoogleSignInButton",
-  props: {
-    className: "string",
-    children: "slot",
-    onSuccess: {
-      type: "eventHandler",
-      argTypes: [],
-    },
-    onError: {
-      type: "eventHandler",
-      argTypes: [{ name: "error", type: "string" }],
-    },
-    disabled: "boolean",
-  },
-});
-
-PLASMIC.registerComponent(EmailSignInForm, {
-  name: "EmailSignInForm",
-  props: {
-    className: "string",
-    onSuccess: {
-      type: "eventHandler",
-      argTypes: [],
-    },
-    onError: {
-      type: "eventHandler",
-      argTypes: [{ name: "error", type: "string" }],
-    },
-    mode: {
-      type: "choice",
-      options: ["signin", "signup"],
-    },
-    showSignUp: "boolean",
-    showForgotPassword: "boolean",
-  },
-});
-
-PLASMIC.registerComponent(UserProfile, {
-  name: "UserProfile",
-  props: {
-    className: "string",
-    showSignOut: "boolean",
-  },
-});
-
-PLASMIC.registerComponent(ProtectedRoute, {
-  name: "ProtectedRoute",
-  props: {
-    children: "slot",
-    fallback: "slot",
-  },
-});
-
-PLASMIC.registerGlobalContext(AuthProvider, {
-  name: "AuthProvider",
-  providesData: true,
-  props: {},
-});
+// You can register any code components that you want to use here; see
+// https://docs.plasmic.app/learn/code-components-ref/
+// And configure your Plasmic project to use the host url pointing at
+// the /plasmic-host page of your nextjs app (for example,
+// http://localhost:3000/plasmic-host).  See
+// https://docs.plasmic.app/learn/app-hosting/#set-a-plasmic-project-to-use-your-app-host
