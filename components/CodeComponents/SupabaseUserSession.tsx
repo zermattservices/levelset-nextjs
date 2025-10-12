@@ -28,8 +28,6 @@ export function SupabaseUserSession({
           .finally(() => {
             setIsLoaded(true);
           });
-      } else {
-        setIsLoaded(true);
       }
       return;
     }
@@ -46,7 +44,7 @@ export function SupabaseUserSession({
     });
 
     return subscription.unsubscribe;
-  }, [inEditor, staticToken]);
+  }, []);
 
   return (
     <DataProvider name="auth" data={currentUser || {}}>
