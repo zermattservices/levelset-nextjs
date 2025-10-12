@@ -69,3 +69,7 @@ Import trace for requested module:
  ✓ Compiled in 85ms (380 modules)
 <w> [webpack.cache.PackFileCacheStrategy] Restoring pack from /Users/andrewdyar/levelset-nextjs/.next/cache/webpack/client-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
  ✓ Compiled in 449ms (402 modules)
+2025-10-12T20:34:43.673Z: Project eNCsaJXBZ9ykYnmvxCb8Zx updated to revision 1097
+ ✓ Compiled in 138ms (402 modules)
+2025-10-12T20:34:55.656Z: Project eNCsaJXBZ9ykYnmvxCb8Zx updated to revision 1098
+ ✓ Compiled in 275ms (402 modules)

@@ -28,6 +28,9 @@ export function SupabaseUserSession({
           .finally(() => {
             setIsLoaded(true);
           });
+      } else {
+        // No static token provided in editor, just set loaded to true
+        setIsLoaded(true);
       }
       return;
     }
