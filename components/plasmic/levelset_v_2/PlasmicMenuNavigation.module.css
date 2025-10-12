@@ -41,7 +41,7 @@
   padding: 8px;
 }
 .logo {
-  object-fit: none;
+  object-fit: fill;
   max-width: 100%;
   width: 128px;
   height: auto;
@@ -51,7 +51,7 @@
   cursor: pointer;
 }
 .logo > picture > img {
-  object-fit: none;
+  object-fit: fill;
 }
 .button___5Tvwa:global(.__wab_instance) {
   max-width: 100%;
