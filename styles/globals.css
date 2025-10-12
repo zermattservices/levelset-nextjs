@@ -1,0 +1,160 @@
+@font-face {
+  font-family: 'ApercuMedium';
+  src: url('/fonts/ApercuMedium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mont';
+  src: url('/fonts/Mont-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mont';
+  src: url('/fonts/Mont-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Global font family for the app */
+body {
+  font-family: 'ApercuMedium', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Make ApercuMedium available for Plasmic */
+.apercu-medium {
+  font-family: 'ApercuMedium', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
+}
+
+/* Make Mont available for Plasmic */
+.mont {
+  font-family: 'Mont', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
+}
+
+.mont-bold {
+  font-family: 'Mont', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* Make Satoshi available for Plasmic */
+.satoshi {
+  font-family: 'Satoshi', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
+}
+
+.satoshi-medium {
+  font-family: 'Satoshi', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
+  font-weight: 500 !important;
+}
+
+.satoshi-bold {
+  font-family: 'Satoshi', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* RosterTable styles are imported directly in the component */
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Ensure SVG icons are sized correctly */
+svg {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Force Tailwind size classes to work properly */
+.w-4 { width: 1rem !important; }
+.h-4 { height: 1rem !important; }
+.w-5 { width: 1.25rem !important; }
+.h-5 { height: 1.25rem !important; }
+.w-6 { width: 1.5rem !important; }
+.h-6 { height: 1.5rem !important; }
+.w-8 { width: 2rem !important; }
+.h-8 { height: 2rem !important; }
+
+/* Dashboard specific styles */
+.dashboard-container {
+  background-color: #f9fafb; /* gray-50 */
+}
+
+.dashboard-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb; /* gray-200 */
+}
+
+.metric-card {
+  transition: box-shadow 0.15s ease-in-out;
+}
+
+.metric-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.badge-positive {
+  background-color: #dcfce7; /* green-100 */
+  color: #16a34a; /* green-600 */
+}
+
+.badge-negative {
+  background-color: #fee2e2; /* red-100 */
+  color: #dc2626; /* red-600 */
+}
+
+/* Tab navigation styles */
+.tab-nav {
+  border-bottom: 1px solid #e5e7eb; /* gray-200 */
+}
+
+.tab-nav .tab-link {
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease-in-out;
+}
+
+.tab-nav .tab-link.active {
+  border-bottom-color: #3b82f6; /* blue-500 */
+  color: #2563eb; /* blue-600 */
+}
+
+.tab-nav .tab-link:hover:not(.active) {
+  border-bottom-color: #d1d5db; /* gray-300 */
+  color: #374151; /* gray-700 */
+}
