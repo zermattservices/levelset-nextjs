@@ -617,66 +617,80 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                 }
               }}
             >
-              <AntdButton
-                className={classNames("__wab_instance", sty.button__seDk6)}
-                loading={false}
-                onClick={async () => {
-                  const $steps = {};
-
-                  $steps["runCode"] = true
-                    ? (() => {
-                        const actionArgs = {
-                          customFunction: async () => {
-                            return async () => {
-                              try {
-                                // Call the global logout function
-                                await window.logoutUser();
-                              } catch (error) {
-                                console.error("Logout failed:", error);
-                                // Fallback: try direct Supabase logout
-                                try {
-                                  const { getSupabaseClient } = await import(
-                                    "~/lib/supabase-client"
-                                  );
-                                  const supabase = getSupabaseClient();
-                                  await supabase.auth.signOut();
-                                  window.location.href = "/auth/login";
-                                } catch (fallbackError) {
-                                  console.error(
-                                    "Fallback logout failed:",
-                                    fallbackError
-                                  );
-                                  // Last resort: just redirect
-                                  window.location.href = "/auth/login";
-                                }
-                              }
-                            };
-                          }
-                        };
-                        return (({ customFunction }) => {
-                          return customFunction();
-                        })?.apply(null, [actionArgs]);
-                      })()
-                    : undefined;
+              {(() => {
+                try {
+                  return $state.logoutShow;
+                } catch (e) {
                   if (
-                    $steps["runCode"] != null &&
-                    typeof $steps["runCode"] === "object" &&
-                    typeof $steps["runCode"].then === "function"
+                    e instanceof TypeError ||
+                    e?.plasmicType === "PlasmicUndefinedDataError"
                   ) {
-                    $steps["runCode"] = await $steps["runCode"];
+                    return true;
                   }
-                }}
-              >
-                <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text___6Hkr
-                  )}
+                  throw e;
+                }
+              })() ? (
+                <AntdButton
+                  className={classNames("__wab_instance", sty.button__seDk6)}
+                  loading={false}
+                  onClick={async () => {
+                    const $steps = {};
+
+                    $steps["runCode"] = true
+                      ? (() => {
+                          const actionArgs = {
+                            customFunction: async () => {
+                              return async () => {
+                                try {
+                                  // Call the global logout function
+                                  await window.logoutUser();
+                                } catch (error) {
+                                  console.error("Logout failed:", error);
+                                  // Fallback: try direct Supabase logout
+                                  try {
+                                    const { getSupabaseClient } = await import(
+                                      "~/lib/supabase-client"
+                                    );
+                                    const supabase = getSupabaseClient();
+                                    await supabase.auth.signOut();
+                                    window.location.href = "/auth/login";
+                                  } catch (fallbackError) {
+                                    console.error(
+                                      "Fallback logout failed:",
+                                      fallbackError
+                                    );
+                                    // Last resort: just redirect
+                                    window.location.href = "/auth/login";
+                                  }
+                                }
+                              };
+                            }
+                          };
+                          return (({ customFunction }) => {
+                            return customFunction();
+                          })?.apply(null, [actionArgs]);
+                        })()
+                      : undefined;
+                    if (
+                      $steps["runCode"] != null &&
+                      typeof $steps["runCode"] === "object" &&
+                      typeof $steps["runCode"].then === "function"
+                    ) {
+                      $steps["runCode"] = await $steps["runCode"];
+                    }
+                  }}
                 >
-                  {"Logout"}
-                </div>
-              </AntdButton>
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text___6Hkr
+                    )}
+                  >
+                    {"Logout"}
+                  </div>
+                </AntdButton>
+              ) : null}
             </SupabaseUserLogOut>
           </div>
         </div>
