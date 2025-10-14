@@ -32,6 +32,7 @@ export interface DisciplineTableProps {
   // handlers
   onViewDetails?: (id: string) => void;
   onAddInfraction?: (id: string) => void;
+  onRowClick?: (employee: DisciplineEntry) => void;
 }
 
 // Role badge helper
@@ -112,6 +113,7 @@ export function DisciplineTable({
 
   onViewDetails,
   onAddInfraction,
+  onRowClick,
 }: DisciplineTableProps) {
   const [data, setData] = React.useState<DisciplineEntry[]>([]);
   const [disciplineActions, setDisciplineActions] = React.useState<any[]>([]);
@@ -331,7 +333,11 @@ export function DisciplineTable({
 
           <tbody>
             {data.map((e) => (
-              <tr key={e.id} className={rowClass}>
+              <tr 
+                key={e.id} 
+                className={`${rowClass} ${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+                onClick={() => onRowClick?.(e)}
+              >
                 <td className={`name-cell ${nameCellClass || ""} ${cellClass || ""}`} style={{ fontWeight: '600' }}>
                   {e.full_name}
                 </td>
@@ -355,7 +361,10 @@ export function DisciplineTable({
                   <td className={`centered ${cellClass || ""} ${actionsCellClass || ""}`}>
                     <button
                       type="button"
-                      onClick={() => onViewDetails?.(e.id)}
+                      onClick={(event) => {
+                        event.stopPropagation(); // Prevent row click when clicking button
+                        onViewDetails?.(e.id);
+                      }}
                       className="actions-button arrow-button"
                       aria-label="View details"
                       title="View details"

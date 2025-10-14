@@ -68,9 +68,12 @@ PLASMIC.registerComponent(RedirectIf, {
 });
 
 // Register DisciplineTable component
+// @ts-ignore - Complex Plasmic registration type
 PLASMIC.registerComponent(DisciplineTable, {
   name: "DisciplineTable",
+  // @ts-ignore - Complex Plasmic registration type
   displayName: "Discipline Table",
+  // @ts-ignore - Complex Plasmic registration type
   props: {
     orgId: {
       type: "string",
@@ -93,6 +96,16 @@ PLASMIC.registerComponent(DisciplineTable, {
       type: "boolean",
       defaultValue: true,
       description: "Whether to show action buttons"
+    },
+    onRowClick: {
+      type: "eventHandler",
+      argTypes: [
+        { 
+          name: "employee", 
+          type: "object"
+        }
+      ],
+      description: "Callback when a table row is clicked. Receives the full employee object."
     }
   },
   importPath: "./components/CodeComponents/DisciplineTable",
