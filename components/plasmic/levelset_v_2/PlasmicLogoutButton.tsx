@@ -176,6 +176,34 @@ function PlasmicLogoutButton__RenderFunc(props: {
           )
         }
       )}
+      onSuccess={async () => {
+        const $steps = {};
+
+        $steps["goToLoginPage"] = true
+          ? (() => {
+              const actionArgs = { destination: `/auth/login` };
+              return (({ destination }) => {
+                if (
+                  typeof destination === "string" &&
+                  destination.startsWith("#")
+                ) {
+                  document
+                    .getElementById(destination.substr(1))
+                    .scrollIntoView({ behavior: "smooth" });
+                } else {
+                  __nextRouter?.push(destination);
+                }
+              })?.apply(null, [actionArgs]);
+            })()
+          : undefined;
+        if (
+          $steps["goToLoginPage"] != null &&
+          typeof $steps["goToLoginPage"] === "object" &&
+          typeof $steps["goToLoginPage"].then === "function"
+        ) {
+          $steps["goToLoginPage"] = await $steps["goToLoginPage"];
+        }
+      }}
     >
       <div
         data-plasmic-name={"freeBox"}

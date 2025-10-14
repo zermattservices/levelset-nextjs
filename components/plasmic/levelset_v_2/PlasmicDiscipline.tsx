@@ -290,7 +290,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => false
+        initFunc: ({ $props, $state, $queries, $ctx }) => true
       },
       {
         path: "selectedEmployee",
