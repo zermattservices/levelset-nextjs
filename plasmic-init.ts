@@ -302,125 +302,208 @@ PLASMIC.registerComponent(SupabaseUserLogOut, {
   importPath: "./components/CodeComponents/auth/SupabaseUserLogOut",
 });
 
-// Register DrawerV2 component
-// @ts-ignore - Complex Plasmic registration type
+// Register DrawerV2 component - Enhanced version of Plasmic's default Drawer with size prop
 PLASMIC.registerComponent(DrawerV2, {
   name: "DrawerV2",
+  // @ts-ignore - Complex Plasmic registration type
   displayName: "Drawer v2",
+  // @ts-ignore - Complex Plasmic registration type
   props: {
-    // Core props
+    // Core props - matching Plasmic's default Drawer
     open: {
-      type: "boolean",
-      defaultValue: false,
-      description: "Whether the Drawer dialog is visible or not"
+      type: "boolean"
     },
-    onClose: {
-      type: "eventHandler",
-      argTypes: [
-        { name: "event", type: "object" }
-      ],
-      description: "Callback when user clicks mask, close button or Cancel button"
-    },
-    onOpenChange: {
-      type: "eventHandler",
-      argTypes: [
-        { name: "open", type: "boolean" }
-      ],
-      description: "Callback when the open state changes"
-    },
-    
-    // Content props
-    title: "slot",
-    children: "slot",
-    footer: "slot",
-    extra: "slot",
-    closeIcon: "slot",
-    
-    // Layout props
     placement: {
       type: "choice",
       options: ["top", "right", "bottom", "left"],
-      defaultValue: "right",
-      description: "The placement of the Drawer"
+      defaultValueHint: "right"
     },
+    children: {
+      type: "slot",
+      defaultValue: {
+        type: "vbox",
+        children: ["Drawer content"]
+      }
+    },
+    title: {
+      type: "slot",
+      defaultValue: "Drawer title"
+    },
+    footer: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    closeIcon: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    onOpenChange: {
+      type: "eventHandler",
+      argTypes: [{ name: "open", type: "boolean" }]
+    },
+    
+    // ADDED: Size prop (missing from Plasmic's default Drawer)
     size: {
       type: "choice",
       options: ["default", "large"],
-      defaultValue: "default",
+      defaultValueHint: "default",
       description: "Preset size of drawer: default (378px) or large (736px)"
     },
+    
+    // ADDED: Width/Height props (missing from Plasmic's default Drawer)
     width: {
       type: "string",
       description: "Custom width of the Drawer (e.g., '500px' or '50%')"
     },
     height: {
-      type: "string", 
+      type: "string",
       description: "Custom height when placement is top or bottom"
     },
     
-    // Behavior props
+    // ADDED: Additional behavior props
     mask: {
       type: "boolean",
-      defaultValue: true,
-      description: "Whether to show background mask"
+      defaultValueHint: true,
+      description: "Whether to show background mask",
+      advanced: true
     },
     maskClosable: {
       type: "boolean",
-      defaultValue: true,
-      description: "Click mask to close the Drawer"
+      defaultValueHint: true,
+      description: "Click mask to close the Drawer",
+      advanced: true
     },
     keyboard: {
       type: "boolean",
-      defaultValue: true,
-      description: "Press ESC to close"
+      defaultValueHint: true,
+      description: "Press ESC to close",
+      advanced: true
     },
     destroyOnClose: {
       type: "boolean",
-      defaultValue: false,
-      description: "Unmount children when closing"
-    },
-    forceRender: {
-      type: "boolean",
-      defaultValue: false,
-      description: "Pre-render Drawer content"
+      defaultValueHint: false,
+      description: "Unmount children when closing",
+      advanced: true
     },
     autoFocus: {
       type: "boolean",
-      defaultValue: true,
-      description: "Auto-focus when opened"
+      defaultValueHint: true,
+      description: "Auto-focus when opened",
+      advanced: true
     },
     closable: {
       type: "boolean",
-      defaultValue: true,
-      description: "Show close (x) button"
+      defaultValueHint: true,
+      description: "Show close (x) button",
+      advanced: true
     },
-    
-    // Styling props
-    className: "string",
-    rootClassName: "string",
-    style: "object",
-    rootStyle: "object",
-    headerStyle: "object",
-    bodyStyle: "object",
-    footerStyle: "object",
-    maskStyle: "object",
-    contentWrapperStyle: "object",
     zIndex: {
       type: "number",
-      defaultValue: 1000,
-      description: "The z-index of the Drawer"
+      defaultValueHint: 1000,
+      description: "The z-index of the Drawer",
+      advanced: true
     },
     
-    // Advanced props
-    getContainer: "string",
-    afterOpenChange: {
-      type: "eventHandler",
-      argTypes: [
-        { name: "open", type: "boolean" }
-      ],
-      description: "Callback after animation ends"
+    // Plasmic's nested style classes - EXACTLY like default Drawer
+    drawerScopeClassName: {
+      type: "styleScopeClass",
+      scopeName: "drawer"
     },
-    push: "object",
+    drawerHeaderClassName: {
+      type: "class",
+      displayName: "Drawer header",
+      noSelf: true,
+      selectors: [
+        {
+          selector: ":drawer .ant-drawer-header",
+          label: "Base"
+        }
+      ]
+    },
+    drawerBodyClassName: {
+      type: "class",
+      displayName: "Drawer body",
+      noSelf: true,
+      selectors: [
+        {
+          selector: ":drawer .ant-drawer-body",
+          label: "Base"
+        }
+      ]
+    },
+    drawerFooterClassName: {
+      type: "class",
+      displayName: "Drawer footer",
+      noSelf: true,
+      selectors: [
+        {
+          selector: ":drawer .ant-drawer-footer",
+          label: "Base"
+        }
+      ]
+    },
+    drawerTitleClassName: {
+      type: "class",
+      displayName: "Drawer title",
+      noSelf: true,
+      selectors: [
+        {
+          selector: ":drawer .ant-drawer-title",
+          label: "Base"
+        }
+      ]
+    },
+    drawerMaskClassName: {
+      type: "class",
+      displayName: "Drawer mask",
+      styleSections: ["background"],
+      noSelf: true,
+      selectors: [
+        {
+          selector: ":drawer .ant-drawer-mask",
+          label: "Base"
+        }
+      ]
+    },
+    drawerContentWrapperClassName: {
+      type: "class",
+      displayName: "Drawer content wrapper",
+      noSelf: true,
+      selectors: [
+        {
+          selector: ":drawer .ant-drawer-content-wrapper",
+          label: "Base"
+        }
+      ],
+      advanced: true
+    },
+    closeButtonClassName: {
+      type: "class",
+      displayName: "Close button",
+      noSelf: true,
+      selectors: [
+        {
+          selector: ":drawer .ant-drawer-close",
+          label: "Base"
+        }
+      ],
+      advanced: true
+    },
+    forceRender: {
+      advanced: true,
+      type: "boolean"
+    },
+    defaultStylesClassName: {
+      type: "themeResetClass"
+    }
+  },
+  states: {
+    open: {
+      type: "writable",
+      valueProp: "open",
+      onChangeProp: "onOpenChange",
+      variableType: "boolean"
+    }
   },
   importPath: "./components/CodeComponents/DrawerV2",
 });
