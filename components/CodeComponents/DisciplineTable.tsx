@@ -361,8 +361,8 @@ export function DisciplineTable({
                   <td className={`centered ${cellClass || ""} ${actionsCellClass || ""}`}>
                     <button
                       type="button"
-                      onClick={(event) => {
-                        event.stopPropagation(); // Prevent row click when clicking button
+                      onClick={() => {
+                        onRowClick?.(e);
                         onViewDetails?.(e.id);
                       }}
                       className="actions-button arrow-button"
