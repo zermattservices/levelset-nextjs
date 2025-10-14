@@ -227,7 +227,22 @@ PLASMIC.registerComponent(LoginPageForm, {
   name: "LoginPageForm",
   displayName: "Login Page Form",
   props: {
-    className: "string"
+    className: "string",
+    onSuccess: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Called when login is successful"
+    },
+    onError: {
+      type: "eventHandler",
+      argTypes: [{ name: "error", type: "string" }],
+      description: "Called when login fails. Receives error message."
+    },
+    showGoogleSignIn: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Whether to show Google sign in button"
+    }
   },
   importPath: "./components/CodeComponents/auth/LoginPageForm",
 });
