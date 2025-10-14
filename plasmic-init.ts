@@ -17,7 +17,7 @@ import { ProtectedRoute } from "./components/CodeComponents/auth/ProtectedRoute"
 import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
 import { LogoutButton } from "./components/CodeComponents/auth/LogoutButton";
 import { SupabaseUserLogOut } from "./components/CodeComponents/auth/SupabaseUserLogOut";
-import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
+// import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
 const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
@@ -302,7 +302,8 @@ PLASMIC.registerComponent(SupabaseUserLogOut, {
   importPath: "./components/CodeComponents/auth/SupabaseUserLogOut",
 });
 
-// Register DrawerV2 component
+// Register DrawerV2 component (temporarily disabled due to build issues)
+/*
 PLASMIC.registerComponent(DrawerV2, {
   name: "DrawerV2",
   displayName: "Drawer v2",
@@ -419,3 +420,4 @@ PLASMIC.registerComponent(DrawerV2, {
   },
   importPath: "./components/CodeComponents/DrawerV2",
 });
+*/
