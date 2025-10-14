@@ -17,6 +17,7 @@ import { ProtectedRoute } from "./components/CodeComponents/auth/ProtectedRoute"
 import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
 import { LogoutButton } from "./components/CodeComponents/auth/LogoutButton";
 import { SupabaseUserLogOut } from "./components/CodeComponents/auth/SupabaseUserLogOut";
+import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
 const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
@@ -299,4 +300,122 @@ PLASMIC.registerComponent(SupabaseUserLogOut, {
     }
   },
   importPath: "./components/CodeComponents/auth/SupabaseUserLogOut",
+});
+
+// Register DrawerV2 component
+PLASMIC.registerComponent(DrawerV2, {
+  name: "DrawerV2",
+  displayName: "Drawer v2",
+  props: {
+    // Core props
+    open: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Whether the Drawer dialog is visible or not"
+    },
+    onClose: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "event", type: "object" }
+      ],
+      description: "Callback when user clicks mask, close button or Cancel button"
+    },
+    
+    // Content props
+    title: "slot",
+    children: "slot",
+    footer: "slot",
+    extra: "slot",
+    
+    // Layout props
+    placement: {
+      type: "choice",
+      options: ["top", "right", "bottom", "left"],
+      defaultValue: "right",
+      description: "The placement of the Drawer"
+    },
+    size: {
+      type: "choice",
+      options: ["default", "large"],
+      defaultValue: "default",
+      description: "Preset size of drawer, default 378px and large 736px"
+    },
+    width: {
+      type: "string",
+      description: "Width of the Drawer dialog"
+    },
+    height: {
+      type: "string", 
+      description: "Placement is top or bottom, height of the Drawer dialog"
+    },
+    
+    // Behavior props
+    mask: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Whether to show mask or not"
+    },
+    maskClosable: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Clicking on the mask to close the Drawer or not"
+    },
+    keyboard: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Whether support press esc to close"
+    },
+    destroyOnHidden: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Whether to unmount child components on closing drawer or not"
+    },
+    forceRender: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Pre-render Drawer component forcibly"
+    },
+    autoFocus: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Whether Drawer should get focused after open"
+    },
+    loading: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Show the Skeleton loading state"
+    },
+    
+    // Styling props
+    className: "string",
+    rootClassName: "string",
+    style: "object",
+    rootStyle: "object",
+    headerStyle: "object",
+    zIndex: {
+      type: "number",
+      defaultValue: 1000,
+      description: "The z-index of the Drawer"
+    },
+    
+    // Advanced props
+    getContainer: "string",
+    closeIcon: "slot",
+    afterOpenChange: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "open", type: "boolean" }
+      ],
+      description: "Callback after the animation ends when switching drawers"
+    },
+    push: {
+      type: "object",
+      description: "Nested drawers push behavior"
+    },
+    
+    // Semantic structure styling
+    classNames: "object",
+    styles: "object"
+  },
+  importPath: "./components/CodeComponents/DrawerV2",
 });
