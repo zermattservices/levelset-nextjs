@@ -262,6 +262,12 @@
   cursor: pointer;
   flex-shrink: 0;
 }
+.supabaseUserLogOut:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+  width: auto;
+  height: auto;
+}
 .button__seDk6:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;

@@ -721,6 +721,12 @@
           "name": "AuthProvider",
           "displayName": "AuthProvider",
           "componentImportPath": "./components/CodeComponents/auth/AuthProvider"
+        },
+        {
+          "id": "l-xO2VjafQ7l",
+          "name": "SupabaseUserLogOut",
+          "displayName": "SupabaseUserLogOut",
+          "componentImportPath": "./components/CodeComponents/auth/SupabaseUserLogOut"
         }
       ],
       "splitsProviderFilePath": "",

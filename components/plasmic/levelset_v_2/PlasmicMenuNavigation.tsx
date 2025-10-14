@@ -59,7 +59,15 @@ import {
   useGlobalActions
 } from "@plasmicapp/react-web/lib/host";
 
+import { usePlasmicDataSourceContext } from "@plasmicapp/data-sources-context";
+import {
+  executePlasmicDataOp,
+  usePlasmicDataOp,
+  usePlasmicInvalidate
+} from "@plasmicapp/react-web/lib/data-sources";
+
 import { AntdButton } from "@plasmicpkgs/antd5/skinny/registerButton";
+import { SupabaseUserLogOut } from "../../CodeComponents/auth/SupabaseUserLogOut"; // plasmic-import: l-xO2VjafQ7l/codeComponent
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
 import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
@@ -125,6 +133,7 @@ export type PlasmicMenuNavigation__OverridesType = {
   root?: Flex__<"div">;
   logo?: Flex__<typeof PlasmicImg__>;
   img?: Flex__<typeof PlasmicImg__>;
+  supabaseUserLogOut?: Flex__<typeof SupabaseUserLogOut>;
 };
 
 export interface DefaultMenuNavigationProps {
@@ -242,6 +251,8 @@ function PlasmicMenuNavigation__RenderFunc(props: {
     $queries: {},
     $refs
   });
+  const dataSourcesCtx = usePlasmicDataSourceContext();
+  const plasmicInvalidate = usePlasmicInvalidate();
 
   const styleTokensClassNames = _useStyleTokens();
 
@@ -552,80 +563,90 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                 role={"img"}
               />
             </div>
-            {(() => {
-              try {
-                return $state.logoutShow;
-              } catch (e) {
-                if (
-                  e instanceof TypeError ||
-                  e?.plasmicType === "PlasmicUndefinedDataError"
-                ) {
-                  return true;
-                }
-                throw e;
-              }
-            })() ? (
-              <AntdButton
-                className={classNames("__wab_instance", sty.button__seDk6)}
-                loading={false}
-                onClick={async () => {
-                  const $steps = {};
+            <SupabaseUserLogOut
+              data-plasmic-name={"supabaseUserLogOut"}
+              data-plasmic-override={overrides.supabaseUserLogOut}
+              className={classNames("__wab_instance", sty.supabaseUserLogOut)}
+              onSuccess={async () => {
+                const $steps = {};
 
-                  $steps["runCode"] = true
-                    ? (() => {
-                        const actionArgs = {
-                          customFunction: async () => {
-                            return async () => {
-                              try {
-                                // Call the global logout function
-                                await window.logoutUser();
-                              } catch (error) {
-                                console.error("Logout failed:", error);
-                                // Fallback: try direct Supabase logout
-                                try {
-                                  const { getSupabaseClient } = await import(
-                                    "~/lib/supabase-client"
-                                  );
-                                  const supabase = getSupabaseClient();
-                                  await supabase.auth.signOut();
-                                  window.location.href = "/auth/login";
-                                } catch (fallbackError) {
-                                  console.error(
-                                    "Fallback logout failed:",
-                                    fallbackError
-                                  );
-                                  // Last resort: just redirect
-                                  window.location.href = "/auth/login";
-                                }
-                              }
-                            };
-                          }
-                        };
-                        return (({ customFunction }) => {
-                          return customFunction();
-                        })?.apply(null, [actionArgs]);
-                      })()
-                    : undefined;
+                $steps["refreshData"] = true
+                  ? (() => {
+                      const actionArgs = {
+                        queryInvalidation: ["plasmic_refresh_all"]
+                      };
+                      return (async ({ queryInvalidation }) => {
+                        if (!queryInvalidation) {
+                          return;
+                        }
+                        await plasmicInvalidate(queryInvalidation);
+                      })?.apply(null, [actionArgs]);
+                    })()
+                  : undefined;
+                if (
+                  $steps["refreshData"] != null &&
+                  typeof $steps["refreshData"] === "object" &&
+                  typeof $steps["refreshData"].then === "function"
+                ) {
+                  $steps["refreshData"] = await $steps["refreshData"];
+                }
+
+                $steps["goToLoginPage"] = true
+                  ? (() => {
+                      const actionArgs = { destination: `/auth/login` };
+                      return (({ destination }) => {
+                        if (
+                          typeof destination === "string" &&
+                          destination.startsWith("#")
+                        ) {
+                          document
+                            .getElementById(destination.substr(1))
+                            .scrollIntoView({ behavior: "smooth" });
+                        } else {
+                          __nextRouter?.push(destination);
+                        }
+                      })?.apply(null, [actionArgs]);
+                    })()
+                  : undefined;
+                if (
+                  $steps["goToLoginPage"] != null &&
+                  typeof $steps["goToLoginPage"] === "object" &&
+                  typeof $steps["goToLoginPage"].then === "function"
+                ) {
+                  $steps["goToLoginPage"] = await $steps["goToLoginPage"];
+                }
+              }}
+            >
+              {(() => {
+                try {
+                  return $state.logoutShow;
+                } catch (e) {
                   if (
-                    $steps["runCode"] != null &&
-                    typeof $steps["runCode"] === "object" &&
-                    typeof $steps["runCode"].then === "function"
+                    e instanceof TypeError ||
+                    e?.plasmicType === "PlasmicUndefinedDataError"
                   ) {
-                    $steps["runCode"] = await $steps["runCode"];
+                    return true;
                   }
-                }}
-              >
-                <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text___6Hkr
-                  )}
+                  throw e;
+                }
+              })() ? (
+                <AntdButton
+                  className={classNames("__wab_instance", sty.button__seDk6)}
+                  loading={false}
+                  submitsForm={true}
                 >
-                  {"Logout"}
-                </div>
-              </AntdButton>
-            ) : null}
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text___6Hkr
+                    )}
+                  >
+                    {"Logout"}
+                  </div>
+                </AntdButton>
+              ) : null}
+            </SupabaseUserLogOut>
           </div>
         </div>
       </div>
@@ -656,9 +677,10 @@ function PlasmicMenuNavigation__RenderFunc(props: {
 }
 
 const PlasmicDescendants = {
-  root: ["root", "logo", "img"],
+  root: ["root", "logo", "img", "supabaseUserLogOut"],
   logo: ["logo"],
-  img: ["img"]
+  img: ["img"],
+  supabaseUserLogOut: ["supabaseUserLogOut"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
 type DescendantsType<T extends NodeNameType> =
@@ -667,6 +689,7 @@ type NodeDefaultElementType = {
   root: "div";
   logo: typeof PlasmicImg__;
   img: typeof PlasmicImg__;
+  supabaseUserLogOut: typeof SupabaseUserLogOut;
 };
 
 type ReservedPropsType = "variants" | "args" | "overrides";
@@ -733,6 +756,7 @@ export const PlasmicMenuNavigation = Object.assign(
     // Helper components rendering sub-elements
     logo: makeNodeComponent("logo"),
     img: makeNodeComponent("img"),
+    supabaseUserLogOut: makeNodeComponent("supabaseUserLogOut"),
 
     // Metadata about props expected for PlasmicMenuNavigation
     internalVariantProps: PlasmicMenuNavigation__VariantProps,
