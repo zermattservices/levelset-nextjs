@@ -40,7 +40,7 @@
   flex-direction: row;
 }
 .slotTargetMetricName {
-  font-family: "Inter", sans-serif;
+  font-family: "Satoshi";
   font-size: 24px;
   font-weight: 600;
   color: rgba(24, 29, 39, 1);
@@ -50,7 +50,7 @@
 .trendCard:global(.__wab_instance) {
   max-width: 100%;
 }
-.text__lu6Pf {
+.text__pDxek {
   padding-right: 0px;
   color: #249e6b;
 }
@@ -75,17 +75,20 @@
   justify-content: flex-start;
 }
 .heading {
-  display: block;
+  display: flex;
   flex-grow: 0;
-  font-size: 16px;
-  font-family: "Inter", sans-serif;
-  font-weight: 500;
-  letter-spacing: 0em;
-  line-height: 24px;
-  color: rgba(83, 88, 98, 1);
   width: auto;
   align-self: stretch;
   position: relative;
+  flex-direction: row;
+}
+.slotTargetChildren {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(83, 88, 98, 1);
+  line-height: 24px;
+  letter-spacing: 0em;
 }
 .metricTotal {
   display: flex;
@@ -95,7 +98,7 @@
   flex-direction: row;
 }
 .slotTargetMetricTotal2 {
-  font-family: "Inter", sans-serif;
+  font-family: "Satoshi";
   font-size: 16px;
   font-weight: 500;
   color: rgba(83, 88, 98, 1);
@@ -113,7 +116,7 @@
 .heading3 {
   display: block;
   font-size: 16px;
-  font-family: "Inter", sans-serif;
+  font-family: "Satoshi";
   font-weight: 500;
   letter-spacing: 0em;
   line-height: 24px;
@@ -132,7 +135,7 @@
   justify-content: flex-end;
 }
 .slotTargetHeading5 {
-  font-family: "Inter", sans-serif;
+  font-family: "Satoshi";
   font-size: 16px;
   font-weight: 500;
   color: rgba(83, 88, 98, 1);

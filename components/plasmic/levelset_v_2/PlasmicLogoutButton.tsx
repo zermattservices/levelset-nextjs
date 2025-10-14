@@ -59,6 +59,7 @@ import {
   useGlobalActions
 } from "@plasmicapp/react-web/lib/host";
 
+import { SupabaseUserLogOut } from "../../CodeComponents/auth/SupabaseUserLogOut"; // plasmic-import: l-xO2VjafQ7l/codeComponent
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -85,7 +86,8 @@ type ArgPropType = keyof PlasmicLogoutButton__ArgsType;
 export const PlasmicLogoutButton__ArgProps = new Array<ArgPropType>("slot3");
 
 export type PlasmicLogoutButton__OverridesType = {
-  root?: Flex__<"div">;
+  root?: Flex__<typeof SupabaseUserLogOut>;
+  freeBox?: Flex__<"div">;
 };
 
 export interface DefaultLogoutButtonProps {
@@ -154,13 +156,13 @@ function PlasmicLogoutButton__RenderFunc(props: {
   const styleTokensClassNames = _useStyleTokens();
 
   return (
-    <div
+    <SupabaseUserLogOut
       data-plasmic-name={"root"}
       data-plasmic-override={overrides.root}
       data-plasmic-root={true}
       data-plasmic-for-node={forNode}
       className={classNames(
-        projectcss.all,
+        "__wab_instance",
         projectcss.root_reset,
         projectcss.plasmic_default_styles,
         projectcss.plasmic_mixins,
@@ -174,88 +176,102 @@ function PlasmicLogoutButton__RenderFunc(props: {
           )
         }
       )}
-      onMouseEnter={async event => {
-        const $steps = {};
-
-        $steps["updateLogoutHover"] = true
-          ? (() => {
-              const actionArgs = {
-                vgroup: "logoutHover",
-                operation: 2,
-                value: "logoutHover"
-              };
-              return (({ vgroup, value }) => {
-                if (typeof value === "string") {
-                  value = [value];
-                }
-
-                const oldValue = $stateGet($state, vgroup);
-                $stateSet($state, vgroup, !oldValue);
-                return !oldValue;
-              })?.apply(null, [actionArgs]);
-            })()
-          : undefined;
-        if (
-          $steps["updateLogoutHover"] != null &&
-          typeof $steps["updateLogoutHover"] === "object" &&
-          typeof $steps["updateLogoutHover"].then === "function"
-        ) {
-          $steps["updateLogoutHover"] = await $steps["updateLogoutHover"];
-        }
-      }}
-      onMouseLeave={async event => {
-        const $steps = {};
-
-        $steps["updateLogoutHover"] = true
-          ? (() => {
-              const actionArgs = {
-                vgroup: "logoutHover",
-                operation: 2,
-                value: "logoutHover"
-              };
-              return (({ vgroup, value }) => {
-                if (typeof value === "string") {
-                  value = [value];
-                }
-
-                const oldValue = $stateGet($state, vgroup);
-                $stateSet($state, vgroup, !oldValue);
-                return !oldValue;
-              })?.apply(null, [actionArgs]);
-            })()
-          : undefined;
-        if (
-          $steps["updateLogoutHover"] != null &&
-          typeof $steps["updateLogoutHover"] === "object" &&
-          typeof $steps["updateLogoutHover"].then === "function"
-        ) {
-          $steps["updateLogoutHover"] = await $steps["updateLogoutHover"];
-        }
-      }}
     >
-      {renderPlasmicSlot({
-        defaultContents: "Log Out",
-        value: args.slot3,
-        className: classNames(sty.slotTargetSlot3, {
-          [sty.slotTargetSlot3logoutHover]: hasVariant(
+      <div
+        data-plasmic-name={"freeBox"}
+        data-plasmic-override={overrides.freeBox}
+        className={classNames(projectcss.all, sty.freeBox, {
+          [sty.freeBoxlogoutHover]: hasVariant(
             $state,
             "logoutHover",
             "logoutHover"
           )
-        })
-      })}
-    </div>
+        })}
+        onMouseEnter={async event => {
+          const $steps = {};
+
+          $steps["updateLogoutHover"] = true
+            ? (() => {
+                const actionArgs = {
+                  vgroup: "logoutHover",
+                  operation: 2,
+                  value: "logoutHover"
+                };
+                return (({ vgroup, value }) => {
+                  if (typeof value === "string") {
+                    value = [value];
+                  }
+
+                  const oldValue = $stateGet($state, vgroup);
+                  $stateSet($state, vgroup, !oldValue);
+                  return !oldValue;
+                })?.apply(null, [actionArgs]);
+              })()
+            : undefined;
+          if (
+            $steps["updateLogoutHover"] != null &&
+            typeof $steps["updateLogoutHover"] === "object" &&
+            typeof $steps["updateLogoutHover"].then === "function"
+          ) {
+            $steps["updateLogoutHover"] = await $steps["updateLogoutHover"];
+          }
+        }}
+        onMouseLeave={async event => {
+          const $steps = {};
+
+          $steps["updateLogoutHover"] = true
+            ? (() => {
+                const actionArgs = {
+                  vgroup: "logoutHover",
+                  operation: 2,
+                  value: "logoutHover"
+                };
+                return (({ vgroup, value }) => {
+                  if (typeof value === "string") {
+                    value = [value];
+                  }
+
+                  const oldValue = $stateGet($state, vgroup);
+                  $stateSet($state, vgroup, !oldValue);
+                  return !oldValue;
+                })?.apply(null, [actionArgs]);
+              })()
+            : undefined;
+          if (
+            $steps["updateLogoutHover"] != null &&
+            typeof $steps["updateLogoutHover"] === "object" &&
+            typeof $steps["updateLogoutHover"].then === "function"
+          ) {
+            $steps["updateLogoutHover"] = await $steps["updateLogoutHover"];
+          }
+        }}
+      >
+        {renderPlasmicSlot({
+          defaultContents: "Log Out",
+          value: args.slot3,
+          className: classNames(sty.slotTargetSlot3, {
+            [sty.slotTargetSlot3logoutHover]: hasVariant(
+              $state,
+              "logoutHover",
+              "logoutHover"
+            )
+          })
+        })}
+      </div>
+    </SupabaseUserLogOut>
   ) as React.ReactElement | null;
 }
 
 const PlasmicDescendants = {
-  root: ["root"]
+  root: ["root", "freeBox"],
+  freeBox: ["freeBox"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
 type DescendantsType<T extends NodeNameType> =
   (typeof PlasmicDescendants)[T][number];
 type NodeDefaultElementType = {
-  root: "div";
+  root: typeof SupabaseUserLogOut;
+  freeBox: "div";
 };
 
 type ReservedPropsType = "variants" | "args" | "overrides";
@@ -320,6 +336,7 @@ export const PlasmicLogoutButton = Object.assign(
   makeNodeComponent("root"),
   {
     // Helper components rendering sub-elements
+    freeBox: makeNodeComponent("freeBox"),
 
     // Metadata about props expected for PlasmicLogoutButton
     internalVariantProps: PlasmicLogoutButton__VariantProps,

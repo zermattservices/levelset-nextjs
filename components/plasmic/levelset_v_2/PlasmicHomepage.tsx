@@ -88,6 +88,7 @@ export type PlasmicHomepage__OverridesType = {
   redirectIf?: Flex__<typeof RedirectIf>;
   img?: Flex__<typeof PlasmicImg__>;
   _360Stack?: Flex__<"div">;
+  heading3?: Flex__<"div">;
   blurredStack?: Flex__<"div">;
   whedStack?: Flex__<"div">;
 };
@@ -497,7 +498,21 @@ function PlasmicHomepage__RenderFunc(props: {
                           "__wab_instance",
                           sty.metricCard__x6EnB
                         )}
+                        delta={
+                          <div
+                            data-plasmic-name={"heading3"}
+                            data-plasmic-override={overrides.heading3}
+                            className={classNames(
+                              projectcss.all,
+                              projectcss.__wab_text,
+                              sty.heading3
+                            )}
+                          >
+                            {"+27"}
+                          </div>
+                        }
                         metricName={"PEA Ratings"}
+                        metricTotal2={"485"}
                       />
                     </div>
                     <div
@@ -538,7 +553,10 @@ function PlasmicHomepage__RenderFunc(props: {
                           sty.metricCard__zxCMh
                         )}
                         metricName={"Accountability Points"}
-                      />
+                        metricTotal2={"55"}
+                      >
+                        {"Average:"}
+                      </MetricCard>
                     </div>
                     <div
                       data-plasmic-name={"blurredStack"}
@@ -578,7 +596,7 @@ function PlasmicHomepage__RenderFunc(props: {
                       sty.text___3DmR3
                     )}
                   >
-                    {"Winning Hearts Every Day (Coming Soon)"}
+                    {"Operational Excellence (Coming Soon)"}
                   </div>
                 </div>
                 <div className={classNames(projectcss.all, sty.freeBox__hvq52)}>
@@ -598,7 +616,7 @@ function PlasmicHomepage__RenderFunc(props: {
                             sty.text__cToMc
                           )}
                         >
-                          {"Attentive & Friendly Team Members"}
+                          {"Caring Interactions"}
                         </div>
                       }
                     />
@@ -616,7 +634,7 @@ function PlasmicHomepage__RenderFunc(props: {
                             sty.text___6CLr
                           )}
                         >
-                          {"Craveable Food"}
+                          {"Great Food"}
                         </div>
                       }
                     />
@@ -634,7 +652,7 @@ function PlasmicHomepage__RenderFunc(props: {
                             sty.text__aaKts
                           )}
                         >
-                          {"Fast & Accurate Service"}
+                          {"Quick & Accurate"}
                         </div>
                       }
                     />
@@ -652,7 +670,7 @@ function PlasmicHomepage__RenderFunc(props: {
                             sty.text__gn7Ek
                           )}
                         >
-                          {"Second Mile Service"}
+                          {"Creating Moments"}
                         </div>
                       }
                     />
@@ -670,7 +688,7 @@ function PlasmicHomepage__RenderFunc(props: {
                             sty.text___4Uzfe
                           )}
                         >
-                          {"Welcoming Environment"}
+                          {"Inviting Atmosphere"}
                         </div>
                       }
                     />
@@ -692,13 +710,22 @@ const PlasmicDescendants = {
     "redirectIf",
     "img",
     "_360Stack",
+    "heading3",
     "blurredStack",
     "whedStack"
   ],
   menuNavigation: ["menuNavigation"],
-  redirectIf: ["redirectIf", "img", "_360Stack", "blurredStack", "whedStack"],
+  redirectIf: [
+    "redirectIf",
+    "img",
+    "_360Stack",
+    "heading3",
+    "blurredStack",
+    "whedStack"
+  ],
   img: ["img"],
-  _360Stack: ["_360Stack", "blurredStack"],
+  _360Stack: ["_360Stack", "heading3", "blurredStack"],
+  heading3: ["heading3"],
   blurredStack: ["blurredStack"],
   whedStack: ["whedStack"]
 } as const;
@@ -711,6 +738,7 @@ type NodeDefaultElementType = {
   redirectIf: typeof RedirectIf;
   img: typeof PlasmicImg__;
   _360Stack: "div";
+  heading3: "div";
   blurredStack: "div";
   whedStack: "div";
 };
@@ -781,6 +809,7 @@ export const PlasmicHomepage = Object.assign(
     redirectIf: makeNodeComponent("redirectIf"),
     img: makeNodeComponent("img"),
     _360Stack: makeNodeComponent("_360Stack"),
+    heading3: makeNodeComponent("heading3"),
     blurredStack: makeNodeComponent("blurredStack"),
     whedStack: makeNodeComponent("whedStack"),
 

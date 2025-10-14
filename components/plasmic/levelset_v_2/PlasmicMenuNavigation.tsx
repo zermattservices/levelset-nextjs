@@ -107,7 +107,6 @@ export type PlasmicMenuNavigation__ArgsType = {
   onLastNameChange?: (val: string) => void;
   children2?: React.ReactNode;
   children3?: React.ReactNode;
-  slot3?: React.ReactNode;
   children?: React.ReactNode;
 };
 type ArgPropType = keyof PlasmicMenuNavigation__ArgsType;
@@ -123,7 +122,6 @@ export const PlasmicMenuNavigation__ArgProps = new Array<ArgPropType>(
   "onLastNameChange",
   "children2",
   "children3",
-  "slot3",
   "children"
 );
 
@@ -147,7 +145,6 @@ export interface DefaultMenuNavigationProps {
   onLastNameChange?: (val: string) => void;
   children2?: React.ReactNode;
   children3?: React.ReactNode;
-  slot3?: React.ReactNode;
   children?: React.ReactNode;
   dashboardOpen?: SingleBooleanChoiceArg<"dashboardOpen">;
   className?: string;
@@ -484,10 +481,6 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                 data-plasmic-name={"logoutButton"}
                 data-plasmic-override={overrides.logoutButton}
                 className={classNames("__wab_instance", sty.logoutButton)}
-                slot3={renderPlasmicSlot({
-                  defaultContents: "Log Out",
-                  value: args.slot3
-                })}
               />
             </div>
             <div className={classNames(projectcss.all, sty.freeBox__kYv9N)}>

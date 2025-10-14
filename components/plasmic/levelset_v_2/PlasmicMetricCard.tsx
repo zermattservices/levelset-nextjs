@@ -77,6 +77,7 @@ export const PlasmicMetricCard__VariantProps = new Array<VariantPropType>();
 
 export type PlasmicMetricCard__ArgsType = {
   metricName?: React.ReactNode;
+  children?: React.ReactNode;
   metricTotal2?: React.ReactNode;
   delta?: React.ReactNode;
   heading5?: React.ReactNode;
@@ -84,6 +85,7 @@ export type PlasmicMetricCard__ArgsType = {
 type ArgPropType = keyof PlasmicMetricCard__ArgsType;
 export const PlasmicMetricCard__ArgProps = new Array<ArgPropType>(
   "metricName",
+  "children",
   "metricTotal2",
   "delta",
   "heading5"
@@ -105,6 +107,7 @@ export type PlasmicMetricCard__OverridesType = {
 
 export interface DefaultMetricCardProps {
   metricName?: React.ReactNode;
+  children?: React.ReactNode;
   metricTotal2?: React.ReactNode;
   delta?: React.ReactNode;
   heading5?: React.ReactNode;
@@ -282,13 +285,13 @@ function PlasmicMetricCard__RenderFunc(props: {
             <div
               data-plasmic-name={"heading"}
               data-plasmic-override={overrides.heading}
-              className={classNames(
-                projectcss.all,
-                projectcss.__wab_text,
-                sty.heading
-              )}
+              className={classNames(projectcss.all, sty.heading)}
             >
-              {"Average:"}
+              {renderPlasmicSlot({
+                defaultContents: "Total:",
+                value: args.children,
+                className: classNames(sty.slotTargetChildren)
+              })}
             </div>
             <div
               data-plasmic-name={"metricTotal"}
