@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { Drawer } from "antd";
 import type { DrawerProps } from "antd";
@@ -27,6 +29,7 @@ export interface DrawerV2Props {
   forceRender?: boolean;
   autoFocus?: boolean;
   loading?: boolean;
+  closable?: boolean;
   
   // Styling props
   className?: string;
@@ -34,6 +37,10 @@ export interface DrawerV2Props {
   style?: React.CSSProperties;
   rootStyle?: React.CSSProperties;
   headerStyle?: React.CSSProperties;
+  bodyStyle?: React.CSSProperties;
+  footerStyle?: React.CSSProperties;
+  maskStyle?: React.CSSProperties;
+  contentWrapperStyle?: React.CSSProperties;
   zIndex?: number;
   
   // Advanced props
@@ -78,11 +85,16 @@ export function DrawerV2({
   forceRender = false,
   autoFocus = true,
   loading = false,
+  closable = true,
   className,
   rootClassName,
   style,
   rootStyle,
   headerStyle,
+  bodyStyle,
+  footerStyle,
+  maskStyle,
+  contentWrapperStyle,
   zIndex = 1000,
   getContainer = "body",
   closeIcon,
@@ -115,11 +127,16 @@ export function DrawerV2({
       forceRender={forceRender}
       autoFocus={autoFocus}
       loading={loading}
+      closable={closable}
       className={className}
       rootClassName={rootClassName}
       style={style}
       rootStyle={rootStyle}
       headerStyle={headerStyle}
+      bodyStyle={bodyStyle}
+      footerStyle={footerStyle}
+      maskStyle={maskStyle}
+      contentWrapperStyle={contentWrapperStyle}
       zIndex={zIndex}
       getContainer={getContainer}
       closeIcon={closeIcon}

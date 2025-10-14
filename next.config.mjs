@@ -24,6 +24,19 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Transpile Ant Design packages to fix ESM module resolution issues
+  transpilePackages: [
+    'antd',
+    '@ant-design/icons',
+    '@ant-design/icons-svg',
+    'rc-util',
+    'rc-pagination',
+    'rc-picker',
+    'rc-notification',
+    'rc-tooltip',
+    'rc-tree',
+    'rc-table',
+  ],
 };
 
 export default nextConfig;

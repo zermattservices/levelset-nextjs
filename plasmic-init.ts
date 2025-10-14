@@ -17,7 +17,7 @@ import { ProtectedRoute } from "./components/CodeComponents/auth/ProtectedRoute"
 import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
 import { LogoutButton } from "./components/CodeComponents/auth/LogoutButton";
 import { SupabaseUserLogOut } from "./components/CodeComponents/auth/SupabaseUserLogOut";
-// import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
+import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
 const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
@@ -302,8 +302,7 @@ PLASMIC.registerComponent(SupabaseUserLogOut, {
   importPath: "./components/CodeComponents/auth/SupabaseUserLogOut",
 });
 
-// Register DrawerV2 component (temporarily disabled due to build issues)
-/*
+// Register DrawerV2 component
 PLASMIC.registerComponent(DrawerV2, {
   name: "DrawerV2",
   displayName: "Drawer v2",
@@ -386,6 +385,11 @@ PLASMIC.registerComponent(DrawerV2, {
       defaultValue: false,
       description: "Show the Skeleton loading state"
     },
+    closable: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Whether a close (x) button is visible on top right"
+    },
     
     // Styling props
     className: "string",
@@ -393,6 +397,22 @@ PLASMIC.registerComponent(DrawerV2, {
     style: "object",
     rootStyle: "object",
     headerStyle: "object",
+    bodyStyle: {
+      type: "object",
+      description: "Style of the drawer body"
+    },
+    footerStyle: {
+      type: "object",
+      description: "Style of the drawer footer"
+    },
+    maskStyle: {
+      type: "object",
+      description: "Style of the mask element"
+    },
+    contentWrapperStyle: {
+      type: "object",
+      description: "Style of the content wrapper"
+    },
     zIndex: {
       type: "number",
       defaultValue: 1000,
@@ -402,6 +422,10 @@ PLASMIC.registerComponent(DrawerV2, {
     // Advanced props
     getContainer: "string",
     closeIcon: "slot",
+    drawerRender: {
+      type: "slot",
+      description: "Custom drawer content render"
+    },
     afterOpenChange: {
       type: "eventHandler",
       argTypes: [
@@ -420,4 +444,3 @@ PLASMIC.registerComponent(DrawerV2, {
   },
   importPath: "./components/CodeComponents/DrawerV2",
 });
-*/
