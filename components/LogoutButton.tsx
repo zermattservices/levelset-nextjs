@@ -38,7 +38,7 @@ function LogoutButton_(props: LogoutButtonProps, ref: HTMLElementRefOf<"div">) {
   // By default, we are just piping all LogoutButtonProps here, but feel free
   // to do whatever works for you.
 
-  return <PlasmicLogoutButton root={{ ref }} {...props} />;
+  return <PlasmicLogoutButton {...props} />;
 }
 
 const LogoutButton = React.forwardRef(LogoutButton_);
