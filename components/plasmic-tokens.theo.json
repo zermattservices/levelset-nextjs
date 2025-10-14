@@ -403,7 +403,7 @@
     {
       "name": "Basic/Text-Primary",
       "type": "color",
-      "value": "#030712",
+      "value": "#181D27",
       "category": "color",
       "meta": {
         "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
@@ -413,7 +413,7 @@
     {
       "name": "Basic/Text-Secondary",
       "type": "color",
-      "value": "#6B7280",
+      "value": "#414651",
       "category": "color",
       "meta": {
         "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
@@ -433,7 +433,7 @@
     {
       "name": "Brand/Brand-Border",
       "type": "color",
-      "value": "#93C5FD",
+      "value": "#458461",
       "category": "color",
       "meta": {
         "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
@@ -483,7 +483,7 @@
     {
       "name": "Destructive/Destructive",
       "type": "color",
-      "value": "#DC2626",
+      "value": "#D23230",
       "category": "color",
       "meta": {
         "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
@@ -493,7 +493,7 @@
     {
       "name": "Destructive/Destructive-Border",
       "type": "color",
-      "value": "#FCA5A5",
+      "value": "#E64F4D",
       "category": "color",
       "meta": {
         "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
@@ -513,7 +513,7 @@
     {
       "name": "Destructive/Destructive-Soft",
       "type": "color",
-      "value": "#FEE2E2",
+      "value": "#F7ABAA",
       "category": "color",
       "meta": {
         "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",

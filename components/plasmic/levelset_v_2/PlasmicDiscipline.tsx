@@ -63,6 +63,7 @@ import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_m
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
 import { DisciplineTable } from "../../CodeComponents/DisciplineTable"; // plasmic-import: Gsr7FZewgF56/codeComponent
 import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTable"; // plasmic-import: gO99exJZ_N-6/codeComponent
+import { AntdDrawer } from "@plasmicpkgs/antd5/skinny/registerDrawer";
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -89,6 +90,7 @@ export type PlasmicDiscipline__OverridesType = {
   disciplineTable?: Flex__<typeof DisciplineTable>;
   verticalStack2?: Flex__<"div">;
   disciplineActionsTable?: Flex__<typeof DisciplineActionsTable>;
+  drawer2?: Flex__<typeof AntdDrawer>;
 };
 
 export interface DefaultDisciplineProps {}
@@ -196,6 +198,12 @@ function PlasmicDiscipline__RenderFunc(props: {
               throw e;
             }
           })()
+      },
+      {
+        path: "drawer2.open",
+        type: "private",
+        variableType: "boolean",
+        initFunc: ({ $props, $state, $queries, $ctx }) => true
       }
     ],
     [$props, $ctx, $refs]
@@ -409,6 +417,38 @@ function PlasmicDiscipline__RenderFunc(props: {
             </div>
           </div>
         </div>
+        <AntdDrawer
+          data-plasmic-name={"drawer2"}
+          data-plasmic-override={overrides.drawer2}
+          className={classNames("__wab_instance", sty.drawer2)}
+          defaultStylesClassName={classNames(
+            projectcss.root_reset,
+            projectcss.plasmic_default_styles,
+            projectcss.plasmic_mixins,
+            styleTokensClassNames
+          )}
+          drawerScopeClassName={sty["drawer2__drawer"]}
+          onOpenChange={async (...eventArgs: any) => {
+            generateStateOnChangeProp($state, ["drawer2", "open"]).apply(
+              null,
+              eventArgs
+            );
+          }}
+          open={generateStateValueProp($state, ["drawer2", "open"])}
+          title={"Drawer title"}
+        >
+          <div className={classNames(projectcss.all, sty.freeBox__f9IxW)}>
+            <div
+              className={classNames(
+                projectcss.all,
+                projectcss.__wab_text,
+                sty.text___59PeK
+              )}
+            >
+              {"Drawer content"}
+            </div>
+          </div>
+        </AntdDrawer>
       </div>
     </React.Fragment>
   ) as React.ReactElement | null;
@@ -421,13 +461,15 @@ const PlasmicDescendants = {
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
-    "disciplineActionsTable"
+    "disciplineActionsTable",
+    "drawer2"
   ],
   menuNavigation: ["menuNavigation"],
   verticalStack: ["verticalStack", "disciplineTable"],
   disciplineTable: ["disciplineTable"],
   verticalStack2: ["verticalStack2", "disciplineActionsTable"],
-  disciplineActionsTable: ["disciplineActionsTable"]
+  disciplineActionsTable: ["disciplineActionsTable"],
+  drawer2: ["drawer2"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
 type DescendantsType<T extends NodeNameType> =
@@ -439,6 +481,7 @@ type NodeDefaultElementType = {
   disciplineTable: typeof DisciplineTable;
   verticalStack2: "div";
   disciplineActionsTable: typeof DisciplineActionsTable;
+  drawer2: typeof AntdDrawer;
 };
 
 type ReservedPropsType = "variants" | "args" | "overrides";
@@ -508,6 +551,7 @@ export const PlasmicDiscipline = Object.assign(
     disciplineTable: makeNodeComponent("disciplineTable"),
     verticalStack2: makeNodeComponent("verticalStack2"),
     disciplineActionsTable: makeNodeComponent("disciplineActionsTable"),
+    drawer2: makeNodeComponent("drawer2"),
 
     // Metadata about props expected for PlasmicDiscipline
     internalVariantProps: PlasmicDiscipline__VariantProps,

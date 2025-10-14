@@ -67,6 +67,7 @@ import {
 } from "@plasmicapp/react-web/lib/data-sources";
 
 import { AntdButton } from "@plasmicpkgs/antd5/skinny/registerButton";
+import LogoutButton from "../../LogoutButton"; // plasmic-import: UwKJxxQFYiGw/component
 import { SupabaseUserLogOut } from "../../CodeComponents/auth/SupabaseUserLogOut"; // plasmic-import: l-xO2VjafQ7l/codeComponent
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
 import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
@@ -80,7 +81,6 @@ import sty from "./PlasmicMenuNavigation.module.css"; // plasmic-import: eJlFBj1
 
 import CircleDotFilledIcon from "../library_tabler_3_2_icons/icons/PlasmicIcon__CircleDotFilled"; // plasmic-import: PL4O-3ScZjiD/icon
 import ChevronSelectorVerticalIcon from "./icons/PlasmicIcon__ChevronSelectorVertical"; // plasmic-import: cjzcuVmo8rE7/icon
-import DotsVerticalIcon from "./icons/PlasmicIcon__DotsVertical"; // plasmic-import: Nj_WO85Tkuxp/icon
 
 createPlasmicElementProxy;
 
@@ -107,7 +107,6 @@ export type PlasmicMenuNavigation__ArgsType = {
   onLastNameChange?: (val: string) => void;
   children2?: React.ReactNode;
   children3?: React.ReactNode;
-  children4?: React.ReactNode;
   slot3?: React.ReactNode;
   children?: React.ReactNode;
 };
@@ -124,7 +123,6 @@ export const PlasmicMenuNavigation__ArgProps = new Array<ArgPropType>(
   "onLastNameChange",
   "children2",
   "children3",
-  "children4",
   "slot3",
   "children"
 );
@@ -132,7 +130,8 @@ export const PlasmicMenuNavigation__ArgProps = new Array<ArgPropType>(
 export type PlasmicMenuNavigation__OverridesType = {
   root?: Flex__<"div">;
   logo?: Flex__<typeof PlasmicImg__>;
-  img?: Flex__<typeof PlasmicImg__>;
+  logoutButton?: Flex__<typeof LogoutButton>;
+  account?: Flex__<typeof PlasmicImg__>;
   supabaseUserLogOut?: Flex__<typeof SupabaseUserLogOut>;
 };
 
@@ -148,7 +147,6 @@ export interface DefaultMenuNavigationProps {
   onLastNameChange?: (val: string) => void;
   children2?: React.ReactNode;
   children3?: React.ReactNode;
-  children4?: React.ReactNode;
   slot3?: React.ReactNode;
   children?: React.ReactNode;
   dashboardOpen?: SingleBooleanChoiceArg<"dashboardOpen">;
@@ -290,7 +288,7 @@ function PlasmicMenuNavigation__RenderFunc(props: {
             displayMaxWidth={"100%"}
             displayMinHeight={"0"}
             displayMinWidth={"0"}
-            displayWidth={"128px"}
+            displayWidth={"100px"}
             loading={"lazy"}
             onClick={async event => {
               const $steps = {};
@@ -321,8 +319,8 @@ function PlasmicMenuNavigation__RenderFunc(props: {
               }
             }}
             src={{
-              src: "/plasmic/levelset_v_2/images/horizontalLockupPrimarySm1.png",
-              fullWidth: 1000,
+              src: "/plasmic/levelset_v_2/images/levelsetNoMargingPng.png",
+              fullWidth: 800,
               fullHeight: 250,
               aspectRatio: undefined
             }}
@@ -430,138 +428,90 @@ function PlasmicMenuNavigation__RenderFunc(props: {
         </div>
         <div className={classNames(projectcss.all, sty.freeBox__rkbjc)}>
           <div className={classNames(projectcss.all, sty.freeBox___1LyUp)}>
-            <PlasmicImg__
-              data-plasmic-name={"img"}
-              data-plasmic-override={overrides.img}
-              alt={""}
-              className={classNames(sty.img)}
-              displayHeight={"auto"}
-              displayMaxHeight={"none"}
-              displayMaxWidth={"100%"}
-              displayMinHeight={"0"}
-              displayMinWidth={"0"}
-              displayWidth={"40px"}
-              loading={"lazy"}
-              src={{
-                src: "/plasmic/levelset_v_2/images/circleCCfaPng.png",
-                fullWidth: 4167,
-                fullHeight: 4167,
-                aspectRatio: undefined
-              }}
-            />
-
             <div className={classNames(projectcss.all, sty.freeBox__pKjWu)}>
               <div className={classNames(projectcss.all, sty.freeBox__cVk2)}>
                 {renderPlasmicSlot({
                   defaultContents: (
                     <React.Fragment>
-                      {(() => {
-                        try {
-                          return $state.firstName;
-                        } catch (e) {
-                          if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
-                          ) {
-                            return "Reece Howard";
-                          }
-                          throw e;
-                        }
-                      })()}
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          projectcss.__wab_text,
+                          sty.text__wg9Jo
+                        )}
+                      >
+                        <React.Fragment>
+                          <span
+                            className={
+                              "plasmic_default__all plasmic_default__span"
+                            }
+                            style={{ fontStyle: "italic" }}
+                          >
+                            {"Hello, "}
+                          </span>
+                        </React.Fragment>
+                      </div>
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          projectcss.__wab_text,
+                          sty.text__gFy0A
+                        )}
+                      >
+                        <React.Fragment>
+                          {(() => {
+                            try {
+                              return $state.firstName;
+                            } catch (e) {
+                              if (
+                                e instanceof TypeError ||
+                                e?.plasmicType === "PlasmicUndefinedDataError"
+                              ) {
+                                return "Reece Howard";
+                              }
+                              throw e;
+                            }
+                          })()}
+                        </React.Fragment>
+                      </div>
                     </React.Fragment>
                   ),
                   value: args.children3,
                   className: classNames(sty.slotTargetChildren3)
                 })}
-                {renderPlasmicSlot({
-                  defaultContents: (
-                    <React.Fragment>
-                      {(() => {
-                        try {
-                          return $state.lastName;
-                        } catch (e) {
-                          if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
-                          ) {
-                            return "Reece Howard";
-                          }
-                          throw e;
-                        }
-                      })()}
-                    </React.Fragment>
-                  ),
-                  value: args.children4,
-                  className: classNames(sty.slotTargetChildren4)
-                })}
               </div>
-              <div className={classNames(projectcss.all, sty.freeBox__cxGXx)}>
-                {renderPlasmicSlot({
-                  defaultContents: (
-                    <React.Fragment>
-                      {(() => {
-                        try {
-                          return $state.userRole;
-                        } catch (e) {
-                          if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
-                          ) {
-                            return "Owner/Operator";
-                          }
-                          throw e;
-                        }
-                      })()}
-                    </React.Fragment>
-                  ),
-                  value: args.slot3,
-                  className: classNames(sty.slotTargetSlot3)
+              <LogoutButton
+                data-plasmic-name={"logoutButton"}
+                data-plasmic-override={overrides.logoutButton}
+                className={classNames("__wab_instance", sty.logoutButton)}
+                slot3={renderPlasmicSlot({
+                  defaultContents: "Log Out",
+                  value: args.slot3
                 })}
-              </div>
+              />
             </div>
             <div className={classNames(projectcss.all, sty.freeBox__kYv9N)}>
-              <DotsVerticalIcon
-                className={classNames(projectcss.all, sty.svg__qxnzD)}
-                onClick={async event => {
-                  const $steps = {};
-
-                  $steps["updateLogoutShow"] = true
-                    ? (() => {
-                        const actionArgs = {
-                          variable: {
-                            objRoot: $state,
-                            variablePath: ["logoutShow"]
-                          },
-                          operation: 4
-                        };
-                        return (({
-                          variable,
-                          value,
-                          startIndex,
-                          deleteCount
-                        }) => {
-                          if (!variable) {
-                            return;
-                          }
-                          const { objRoot, variablePath } = variable;
-
-                          const oldValue = $stateGet(objRoot, variablePath);
-                          $stateSet(objRoot, variablePath, !oldValue);
-                          return !oldValue;
-                        })?.apply(null, [actionArgs]);
-                      })()
-                    : undefined;
-                  if (
-                    $steps["updateLogoutShow"] != null &&
-                    typeof $steps["updateLogoutShow"] === "object" &&
-                    typeof $steps["updateLogoutShow"].then === "function"
-                  ) {
-                    $steps["updateLogoutShow"] =
-                      await $steps["updateLogoutShow"];
-                  }
-                }}
-                role={"img"}
-              />
+              <div className={classNames(projectcss.all, sty.freeBox__yUskQ)}>
+                <PlasmicImg__
+                  data-plasmic-name={"account"}
+                  data-plasmic-override={overrides.account}
+                  alt={""}
+                  className={classNames(sty.account)}
+                  displayHeight={"auto"}
+                  displayMaxHeight={"none"}
+                  displayMaxWidth={"100%"}
+                  displayMinHeight={"0"}
+                  displayMinWidth={"0"}
+                  displayWidth={"24px"}
+                  loading={"lazy"}
+                  src={{
+                    src: "/plasmic/levelset_v_2/images/userLevelsetSvg2.svg",
+                    fullWidth: 38,
+                    fullHeight: 40,
+                    aspectRatio: undefined
+                  }}
+                />
+              </div>
             </div>
             <SupabaseUserLogOut
               data-plasmic-name={"supabaseUserLogOut"}
@@ -677,9 +627,10 @@ function PlasmicMenuNavigation__RenderFunc(props: {
 }
 
 const PlasmicDescendants = {
-  root: ["root", "logo", "img", "supabaseUserLogOut"],
+  root: ["root", "logo", "logoutButton", "account", "supabaseUserLogOut"],
   logo: ["logo"],
-  img: ["img"],
+  logoutButton: ["logoutButton"],
+  account: ["account"],
   supabaseUserLogOut: ["supabaseUserLogOut"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
@@ -688,7 +639,8 @@ type DescendantsType<T extends NodeNameType> =
 type NodeDefaultElementType = {
   root: "div";
   logo: typeof PlasmicImg__;
-  img: typeof PlasmicImg__;
+  logoutButton: typeof LogoutButton;
+  account: typeof PlasmicImg__;
   supabaseUserLogOut: typeof SupabaseUserLogOut;
 };
 
@@ -755,7 +707,8 @@ export const PlasmicMenuNavigation = Object.assign(
   {
     // Helper components rendering sub-elements
     logo: makeNodeComponent("logo"),
-    img: makeNodeComponent("img"),
+    logoutButton: makeNodeComponent("logoutButton"),
+    account: makeNodeComponent("account"),
     supabaseUserLogOut: makeNodeComponent("supabaseUserLogOut"),
 
     // Metadata about props expected for PlasmicMenuNavigation
