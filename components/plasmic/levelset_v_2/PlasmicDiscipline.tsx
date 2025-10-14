@@ -290,7 +290,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => true
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
       },
       {
         path: "selectedEmployee",
@@ -1046,22 +1046,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                     sty.text__o774
                                   )}
                                 >
-                                  <React.Fragment>
-                                    {(() => {
-                                      try {
-                                        return $ctx.currentTabKey;
-                                      } catch (e) {
-                                        if (
-                                          e instanceof TypeError ||
-                                          e?.plasmicType ===
-                                            "PlasmicUndefinedDataError"
-                                        ) {
-                                          return "Some content for tab 1";
-                                        }
-                                        throw e;
-                                      }
-                                    })()}
-                                  </React.Fragment>
+                                  {"Coming soon!"}
                                 </div>
                               </div>
                             </TabContent>
@@ -1087,22 +1072,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                     sty.text__ts6AM
                                   )}
                                 >
-                                  <React.Fragment>
-                                    {(() => {
-                                      try {
-                                        return $ctx.currentTabKey;
-                                      } catch (e) {
-                                        if (
-                                          e instanceof TypeError ||
-                                          e?.plasmicType ===
-                                            "PlasmicUndefinedDataError"
-                                        ) {
-                                          return "Some content for tab 1";
-                                        }
-                                        throw e;
-                                      }
-                                    })()}
-                                  </React.Fragment>
+                                  {"Coming soon!"}
                                 </div>
                               </div>
                             </TabContent>
@@ -1128,7 +1098,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                     sty.text__jrDLj
                                   )}
                                 >
-                                  {"Some content for tab 1"}
+                                  {"Coming soon!"}
                                 </div>
                               </div>
                             </TabContent>

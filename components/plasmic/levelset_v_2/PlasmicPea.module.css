@@ -129,9 +129,18 @@
   font-size: var(--token-BlA-iDkaAWvO);
   font-family: "Satoshi";
   min-width: 0;
+  display: none;
+}
+.text__r2U50 {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  font-size: var(--token-BlA-iDkaAWvO);
+  font-family: "Satoshi";
+  min-width: 0;
 }
 .freeBox__de9Bv {
-  display: flex;
   flex-direction: row;
   position: relative;
   align-items: flex-start;
@@ -141,6 +150,7 @@
   max-width: 100%;
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
+  display: none;
   padding: 8px;
 }
 .freeBox___64Wwo {

@@ -147,9 +147,10 @@
   height: 1em;
 }
 .tabButton__ys00:global(.__wab_instance) {
-  width: auto;
+  width: 100%;
   max-width: 100%;
   object-fit: cover;
+  min-width: 0;
 }
 .button__xW3GE:global(.__wab_instance) {
   max-width: 100%;
@@ -177,9 +178,10 @@
   height: 1em;
 }
 .tabButton__viQnu:global(.__wab_instance) {
-  width: auto;
+  width: 100%;
   max-width: 100%;
   object-fit: cover;
+  min-width: 0;
 }
 .button__yuqKt:global(.__wab_instance) {
   max-width: 100%;

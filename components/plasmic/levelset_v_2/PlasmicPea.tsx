@@ -354,6 +354,22 @@ function PlasmicPea__RenderFunc(props: {
                     "Filter using the position buttons and click a Team Member to see their recent ratings.."
                   }
                 </div>
+                <div
+                  className={classNames(
+                    projectcss.all,
+                    projectcss.__wab_text,
+                    sty.text__r2U50
+                  )}
+                >
+                  <React.Fragment>
+                    <span
+                      className={"plasmic_default__all plasmic_default__span"}
+                      style={{ color: "#000000" }}
+                    >
+                      {"Coming soon!"}
+                    </span>
+                  </React.Fragment>
+                </div>
               </div>
             </div>
           </div>
@@ -398,7 +414,19 @@ function PlasmicPea__RenderFunc(props: {
                     "__wab_instance",
                     sty.peaScoreboardTable
                   )}
-                  currentTab={"FOH"}
+                  currentTab={(() => {
+                    try {
+                      return undefined;
+                    } catch (e) {
+                      if (
+                        e instanceof TypeError ||
+                        e?.plasmicType === "PlasmicUndefinedDataError"
+                      ) {
+                        return "FOH";
+                      }
+                      throw e;
+                    }
+                  })()}
                 />
               </div>
             </div>

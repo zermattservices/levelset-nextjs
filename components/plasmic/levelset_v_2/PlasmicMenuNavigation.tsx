@@ -323,67 +323,71 @@ function PlasmicMenuNavigation__RenderFunc(props: {
             }}
           />
 
-          <AntdButton
-            className={classNames("__wab_instance", sty.button___5Tvwa)}
-            ghost={false}
-            loading={false}
-            onClick={async () => {
-              const $steps = {};
+          <div className={classNames(projectcss.all, sty.freeBox___9Xy55)}>
+            <AntdButton
+              className={classNames("__wab_instance", sty.button___5Tvwa)}
+              ghost={false}
+              loading={false}
+              onClick={async () => {
+                const $steps = {};
 
-              $steps["updateDashboardOpen"] = true
-                ? (() => {
-                    const actionArgs = {
-                      vgroup: "dashboardOpen",
-                      operation: 2,
-                      value: "dashboardOpen"
-                    };
-                    return (({ vgroup, value }) => {
-                      if (typeof value === "string") {
-                        value = [value];
-                      }
+                $steps["updateDashboardOpen"] = true
+                  ? (() => {
+                      const actionArgs = {
+                        vgroup: "dashboardOpen",
+                        operation: 2,
+                        value: "dashboardOpen"
+                      };
+                      return (({ vgroup, value }) => {
+                        if (typeof value === "string") {
+                          value = [value];
+                        }
 
-                      const oldValue = $stateGet($state, vgroup);
-                      $stateSet($state, vgroup, !oldValue);
-                      return !oldValue;
-                    })?.apply(null, [actionArgs]);
-                  })()
-                : undefined;
-              if (
-                $steps["updateDashboardOpen"] != null &&
-                typeof $steps["updateDashboardOpen"] === "object" &&
-                typeof $steps["updateDashboardOpen"].then === "function"
-              ) {
-                $steps["updateDashboardOpen"] =
-                  await $steps["updateDashboardOpen"];
-              }
-            }}
-            shape={"default"}
-            type={"ghost"}
-          >
-            <div
-              className={classNames(
-                projectcss.all,
-                projectcss.__wab_text,
-                sty.text__ayRwz
-              )}
+                        const oldValue = $stateGet($state, vgroup);
+                        $stateSet($state, vgroup, !oldValue);
+                        return !oldValue;
+                      })?.apply(null, [actionArgs]);
+                    })()
+                  : undefined;
+                if (
+                  $steps["updateDashboardOpen"] != null &&
+                  typeof $steps["updateDashboardOpen"] === "object" &&
+                  typeof $steps["updateDashboardOpen"].then === "function"
+                ) {
+                  $steps["updateDashboardOpen"] =
+                    await $steps["updateDashboardOpen"];
+                }
+              }}
+              shape={"default"}
+              size={"small"}
+              type={"ghost"}
             >
-              {"Dashboards"}
-            </div>
-          </AntdButton>
-          <AntdButton
-            className={classNames("__wab_instance", sty.button__fBkbv)}
-            type={"ghost"}
-          >
-            <div
-              className={classNames(
-                projectcss.all,
-                projectcss.__wab_text,
-                sty.text__mNyQw
-              )}
+              <div
+                className={classNames(
+                  projectcss.all,
+                  projectcss.__wab_text,
+                  sty.text__ayRwz
+                )}
+              >
+                {"Dashboards"}
+              </div>
+            </AntdButton>
+            <AntdButton
+              className={classNames("__wab_instance", sty.button__fBkbv)}
+              size={"small"}
+              type={"ghost"}
             >
-              {"Admin"}
-            </div>
-          </AntdButton>
+              <div
+                className={classNames(
+                  projectcss.all,
+                  projectcss.__wab_text,
+                  sty.text__mNyQw
+                )}
+              >
+                {"Admin"}
+              </div>
+            </AntdButton>
+          </div>
         </div>
         <div className={classNames(projectcss.all, sty.freeBox__xTe9W)}>
           <div className={classNames(projectcss.all, sty.freeBox__sltyv)}>
