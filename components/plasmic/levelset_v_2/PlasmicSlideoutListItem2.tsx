@@ -74,13 +74,15 @@ createPlasmicElementProxy;
 
 export type PlasmicSlideoutListItem2__VariantMembers = {
   disciplinaryAction: "disciplinaryAction";
+  infractionType: "positive" | "negative";
 };
 export type PlasmicSlideoutListItem2__VariantsArgs = {
   disciplinaryAction?: SingleBooleanChoiceArg<"disciplinaryAction">;
+  infractionType?: SingleChoiceArg<"positive" | "negative">;
 };
 type VariantPropType = keyof PlasmicSlideoutListItem2__VariantsArgs;
 export const PlasmicSlideoutListItem2__VariantProps =
-  new Array<VariantPropType>("disciplinaryAction");
+  new Array<VariantPropType>("disciplinaryAction", "infractionType");
 
 export type PlasmicSlideoutListItem2__ArgsType = {
   itemName?: React.ReactNode;
@@ -118,6 +120,7 @@ export interface DefaultSlideoutListItem2Props {
   informed2?: React.ReactNode;
   pointValue2?: React.ReactNode;
   disciplinaryAction?: SingleBooleanChoiceArg<"disciplinaryAction">;
+  infractionType?: SingleChoiceArg<"positive" | "negative">;
   className?: string;
 }
 
@@ -168,6 +171,12 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
         variableType: "variant",
         initFunc: ({ $props, $state, $queries, $ctx }) =>
           $props.disciplinaryAction
+      },
+      {
+        path: "infractionType",
+        type: "private",
+        variableType: "variant",
+        initFunc: ({ $props, $state, $queries, $ctx }) => $props.infractionType
       }
     ],
     [$props, $ctx, $refs]
@@ -193,7 +202,14 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
         projectcss.plasmic_default_styles,
         projectcss.plasmic_mixins,
         styleTokensClassNames,
-        sty.listItem
+        sty.listItem,
+        {
+          [sty.listIteminfractionType_positive]: hasVariant(
+            $state,
+            "infractionType",
+            "positive"
+          )
+        }
       )}
     >
       <div
@@ -217,7 +233,7 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
               className={classNames(projectcss.all, sty.text24)}
             >
               {renderPlasmicSlot({
-                defaultContents: "Covering Hours for a Team Member",
+                defaultContents: "Item Name",
                 value: args.itemName,
                 className: classNames(sty.slotTargetItemName, {
                   [sty.slotTargetItemNamedisciplinaryAction]: hasVariant(
@@ -246,7 +262,13 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
                   </div>
                 ),
                 value: args.date2,
-                className: classNames(sty.slotTargetDate2)
+                className: classNames(sty.slotTargetDate2, {
+                  [sty.slotTargetDate2disciplinaryAction]: hasVariant(
+                    $state,
+                    "disciplinaryAction",
+                    "disciplinaryAction"
+                  )
+                })
               })}
               <Divider3Icon
                 data-plasmic-name={"divider"}
@@ -274,7 +296,7 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
                         sty.text__b3Ym2
                       )}
                     >
-                      {"Amanda Luna"}
+                      {"Leader Name"}
                     </div>
                   ),
                   value: args.documentingLeader,
@@ -341,14 +363,16 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
           >
             {renderPlasmicSlot({
               defaultContents: (
-                <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text__yBoHx
-                  )}
-                >
-                  {"-10"}
+                <div className={classNames(projectcss.all, sty.freeBox__z3Kv)}>
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text__yBoHx
+                    )}
+                  >
+                    {"10"}
+                  </div>
                 </div>
               ),
               value: args.pointValue2,
@@ -357,6 +381,16 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
                   $state,
                   "disciplinaryAction",
                   "disciplinaryAction"
+                ),
+                [sty.slotTargetPointValue2infractionType_negative]: hasVariant(
+                  $state,
+                  "infractionType",
+                  "negative"
+                ),
+                [sty.slotTargetPointValue2infractionType_positive]: hasVariant(
+                  $state,
+                  "infractionType",
+                  "positive"
                 )
               })
             })}

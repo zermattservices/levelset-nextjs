@@ -53,7 +53,7 @@
   flex-direction: row;
 }
 .slotTargetItemName {
-  font-family: "Inter", sans-serif;
+  font-family: "Satoshi";
   font-size: 14px;
   font-weight: 500;
   color: rgba(65, 70, 81, 1);
@@ -71,9 +71,9 @@
   justify-content: flex-start;
 }
 .slotTargetDate2 {
-  font-family: "Inter", sans-serif;
+  font-family: "Satoshi";
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   color: rgba(83, 88, 98, 1);
   line-height: 20px;
   letter-spacing: 0em;
@@ -104,9 +104,9 @@
   height: 1em;
 }
 .slotTargetDocumentingLeader {
-  font-family: "Inter", sans-serif;
+  font-family: "Satoshi";
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   color: rgba(83, 88, 98, 1);
   line-height: 20px;
   letter-spacing: 0em;
@@ -125,9 +125,9 @@
   display: none;
 }
 .slotTargetInformed2 {
-  font-family: "Inter", sans-serif;
+  font-family: "Satoshi";
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   color: rgba(83, 88, 98, 1);
   line-height: 20px;
   letter-spacing: 0em;
@@ -153,11 +153,58 @@
   line-height: 32px;
   letter-spacing: 0em;
 }
+.slotTargetPointValue2 > *,
+.slotTargetPointValue2 > :global(.__wab_slot) > *,
+.slotTargetPointValue2 > :global(.__wab_slot) > :global(.__wab_slot) > *,
+.slotTargetPointValue2
+  > :global(.__wab_slot)
+  > :global(.__wab_slot)
+  > :global(.__wab_slot)
+  > *,
+.slotTargetPointValue2 > picture > img,
+.slotTargetPointValue2 > :global(.__wab_slot) > picture > img,
+.slotTargetPointValue2
+  > :global(.__wab_slot)
+  > :global(.__wab_slot)
+  > picture
+  > img,
+.slotTargetPointValue2
+  > :global(.__wab_slot)
+  > :global(.__wab_slot)
+  > :global(.__wab_slot)
+  > picture
+  > img {
+  transition-property: all;
+  transition-duration: 1s;
+  -webkit-transition-property: all;
+  -webkit-transition-duration: 1s;
+}
+.slotTargetPointValue2infractionType_positive {
+  color: var(--token-yU83lAfPunGi);
+}
+.slotTargetPointValue2infractionType_negative {
+  color: var(--token-kv72MHA99lrw);
+}
+.freeBox__z3Kv {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0px;
+}
+.text__yBoHx {
+  font-family: "Satoshi";
+}
 .pointsText {
   display: block;
   font-size: 12px;
   text-align: center;
-  font-family: "Inter", sans-serif;
+  font-family: "Satoshi";
   font-weight: 500;
   letter-spacing: 0em;
   line-height: 18px;

@@ -59,11 +59,24 @@ import {
   useGlobalActions
 } from "@plasmicapp/react-web/lib/host";
 
+import {
+  executePlasmicDataOp,
+  usePlasmicDataOp,
+  usePlasmicInvalidate
+} from "@plasmicapp/react-web/lib/data-sources";
+
 import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_mCN/component
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
 import { DisciplineTable } from "../../CodeComponents/DisciplineTable"; // plasmic-import: Gsr7FZewgF56/codeComponent
 import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTable"; // plasmic-import: gO99exJZ_N-6/codeComponent
-import { AntdDrawer } from "@plasmicpkgs/antd5/skinny/registerDrawer";
+import { DrawerV2 } from "../../CodeComponents/DrawerV2"; // plasmic-import: lBRE4GzKIedo/codeComponent
+import { TabsContainer } from "@plasmicpkgs/plasmic-tabs";
+import { TabButton } from "@plasmicpkgs/plasmic-tabs";
+import Button from "../../Button"; // plasmic-import: u704oB_4BUvT/component
+import { TabUnderline } from "@plasmicpkgs/plasmic-tabs";
+import { TabContent } from "@plasmicpkgs/plasmic-tabs";
+import SlideoutListItem2 from "../../SlideoutListItem2"; // plasmic-import: 9Efhz4aeRJA1/component
+import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -72,6 +85,11 @@ import "@plasmicapp/react-web/lib/plasmic.css";
 import projectcss from "../levelset_v2/plasmic_levelset_v2.module.css"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectcss
 import sty from "./PlasmicDiscipline.module.css"; // plasmic-import: -vnBKJaatlPo/css
 
+import CheckSvgIcon from "../levelset_tabs/icons/PlasmicIcon__CheckSvg"; // plasmic-import: dTo8s4EZdHvA/icon
+import IconIcon from "../levelset_tabs/icons/PlasmicIcon__Icon"; // plasmic-import: CEbmjO_n9jaW/icon
+import DividerIcon from "./icons/PlasmicIcon__Divider"; // plasmic-import: FnQVtjsAqctc/icon
+import Divider2Icon from "./icons/PlasmicIcon__Divider2"; // plasmic-import: SrOGhElNYzm6/icon
+
 createPlasmicElementProxy;
 
 export type PlasmicDiscipline__VariantMembers = {};
@@ -79,9 +97,19 @@ export type PlasmicDiscipline__VariantsArgs = {};
 type VariantPropType = keyof PlasmicDiscipline__VariantsArgs;
 export const PlasmicDiscipline__VariantProps = new Array<VariantPropType>();
 
-export type PlasmicDiscipline__ArgsType = {};
+export type PlasmicDiscipline__ArgsType = {
+  itemName?: React.ReactNode;
+  pointValue3?: React.ReactNode;
+  itemName2?: React.ReactNode;
+  pointValue5?: React.ReactNode;
+};
 type ArgPropType = keyof PlasmicDiscipline__ArgsType;
-export const PlasmicDiscipline__ArgProps = new Array<ArgPropType>();
+export const PlasmicDiscipline__ArgProps = new Array<ArgPropType>(
+  "itemName",
+  "pointValue3",
+  "itemName2",
+  "pointValue5"
+);
 
 export type PlasmicDiscipline__OverridesType = {
   root?: Flex__<"div">;
@@ -90,7 +118,63 @@ export type PlasmicDiscipline__OverridesType = {
   disciplineTable?: Flex__<typeof DisciplineTable>;
   verticalStack2?: Flex__<"div">;
   disciplineActionsTable?: Flex__<typeof DisciplineActionsTable>;
-  drawer2?: Flex__<typeof AntdDrawer>;
+  drawerV2?: Flex__<typeof DrawerV2>;
+  content2?: Flex__<"div">;
+  textAndSupportingText2?: Flex__<"div">;
+  textAndOnlineIndicator?: Flex__<"div">;
+  text2?: Flex__<"div">;
+  supportingText2?: Flex__<"div">;
+  panel?: Flex__<"div">;
+  header?: Flex__<"div">;
+  container?: Flex__<"div">;
+  statistics?: Flex__<"div">;
+  tabsContainer?: Flex__<typeof TabsContainer>;
+  tabUnderline?: Flex__<typeof TabUnderline>;
+  pathwayContent?: Flex__<typeof TabContent>;
+  peContent?: Flex__<typeof TabContent>;
+  evalsContent?: Flex__<typeof TabContent>;
+  disciplineContent?: Flex__<typeof TabContent>;
+  discipline?: Flex__<"div">;
+  row?: Flex__<"div">;
+  text13?: Flex__<"div">;
+  row2?: Flex__<"div">;
+  metricItem?: Flex__<"div">;
+  headingAndNumber?: Flex__<"div">;
+  heading?: Flex__<"div">;
+  numberAndBadge?: Flex__<"div">;
+  number?: Flex__<"div">;
+  metricItem2?: Flex__<"div">;
+  headingAndNumber2?: Flex__<"div">;
+  heading2?: Flex__<"div">;
+  numberAndBadge2?: Flex__<"div">;
+  number2?: Flex__<"div">;
+  inputAndText?: Flex__<"div">;
+  iconAndText?: Flex__<"div">;
+  text14?: Flex__<"div">;
+  frame1?: Flex__<"div">;
+  informed?: Flex__<"div">;
+  date?: Flex__<"div">;
+  pointValue?: Flex__<"div">;
+  listItem?: Flex__<"div">;
+  contents?: Flex__<"div">;
+  content11?: Flex__<"div">;
+  listItemDetails?: Flex__<"div">;
+  text24?: Flex__<"div">;
+  points?: Flex__<"div">;
+  pointsText?: Flex__<"div">;
+  inputAndText2?: Flex__<"div">;
+  iconAndText2?: Flex__<"div">;
+  text27?: Flex__<"div">;
+  frame6?: Flex__<"div">;
+  leader2?: Flex__<"div">;
+  date2?: Flex__<"div">;
+  listItem2?: Flex__<"div">;
+  contents2?: Flex__<"div">;
+  content12?: Flex__<"div">;
+  listItemDetails2?: Flex__<"div">;
+  text25?: Flex__<"div">;
+  points2?: Flex__<"div">;
+  pointsText2?: Flex__<"div">;
 };
 
 export interface DefaultDisciplineProps {}
@@ -134,6 +218,9 @@ function PlasmicDiscipline__RenderFunc(props: {
   const refsRef = React.useRef({});
   const $refs = refsRef.current;
 
+  let [$queries, setDollarQueries] = React.useState<
+    Record<string, ReturnType<typeof usePlasmicDataOp>>
+  >({});
   const stateSpecs: Parameters<typeof useDollarState>[0] = React.useMemo(
     () => [
       {
@@ -200,10 +287,22 @@ function PlasmicDiscipline__RenderFunc(props: {
           })()
       },
       {
-        path: "drawer2.open",
+        path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
         initFunc: ({ $props, $state, $queries, $ctx }) => true
+      },
+      {
+        path: "selectedEmployee",
+        type: "private",
+        variableType: "object",
+        initFunc: ({ $props, $state, $queries, $ctx }) => ({})
+      },
+      {
+        path: "initialProfileTab",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "tab4"
       }
     ],
     [$props, $ctx, $refs]
@@ -211,9 +310,41 @@ function PlasmicDiscipline__RenderFunc(props: {
   const $state = useDollarState(stateSpecs, {
     $props,
     $ctx,
-    $queries: {},
+    $queries: $queries,
     $refs
   });
+
+  const new$Queries: Record<string, ReturnType<typeof usePlasmicDataOp>> = {
+    infractionsQuery: usePlasmicDataOp(() => {
+      return {
+        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
+        opId: "e65432bc-5986-43cc-a6fc-d197107efdc1",
+        userArgs: {
+          filters: [$state.selectedEmployee?.id]
+        },
+        cacheKey: `plasmic.$.e65432bc-5986-43cc-a6fc-d197107efdc1.$.`,
+        invalidatedKeys: null,
+        roleId: null
+      };
+    }),
+    discActions: usePlasmicDataOp(() => {
+      return {
+        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
+        opId: "65e45fcb-fda5-4165-aef9-aed4c21434bd",
+        userArgs: {
+          filters: [$state.selectedEmployee?.id]
+        },
+        cacheKey: `plasmic.$.65e45fcb-fda5-4165-aef9-aed4c21434bd.$.`,
+        invalidatedKeys: null,
+        roleId: null
+      };
+    })
+  };
+  if (Object.keys(new$Queries).some(k => new$Queries[k] !== $queries[k])) {
+    setDollarQueries(new$Queries);
+
+    $queries = new$Queries;
+  }
 
   const styleTokensClassNames = _useStyleTokens();
 
@@ -383,8 +514,141 @@ function PlasmicDiscipline__RenderFunc(props: {
                 data-plasmic-override={overrides.disciplineTable}
                 className={classNames("__wab_instance", sty.disciplineTable)}
                 density={"comfortable"}
-                locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                locationId={(() => {
+                  try {
+                    return $ctx.auth.location_id;
+                  } catch (e) {
+                    if (
+                      e instanceof TypeError ||
+                      e?.plasmicType === "PlasmicUndefinedDataError"
+                    ) {
+                      return undefined;
+                    }
+                    throw e;
+                  }
+                })()}
+                onRowClick={async employee => {
+                  const $steps = {};
+
+                  $steps["updateSelectedEmployee"] = true
+                    ? (() => {
+                        const actionArgs = {
+                          variable: {
+                            objRoot: $state,
+                            variablePath: ["selectedEmployee"]
+                          },
+                          operation: 0,
+                          value: employee
+                        };
+                        return (({
+                          variable,
+                          value,
+                          startIndex,
+                          deleteCount
+                        }) => {
+                          if (!variable) {
+                            return;
+                          }
+                          const { objRoot, variablePath } = variable;
+
+                          $stateSet(objRoot, variablePath, value);
+                          return value;
+                        })?.apply(null, [actionArgs]);
+                      })()
+                    : undefined;
+                  if (
+                    $steps["updateSelectedEmployee"] != null &&
+                    typeof $steps["updateSelectedEmployee"] === "object" &&
+                    typeof $steps["updateSelectedEmployee"].then === "function"
+                  ) {
+                    $steps["updateSelectedEmployee"] =
+                      await $steps["updateSelectedEmployee"];
+                  }
+
+                  $steps["updateDrawerV2Open"] = true
+                    ? (() => {
+                        const actionArgs = {
+                          variable: {
+                            objRoot: $state,
+                            variablePath: ["drawerV2", "open"]
+                          },
+                          operation: 0,
+                          value: true
+                        };
+                        return (({
+                          variable,
+                          value,
+                          startIndex,
+                          deleteCount
+                        }) => {
+                          if (!variable) {
+                            return;
+                          }
+                          const { objRoot, variablePath } = variable;
+
+                          $stateSet(objRoot, variablePath, value);
+                          return value;
+                        })?.apply(null, [actionArgs]);
+                      })()
+                    : undefined;
+                  if (
+                    $steps["updateDrawerV2Open"] != null &&
+                    typeof $steps["updateDrawerV2Open"] === "object" &&
+                    typeof $steps["updateDrawerV2Open"].then === "function"
+                  ) {
+                    $steps["updateDrawerV2Open"] =
+                      await $steps["updateDrawerV2Open"];
+                  }
+
+                  $steps["updateMenuNavigationLocationName"] = true
+                    ? (() => {
+                        const actionArgs = {
+                          variable: {
+                            objRoot: $state,
+                            variablePath: ["menuNavigation", "locationName"]
+                          },
+                          operation: 0
+                        };
+                        return (({
+                          variable,
+                          value,
+                          startIndex,
+                          deleteCount
+                        }) => {
+                          if (!variable) {
+                            return;
+                          }
+                          const { objRoot, variablePath } = variable;
+
+                          $stateSet(objRoot, variablePath, value);
+                          return value;
+                        })?.apply(null, [actionArgs]);
+                      })()
+                    : undefined;
+                  if (
+                    $steps["updateMenuNavigationLocationName"] != null &&
+                    typeof $steps["updateMenuNavigationLocationName"] ===
+                      "object" &&
+                    typeof $steps["updateMenuNavigationLocationName"].then ===
+                      "function"
+                  ) {
+                    $steps["updateMenuNavigationLocationName"] =
+                      await $steps["updateMenuNavigationLocationName"];
+                  }
+                }}
+                orgId={(() => {
+                  try {
+                    return $ctx.auth.org_id;
+                  } catch (e) {
+                    if (
+                      e instanceof TypeError ||
+                      e?.plasmicType === "PlasmicUndefinedDataError"
+                    ) {
+                      return undefined;
+                    }
+                    throw e;
+                  }
+                })()}
                 showActions={true}
               />
             </div>
@@ -417,38 +681,1304 @@ function PlasmicDiscipline__RenderFunc(props: {
             </div>
           </div>
         </div>
-        <AntdDrawer
-          data-plasmic-name={"drawer2"}
-          data-plasmic-override={overrides.drawer2}
-          className={classNames("__wab_instance", sty.drawer2)}
+        <DrawerV2
+          data-plasmic-name={"drawerV2"}
+          data-plasmic-override={overrides.drawerV2}
+          className={classNames("__wab_instance", sty.drawerV2)}
+          closable={true}
+          closeButtonClassName={classNames({
+            [sty["pcls_1P0T8Swx7ssW"]]: true
+          })}
           defaultStylesClassName={classNames(
             projectcss.root_reset,
             projectcss.plasmic_default_styles,
             projectcss.plasmic_mixins,
             styleTokensClassNames
           )}
-          drawerScopeClassName={sty["drawer2__drawer"]}
+          drawerBodyClassName={classNames({ [sty["pcls_0s1oo6MW753L"]]: true })}
+          drawerContentWrapperClassName={classNames({
+            [sty["pcls_NIsXGOi-WC36"]]: true
+          })}
+          drawerScopeClassName={sty["drawerV2__drawer"]}
+          keyboard={false}
+          mask={false}
+          maskClosable={false}
           onOpenChange={async (...eventArgs: any) => {
-            generateStateOnChangeProp($state, ["drawer2", "open"]).apply(
+            generateStateOnChangeProp($state, ["drawerV2", "open"]).apply(
               null,
               eventArgs
             );
           }}
-          open={generateStateValueProp($state, ["drawer2", "open"])}
-          title={"Drawer title"}
-        >
-          <div className={classNames(projectcss.all, sty.freeBox__f9IxW)}>
+          open={generateStateValueProp($state, ["drawerV2", "open"])}
+          size={"default"}
+          title={
             <div
-              className={classNames(
-                projectcss.all,
-                projectcss.__wab_text,
-                sty.text___59PeK
-              )}
+              data-plasmic-name={"content2"}
+              data-plasmic-override={overrides.content2}
+              className={classNames(projectcss.all, sty.content2)}
             >
-              {"Drawer content"}
+              <div
+                data-plasmic-name={"textAndSupportingText2"}
+                data-plasmic-override={overrides.textAndSupportingText2}
+                className={classNames(
+                  projectcss.all,
+                  sty.textAndSupportingText2
+                )}
+              >
+                <div
+                  data-plasmic-name={"textAndOnlineIndicator"}
+                  data-plasmic-override={overrides.textAndOnlineIndicator}
+                  className={classNames(
+                    projectcss.all,
+                    sty.textAndOnlineIndicator
+                  )}
+                >
+                  <div
+                    data-plasmic-name={"text2"}
+                    data-plasmic-override={overrides.text2}
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text2
+                    )}
+                  >
+                    <React.Fragment>
+                      {(() => {
+                        try {
+                          return (() => {
+                            {
+                              {
+                                return $state.selectedEmployee?.full_name;
+                              }
+                            }
+                          })();
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return "Reece Howard";
+                          }
+                          throw e;
+                        }
+                      })()}
+                    </React.Fragment>
+                  </div>
+                </div>
+                <div
+                  data-plasmic-name={"supportingText2"}
+                  data-plasmic-override={overrides.supportingText2}
+                  className={classNames(
+                    projectcss.all,
+                    projectcss.__wab_text,
+                    sty.supportingText2
+                  )}
+                >
+                  <React.Fragment>
+                    {(() => {
+                      try {
+                        return $state.selectedEmployee?.role;
+                      } catch (e) {
+                        if (
+                          e instanceof TypeError ||
+                          e?.plasmicType === "PlasmicUndefinedDataError"
+                        ) {
+                          return "Owner/Operator";
+                        }
+                        throw e;
+                      }
+                    })()}
+                  </React.Fragment>
+                </div>
+              </div>
+            </div>
+          }
+          width={"620"}
+        >
+          <div
+            data-plasmic-name={"panel"}
+            data-plasmic-override={overrides.panel}
+            className={classNames(projectcss.all, sty.panel)}
+          >
+            <div
+              data-plasmic-name={"header"}
+              data-plasmic-override={overrides.header}
+              className={classNames(projectcss.all, sty.header)}
+            >
+              <div
+                data-plasmic-name={"container"}
+                data-plasmic-override={overrides.container}
+                className={classNames(projectcss.all, sty.container)}
+              >
+                <div
+                  data-plasmic-name={"statistics"}
+                  data-plasmic-override={overrides.statistics}
+                  className={classNames(projectcss.all, sty.statistics)}
+                >
+                  <TabsContainer
+                    data-plasmic-name={"tabsContainer"}
+                    data-plasmic-override={overrides.tabsContainer}
+                    initialKey={(() => {
+                      try {
+                        return $state.initialProfileTab;
+                      } catch (e) {
+                        if (
+                          e instanceof TypeError ||
+                          e?.plasmicType === "PlasmicUndefinedDataError"
+                        ) {
+                          return undefined;
+                        }
+                        throw e;
+                      }
+                    })()}
+                    mountMode={"mountAllEagerly"}
+                    previewAll={false}
+                    previewKey={"tab4"}
+                  >
+                    <DataCtxReader__>
+                      {$ctx => (
+                        <div
+                          className={classNames(
+                            projectcss.all,
+                            sty.freeBox___2R2C
+                          )}
+                        >
+                          <div
+                            className={classNames(
+                              projectcss.all,
+                              sty.freeBox__eLzb
+                            )}
+                          >
+                            <TabButton
+                              className={classNames(
+                                "__wab_instance",
+                                sty.tabButton__aqaGl
+                              )}
+                              tabKey={"tab1"}
+                            >
+                              <Button
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.button__q81U
+                                )}
+                                color={(() => {
+                                  try {
+                                    return $ctx.currentTabKey === "tab1"
+                                      ? "green"
+                                      : "softSand";
+                                  } catch (e) {
+                                    if (
+                                      e instanceof TypeError ||
+                                      e?.plasmicType ===
+                                        "PlasmicUndefinedDataError"
+                                    ) {
+                                      return "green";
+                                    }
+                                    throw e;
+                                  }
+                                })()}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    projectcss.__wab_text,
+                                    sty.text___6KyZb
+                                  )}
+                                >
+                                  {"Pathway"}
+                                </div>
+                              </Button>
+                            </TabButton>
+                            <TabButton
+                              className={classNames(
+                                "__wab_instance",
+                                sty.tabButton__hM9Qt
+                              )}
+                              tabKey={"tab2"}
+                            >
+                              <Button
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.button__nUeV4
+                                )}
+                                color={(() => {
+                                  try {
+                                    return $ctx.currentTabKey === "tab2"
+                                      ? "green"
+                                      : "softSand";
+                                  } catch (e) {
+                                    if (
+                                      e instanceof TypeError ||
+                                      e?.plasmicType ===
+                                        "PlasmicUndefinedDataError"
+                                    ) {
+                                      return "green";
+                                    }
+                                    throw e;
+                                  }
+                                })()}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    projectcss.__wab_text,
+                                    sty.text__l7T
+                                  )}
+                                >
+                                  {"Positional Excellence"}
+                                </div>
+                              </Button>
+                            </TabButton>
+                            <TabButton
+                              className={classNames(
+                                "__wab_instance",
+                                sty.tabButton__mfDk
+                              )}
+                              tabKey={"tab3"}
+                            >
+                              <Button
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.button__rd97
+                                )}
+                                color={(() => {
+                                  try {
+                                    return $ctx.currentTabKey === "tab3"
+                                      ? "green"
+                                      : "softSand";
+                                  } catch (e) {
+                                    if (
+                                      e instanceof TypeError ||
+                                      e?.plasmicType ===
+                                        "PlasmicUndefinedDataError"
+                                    ) {
+                                      return "green";
+                                    }
+                                    throw e;
+                                  }
+                                })()}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    projectcss.__wab_text,
+                                    sty.text___4BkwJ
+                                  )}
+                                >
+                                  {"Evaluations"}
+                                </div>
+                              </Button>
+                            </TabButton>
+                            <TabButton
+                              className={classNames(
+                                "__wab_instance",
+                                sty.tabButton__myaYm
+                              )}
+                              tabKey={"tab4"}
+                            >
+                              <Button
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.button__twGtL
+                                )}
+                                color={(() => {
+                                  try {
+                                    return $ctx.currentTabKey === "tab4"
+                                      ? "green"
+                                      : "softSand";
+                                  } catch (e) {
+                                    if (
+                                      e instanceof TypeError ||
+                                      e?.plasmicType ===
+                                        "PlasmicUndefinedDataError"
+                                    ) {
+                                      return "green";
+                                    }
+                                    throw e;
+                                  }
+                                })()}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    projectcss.__wab_text,
+                                    sty.text__rnFqb
+                                  )}
+                                >
+                                  {"Discipline"}
+                                </div>
+                              </Button>
+                            </TabButton>
+                            <TabUnderline
+                              data-plasmic-name={"tabUnderline"}
+                              data-plasmic-override={overrides.tabUnderline}
+                              className={classNames(
+                                "__wab_instance",
+                                sty.tabUnderline
+                              )}
+                            />
+                          </div>
+                          <div
+                            className={classNames(
+                              projectcss.all,
+                              sty.freeBox__aRoag
+                            )}
+                          >
+                            <TabContent
+                              data-plasmic-name={"pathwayContent"}
+                              data-plasmic-override={overrides.pathwayContent}
+                              className={classNames(
+                                "__wab_instance",
+                                sty.pathwayContent
+                              )}
+                              tabKey={"tab1"}
+                            >
+                              <div
+                                className={classNames(
+                                  projectcss.all,
+                                  sty.freeBox__eNnS6
+                                )}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    projectcss.__wab_text,
+                                    sty.text__o774
+                                  )}
+                                >
+                                  <React.Fragment>
+                                    {(() => {
+                                      try {
+                                        return $ctx.currentTabKey;
+                                      } catch (e) {
+                                        if (
+                                          e instanceof TypeError ||
+                                          e?.plasmicType ===
+                                            "PlasmicUndefinedDataError"
+                                        ) {
+                                          return "Some content for tab 1";
+                                        }
+                                        throw e;
+                                      }
+                                    })()}
+                                  </React.Fragment>
+                                </div>
+                              </div>
+                            </TabContent>
+                            <TabContent
+                              data-plasmic-name={"peContent"}
+                              data-plasmic-override={overrides.peContent}
+                              className={classNames(
+                                "__wab_instance",
+                                sty.peContent
+                              )}
+                              tabKey={"tab2"}
+                            >
+                              <div
+                                className={classNames(
+                                  projectcss.all,
+                                  sty.freeBox__gmIt2
+                                )}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    projectcss.__wab_text,
+                                    sty.text__ts6AM
+                                  )}
+                                >
+                                  <React.Fragment>
+                                    {(() => {
+                                      try {
+                                        return $ctx.currentTabKey;
+                                      } catch (e) {
+                                        if (
+                                          e instanceof TypeError ||
+                                          e?.plasmicType ===
+                                            "PlasmicUndefinedDataError"
+                                        ) {
+                                          return "Some content for tab 1";
+                                        }
+                                        throw e;
+                                      }
+                                    })()}
+                                  </React.Fragment>
+                                </div>
+                              </div>
+                            </TabContent>
+                            <TabContent
+                              data-plasmic-name={"evalsContent"}
+                              data-plasmic-override={overrides.evalsContent}
+                              className={classNames(
+                                "__wab_instance",
+                                sty.evalsContent
+                              )}
+                              tabKey={"tab3"}
+                            >
+                              <div
+                                className={classNames(
+                                  projectcss.all,
+                                  sty.freeBox__wMoxn
+                                )}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    projectcss.__wab_text,
+                                    sty.text__jrDLj
+                                  )}
+                                >
+                                  {"Some content for tab 1"}
+                                </div>
+                              </div>
+                            </TabContent>
+                            <TabContent
+                              data-plasmic-name={"disciplineContent"}
+                              data-plasmic-override={
+                                overrides.disciplineContent
+                              }
+                              className={classNames(
+                                "__wab_instance",
+                                sty.disciplineContent
+                              )}
+                              tabKey={"tab4"}
+                            >
+                              <div
+                                className={classNames(
+                                  projectcss.all,
+                                  sty.freeBox__imotp
+                                )}
+                              >
+                                <div
+                                  data-plasmic-name={"discipline"}
+                                  data-plasmic-override={overrides.discipline}
+                                  className={classNames(
+                                    projectcss.all,
+                                    sty.discipline
+                                  )}
+                                >
+                                  <DividerIcon
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.svg__m1Kxu
+                                    )}
+                                    role={"img"}
+                                  />
+
+                                  <div
+                                    data-plasmic-name={"row"}
+                                    data-plasmic-override={overrides.row}
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.row
+                                    )}
+                                  >
+                                    <div
+                                      data-plasmic-name={"text13"}
+                                      data-plasmic-override={overrides.text13}
+                                      className={classNames(
+                                        projectcss.all,
+                                        projectcss.__wab_text,
+                                        sty.text13
+                                      )}
+                                    >
+                                      {"In the last 90 days..."}
+                                    </div>
+                                  </div>
+                                  <div
+                                    data-plasmic-name={"row2"}
+                                    data-plasmic-override={overrides.row2}
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.row2
+                                    )}
+                                  >
+                                    <div
+                                      data-plasmic-name={"metricItem"}
+                                      data-plasmic-override={
+                                        overrides.metricItem
+                                      }
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.metricItem
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"headingAndNumber"}
+                                        data-plasmic-override={
+                                          overrides.headingAndNumber
+                                        }
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.headingAndNumber
+                                        )}
+                                      >
+                                        <div
+                                          data-plasmic-name={"heading"}
+                                          data-plasmic-override={
+                                            overrides.heading
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            projectcss.__wab_text,
+                                            sty.heading
+                                          )}
+                                        >
+                                          {"Infractions"}
+                                        </div>
+                                        <div
+                                          data-plasmic-name={"numberAndBadge"}
+                                          data-plasmic-override={
+                                            overrides.numberAndBadge
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            sty.numberAndBadge
+                                          )}
+                                        >
+                                          <div
+                                            data-plasmic-name={"number"}
+                                            data-plasmic-override={
+                                              overrides.number
+                                            }
+                                            className={classNames(
+                                              projectcss.all,
+                                              projectcss.__wab_text,
+                                              sty.number
+                                            )}
+                                          >
+                                            <React.Fragment>
+                                              {(() => {
+                                                try {
+                                                  return (
+                                                    $queries.infractionsQuery
+                                                      .data ?? []
+                                                  ).reduce(
+                                                    total => total + 1,
+                                                    0
+                                                  );
+                                                } catch (e) {
+                                                  if (
+                                                    e instanceof TypeError ||
+                                                    e?.plasmicType ===
+                                                      "PlasmicUndefinedDataError"
+                                                  ) {
+                                                    return "4";
+                                                  }
+                                                  throw e;
+                                                }
+                                              })()}
+                                            </React.Fragment>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div
+                                      data-plasmic-name={"metricItem2"}
+                                      data-plasmic-override={
+                                        overrides.metricItem2
+                                      }
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.metricItem2
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"headingAndNumber2"}
+                                        data-plasmic-override={
+                                          overrides.headingAndNumber2
+                                        }
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.headingAndNumber2
+                                        )}
+                                      >
+                                        <div
+                                          data-plasmic-name={"heading2"}
+                                          data-plasmic-override={
+                                            overrides.heading2
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            projectcss.__wab_text,
+                                            sty.heading2
+                                          )}
+                                        >
+                                          {"Discipline Points"}
+                                        </div>
+                                        <div
+                                          data-plasmic-name={"numberAndBadge2"}
+                                          data-plasmic-override={
+                                            overrides.numberAndBadge2
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            sty.numberAndBadge2
+                                          )}
+                                        >
+                                          <div
+                                            data-plasmic-name={"number2"}
+                                            data-plasmic-override={
+                                              overrides.number2
+                                            }
+                                            className={classNames(
+                                              projectcss.all,
+                                              projectcss.__wab_text,
+                                              sty.number2
+                                            )}
+                                          >
+                                            <React.Fragment>
+                                              {(() => {
+                                                try {
+                                                  return (
+                                                    $queries.infractionsQuery
+                                                      .data ?? []
+                                                  ).reduce(
+                                                    (total, i) =>
+                                                      total + (i.points ?? 0),
+                                                    0
+                                                  );
+                                                } catch (e) {
+                                                  if (
+                                                    e instanceof TypeError ||
+                                                    e?.plasmicType ===
+                                                      "PlasmicUndefinedDataError"
+                                                  ) {
+                                                    return "55";
+                                                  }
+                                                  throw e;
+                                                }
+                                              })()}
+                                            </React.Fragment>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <Divider2Icon
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.svg__eycfx
+                                    )}
+                                    role={"img"}
+                                  />
+
+                                  <div
+                                    data-plasmic-name={"inputAndText"}
+                                    data-plasmic-override={
+                                      overrides.inputAndText
+                                    }
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.inputAndText
+                                    )}
+                                  >
+                                    <div
+                                      data-plasmic-name={"iconAndText"}
+                                      data-plasmic-override={
+                                        overrides.iconAndText
+                                      }
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.iconAndText
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"text14"}
+                                        data-plasmic-override={overrides.text14}
+                                        className={classNames(
+                                          projectcss.all,
+                                          projectcss.__wab_text,
+                                          sty.text14
+                                        )}
+                                      >
+                                        {"Infractions"}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div
+                                    data-plasmic-name={"frame1"}
+                                    data-plasmic-override={overrides.frame1}
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.frame1
+                                    )}
+                                  >
+                                    {(_par =>
+                                      !_par
+                                        ? []
+                                        : Array.isArray(_par)
+                                          ? _par
+                                          : [_par])(
+                                      (() => {
+                                        try {
+                                          return $queries.infractionsQuery.data;
+                                        } catch (e) {
+                                          if (
+                                            e instanceof TypeError ||
+                                            e?.plasmicType ===
+                                              "PlasmicUndefinedDataError"
+                                          ) {
+                                            return [];
+                                          }
+                                          throw e;
+                                        }
+                                      })()
+                                    ).map(
+                                      (__plasmic_item_0, __plasmic_idx_0) => {
+                                        const infraction = __plasmic_item_0;
+                                        const currentIndex = __plasmic_idx_0;
+                                        return (
+                                          <SlideoutListItem2
+                                            className={classNames(
+                                              "__wab_instance",
+                                              sty.slideoutListItem2__lFuv
+                                            )}
+                                            date2={
+                                              <div
+                                                data-plasmic-name={"date"}
+                                                data-plasmic-override={
+                                                  overrides.date
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  projectcss.__wab_text,
+                                                  sty.date
+                                                )}
+                                              >
+                                                <React.Fragment>
+                                                  {(() => {
+                                                    try {
+                                                      return infraction.infraction_date;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return "error";
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                </React.Fragment>
+                                              </div>
+                                            }
+                                            informed2={
+                                              <div
+                                                data-plasmic-name={"informed"}
+                                                data-plasmic-override={
+                                                  overrides.informed
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  projectcss.__wab_text,
+                                                  sty.informed
+                                                )}
+                                              >
+                                                <React.Fragment>
+                                                  {(() => {
+                                                    try {
+                                                      return infraction.acknowledgement;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return "Informed";
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                </React.Fragment>
+                                              </div>
+                                            }
+                                            infractionType={(() => {
+                                              try {
+                                                return infraction.points > 0
+                                                  ? "Negative"
+                                                  : "Positive";
+                                              } catch (e) {
+                                                if (
+                                                  e instanceof TypeError ||
+                                                  e?.plasmicType ===
+                                                    "PlasmicUndefinedDataError"
+                                                ) {
+                                                  return "positive";
+                                                }
+                                                throw e;
+                                              }
+                                            })()}
+                                            itemName={
+                                              <React.Fragment>
+                                                {(() => {
+                                                  try {
+                                                    return infraction.infraction;
+                                                  } catch (e) {
+                                                    if (
+                                                      e instanceof TypeError ||
+                                                      e?.plasmicType ===
+                                                        "PlasmicUndefinedDataError"
+                                                    ) {
+                                                      return "DB Error";
+                                                    }
+                                                    throw e;
+                                                  }
+                                                })()}
+                                              </React.Fragment>
+                                            }
+                                            key={currentIndex}
+                                            pointValue2={
+                                              <div
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  sty.freeBox__lapbp
+                                                )}
+                                              >
+                                                <div
+                                                  data-plasmic-name={
+                                                    "pointValue"
+                                                  }
+                                                  data-plasmic-override={
+                                                    overrides.pointValue
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.pointValue
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return infraction.points;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "10";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
+                                              </div>
+                                            }
+                                          />
+                                        );
+                                      }
+                                    )}
+                                    <div
+                                      data-plasmic-name={"listItem"}
+                                      data-plasmic-override={overrides.listItem}
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.listItem
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"contents"}
+                                        data-plasmic-override={
+                                          overrides.contents
+                                        }
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.contents
+                                        )}
+                                      >
+                                        <div
+                                          data-plasmic-name={"content11"}
+                                          data-plasmic-override={
+                                            overrides.content11
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            sty.content11
+                                          )}
+                                        >
+                                          <div
+                                            data-plasmic-name={
+                                              "listItemDetails"
+                                            }
+                                            data-plasmic-override={
+                                              overrides.listItemDetails
+                                            }
+                                            className={classNames(
+                                              projectcss.all,
+                                              sty.listItemDetails
+                                            )}
+                                          >
+                                            <div
+                                              data-plasmic-name={"text24"}
+                                              data-plasmic-override={
+                                                overrides.text24
+                                              }
+                                              className={classNames(
+                                                projectcss.all,
+                                                sty.text24
+                                              )}
+                                            >
+                                              {renderPlasmicSlot({
+                                                defaultContents:
+                                                  "No infractions in the last 90 days",
+                                                value: args.itemName,
+                                                className: classNames(
+                                                  sty.slotTargetItemName
+                                                )
+                                              })}
+                                            </div>
+                                          </div>
+                                          <div
+                                            data-plasmic-name={"points"}
+                                            data-plasmic-override={
+                                              overrides.points
+                                            }
+                                            className={classNames(
+                                              projectcss.all,
+                                              sty.points
+                                            )}
+                                          >
+                                            {renderPlasmicSlot({
+                                              defaultContents: (
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.freeBox__auyOl
+                                                  )}
+                                                >
+                                                  <div
+                                                    className={classNames(
+                                                      projectcss.all,
+                                                      projectcss.__wab_text,
+                                                      sty.text__aKcB
+                                                    )}
+                                                  >
+                                                    {"10"}
+                                                  </div>
+                                                </div>
+                                              ),
+                                              value: args.pointValue3,
+                                              className: classNames(
+                                                sty.slotTargetPointValue3
+                                              )
+                                            })}
+                                            <div
+                                              data-plasmic-name={"pointsText"}
+                                              data-plasmic-override={
+                                                overrides.pointsText
+                                              }
+                                              className={classNames(
+                                                projectcss.all,
+                                                projectcss.__wab_text,
+                                                sty.pointsText
+                                              )}
+                                            >
+                                              {"points"}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <Divider2Icon
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.svg__rlWc
+                                    )}
+                                    role={"img"}
+                                  />
+
+                                  <div
+                                    data-plasmic-name={"inputAndText2"}
+                                    data-plasmic-override={
+                                      overrides.inputAndText2
+                                    }
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.inputAndText2
+                                    )}
+                                  >
+                                    <div
+                                      data-plasmic-name={"iconAndText2"}
+                                      data-plasmic-override={
+                                        overrides.iconAndText2
+                                      }
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.iconAndText2
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"text27"}
+                                        data-plasmic-override={overrides.text27}
+                                        className={classNames(
+                                          projectcss.all,
+                                          projectcss.__wab_text,
+                                          sty.text27
+                                        )}
+                                      >
+                                        {"Disciplinary Actions"}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div
+                                    data-plasmic-name={"frame6"}
+                                    data-plasmic-override={overrides.frame6}
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.frame6
+                                    )}
+                                  >
+                                    {(_par =>
+                                      !_par
+                                        ? []
+                                        : Array.isArray(_par)
+                                          ? _par
+                                          : [_par])(
+                                      (() => {
+                                        try {
+                                          return $queries.discActions.data;
+                                        } catch (e) {
+                                          if (
+                                            e instanceof TypeError ||
+                                            e?.plasmicType ===
+                                              "PlasmicUndefinedDataError"
+                                          ) {
+                                            return [];
+                                          }
+                                          throw e;
+                                        }
+                                      })()
+                                    ).map(
+                                      (__plasmic_item_0, __plasmic_idx_0) => {
+                                        const action = __plasmic_item_0;
+                                        const currentIndex = __plasmic_idx_0;
+                                        return (
+                                          <SlideoutListItem2
+                                            className={classNames(
+                                              "__wab_instance",
+                                              sty.slideoutListItem2__o7OIj
+                                            )}
+                                            date2={
+                                              <div
+                                                data-plasmic-name={"date2"}
+                                                data-plasmic-override={
+                                                  overrides.date2
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  projectcss.__wab_text,
+                                                  sty.date2
+                                                )}
+                                              >
+                                                <React.Fragment>
+                                                  {(() => {
+                                                    try {
+                                                      return action.action_date;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return "10/2/2025";
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                </React.Fragment>
+                                              </div>
+                                            }
+                                            disciplinaryAction={true}
+                                            documentingLeader={
+                                              <div
+                                                data-plasmic-name={"leader2"}
+                                                data-plasmic-override={
+                                                  overrides.leader2
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  projectcss.__wab_text,
+                                                  sty.leader2
+                                                )}
+                                              >
+                                                <React.Fragment>
+                                                  {(() => {
+                                                    try {
+                                                      return action.leader_name;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return "Leader Name";
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                </React.Fragment>
+                                              </div>
+                                            }
+                                            itemName={
+                                              <React.Fragment>
+                                                {(() => {
+                                                  try {
+                                                    return action.action;
+                                                  } catch (e) {
+                                                    if (
+                                                      e instanceof TypeError ||
+                                                      e?.plasmicType ===
+                                                        "PlasmicUndefinedDataError"
+                                                    ) {
+                                                      return "Item Name";
+                                                    }
+                                                    throw e;
+                                                  }
+                                                })()}
+                                              </React.Fragment>
+                                            }
+                                            key={currentIndex}
+                                          />
+                                        );
+                                      }
+                                    )}
+                                    <div
+                                      data-plasmic-name={"listItem2"}
+                                      data-plasmic-override={
+                                        overrides.listItem2
+                                      }
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.listItem2
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"contents2"}
+                                        data-plasmic-override={
+                                          overrides.contents2
+                                        }
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.contents2
+                                        )}
+                                      >
+                                        <div
+                                          data-plasmic-name={"content12"}
+                                          data-plasmic-override={
+                                            overrides.content12
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            sty.content12
+                                          )}
+                                        >
+                                          <div
+                                            data-plasmic-name={
+                                              "listItemDetails2"
+                                            }
+                                            data-plasmic-override={
+                                              overrides.listItemDetails2
+                                            }
+                                            className={classNames(
+                                              projectcss.all,
+                                              sty.listItemDetails2
+                                            )}
+                                          >
+                                            <div
+                                              data-plasmic-name={"text25"}
+                                              data-plasmic-override={
+                                                overrides.text25
+                                              }
+                                              className={classNames(
+                                                projectcss.all,
+                                                sty.text25
+                                              )}
+                                            >
+                                              {renderPlasmicSlot({
+                                                defaultContents:
+                                                  "No disciplinary actions in the last 90 days",
+                                                value: args.itemName2,
+                                                className: classNames(
+                                                  sty.slotTargetItemName2
+                                                )
+                                              })}
+                                            </div>
+                                          </div>
+                                          <div
+                                            data-plasmic-name={"points2"}
+                                            data-plasmic-override={
+                                              overrides.points2
+                                            }
+                                            className={classNames(
+                                              projectcss.all,
+                                              sty.points2
+                                            )}
+                                          >
+                                            {renderPlasmicSlot({
+                                              defaultContents: (
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.freeBox__wsOmu
+                                                  )}
+                                                >
+                                                  <div
+                                                    className={classNames(
+                                                      projectcss.all,
+                                                      projectcss.__wab_text,
+                                                      sty.text__beuRy
+                                                    )}
+                                                  >
+                                                    {"10"}
+                                                  </div>
+                                                </div>
+                                              ),
+                                              value: args.pointValue5,
+                                              className: classNames(
+                                                sty.slotTargetPointValue5
+                                              )
+                                            })}
+                                            <div
+                                              data-plasmic-name={"pointsText2"}
+                                              data-plasmic-override={
+                                                overrides.pointsText2
+                                              }
+                                              className={classNames(
+                                                projectcss.all,
+                                                projectcss.__wab_text,
+                                                sty.pointsText2
+                                              )}
+                                            >
+                                              {"points"}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </TabContent>
+                          </div>
+                        </div>
+                      )}
+                    </DataCtxReader__>
+                  </TabsContainer>
+                </div>
+              </div>
             </div>
           </div>
-        </AntdDrawer>
+        </DrawerV2>
       </div>
     </React.Fragment>
   ) as React.ReactElement | null;
@@ -462,14 +1992,618 @@ const PlasmicDescendants = {
     "disciplineTable",
     "verticalStack2",
     "disciplineActionsTable",
-    "drawer2"
+    "drawerV2",
+    "content2",
+    "textAndSupportingText2",
+    "textAndOnlineIndicator",
+    "text2",
+    "supportingText2",
+    "panel",
+    "header",
+    "container",
+    "statistics",
+    "tabsContainer",
+    "tabUnderline",
+    "pathwayContent",
+    "peContent",
+    "evalsContent",
+    "disciplineContent",
+    "discipline",
+    "row",
+    "text13",
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2",
+    "inputAndText",
+    "iconAndText",
+    "text14",
+    "frame1",
+    "informed",
+    "date",
+    "pointValue",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText",
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
   ],
   menuNavigation: ["menuNavigation"],
   verticalStack: ["verticalStack", "disciplineTable"],
   disciplineTable: ["disciplineTable"],
   verticalStack2: ["verticalStack2", "disciplineActionsTable"],
   disciplineActionsTable: ["disciplineActionsTable"],
-  drawer2: ["drawer2"]
+  drawerV2: [
+    "drawerV2",
+    "content2",
+    "textAndSupportingText2",
+    "textAndOnlineIndicator",
+    "text2",
+    "supportingText2",
+    "panel",
+    "header",
+    "container",
+    "statistics",
+    "tabsContainer",
+    "tabUnderline",
+    "pathwayContent",
+    "peContent",
+    "evalsContent",
+    "disciplineContent",
+    "discipline",
+    "row",
+    "text13",
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2",
+    "inputAndText",
+    "iconAndText",
+    "text14",
+    "frame1",
+    "informed",
+    "date",
+    "pointValue",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText",
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  content2: [
+    "content2",
+    "textAndSupportingText2",
+    "textAndOnlineIndicator",
+    "text2",
+    "supportingText2"
+  ],
+  textAndSupportingText2: [
+    "textAndSupportingText2",
+    "textAndOnlineIndicator",
+    "text2",
+    "supportingText2"
+  ],
+  textAndOnlineIndicator: ["textAndOnlineIndicator", "text2"],
+  text2: ["text2"],
+  supportingText2: ["supportingText2"],
+  panel: [
+    "panel",
+    "header",
+    "container",
+    "statistics",
+    "tabsContainer",
+    "tabUnderline",
+    "pathwayContent",
+    "peContent",
+    "evalsContent",
+    "disciplineContent",
+    "discipline",
+    "row",
+    "text13",
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2",
+    "inputAndText",
+    "iconAndText",
+    "text14",
+    "frame1",
+    "informed",
+    "date",
+    "pointValue",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText",
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  header: [
+    "header",
+    "container",
+    "statistics",
+    "tabsContainer",
+    "tabUnderline",
+    "pathwayContent",
+    "peContent",
+    "evalsContent",
+    "disciplineContent",
+    "discipline",
+    "row",
+    "text13",
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2",
+    "inputAndText",
+    "iconAndText",
+    "text14",
+    "frame1",
+    "informed",
+    "date",
+    "pointValue",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText",
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  container: [
+    "container",
+    "statistics",
+    "tabsContainer",
+    "tabUnderline",
+    "pathwayContent",
+    "peContent",
+    "evalsContent",
+    "disciplineContent",
+    "discipline",
+    "row",
+    "text13",
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2",
+    "inputAndText",
+    "iconAndText",
+    "text14",
+    "frame1",
+    "informed",
+    "date",
+    "pointValue",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText",
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  statistics: [
+    "statistics",
+    "tabsContainer",
+    "tabUnderline",
+    "pathwayContent",
+    "peContent",
+    "evalsContent",
+    "disciplineContent",
+    "discipline",
+    "row",
+    "text13",
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2",
+    "inputAndText",
+    "iconAndText",
+    "text14",
+    "frame1",
+    "informed",
+    "date",
+    "pointValue",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText",
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  tabsContainer: [
+    "tabsContainer",
+    "tabUnderline",
+    "pathwayContent",
+    "peContent",
+    "evalsContent",
+    "disciplineContent",
+    "discipline",
+    "row",
+    "text13",
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2",
+    "inputAndText",
+    "iconAndText",
+    "text14",
+    "frame1",
+    "informed",
+    "date",
+    "pointValue",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText",
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  tabUnderline: ["tabUnderline"],
+  pathwayContent: ["pathwayContent"],
+  peContent: ["peContent"],
+  evalsContent: ["evalsContent"],
+  disciplineContent: [
+    "disciplineContent",
+    "discipline",
+    "row",
+    "text13",
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2",
+    "inputAndText",
+    "iconAndText",
+    "text14",
+    "frame1",
+    "informed",
+    "date",
+    "pointValue",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText",
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  discipline: [
+    "discipline",
+    "row",
+    "text13",
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2",
+    "inputAndText",
+    "iconAndText",
+    "text14",
+    "frame1",
+    "informed",
+    "date",
+    "pointValue",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText",
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  row: ["row", "text13"],
+  text13: ["text13"],
+  row2: [
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2"
+  ],
+  metricItem: [
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number"
+  ],
+  headingAndNumber: ["headingAndNumber", "heading", "numberAndBadge", "number"],
+  heading: ["heading"],
+  numberAndBadge: ["numberAndBadge", "number"],
+  number: ["number"],
+  metricItem2: [
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2"
+  ],
+  headingAndNumber2: [
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2"
+  ],
+  heading2: ["heading2"],
+  numberAndBadge2: ["numberAndBadge2", "number2"],
+  number2: ["number2"],
+  inputAndText: ["inputAndText", "iconAndText", "text14"],
+  iconAndText: ["iconAndText", "text14"],
+  text14: ["text14"],
+  frame1: [
+    "frame1",
+    "informed",
+    "date",
+    "pointValue",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText"
+  ],
+  informed: ["informed"],
+  date: ["date"],
+  pointValue: ["pointValue"],
+  listItem: [
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText"
+  ],
+  contents: [
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText"
+  ],
+  content11: ["content11", "listItemDetails", "text24", "points", "pointsText"],
+  listItemDetails: ["listItemDetails", "text24"],
+  text24: ["text24"],
+  points: ["points", "pointsText"],
+  pointsText: ["pointsText"],
+  inputAndText2: ["inputAndText2", "iconAndText2", "text27"],
+  iconAndText2: ["iconAndText2", "text27"],
+  text27: ["text27"],
+  frame6: [
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  leader2: ["leader2"],
+  date2: ["date2"],
+  listItem2: [
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  contents2: [
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  content12: [
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
+  listItemDetails2: ["listItemDetails2", "text25"],
+  text25: ["text25"],
+  points2: ["points2", "pointsText2"],
+  pointsText2: ["pointsText2"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
 type DescendantsType<T extends NodeNameType> =
@@ -481,7 +2615,63 @@ type NodeDefaultElementType = {
   disciplineTable: typeof DisciplineTable;
   verticalStack2: "div";
   disciplineActionsTable: typeof DisciplineActionsTable;
-  drawer2: typeof AntdDrawer;
+  drawerV2: typeof DrawerV2;
+  content2: "div";
+  textAndSupportingText2: "div";
+  textAndOnlineIndicator: "div";
+  text2: "div";
+  supportingText2: "div";
+  panel: "div";
+  header: "div";
+  container: "div";
+  statistics: "div";
+  tabsContainer: typeof TabsContainer;
+  tabUnderline: typeof TabUnderline;
+  pathwayContent: typeof TabContent;
+  peContent: typeof TabContent;
+  evalsContent: typeof TabContent;
+  disciplineContent: typeof TabContent;
+  discipline: "div";
+  row: "div";
+  text13: "div";
+  row2: "div";
+  metricItem: "div";
+  headingAndNumber: "div";
+  heading: "div";
+  numberAndBadge: "div";
+  number: "div";
+  metricItem2: "div";
+  headingAndNumber2: "div";
+  heading2: "div";
+  numberAndBadge2: "div";
+  number2: "div";
+  inputAndText: "div";
+  iconAndText: "div";
+  text14: "div";
+  frame1: "div";
+  informed: "div";
+  date: "div";
+  pointValue: "div";
+  listItem: "div";
+  contents: "div";
+  content11: "div";
+  listItemDetails: "div";
+  text24: "div";
+  points: "div";
+  pointsText: "div";
+  inputAndText2: "div";
+  iconAndText2: "div";
+  text27: "div";
+  frame6: "div";
+  leader2: "div";
+  date2: "div";
+  listItem2: "div";
+  contents2: "div";
+  content12: "div";
+  listItemDetails2: "div";
+  text25: "div";
+  points2: "div";
+  pointsText2: "div";
 };
 
 type ReservedPropsType = "variants" | "args" | "overrides";
@@ -551,7 +2741,63 @@ export const PlasmicDiscipline = Object.assign(
     disciplineTable: makeNodeComponent("disciplineTable"),
     verticalStack2: makeNodeComponent("verticalStack2"),
     disciplineActionsTable: makeNodeComponent("disciplineActionsTable"),
-    drawer2: makeNodeComponent("drawer2"),
+    drawerV2: makeNodeComponent("drawerV2"),
+    content2: makeNodeComponent("content2"),
+    textAndSupportingText2: makeNodeComponent("textAndSupportingText2"),
+    textAndOnlineIndicator: makeNodeComponent("textAndOnlineIndicator"),
+    text2: makeNodeComponent("text2"),
+    supportingText2: makeNodeComponent("supportingText2"),
+    panel: makeNodeComponent("panel"),
+    header: makeNodeComponent("header"),
+    container: makeNodeComponent("container"),
+    statistics: makeNodeComponent("statistics"),
+    tabsContainer: makeNodeComponent("tabsContainer"),
+    tabUnderline: makeNodeComponent("tabUnderline"),
+    pathwayContent: makeNodeComponent("pathwayContent"),
+    peContent: makeNodeComponent("peContent"),
+    evalsContent: makeNodeComponent("evalsContent"),
+    disciplineContent: makeNodeComponent("disciplineContent"),
+    discipline: makeNodeComponent("discipline"),
+    row: makeNodeComponent("row"),
+    text13: makeNodeComponent("text13"),
+    row2: makeNodeComponent("row2"),
+    metricItem: makeNodeComponent("metricItem"),
+    headingAndNumber: makeNodeComponent("headingAndNumber"),
+    heading: makeNodeComponent("heading"),
+    numberAndBadge: makeNodeComponent("numberAndBadge"),
+    number: makeNodeComponent("number"),
+    metricItem2: makeNodeComponent("metricItem2"),
+    headingAndNumber2: makeNodeComponent("headingAndNumber2"),
+    heading2: makeNodeComponent("heading2"),
+    numberAndBadge2: makeNodeComponent("numberAndBadge2"),
+    number2: makeNodeComponent("number2"),
+    inputAndText: makeNodeComponent("inputAndText"),
+    iconAndText: makeNodeComponent("iconAndText"),
+    text14: makeNodeComponent("text14"),
+    frame1: makeNodeComponent("frame1"),
+    informed: makeNodeComponent("informed"),
+    date: makeNodeComponent("date"),
+    pointValue: makeNodeComponent("pointValue"),
+    listItem: makeNodeComponent("listItem"),
+    contents: makeNodeComponent("contents"),
+    content11: makeNodeComponent("content11"),
+    listItemDetails: makeNodeComponent("listItemDetails"),
+    text24: makeNodeComponent("text24"),
+    points: makeNodeComponent("points"),
+    pointsText: makeNodeComponent("pointsText"),
+    inputAndText2: makeNodeComponent("inputAndText2"),
+    iconAndText2: makeNodeComponent("iconAndText2"),
+    text27: makeNodeComponent("text27"),
+    frame6: makeNodeComponent("frame6"),
+    leader2: makeNodeComponent("leader2"),
+    date2: makeNodeComponent("date2"),
+    listItem2: makeNodeComponent("listItem2"),
+    contents2: makeNodeComponent("contents2"),
+    content12: makeNodeComponent("content12"),
+    listItemDetails2: makeNodeComponent("listItemDetails2"),
+    text25: makeNodeComponent("text25"),
+    points2: makeNodeComponent("points2"),
+    pointsText2: makeNodeComponent("pointsText2"),
 
     // Metadata about props expected for PlasmicDiscipline
     internalVariantProps: PlasmicDiscipline__VariantProps,

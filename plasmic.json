@@ -868,6 +868,12 @@
           "name": "LogoutButton",
           "displayName": "LogoutButton",
           "componentImportPath": "./components/CodeComponents/auth/LogoutButton"
+        },
+        {
+          "id": "lBRE4GzKIedo",
+          "name": "DrawerV2",
+          "displayName": "DrawerV2",
+          "componentImportPath": "./components/CodeComponents/DrawerV2"
         }
       ],
       "splitsProviderFilePath": "",

@@ -65,6 +65,7 @@ import Button from "../../Button"; // plasmic-import: u704oB_4BUvT/component
 import { TabUnderline } from "@plasmicpkgs/plasmic-tabs";
 import { TabContent } from "@plasmicpkgs/plasmic-tabs";
 import SlideoutListItem2 from "../../SlideoutListItem2"; // plasmic-import: 9Efhz4aeRJA1/component
+import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -73,13 +74,10 @@ import "@plasmicapp/react-web/lib/plasmic.css";
 import projectcss from "../levelset_v2/plasmic_levelset_v2.module.css"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectcss
 import sty from "./PlasmicProfileSlideout.module.css"; // plasmic-import: 8BMUJ341vUF7/css
 
-import XCloseIcon from "./icons/PlasmicIcon__XClose"; // plasmic-import: fGjub-6QDO8m/icon
 import CheckSvgIcon from "../levelset_tabs/icons/PlasmicIcon__CheckSvg"; // plasmic-import: dTo8s4EZdHvA/icon
 import IconIcon from "../levelset_tabs/icons/PlasmicIcon__Icon"; // plasmic-import: CEbmjO_n9jaW/icon
 import DividerIcon from "./icons/PlasmicIcon__Divider"; // plasmic-import: FnQVtjsAqctc/icon
 import Divider2Icon from "./icons/PlasmicIcon__Divider2"; // plasmic-import: SrOGhElNYzm6/icon
-import Divider3Icon from "./icons/PlasmicIcon__Divider3"; // plasmic-import: K2tYHr-lcp8R/icon
-import Trash01Icon from "./icons/PlasmicIcon__Trash01"; // plasmic-import: 9yy7XVDaeY1L/icon
 
 createPlasmicElementProxy;
 
@@ -95,22 +93,9 @@ export const PlasmicProfileSlideout__ArgProps = new Array<ArgPropType>();
 
 export type PlasmicProfileSlideout__OverridesType = {
   root?: Flex__<"div">;
-  typeUserSettingsBreakpointDesktop?: Flex__<"div">;
   panel?: Flex__<"div">;
-  slideOutMenuHeader?: Flex__<"div">;
-  content?: Flex__<"div">;
-  featuredIcon?: Flex__<"div">;
-  textAndSupportingText?: Flex__<"div">;
-  text?: Flex__<"div">;
-  supportingText?: Flex__<"div">;
-  buttonsButtonCloseX?: Flex__<"div">;
   header?: Flex__<"div">;
   container?: Flex__<"div">;
-  content2?: Flex__<"div">;
-  textAndSupportingText2?: Flex__<"div">;
-  textAndOnlineIndicator?: Flex__<"div">;
-  text2?: Flex__<"div">;
-  supportingText2?: Flex__<"div">;
   statistics?: Flex__<"div">;
   tabsContainer?: Flex__<typeof TabsContainer>;
   tabUnderline?: Flex__<typeof TabUnderline>;
@@ -136,59 +121,11 @@ export type PlasmicProfileSlideout__OverridesType = {
   iconAndText?: Flex__<"div">;
   text14?: Flex__<"div">;
   frame1?: Flex__<"div">;
-  fileUploadItemBase?: Flex__<"div">;
-  content4?: Flex__<"div">;
-  fileTypeIcon?: Flex__<"div">;
-  fileType?: Flex__<"div">;
-  content5?: Flex__<"div">;
-  textAndSupportingText3?: Flex__<"div">;
-  text15?: Flex__<"div">;
-  supportingTextAndPercentage?: Flex__<"div">;
-  supportingText3?: Flex__<"div">;
-  iconAndPercentage?: Flex__<"div">;
-  percentage?: Flex__<"div">;
-  supportingText4?: Flex__<"div">;
-  frame2?: Flex__<"div">;
-  text16?: Flex__<"div">;
-  text17?: Flex__<"div">;
-  buttonsButtonUtility?: Flex__<"div">;
-  fileUploadItemBase2?: Flex__<"div">;
-  content6?: Flex__<"div">;
-  fileTypeIcon2?: Flex__<"div">;
-  fileType2?: Flex__<"div">;
-  content7?: Flex__<"div">;
-  textAndSupportingText4?: Flex__<"div">;
-  text18?: Flex__<"div">;
-  supportingTextAndPercentage2?: Flex__<"div">;
-  supportingText5?: Flex__<"div">;
-  iconAndPercentage2?: Flex__<"div">;
-  percentage2?: Flex__<"div">;
-  supportingText6?: Flex__<"div">;
-  frame3?: Flex__<"div">;
-  text19?: Flex__<"div">;
-  text20?: Flex__<"div">;
-  buttonsButtonUtility2?: Flex__<"div">;
-  fileUploadItemBase3?: Flex__<"div">;
-  content8?: Flex__<"div">;
-  fileTypeIcon3?: Flex__<"div">;
-  fileType3?: Flex__<"div">;
-  content9?: Flex__<"div">;
-  textAndSupportingText5?: Flex__<"div">;
-  text21?: Flex__<"div">;
-  supportingTextAndPercentage3?: Flex__<"div">;
-  supportingText7?: Flex__<"div">;
-  iconAndPercentage3?: Flex__<"div">;
-  percentage3?: Flex__<"div">;
-  supportingText8?: Flex__<"div">;
-  frame4?: Flex__<"div">;
-  text22?: Flex__<"div">;
-  text23?: Flex__<"div">;
-  buttonsButtonUtility3?: Flex__<"div">;
+  pointValue4?: Flex__<"div">;
   inputAndText2?: Flex__<"div">;
   iconAndText2?: Flex__<"div">;
   text27?: Flex__<"div">;
   frame6?: Flex__<"div">;
-  content3?: Flex__<"div">;
 };
 
 export interface DefaultProfileSlideoutProps {
@@ -252,1582 +189,697 @@ function PlasmicProfileSlideout__RenderFunc(props: {
       )}
     >
       <div
-        data-plasmic-name={"typeUserSettingsBreakpointDesktop"}
-        data-plasmic-override={overrides.typeUserSettingsBreakpointDesktop}
-        className={classNames(
-          projectcss.all,
-          sty.typeUserSettingsBreakpointDesktop
-        )}
+        data-plasmic-name={"panel"}
+        data-plasmic-override={overrides.panel}
+        className={classNames(projectcss.all, sty.panel)}
       >
         <div
-          data-plasmic-name={"panel"}
-          data-plasmic-override={overrides.panel}
-          className={classNames(projectcss.all, sty.panel)}
+          data-plasmic-name={"header"}
+          data-plasmic-override={overrides.header}
+          className={classNames(projectcss.all, sty.header)}
         >
-          {false ? (
-            <div
-              data-plasmic-name={"slideOutMenuHeader"}
-              data-plasmic-override={overrides.slideOutMenuHeader}
-              className={classNames(projectcss.all, sty.slideOutMenuHeader)}
-            >
-              <div
-                data-plasmic-name={"content"}
-                data-plasmic-override={overrides.content}
-                className={classNames(projectcss.all, sty.content)}
-              >
-                {false ? (
-                  <div
-                    data-plasmic-name={"featuredIcon"}
-                    data-plasmic-override={overrides.featuredIcon}
-                    className={classNames(projectcss.all, sty.featuredIcon)}
-                  >
-                    <PlasmicImg__
-                      alt={""}
-                      className={classNames(sty.img___4ONxu)}
-                      displayHeight={"20px"}
-                      displayMaxHeight={"none"}
-                      displayMaxWidth={"100%"}
-                      displayMinHeight={"0"}
-                      displayMinWidth={"0"}
-                      displayWidth={"20px"}
-                      loading={"lazy"}
-                      src={{
-                        src: "/plasmic/levelset_v_2/images/placeholder3.svg",
-                        fullWidth: 20,
-                        fullHeight: 20,
-                        aspectRatio: undefined
-                      }}
-                    />
-                  </div>
-                ) : null}
-                <div
-                  data-plasmic-name={"textAndSupportingText"}
-                  data-plasmic-override={overrides.textAndSupportingText}
-                  className={classNames(
-                    projectcss.all,
-                    sty.textAndSupportingText
-                  )}
-                >
-                  <div
-                    data-plasmic-name={"text"}
-                    data-plasmic-override={overrides.text}
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.text
-                    )}
-                  >
-                    {"Freelancer"}
-                  </div>
-                  {false ? (
-                    <div
-                      data-plasmic-name={"supportingText"}
-                      data-plasmic-override={overrides.supportingText}
-                      className={classNames(
-                        projectcss.all,
-                        projectcss.__wab_text,
-                        sty.supportingText
-                      )}
-                    >
-                      {"Lorem ipsum dolor sit amet."}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-              <div
-                data-plasmic-name={"buttonsButtonCloseX"}
-                data-plasmic-override={overrides.buttonsButtonCloseX}
-                className={classNames(projectcss.all, sty.buttonsButtonCloseX)}
-              >
-                <XCloseIcon
-                  className={classNames(projectcss.all, sty.svg___74YAx)}
-                  role={"img"}
-                />
-              </div>
-            </div>
-          ) : null}
           <div
-            data-plasmic-name={"header"}
-            data-plasmic-override={overrides.header}
-            className={classNames(projectcss.all, sty.header)}
+            data-plasmic-name={"container"}
+            data-plasmic-override={overrides.container}
+            className={classNames(projectcss.all, sty.container)}
           >
             <div
-              data-plasmic-name={"container"}
-              data-plasmic-override={overrides.container}
-              className={classNames(projectcss.all, sty.container)}
+              data-plasmic-name={"statistics"}
+              data-plasmic-override={overrides.statistics}
+              className={classNames(projectcss.all, sty.statistics)}
             >
-              <div
-                data-plasmic-name={"content2"}
-                data-plasmic-override={overrides.content2}
-                className={classNames(projectcss.all, sty.content2)}
+              <TabsContainer
+                data-plasmic-name={"tabsContainer"}
+                data-plasmic-override={overrides.tabsContainer}
+                initialKey={"tab4"}
+                mountMode={"mountAllEagerly"}
+                previewAll={false}
+                previewKey={"tab4"}
               >
-                <div
-                  data-plasmic-name={"textAndSupportingText2"}
-                  data-plasmic-override={overrides.textAndSupportingText2}
-                  className={classNames(
-                    projectcss.all,
-                    sty.textAndSupportingText2
-                  )}
-                >
-                  <div
-                    data-plasmic-name={"textAndOnlineIndicator"}
-                    data-plasmic-override={overrides.textAndOnlineIndicator}
-                    className={classNames(
-                      projectcss.all,
-                      sty.textAndOnlineIndicator
-                    )}
-                  >
+                <DataCtxReader__>
+                  {$ctx => (
                     <div
-                      data-plasmic-name={"text2"}
-                      data-plasmic-override={overrides.text2}
-                      className={classNames(
-                        projectcss.all,
-                        projectcss.__wab_text,
-                        sty.text2
-                      )}
+                      className={classNames(projectcss.all, sty.freeBox__nkkHv)}
                     >
-                      {"Reece Howard"}
-                    </div>
-                  </div>
-                  <div
-                    data-plasmic-name={"supportingText2"}
-                    data-plasmic-override={overrides.supportingText2}
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.supportingText2
-                    )}
-                  >
-                    {"Owner/Operator"}
-                  </div>
-                </div>
-              </div>
-              <div
-                data-plasmic-name={"statistics"}
-                data-plasmic-override={overrides.statistics}
-                className={classNames(projectcss.all, sty.statistics)}
-              >
-                <TabsContainer
-                  data-plasmic-name={"tabsContainer"}
-                  data-plasmic-override={overrides.tabsContainer}
-                  initialKey={"tab1"}
-                  mountMode={"mountAllEagerly"}
-                  previewAll={false}
-                >
-                  <DataCtxReader__>
-                    {$ctx => (
                       <div
                         className={classNames(
                           projectcss.all,
-                          sty.freeBox__lceVo
+                          sty.freeBox__vJdT6
                         )}
                       >
-                        <div
+                        <TabButton
                           className={classNames(
-                            projectcss.all,
-                            sty.freeBox__wnCe8
+                            "__wab_instance",
+                            sty.tabButton___853G
                           )}
+                          tabKey={"tab1"}
                         >
-                          <TabButton
+                          <Button
                             className={classNames(
                               "__wab_instance",
-                              sty.tabButton__eXauf
+                              sty.button__rokb
                             )}
-                            tabKey={"tab1"}
-                          >
-                            <Button
-                              className={classNames(
-                                "__wab_instance",
-                                sty.button___1Vp5L
-                              )}
-                              color={(() => {
-                                try {
-                                  return $ctx.currentTabKey === "tab1"
-                                    ? "green"
-                                    : "softSand";
-                                } catch (e) {
-                                  if (
-                                    e instanceof TypeError ||
-                                    e?.plasmicType ===
-                                      "PlasmicUndefinedDataError"
-                                  ) {
-                                    return "green";
-                                  }
-                                  throw e;
+                            color={(() => {
+                              try {
+                                return $ctx.currentTabKey === "tab1"
+                                  ? "green"
+                                  : "softSand";
+                              } catch (e) {
+                                if (
+                                  e instanceof TypeError ||
+                                  e?.plasmicType === "PlasmicUndefinedDataError"
+                                ) {
+                                  return "green";
                                 }
-                              })()}
-                            >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text___7Kdl6
-                                )}
-                              >
-                                {"Pathway"}
-                              </div>
-                            </Button>
-                          </TabButton>
-                          <TabButton
-                            className={classNames(
-                              "__wab_instance",
-                              sty.tabButton__kidKm
-                            )}
-                            tabKey={"tab2"}
+                                throw e;
+                              }
+                            })()}
                           >
-                            <Button
+                            <div
                               className={classNames(
-                                "__wab_instance",
-                                sty.button__dEyuL
+                                projectcss.all,
+                                projectcss.__wab_text,
+                                sty.text__j3I9Q
                               )}
-                              color={(() => {
-                                try {
-                                  return $ctx.currentTabKey === "tab2"
-                                    ? "green"
-                                    : "softSand";
-                                } catch (e) {
-                                  if (
-                                    e instanceof TypeError ||
-                                    e?.plasmicType ===
-                                      "PlasmicUndefinedDataError"
-                                  ) {
-                                    return "green";
-                                  }
-                                  throw e;
-                                }
-                              })()}
                             >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text__bWCpR
-                                )}
-                              >
-                                {"Positional Excellence"}
-                              </div>
-                            </Button>
-                          </TabButton>
-                          <TabButton
-                            className={classNames(
-                              "__wab_instance",
-                              sty.tabButton__wWbbk
-                            )}
-                            tabKey={"tab3"}
-                          >
-                            <Button
-                              className={classNames(
-                                "__wab_instance",
-                                sty.button___1ENcf
-                              )}
-                              color={(() => {
-                                try {
-                                  return $ctx.currentTabKey === "tab3"
-                                    ? "green"
-                                    : "softSand";
-                                } catch (e) {
-                                  if (
-                                    e instanceof TypeError ||
-                                    e?.plasmicType ===
-                                      "PlasmicUndefinedDataError"
-                                  ) {
-                                    return "green";
-                                  }
-                                  throw e;
-                                }
-                              })()}
-                            >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text__ln0Wk
-                                )}
-                              >
-                                {"Evaluations"}
-                              </div>
-                            </Button>
-                          </TabButton>
-                          <TabButton
-                            className={classNames(
-                              "__wab_instance",
-                              sty.tabButton__ujPrH
-                            )}
-                            tabKey={"tab4"}
-                          >
-                            <Button
-                              className={classNames(
-                                "__wab_instance",
-                                sty.button__wfgj8
-                              )}
-                              color={(() => {
-                                try {
-                                  return $ctx.currentTabKey === "tab4"
-                                    ? "green"
-                                    : "softSand";
-                                } catch (e) {
-                                  if (
-                                    e instanceof TypeError ||
-                                    e?.plasmicType ===
-                                      "PlasmicUndefinedDataError"
-                                  ) {
-                                    return "green";
-                                  }
-                                  throw e;
-                                }
-                              })()}
-                            >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text___3DMox
-                                )}
-                              >
-                                {"Discipline"}
-                              </div>
-                            </Button>
-                          </TabButton>
-                          <TabUnderline
-                            data-plasmic-name={"tabUnderline"}
-                            data-plasmic-override={overrides.tabUnderline}
-                            className={classNames(
-                              "__wab_instance",
-                              sty.tabUnderline
-                            )}
-                          />
-                        </div>
-                        <div
+                              {"Pathway"}
+                            </div>
+                          </Button>
+                        </TabButton>
+                        <TabButton
                           className={classNames(
-                            projectcss.all,
-                            sty.freeBox__dZe4A
+                            "__wab_instance",
+                            sty.tabButton__cHyw
                           )}
+                          tabKey={"tab2"}
                         >
-                          <TabContent
-                            data-plasmic-name={"pathwayContent"}
-                            data-plasmic-override={overrides.pathwayContent}
+                          <Button
                             className={classNames(
                               "__wab_instance",
-                              sty.pathwayContent
+                              sty.button__dvzP9
                             )}
-                            tabKey={"tab1"}
+                            color={(() => {
+                              try {
+                                return $ctx.currentTabKey === "tab2"
+                                  ? "green"
+                                  : "softSand";
+                              } catch (e) {
+                                if (
+                                  e instanceof TypeError ||
+                                  e?.plasmicType === "PlasmicUndefinedDataError"
+                                ) {
+                                  return "green";
+                                }
+                                throw e;
+                              }
+                            })()}
                           >
                             <div
                               className={classNames(
                                 projectcss.all,
-                                sty.freeBox__hjPza
+                                projectcss.__wab_text,
+                                sty.text___9HvWm
                               )}
                             >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text__bv8C0
-                                )}
-                              >
-                                <React.Fragment>
-                                  {(() => {
-                                    try {
-                                      return $ctx.currentTabKey;
-                                    } catch (e) {
-                                      if (
-                                        e instanceof TypeError ||
-                                        e?.plasmicType ===
-                                          "PlasmicUndefinedDataError"
-                                      ) {
-                                        return "Some content for tab 1";
-                                      }
-                                      throw e;
+                              {"Positional Excellence"}
+                            </div>
+                          </Button>
+                        </TabButton>
+                        <TabButton
+                          className={classNames(
+                            "__wab_instance",
+                            sty.tabButton__ys00
+                          )}
+                          tabKey={"tab3"}
+                        >
+                          <Button
+                            className={classNames(
+                              "__wab_instance",
+                              sty.button__xW3GE
+                            )}
+                            color={(() => {
+                              try {
+                                return $ctx.currentTabKey === "tab3"
+                                  ? "green"
+                                  : "softSand";
+                              } catch (e) {
+                                if (
+                                  e instanceof TypeError ||
+                                  e?.plasmicType === "PlasmicUndefinedDataError"
+                                ) {
+                                  return "green";
+                                }
+                                throw e;
+                              }
+                            })()}
+                          >
+                            <div
+                              className={classNames(
+                                projectcss.all,
+                                projectcss.__wab_text,
+                                sty.text___3WsRe
+                              )}
+                            >
+                              {"Evaluations"}
+                            </div>
+                          </Button>
+                        </TabButton>
+                        <TabButton
+                          className={classNames(
+                            "__wab_instance",
+                            sty.tabButton__viQnu
+                          )}
+                          tabKey={"tab4"}
+                        >
+                          <Button
+                            className={classNames(
+                              "__wab_instance",
+                              sty.button__yuqKt
+                            )}
+                            color={(() => {
+                              try {
+                                return $ctx.currentTabKey === "tab4"
+                                  ? "green"
+                                  : "softSand";
+                              } catch (e) {
+                                if (
+                                  e instanceof TypeError ||
+                                  e?.plasmicType === "PlasmicUndefinedDataError"
+                                ) {
+                                  return "green";
+                                }
+                                throw e;
+                              }
+                            })()}
+                          >
+                            <div
+                              className={classNames(
+                                projectcss.all,
+                                projectcss.__wab_text,
+                                sty.text__pD265
+                              )}
+                            >
+                              {"Discipline"}
+                            </div>
+                          </Button>
+                        </TabButton>
+                        <TabUnderline
+                          data-plasmic-name={"tabUnderline"}
+                          data-plasmic-override={overrides.tabUnderline}
+                          className={classNames(
+                            "__wab_instance",
+                            sty.tabUnderline
+                          )}
+                        />
+                      </div>
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          sty.freeBox__nDqIn
+                        )}
+                      >
+                        <TabContent
+                          data-plasmic-name={"pathwayContent"}
+                          data-plasmic-override={overrides.pathwayContent}
+                          className={classNames(
+                            "__wab_instance",
+                            sty.pathwayContent
+                          )}
+                          tabKey={"tab1"}
+                        >
+                          <div
+                            className={classNames(
+                              projectcss.all,
+                              sty.freeBox__ghLeA
+                            )}
+                          >
+                            <div
+                              className={classNames(
+                                projectcss.all,
+                                projectcss.__wab_text,
+                                sty.text__q5Mt
+                              )}
+                            >
+                              <React.Fragment>
+                                {(() => {
+                                  try {
+                                    return $ctx.currentTabKey;
+                                  } catch (e) {
+                                    if (
+                                      e instanceof TypeError ||
+                                      e?.plasmicType ===
+                                        "PlasmicUndefinedDataError"
+                                    ) {
+                                      return "Some content for tab 1";
                                     }
-                                  })()}
-                                </React.Fragment>
-                              </div>
+                                    throw e;
+                                  }
+                                })()}
+                              </React.Fragment>
                             </div>
-                          </TabContent>
-                          <TabContent
-                            data-plasmic-name={"peContent"}
-                            data-plasmic-override={overrides.peContent}
+                          </div>
+                        </TabContent>
+                        <TabContent
+                          data-plasmic-name={"peContent"}
+                          data-plasmic-override={overrides.peContent}
+                          className={classNames(
+                            "__wab_instance",
+                            sty.peContent
+                          )}
+                          tabKey={"tab2"}
+                        >
+                          <div
                             className={classNames(
-                              "__wab_instance",
-                              sty.peContent
+                              projectcss.all,
+                              sty.freeBox__pChx
                             )}
-                            tabKey={"tab2"}
                           >
                             <div
                               className={classNames(
                                 projectcss.all,
-                                sty.freeBox__gkuJp
+                                projectcss.__wab_text,
+                                sty.text__kcpU6
                               )}
                             >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text__naBm
-                                )}
-                              >
-                                <React.Fragment>
-                                  {(() => {
-                                    try {
-                                      return $ctx.currentTabKey;
-                                    } catch (e) {
-                                      if (
-                                        e instanceof TypeError ||
-                                        e?.plasmicType ===
-                                          "PlasmicUndefinedDataError"
-                                      ) {
-                                        return "Some content for tab 1";
-                                      }
-                                      throw e;
+                              <React.Fragment>
+                                {(() => {
+                                  try {
+                                    return $ctx.currentTabKey;
+                                  } catch (e) {
+                                    if (
+                                      e instanceof TypeError ||
+                                      e?.plasmicType ===
+                                        "PlasmicUndefinedDataError"
+                                    ) {
+                                      return "Some content for tab 1";
                                     }
-                                  })()}
-                                </React.Fragment>
-                              </div>
+                                    throw e;
+                                  }
+                                })()}
+                              </React.Fragment>
                             </div>
-                          </TabContent>
-                          <TabContent
-                            data-plasmic-name={"evalsContent"}
-                            data-plasmic-override={overrides.evalsContent}
+                          </div>
+                        </TabContent>
+                        <TabContent
+                          data-plasmic-name={"evalsContent"}
+                          data-plasmic-override={overrides.evalsContent}
+                          className={classNames(
+                            "__wab_instance",
+                            sty.evalsContent
+                          )}
+                          tabKey={"tab3"}
+                        >
+                          <div
                             className={classNames(
-                              "__wab_instance",
-                              sty.evalsContent
+                              projectcss.all,
+                              sty.freeBox__jXaQy
                             )}
-                            tabKey={"tab3"}
                           >
                             <div
                               className={classNames(
                                 projectcss.all,
-                                sty.freeBox__ztkmn
+                                projectcss.__wab_text,
+                                sty.text___35Qv1
                               )}
                             >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text__xWhNl
-                                )}
-                              >
-                                {"Some content for tab 1"}
-                              </div>
+                              {"Some content for tab 1"}
                             </div>
-                          </TabContent>
-                          <TabContent
-                            data-plasmic-name={"disciplineContent"}
-                            data-plasmic-override={overrides.disciplineContent}
+                          </div>
+                        </TabContent>
+                        <TabContent
+                          data-plasmic-name={"disciplineContent"}
+                          data-plasmic-override={overrides.disciplineContent}
+                          className={classNames(
+                            "__wab_instance",
+                            sty.disciplineContent
+                          )}
+                          tabKey={"tab4"}
+                        >
+                          <div
                             className={classNames(
-                              "__wab_instance",
-                              sty.disciplineContent
+                              projectcss.all,
+                              sty.freeBox___0PldT
                             )}
-                            tabKey={"tab4"}
                           >
                             <div
+                              data-plasmic-name={"discipline"}
+                              data-plasmic-override={overrides.discipline}
                               className={classNames(
                                 projectcss.all,
-                                sty.freeBox__rvUR
+                                sty.discipline
                               )}
                             >
-                              <div
-                                data-plasmic-name={"discipline"}
-                                data-plasmic-override={overrides.discipline}
+                              <DividerIcon
                                 className={classNames(
                                   projectcss.all,
-                                  sty.discipline
+                                  sty.svg__zGiBg
                                 )}
-                              >
-                                <DividerIcon
-                                  className={classNames(
-                                    projectcss.all,
-                                    sty.svg__x92E7
-                                  )}
-                                  role={"img"}
-                                />
+                                role={"img"}
+                              />
 
+                              <div
+                                data-plasmic-name={"row"}
+                                data-plasmic-override={overrides.row}
+                                className={classNames(projectcss.all, sty.row)}
+                              >
                                 <div
-                                  data-plasmic-name={"row"}
-                                  data-plasmic-override={overrides.row}
+                                  data-plasmic-name={"text13"}
+                                  data-plasmic-override={overrides.text13}
                                   className={classNames(
                                     projectcss.all,
-                                    sty.row
+                                    projectcss.__wab_text,
+                                    sty.text13
                                   )}
                                 >
-                                  <div
-                                    data-plasmic-name={"text13"}
-                                    data-plasmic-override={overrides.text13}
-                                    className={classNames(
-                                      projectcss.all,
-                                      projectcss.__wab_text,
-                                      sty.text13
-                                    )}
-                                  >
-                                    {"In the last 90 days..."}
-                                  </div>
+                                  {"In the last 90 days..."}
                                 </div>
+                              </div>
+                              <div
+                                data-plasmic-name={"row2"}
+                                data-plasmic-override={overrides.row2}
+                                className={classNames(projectcss.all, sty.row2)}
+                              >
                                 <div
-                                  data-plasmic-name={"row2"}
-                                  data-plasmic-override={overrides.row2}
+                                  data-plasmic-name={"metricItem"}
+                                  data-plasmic-override={overrides.metricItem}
                                   className={classNames(
                                     projectcss.all,
-                                    sty.row2
+                                    sty.metricItem
                                   )}
                                 >
                                   <div
-                                    data-plasmic-name={"metricItem"}
-                                    data-plasmic-override={overrides.metricItem}
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.metricItem
-                                    )}
-                                  >
-                                    <div
-                                      data-plasmic-name={"headingAndNumber"}
-                                      data-plasmic-override={
-                                        overrides.headingAndNumber
-                                      }
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.headingAndNumber
-                                      )}
-                                    >
-                                      <div
-                                        data-plasmic-name={"heading"}
-                                        data-plasmic-override={
-                                          overrides.heading
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          projectcss.__wab_text,
-                                          sty.heading
-                                        )}
-                                      >
-                                        {"Infractions"}
-                                      </div>
-                                      <div
-                                        data-plasmic-name={"numberAndBadge"}
-                                        data-plasmic-override={
-                                          overrides.numberAndBadge
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.numberAndBadge
-                                        )}
-                                      >
-                                        <div
-                                          data-plasmic-name={"number"}
-                                          data-plasmic-override={
-                                            overrides.number
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            projectcss.__wab_text,
-                                            sty.number
-                                          )}
-                                        >
-                                          {"4"}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div
-                                    data-plasmic-name={"metricItem2"}
+                                    data-plasmic-name={"headingAndNumber"}
                                     data-plasmic-override={
-                                      overrides.metricItem2
+                                      overrides.headingAndNumber
                                     }
                                     className={classNames(
                                       projectcss.all,
-                                      sty.metricItem2
+                                      sty.headingAndNumber
                                     )}
                                   >
                                     <div
-                                      data-plasmic-name={"headingAndNumber2"}
-                                      data-plasmic-override={
-                                        overrides.headingAndNumber2
-                                      }
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.headingAndNumber2
-                                      )}
-                                    >
-                                      <div
-                                        data-plasmic-name={"heading2"}
-                                        data-plasmic-override={
-                                          overrides.heading2
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          projectcss.__wab_text,
-                                          sty.heading2
-                                        )}
-                                      >
-                                        {"Discipline Points"}
-                                      </div>
-                                      <div
-                                        data-plasmic-name={"numberAndBadge2"}
-                                        data-plasmic-override={
-                                          overrides.numberAndBadge2
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.numberAndBadge2
-                                        )}
-                                      >
-                                        <div
-                                          data-plasmic-name={"number2"}
-                                          data-plasmic-override={
-                                            overrides.number2
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            projectcss.__wab_text,
-                                            sty.number2
-                                          )}
-                                        >
-                                          {"55"}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <Divider2Icon
-                                  className={classNames(
-                                    projectcss.all,
-                                    sty.svg__nlnNo
-                                  )}
-                                  role={"img"}
-                                />
-
-                                <div
-                                  data-plasmic-name={"inputAndText"}
-                                  data-plasmic-override={overrides.inputAndText}
-                                  className={classNames(
-                                    projectcss.all,
-                                    sty.inputAndText
-                                  )}
-                                >
-                                  <div
-                                    data-plasmic-name={"iconAndText"}
-                                    data-plasmic-override={
-                                      overrides.iconAndText
-                                    }
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.iconAndText
-                                    )}
-                                  >
-                                    <div
-                                      data-plasmic-name={"text14"}
-                                      data-plasmic-override={overrides.text14}
+                                      data-plasmic-name={"heading"}
+                                      data-plasmic-override={overrides.heading}
                                       className={classNames(
                                         projectcss.all,
                                         projectcss.__wab_text,
-                                        sty.text14
+                                        sty.heading
                                       )}
                                     >
                                       {"Infractions"}
                                     </div>
+                                    <div
+                                      data-plasmic-name={"numberAndBadge"}
+                                      data-plasmic-override={
+                                        overrides.numberAndBadge
+                                      }
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.numberAndBadge
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"number"}
+                                        data-plasmic-override={overrides.number}
+                                        className={classNames(
+                                          projectcss.all,
+                                          projectcss.__wab_text,
+                                          sty.number
+                                        )}
+                                      >
+                                        {"4"}
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
                                 <div
-                                  data-plasmic-name={"frame1"}
-                                  data-plasmic-override={overrides.frame1}
+                                  data-plasmic-name={"metricItem2"}
+                                  data-plasmic-override={overrides.metricItem2}
                                   className={classNames(
                                     projectcss.all,
-                                    sty.frame1
+                                    sty.metricItem2
                                   )}
                                 >
                                   <div
-                                    data-plasmic-name={"fileUploadItemBase"}
+                                    data-plasmic-name={"headingAndNumber2"}
                                     data-plasmic-override={
-                                      overrides.fileUploadItemBase
+                                      overrides.headingAndNumber2
                                     }
                                     className={classNames(
                                       projectcss.all,
-                                      sty.fileUploadItemBase
+                                      sty.headingAndNumber2
                                     )}
                                   >
                                     <div
-                                      data-plasmic-name={"content4"}
-                                      data-plasmic-override={overrides.content4}
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.content4
-                                      )}
-                                    >
-                                      {false ? (
-                                        <div
-                                          data-plasmic-name={"fileTypeIcon"}
-                                          data-plasmic-override={
-                                            overrides.fileTypeIcon
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.fileTypeIcon
-                                          )}
-                                        >
-                                          <PlasmicImg__
-                                            alt={""}
-                                            className={classNames(
-                                              sty.img__lYvHw
-                                            )}
-                                            displayHeight={"40px"}
-                                            displayMaxHeight={"none"}
-                                            displayMaxWidth={"100%"}
-                                            displayMinHeight={"0"}
-                                            displayMinWidth={"0"}
-                                            displayWidth={"32px"}
-                                            loading={"lazy"}
-                                            src={{
-                                              src: "/plasmic/levelset_v_2/images/page.svg",
-                                              fullWidth: 32,
-                                              fullHeight: 40,
-                                              aspectRatio: undefined
-                                            }}
-                                          />
-
-                                          <div
-                                            data-plasmic-name={"fileType"}
-                                            data-plasmic-override={
-                                              overrides.fileType
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.fileType
-                                            )}
-                                          >
-                                            {"MP4"}
-                                          </div>
-                                        </div>
-                                      ) : null}
-                                      <div
-                                        data-plasmic-name={"content5"}
-                                        data-plasmic-override={
-                                          overrides.content5
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.content5
-                                        )}
-                                      >
-                                        <div
-                                          data-plasmic-name={
-                                            "textAndSupportingText3"
-                                          }
-                                          data-plasmic-override={
-                                            overrides.textAndSupportingText3
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.textAndSupportingText3
-                                          )}
-                                        >
-                                          <div
-                                            data-plasmic-name={"text15"}
-                                            data-plasmic-override={
-                                              overrides.text15
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.text15
-                                            )}
-                                          >
-                                            {"Values Violation - Humility"}
-                                          </div>
-                                          <div
-                                            data-plasmic-name={
-                                              "supportingTextAndPercentage"
-                                            }
-                                            data-plasmic-override={
-                                              overrides.supportingTextAndPercentage
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.supportingTextAndPercentage
-                                            )}
-                                          >
-                                            <div
-                                              data-plasmic-name={
-                                                "supportingText3"
-                                              }
-                                              data-plasmic-override={
-                                                overrides.supportingText3
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                projectcss.__wab_text,
-                                                sty.supportingText3
-                                              )}
-                                            >
-                                              {"10/12/2025"}
-                                            </div>
-                                            <Divider3Icon
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.svg__bnWmn
-                                              )}
-                                              role={"img"}
-                                            />
-
-                                            <div
-                                              data-plasmic-name={
-                                                "iconAndPercentage"
-                                              }
-                                              data-plasmic-override={
-                                                overrides.iconAndPercentage
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.iconAndPercentage
-                                              )}
-                                            >
-                                              <PlasmicImg__
-                                                alt={""}
-                                                className={classNames(
-                                                  sty.img__btu7M
-                                                )}
-                                                displayHeight={"16px"}
-                                                displayMaxHeight={"none"}
-                                                displayMaxWidth={"100%"}
-                                                displayMinHeight={"0"}
-                                                displayMinWidth={"0"}
-                                                displayWidth={"16px"}
-                                                loading={"lazy"}
-                                                src={{
-                                                  src: "/plasmic/levelset_v_2/images/user023.svg",
-                                                  fullWidth: 16,
-                                                  fullHeight: 16,
-                                                  aspectRatio: undefined
-                                                }}
-                                              />
-
-                                              <div
-                                                data-plasmic-name={"percentage"}
-                                                data-plasmic-override={
-                                                  overrides.percentage
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.percentage
-                                                )}
-                                              >
-                                                {"Traci Danmeyer-Rodgers"}
-                                              </div>
-                                            </div>
-                                            <Divider3Icon
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.svg__hNho
-                                              )}
-                                              role={"img"}
-                                            />
-
-                                            <div
-                                              data-plasmic-name={
-                                                "supportingText4"
-                                              }
-                                              data-plasmic-override={
-                                                overrides.supportingText4
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                projectcss.__wab_text,
-                                                sty.supportingText4
-                                              )}
-                                            >
-                                              {"Not Informed"}
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div
-                                          data-plasmic-name={"frame2"}
-                                          data-plasmic-override={
-                                            overrides.frame2
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.frame2
-                                          )}
-                                        >
-                                          <div
-                                            data-plasmic-name={"text16"}
-                                            data-plasmic-override={
-                                              overrides.text16
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.text16
-                                            )}
-                                          >
-                                            {"10"}
-                                          </div>
-                                          <div
-                                            data-plasmic-name={"text17"}
-                                            data-plasmic-override={
-                                              overrides.text17
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.text17
-                                            )}
-                                          >
-                                            {"points"}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div
-                                      data-plasmic-name={"buttonsButtonUtility"}
-                                      data-plasmic-override={
-                                        overrides.buttonsButtonUtility
-                                      }
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.buttonsButtonUtility
-                                      )}
-                                    >
-                                      <Trash01Icon
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.svg__qLr6
-                                        )}
-                                        role={"img"}
-                                      />
-                                    </div>
-                                  </div>
-                                  <div
-                                    data-plasmic-name={"fileUploadItemBase2"}
-                                    data-plasmic-override={
-                                      overrides.fileUploadItemBase2
-                                    }
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.fileUploadItemBase2
-                                    )}
-                                  >
-                                    <div
-                                      data-plasmic-name={"content6"}
-                                      data-plasmic-override={overrides.content6}
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.content6
-                                      )}
-                                    >
-                                      {false ? (
-                                        <div
-                                          data-plasmic-name={"fileTypeIcon2"}
-                                          data-plasmic-override={
-                                            overrides.fileTypeIcon2
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.fileTypeIcon2
-                                          )}
-                                        >
-                                          <PlasmicImg__
-                                            alt={""}
-                                            className={classNames(
-                                              sty.img__lqo7P
-                                            )}
-                                            displayHeight={"40px"}
-                                            displayMaxHeight={"none"}
-                                            displayMaxWidth={"100%"}
-                                            displayMinHeight={"0"}
-                                            displayMinWidth={"0"}
-                                            displayWidth={"32px"}
-                                            loading={"lazy"}
-                                            src={{
-                                              src: "/plasmic/levelset_v_2/images/page.svg",
-                                              fullWidth: 32,
-                                              fullHeight: 40,
-                                              aspectRatio: undefined
-                                            }}
-                                          />
-
-                                          <div
-                                            data-plasmic-name={"fileType2"}
-                                            data-plasmic-override={
-                                              overrides.fileType2
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.fileType2
-                                            )}
-                                          >
-                                            {"MP4"}
-                                          </div>
-                                        </div>
-                                      ) : null}
-                                      <div
-                                        data-plasmic-name={"content7"}
-                                        data-plasmic-override={
-                                          overrides.content7
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.content7
-                                        )}
-                                      >
-                                        <div
-                                          data-plasmic-name={
-                                            "textAndSupportingText4"
-                                          }
-                                          data-plasmic-override={
-                                            overrides.textAndSupportingText4
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.textAndSupportingText4
-                                          )}
-                                        >
-                                          <div
-                                            data-plasmic-name={"text18"}
-                                            data-plasmic-override={
-                                              overrides.text18
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.text18
-                                            )}
-                                          >
-                                            {"Uniform/Appearance"}
-                                          </div>
-                                          <div
-                                            data-plasmic-name={
-                                              "supportingTextAndPercentage2"
-                                            }
-                                            data-plasmic-override={
-                                              overrides.supportingTextAndPercentage2
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.supportingTextAndPercentage2
-                                            )}
-                                          >
-                                            <div
-                                              data-plasmic-name={
-                                                "supportingText5"
-                                              }
-                                              data-plasmic-override={
-                                                overrides.supportingText5
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                projectcss.__wab_text,
-                                                sty.supportingText5
-                                              )}
-                                            >
-                                              {"10/10/2025"}
-                                            </div>
-                                            <Divider3Icon
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.svg___4Zii2
-                                              )}
-                                              role={"img"}
-                                            />
-
-                                            <div
-                                              data-plasmic-name={
-                                                "iconAndPercentage2"
-                                              }
-                                              data-plasmic-override={
-                                                overrides.iconAndPercentage2
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.iconAndPercentage2
-                                              )}
-                                            >
-                                              <PlasmicImg__
-                                                alt={""}
-                                                className={classNames(
-                                                  sty.img__qQvt
-                                                )}
-                                                displayHeight={"16px"}
-                                                displayMaxHeight={"none"}
-                                                displayMaxWidth={"100%"}
-                                                displayMinHeight={"0"}
-                                                displayMinWidth={"0"}
-                                                displayWidth={"16px"}
-                                                loading={"lazy"}
-                                                src={{
-                                                  src: "/plasmic/levelset_v_2/images/user023.svg",
-                                                  fullWidth: 16,
-                                                  fullHeight: 16,
-                                                  aspectRatio: undefined
-                                                }}
-                                              />
-
-                                              <div
-                                                data-plasmic-name={
-                                                  "percentage2"
-                                                }
-                                                data-plasmic-override={
-                                                  overrides.percentage2
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.percentage2
-                                                )}
-                                              >
-                                                {"Traci Danmeyer-Rodgers"}
-                                              </div>
-                                            </div>
-                                            <Divider3Icon
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.svg___4Tf27
-                                              )}
-                                              role={"img"}
-                                            />
-
-                                            <div
-                                              data-plasmic-name={
-                                                "supportingText6"
-                                              }
-                                              data-plasmic-override={
-                                                overrides.supportingText6
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                projectcss.__wab_text,
-                                                sty.supportingText6
-                                              )}
-                                            >
-                                              {"Informed"}
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div
-                                          data-plasmic-name={"frame3"}
-                                          data-plasmic-override={
-                                            overrides.frame3
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.frame3
-                                          )}
-                                        >
-                                          <div
-                                            data-plasmic-name={"text19"}
-                                            data-plasmic-override={
-                                              overrides.text19
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.text19
-                                            )}
-                                          >
-                                            {"5"}
-                                          </div>
-                                          <div
-                                            data-plasmic-name={"text20"}
-                                            data-plasmic-override={
-                                              overrides.text20
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.text20
-                                            )}
-                                          >
-                                            {"points"}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div
-                                      data-plasmic-name={
-                                        "buttonsButtonUtility2"
-                                      }
-                                      data-plasmic-override={
-                                        overrides.buttonsButtonUtility2
-                                      }
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.buttonsButtonUtility2
-                                      )}
-                                    >
-                                      <Trash01Icon
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.svg__rztSr
-                                        )}
-                                        role={"img"}
-                                      />
-                                    </div>
-                                  </div>
-                                  <div
-                                    data-plasmic-name={"fileUploadItemBase3"}
-                                    data-plasmic-override={
-                                      overrides.fileUploadItemBase3
-                                    }
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.fileUploadItemBase3
-                                    )}
-                                  >
-                                    <div
-                                      data-plasmic-name={"content8"}
-                                      data-plasmic-override={overrides.content8}
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.content8
-                                      )}
-                                    >
-                                      {false ? (
-                                        <div
-                                          data-plasmic-name={"fileTypeIcon3"}
-                                          data-plasmic-override={
-                                            overrides.fileTypeIcon3
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.fileTypeIcon3
-                                          )}
-                                        >
-                                          <PlasmicImg__
-                                            alt={""}
-                                            className={classNames(
-                                              sty.img__q8X5U
-                                            )}
-                                            displayHeight={"40px"}
-                                            displayMaxHeight={"none"}
-                                            displayMaxWidth={"100%"}
-                                            displayMinHeight={"0"}
-                                            displayMinWidth={"0"}
-                                            displayWidth={"32px"}
-                                            loading={"lazy"}
-                                            src={{
-                                              src: "/plasmic/levelset_v_2/images/page.svg",
-                                              fullWidth: 32,
-                                              fullHeight: 40,
-                                              aspectRatio: undefined
-                                            }}
-                                          />
-
-                                          <div
-                                            data-plasmic-name={"fileType3"}
-                                            data-plasmic-override={
-                                              overrides.fileType3
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.fileType3
-                                            )}
-                                          >
-                                            {"MP4"}
-                                          </div>
-                                        </div>
-                                      ) : null}
-                                      <div
-                                        data-plasmic-name={"content9"}
-                                        data-plasmic-override={
-                                          overrides.content9
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.content9
-                                        )}
-                                      >
-                                        <div
-                                          data-plasmic-name={
-                                            "textAndSupportingText5"
-                                          }
-                                          data-plasmic-override={
-                                            overrides.textAndSupportingText5
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.textAndSupportingText5
-                                          )}
-                                        >
-                                          <div
-                                            data-plasmic-name={"text21"}
-                                            data-plasmic-override={
-                                              overrides.text21
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.text21
-                                            )}
-                                          >
-                                            {
-                                              "Inappropriate Conduct (language, horseplay, etc)"
-                                            }
-                                          </div>
-                                          <div
-                                            data-plasmic-name={
-                                              "supportingTextAndPercentage3"
-                                            }
-                                            data-plasmic-override={
-                                              overrides.supportingTextAndPercentage3
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.supportingTextAndPercentage3
-                                            )}
-                                          >
-                                            <div
-                                              data-plasmic-name={
-                                                "supportingText7"
-                                              }
-                                              data-plasmic-override={
-                                                overrides.supportingText7
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                projectcss.__wab_text,
-                                                sty.supportingText7
-                                              )}
-                                            >
-                                              {"10/9/2025"}
-                                            </div>
-                                            <Divider3Icon
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.svg___0HluD
-                                              )}
-                                              role={"img"}
-                                            />
-
-                                            <div
-                                              data-plasmic-name={
-                                                "iconAndPercentage3"
-                                              }
-                                              data-plasmic-override={
-                                                overrides.iconAndPercentage3
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.iconAndPercentage3
-                                              )}
-                                            >
-                                              <PlasmicImg__
-                                                alt={""}
-                                                className={classNames(
-                                                  sty.img__ymwb
-                                                )}
-                                                displayHeight={"16px"}
-                                                displayMaxHeight={"none"}
-                                                displayMaxWidth={"100%"}
-                                                displayMinHeight={"0"}
-                                                displayMinWidth={"0"}
-                                                displayWidth={"16px"}
-                                                loading={"lazy"}
-                                                src={{
-                                                  src: "/plasmic/levelset_v_2/images/user023.svg",
-                                                  fullWidth: 16,
-                                                  fullHeight: 16,
-                                                  aspectRatio: undefined
-                                                }}
-                                              />
-
-                                              <div
-                                                data-plasmic-name={
-                                                  "percentage3"
-                                                }
-                                                data-plasmic-override={
-                                                  overrides.percentage3
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.percentage3
-                                                )}
-                                              >
-                                                {"Casey Howard"}
-                                              </div>
-                                            </div>
-                                            <Divider3Icon
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.svg__aLnTg
-                                              )}
-                                              role={"img"}
-                                            />
-
-                                            <div
-                                              data-plasmic-name={
-                                                "supportingText8"
-                                              }
-                                              data-plasmic-override={
-                                                overrides.supportingText8
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                projectcss.__wab_text,
-                                                sty.supportingText8
-                                              )}
-                                            >
-                                              {"Informed"}
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div
-                                          data-plasmic-name={"frame4"}
-                                          data-plasmic-override={
-                                            overrides.frame4
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.frame4
-                                          )}
-                                        >
-                                          <div
-                                            data-plasmic-name={"text22"}
-                                            data-plasmic-override={
-                                              overrides.text22
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.text22
-                                            )}
-                                          >
-                                            {"50"}
-                                          </div>
-                                          <div
-                                            data-plasmic-name={"text23"}
-                                            data-plasmic-override={
-                                              overrides.text23
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.text23
-                                            )}
-                                          >
-                                            {"points"}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div
-                                      data-plasmic-name={
-                                        "buttonsButtonUtility3"
-                                      }
-                                      data-plasmic-override={
-                                        overrides.buttonsButtonUtility3
-                                      }
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.buttonsButtonUtility3
-                                      )}
-                                    >
-                                      <Trash01Icon
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.svg__ny93I
-                                        )}
-                                        role={"img"}
-                                      />
-                                    </div>
-                                  </div>
-                                  <SlideoutListItem2
-                                    className={classNames(
-                                      "__wab_instance",
-                                      sty.slideoutListItem2__z58FF
-                                    )}
-                                  />
-                                </div>
-                                <Divider2Icon
-                                  className={classNames(
-                                    projectcss.all,
-                                    sty.svg__iJw2I
-                                  )}
-                                  role={"img"}
-                                />
-
-                                <div
-                                  data-plasmic-name={"inputAndText2"}
-                                  data-plasmic-override={
-                                    overrides.inputAndText2
-                                  }
-                                  className={classNames(
-                                    projectcss.all,
-                                    sty.inputAndText2
-                                  )}
-                                >
-                                  <div
-                                    data-plasmic-name={"iconAndText2"}
-                                    data-plasmic-override={
-                                      overrides.iconAndText2
-                                    }
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.iconAndText2
-                                    )}
-                                  >
-                                    <div
-                                      data-plasmic-name={"text27"}
-                                      data-plasmic-override={overrides.text27}
+                                      data-plasmic-name={"heading2"}
+                                      data-plasmic-override={overrides.heading2}
                                       className={classNames(
                                         projectcss.all,
                                         projectcss.__wab_text,
-                                        sty.text27
+                                        sty.heading2
                                       )}
                                     >
-                                      {"Disciplinary Actions"}
+                                      {"Discipline Points"}
+                                    </div>
+                                    <div
+                                      data-plasmic-name={"numberAndBadge2"}
+                                      data-plasmic-override={
+                                        overrides.numberAndBadge2
+                                      }
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.numberAndBadge2
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"number2"}
+                                        data-plasmic-override={
+                                          overrides.number2
+                                        }
+                                        className={classNames(
+                                          projectcss.all,
+                                          projectcss.__wab_text,
+                                          sty.number2
+                                        )}
+                                      >
+                                        {"55"}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
+                              </div>
+                              <Divider2Icon
+                                className={classNames(
+                                  projectcss.all,
+                                  sty.svg__rk7Ms
+                                )}
+                                role={"img"}
+                              />
+
+                              <div
+                                data-plasmic-name={"inputAndText"}
+                                data-plasmic-override={overrides.inputAndText}
+                                className={classNames(
+                                  projectcss.all,
+                                  sty.inputAndText
+                                )}
+                              >
                                 <div
-                                  data-plasmic-name={"frame6"}
-                                  data-plasmic-override={overrides.frame6}
+                                  data-plasmic-name={"iconAndText"}
+                                  data-plasmic-override={overrides.iconAndText}
                                   className={classNames(
                                     projectcss.all,
-                                    sty.frame6
+                                    sty.iconAndText
                                   )}
                                 >
-                                  {(_par =>
-                                    !_par
-                                      ? []
-                                      : Array.isArray(_par)
-                                        ? _par
-                                        : [_par])([2, 3, 4]).map(
-                                    (__plasmic_item_0, __plasmic_idx_0) => {
-                                      const currentItem = __plasmic_item_0;
-                                      const currentIndex = __plasmic_idx_0;
-                                      return (
-                                        <SlideoutListItem2
-                                          className={classNames(
-                                            "__wab_instance",
-                                            sty.slideoutListItem2__tesYb
-                                          )}
-                                          disciplinaryAction={true}
-                                          key={currentIndex}
-                                        />
-                                      );
-                                    }
-                                  )}
+                                  <div
+                                    data-plasmic-name={"text14"}
+                                    data-plasmic-override={overrides.text14}
+                                    className={classNames(
+                                      projectcss.all,
+                                      projectcss.__wab_text,
+                                      sty.text14
+                                    )}
+                                  >
+                                    {"Infractions"}
+                                  </div>
                                 </div>
                               </div>
+                              <div
+                                data-plasmic-name={"frame1"}
+                                data-plasmic-override={overrides.frame1}
+                                className={classNames(
+                                  projectcss.all,
+                                  sty.frame1
+                                )}
+                              >
+                                <SlideoutListItem2
+                                  className={classNames(
+                                    "__wab_instance",
+                                    sty.slideoutListItem2__e09N4
+                                  )}
+                                  itemName={
+                                    <React.Fragment>
+                                      {(() => {
+                                        try {
+                                          return undefined;
+                                        } catch (e) {
+                                          if (
+                                            e instanceof TypeError ||
+                                            e?.plasmicType ===
+                                              "PlasmicUndefinedDataError"
+                                          ) {
+                                            return "Values Violation - Humility";
+                                          }
+                                          throw e;
+                                        }
+                                      })()}
+                                    </React.Fragment>
+                                  }
+                                />
+
+                                <SlideoutListItem2
+                                  className={classNames(
+                                    "__wab_instance",
+                                    sty.slideoutListItem2__laOi6
+                                  )}
+                                  itemName={
+                                    <div
+                                      className={classNames(
+                                        projectcss.all,
+                                        projectcss.__wab_text,
+                                        sty.text__c9Wrl
+                                      )}
+                                    >
+                                      {"Uniform/Appearance"}
+                                    </div>
+                                  }
+                                />
+
+                                <SlideoutListItem2
+                                  className={classNames(
+                                    "__wab_instance",
+                                    sty.slideoutListItem2__im0D1
+                                  )}
+                                  itemName={
+                                    <div
+                                      className={classNames(
+                                        projectcss.all,
+                                        projectcss.__wab_text,
+                                        sty.text__csSld
+                                      )}
+                                    >
+                                      {
+                                        "Inappropriate Conduct (language, horseplay, etc)"
+                                      }
+                                    </div>
+                                  }
+                                  pointValue2={
+                                    <div
+                                      data-plasmic-name={"pointValue4"}
+                                      data-plasmic-override={
+                                        overrides.pointValue4
+                                      }
+                                      className={classNames(
+                                        projectcss.all,
+                                        projectcss.__wab_text,
+                                        sty.pointValue4
+                                      )}
+                                    >
+                                      {"50"}
+                                    </div>
+                                  }
+                                />
+
+                                <SlideoutListItem2
+                                  className={classNames(
+                                    "__wab_instance",
+                                    sty.slideoutListItem2__iQ6IM
+                                  )}
+                                />
+
+                                <SlideoutListItem2
+                                  className={classNames(
+                                    "__wab_instance",
+                                    sty.slideoutListItem2___6G0C5
+                                  )}
+                                />
+                              </div>
+                              <Divider2Icon
+                                className={classNames(
+                                  projectcss.all,
+                                  sty.svg__z2VN
+                                )}
+                                role={"img"}
+                              />
+
+                              <div
+                                data-plasmic-name={"inputAndText2"}
+                                data-plasmic-override={overrides.inputAndText2}
+                                className={classNames(
+                                  projectcss.all,
+                                  sty.inputAndText2
+                                )}
+                              >
+                                <div
+                                  data-plasmic-name={"iconAndText2"}
+                                  data-plasmic-override={overrides.iconAndText2}
+                                  className={classNames(
+                                    projectcss.all,
+                                    sty.iconAndText2
+                                  )}
+                                >
+                                  <div
+                                    data-plasmic-name={"text27"}
+                                    data-plasmic-override={overrides.text27}
+                                    className={classNames(
+                                      projectcss.all,
+                                      projectcss.__wab_text,
+                                      sty.text27
+                                    )}
+                                  >
+                                    {"Disciplinary Actions"}
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                data-plasmic-name={"frame6"}
+                                data-plasmic-override={overrides.frame6}
+                                className={classNames(
+                                  projectcss.all,
+                                  sty.frame6
+                                )}
+                              >
+                                {(_par =>
+                                  !_par
+                                    ? []
+                                    : Array.isArray(_par)
+                                      ? _par
+                                      : [_par])([2, 3, 4]).map(
+                                  (__plasmic_item_0, __plasmic_idx_0) => {
+                                    const currentItem = __plasmic_item_0;
+                                    const currentIndex = __plasmic_idx_0;
+                                    return (
+                                      <SlideoutListItem2
+                                        className={classNames(
+                                          "__wab_instance",
+                                          sty.slideoutListItem2__bxkK7
+                                        )}
+                                        disciplinaryAction={true}
+                                        key={currentIndex}
+                                      />
+                                    );
+                                  }
+                                )}
+                              </div>
                             </div>
-                            <div
-                              data-plasmic-name={"content3"}
-                              data-plasmic-override={overrides.content3}
-                              className={classNames(
-                                projectcss.all,
-                                sty.content3
-                              )}
-                            />
-                          </TabContent>
-                        </div>
+                          </div>
+                        </TabContent>
                       </div>
-                    )}
-                  </DataCtxReader__>
-                </TabsContainer>
-              </div>
+                    </div>
+                  )}
+                </DataCtxReader__>
+              </TabsContainer>
             </div>
           </div>
         </div>
@@ -1839,22 +891,9 @@ function PlasmicProfileSlideout__RenderFunc(props: {
 const PlasmicDescendants = {
   root: [
     "root",
-    "typeUserSettingsBreakpointDesktop",
     "panel",
-    "slideOutMenuHeader",
-    "content",
-    "featuredIcon",
-    "textAndSupportingText",
-    "text",
-    "supportingText",
-    "buttonsButtonCloseX",
     "header",
     "container",
-    "content2",
-    "textAndSupportingText2",
-    "textAndOnlineIndicator",
-    "text2",
-    "supportingText2",
     "statistics",
     "tabsContainer",
     "tabUnderline",
@@ -1880,172 +919,16 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility",
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2",
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3",
+    "pointValue4",
     "inputAndText2",
     "iconAndText2",
     "text27",
-    "frame6",
-    "content3"
-  ],
-  typeUserSettingsBreakpointDesktop: [
-    "typeUserSettingsBreakpointDesktop",
-    "panel",
-    "slideOutMenuHeader",
-    "content",
-    "featuredIcon",
-    "textAndSupportingText",
-    "text",
-    "supportingText",
-    "buttonsButtonCloseX",
-    "header",
-    "container",
-    "content2",
-    "textAndSupportingText2",
-    "textAndOnlineIndicator",
-    "text2",
-    "supportingText2",
-    "statistics",
-    "tabsContainer",
-    "tabUnderline",
-    "pathwayContent",
-    "peContent",
-    "evalsContent",
-    "disciplineContent",
-    "discipline",
-    "row",
-    "text13",
-    "row2",
-    "metricItem",
-    "headingAndNumber",
-    "heading",
-    "numberAndBadge",
-    "number",
-    "metricItem2",
-    "headingAndNumber2",
-    "heading2",
-    "numberAndBadge2",
-    "number2",
-    "inputAndText",
-    "iconAndText",
-    "text14",
-    "frame1",
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility",
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2",
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3",
-    "inputAndText2",
-    "iconAndText2",
-    "text27",
-    "frame6",
-    "content3"
+    "frame6"
   ],
   panel: [
     "panel",
-    "slideOutMenuHeader",
-    "content",
-    "featuredIcon",
-    "textAndSupportingText",
-    "text",
-    "supportingText",
-    "buttonsButtonCloseX",
     "header",
     "container",
-    "content2",
-    "textAndSupportingText2",
-    "textAndOnlineIndicator",
-    "text2",
-    "supportingText2",
     "statistics",
     "tabsContainer",
     "tabUnderline",
@@ -2071,89 +954,15 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility",
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2",
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3",
+    "pointValue4",
     "inputAndText2",
     "iconAndText2",
     "text27",
-    "frame6",
-    "content3"
+    "frame6"
   ],
-  slideOutMenuHeader: [
-    "slideOutMenuHeader",
-    "content",
-    "featuredIcon",
-    "textAndSupportingText",
-    "text",
-    "supportingText",
-    "buttonsButtonCloseX"
-  ],
-  content: [
-    "content",
-    "featuredIcon",
-    "textAndSupportingText",
-    "text",
-    "supportingText"
-  ],
-  featuredIcon: ["featuredIcon"],
-  textAndSupportingText: ["textAndSupportingText", "text", "supportingText"],
-  text: ["text"],
-  supportingText: ["supportingText"],
-  buttonsButtonCloseX: ["buttonsButtonCloseX"],
   header: [
     "header",
     "container",
-    "content2",
-    "textAndSupportingText2",
-    "textAndOnlineIndicator",
-    "text2",
-    "supportingText2",
     "statistics",
     "tabsContainer",
     "tabUnderline",
@@ -2179,67 +988,14 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility",
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2",
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3",
+    "pointValue4",
     "inputAndText2",
     "iconAndText2",
     "text27",
-    "frame6",
-    "content3"
+    "frame6"
   ],
   container: [
     "container",
-    "content2",
-    "textAndSupportingText2",
-    "textAndOnlineIndicator",
-    "text2",
-    "supportingText2",
     "statistics",
     "tabsContainer",
     "tabUnderline",
@@ -2265,76 +1021,12 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility",
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2",
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3",
+    "pointValue4",
     "inputAndText2",
     "iconAndText2",
     "text27",
-    "frame6",
-    "content3"
+    "frame6"
   ],
-  content2: [
-    "content2",
-    "textAndSupportingText2",
-    "textAndOnlineIndicator",
-    "text2",
-    "supportingText2"
-  ],
-  textAndSupportingText2: [
-    "textAndSupportingText2",
-    "textAndOnlineIndicator",
-    "text2",
-    "supportingText2"
-  ],
-  textAndOnlineIndicator: ["textAndOnlineIndicator", "text2"],
-  text2: ["text2"],
-  supportingText2: ["supportingText2"],
   statistics: [
     "statistics",
     "tabsContainer",
@@ -2361,59 +1053,11 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility",
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2",
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3",
+    "pointValue4",
     "inputAndText2",
     "iconAndText2",
     "text27",
-    "frame6",
-    "content3"
+    "frame6"
   ],
   tabsContainer: [
     "tabsContainer",
@@ -2440,59 +1084,11 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility",
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2",
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3",
+    "pointValue4",
     "inputAndText2",
     "iconAndText2",
     "text27",
-    "frame6",
-    "content3"
+    "frame6"
   ],
   tabUnderline: ["tabUnderline"],
   pathwayContent: ["pathwayContent"],
@@ -2518,59 +1114,11 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility",
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2",
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3",
+    "pointValue4",
     "inputAndText2",
     "iconAndText2",
     "text27",
-    "frame6",
-    "content3"
+    "frame6"
   ],
   discipline: [
     "discipline",
@@ -2591,54 +1139,7 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility",
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2",
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3",
+    "pointValue4",
     "inputAndText2",
     "iconAndText2",
     "text27",
@@ -2689,306 +1190,21 @@ const PlasmicDescendants = {
   inputAndText: ["inputAndText", "iconAndText", "text14"],
   iconAndText: ["iconAndText", "text14"],
   text14: ["text14"],
-  frame1: [
-    "frame1",
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility",
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2",
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3"
-  ],
-  fileUploadItemBase: [
-    "fileUploadItemBase",
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17",
-    "buttonsButtonUtility"
-  ],
-  content4: [
-    "content4",
-    "fileTypeIcon",
-    "fileType",
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17"
-  ],
-  fileTypeIcon: ["fileTypeIcon", "fileType"],
-  fileType: ["fileType"],
-  content5: [
-    "content5",
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4",
-    "frame2",
-    "text16",
-    "text17"
-  ],
-  textAndSupportingText3: [
-    "textAndSupportingText3",
-    "text15",
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4"
-  ],
-  text15: ["text15"],
-  supportingTextAndPercentage: [
-    "supportingTextAndPercentage",
-    "supportingText3",
-    "iconAndPercentage",
-    "percentage",
-    "supportingText4"
-  ],
-  supportingText3: ["supportingText3"],
-  iconAndPercentage: ["iconAndPercentage", "percentage"],
-  percentage: ["percentage"],
-  supportingText4: ["supportingText4"],
-  frame2: ["frame2", "text16", "text17"],
-  text16: ["text16"],
-  text17: ["text17"],
-  buttonsButtonUtility: ["buttonsButtonUtility"],
-  fileUploadItemBase2: [
-    "fileUploadItemBase2",
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20",
-    "buttonsButtonUtility2"
-  ],
-  content6: [
-    "content6",
-    "fileTypeIcon2",
-    "fileType2",
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20"
-  ],
-  fileTypeIcon2: ["fileTypeIcon2", "fileType2"],
-  fileType2: ["fileType2"],
-  content7: [
-    "content7",
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6",
-    "frame3",
-    "text19",
-    "text20"
-  ],
-  textAndSupportingText4: [
-    "textAndSupportingText4",
-    "text18",
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6"
-  ],
-  text18: ["text18"],
-  supportingTextAndPercentage2: [
-    "supportingTextAndPercentage2",
-    "supportingText5",
-    "iconAndPercentage2",
-    "percentage2",
-    "supportingText6"
-  ],
-  supportingText5: ["supportingText5"],
-  iconAndPercentage2: ["iconAndPercentage2", "percentage2"],
-  percentage2: ["percentage2"],
-  supportingText6: ["supportingText6"],
-  frame3: ["frame3", "text19", "text20"],
-  text19: ["text19"],
-  text20: ["text20"],
-  buttonsButtonUtility2: ["buttonsButtonUtility2"],
-  fileUploadItemBase3: [
-    "fileUploadItemBase3",
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23",
-    "buttonsButtonUtility3"
-  ],
-  content8: [
-    "content8",
-    "fileTypeIcon3",
-    "fileType3",
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23"
-  ],
-  fileTypeIcon3: ["fileTypeIcon3", "fileType3"],
-  fileType3: ["fileType3"],
-  content9: [
-    "content9",
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8",
-    "frame4",
-    "text22",
-    "text23"
-  ],
-  textAndSupportingText5: [
-    "textAndSupportingText5",
-    "text21",
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8"
-  ],
-  text21: ["text21"],
-  supportingTextAndPercentage3: [
-    "supportingTextAndPercentage3",
-    "supportingText7",
-    "iconAndPercentage3",
-    "percentage3",
-    "supportingText8"
-  ],
-  supportingText7: ["supportingText7"],
-  iconAndPercentage3: ["iconAndPercentage3", "percentage3"],
-  percentage3: ["percentage3"],
-  supportingText8: ["supportingText8"],
-  frame4: ["frame4", "text22", "text23"],
-  text22: ["text22"],
-  text23: ["text23"],
-  buttonsButtonUtility3: ["buttonsButtonUtility3"],
+  frame1: ["frame1", "pointValue4"],
+  pointValue4: ["pointValue4"],
   inputAndText2: ["inputAndText2", "iconAndText2", "text27"],
   iconAndText2: ["iconAndText2", "text27"],
   text27: ["text27"],
-  frame6: ["frame6"],
-  content3: ["content3"]
+  frame6: ["frame6"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
 type DescendantsType<T extends NodeNameType> =
   (typeof PlasmicDescendants)[T][number];
 type NodeDefaultElementType = {
   root: "div";
-  typeUserSettingsBreakpointDesktop: "div";
   panel: "div";
-  slideOutMenuHeader: "div";
-  content: "div";
-  featuredIcon: "div";
-  textAndSupportingText: "div";
-  text: "div";
-  supportingText: "div";
-  buttonsButtonCloseX: "div";
   header: "div";
   container: "div";
-  content2: "div";
-  textAndSupportingText2: "div";
-  textAndOnlineIndicator: "div";
-  text2: "div";
-  supportingText2: "div";
   statistics: "div";
   tabsContainer: typeof TabsContainer;
   tabUnderline: typeof TabUnderline;
@@ -3014,59 +1230,11 @@ type NodeDefaultElementType = {
   iconAndText: "div";
   text14: "div";
   frame1: "div";
-  fileUploadItemBase: "div";
-  content4: "div";
-  fileTypeIcon: "div";
-  fileType: "div";
-  content5: "div";
-  textAndSupportingText3: "div";
-  text15: "div";
-  supportingTextAndPercentage: "div";
-  supportingText3: "div";
-  iconAndPercentage: "div";
-  percentage: "div";
-  supportingText4: "div";
-  frame2: "div";
-  text16: "div";
-  text17: "div";
-  buttonsButtonUtility: "div";
-  fileUploadItemBase2: "div";
-  content6: "div";
-  fileTypeIcon2: "div";
-  fileType2: "div";
-  content7: "div";
-  textAndSupportingText4: "div";
-  text18: "div";
-  supportingTextAndPercentage2: "div";
-  supportingText5: "div";
-  iconAndPercentage2: "div";
-  percentage2: "div";
-  supportingText6: "div";
-  frame3: "div";
-  text19: "div";
-  text20: "div";
-  buttonsButtonUtility2: "div";
-  fileUploadItemBase3: "div";
-  content8: "div";
-  fileTypeIcon3: "div";
-  fileType3: "div";
-  content9: "div";
-  textAndSupportingText5: "div";
-  text21: "div";
-  supportingTextAndPercentage3: "div";
-  supportingText7: "div";
-  iconAndPercentage3: "div";
-  percentage3: "div";
-  supportingText8: "div";
-  frame4: "div";
-  text22: "div";
-  text23: "div";
-  buttonsButtonUtility3: "div";
+  pointValue4: "div";
   inputAndText2: "div";
   iconAndText2: "div";
   text27: "div";
   frame6: "div";
-  content3: "div";
 };
 
 type ReservedPropsType = "variants" | "args" | "overrides";
@@ -3131,24 +1299,9 @@ export const PlasmicProfileSlideout = Object.assign(
   makeNodeComponent("root"),
   {
     // Helper components rendering sub-elements
-    typeUserSettingsBreakpointDesktop: makeNodeComponent(
-      "typeUserSettingsBreakpointDesktop"
-    ),
     panel: makeNodeComponent("panel"),
-    slideOutMenuHeader: makeNodeComponent("slideOutMenuHeader"),
-    content: makeNodeComponent("content"),
-    featuredIcon: makeNodeComponent("featuredIcon"),
-    textAndSupportingText: makeNodeComponent("textAndSupportingText"),
-    text: makeNodeComponent("text"),
-    supportingText: makeNodeComponent("supportingText"),
-    buttonsButtonCloseX: makeNodeComponent("buttonsButtonCloseX"),
     header: makeNodeComponent("header"),
     container: makeNodeComponent("container"),
-    content2: makeNodeComponent("content2"),
-    textAndSupportingText2: makeNodeComponent("textAndSupportingText2"),
-    textAndOnlineIndicator: makeNodeComponent("textAndOnlineIndicator"),
-    text2: makeNodeComponent("text2"),
-    supportingText2: makeNodeComponent("supportingText2"),
     statistics: makeNodeComponent("statistics"),
     tabsContainer: makeNodeComponent("tabsContainer"),
     tabUnderline: makeNodeComponent("tabUnderline"),
@@ -3174,65 +1327,11 @@ export const PlasmicProfileSlideout = Object.assign(
     iconAndText: makeNodeComponent("iconAndText"),
     text14: makeNodeComponent("text14"),
     frame1: makeNodeComponent("frame1"),
-    fileUploadItemBase: makeNodeComponent("fileUploadItemBase"),
-    content4: makeNodeComponent("content4"),
-    fileTypeIcon: makeNodeComponent("fileTypeIcon"),
-    fileType: makeNodeComponent("fileType"),
-    content5: makeNodeComponent("content5"),
-    textAndSupportingText3: makeNodeComponent("textAndSupportingText3"),
-    text15: makeNodeComponent("text15"),
-    supportingTextAndPercentage: makeNodeComponent(
-      "supportingTextAndPercentage"
-    ),
-    supportingText3: makeNodeComponent("supportingText3"),
-    iconAndPercentage: makeNodeComponent("iconAndPercentage"),
-    percentage: makeNodeComponent("percentage"),
-    supportingText4: makeNodeComponent("supportingText4"),
-    frame2: makeNodeComponent("frame2"),
-    text16: makeNodeComponent("text16"),
-    text17: makeNodeComponent("text17"),
-    buttonsButtonUtility: makeNodeComponent("buttonsButtonUtility"),
-    fileUploadItemBase2: makeNodeComponent("fileUploadItemBase2"),
-    content6: makeNodeComponent("content6"),
-    fileTypeIcon2: makeNodeComponent("fileTypeIcon2"),
-    fileType2: makeNodeComponent("fileType2"),
-    content7: makeNodeComponent("content7"),
-    textAndSupportingText4: makeNodeComponent("textAndSupportingText4"),
-    text18: makeNodeComponent("text18"),
-    supportingTextAndPercentage2: makeNodeComponent(
-      "supportingTextAndPercentage2"
-    ),
-    supportingText5: makeNodeComponent("supportingText5"),
-    iconAndPercentage2: makeNodeComponent("iconAndPercentage2"),
-    percentage2: makeNodeComponent("percentage2"),
-    supportingText6: makeNodeComponent("supportingText6"),
-    frame3: makeNodeComponent("frame3"),
-    text19: makeNodeComponent("text19"),
-    text20: makeNodeComponent("text20"),
-    buttonsButtonUtility2: makeNodeComponent("buttonsButtonUtility2"),
-    fileUploadItemBase3: makeNodeComponent("fileUploadItemBase3"),
-    content8: makeNodeComponent("content8"),
-    fileTypeIcon3: makeNodeComponent("fileTypeIcon3"),
-    fileType3: makeNodeComponent("fileType3"),
-    content9: makeNodeComponent("content9"),
-    textAndSupportingText5: makeNodeComponent("textAndSupportingText5"),
-    text21: makeNodeComponent("text21"),
-    supportingTextAndPercentage3: makeNodeComponent(
-      "supportingTextAndPercentage3"
-    ),
-    supportingText7: makeNodeComponent("supportingText7"),
-    iconAndPercentage3: makeNodeComponent("iconAndPercentage3"),
-    percentage3: makeNodeComponent("percentage3"),
-    supportingText8: makeNodeComponent("supportingText8"),
-    frame4: makeNodeComponent("frame4"),
-    text22: makeNodeComponent("text22"),
-    text23: makeNodeComponent("text23"),
-    buttonsButtonUtility3: makeNodeComponent("buttonsButtonUtility3"),
+    pointValue4: makeNodeComponent("pointValue4"),
     inputAndText2: makeNodeComponent("inputAndText2"),
     iconAndText2: makeNodeComponent("iconAndText2"),
     text27: makeNodeComponent("text27"),
     frame6: makeNodeComponent("frame6"),
-    content3: makeNodeComponent("content3"),
 
     // Metadata about props expected for PlasmicProfileSlideout
     internalVariantProps: PlasmicProfileSlideout__VariantProps,
