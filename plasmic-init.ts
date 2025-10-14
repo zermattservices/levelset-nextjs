@@ -303,6 +303,7 @@ PLASMIC.registerComponent(SupabaseUserLogOut, {
 });
 
 // Register DrawerV2 component
+// @ts-ignore - Complex Plasmic registration type
 PLASMIC.registerComponent(DrawerV2, {
   name: "DrawerV2",
   displayName: "Drawer v2",
@@ -320,12 +321,20 @@ PLASMIC.registerComponent(DrawerV2, {
       ],
       description: "Callback when user clicks mask, close button or Cancel button"
     },
+    onOpenChange: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "open", type: "boolean" }
+      ],
+      description: "Callback when the open state changes"
+    },
     
     // Content props
     title: "slot",
     children: "slot",
     footer: "slot",
     extra: "slot",
+    closeIcon: "slot",
     
     // Layout props
     placement: {
@@ -338,57 +347,52 @@ PLASMIC.registerComponent(DrawerV2, {
       type: "choice",
       options: ["default", "large"],
       defaultValue: "default",
-      description: "Preset size of drawer, default 378px and large 736px"
+      description: "Preset size of drawer: default (378px) or large (736px)"
     },
     width: {
       type: "string",
-      description: "Width of the Drawer dialog"
+      description: "Custom width of the Drawer (e.g., '500px' or '50%')"
     },
     height: {
       type: "string", 
-      description: "Placement is top or bottom, height of the Drawer dialog"
+      description: "Custom height when placement is top or bottom"
     },
     
     // Behavior props
     mask: {
       type: "boolean",
       defaultValue: true,
-      description: "Whether to show mask or not"
+      description: "Whether to show background mask"
     },
     maskClosable: {
       type: "boolean",
       defaultValue: true,
-      description: "Clicking on the mask to close the Drawer or not"
+      description: "Click mask to close the Drawer"
     },
     keyboard: {
       type: "boolean",
       defaultValue: true,
-      description: "Whether support press esc to close"
+      description: "Press ESC to close"
     },
-    destroyOnHidden: {
+    destroyOnClose: {
       type: "boolean",
       defaultValue: false,
-      description: "Whether to unmount child components on closing drawer or not"
+      description: "Unmount children when closing"
     },
     forceRender: {
       type: "boolean",
       defaultValue: false,
-      description: "Pre-render Drawer component forcibly"
+      description: "Pre-render Drawer content"
     },
     autoFocus: {
       type: "boolean",
       defaultValue: true,
-      description: "Whether Drawer should get focused after open"
-    },
-    loading: {
-      type: "boolean",
-      defaultValue: false,
-      description: "Show the Skeleton loading state"
+      description: "Auto-focus when opened"
     },
     closable: {
       type: "boolean",
       defaultValue: true,
-      description: "Whether a close (x) button is visible on top right"
+      description: "Show close (x) button"
     },
     
     // Styling props
@@ -397,22 +401,10 @@ PLASMIC.registerComponent(DrawerV2, {
     style: "object",
     rootStyle: "object",
     headerStyle: "object",
-    bodyStyle: {
-      type: "object",
-      description: "Style of the drawer body"
-    },
-    footerStyle: {
-      type: "object",
-      description: "Style of the drawer footer"
-    },
-    maskStyle: {
-      type: "object",
-      description: "Style of the mask element"
-    },
-    contentWrapperStyle: {
-      type: "object",
-      description: "Style of the content wrapper"
-    },
+    bodyStyle: "object",
+    footerStyle: "object",
+    maskStyle: "object",
+    contentWrapperStyle: "object",
     zIndex: {
       type: "number",
       defaultValue: 1000,
@@ -421,26 +413,14 @@ PLASMIC.registerComponent(DrawerV2, {
     
     // Advanced props
     getContainer: "string",
-    closeIcon: "slot",
-    drawerRender: {
-      type: "slot",
-      description: "Custom drawer content render"
-    },
     afterOpenChange: {
       type: "eventHandler",
       argTypes: [
         { name: "open", type: "boolean" }
       ],
-      description: "Callback after the animation ends when switching drawers"
+      description: "Callback after animation ends"
     },
-    push: {
-      type: "object",
-      description: "Nested drawers push behavior"
-    },
-    
-    // Semantic structure styling
-    classNames: "object",
-    styles: "object"
+    push: "object",
   },
   importPath: "./components/CodeComponents/DrawerV2",
 });
