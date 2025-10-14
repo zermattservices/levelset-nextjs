@@ -460,6 +460,71 @@
           "scheme": "blackbox",
           "componentType": "page",
           "path": "/auth/login"
+        },
+        {
+          "id": "UwKJxxQFYiGw",
+          "name": "LogoutButton",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicLogoutButton.tsx",
+          "importSpec": {
+            "modulePath": "LogoutButton.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicLogoutButton.module.css",
+          "scheme": "blackbox",
+          "componentType": "component"
+        },
+        {
+          "id": "8BMUJ341vUF7",
+          "name": "ProfileSlideout",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicProfileSlideout.tsx",
+          "importSpec": {
+            "modulePath": "ProfileSlideout.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicProfileSlideout.module.css",
+          "scheme": "blackbox",
+          "componentType": "component"
+        },
+        {
+          "id": "cUTmStBqQImV",
+          "name": "SlideoutListItem",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicSlideoutListItem.tsx",
+          "importSpec": {
+            "modulePath": "SlideoutListItem.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicSlideoutListItem.module.css",
+          "scheme": "blackbox",
+          "componentType": "component"
+        },
+        {
+          "id": "9Efhz4aeRJA1",
+          "name": "SlideoutListItem2",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicSlideoutListItem2.tsx",
+          "importSpec": {
+            "modulePath": "SlideoutListItem2.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicSlideoutListItem2.module.css",
+          "scheme": "blackbox",
+          "componentType": "component"
+        },
+        {
+          "id": "9R-HbnfzAckM",
+          "name": "DrawerTest",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicDrawerTest.tsx",
+          "importSpec": {
+            "modulePath": "DrawerTest.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicDrawerTest.module.css",
+          "scheme": "blackbox",
+          "componentType": "component"
         }
       ],
       "icons": [
@@ -557,6 +622,51 @@
           "id": "0huvUc4-qfwq",
           "name": "SocialIcon4Icon",
           "moduleFilePath": "plasmic/levelset_v_2/icons/PlasmicIcon__SocialIcon4.tsx"
+        },
+        {
+          "id": "2Uwgk0NcERV_",
+          "name": "User02Icon",
+          "moduleFilePath": "plasmic/levelset_v_2/icons/PlasmicIcon__User02.tsx"
+        },
+        {
+          "id": "6NxAapcSBgSW",
+          "name": "User022Icon",
+          "moduleFilePath": "plasmic/levelset_v_2/icons/PlasmicIcon__User022.tsx"
+        },
+        {
+          "id": "G5x8fv-KrC43",
+          "name": "UserLevelsetSvgIcon",
+          "moduleFilePath": "plasmic/levelset_v_2/icons/PlasmicIcon__UserLevelsetSvg.tsx"
+        },
+        {
+          "id": "G5DLOajfP9H1",
+          "name": "IconSvgIcon",
+          "moduleFilePath": "plasmic/levelset_v_2/icons/PlasmicIcon__IconSvg.tsx"
+        },
+        {
+          "id": "fGjub-6QDO8m",
+          "name": "XCloseIcon",
+          "moduleFilePath": "plasmic/levelset_v_2/icons/PlasmicIcon__XClose.tsx"
+        },
+        {
+          "id": "FnQVtjsAqctc",
+          "name": "DividerIcon",
+          "moduleFilePath": "plasmic/levelset_v_2/icons/PlasmicIcon__Divider.tsx"
+        },
+        {
+          "id": "SrOGhElNYzm6",
+          "name": "Divider2Icon",
+          "moduleFilePath": "plasmic/levelset_v_2/icons/PlasmicIcon__Divider2.tsx"
+        },
+        {
+          "id": "K2tYHr-lcp8R",
+          "name": "Divider3Icon",
+          "moduleFilePath": "plasmic/levelset_v_2/icons/PlasmicIcon__Divider3.tsx"
+        },
+        {
+          "id": "9yy7XVDaeY1L",
+          "name": "Trash01Icon",
+          "moduleFilePath": "plasmic/levelset_v_2/icons/PlasmicIcon__Trash01.tsx"
         }
       ],
       "images": [
@@ -609,6 +719,31 @@
           "id": "PRmgS5757J8M",
           "name": "Circle C CFA.png",
           "filePath": "../public/plasmic/levelset_v_2/images/circleCCfaPng.png"
+        },
+        {
+          "id": "WWp_xgrOvqsh",
+          "name": "Levelset no marging.png",
+          "filePath": "../public/plasmic/levelset_v_2/images/levelsetNoMargingPng.png"
+        },
+        {
+          "id": "nOO_OPhGxZUq",
+          "name": "user_levelset.svg 2",
+          "filePath": "../public/plasmic/levelset_v_2/images/userLevelsetSvg2.svg"
+        },
+        {
+          "id": "ZmoXfpPyrK8e",
+          "name": "placeholder 3",
+          "filePath": "../public/plasmic/levelset_v_2/images/placeholder3.svg"
+        },
+        {
+          "id": "dBV-qa4Yw1BK",
+          "name": "Page",
+          "filePath": "../public/plasmic/levelset_v_2/images/page.svg"
+        },
+        {
+          "id": "RXWmr_6Q_0C9",
+          "name": "user-02 3",
+          "filePath": "../public/plasmic/levelset_v_2/images/user023.svg"
         }
       ],
       "indirect": false,
@@ -727,6 +862,12 @@
           "name": "SupabaseUserLogOut",
           "displayName": "SupabaseUserLogOut",
           "componentImportPath": "./components/CodeComponents/auth/SupabaseUserLogOut"
+        },
+        {
+          "id": "tpx8tB_brjfJ",
+          "name": "LogoutButton",
+          "displayName": "LogoutButton",
+          "componentImportPath": "./components/CodeComponents/auth/LogoutButton"
         }
       ],
       "splitsProviderFilePath": "",
@@ -27661,6 +27802,130 @@
           "name": "AntdBreadcrumbItem",
           "displayName": "plasmic-antd5-breadcrumb-item",
           "componentImportPath": "@plasmicpkgs/antd5/skinny/registerBreadcrumb"
+        }
+      ],
+      "customFunctions": []
+    },
+    {
+      "projectId": "hfvcswHWSYnUqjFH7TxzLR",
+      "projectApiToken": "etPOjhaIBnbmeDIrRlpyDdRWV81ZgsvcAtqcIcb9YbxNeb1B2onw2vUDxJfFMLyLJR9e0A1XeKMks4d3EnXrMA",
+      "projectName": "levelset-tabs",
+      "version": ">0.0.0",
+      "cssFilePath": "plasmic/levelset_tabs/plasmic.module.css",
+      "components": [
+        {
+          "id": "u704oB_4BUvT",
+          "name": "Button",
+          "type": "managed",
+          "projectId": "hfvcswHWSYnUqjFH7TxzLR",
+          "renderModuleFilePath": "plasmic/levelset_tabs/PlasmicButton.tsx",
+          "importSpec": {
+            "modulePath": "Button.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_tabs/PlasmicButton.module.css",
+          "scheme": "blackbox",
+          "componentType": "component",
+          "plumeType": "button"
+        }
+      ],
+      "icons": [
+        {
+          "id": "dTo8s4EZdHvA",
+          "name": "CheckSvgIcon",
+          "moduleFilePath": "plasmic/levelset_tabs/icons/PlasmicIcon__CheckSvg.tsx"
+        },
+        {
+          "id": "CEbmjO_n9jaW",
+          "name": "IconIcon",
+          "moduleFilePath": "plasmic/levelset_tabs/icons/PlasmicIcon__Icon.tsx"
+        }
+      ],
+      "images": [],
+      "indirect": true,
+      "globalContextsFilePath": "",
+      "splitsProviderFilePath": "",
+      "styleTokensProviderFilePath": "plasmic/levelset_tabs/PlasmicStyleTokensProvider.tsx",
+      "projectModuleFilePath": "plasmic/levelset_tabs/plasmic.tsx",
+      "codeComponents": [
+        {
+          "id": "i82YIILQQEWv",
+          "name": "PlasmicHead",
+          "displayName": "hostless-plasmic-head",
+          "componentImportPath": "@plasmicapp/react-web"
+        },
+        {
+          "id": "J8M-GtyKt6MZ",
+          "name": "Fetcher",
+          "displayName": "plasmic-data-source-fetcher",
+          "componentImportPath": "@plasmicapp/react-web/lib/data-sources"
+        }
+      ],
+      "customFunctions": []
+    },
+    {
+      "projectId": "gLnoj82AzKVVT7qXiqAbHD",
+      "projectApiToken": "30Q6Vm3wLmLUouXUphjiHN1eerUuQNmjcIHNiu6sFoeK8pIoi3LRDH2gMh9txlrZGCbOh9s0VaoZHqtvs3hQ",
+      "projectName": "plasmic-tabs",
+      "version": ">0.0.0",
+      "cssFilePath": "plasmic/plasmic_tabs/plasmic.module.css",
+      "components": [
+        {
+          "id": "lBHNzts6tFyj",
+          "name": "Button",
+          "type": "managed",
+          "projectId": "gLnoj82AzKVVT7qXiqAbHD",
+          "renderModuleFilePath": "plasmic/plasmic_tabs/PlasmicButton.tsx",
+          "importSpec": {
+            "modulePath": "Button.tsx"
+          },
+          "cssFilePath": "plasmic/plasmic_tabs/PlasmicButton.module.css",
+          "scheme": "blackbox",
+          "componentType": "component",
+          "plumeType": "button"
+        }
+      ],
+      "icons": [
+        {
+          "id": "zq2s7N0xWucT",
+          "name": "CheckSvgIcon",
+          "moduleFilePath": "plasmic/plasmic_tabs/icons/PlasmicIcon__CheckSvg.tsx"
+        },
+        {
+          "id": "8K40faRNhuCj",
+          "name": "IconIcon",
+          "moduleFilePath": "plasmic/plasmic_tabs/icons/PlasmicIcon__Icon.tsx"
+        }
+      ],
+      "images": [],
+      "indirect": true,
+      "globalContextsFilePath": "",
+      "splitsProviderFilePath": "",
+      "styleTokensProviderFilePath": "plasmic/plasmic_tabs/PlasmicStyleTokensProvider.tsx",
+      "projectModuleFilePath": "plasmic/plasmic_tabs/plasmic.tsx",
+      "codeComponents": [
+        {
+          "id": "qT-BBamUwNg",
+          "name": "TabsContainer",
+          "displayName": "hostless-tabs-container",
+          "componentImportPath": "@plasmicpkgs/plasmic-tabs"
+        },
+        {
+          "id": "7uvxnLIBlo3",
+          "name": "TabUnderline",
+          "displayName": "hostless-tab-underline",
+          "componentImportPath": "@plasmicpkgs/plasmic-tabs"
+        },
+        {
+          "id": "5jaBI7A4_ak",
+          "name": "TabButton",
+          "displayName": "hostless-tab-button",
+          "componentImportPath": "@plasmicpkgs/plasmic-tabs"
+        },
+        {
+          "id": "KyRr6GQ_tPI",
+          "name": "TabContent",
+          "displayName": "hostless-tab-content",
+          "componentImportPath": "@plasmicpkgs/plasmic-tabs"
         }
       ],
       "customFunctions": []

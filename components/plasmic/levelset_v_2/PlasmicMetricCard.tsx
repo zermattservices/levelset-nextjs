@@ -288,7 +288,7 @@ function PlasmicMetricCard__RenderFunc(props: {
                 sty.heading
               )}
             >
-              {"Total: "}
+              {"Average:"}
             </div>
             <div
               data-plasmic-name={"metricTotal"}

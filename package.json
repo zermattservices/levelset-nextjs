@@ -19,6 +19,7 @@
     "@plasmicpkgs/plasmic-embed-css": "^0.1.212",
     "@plasmicpkgs/plasmic-nav": "^0.0.197",
     "@plasmicpkgs/plasmic-rich-components": "^1.0.223",
+    "@plasmicpkgs/plasmic-tabs": "^0.0.68",
     "@plasmicpkgs/react-aria": "^0.0.154",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.48.0",

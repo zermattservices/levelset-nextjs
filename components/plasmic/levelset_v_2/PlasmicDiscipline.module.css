@@ -34,6 +34,17 @@
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
 }
+.text__rxZbW {
+  position: relative;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  font-family: "Satoshi";
+}
+.text___15KE8 {
+  font-style: italic;
+  font-family: "Satoshi";
+}
 .dashboardSubmenu__pOpaY:global(.__wab_instance) {
   max-width: 100%;
   height: auto;
@@ -197,4 +208,21 @@
 .disciplineActionsTable:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
+}
+.drawer2:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+  width: 736px;
+}
+.freeBox__f9IxW {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  min-width: 0;
+  padding: 8px;
 }
