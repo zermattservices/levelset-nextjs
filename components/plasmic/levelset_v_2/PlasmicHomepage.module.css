@@ -6,6 +6,7 @@
   align-content: flex-start;
   justify-items: center;
   overflow: auto;
+  background: #ffffff;
   min-width: 0;
   grid-template-columns:
     var(--plsmc-viewport-gap) 1fr minmax(0, var(--plsmc-wide-chunk))

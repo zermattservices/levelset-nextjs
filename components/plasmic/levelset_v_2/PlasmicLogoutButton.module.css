@@ -18,7 +18,7 @@
   align-items: center;
   position: relative;
   justify-self: flex-start;
-  cursor: auto;
+  cursor: pointer;
 }
 .slotTargetSlot3 {
   font-size: var(--token-7z5Kw5B89TZR);
