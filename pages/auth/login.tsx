@@ -2,7 +2,7 @@
 // This file is owned by you, feel free to edit as you see fit.
 import * as React from "react";
 import { PageParamsProvider as PageParamsProvider__ } from "@plasmicapp/react-web/lib/host";
-import GlobalContextsProvider from "../../components/plasmic/levelset_v2/PlasmicGlobalContextsProvider";
+import GlobalContextsProvider from "../../components/plasmic/levelset_v_2/PlasmicGlobalContextsProvider";
 
 import { PlasmicLoginPage } from "../../components/plasmic/levelset_v_2/PlasmicLoginPage";
 import { useRouter } from "next/router";
