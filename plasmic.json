@@ -874,6 +874,12 @@
           "name": "DrawerV2",
           "displayName": "DrawerV2",
           "componentImportPath": "./components/CodeComponents/DrawerV2"
+        },
+        {
+          "id": "olpWxIitlyrG",
+          "name": "SimpleLogoutButton",
+          "displayName": "SimpleLogoutButton",
+          "componentImportPath": "./components/CodeComponents/auth/SimpleLogoutButton"
         }
       ],
       "splitsProviderFilePath": "",
@@ -27821,14 +27827,14 @@
       "components": [
         {
           "id": "u704oB_4BUvT",
-          "name": "Button",
+          "name": "LevelsetButton",
           "type": "managed",
           "projectId": "hfvcswHWSYnUqjFH7TxzLR",
-          "renderModuleFilePath": "plasmic/levelset_tabs/PlasmicButton.tsx",
+          "renderModuleFilePath": "plasmic/levelset_tabs/PlasmicLevelsetButton.tsx",
           "importSpec": {
-            "modulePath": "Button.tsx"
+            "modulePath": "LevelsetButton.tsx"
           },
-          "cssFilePath": "plasmic/levelset_tabs/PlasmicButton.module.css",
+          "cssFilePath": "plasmic/levelset_tabs/PlasmicLevelsetButton.module.css",
           "scheme": "blackbox",
           "componentType": "component",
           "plumeType": "button"

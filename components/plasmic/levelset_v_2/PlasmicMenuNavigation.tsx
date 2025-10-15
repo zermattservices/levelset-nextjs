@@ -66,7 +66,7 @@ import {
   usePlasmicInvalidate
 } from "@plasmicapp/react-web/lib/data-sources";
 
-import { AntdButton } from "@plasmicpkgs/antd5/skinny/registerButton";
+import LevelsetButton from "../../LevelsetButton"; // plasmic-import: u704oB_4BUvT/component
 import LogoutButton from "../../LogoutButton"; // plasmic-import: UwKJxxQFYiGw/component
 import { SupabaseUserLogOut } from "../../CodeComponents/auth/SupabaseUserLogOut"; // plasmic-import: l-xO2VjafQ7l/codeComponent
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
@@ -79,6 +79,8 @@ import "@plasmicapp/react-web/lib/plasmic.css";
 import projectcss from "../levelset_v2/plasmic_levelset_v2.module.css"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectcss
 import sty from "./PlasmicMenuNavigation.module.css"; // plasmic-import: eJlFBj1x_mCN/css
 
+import CheckSvgIcon from "../levelset_tabs/icons/PlasmicIcon__CheckSvg"; // plasmic-import: dTo8s4EZdHvA/icon
+import IconIcon from "../levelset_tabs/icons/PlasmicIcon__Icon"; // plasmic-import: CEbmjO_n9jaW/icon
 import CircleDotFilledIcon from "../library_tabler_3_2_icons/icons/PlasmicIcon__CircleDotFilled"; // plasmic-import: PL4O-3ScZjiD/icon
 import ChevronSelectorVerticalIcon from "./icons/PlasmicIcon__ChevronSelectorVertical"; // plasmic-import: cjzcuVmo8rE7/icon
 
@@ -324,43 +326,13 @@ function PlasmicMenuNavigation__RenderFunc(props: {
           />
 
           <div className={classNames(projectcss.all, sty.freeBox___9Xy55)}>
-            <AntdButton
-              className={classNames("__wab_instance", sty.button___5Tvwa)}
-              ghost={false}
-              loading={false}
-              onClick={async () => {
-                const $steps = {};
-
-                $steps["updateDashboardOpen"] = true
-                  ? (() => {
-                      const actionArgs = {
-                        vgroup: "dashboardOpen",
-                        operation: 2,
-                        value: "dashboardOpen"
-                      };
-                      return (({ vgroup, value }) => {
-                        if (typeof value === "string") {
-                          value = [value];
-                        }
-
-                        const oldValue = $stateGet($state, vgroup);
-                        $stateSet($state, vgroup, !oldValue);
-                        return !oldValue;
-                      })?.apply(null, [actionArgs]);
-                    })()
-                  : undefined;
-                if (
-                  $steps["updateDashboardOpen"] != null &&
-                  typeof $steps["updateDashboardOpen"] === "object" &&
-                  typeof $steps["updateDashboardOpen"].then === "function"
-                ) {
-                  $steps["updateDashboardOpen"] =
-                    await $steps["updateDashboardOpen"];
-                }
-              }}
-              shape={"default"}
-              size={"small"}
-              type={"ghost"}
+            <LevelsetButton
+              className={classNames(
+                "__wab_instance",
+                sty.levelsetButton___5Tvwa
+              )}
+              color={"clear"}
+              size={"compact"}
             >
               <div
                 className={classNames(
@@ -371,11 +343,14 @@ function PlasmicMenuNavigation__RenderFunc(props: {
               >
                 {"Dashboards"}
               </div>
-            </AntdButton>
-            <AntdButton
-              className={classNames("__wab_instance", sty.button__fBkbv)}
-              size={"small"}
-              type={"ghost"}
+            </LevelsetButton>
+            <LevelsetButton
+              className={classNames(
+                "__wab_instance",
+                sty.levelsetButton__fBkbv
+              )}
+              color={"clear"}
+              size={"compact"}
             >
               <div
                 className={classNames(
@@ -386,7 +361,7 @@ function PlasmicMenuNavigation__RenderFunc(props: {
               >
                 {"Admin"}
               </div>
-            </AntdButton>
+            </LevelsetButton>
           </div>
         </div>
         <div className={classNames(projectcss.all, sty.freeBox__xTe9W)}>
@@ -577,9 +552,11 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                   throw e;
                 }
               })() ? (
-                <AntdButton
-                  className={classNames("__wab_instance", sty.button__seDk6)}
-                  loading={false}
+                <LevelsetButton
+                  className={classNames(
+                    "__wab_instance",
+                    sty.levelsetButton__seDk6
+                  )}
                   submitsForm={true}
                 >
                   <div
@@ -591,7 +568,7 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                   >
                     {"Logout"}
                   </div>
-                </AntdButton>
+                </LevelsetButton>
               ) : null}
             </SupabaseUserLogOut>
           </div>

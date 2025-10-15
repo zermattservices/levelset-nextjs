@@ -72,7 +72,7 @@ import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTa
 import { DrawerV2 } from "../../CodeComponents/DrawerV2"; // plasmic-import: lBRE4GzKIedo/codeComponent
 import { TabsContainer } from "@plasmicpkgs/plasmic-tabs";
 import { TabButton } from "@plasmicpkgs/plasmic-tabs";
-import Button from "../../Button"; // plasmic-import: u704oB_4BUvT/component
+import LevelsetButton from "../../LevelsetButton"; // plasmic-import: u704oB_4BUvT/component
 import { TabUnderline } from "@plasmicpkgs/plasmic-tabs";
 import { TabContent } from "@plasmicpkgs/plasmic-tabs";
 import SlideoutListItem2 from "../../SlideoutListItem2"; // plasmic-import: 9Efhz4aeRJA1/component
@@ -290,7 +290,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => false
+        initFunc: ({ $props, $state, $queries, $ctx }) => true
       },
       {
         path: "selectedEmployee",
@@ -832,10 +832,10 @@ function PlasmicDiscipline__RenderFunc(props: {
                               )}
                               tabKey={"tab1"}
                             >
-                              <Button
+                              <LevelsetButton
                                 className={classNames(
                                   "__wab_instance",
-                                  sty.button__q81U
+                                  sty.levelsetButton__q81U
                                 )}
                                 color={(() => {
                                   try {
@@ -863,7 +863,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                 >
                                   {"Pathway"}
                                 </div>
-                              </Button>
+                              </LevelsetButton>
                             </TabButton>
                             <TabButton
                               className={classNames(
@@ -872,10 +872,10 @@ function PlasmicDiscipline__RenderFunc(props: {
                               )}
                               tabKey={"tab2"}
                             >
-                              <Button
+                              <LevelsetButton
                                 className={classNames(
                                   "__wab_instance",
-                                  sty.button__nUeV4
+                                  sty.levelsetButton__nUeV4
                                 )}
                                 color={(() => {
                                   try {
@@ -903,7 +903,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                 >
                                   {"Positional Excellence"}
                                 </div>
-                              </Button>
+                              </LevelsetButton>
                             </TabButton>
                             <TabButton
                               className={classNames(
@@ -912,10 +912,10 @@ function PlasmicDiscipline__RenderFunc(props: {
                               )}
                               tabKey={"tab3"}
                             >
-                              <Button
+                              <LevelsetButton
                                 className={classNames(
                                   "__wab_instance",
-                                  sty.button__rd97
+                                  sty.levelsetButton__rd97
                                 )}
                                 color={(() => {
                                   try {
@@ -943,7 +943,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                 >
                                   {"Evaluations"}
                                 </div>
-                              </Button>
+                              </LevelsetButton>
                             </TabButton>
                             <TabButton
                               className={classNames(
@@ -952,10 +952,10 @@ function PlasmicDiscipline__RenderFunc(props: {
                               )}
                               tabKey={"tab4"}
                             >
-                              <Button
+                              <LevelsetButton
                                 className={classNames(
                                   "__wab_instance",
-                                  sty.button__twGtL
+                                  sty.levelsetButton__twGtL
                                 )}
                                 color={(() => {
                                   try {
@@ -983,7 +983,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                 >
                                   {"Discipline"}
                                 </div>
-                              </Button>
+                              </LevelsetButton>
                             </TabButton>
                             <TabUnderline
                               data-plasmic-name={"tabUnderline"}
@@ -1521,117 +1521,137 @@ function PlasmicDiscipline__RenderFunc(props: {
                                         );
                                       }
                                     )}
-                                    <div
-                                      data-plasmic-name={"listItem"}
-                                      data-plasmic-override={overrides.listItem}
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.listItem
-                                      )}
-                                    >
+                                    {(() => {
+                                      try {
+                                        return (
+                                          ($queries.infractionsQuery.data ?? [])
+                                            .length === 0
+                                        );
+                                      } catch (e) {
+                                        if (
+                                          e instanceof TypeError ||
+                                          e?.plasmicType ===
+                                            "PlasmicUndefinedDataError"
+                                        ) {
+                                          return true;
+                                        }
+                                        throw e;
+                                      }
+                                    })() ? (
                                       <div
-                                        data-plasmic-name={"contents"}
+                                        data-plasmic-name={"listItem"}
                                         data-plasmic-override={
-                                          overrides.contents
+                                          overrides.listItem
                                         }
                                         className={classNames(
                                           projectcss.all,
-                                          sty.contents
+                                          sty.listItem
                                         )}
                                       >
                                         <div
-                                          data-plasmic-name={"content11"}
+                                          data-plasmic-name={"contents"}
                                           data-plasmic-override={
-                                            overrides.content11
+                                            overrides.contents
                                           }
                                           className={classNames(
                                             projectcss.all,
-                                            sty.content11
+                                            sty.contents
                                           )}
                                         >
                                           <div
-                                            data-plasmic-name={
-                                              "listItemDetails"
-                                            }
+                                            data-plasmic-name={"content11"}
                                             data-plasmic-override={
-                                              overrides.listItemDetails
+                                              overrides.content11
                                             }
                                             className={classNames(
                                               projectcss.all,
-                                              sty.listItemDetails
+                                              sty.content11
                                             )}
                                           >
                                             <div
-                                              data-plasmic-name={"text24"}
+                                              data-plasmic-name={
+                                                "listItemDetails"
+                                              }
                                               data-plasmic-override={
-                                                overrides.text24
+                                                overrides.listItemDetails
                                               }
                                               className={classNames(
                                                 projectcss.all,
-                                                sty.text24
+                                                sty.listItemDetails
+                                              )}
+                                            >
+                                              <div
+                                                data-plasmic-name={"text24"}
+                                                data-plasmic-override={
+                                                  overrides.text24
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  sty.text24
+                                                )}
+                                              >
+                                                {renderPlasmicSlot({
+                                                  defaultContents:
+                                                    "No infractions in the last 90 days",
+                                                  value: args.itemName,
+                                                  className: classNames(
+                                                    sty.slotTargetItemName
+                                                  )
+                                                })}
+                                              </div>
+                                            </div>
+                                            <div
+                                              data-plasmic-name={"points"}
+                                              data-plasmic-override={
+                                                overrides.points
+                                              }
+                                              className={classNames(
+                                                projectcss.all,
+                                                sty.points
                                               )}
                                             >
                                               {renderPlasmicSlot({
-                                                defaultContents:
-                                                  "No infractions in the last 90 days",
-                                                value: args.itemName,
-                                                className: classNames(
-                                                  sty.slotTargetItemName
-                                                )
-                                              })}
-                                            </div>
-                                          </div>
-                                          <div
-                                            data-plasmic-name={"points"}
-                                            data-plasmic-override={
-                                              overrides.points
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.points
-                                            )}
-                                          >
-                                            {renderPlasmicSlot({
-                                              defaultContents: (
-                                                <div
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    sty.freeBox__auyOl
-                                                  )}
-                                                >
+                                                defaultContents: (
                                                   <div
                                                     className={classNames(
                                                       projectcss.all,
-                                                      projectcss.__wab_text,
-                                                      sty.text__aKcB
+                                                      sty.freeBox__auyOl
                                                     )}
                                                   >
-                                                    {"10"}
+                                                    <div
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        projectcss.__wab_text,
+                                                        sty.text__aKcB
+                                                      )}
+                                                    >
+                                                      {"10"}
+                                                    </div>
                                                   </div>
-                                                </div>
-                                              ),
-                                              value: args.pointValue3,
-                                              className: classNames(
-                                                sty.slotTargetPointValue3
-                                              )
-                                            })}
-                                            <div
-                                              data-plasmic-name={"pointsText"}
-                                              data-plasmic-override={
-                                                overrides.pointsText
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                projectcss.__wab_text,
-                                                sty.pointsText
-                                              )}
-                                            >
-                                              {"points"}
+                                                ),
+                                                value: args.pointValue3,
+                                                className: classNames(
+                                                  sty.slotTargetPointValue3
+                                                )
+                                              })}
+                                              <div
+                                                data-plasmic-name={"pointsText"}
+                                                data-plasmic-override={
+                                                  overrides.pointsText
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  projectcss.__wab_text,
+                                                  sty.pointsText
+                                                )}
+                                              >
+                                                {"points"}
+                                              </div>
                                             </div>
                                           </div>
                                         </div>
                                       </div>
-                                    </div>
+                                    ) : null}
                                   </div>
                                   <Divider2Icon
                                     className={classNames(
@@ -1798,119 +1818,139 @@ function PlasmicDiscipline__RenderFunc(props: {
                                         );
                                       }
                                     )}
-                                    <div
-                                      data-plasmic-name={"listItem2"}
-                                      data-plasmic-override={
-                                        overrides.listItem2
+                                    {(() => {
+                                      try {
+                                        return (
+                                          ($queries.discActions.data ?? [])
+                                            .length === 0
+                                        );
+                                      } catch (e) {
+                                        if (
+                                          e instanceof TypeError ||
+                                          e?.plasmicType ===
+                                            "PlasmicUndefinedDataError"
+                                        ) {
+                                          return true;
+                                        }
+                                        throw e;
                                       }
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.listItem2
-                                      )}
-                                    >
+                                    })() ? (
                                       <div
-                                        data-plasmic-name={"contents2"}
+                                        data-plasmic-name={"listItem2"}
                                         data-plasmic-override={
-                                          overrides.contents2
+                                          overrides.listItem2
                                         }
                                         className={classNames(
                                           projectcss.all,
-                                          sty.contents2
+                                          sty.listItem2
                                         )}
                                       >
                                         <div
-                                          data-plasmic-name={"content12"}
+                                          data-plasmic-name={"contents2"}
                                           data-plasmic-override={
-                                            overrides.content12
+                                            overrides.contents2
                                           }
                                           className={classNames(
                                             projectcss.all,
-                                            sty.content12
+                                            sty.contents2
                                           )}
                                         >
                                           <div
-                                            data-plasmic-name={
-                                              "listItemDetails2"
-                                            }
+                                            data-plasmic-name={"content12"}
                                             data-plasmic-override={
-                                              overrides.listItemDetails2
+                                              overrides.content12
                                             }
                                             className={classNames(
                                               projectcss.all,
-                                              sty.listItemDetails2
+                                              sty.content12
                                             )}
                                           >
                                             <div
-                                              data-plasmic-name={"text25"}
+                                              data-plasmic-name={
+                                                "listItemDetails2"
+                                              }
                                               data-plasmic-override={
-                                                overrides.text25
+                                                overrides.listItemDetails2
                                               }
                                               className={classNames(
                                                 projectcss.all,
-                                                sty.text25
+                                                sty.listItemDetails2
+                                              )}
+                                            >
+                                              <div
+                                                data-plasmic-name={"text25"}
+                                                data-plasmic-override={
+                                                  overrides.text25
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  sty.text25
+                                                )}
+                                              >
+                                                {renderPlasmicSlot({
+                                                  defaultContents:
+                                                    "No disciplinary actions in the last 90 days",
+                                                  value: args.itemName2,
+                                                  className: classNames(
+                                                    sty.slotTargetItemName2
+                                                  )
+                                                })}
+                                              </div>
+                                            </div>
+                                            <div
+                                              data-plasmic-name={"points2"}
+                                              data-plasmic-override={
+                                                overrides.points2
+                                              }
+                                              className={classNames(
+                                                projectcss.all,
+                                                sty.points2
                                               )}
                                             >
                                               {renderPlasmicSlot({
-                                                defaultContents:
-                                                  "No disciplinary actions in the last 90 days",
-                                                value: args.itemName2,
-                                                className: classNames(
-                                                  sty.slotTargetItemName2
-                                                )
-                                              })}
-                                            </div>
-                                          </div>
-                                          <div
-                                            data-plasmic-name={"points2"}
-                                            data-plasmic-override={
-                                              overrides.points2
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.points2
-                                            )}
-                                          >
-                                            {renderPlasmicSlot({
-                                              defaultContents: (
-                                                <div
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    sty.freeBox__wsOmu
-                                                  )}
-                                                >
+                                                defaultContents: (
                                                   <div
                                                     className={classNames(
                                                       projectcss.all,
-                                                      projectcss.__wab_text,
-                                                      sty.text__beuRy
+                                                      sty.freeBox__wsOmu
                                                     )}
                                                   >
-                                                    {"10"}
+                                                    <div
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        projectcss.__wab_text,
+                                                        sty.text__beuRy
+                                                      )}
+                                                    >
+                                                      {"10"}
+                                                    </div>
                                                   </div>
-                                                </div>
-                                              ),
-                                              value: args.pointValue5,
-                                              className: classNames(
-                                                sty.slotTargetPointValue5
-                                              )
-                                            })}
-                                            <div
-                                              data-plasmic-name={"pointsText2"}
-                                              data-plasmic-override={
-                                                overrides.pointsText2
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                projectcss.__wab_text,
-                                                sty.pointsText2
-                                              )}
-                                            >
-                                              {"points"}
+                                                ),
+                                                value: args.pointValue5,
+                                                className: classNames(
+                                                  sty.slotTargetPointValue5
+                                                )
+                                              })}
+                                              <div
+                                                data-plasmic-name={
+                                                  "pointsText2"
+                                                }
+                                                data-plasmic-override={
+                                                  overrides.pointsText2
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  projectcss.__wab_text,
+                                                  sty.pointsText2
+                                                )}
+                                              >
+                                                {"points"}
+                                              </div>
                                             </div>
                                           </div>
                                         </div>
                                       </div>
-                                    </div>
+                                    ) : null}
                                   </div>
                                 </div>
                               </div>

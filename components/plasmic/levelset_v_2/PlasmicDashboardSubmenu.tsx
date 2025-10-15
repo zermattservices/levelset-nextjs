@@ -59,7 +59,7 @@ import {
   useGlobalActions
 } from "@plasmicapp/react-web/lib/host";
 
-import { AntdButton } from "@plasmicpkgs/antd5/skinny/registerButton";
+import LevelsetButton from "../../LevelsetButton"; // plasmic-import: u704oB_4BUvT/component
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -67,6 +67,9 @@ import "@plasmicapp/react-web/lib/plasmic.css";
 
 import projectcss from "../levelset_v2/plasmic_levelset_v2.module.css"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectcss
 import sty from "./PlasmicDashboardSubmenu.module.css"; // plasmic-import: DnrJ08NISsSS/css
+
+import CheckSvgIcon from "../levelset_tabs/icons/PlasmicIcon__CheckSvg"; // plasmic-import: dTo8s4EZdHvA/icon
+import IconIcon from "../levelset_tabs/icons/PlasmicIcon__Icon"; // plasmic-import: CEbmjO_n9jaW/icon
 
 createPlasmicElementProxy;
 
@@ -146,12 +149,10 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
     >
       <div className={classNames(projectcss.all, sty.freeBox__lx5Gj)}>
         <div className={classNames(projectcss.all, sty.freeBox___5Vowa)}>
-          <AntdButton
-            className={classNames("__wab_instance", sty.button__ouwyl)}
-            ghost={false}
-            loading={false}
-            shape={"default"}
-            type={"ghost"}
+          <LevelsetButton
+            className={classNames("__wab_instance", sty.levelsetButton__ouwyl)}
+            color={"clear"}
+            size={"compact"}
           >
             <div
               className={classNames(
@@ -162,40 +163,11 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
             >
               {"Pathway"}
             </div>
-          </AntdButton>
-          <AntdButton
-            className={classNames("__wab_instance", sty.button__fzAcG)}
-            onClick={async () => {
-              const $steps = {};
-
-              $steps["goToPea"] = true
-                ? (() => {
-                    const actionArgs = {
-                      destination: `/positional-excellence`
-                    };
-                    return (({ destination }) => {
-                      if (
-                        typeof destination === "string" &&
-                        destination.startsWith("#")
-                      ) {
-                        document
-                          .getElementById(destination.substr(1))
-                          .scrollIntoView({ behavior: "smooth" });
-                      } else {
-                        __nextRouter?.push(destination);
-                      }
-                    })?.apply(null, [actionArgs]);
-                  })()
-                : undefined;
-              if (
-                $steps["goToPea"] != null &&
-                typeof $steps["goToPea"] === "object" &&
-                typeof $steps["goToPea"].then === "function"
-              ) {
-                $steps["goToPea"] = await $steps["goToPea"];
-              }
-            }}
-            type={"ghost"}
+          </LevelsetButton>
+          <LevelsetButton
+            className={classNames("__wab_instance", sty.levelsetButton__fzAcG)}
+            color={"clear"}
+            size={"compact"}
           >
             <div
               className={classNames(
@@ -206,10 +178,11 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
             >
               {"PEA"}
             </div>
-          </AntdButton>
-          <AntdButton
-            className={classNames("__wab_instance", sty.button__elre)}
-            type={"ghost"}
+          </LevelsetButton>
+          <LevelsetButton
+            className={classNames("__wab_instance", sty.levelsetButton__elre)}
+            color={"clear"}
+            size={"compact"}
           >
             <div
               className={classNames(
@@ -220,14 +193,11 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
             >
               {"Evaluations"}
             </div>
-          </AntdButton>
-          <AntdButton
-            className={classNames("__wab_instance", sty.button__tGzU)}
-            danger={false}
-            ghost={false}
-            href={`/discipline`}
-            loading={false}
-            type={"ghost"}
+          </LevelsetButton>
+          <LevelsetButton
+            className={classNames("__wab_instance", sty.levelsetButton__tGzU)}
+            color={"clear"}
+            size={"compact"}
           >
             <div
               className={classNames(
@@ -238,10 +208,11 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
             >
               {"APS"}
             </div>
-          </AntdButton>
-          <AntdButton
-            className={classNames("__wab_instance", sty.button___3Cma9)}
-            type={"ghost"}
+          </LevelsetButton>
+          <LevelsetButton
+            className={classNames("__wab_instance", sty.levelsetButton___3Cma9)}
+            color={"clear"}
+            size={"compact"}
           >
             <div
               className={classNames(
@@ -252,10 +223,11 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
             >
               {"WHED"}
             </div>
-          </AntdButton>
-          <AntdButton
-            className={classNames("__wab_instance", sty.button__flfMl)}
-            type={"ghost"}
+          </LevelsetButton>
+          <LevelsetButton
+            className={classNames("__wab_instance", sty.levelsetButton__flfMl)}
+            color={"clear"}
+            size={"compact"}
           >
             <div
               className={classNames(
@@ -266,7 +238,7 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
             >
               {"360\u00b0\u00a0Overview"}
             </div>
-          </AntdButton>
+          </LevelsetButton>
         </div>
       </div>
     </div>

@@ -26,7 +26,7 @@
   top: 0px;
   z-index: 1;
   min-width: 0;
-  padding: 8px;
+  padding: 0px 8px;
   border-bottom: 1px solid var(--token-Pxe4wDL2kJpb);
 }
 .freeBox__a3UdP {
@@ -66,15 +66,10 @@
   min-width: 0;
   padding: 8px;
 }
-.button___5Tvwa:global(.__wab_instance) {
+.levelsetButton___5Tvwa:global(.__wab_instance) {
   max-width: 100%;
-  object-fit: cover;
-  text-align: center;
   width: auto;
-  font-size: var(--token-hYndcje43OGL);
   height: auto;
-  font-family: "Satoshi";
-  color: var(--token-0Rg7d9VjUj_J);
 }
 .text__ayRwz {
   position: relative;
@@ -84,14 +79,24 @@
   font-size: var(--token-hYndcje43OGL);
   font-weight: 600;
   font-family: "Satoshi";
+  color: var(--token-0Rg7d9VjUj_J);
   min-width: 0;
 }
-.button__fBkbv:global(.__wab_instance) {
-  max-width: 100%;
+.svg__tpkY {
+  position: relative;
   object-fit: cover;
+  width: auto;
+  height: 1em;
+}
+.svg___2Chs {
+  position: relative;
+  object-fit: cover;
+  width: auto;
+  height: 1em;
+}
+.levelsetButton__fBkbv:global(.__wab_instance) {
+  max-width: 100%;
   height: auto;
-  font-family: "Satoshi";
-  color: var(--token-0Rg7d9VjUj_J);
 }
 .text__mNyQw {
   position: relative;
@@ -100,7 +105,21 @@
   max-width: 100%;
   font-size: var(--token-hYndcje43OGL);
   font-weight: 600;
+  font-family: "Satoshi";
+  color: var(--token-0Rg7d9VjUj_J);
   min-width: 0;
+}
+.svg__jCMr7 {
+  position: relative;
+  object-fit: cover;
+  width: auto;
+  height: 1em;
+}
+.svg__kc1T {
+  position: relative;
+  object-fit: cover;
+  width: auto;
+  height: 1em;
 }
 .freeBox__xTe9W {
   flex-direction: row;
@@ -289,9 +308,8 @@
   width: auto;
   height: auto;
 }
-.button__seDk6:global(.__wab_instance) {
+.levelsetButton__seDk6:global(.__wab_instance) {
   max-width: 100%;
-  object-fit: cover;
   left: 124px;
   top: 54px;
   z-index: 1;
@@ -299,14 +317,6 @@
   right: 0px;
   flex-grow: 0;
   flex-shrink: 1;
-  display: flex;
-  flex-direction: row;
-  text-align: center;
-  justify-content: center;
-  align-items: center;
-  background: var(--token-eRwVnCXPLlDU);
-  border-radius: 8px;
-  border: 0.5px solid var(--token-bGw1ZBUIaR08);
 }
 .text___6Hkr {
   position: relative;
@@ -318,6 +328,18 @@
   font-family: "Satoshi";
   font-weight: 600;
   min-width: 0;
+}
+.svg__bhPhh {
+  position: relative;
+  object-fit: cover;
+  width: auto;
+  height: 1em;
+}
+.svg__qbMt {
+  position: relative;
+  object-fit: cover;
+  width: auto;
+  height: 1em;
 }
 .freeBox___8OAdU {
   flex-direction: row;
@@ -332,7 +354,7 @@
   z-index: 1;
   min-width: 0;
   display: none;
-  padding: var(--token-RuQNZpYm0Yds);
+  padding: 0px;
 }
 .freeBoxdashboardOpen___8OAdUkDcoZ {
   display: flex;

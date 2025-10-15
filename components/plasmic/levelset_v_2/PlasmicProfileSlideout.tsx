@@ -61,7 +61,7 @@ import {
 
 import { TabsContainer } from "@plasmicpkgs/plasmic-tabs";
 import { TabButton } from "@plasmicpkgs/plasmic-tabs";
-import Button from "../../Button"; // plasmic-import: u704oB_4BUvT/component
+import LevelsetButton from "../../LevelsetButton"; // plasmic-import: u704oB_4BUvT/component
 import { TabUnderline } from "@plasmicpkgs/plasmic-tabs";
 import { TabContent } from "@plasmicpkgs/plasmic-tabs";
 import SlideoutListItem2 from "../../SlideoutListItem2"; // plasmic-import: 9Efhz4aeRJA1/component
@@ -234,10 +234,10 @@ function PlasmicProfileSlideout__RenderFunc(props: {
                           )}
                           tabKey={"tab1"}
                         >
-                          <Button
+                          <LevelsetButton
                             className={classNames(
                               "__wab_instance",
-                              sty.button__rokb
+                              sty.levelsetButton__rokb
                             )}
                             color={(() => {
                               try {
@@ -264,7 +264,7 @@ function PlasmicProfileSlideout__RenderFunc(props: {
                             >
                               {"Pathway"}
                             </div>
-                          </Button>
+                          </LevelsetButton>
                         </TabButton>
                         <TabButton
                           className={classNames(
@@ -273,10 +273,10 @@ function PlasmicProfileSlideout__RenderFunc(props: {
                           )}
                           tabKey={"tab2"}
                         >
-                          <Button
+                          <LevelsetButton
                             className={classNames(
                               "__wab_instance",
-                              sty.button__dvzP9
+                              sty.levelsetButton__dvzP9
                             )}
                             color={(() => {
                               try {
@@ -303,7 +303,7 @@ function PlasmicProfileSlideout__RenderFunc(props: {
                             >
                               {"Positional Excellence"}
                             </div>
-                          </Button>
+                          </LevelsetButton>
                         </TabButton>
                         <TabButton
                           className={classNames(
@@ -312,10 +312,10 @@ function PlasmicProfileSlideout__RenderFunc(props: {
                           )}
                           tabKey={"tab3"}
                         >
-                          <Button
+                          <LevelsetButton
                             className={classNames(
                               "__wab_instance",
-                              sty.button__xW3GE
+                              sty.levelsetButton__xW3GE
                             )}
                             color={(() => {
                               try {
@@ -342,7 +342,7 @@ function PlasmicProfileSlideout__RenderFunc(props: {
                             >
                               {"Evaluations"}
                             </div>
-                          </Button>
+                          </LevelsetButton>
                         </TabButton>
                         <TabButton
                           className={classNames(
@@ -351,10 +351,10 @@ function PlasmicProfileSlideout__RenderFunc(props: {
                           )}
                           tabKey={"tab4"}
                         >
-                          <Button
+                          <LevelsetButton
                             className={classNames(
                               "__wab_instance",
-                              sty.button__yuqKt
+                              sty.levelsetButton__yuqKt
                             )}
                             color={(() => {
                               try {
@@ -381,7 +381,7 @@ function PlasmicProfileSlideout__RenderFunc(props: {
                             >
                               {"Discipline"}
                             </div>
-                          </Button>
+                          </LevelsetButton>
                         </TabButton>
                         <TabUnderline
                           data-plasmic-name={"tabUnderline"}
