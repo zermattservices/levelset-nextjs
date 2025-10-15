@@ -17,6 +17,7 @@ import { ProtectedRoute } from "./components/CodeComponents/auth/ProtectedRoute"
 import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
 import { LogoutButton } from "./components/CodeComponents/auth/LogoutButton";
 import { SupabaseUserLogOut } from "./components/CodeComponents/auth/SupabaseUserLogOut";
+import { SimpleLogoutButton } from "./components/CodeComponents/auth/SimpleLogoutButton";
 import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
@@ -328,6 +329,26 @@ PLASMIC.registerComponent(SupabaseUserLogOut, {
     }
   },
   importPath: "./components/CodeComponents/auth/SupabaseUserLogOut",
+});
+
+// Register SimpleLogoutButton component - More reliable logout solution
+PLASMIC.registerComponent(SimpleLogoutButton, {
+  name: "SimpleLogoutButton",
+  displayName: "Simple Logout Button",
+  props: {
+    children: "slot",
+    className: "string",
+    onSuccess: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Action to perform after successful logout (optional - defaults to redirect to /auth/login)"
+    },
+    style: {
+      type: "object",
+      description: "Inline styles for the button"
+    }
+  },
+  importPath: "./components/CodeComponents/auth/SimpleLogoutButton",
 });
 
 // Register DrawerV2 component - Enhanced version of Plasmic's default Drawer with size prop
