@@ -1,6 +1,11 @@
 .root:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
+  cursor: pointer;
+  transition-property: all;
+  transition-duration: 1s;
+  -webkit-transition-property: all;
+  -webkit-transition-duration: 1s;
 }
 .freeBox {
   width: auto;
@@ -13,12 +18,13 @@
   align-items: center;
   position: relative;
   justify-self: flex-start;
-  cursor: pointer;
+  cursor: auto;
 }
 .slotTargetSlot3 {
   font-size: var(--token-7z5Kw5B89TZR);
   color: var(--token-FTu687H3gT3S);
   font-weight: 600;
+  font-family: "Satoshi";
 }
 .slotTargetSlot3logoutHover > :global(.__wab_text),
 .slotTargetSlot3logoutHover > :global(.__wab_expr_html_text),
