@@ -290,7 +290,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => true
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
       },
       {
         path: "selectedEmployee",
@@ -514,19 +514,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                 data-plasmic-override={overrides.disciplineTable}
                 className={classNames("__wab_instance", sty.disciplineTable)}
                 density={"comfortable"}
-                locationId={(() => {
-                  try {
-                    return $ctx.auth.location_id;
-                  } catch (e) {
-                    if (
-                      e instanceof TypeError ||
-                      e?.plasmicType === "PlasmicUndefinedDataError"
-                    ) {
-                      return undefined;
-                    }
-                    throw e;
-                  }
-                })()}
+                locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
                 onRowClick={async employee => {
                   const $steps = {};
 
@@ -636,19 +624,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                       await $steps["updateMenuNavigationLocationName"];
                   }
                 }}
-                orgId={(() => {
-                  try {
-                    return $ctx.auth.org_id;
-                  } catch (e) {
-                    if (
-                      e instanceof TypeError ||
-                      e?.plasmicType === "PlasmicUndefinedDataError"
-                    ) {
-                      return undefined;
-                    }
-                    throw e;
-                  }
-                })()}
+                orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
                 showActions={true}
               />
             </div>
