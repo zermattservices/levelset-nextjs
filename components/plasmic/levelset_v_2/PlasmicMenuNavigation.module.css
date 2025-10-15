@@ -11,6 +11,7 @@
   align-content: stretch;
   position: relative;
   background: #ffffff;
+  max-width: var(--token-eC7sN0TdrMwT);
   min-width: 0;
 }
 .freeBox__qAtX2 {
@@ -220,7 +221,7 @@
   column-gap: var(--token-dT2WOkFV5Mee);
   min-height: 50px;
   border-radius: 12px;
-  padding: 4px 16px;
+  padding: 4px 0px;
 }
 .freeBox__pKjWu {
   display: flex;
@@ -257,12 +258,12 @@
   height: auto;
   max-width: 100%;
   font-family: "Satoshi";
-  color: var(--token-0Rg7d9VjUj_J);
+  color: var(--token-WOsv3R6KKLJw);
 }
 .text__gFy0A {
   font-style: italic;
   font-family: "Satoshi";
-  color: var(--token-0Rg7d9VjUj_J);
+  color: var(--token-WOsv3R6KKLJw);
 }
 .logoutButton:global(.__wab_instance):global(.__wab_instance) {
   max-width: 100%;
@@ -342,6 +343,7 @@
   height: 1em;
 }
 .freeBox___8OAdU {
+  display: flex;
   flex-direction: row;
   position: sticky;
   align-items: stretch;
@@ -353,7 +355,6 @@
   top: 0px;
   z-index: 1;
   min-width: 0;
-  display: none;
   padding: 0px;
 }
 .freeBoxdashboardOpen___8OAdUkDcoZ {

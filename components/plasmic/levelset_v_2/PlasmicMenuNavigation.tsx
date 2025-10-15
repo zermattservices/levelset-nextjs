@@ -332,6 +332,36 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                 sty.levelsetButton___5Tvwa
               )}
               color={"clear"}
+              onClick={async event => {
+                const $steps = {};
+
+                $steps["updateDashboardOpen"] = true
+                  ? (() => {
+                      const actionArgs = {
+                        vgroup: "dashboardOpen",
+                        operation: 2,
+                        value: "dashboardOpen"
+                      };
+                      return (({ vgroup, value }) => {
+                        if (typeof value === "string") {
+                          value = [value];
+                        }
+
+                        const oldValue = $stateGet($state, vgroup);
+                        $stateSet($state, vgroup, !oldValue);
+                        return !oldValue;
+                      })?.apply(null, [actionArgs]);
+                    })()
+                  : undefined;
+                if (
+                  $steps["updateDashboardOpen"] != null &&
+                  typeof $steps["updateDashboardOpen"] === "object" &&
+                  typeof $steps["updateDashboardOpen"].then === "function"
+                ) {
+                  $steps["updateDashboardOpen"] =
+                    await $steps["updateDashboardOpen"];
+                }
+              }}
               size={"compact"}
             >
               <div
@@ -574,28 +604,46 @@ function PlasmicMenuNavigation__RenderFunc(props: {
           </div>
         </div>
       </div>
-      <div
-        className={classNames(projectcss.all, sty.freeBox___8OAdU, {
-          [sty.freeBoxdashboardOpen___8OAdUkDcoZ]: hasVariant(
-            $state,
-            "dashboardOpen",
-            "dashboardOpen"
-          )
-        })}
-      >
-        {renderPlasmicSlot({
-          defaultContents: (
-            <DashboardSubmenu
-              className={classNames(
-                "__wab_instance",
-                sty.dashboardSubmenu__zwXjo
-              )}
-            />
-          ),
+      {(
+        hasVariant($state, "dashboardOpen", "dashboardOpen")
+          ? true
+          : (() => {
+              try {
+                return $state.dashboardOpen;
+              } catch (e) {
+                if (
+                  e instanceof TypeError ||
+                  e?.plasmicType === "PlasmicUndefinedDataError"
+                ) {
+                  return true;
+                }
+                throw e;
+              }
+            })()
+      ) ? (
+        <div
+          className={classNames(projectcss.all, sty.freeBox___8OAdU, {
+            [sty.freeBoxdashboardOpen___8OAdUkDcoZ]: hasVariant(
+              $state,
+              "dashboardOpen",
+              "dashboardOpen"
+            )
+          })}
+        >
+          {renderPlasmicSlot({
+            defaultContents: (
+              <DashboardSubmenu
+                className={classNames(
+                  "__wab_instance",
+                  sty.dashboardSubmenu__zwXjo
+                )}
+              />
+            ),
 
-          value: args.children
-        })}
-      </div>
+            value: args.children
+          })}
+        </div>
+      ) : null}
     </div>
   ) as React.ReactElement | null;
 }

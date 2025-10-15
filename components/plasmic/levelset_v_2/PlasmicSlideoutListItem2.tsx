@@ -204,6 +204,11 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
         styleTokensClassNames,
         sty.listItem,
         {
+          [sty.listIteminfractionType_negative]: hasVariant(
+            $state,
+            "infractionType",
+            "negative"
+          ),
           [sty.listIteminfractionType_positive]: hasVariant(
             $state,
             "infractionType",

@@ -148,7 +148,6 @@
   font-family: "Inter", sans-serif;
   font-size: 24px;
   font-weight: 600;
-  color: rgba(23, 132, 89, 1);
   text-align: center;
   line-height: 32px;
   letter-spacing: 0em;
@@ -180,7 +179,7 @@
   -webkit-transition-duration: 1s;
 }
 .slotTargetPointValue2infractionType_positive {
-  color: var(--token-yU83lAfPunGi);
+  color: rgba(23, 132, 89, 1);
 }
 .slotTargetPointValue2infractionType_negative {
   color: var(--token-kv72MHA99lrw);

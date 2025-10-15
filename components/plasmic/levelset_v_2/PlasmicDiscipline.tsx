@@ -87,8 +87,6 @@ import sty from "./PlasmicDiscipline.module.css"; // plasmic-import: -vnBKJaatlP
 
 import CheckSvgIcon from "../levelset_tabs/icons/PlasmicIcon__CheckSvg"; // plasmic-import: dTo8s4EZdHvA/icon
 import IconIcon from "../levelset_tabs/icons/PlasmicIcon__Icon"; // plasmic-import: CEbmjO_n9jaW/icon
-import DividerIcon from "./icons/PlasmicIcon__Divider"; // plasmic-import: FnQVtjsAqctc/icon
-import Divider2Icon from "./icons/PlasmicIcon__Divider2"; // plasmic-import: SrOGhElNYzm6/icon
 
 createPlasmicElementProxy;
 
@@ -152,9 +150,10 @@ export type PlasmicDiscipline__OverridesType = {
   iconAndText?: Flex__<"div">;
   text14?: Flex__<"div">;
   frame1?: Flex__<"div">;
-  informed?: Flex__<"div">;
-  date?: Flex__<"div">;
-  pointValue?: Flex__<"div">;
+  date4?: Flex__<"div">;
+  leader4?: Flex__<"div">;
+  informed4?: Flex__<"div">;
+  pointValue8?: Flex__<"div">;
   listItem?: Flex__<"div">;
   contents?: Flex__<"div">;
   content11?: Flex__<"div">;
@@ -224,6 +223,24 @@ function PlasmicDiscipline__RenderFunc(props: {
   const stateSpecs: Parameters<typeof useDollarState>[0] = React.useMemo(
     () => [
       {
+        path: "drawerV2.open",
+        type: "private",
+        variableType: "boolean",
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
+      },
+      {
+        path: "selectedEmployee",
+        type: "private",
+        variableType: "object",
+        initFunc: ({ $props, $state, $queries, $ctx }) => ({})
+      },
+      {
+        path: "initialProfileTab",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "tab4"
+      },
+      {
         path: "menuNavigation.locationName",
         type: "private",
         variableType: "text",
@@ -285,24 +302,6 @@ function PlasmicDiscipline__RenderFunc(props: {
               throw e;
             }
           })()
-      },
-      {
-        path: "drawerV2.open",
-        type: "private",
-        variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => true
-      },
-      {
-        path: "selectedEmployee",
-        type: "private",
-        variableType: "object",
-        initFunc: ({ $props, $state, $queries, $ctx }) => ({})
-      },
-      {
-        path: "initialProfileTab",
-        type: "private",
-        variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "tab4"
       }
     ],
     [$props, $ctx, $refs]
@@ -318,11 +317,11 @@ function PlasmicDiscipline__RenderFunc(props: {
     infractionsQuery: usePlasmicDataOp(() => {
       return {
         sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
-        opId: "e65432bc-5986-43cc-a6fc-d197107efdc1",
+        opId: "da7f410d-9ebd-4d9b-a1dd-36c551524fd5",
         userArgs: {
           filters: [$state.selectedEmployee?.id]
         },
-        cacheKey: `plasmic.$.e65432bc-5986-43cc-a6fc-d197107efdc1.$.`,
+        cacheKey: `plasmic.$.da7f410d-9ebd-4d9b-a1dd-36c551524fd5.$.`,
         invalidatedKeys: null,
         roleId: null
       };
@@ -586,42 +585,6 @@ function PlasmicDiscipline__RenderFunc(props: {
                   ) {
                     $steps["updateDrawerV2Open"] =
                       await $steps["updateDrawerV2Open"];
-                  }
-
-                  $steps["updateMenuNavigationLocationName"] = true
-                    ? (() => {
-                        const actionArgs = {
-                          variable: {
-                            objRoot: $state,
-                            variablePath: ["menuNavigation", "locationName"]
-                          },
-                          operation: 0
-                        };
-                        return (({
-                          variable,
-                          value,
-                          startIndex,
-                          deleteCount
-                        }) => {
-                          if (!variable) {
-                            return;
-                          }
-                          const { objRoot, variablePath } = variable;
-
-                          $stateSet(objRoot, variablePath, value);
-                          return value;
-                        })?.apply(null, [actionArgs]);
-                      })()
-                    : undefined;
-                  if (
-                    $steps["updateMenuNavigationLocationName"] != null &&
-                    typeof $steps["updateMenuNavigationLocationName"] ===
-                      "object" &&
-                    typeof $steps["updateMenuNavigationLocationName"].then ===
-                      "function"
-                  ) {
-                    $steps["updateMenuNavigationLocationName"] =
-                      await $steps["updateMenuNavigationLocationName"];
                   }
                 }}
                 orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
@@ -1103,14 +1066,6 @@ function PlasmicDiscipline__RenderFunc(props: {
                                     sty.discipline
                                   )}
                                 >
-                                  <DividerIcon
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.svg__m1Kxu
-                                    )}
-                                    role={"img"}
-                                  />
-
                                   <div
                                     data-plasmic-name={"row"}
                                     data-plasmic-override={overrides.row}
@@ -1301,12 +1256,11 @@ function PlasmicDiscipline__RenderFunc(props: {
                                       </div>
                                     </div>
                                   </div>
-                                  <Divider2Icon
+                                  <div
                                     className={classNames(
                                       projectcss.all,
-                                      sty.svg__eycfx
+                                      sty.freeBox__jzVpm
                                     )}
-                                    role={"img"}
                                   />
 
                                   <div
@@ -1378,18 +1332,18 @@ function PlasmicDiscipline__RenderFunc(props: {
                                           <SlideoutListItem2
                                             className={classNames(
                                               "__wab_instance",
-                                              sty.slideoutListItem2__lFuv
+                                              sty.slideoutListItem2__kgkig
                                             )}
                                             date2={
                                               <div
-                                                data-plasmic-name={"date"}
+                                                data-plasmic-name={"date4"}
                                                 data-plasmic-override={
-                                                  overrides.date
+                                                  overrides.date4
                                                 }
                                                 className={classNames(
                                                   projectcss.all,
                                                   projectcss.__wab_text,
-                                                  sty.date
+                                                  sty.date4
                                                 )}
                                               >
                                                 <React.Fragment>
@@ -1403,7 +1357,38 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                         e?.plasmicType ===
                                                           "PlasmicUndefinedDataError"
                                                       ) {
-                                                        return "error";
+                                                        return "10/2/2025";
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                </React.Fragment>
+                                              </div>
+                                            }
+                                            documentingLeader={
+                                              <div
+                                                data-plasmic-name={"leader4"}
+                                                data-plasmic-override={
+                                                  overrides.leader4
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  projectcss.__wab_text,
+                                                  sty.leader4
+                                                )}
+                                              >
+                                                <React.Fragment>
+                                                  {(() => {
+                                                    try {
+                                                      return infraction.leader_name;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return "Leader Name";
                                                       }
                                                       throw e;
                                                     }
@@ -1413,14 +1398,14 @@ function PlasmicDiscipline__RenderFunc(props: {
                                             }
                                             informed2={
                                               <div
-                                                data-plasmic-name={"informed"}
+                                                data-plasmic-name={"informed4"}
                                                 data-plasmic-override={
-                                                  overrides.informed
+                                                  overrides.informed4
                                                 }
                                                 className={classNames(
                                                   projectcss.all,
                                                   projectcss.__wab_text,
-                                                  sty.informed
+                                                  sty.informed4
                                                 )}
                                               >
                                                 <React.Fragment>
@@ -1445,15 +1430,15 @@ function PlasmicDiscipline__RenderFunc(props: {
                                             infractionType={(() => {
                                               try {
                                                 return infraction.points > 0
-                                                  ? "Negative"
-                                                  : "Positive";
+                                                  ? "negative"
+                                                  : "positive";
                                               } catch (e) {
                                                 if (
                                                   e instanceof TypeError ||
                                                   e?.plasmicType ===
                                                     "PlasmicUndefinedDataError"
                                                 ) {
-                                                  return "positive";
+                                                  return "negative";
                                                 }
                                                 throw e;
                                               }
@@ -1469,7 +1454,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                       e?.plasmicType ===
                                                         "PlasmicUndefinedDataError"
                                                     ) {
-                                                      return "DB Error";
+                                                      return "Item Name";
                                                     }
                                                     throw e;
                                                   }
@@ -1481,20 +1466,20 @@ function PlasmicDiscipline__RenderFunc(props: {
                                               <div
                                                 className={classNames(
                                                   projectcss.all,
-                                                  sty.freeBox__lapbp
+                                                  sty.freeBox__birHi
                                                 )}
                                               >
                                                 <div
                                                   data-plasmic-name={
-                                                    "pointValue"
+                                                    "pointValue8"
                                                   }
                                                   data-plasmic-override={
-                                                    overrides.pointValue
+                                                    overrides.pointValue8
                                                   }
                                                   className={classNames(
                                                     projectcss.all,
                                                     projectcss.__wab_text,
-                                                    sty.pointValue
+                                                    sty.pointValue8
                                                   )}
                                                 >
                                                   <React.Fragment>
@@ -1653,12 +1638,11 @@ function PlasmicDiscipline__RenderFunc(props: {
                                       </div>
                                     ) : null}
                                   </div>
-                                  <Divider2Icon
+                                  <div
                                     className={classNames(
                                       projectcss.all,
-                                      sty.svg__rlWc
+                                      sty.freeBox__wP2M3
                                     )}
-                                    role={"img"}
                                   />
 
                                   <div
@@ -2012,9 +1996,10 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "informed",
-    "date",
-    "pointValue",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
     "listItem",
     "contents",
     "content11",
@@ -2076,9 +2061,10 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "informed",
-    "date",
-    "pointValue",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
     "listItem",
     "contents",
     "content11",
@@ -2145,9 +2131,10 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "informed",
-    "date",
-    "pointValue",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
     "listItem",
     "contents",
     "content11",
@@ -2197,9 +2184,10 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "informed",
-    "date",
-    "pointValue",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
     "listItem",
     "contents",
     "content11",
@@ -2248,9 +2236,10 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "informed",
-    "date",
-    "pointValue",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
     "listItem",
     "contents",
     "content11",
@@ -2298,9 +2287,10 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "informed",
-    "date",
-    "pointValue",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
     "listItem",
     "contents",
     "content11",
@@ -2347,9 +2337,10 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "informed",
-    "date",
-    "pointValue",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
     "listItem",
     "contents",
     "content11",
@@ -2395,9 +2386,10 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "informed",
-    "date",
-    "pointValue",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
     "listItem",
     "contents",
     "content11",
@@ -2438,9 +2430,10 @@ const PlasmicDescendants = {
     "iconAndText",
     "text14",
     "frame1",
-    "informed",
-    "date",
-    "pointValue",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
     "listItem",
     "contents",
     "content11",
@@ -2509,9 +2502,10 @@ const PlasmicDescendants = {
   text14: ["text14"],
   frame1: [
     "frame1",
-    "informed",
-    "date",
-    "pointValue",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
     "listItem",
     "contents",
     "content11",
@@ -2520,9 +2514,10 @@ const PlasmicDescendants = {
     "points",
     "pointsText"
   ],
-  informed: ["informed"],
-  date: ["date"],
-  pointValue: ["pointValue"],
+  date4: ["date4"],
+  leader4: ["leader4"],
+  informed4: ["informed4"],
+  pointValue8: ["pointValue8"],
   listItem: [
     "listItem",
     "contents",
@@ -2635,9 +2630,10 @@ type NodeDefaultElementType = {
   iconAndText: "div";
   text14: "div";
   frame1: "div";
-  informed: "div";
-  date: "div";
-  pointValue: "div";
+  date4: "div";
+  leader4: "div";
+  informed4: "div";
+  pointValue8: "div";
   listItem: "div";
   contents: "div";
   content11: "div";
@@ -2761,9 +2757,10 @@ export const PlasmicDiscipline = Object.assign(
     iconAndText: makeNodeComponent("iconAndText"),
     text14: makeNodeComponent("text14"),
     frame1: makeNodeComponent("frame1"),
-    informed: makeNodeComponent("informed"),
-    date: makeNodeComponent("date"),
-    pointValue: makeNodeComponent("pointValue"),
+    date4: makeNodeComponent("date4"),
+    leader4: makeNodeComponent("leader4"),
+    informed4: makeNodeComponent("informed4"),
+    pointValue8: makeNodeComponent("pointValue8"),
     listItem: makeNodeComponent("listItem"),
     contents: makeNodeComponent("contents"),
     content11: makeNodeComponent("content11"),
