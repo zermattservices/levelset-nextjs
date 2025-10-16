@@ -322,21 +322,7 @@ export function FullPEAScoreboard({
     ]);
 
     let ratingsCountIdx = -1;
-    function isPureNumber(s){ 
-      if (s === null || s === undefined || s === '') return false;
-      const str = String(s).trim();
-      if (str === '') return false;
-      
-      // Exclude dates and other non-rating values
-      if (/\d{1,2}\/\d{1,2}\/\d{4}/.test(str)) return false; // MM/DD/YYYY format
-      if (/\d{4}-\d{2}-\d{2}/.test(str)) return false; // YYYY-MM-DD format
-      if (/^\d{1,2}\/\d{1,2}$/.test(str)) return false; // MM/DD format
-      
-      // Simple check: if parseFloat works and the result is a finite number, it's a number
-      const num = parseFloat(str);
-      const result = !isNaN(num) && isFinite(num) && num >= 0 && num <= 3.0; // Ratings are 0-3.0
-      return result;
-    }
+    function isPureNumber(s){ return /^\s*\d+(\.\d+)?\s*$/.test(String(s)); }
     function mk(tag){ return document.createElement(tag); }
 
     function showLoading(on){
@@ -406,82 +392,47 @@ export function FullPEAScoreboard({
       return -1;
     }
 
-    function tdValue(val, colIndex, cols, isLeaderTab, header){
+    function tdValue(val, colIndex, cols, isLeaderTab){
       const d = mk('td');
       const display = (val == null ? '' : String(val));
       d.textContent = display;
 
-      // Get the column name from header
-      const columnName = header && header[colIndex] ? header[colIndex] : '';
-
-      // Center all data columns except name (column 1)
-      if (colIndex > 1) {
-        d.style.textAlign = 'center';
+      if (colIndex === ratingsCountIdx){
+        d.style.color = 'var(--text)'; d.style.textAlign='center'; return d;
       }
-
-      // Skip color coding for specific column types based on name
-      const isLastRating = columnName && /last\s*rating/i.test(columnName);
-      const isRatingsCount = columnName && /#\s*of\s*ratings/i.test(columnName);
-      
-      if (isLastRating || isRatingsCount){
-        d.style.color = 'var(--text)'; 
-        d.style.textAlign = 'center'; 
-        return d;
-      }
-      
       if (colIndex === 1 && display) d.title = display;
+      if (colIndex === 2) d.style.textAlign = 'center';
 
-      // Apply color coding to numerical values (excluding specific column types)
-      if (!isLastRating && !isRatingsCount && isPureNumber(display)){
+      const isLeaderLastCol = isLeaderTab && (colIndex === cols - 1);
+      if (!isLeaderLastCol && isPureNumber(display)){
         const num = parseFloat(display);
         d.classList.add('num');
-        if (num >= 2.75) {
-          d.classList.add('v-green');
-        } else if (num >= 1.75) {
-          d.classList.add('v-yellow');
-        } else if (num >= 1.0) {
-          d.classList.add('v-red');
-        }
+        if (num >= 2.75) d.classList.add('v-green');
+        else if (num >= 1.75) d.classList.add('v-yellow');
+        else if (num >= 1.0) d.classList.add('v-red');
+      } else if (isLeaderLastCol && isPureNumber(display)) {
+        d.style.textAlign = 'center';
       }
-      
       return d;
     }
-    function thFromValue(val, colIndex, cols, isLeaderTab, header){
+    function thFromValue(val, colIndex, cols, isLeaderTab){
       const th = mk('th');
       const display = (val == null ? '' : String(val));
       th.textContent = display;
 
-      // Get the column name from header
-      const columnName = header && header[colIndex] ? header[colIndex] : '';
-
-      // Center all header columns except name (column 1)
-      if (colIndex > 1) {
-        th.style.textAlign = 'center';
+      if (colIndex === ratingsCountIdx){
+        th.style.color = 'var(--text)'; th.style.textAlign='center'; return th;
       }
-
-      // Skip color coding for specific column types based on name
-      const isLastRating = columnName && /last\s*rating/i.test(columnName);
-      const isRatingsCount = columnName && /#\s*of\s*ratings/i.test(columnName);
-      
-      if (isLastRating || isRatingsCount){
-        th.style.color = 'var(--text)'; 
-        th.style.textAlign = 'center'; 
-        return th;
-      }
-
-      // Apply color coding to numerical values (excluding specific column types)
-      if (!isLastRating && !isRatingsCount && isPureNumber(display)){
+      const isLeaderLastCol = isLeaderTab && (colIndex === cols - 1);
+      if (!isLeaderLastCol && isPureNumber(display)){
         const num = parseFloat(display);
         th.classList.add('num');
-        if (num >= 2.75) {
-          th.classList.add('v-green');
-        } else if (num >= 1.75) {
-          th.classList.add('v-yellow');
-        } else if (num >= 1.0) {
-          th.classList.add('v-red');
-        }
+        if (num >= 2.75) th.classList.add('v-green');
+        else if (num >= 1.75) th.classList.add('v-yellow');
+        else if (num >= 1.0) th.classList.add('v-red');
+      } else if (colIndex === 2) {
+        th.style.textAlign = 'center';
       }
-      
       return th;
     }
 
@@ -542,7 +493,7 @@ export function FullPEAScoreboard({
       if (isPosition && rows.length){
         const firstData = rows.shift();
         const secondSticky = mk('tr'); secondSticky.className = 'second-head';
-        for (let c = 0; c < cols; c++) secondSticky.appendChild(thFromValue(firstData[c], c, cols, false, header));
+        for (let c = 0; c < cols; c++) secondSticky.appendChild(thFromValue(firstData[c], c, cols, false));
         thead.appendChild(secondSticky);
       }
 
@@ -561,18 +512,18 @@ export function FullPEAScoreboard({
           tr.dataset.group = currentId;
           tr.setAttribute('aria-expanded','false');
 
-          tr.appendChild(tdValue(r[0], 0, cols, isLeaderTab, header));
+          tr.appendChild(tdValue(r[0], 0, cols, isLeaderTab));
           const nameTd = mk('td'); const btn = mk('span');
           btn.className = 'toggle'; btn.setAttribute('role','button'); btn.setAttribute('tabindex','0');
           btn.innerHTML = '<span class="chev">▸</span>' + (r[1] || '');
           nameTd.appendChild(btn); tr.appendChild(nameTd);
 
-          for (let c = 2; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab, header));
+          for (let c = 2; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab));
           tbody.appendChild(tr);
         } else if (currentId && isChildRow(r)) {
           if (!isLeaderTab || childCount < 10){
             const tr = mk('tr'); tr.className = 'group-child'; tr.dataset.parent = currentId;
-            for (let c = 0; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab, header));
+            for (let c = 0; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab));
             tbody.appendChild(tr);
             if (isLeaderTab) childCount += 1;
           }
