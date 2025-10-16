@@ -65,6 +65,7 @@ import { FohBohSlider } from "../../CodeComponents/FohBohSlider"; // plasmic-imp
 import { PositionButtons } from "../../CodeComponents/PositionButtons"; // plasmic-import: tQU-ID6-K3GO/codeComponent
 import { ScoreboardTable } from "../../CodeComponents/ScoreboardTable"; // plasmic-import: EURkS6Dky8BE/codeComponent
 import { PEARubric } from "../../CodeComponents/PEARubric"; // plasmic-import: Kl-hD0pLbIQ_/codeComponent
+import { FullPEAScoreboard } from "../../CodeComponents/FullPEAScoreboard"; // plasmic-import: Y-WGXOhHxLj4/codeComponent
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -93,6 +94,8 @@ export type PlasmicPea__OverridesType = {
   peaScoreboardTable?: Flex__<typeof ScoreboardTable>;
   verticalStack2?: Flex__<"div">;
   peaRubric?: Flex__<typeof PEARubric>;
+  verticalStack3?: Flex__<"div">;
+  fullPeaScoreboard?: Flex__<typeof FullPEAScoreboard>;
 };
 
 export interface DefaultPeaProps {}
@@ -452,6 +455,23 @@ function PlasmicPea__RenderFunc(props: {
             </div>
           </div>
         </div>
+        <div
+          data-plasmic-name={"verticalStack3"}
+          data-plasmic-override={overrides.verticalStack3}
+          className={classNames(projectcss.all, sty.verticalStack3)}
+        >
+          <div className={classNames(projectcss.all, sty.freeBox___9LQfr)}>
+            <FullPEAScoreboard
+              data-plasmic-name={"fullPeaScoreboard"}
+              data-plasmic-override={overrides.fullPeaScoreboard}
+              className={classNames("__wab_instance", sty.fullPeaScoreboard)}
+              dashboardWidth={"1280px"}
+              height={"800px"}
+              maxWidth={"1280px"}
+              variant={"buda"}
+            />
+          </div>
+        </div>
       </div>
     </React.Fragment>
   ) as React.ReactElement | null;
@@ -466,7 +486,9 @@ const PlasmicDescendants = {
     "positionButtons",
     "peaScoreboardTable",
     "verticalStack2",
-    "peaRubric"
+    "peaRubric",
+    "verticalStack3",
+    "fullPeaScoreboard"
   ],
   menuNavigation: ["menuNavigation"],
   verticalStack: [
@@ -479,7 +501,9 @@ const PlasmicDescendants = {
   positionButtons: ["positionButtons"],
   peaScoreboardTable: ["peaScoreboardTable"],
   verticalStack2: ["verticalStack2", "peaRubric"],
-  peaRubric: ["peaRubric"]
+  peaRubric: ["peaRubric"],
+  verticalStack3: ["verticalStack3", "fullPeaScoreboard"],
+  fullPeaScoreboard: ["fullPeaScoreboard"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
 type DescendantsType<T extends NodeNameType> =
@@ -493,6 +517,8 @@ type NodeDefaultElementType = {
   peaScoreboardTable: typeof ScoreboardTable;
   verticalStack2: "div";
   peaRubric: typeof PEARubric;
+  verticalStack3: "div";
+  fullPeaScoreboard: typeof FullPEAScoreboard;
 };
 
 type ReservedPropsType = "variants" | "args" | "overrides";
@@ -564,6 +590,8 @@ export const PlasmicPea = Object.assign(
     peaScoreboardTable: makeNodeComponent("peaScoreboardTable"),
     verticalStack2: makeNodeComponent("verticalStack2"),
     peaRubric: makeNodeComponent("peaRubric"),
+    verticalStack3: makeNodeComponent("verticalStack3"),
+    fullPeaScoreboard: makeNodeComponent("fullPeaScoreboard"),
 
     // Metadata about props expected for PlasmicPea
     internalVariantProps: PlasmicPea__VariantProps,

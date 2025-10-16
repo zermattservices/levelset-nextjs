@@ -880,6 +880,12 @@
           "name": "SimpleLogoutButton",
           "displayName": "SimpleLogoutButton",
           "componentImportPath": "./components/CodeComponents/auth/SimpleLogoutButton"
+        },
+        {
+          "id": "Y-WGXOhHxLj4",
+          "name": "FullPEAScoreboard",
+          "displayName": "FullPEAScoreboard",
+          "componentImportPath": "./components/CodeComponents/FullPEAScoreboard"
         }
       ],
       "splitsProviderFilePath": "",
@@ -27976,6 +27982,6 @@
   "nextjsConfig": {
     "pagesDir": "../pages"
   },
-  "cliVersion": "0.1.347",
-  "$schema": "https://unpkg.com/@plasmicapp/cli@0.1.347/dist/plasmic.schema.json"
+  "cliVersion": "0.1.348",
+  "$schema": "https://unpkg.com/@plasmicapp/cli@0.1.348/dist/plasmic.schema.json"
 }
