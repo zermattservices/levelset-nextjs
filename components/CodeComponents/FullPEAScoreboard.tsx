@@ -323,8 +323,15 @@ export function FullPEAScoreboard({
 
     let ratingsCountIdx = -1;
     function isPureNumber(s){ 
+      if (s === null || s === undefined || s === '') return false;
       const str = String(s).trim();
-      return /^\d+(\.\d+)?$/.test(str) && !isNaN(parseFloat(str)) && isFinite(parseFloat(str));
+      if (str === '') return false;
+      
+      // Simple check: if parseFloat works and the result is a finite number, it's a number
+      const num = parseFloat(str);
+      const result = !isNaN(num) && isFinite(num) && num >= 0;
+      console.log('isPureNumber test:', { input: s, str, num, result });
+      return result;
     }
     function mk(tag){ return document.createElement(tag); }
 
