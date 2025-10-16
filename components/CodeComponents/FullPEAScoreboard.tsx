@@ -43,7 +43,7 @@ export function FullPEAScoreboard({
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>' + currentConfig.title + '</title>
+<title>${currentConfig.title}</title>
 
 <!-- Favicons / theme -->
 <link rel="icon" href="https://storage.googleapis.com/trainingapp-assets/Circle%20C%20CFA.png" sizes="any">
@@ -267,7 +267,7 @@ export function FullPEAScoreboard({
 
       <!-- Right: Logo (hidden on mobile via CSS) -->
       <div class="header-logo">
-        <img src="' + currentConfig.logo + '" alt="Location Logo" class="logo-img">
+        <img src="${currentConfig.logo}" alt="Location Logo" class="logo-img">
       </div>
     </div>
 
@@ -283,7 +283,7 @@ export function FullPEAScoreboard({
 
   <script>
     // Use the bundle URL from the current variant
-    const BUNDLE_URL = "' + currentConfig.bundle + '" + "?v=" + Date.now();
+    const BUNDLE_URL = "${currentConfig.bundle}" + "?v=" + Date.now();
 
     // --- Mobile controls collapsible ---
     (function(){
