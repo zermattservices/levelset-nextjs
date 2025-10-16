@@ -400,6 +400,8 @@ export function FullPEAScoreboard({
       const display = (val == null ? '' : String(val));
       d.textContent = display;
 
+      console.log('tdValue called:', { val, display, colIndex, ratingsCountIdx, isPureNumber: isPureNumber(display) });
+
       // Center all data columns except name (column 1)
       if (colIndex > 1) {
         d.style.textAlign = 'center';
@@ -428,6 +430,8 @@ export function FullPEAScoreboard({
           d.classList.add('v-red');
           console.log('Added red class');
         }
+      } else {
+        console.log('NOT applying color:', { colIndex, ratingsCountIdx, display, isPureNumber: isPureNumber(display) });
       }
       
       return d;
@@ -472,6 +476,7 @@ export function FullPEAScoreboard({
       showLoading(false);
 
       let header = payload.header.slice();
+      console.log('buildTable called with payload:', payload);
       let rows   = payload.rows.map(r => r.slice());
       const sheetName = payload.sheetName;
       const updated   = payload.updated;
@@ -480,6 +485,7 @@ export function FullPEAScoreboard({
       const isPosition  = POSITION_TAB_SET.has(sheetName);
 
       ratingsCountIdx = header.findIndex(h => typeof h === 'string' && /#\s*of\s*ratings/i.test(h));
+      console.log('ratingsCountIdx set to:', ratingsCountIdx, 'header:', header);
 
       // Include all non-empty trailing columns
       let last = lastNonEmptyIndex(header);
