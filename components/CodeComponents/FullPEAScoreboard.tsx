@@ -327,10 +327,14 @@ export function FullPEAScoreboard({
       const str = String(s).trim();
       if (str === '') return false;
       
+      // Exclude dates and other non-rating values
+      if (/\d{1,2}\/\d{1,2}\/\d{4}/.test(str)) return false; // MM/DD/YYYY format
+      if (/\d{4}-\d{2}-\d{2}/.test(str)) return false; // YYYY-MM-DD format
+      if (/^\d{1,2}\/\d{1,2}$/.test(str)) return false; // MM/DD format
+      
       // Simple check: if parseFloat works and the result is a finite number, it's a number
       const num = parseFloat(str);
-      const result = !isNaN(num) && isFinite(num) && num >= 0;
-      console.log('isPureNumber test:', { input: s, str, num, result });
+      const result = !isNaN(num) && isFinite(num) && num >= 0 && num <= 3.0; // Ratings are 0-3.0
       return result;
     }
     function mk(tag){ return document.createElement(tag); }
