@@ -18,6 +18,7 @@ import { AuthProvider } from "./components/CodeComponents/auth/AuthProvider";
 import { LogoutButton } from "./components/CodeComponents/auth/LogoutButton";
 import { SupabaseUserLogOut } from "./components/CodeComponents/auth/SupabaseUserLogOut";
 import { SimpleLogoutButton } from "./components/CodeComponents/auth/SimpleLogoutButton";
+import { FullPEAScoreboard } from "./components/CodeComponents/FullPEAScoreboard";
 import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
@@ -349,6 +350,32 @@ PLASMIC.registerComponent(SimpleLogoutButton, {
     }
   },
   importPath: "./components/CodeComponents/auth/SimpleLogoutButton",
+});
+
+// Register FullPEAScoreboard component - Complete PEA Scoreboard with variant selection
+PLASMIC.registerComponent(FullPEAScoreboard, {
+  name: "FullPEAScoreboard",
+  displayName: "Full PEA Scoreboard",
+  props: {
+    className: "string",
+    variant: {
+      type: "choice",
+      options: ["buda", "west-buda"],
+      defaultValue: "buda",
+      description: "Location variant: Buda FSU or West Buda FSU"
+    },
+    height: {
+      type: "string",
+      defaultValue: "600px",
+      description: "Height of the scoreboard (e.g., '600px' or '50vh')"
+    },
+    maxWidth: {
+      type: "string", 
+      defaultValue: "1280px",
+      description: "Maximum width of the scoreboard (e.g., '1280px' or '100%')"
+    }
+  },
+  importPath: "./components/CodeComponents/FullPEAScoreboard",
 });
 
 // Register DrawerV2 component - Enhanced version of Plasmic's default Drawer with size prop
