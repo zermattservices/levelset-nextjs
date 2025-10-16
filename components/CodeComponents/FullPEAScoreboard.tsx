@@ -322,7 +322,13 @@ export function FullPEAScoreboard({
     ]);
 
     let ratingsCountIdx = -1;
-    function isPureNumber(s){ return /^\s*\d+(\.\d+)?\s*$/.test(String(s)); }
+    function isPureNumber(s){ 
+      if (s === null || s === undefined || s === '') return false;
+      const str = String(s).trim();
+      if (str === '') return false;
+      const num = parseFloat(str);
+      return !isNaN(num) && isFinite(num) && num >= 0 && num <= 3.0;
+    }
     function mk(tag){ return document.createElement(tag); }
 
     function showLoading(on){
