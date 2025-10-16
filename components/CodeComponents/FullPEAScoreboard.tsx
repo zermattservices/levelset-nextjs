@@ -407,11 +407,14 @@ export function FullPEAScoreboard({
       if (!isLeaderLastCol && isPureNumber(display)){
         const num = parseFloat(display);
         d.classList.add('num');
+        console.log('Applying color to:', display, 'num:', num, 'colIndex:', colIndex, 'isLeaderLastCol:', isLeaderLastCol);
         if (num >= 2.75) d.classList.add('v-green');
         else if (num >= 1.75) d.classList.add('v-yellow');
         else if (num >= 1.0) d.classList.add('v-red');
       } else if (isLeaderLastCol && isPureNumber(display)) {
         d.style.textAlign = 'center';
+      } else {
+        console.log('NOT applying color:', { display, colIndex, isLeaderLastCol, isPureNumber: isPureNumber(display) });
       }
       return d;
     }
