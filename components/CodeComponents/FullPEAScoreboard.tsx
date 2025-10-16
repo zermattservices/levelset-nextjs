@@ -175,6 +175,17 @@ export function FullPEAScoreboard({
   #grid thead th:nth-child(2), #grid tbody td:nth-child(2){
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
+  
+  /* Fix data alignment - center all data columns except name */
+  #grid tbody td:nth-child(n+3), #grid thead th:nth-child(n+3) {
+    text-align: center;
+  }
+  
+  /* Ensure numerical values are centered and styled */
+  #grid tbody td.num, #grid thead th.num {
+    text-align: center !important;
+    font-weight: 600;
+  }
   #grid.has-divider thead th:nth-last-child(2),
   #grid.has-divider tbody td:nth-last-child(2){ box-shadow: inset 2px 0 0 var(--divider); }
 
@@ -383,22 +394,32 @@ export function FullPEAScoreboard({
       const display = (val == null ? '' : String(val));
       d.textContent = display;
 
-      if (colIndex === ratingsCountIdx){
-        d.style.color = 'var(--text)'; d.style.textAlign='center'; return d;
-      }
-      if (colIndex === 1 && display) d.title = display;
-      if (colIndex === 2) d.style.textAlign = 'center';
-
-      const isLeaderLastCol = isLeaderTab && (colIndex === cols - 1);
-      if (!isLeaderLastCol && isPureNumber(display)){
-        const num = parseFloat(display);
-        d.classList.add('num');
-        if (num >= 2.75) d.classList.add('v-green');
-        else if (num >= 1.75) d.classList.add('v-yellow');
-        else if (num >= 1.0) d.classList.add('v-red');
-      } else if (isLeaderLastCol && isPureNumber(display)) {
+      // Center all data columns except name (column 1)
+      if (colIndex > 1) {
         d.style.textAlign = 'center';
       }
+
+      if (colIndex === ratingsCountIdx){
+        d.style.color = 'var(--text)'; 
+        d.style.textAlign = 'center'; 
+        return d;
+      }
+      
+      if (colIndex === 1 && display) d.title = display;
+
+      // Apply color coding to numerical values (excluding ratings count column)
+      if (colIndex !== ratingsCountIdx && isPureNumber(display)){
+        const num = parseFloat(display);
+        d.classList.add('num');
+        if (num >= 2.75) {
+          d.classList.add('v-green');
+        } else if (num >= 1.75) {
+          d.classList.add('v-yellow');
+        } else if (num >= 1.0) {
+          d.classList.add('v-red');
+        }
+      }
+      
       return d;
     }
     function thFromValue(val, colIndex, cols, isLeaderTab){
@@ -406,19 +427,30 @@ export function FullPEAScoreboard({
       const display = (val == null ? '' : String(val));
       th.textContent = display;
 
-      if (colIndex === ratingsCountIdx){
-        th.style.color = 'var(--text)'; th.style.textAlign='center'; return th;
-      }
-      const isLeaderLastCol = isLeaderTab && (colIndex === cols - 1);
-      if (!isLeaderLastCol && isPureNumber(display)){
-        const num = parseFloat(display);
-        th.classList.add('num');
-        if (num >= 2.75) th.classList.add('v-green');
-        else if (num >= 1.75) th.classList.add('v-yellow');
-        else if (num >= 1.0) th.classList.add('v-red');
-      } else if (colIndex === 2) {
+      // Center all header columns except name (column 1)
+      if (colIndex > 1) {
         th.style.textAlign = 'center';
       }
+
+      if (colIndex === ratingsCountIdx){
+        th.style.color = 'var(--text)'; 
+        th.style.textAlign = 'center'; 
+        return th;
+      }
+
+      // Apply color coding to numerical values (excluding ratings count column)
+      if (colIndex !== ratingsCountIdx && isPureNumber(display)){
+        const num = parseFloat(display);
+        th.classList.add('num');
+        if (num >= 2.75) {
+          th.classList.add('v-green');
+        } else if (num >= 1.75) {
+          th.classList.add('v-yellow');
+        } else if (num >= 1.0) {
+          th.classList.add('v-red');
+        }
+      }
+      
       return th;
     }
 
