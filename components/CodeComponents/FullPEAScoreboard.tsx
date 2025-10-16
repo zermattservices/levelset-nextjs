@@ -64,7 +64,7 @@ export function FullPEAScoreboard({
     --pill-bg:#f3f4f6; --pill-on:#111827; --pill-off:#6b7280; --pill-border:#e5e7eb;
     --divider:#9ca3af;
     --row-h: 34px;
-    --dashboard-width: 1280px;
+    --dashboard-width: ${typeof dashboardWidth === 'number' ? `${dashboardWidth}px` : dashboardWidth};
   }
   /* ===== Dark override ===== */
   @media (prefers-color-scheme: dark){
@@ -327,14 +327,10 @@ export function FullPEAScoreboard({
       const str = String(s).trim();
       if (str === '') return false;
       
-      // Exclude dates and other non-rating values
-      if (/\d{1,2}\/\d{1,2}\/\d{4}/.test(str)) return false; // MM/DD/YYYY format
-      if (/\d{4}-\d{2}-\d{2}/.test(str)) return false; // YYYY-MM-DD format
-      if (/^\d{1,2}\/\d{1,2}$/.test(str)) return false; // MM/DD format
-      
       // Simple check: if parseFloat works and the result is a finite number, it's a number
       const num = parseFloat(str);
-      const result = !isNaN(num) && isFinite(num) && num >= 0 && num <= 3.0; // Ratings are 0-3.0
+      const result = !isNaN(num) && isFinite(num) && num >= 0;
+      console.log('isPureNumber test:', { input: s, str, num, result });
       return result;
     }
     function mk(tag){ return document.createElement(tag); }
@@ -406,24 +402,19 @@ export function FullPEAScoreboard({
       return -1;
     }
 
-    function tdValue(val, colIndex, cols, isLeaderTab, header){
+    function tdValue(val, colIndex, cols, isLeaderTab){
       const d = mk('td');
       const display = (val == null ? '' : String(val));
       d.textContent = display;
 
-      // Get the column name from header
-      const columnName = header && header[colIndex] ? header[colIndex] : '';
+      console.log('tdValue called:', { val, display, colIndex, ratingsCountIdx, isPureNumber: isPureNumber(display) });
 
       // Center all data columns except name (column 1)
       if (colIndex > 1) {
         d.style.textAlign = 'center';
       }
 
-      // Skip color coding for specific column types based on name
-      const isLastRating = columnName && /last\s*rating/i.test(columnName);
-      const isRatingsCount = columnName && /#\s*of\s*ratings/i.test(columnName);
-      
-      if (isLastRating || isRatingsCount){
+      if (colIndex === ratingsCountIdx){
         d.style.color = 'var(--text)'; 
         d.style.textAlign = 'center'; 
         return d;
@@ -431,17 +422,23 @@ export function FullPEAScoreboard({
       
       if (colIndex === 1 && display) d.title = display;
 
-      // Apply color coding to numerical values (excluding specific column types)
-      if (!isLastRating && !isRatingsCount && isPureNumber(display)){
+      // Apply color coding to numerical values (excluding ratings count column)
+      if (colIndex !== ratingsCountIdx && isPureNumber(display)){
         const num = parseFloat(display);
         d.classList.add('num');
+        console.log('Applying color to:', display, 'num:', num, 'colIndex:', colIndex);
         if (num >= 2.75) {
           d.classList.add('v-green');
+          console.log('Added green class');
         } else if (num >= 1.75) {
           d.classList.add('v-yellow');
+          console.log('Added yellow class');
         } else if (num >= 1.0) {
           d.classList.add('v-red');
+          console.log('Added red class');
         }
+      } else {
+        console.log('NOT applying color:', { colIndex, ratingsCountIdx, display, isPureNumber: isPureNumber(display) });
       }
       
       return d;
@@ -558,18 +555,18 @@ export function FullPEAScoreboard({
           tr.dataset.group = currentId;
           tr.setAttribute('aria-expanded','false');
 
-          tr.appendChild(tdValue(r[0], 0, cols, isLeaderTab, header));
+          tr.appendChild(tdValue(r[0], 0, cols, isLeaderTab));
           const nameTd = mk('td'); const btn = mk('span');
           btn.className = 'toggle'; btn.setAttribute('role','button'); btn.setAttribute('tabindex','0');
           btn.innerHTML = '<span class="chev">▸</span>' + (r[1] || '');
           nameTd.appendChild(btn); tr.appendChild(nameTd);
 
-          for (let c = 2; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab, header));
+          for (let c = 2; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab));
           tbody.appendChild(tr);
         } else if (currentId && isChildRow(r)) {
           if (!isLeaderTab || childCount < 10){
             const tr = mk('tr'); tr.className = 'group-child'; tr.dataset.parent = currentId;
-            for (let c = 0; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab, header));
+            for (let c = 0; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab));
             tbody.appendChild(tr);
             if (isLeaderTab) childCount += 1;
           }
