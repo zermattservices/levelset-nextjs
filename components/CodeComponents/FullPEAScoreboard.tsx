@@ -398,7 +398,7 @@ export function FullPEAScoreboard({
       return -1;
     }
 
-    function tdValue(val, colIndex, cols, isLeaderTab){
+    function tdValue(val, colIndex, cols, isLeaderTab, sheetName){
       const d = mk('td');
       const display = (val == null ? '' : String(val));
       d.textContent = display;
@@ -409,18 +409,17 @@ export function FullPEAScoreboard({
       if (colIndex === 1 && display) d.title = display;
       if (colIndex === 2) d.style.textAlign = 'center';
 
-      const isLeaderLastCol = isLeaderTab && (colIndex === cols - 1);
-      if (!isLeaderLastCol && isPureNumber(display)){
+      // Exclude last column from color coding if it's not a base FOH/BOH view (since it's "# of Ratings")
+      const isLastColumn = colIndex === cols - 1;
+      const isBaseView = sheetName === 'FOH' || sheetName === 'BOH';
+      const shouldExcludeLastCol = isLastColumn && !isBaseView;
+      
+      if (!shouldExcludeLastCol && isPureNumber(display)){
         const num = parseFloat(display);
         d.classList.add('num');
-        console.log('Applying color to:', display, 'num:', num, 'colIndex:', colIndex, 'isLeaderLastCol:', isLeaderLastCol);
         if (num >= 2.75) d.classList.add('v-green');
         else if (num >= 1.75) d.classList.add('v-yellow');
         else if (num >= 1.0) d.classList.add('v-red');
-      } else if (isLeaderLastCol && isPureNumber(display)) {
-        d.style.textAlign = 'center';
-      } else {
-        console.log('NOT applying color:', { display, colIndex, isLeaderLastCol, isPureNumber: isPureNumber(display) });
       }
       return d;
     }
@@ -522,18 +521,18 @@ export function FullPEAScoreboard({
           tr.dataset.group = currentId;
           tr.setAttribute('aria-expanded','false');
 
-          tr.appendChild(tdValue(r[0], 0, cols, isLeaderTab));
+          tr.appendChild(tdValue(r[0], 0, cols, isLeaderTab, sheetName));
           const nameTd = mk('td'); const btn = mk('span');
           btn.className = 'toggle'; btn.setAttribute('role','button'); btn.setAttribute('tabindex','0');
           btn.innerHTML = '<span class="chev">▸</span>' + (r[1] || '');
           nameTd.appendChild(btn); tr.appendChild(nameTd);
 
-          for (let c = 2; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab));
+          for (let c = 2; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab, sheetName));
           tbody.appendChild(tr);
         } else if (currentId && isChildRow(r)) {
           if (!isLeaderTab || childCount < 10){
             const tr = mk('tr'); tr.className = 'group-child'; tr.dataset.parent = currentId;
-            for (let c = 0; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab));
+            for (let c = 0; c < cols; c++) tr.appendChild(tdValue(r[c], c, cols, isLeaderTab, sheetName));
             tbody.appendChild(tr);
             if (isLeaderTab) childCount += 1;
           }
