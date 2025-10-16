@@ -352,31 +352,36 @@ PLASMIC.registerComponent(SimpleLogoutButton, {
   importPath: "./components/CodeComponents/auth/SimpleLogoutButton",
 });
 
-// Register FullPEAScoreboard component - Complete PEA Scoreboard with variant selection
-PLASMIC.registerComponent(FullPEAScoreboard, {
-  name: "FullPEAScoreboard",
-  displayName: "Full PEA Scoreboard",
-  props: {
-    className: "string",
-    variant: {
-      type: "choice",
-      options: ["buda", "west-buda"],
-      defaultValue: "buda",
-      description: "Location variant: Buda FSU or West Buda FSU"
-    },
-    height: {
-      type: "string",
-      defaultValue: "600px",
-      description: "Height of the scoreboard (e.g., '600px' or '50vh')"
-    },
-    maxWidth: {
-      type: "string", 
-      defaultValue: "1280px",
-      description: "Maximum width of the scoreboard (e.g., '1280px' or '100%')"
-    }
-  },
-  importPath: "./components/CodeComponents/FullPEAScoreboard",
-});
+    // Register FullPEAScoreboard component - Complete PEA Scoreboard with variant selection
+    PLASMIC.registerComponent(FullPEAScoreboard, {
+      name: "FullPEAScoreboard",
+      displayName: "Full PEA Scoreboard",
+      props: {
+        className: "string",
+        variant: {
+          type: "choice",
+          options: ["buda", "west-buda"],
+          defaultValue: "buda",
+          description: "Location variant: Buda FSU or West Buda FSU"
+        },
+        height: {
+          type: "string",
+          defaultValue: "600px",
+          description: "Height of the scoreboard (e.g., '600px' or '50vh')"
+        },
+        maxWidth: {
+          type: "string", 
+          defaultValue: "1280px",
+          description: "Maximum width of the outer container (e.g., '1280px' or '100%')"
+        },
+        dashboardWidth: {
+          type: "string",
+          defaultValue: "1280px", 
+          description: "Width of the inner dashboard content (header and table)"
+        }
+      },
+      importPath: "./components/CodeComponents/FullPEAScoreboard",
+    });
 
 // Register DrawerV2 component - Enhanced version of Plasmic's default Drawer with size prop
 PLASMIC.registerComponent(DrawerV2, {

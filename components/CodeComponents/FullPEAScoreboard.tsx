@@ -5,13 +5,15 @@ export interface FullPEAScoreboardProps {
   variant?: 'buda' | 'west-buda';
   height?: string | number;
   maxWidth?: string | number;
+  dashboardWidth?: string | number;
 }
 
 export function FullPEAScoreboard({ 
   className = '',
   variant = 'buda',
   height = 600,
-  maxWidth = 1280
+  maxWidth = 1280,
+  dashboardWidth = 1280
 }: FullPEAScoreboardProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -62,6 +64,7 @@ export function FullPEAScoreboard({
     --pill-bg:#f3f4f6; --pill-on:#111827; --pill-off:#6b7280; --pill-border:#e5e7eb;
     --divider:#9ca3af;
     --row-h: 34px;
+    --dashboard-width: ${typeof dashboardWidth === 'number' ? `${dashboardWidth}px` : dashboardWidth};
   }
   /* ===== Dark override ===== */
   @media (prefers-color-scheme: dark){
@@ -81,7 +84,7 @@ export function FullPEAScoreboard({
   }
 
   .wrap{
-    max-width: 1280px; margin: 0 auto; padding: 24px 16px 40px;
+    max-width: var(--dashboard-width, 1280px); margin: 0 auto; padding: 24px 16px 40px;
     box-sizing: border-box; display:flex; flex-direction:column; height:100dvh; gap:12px;
   }
 
@@ -167,9 +170,9 @@ export function FullPEAScoreboard({
   tr[aria-expanded="true"] .chev{ transform:rotate(90deg); }
 
   td.num, th.num{ text-align:center; color:#fff; font-weight:600; }
-  td.v-green, th.v-green{ background:var(--green); }
-  td.v-yellow, th.v-yellow{ background:var(--yellow); color:#111; }
-  td.v-red, th.v-red{ background:var(--red); }
+  td.v-green, th.v-green{ background:var(--green) !important; color:#fff !important; }
+  td.v-yellow, th.v-yellow{ background:var(--yellow) !important; color:#111 !important; }
+  td.v-red, th.v-red{ background:var(--red) !important; color:#fff !important; }
 
   #grid thead th:nth-child(3), #grid tbody td:nth-child(3){ text-align:center; }
   #grid thead th:nth-child(2), #grid tbody td:nth-child(2){
@@ -319,7 +322,10 @@ export function FullPEAScoreboard({
     ]);
 
     let ratingsCountIdx = -1;
-    function isPureNumber(s){ return /^\s*\d+(\.\d+)?\s*$/.test(String(s)); }
+    function isPureNumber(s){ 
+      const str = String(s).trim();
+      return /^\d+(\.\d+)?$/.test(str) && !isNaN(parseFloat(str)) && isFinite(parseFloat(str));
+    }
     function mk(tag){ return document.createElement(tag); }
 
     function showLoading(on){
@@ -411,12 +417,16 @@ export function FullPEAScoreboard({
       if (colIndex !== ratingsCountIdx && isPureNumber(display)){
         const num = parseFloat(display);
         d.classList.add('num');
+        console.log('Applying color to:', display, 'num:', num, 'colIndex:', colIndex);
         if (num >= 2.75) {
           d.classList.add('v-green');
+          console.log('Added green class');
         } else if (num >= 1.75) {
           d.classList.add('v-yellow');
+          console.log('Added yellow class');
         } else if (num >= 1.0) {
           d.classList.add('v-red');
+          console.log('Added red class');
         }
       }
       
@@ -442,12 +452,16 @@ export function FullPEAScoreboard({
       if (colIndex !== ratingsCountIdx && isPureNumber(display)){
         const num = parseFloat(display);
         th.classList.add('num');
+        console.log('Header: Applying color to:', display, 'num:', num, 'colIndex:', colIndex);
         if (num >= 2.75) {
           th.classList.add('v-green');
+          console.log('Header: Added green class');
         } else if (num >= 1.75) {
           th.classList.add('v-yellow');
+          console.log('Header: Added yellow class');
         } else if (num >= 1.0) {
           th.classList.add('v-red');
+          console.log('Header: Added red class');
         }
       }
       
