@@ -59,6 +59,7 @@ import {
   useGlobalActions
 } from "@plasmicapp/react-web/lib/host";
 
+import { usePlasmicDataSourceContext } from "@plasmicapp/data-sources-context";
 import {
   executePlasmicDataOp,
   usePlasmicDataOp,
@@ -67,6 +68,7 @@ import {
 
 import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_mCN/component
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
+import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
 import { DisciplineTable } from "../../CodeComponents/DisciplineTable"; // plasmic-import: Gsr7FZewgF56/codeComponent
 import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTable"; // plasmic-import: gO99exJZ_N-6/codeComponent
 import { DrawerV2 } from "../../CodeComponents/DrawerV2"; // plasmic-import: lBRE4GzKIedo/codeComponent
@@ -76,6 +78,16 @@ import LevelsetButton from "../../LevelsetButton"; // plasmic-import: u704oB_4BU
 import { TabUnderline } from "@plasmicpkgs/plasmic-tabs";
 import { TabContent } from "@plasmicpkgs/plasmic-tabs";
 import SlideoutListItem2 from "../../SlideoutListItem2"; // plasmic-import: 9Efhz4aeRJA1/component
+import { AntdModal } from "@plasmicpkgs/antd5/skinny/registerModal";
+import { FormWrapper } from "@plasmicpkgs/antd5/skinny/Form";
+import { formHelpers as FormWrapper_Helpers } from "@plasmicpkgs/antd5/skinny/Form";
+import { FormItemWrapper } from "@plasmicpkgs/antd5/skinny/FormItem";
+import { AntdInput } from "@plasmicpkgs/antd5/skinny/registerInput";
+import { inputHelpers as AntdInput_Helpers } from "@plasmicpkgs/antd5/skinny/registerInput";
+import { AntdSelect } from "@plasmicpkgs/antd5/skinny/registerSelect";
+import { AntdDatePicker } from "@plasmicpkgs/antd5/skinny/registerDatePicker";
+import { datePickerHelpers as AntdDatePicker_Helpers } from "@plasmicpkgs/antd5/skinny/registerDatePicker";
+import { AntdButton } from "@plasmicpkgs/antd5/skinny/registerButton";
 import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
@@ -87,6 +99,7 @@ import sty from "./PlasmicDiscipline.module.css"; // plasmic-import: -vnBKJaatlP
 
 import CheckSvgIcon from "../levelset_tabs/icons/PlasmicIcon__CheckSvg"; // plasmic-import: dTo8s4EZdHvA/icon
 import IconIcon from "../levelset_tabs/icons/PlasmicIcon__Icon"; // plasmic-import: CEbmjO_n9jaW/icon
+import SquarePlusIcon from "../library_tabler_3_2_icons/icons/PlasmicIcon__SquarePlus"; // plasmic-import: A4Dw-GYBFNP-/icon
 
 createPlasmicElementProxy;
 
@@ -112,6 +125,7 @@ export const PlasmicDiscipline__ArgProps = new Array<ArgPropType>(
 export type PlasmicDiscipline__OverridesType = {
   root?: Flex__<"div">;
   menuNavigation?: Flex__<typeof MenuNavigation>;
+  redirectIf?: Flex__<typeof RedirectIf>;
   verticalStack?: Flex__<"div">;
   disciplineTable?: Flex__<typeof DisciplineTable>;
   verticalStack2?: Flex__<"div">;
@@ -164,6 +178,11 @@ export type PlasmicDiscipline__OverridesType = {
   inputAndText2?: Flex__<"div">;
   iconAndText2?: Flex__<"div">;
   text27?: Flex__<"div">;
+  modal?: Flex__<typeof AntdModal>;
+  form?: Flex__<typeof FormWrapper>;
+  dateTimePicker?: Flex__<typeof AntdDatePicker>;
+  button?: Flex__<typeof AntdButton>;
+  svg?: Flex__<"svg">;
   frame6?: Flex__<"div">;
   leader2?: Flex__<"div">;
   date2?: Flex__<"div">;
@@ -226,7 +245,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => false
+        initFunc: ({ $props, $state, $queries, $ctx }) => true
       },
       {
         path: "selectedEmployee",
@@ -244,7 +263,20 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "menuNavigation.locationName",
         type: "private",
         variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "Buda FSU"
+        initFunc: ({ $props, $state, $queries, $ctx }) =>
+          (() => {
+            try {
+              return undefined;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return undefined;
+              }
+              throw e;
+            }
+          })()
       },
       {
         path: "menuNavigation.firstName",
@@ -302,6 +334,30 @@ function PlasmicDiscipline__RenderFunc(props: {
               throw e;
             }
           })()
+      },
+      {
+        path: "modal.open",
+        type: "private",
+        variableType: "boolean",
+        initFunc: ({ $props, $state, $queries, $ctx }) => true
+      },
+      {
+        path: "form.value",
+        type: "private",
+        variableType: "object",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        refName: "form",
+        onMutate: generateOnMutateForSpec("value", FormWrapper_Helpers)
+      },
+      {
+        path: "form.isSubmitting",
+        type: "private",
+        variableType: "boolean",
+        initFunc: ({ $props, $state, $queries, $ctx }) => false,
+
+        refName: "form",
+        onMutate: generateOnMutateForSpec("isSubmitting", FormWrapper_Helpers)
       }
     ],
     [$props, $ctx, $refs]
@@ -312,6 +368,8 @@ function PlasmicDiscipline__RenderFunc(props: {
     $queries: $queries,
     $refs
   });
+  const dataSourcesCtx = usePlasmicDataSourceContext();
+  const plasmicInvalidate = usePlasmicInvalidate();
 
   const new$Queries: Record<string, ReturnType<typeof usePlasmicDataOp>> = {
     infractionsQuery: usePlasmicDataOp(() => {
@@ -334,6 +392,38 @@ function PlasmicDiscipline__RenderFunc(props: {
           filters: [$state.selectedEmployee?.id]
         },
         cacheKey: `plasmic.$.65e45fcb-fda5-4165-aef9-aed4c21434bd.$.`,
+        invalidatedKeys: null,
+        roleId: null
+      };
+    }),
+    discActionsRubric: usePlasmicDataOp(() => {
+      return {
+        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
+        opId: "c90e2291-f41b-447d-9c4b-806b8f841be0",
+        userArgs: {},
+        cacheKey: `plasmic.$.c90e2291-f41b-447d-9c4b-806b8f841be0.$.`,
+        invalidatedKeys: null,
+        roleId: null
+      };
+    }),
+    employeesDiscQuery: usePlasmicDataOp(() => {
+      return {
+        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
+        opId: "c3bd2802-6689-478d-a8a6-846360d08597",
+        userArgs: {
+          filters: ["f69c9488-5636-4591-9e6a-10967db6075e"]
+        },
+        cacheKey: `plasmic.$.c3bd2802-6689-478d-a8a6-846360d08597.$.`,
+        invalidatedKeys: null,
+        roleId: null
+      };
+    }),
+    directorsQuery: usePlasmicDataOp(() => {
+      return {
+        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
+        opId: "9fa90f8d-dff1-43d3-a2db-4a18759d94d6",
+        userArgs: {},
+        cacheKey: `plasmic.$.9fa90f8d-dff1-43d3-a2db-4a18759d94d6.$.`,
         invalidatedKeys: null,
         roleId: null
       };
@@ -462,241 +552,316 @@ function PlasmicDiscipline__RenderFunc(props: {
           ])}
         />
 
-        <div className={classNames(projectcss.all, sty.freeBox__jtUkZ)}>
-          <div className={classNames(projectcss.all, sty.freeBox__ureDb)}>
-            <div className={classNames(projectcss.all, sty.freeBox__nlSty)}>
-              <div className={classNames(projectcss.all, sty.freeBox__mKhGx)}>
-                <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text__wQDeC
-                  )}
-                >
-                  {"APS Dashboard"}
-                </div>
-              </div>
-              <div className={classNames(projectcss.all, sty.freeBox__c457R)}>
-                <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text___8HOob
-                  )}
-                >
-                  {
-                    "Here\u2019s your organization's current points. Click a Team Member to see their recent infractions."
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={classNames(projectcss.all, sty.freeBox__lKzxl)}>
-          <div className={classNames(projectcss.all, sty.freeBox__cHwGk)}>
-            <div
-              data-plasmic-name={"verticalStack"}
-              data-plasmic-override={overrides.verticalStack}
-              className={classNames(projectcss.all, sty.verticalStack)}
-            >
-              <div
-                className={classNames(
-                  projectcss.all,
-                  projectcss.__wab_text,
-                  sty.text__of8Zu
-                )}
-              >
-                {"Employees"}
-              </div>
-              <DisciplineTable
-                data-plasmic-name={"disciplineTable"}
-                data-plasmic-override={overrides.disciplineTable}
-                className={classNames("__wab_instance", sty.disciplineTable)}
-                density={"comfortable"}
-                locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                onRowClick={async employee => {
-                  const $steps = {};
+        <RedirectIf
+          data-plasmic-name={"redirectIf"}
+          data-plasmic-override={overrides.redirectIf}
+          className={classNames("__wab_instance", sty.redirectIf)}
+          condition={(() => {
+            try {
+              return $ctx.auth && !!$ctx.auth.email;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return true;
+              }
+              throw e;
+            }
+          })()}
+          onFalse={async () => {
+            const $steps = {};
 
-                  $steps["updateSelectedEmployee"] = true
-                    ? (() => {
-                        const actionArgs = {
-                          variable: {
-                            objRoot: $state,
-                            variablePath: ["selectedEmployee"]
-                          },
-                          operation: 0,
-                          value: employee
-                        };
-                        return (({
-                          variable,
-                          value,
-                          startIndex,
-                          deleteCount
-                        }) => {
-                          if (!variable) {
-                            return;
-                          }
-                          const { objRoot, variablePath } = variable;
-
-                          $stateSet(objRoot, variablePath, value);
-                          return value;
-                        })?.apply(null, [actionArgs]);
-                      })()
-                    : undefined;
-                  if (
-                    $steps["updateSelectedEmployee"] != null &&
-                    typeof $steps["updateSelectedEmployee"] === "object" &&
-                    typeof $steps["updateSelectedEmployee"].then === "function"
-                  ) {
-                    $steps["updateSelectedEmployee"] =
-                      await $steps["updateSelectedEmployee"];
-                  }
-
-                  $steps["updateDrawerV2Open"] = true
-                    ? (() => {
-                        const actionArgs = {
-                          variable: {
-                            objRoot: $state,
-                            variablePath: ["drawerV2", "open"]
-                          },
-                          operation: 0,
-                          value: true
-                        };
-                        return (({
-                          variable,
-                          value,
-                          startIndex,
-                          deleteCount
-                        }) => {
-                          if (!variable) {
-                            return;
-                          }
-                          const { objRoot, variablePath } = variable;
-
-                          $stateSet(objRoot, variablePath, value);
-                          return value;
-                        })?.apply(null, [actionArgs]);
-                      })()
-                    : undefined;
-                  if (
-                    $steps["updateDrawerV2Open"] != null &&
-                    typeof $steps["updateDrawerV2Open"] === "object" &&
-                    typeof $steps["updateDrawerV2Open"].then === "function"
-                  ) {
-                    $steps["updateDrawerV2Open"] =
-                      await $steps["updateDrawerV2Open"];
-                  }
-                }}
-                orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
-                showActions={true}
-              />
-            </div>
-            <div
-              data-plasmic-name={"verticalStack2"}
-              data-plasmic-override={overrides.verticalStack2}
-              className={classNames(projectcss.all, sty.verticalStack2)}
-            >
-              <div
-                className={classNames(
-                  projectcss.all,
-                  projectcss.__wab_text,
-                  sty.text__oSxFd
-                )}
-              >
-                {"Disciplinary Actions"}
-              </div>
-              <DisciplineActionsTable
-                data-plasmic-name={"disciplineActionsTable"}
-                data-plasmic-override={overrides.disciplineActionsTable}
-                className={classNames(
-                  "__wab_instance",
-                  sty.disciplineActionsTable
-                )}
-                density={"comfortable"}
-                locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
-                showActions={false}
-              />
-            </div>
-          </div>
-        </div>
-        <DrawerV2
-          data-plasmic-name={"drawerV2"}
-          data-plasmic-override={overrides.drawerV2}
-          className={classNames("__wab_instance", sty.drawerV2)}
-          closable={true}
-          closeButtonClassName={classNames({
-            [sty["pcls_1P0T8Swx7ssW"]]: true
-          })}
-          defaultStylesClassName={classNames(
-            projectcss.root_reset,
-            projectcss.plasmic_default_styles,
-            projectcss.plasmic_mixins,
-            styleTokensClassNames
-          )}
-          drawerBodyClassName={classNames({ [sty["pcls_0s1oo6MW753L"]]: true })}
-          drawerContentWrapperClassName={classNames({
-            [sty["pcls_NIsXGOi-WC36"]]: true
-          })}
-          drawerScopeClassName={sty["drawerV2__drawer"]}
-          keyboard={false}
-          mask={false}
-          maskClosable={false}
-          onOpenChange={async (...eventArgs: any) => {
-            generateStateOnChangeProp($state, ["drawerV2", "open"]).apply(
-              null,
-              eventArgs
-            );
+            $steps["goToLoginPage"] = true
+              ? (() => {
+                  const actionArgs = { destination: `/auth/login` };
+                  return (({ destination }) => {
+                    if (
+                      typeof destination === "string" &&
+                      destination.startsWith("#")
+                    ) {
+                      document
+                        .getElementById(destination.substr(1))
+                        .scrollIntoView({ behavior: "smooth" });
+                    } else {
+                      __nextRouter?.push(destination);
+                    }
+                  })?.apply(null, [actionArgs]);
+                })()
+              : undefined;
+            if (
+              $steps["goToLoginPage"] != null &&
+              typeof $steps["goToLoginPage"] === "object" &&
+              typeof $steps["goToLoginPage"].then === "function"
+            ) {
+              $steps["goToLoginPage"] = await $steps["goToLoginPage"];
+            }
           }}
-          open={generateStateValueProp($state, ["drawerV2", "open"])}
-          size={"default"}
-          title={
-            <div
-              data-plasmic-name={"content2"}
-              data-plasmic-override={overrides.content2}
-              className={classNames(projectcss.all, sty.content2)}
-            >
-              <div
-                data-plasmic-name={"textAndSupportingText2"}
-                data-plasmic-override={overrides.textAndSupportingText2}
-                className={classNames(
-                  projectcss.all,
-                  sty.textAndSupportingText2
-                )}
-              >
-                <div
-                  data-plasmic-name={"textAndOnlineIndicator"}
-                  data-plasmic-override={overrides.textAndOnlineIndicator}
-                  className={classNames(
-                    projectcss.all,
-                    sty.textAndOnlineIndicator
-                  )}
-                >
+        >
+          <div className={classNames(projectcss.all, sty.freeBox__jtUkZ)}>
+            <div className={classNames(projectcss.all, sty.freeBox__ureDb)}>
+              <div className={classNames(projectcss.all, sty.freeBox__nlSty)}>
+                <div className={classNames(projectcss.all, sty.freeBox__mKhGx)}>
                   <div
-                    data-plasmic-name={"text2"}
-                    data-plasmic-override={overrides.text2}
                     className={classNames(
                       projectcss.all,
                       projectcss.__wab_text,
-                      sty.text2
+                      sty.text__wQDeC
+                    )}
+                  >
+                    {"APS Dashboard"}
+                  </div>
+                </div>
+                <div className={classNames(projectcss.all, sty.freeBox__c457R)}>
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text___8HOob
+                    )}
+                  >
+                    {
+                      "Here\u2019s your organization's current points. Click a Team Member to see their recent infractions."
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className={classNames(projectcss.all, sty.freeBox__lKzxl)}>
+            <div className={classNames(projectcss.all, sty.freeBox__cHwGk)}>
+              <div
+                data-plasmic-name={"verticalStack"}
+                data-plasmic-override={overrides.verticalStack}
+                className={classNames(projectcss.all, sty.verticalStack)}
+              >
+                <div
+                  className={classNames(
+                    projectcss.all,
+                    projectcss.__wab_text,
+                    sty.text__of8Zu
+                  )}
+                >
+                  {"Employees"}
+                </div>
+                <DisciplineTable
+                  data-plasmic-name={"disciplineTable"}
+                  data-plasmic-override={overrides.disciplineTable}
+                  className={classNames("__wab_instance", sty.disciplineTable)}
+                  density={"comfortable"}
+                  locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                  onRowClick={async employee => {
+                    const $steps = {};
+
+                    $steps["updateSelectedEmployee"] = true
+                      ? (() => {
+                          const actionArgs = {
+                            variable: {
+                              objRoot: $state,
+                              variablePath: ["selectedEmployee"]
+                            },
+                            operation: 0,
+                            value: employee
+                          };
+                          return (({
+                            variable,
+                            value,
+                            startIndex,
+                            deleteCount
+                          }) => {
+                            if (!variable) {
+                              return;
+                            }
+                            const { objRoot, variablePath } = variable;
+
+                            $stateSet(objRoot, variablePath, value);
+                            return value;
+                          })?.apply(null, [actionArgs]);
+                        })()
+                      : undefined;
+                    if (
+                      $steps["updateSelectedEmployee"] != null &&
+                      typeof $steps["updateSelectedEmployee"] === "object" &&
+                      typeof $steps["updateSelectedEmployee"].then ===
+                        "function"
+                    ) {
+                      $steps["updateSelectedEmployee"] =
+                        await $steps["updateSelectedEmployee"];
+                    }
+
+                    $steps["updateDrawerV2Open"] = true
+                      ? (() => {
+                          const actionArgs = {
+                            variable: {
+                              objRoot: $state,
+                              variablePath: ["drawerV2", "open"]
+                            },
+                            operation: 0,
+                            value: true
+                          };
+                          return (({
+                            variable,
+                            value,
+                            startIndex,
+                            deleteCount
+                          }) => {
+                            if (!variable) {
+                              return;
+                            }
+                            const { objRoot, variablePath } = variable;
+
+                            $stateSet(objRoot, variablePath, value);
+                            return value;
+                          })?.apply(null, [actionArgs]);
+                        })()
+                      : undefined;
+                    if (
+                      $steps["updateDrawerV2Open"] != null &&
+                      typeof $steps["updateDrawerV2Open"] === "object" &&
+                      typeof $steps["updateDrawerV2Open"].then === "function"
+                    ) {
+                      $steps["updateDrawerV2Open"] =
+                        await $steps["updateDrawerV2Open"];
+                    }
+                  }}
+                  orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                  showActions={true}
+                />
+              </div>
+              <div
+                data-plasmic-name={"verticalStack2"}
+                data-plasmic-override={overrides.verticalStack2}
+                className={classNames(projectcss.all, sty.verticalStack2)}
+              >
+                <div
+                  className={classNames(
+                    projectcss.all,
+                    projectcss.__wab_text,
+                    sty.text__oSxFd
+                  )}
+                >
+                  {"Disciplinary Actions"}
+                </div>
+                <DisciplineActionsTable
+                  data-plasmic-name={"disciplineActionsTable"}
+                  data-plasmic-override={overrides.disciplineActionsTable}
+                  className={classNames(
+                    "__wab_instance",
+                    sty.disciplineActionsTable
+                  )}
+                  density={"comfortable"}
+                  locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                  orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                  showActions={false}
+                />
+              </div>
+            </div>
+          </div>
+          <DrawerV2
+            data-plasmic-name={"drawerV2"}
+            data-plasmic-override={overrides.drawerV2}
+            className={classNames("__wab_instance", sty.drawerV2)}
+            closable={true}
+            closeButtonClassName={classNames({
+              [sty["pcls_1P0T8Swx7ssW"]]: true
+            })}
+            defaultStylesClassName={classNames(
+              projectcss.root_reset,
+              projectcss.plasmic_default_styles,
+              projectcss.plasmic_mixins,
+              styleTokensClassNames
+            )}
+            drawerBodyClassName={classNames({
+              [sty["pcls_0s1oo6MW753L"]]: true
+            })}
+            drawerContentWrapperClassName={classNames({
+              [sty["pcls_NIsXGOi-WC36"]]: true
+            })}
+            drawerScopeClassName={sty["drawerV2__drawer"]}
+            keyboard={false}
+            mask={false}
+            maskClosable={false}
+            onOpenChange={async (...eventArgs: any) => {
+              generateStateOnChangeProp($state, ["drawerV2", "open"]).apply(
+                null,
+                eventArgs
+              );
+            }}
+            open={generateStateValueProp($state, ["drawerV2", "open"])}
+            size={"default"}
+            title={
+              <div
+                data-plasmic-name={"content2"}
+                data-plasmic-override={overrides.content2}
+                className={classNames(projectcss.all, sty.content2)}
+              >
+                <div
+                  data-plasmic-name={"textAndSupportingText2"}
+                  data-plasmic-override={overrides.textAndSupportingText2}
+                  className={classNames(
+                    projectcss.all,
+                    sty.textAndSupportingText2
+                  )}
+                >
+                  <div
+                    data-plasmic-name={"textAndOnlineIndicator"}
+                    data-plasmic-override={overrides.textAndOnlineIndicator}
+                    className={classNames(
+                      projectcss.all,
+                      sty.textAndOnlineIndicator
+                    )}
+                  >
+                    <div
+                      data-plasmic-name={"text2"}
+                      data-plasmic-override={overrides.text2}
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text2
+                      )}
+                    >
+                      <React.Fragment>
+                        {(() => {
+                          try {
+                            return (() => {
+                              {
+                                {
+                                  return $state.selectedEmployee?.full_name;
+                                }
+                              }
+                            })();
+                          } catch (e) {
+                            if (
+                              e instanceof TypeError ||
+                              e?.plasmicType === "PlasmicUndefinedDataError"
+                            ) {
+                              return "Reece Howard";
+                            }
+                            throw e;
+                          }
+                        })()}
+                      </React.Fragment>
+                    </div>
+                  </div>
+                  <div
+                    data-plasmic-name={"supportingText2"}
+                    data-plasmic-override={overrides.supportingText2}
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.supportingText2
                     )}
                   >
                     <React.Fragment>
                       {(() => {
                         try {
-                          return (() => {
-                            {
-                              {
-                                return $state.selectedEmployee?.full_name;
-                              }
-                            }
-                          })();
+                          return $state.selectedEmployee?.role;
                         } catch (e) {
                           if (
                             e instanceof TypeError ||
                             e?.plasmicType === "PlasmicUndefinedDataError"
                           ) {
-                            return "Reece Howard";
+                            return "Owner/Operator";
                           }
                           throw e;
                         }
@@ -704,788 +869,633 @@ function PlasmicDiscipline__RenderFunc(props: {
                     </React.Fragment>
                   </div>
                 </div>
-                <div
-                  data-plasmic-name={"supportingText2"}
-                  data-plasmic-override={overrides.supportingText2}
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.supportingText2
-                  )}
-                >
-                  <React.Fragment>
-                    {(() => {
-                      try {
-                        return $state.selectedEmployee?.role;
-                      } catch (e) {
-                        if (
-                          e instanceof TypeError ||
-                          e?.plasmicType === "PlasmicUndefinedDataError"
-                        ) {
-                          return "Owner/Operator";
-                        }
-                        throw e;
-                      }
-                    })()}
-                  </React.Fragment>
-                </div>
               </div>
-            </div>
-          }
-          width={"620"}
-        >
-          <div
-            data-plasmic-name={"panel"}
-            data-plasmic-override={overrides.panel}
-            className={classNames(projectcss.all, sty.panel)}
+            }
+            width={"620"}
           >
             <div
-              data-plasmic-name={"header"}
-              data-plasmic-override={overrides.header}
-              className={classNames(projectcss.all, sty.header)}
+              data-plasmic-name={"panel"}
+              data-plasmic-override={overrides.panel}
+              className={classNames(projectcss.all, sty.panel)}
             >
               <div
-                data-plasmic-name={"container"}
-                data-plasmic-override={overrides.container}
-                className={classNames(projectcss.all, sty.container)}
+                data-plasmic-name={"header"}
+                data-plasmic-override={overrides.header}
+                className={classNames(projectcss.all, sty.header)}
               >
                 <div
-                  data-plasmic-name={"statistics"}
-                  data-plasmic-override={overrides.statistics}
-                  className={classNames(projectcss.all, sty.statistics)}
+                  data-plasmic-name={"container"}
+                  data-plasmic-override={overrides.container}
+                  className={classNames(projectcss.all, sty.container)}
                 >
-                  <TabsContainer
-                    data-plasmic-name={"tabsContainer"}
-                    data-plasmic-override={overrides.tabsContainer}
-                    initialKey={(() => {
-                      try {
-                        return $state.initialProfileTab;
-                      } catch (e) {
-                        if (
-                          e instanceof TypeError ||
-                          e?.plasmicType === "PlasmicUndefinedDataError"
-                        ) {
-                          return undefined;
-                        }
-                        throw e;
-                      }
-                    })()}
-                    mountMode={"mountAllEagerly"}
-                    previewAll={false}
-                    previewKey={"tab4"}
+                  <div
+                    data-plasmic-name={"statistics"}
+                    data-plasmic-override={overrides.statistics}
+                    className={classNames(projectcss.all, sty.statistics)}
                   >
-                    <DataCtxReader__>
-                      {$ctx => (
-                        <div
-                          className={classNames(
-                            projectcss.all,
-                            sty.freeBox___2R2C
-                          )}
-                        >
+                    <TabsContainer
+                      data-plasmic-name={"tabsContainer"}
+                      data-plasmic-override={overrides.tabsContainer}
+                      initialKey={(() => {
+                        try {
+                          return $state.initialProfileTab;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return undefined;
+                          }
+                          throw e;
+                        }
+                      })()}
+                      mountMode={"mountAllEagerly"}
+                      previewAll={false}
+                      previewKey={"tab4"}
+                    >
+                      <DataCtxReader__>
+                        {$ctx => (
                           <div
                             className={classNames(
                               projectcss.all,
-                              sty.freeBox__eLzb
+                              sty.freeBox___2R2C
                             )}
                           >
-                            <TabButton
+                            <div
                               className={classNames(
-                                "__wab_instance",
-                                sty.tabButton__aqaGl
+                                projectcss.all,
+                                sty.freeBox__eLzb
                               )}
-                              tabKey={"tab1"}
                             >
-                              <LevelsetButton
+                              <TabButton
                                 className={classNames(
                                   "__wab_instance",
-                                  sty.levelsetButton__q81U
+                                  sty.tabButton__aqaGl
                                 )}
-                                color={(() => {
-                                  try {
-                                    return $ctx.currentTabKey === "tab1"
-                                      ? "green"
-                                      : "softSand";
-                                  } catch (e) {
-                                    if (
-                                      e instanceof TypeError ||
-                                      e?.plasmicType ===
-                                        "PlasmicUndefinedDataError"
-                                    ) {
-                                      return "green";
+                                tabKey={"tab1"}
+                              >
+                                <LevelsetButton
+                                  className={classNames(
+                                    "__wab_instance",
+                                    sty.levelsetButton__q81U
+                                  )}
+                                  color={(() => {
+                                    try {
+                                      return $ctx.currentTabKey === "tab1"
+                                        ? "green"
+                                        : "softSand";
+                                    } catch (e) {
+                                      if (
+                                        e instanceof TypeError ||
+                                        e?.plasmicType ===
+                                          "PlasmicUndefinedDataError"
+                                      ) {
+                                        return "green";
+                                      }
+                                      throw e;
                                     }
-                                    throw e;
-                                  }
-                                })()}
-                              >
-                                <div
-                                  className={classNames(
-                                    projectcss.all,
-                                    projectcss.__wab_text,
-                                    sty.text___6KyZb
-                                  )}
-                                >
-                                  {"Pathway"}
-                                </div>
-                              </LevelsetButton>
-                            </TabButton>
-                            <TabButton
-                              className={classNames(
-                                "__wab_instance",
-                                sty.tabButton__hM9Qt
-                              )}
-                              tabKey={"tab2"}
-                            >
-                              <LevelsetButton
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.levelsetButton__nUeV4
-                                )}
-                                color={(() => {
-                                  try {
-                                    return $ctx.currentTabKey === "tab2"
-                                      ? "green"
-                                      : "softSand";
-                                  } catch (e) {
-                                    if (
-                                      e instanceof TypeError ||
-                                      e?.plasmicType ===
-                                        "PlasmicUndefinedDataError"
-                                    ) {
-                                      return "green";
-                                    }
-                                    throw e;
-                                  }
-                                })()}
-                              >
-                                <div
-                                  className={classNames(
-                                    projectcss.all,
-                                    projectcss.__wab_text,
-                                    sty.text__l7T
-                                  )}
-                                >
-                                  {"Positional Excellence"}
-                                </div>
-                              </LevelsetButton>
-                            </TabButton>
-                            <TabButton
-                              className={classNames(
-                                "__wab_instance",
-                                sty.tabButton__mfDk
-                              )}
-                              tabKey={"tab3"}
-                            >
-                              <LevelsetButton
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.levelsetButton__rd97
-                                )}
-                                color={(() => {
-                                  try {
-                                    return $ctx.currentTabKey === "tab3"
-                                      ? "green"
-                                      : "softSand";
-                                  } catch (e) {
-                                    if (
-                                      e instanceof TypeError ||
-                                      e?.plasmicType ===
-                                        "PlasmicUndefinedDataError"
-                                    ) {
-                                      return "green";
-                                    }
-                                    throw e;
-                                  }
-                                })()}
-                              >
-                                <div
-                                  className={classNames(
-                                    projectcss.all,
-                                    projectcss.__wab_text,
-                                    sty.text___4BkwJ
-                                  )}
-                                >
-                                  {"Evaluations"}
-                                </div>
-                              </LevelsetButton>
-                            </TabButton>
-                            <TabButton
-                              className={classNames(
-                                "__wab_instance",
-                                sty.tabButton__myaYm
-                              )}
-                              tabKey={"tab4"}
-                            >
-                              <LevelsetButton
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.levelsetButton__twGtL
-                                )}
-                                color={(() => {
-                                  try {
-                                    return $ctx.currentTabKey === "tab4"
-                                      ? "green"
-                                      : "softSand";
-                                  } catch (e) {
-                                    if (
-                                      e instanceof TypeError ||
-                                      e?.plasmicType ===
-                                        "PlasmicUndefinedDataError"
-                                    ) {
-                                      return "green";
-                                    }
-                                    throw e;
-                                  }
-                                })()}
-                              >
-                                <div
-                                  className={classNames(
-                                    projectcss.all,
-                                    projectcss.__wab_text,
-                                    sty.text__rnFqb
-                                  )}
-                                >
-                                  {"Discipline"}
-                                </div>
-                              </LevelsetButton>
-                            </TabButton>
-                            <TabUnderline
-                              data-plasmic-name={"tabUnderline"}
-                              data-plasmic-override={overrides.tabUnderline}
-                              className={classNames(
-                                "__wab_instance",
-                                sty.tabUnderline
-                              )}
-                            />
-                          </div>
-                          <div
-                            className={classNames(
-                              projectcss.all,
-                              sty.freeBox__aRoag
-                            )}
-                          >
-                            <TabContent
-                              data-plasmic-name={"pathwayContent"}
-                              data-plasmic-override={overrides.pathwayContent}
-                              className={classNames(
-                                "__wab_instance",
-                                sty.pathwayContent
-                              )}
-                              tabKey={"tab1"}
-                            >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  sty.freeBox__eNnS6
-                                )}
-                              >
-                                <div
-                                  className={classNames(
-                                    projectcss.all,
-                                    projectcss.__wab_text,
-                                    sty.text__o774
-                                  )}
-                                >
-                                  {"Coming soon!"}
-                                </div>
-                              </div>
-                            </TabContent>
-                            <TabContent
-                              data-plasmic-name={"peContent"}
-                              data-plasmic-override={overrides.peContent}
-                              className={classNames(
-                                "__wab_instance",
-                                sty.peContent
-                              )}
-                              tabKey={"tab2"}
-                            >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  sty.freeBox__gmIt2
-                                )}
-                              >
-                                <div
-                                  className={classNames(
-                                    projectcss.all,
-                                    projectcss.__wab_text,
-                                    sty.text__ts6AM
-                                  )}
-                                >
-                                  {"Coming soon!"}
-                                </div>
-                              </div>
-                            </TabContent>
-                            <TabContent
-                              data-plasmic-name={"evalsContent"}
-                              data-plasmic-override={overrides.evalsContent}
-                              className={classNames(
-                                "__wab_instance",
-                                sty.evalsContent
-                              )}
-                              tabKey={"tab3"}
-                            >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  sty.freeBox__wMoxn
-                                )}
-                              >
-                                <div
-                                  className={classNames(
-                                    projectcss.all,
-                                    projectcss.__wab_text,
-                                    sty.text__jrDLj
-                                  )}
-                                >
-                                  {"Coming soon!"}
-                                </div>
-                              </div>
-                            </TabContent>
-                            <TabContent
-                              data-plasmic-name={"disciplineContent"}
-                              data-plasmic-override={
-                                overrides.disciplineContent
-                              }
-                              className={classNames(
-                                "__wab_instance",
-                                sty.disciplineContent
-                              )}
-                              tabKey={"tab4"}
-                            >
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  sty.freeBox__imotp
-                                )}
-                              >
-                                <div
-                                  data-plasmic-name={"discipline"}
-                                  data-plasmic-override={overrides.discipline}
-                                  className={classNames(
-                                    projectcss.all,
-                                    sty.discipline
-                                  )}
+                                  })()}
                                 >
                                   <div
-                                    data-plasmic-name={"row"}
-                                    data-plasmic-override={overrides.row}
                                     className={classNames(
                                       projectcss.all,
-                                      sty.row
+                                      projectcss.__wab_text,
+                                      sty.text___6KyZb
                                     )}
                                   >
-                                    <div
-                                      data-plasmic-name={"text13"}
-                                      data-plasmic-override={overrides.text13}
-                                      className={classNames(
-                                        projectcss.all,
-                                        projectcss.__wab_text,
-                                        sty.text13
-                                      )}
-                                    >
-                                      {"In the last 90 days..."}
-                                    </div>
+                                    {"Pathway"}
                                   </div>
-                                  <div
-                                    data-plasmic-name={"row2"}
-                                    data-plasmic-override={overrides.row2}
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.row2
-                                    )}
-                                  >
-                                    <div
-                                      data-plasmic-name={"metricItem"}
-                                      data-plasmic-override={
-                                        overrides.metricItem
+                                </LevelsetButton>
+                              </TabButton>
+                              <TabButton
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.tabButton__hM9Qt
+                                )}
+                                tabKey={"tab2"}
+                              >
+                                <LevelsetButton
+                                  className={classNames(
+                                    "__wab_instance",
+                                    sty.levelsetButton__nUeV4
+                                  )}
+                                  color={(() => {
+                                    try {
+                                      return $ctx.currentTabKey === "tab2"
+                                        ? "green"
+                                        : "softSand";
+                                    } catch (e) {
+                                      if (
+                                        e instanceof TypeError ||
+                                        e?.plasmicType ===
+                                          "PlasmicUndefinedDataError"
+                                      ) {
+                                        return "green";
                                       }
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.metricItem
-                                      )}
-                                    >
-                                      <div
-                                        data-plasmic-name={"headingAndNumber"}
-                                        data-plasmic-override={
-                                          overrides.headingAndNumber
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.headingAndNumber
-                                        )}
-                                      >
-                                        <div
-                                          data-plasmic-name={"heading"}
-                                          data-plasmic-override={
-                                            overrides.heading
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            projectcss.__wab_text,
-                                            sty.heading
-                                          )}
-                                        >
-                                          {"Infractions"}
-                                        </div>
-                                        <div
-                                          data-plasmic-name={"numberAndBadge"}
-                                          data-plasmic-override={
-                                            overrides.numberAndBadge
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.numberAndBadge
-                                          )}
-                                        >
-                                          <div
-                                            data-plasmic-name={"number"}
-                                            data-plasmic-override={
-                                              overrides.number
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.number
-                                            )}
-                                          >
-                                            <React.Fragment>
-                                              {(() => {
-                                                try {
-                                                  return (
-                                                    $queries.infractionsQuery
-                                                      .data ?? []
-                                                  ).reduce(
-                                                    total => total + 1,
-                                                    0
-                                                  );
-                                                } catch (e) {
-                                                  if (
-                                                    e instanceof TypeError ||
-                                                    e?.plasmicType ===
-                                                      "PlasmicUndefinedDataError"
-                                                  ) {
-                                                    return "4";
-                                                  }
-                                                  throw e;
-                                                }
-                                              })()}
-                                            </React.Fragment>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div
-                                      data-plasmic-name={"metricItem2"}
-                                      data-plasmic-override={
-                                        overrides.metricItem2
-                                      }
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.metricItem2
-                                      )}
-                                    >
-                                      <div
-                                        data-plasmic-name={"headingAndNumber2"}
-                                        data-plasmic-override={
-                                          overrides.headingAndNumber2
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.headingAndNumber2
-                                        )}
-                                      >
-                                        <div
-                                          data-plasmic-name={"heading2"}
-                                          data-plasmic-override={
-                                            overrides.heading2
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            projectcss.__wab_text,
-                                            sty.heading2
-                                          )}
-                                        >
-                                          {"Discipline Points"}
-                                        </div>
-                                        <div
-                                          data-plasmic-name={"numberAndBadge2"}
-                                          data-plasmic-override={
-                                            overrides.numberAndBadge2
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.numberAndBadge2
-                                          )}
-                                        >
-                                          <div
-                                            data-plasmic-name={"number2"}
-                                            data-plasmic-override={
-                                              overrides.number2
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              projectcss.__wab_text,
-                                              sty.number2
-                                            )}
-                                          >
-                                            <React.Fragment>
-                                              {(() => {
-                                                try {
-                                                  return (
-                                                    $queries.infractionsQuery
-                                                      .data ?? []
-                                                  ).reduce(
-                                                    (total, i) =>
-                                                      total + (i.points ?? 0),
-                                                    0
-                                                  );
-                                                } catch (e) {
-                                                  if (
-                                                    e instanceof TypeError ||
-                                                    e?.plasmicType ===
-                                                      "PlasmicUndefinedDataError"
-                                                  ) {
-                                                    return "55";
-                                                  }
-                                                  throw e;
-                                                }
-                                              })()}
-                                            </React.Fragment>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.freeBox__jzVpm
-                                    )}
-                                  />
-
-                                  <div
-                                    data-plasmic-name={"inputAndText"}
-                                    data-plasmic-override={
-                                      overrides.inputAndText
+                                      throw e;
                                     }
+                                  })()}
+                                >
+                                  <div
                                     className={classNames(
                                       projectcss.all,
-                                      sty.inputAndText
+                                      projectcss.__wab_text,
+                                      sty.text__l7T
+                                    )}
+                                  >
+                                    {"Positional Excellence"}
+                                  </div>
+                                </LevelsetButton>
+                              </TabButton>
+                              <TabButton
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.tabButton__mfDk
+                                )}
+                                tabKey={"tab3"}
+                              >
+                                <LevelsetButton
+                                  className={classNames(
+                                    "__wab_instance",
+                                    sty.levelsetButton__rd97
+                                  )}
+                                  color={(() => {
+                                    try {
+                                      return $ctx.currentTabKey === "tab3"
+                                        ? "green"
+                                        : "softSand";
+                                    } catch (e) {
+                                      if (
+                                        e instanceof TypeError ||
+                                        e?.plasmicType ===
+                                          "PlasmicUndefinedDataError"
+                                      ) {
+                                        return "green";
+                                      }
+                                      throw e;
+                                    }
+                                  })()}
+                                >
+                                  <div
+                                    className={classNames(
+                                      projectcss.all,
+                                      projectcss.__wab_text,
+                                      sty.text___4BkwJ
+                                    )}
+                                  >
+                                    {"Evaluations"}
+                                  </div>
+                                </LevelsetButton>
+                              </TabButton>
+                              <TabButton
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.tabButton__myaYm
+                                )}
+                                tabKey={"tab4"}
+                              >
+                                <LevelsetButton
+                                  className={classNames(
+                                    "__wab_instance",
+                                    sty.levelsetButton__twGtL
+                                  )}
+                                  color={(() => {
+                                    try {
+                                      return $ctx.currentTabKey === "tab4"
+                                        ? "green"
+                                        : "softSand";
+                                    } catch (e) {
+                                      if (
+                                        e instanceof TypeError ||
+                                        e?.plasmicType ===
+                                          "PlasmicUndefinedDataError"
+                                      ) {
+                                        return "green";
+                                      }
+                                      throw e;
+                                    }
+                                  })()}
+                                >
+                                  <div
+                                    className={classNames(
+                                      projectcss.all,
+                                      projectcss.__wab_text,
+                                      sty.text__rnFqb
+                                    )}
+                                  >
+                                    {"Discipline"}
+                                  </div>
+                                </LevelsetButton>
+                              </TabButton>
+                              <TabUnderline
+                                data-plasmic-name={"tabUnderline"}
+                                data-plasmic-override={overrides.tabUnderline}
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.tabUnderline
+                                )}
+                              />
+                            </div>
+                            <div
+                              className={classNames(
+                                projectcss.all,
+                                sty.freeBox__aRoag
+                              )}
+                            >
+                              <TabContent
+                                data-plasmic-name={"pathwayContent"}
+                                data-plasmic-override={overrides.pathwayContent}
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.pathwayContent
+                                )}
+                                tabKey={"tab1"}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    sty.freeBox__eNnS6
+                                  )}
+                                >
+                                  <div
+                                    className={classNames(
+                                      projectcss.all,
+                                      projectcss.__wab_text,
+                                      sty.text__o774
+                                    )}
+                                  >
+                                    {"Coming soon!"}
+                                  </div>
+                                </div>
+                              </TabContent>
+                              <TabContent
+                                data-plasmic-name={"peContent"}
+                                data-plasmic-override={overrides.peContent}
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.peContent
+                                )}
+                                tabKey={"tab2"}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    sty.freeBox__gmIt2
+                                  )}
+                                >
+                                  <div
+                                    className={classNames(
+                                      projectcss.all,
+                                      projectcss.__wab_text,
+                                      sty.text__ts6AM
+                                    )}
+                                  >
+                                    {"Coming soon!"}
+                                  </div>
+                                </div>
+                              </TabContent>
+                              <TabContent
+                                data-plasmic-name={"evalsContent"}
+                                data-plasmic-override={overrides.evalsContent}
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.evalsContent
+                                )}
+                                tabKey={"tab3"}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    sty.freeBox__wMoxn
+                                  )}
+                                >
+                                  <div
+                                    className={classNames(
+                                      projectcss.all,
+                                      projectcss.__wab_text,
+                                      sty.text__jrDLj
+                                    )}
+                                  >
+                                    {"Coming soon!"}
+                                  </div>
+                                </div>
+                              </TabContent>
+                              <TabContent
+                                data-plasmic-name={"disciplineContent"}
+                                data-plasmic-override={
+                                  overrides.disciplineContent
+                                }
+                                className={classNames(
+                                  "__wab_instance",
+                                  sty.disciplineContent
+                                )}
+                                tabKey={"tab4"}
+                              >
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    sty.freeBox__imotp
+                                  )}
+                                >
+                                  <div
+                                    data-plasmic-name={"discipline"}
+                                    data-plasmic-override={overrides.discipline}
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.discipline
                                     )}
                                   >
                                     <div
-                                      data-plasmic-name={"iconAndText"}
-                                      data-plasmic-override={
-                                        overrides.iconAndText
-                                      }
+                                      data-plasmic-name={"row"}
+                                      data-plasmic-override={overrides.row}
                                       className={classNames(
                                         projectcss.all,
-                                        sty.iconAndText
+                                        sty.row
                                       )}
                                     >
                                       <div
-                                        data-plasmic-name={"text14"}
-                                        data-plasmic-override={overrides.text14}
+                                        data-plasmic-name={"text13"}
+                                        data-plasmic-override={overrides.text13}
                                         className={classNames(
                                           projectcss.all,
                                           projectcss.__wab_text,
-                                          sty.text14
+                                          sty.text13
                                         )}
                                       >
-                                        {"Infractions"}
+                                        {"Current Period (last 90 days)"}
                                       </div>
                                     </div>
-                                  </div>
-                                  <div
-                                    data-plasmic-name={"frame1"}
-                                    data-plasmic-override={overrides.frame1}
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.frame1
-                                    )}
-                                  >
-                                    {(_par =>
-                                      !_par
-                                        ? []
-                                        : Array.isArray(_par)
-                                          ? _par
-                                          : [_par])(
-                                      (() => {
-                                        try {
-                                          return $queries.infractionsQuery.data;
-                                        } catch (e) {
-                                          if (
-                                            e instanceof TypeError ||
-                                            e?.plasmicType ===
-                                              "PlasmicUndefinedDataError"
-                                          ) {
-                                            return [];
-                                          }
-                                          throw e;
+                                    <div
+                                      data-plasmic-name={"row2"}
+                                      data-plasmic-override={overrides.row2}
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.row2
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"metricItem"}
+                                        data-plasmic-override={
+                                          overrides.metricItem
                                         }
-                                      })()
-                                    ).map(
-                                      (__plasmic_item_0, __plasmic_idx_0) => {
-                                        const infraction = __plasmic_item_0;
-                                        const currentIndex = __plasmic_idx_0;
-                                        return (
-                                          <SlideoutListItem2
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.metricItem
+                                        )}
+                                      >
+                                        <div
+                                          data-plasmic-name={"headingAndNumber"}
+                                          data-plasmic-override={
+                                            overrides.headingAndNumber
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            sty.headingAndNumber
+                                          )}
+                                        >
+                                          <div
+                                            data-plasmic-name={"heading"}
+                                            data-plasmic-override={
+                                              overrides.heading
+                                            }
                                             className={classNames(
-                                              "__wab_instance",
-                                              sty.slideoutListItem2__kgkig
+                                              projectcss.all,
+                                              projectcss.__wab_text,
+                                              sty.heading
                                             )}
-                                            date2={
-                                              <div
-                                                data-plasmic-name={"date4"}
-                                                data-plasmic-override={
-                                                  overrides.date4
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.date4
-                                                )}
-                                              >
-                                                <React.Fragment>
-                                                  {(() => {
-                                                    try {
-                                                      return infraction.infraction_date;
-                                                    } catch (e) {
-                                                      if (
-                                                        e instanceof
-                                                          TypeError ||
-                                                        e?.plasmicType ===
-                                                          "PlasmicUndefinedDataError"
-                                                      ) {
-                                                        return "10/2/2025";
-                                                      }
-                                                      throw e;
-                                                    }
-                                                  })()}
-                                                </React.Fragment>
-                                              </div>
+                                          >
+                                            {"Infractions"}
+                                          </div>
+                                          <div
+                                            data-plasmic-name={"numberAndBadge"}
+                                            data-plasmic-override={
+                                              overrides.numberAndBadge
                                             }
-                                            documentingLeader={
-                                              <div
-                                                data-plasmic-name={"leader4"}
-                                                data-plasmic-override={
-                                                  overrides.leader4
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.leader4
-                                                )}
-                                              >
-                                                <React.Fragment>
-                                                  {(() => {
-                                                    try {
-                                                      return infraction.leader_name;
-                                                    } catch (e) {
-                                                      if (
-                                                        e instanceof
-                                                          TypeError ||
-                                                        e?.plasmicType ===
-                                                          "PlasmicUndefinedDataError"
-                                                      ) {
-                                                        return "Leader Name";
-                                                      }
-                                                      throw e;
-                                                    }
-                                                  })()}
-                                                </React.Fragment>
-                                              </div>
-                                            }
-                                            informed2={
-                                              <div
-                                                data-plasmic-name={"informed4"}
-                                                data-plasmic-override={
-                                                  overrides.informed4
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.informed4
-                                                )}
-                                              >
-                                                <React.Fragment>
-                                                  {(() => {
-                                                    try {
-                                                      return infraction.acknowledgement;
-                                                    } catch (e) {
-                                                      if (
-                                                        e instanceof
-                                                          TypeError ||
-                                                        e?.plasmicType ===
-                                                          "PlasmicUndefinedDataError"
-                                                      ) {
-                                                        return "Informed";
-                                                      }
-                                                      throw e;
-                                                    }
-                                                  })()}
-                                                </React.Fragment>
-                                              </div>
-                                            }
-                                            infractionType={(() => {
-                                              try {
-                                                return infraction.points > 0
-                                                  ? "negative"
-                                                  : "positive";
-                                              } catch (e) {
-                                                if (
-                                                  e instanceof TypeError ||
-                                                  e?.plasmicType ===
-                                                    "PlasmicUndefinedDataError"
-                                                ) {
-                                                  return "negative";
-                                                }
-                                                throw e;
+                                            className={classNames(
+                                              projectcss.all,
+                                              sty.numberAndBadge
+                                            )}
+                                          >
+                                            <div
+                                              data-plasmic-name={"number"}
+                                              data-plasmic-override={
+                                                overrides.number
                                               }
-                                            })()}
-                                            itemName={
+                                              className={classNames(
+                                                projectcss.all,
+                                                projectcss.__wab_text,
+                                                sty.number
+                                              )}
+                                            >
                                               <React.Fragment>
                                                 {(() => {
                                                   try {
-                                                    return infraction.infraction;
+                                                    return (
+                                                      $queries.infractionsQuery
+                                                        .data ?? []
+                                                    ).reduce(
+                                                      total => total + 1,
+                                                      0
+                                                    );
                                                   } catch (e) {
                                                     if (
                                                       e instanceof TypeError ||
                                                       e?.plasmicType ===
                                                         "PlasmicUndefinedDataError"
                                                     ) {
-                                                      return "Item Name";
+                                                      return "4";
                                                     }
                                                     throw e;
                                                   }
                                                 })()}
                                               </React.Fragment>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div
+                                        data-plasmic-name={"metricItem2"}
+                                        data-plasmic-override={
+                                          overrides.metricItem2
+                                        }
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.metricItem2
+                                        )}
+                                      >
+                                        <div
+                                          data-plasmic-name={
+                                            "headingAndNumber2"
+                                          }
+                                          data-plasmic-override={
+                                            overrides.headingAndNumber2
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            sty.headingAndNumber2
+                                          )}
+                                        >
+                                          <div
+                                            data-plasmic-name={"heading2"}
+                                            data-plasmic-override={
+                                              overrides.heading2
                                             }
-                                            key={currentIndex}
-                                            pointValue2={
-                                              <div
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  sty.freeBox__birHi
-                                                )}
-                                              >
-                                                <div
-                                                  data-plasmic-name={
-                                                    "pointValue8"
+                                            className={classNames(
+                                              projectcss.all,
+                                              projectcss.__wab_text,
+                                              sty.heading2
+                                            )}
+                                          >
+                                            {"Discipline Points"}
+                                          </div>
+                                          <div
+                                            data-plasmic-name={
+                                              "numberAndBadge2"
+                                            }
+                                            data-plasmic-override={
+                                              overrides.numberAndBadge2
+                                            }
+                                            className={classNames(
+                                              projectcss.all,
+                                              sty.numberAndBadge2
+                                            )}
+                                          >
+                                            <div
+                                              data-plasmic-name={"number2"}
+                                              data-plasmic-override={
+                                                overrides.number2
+                                              }
+                                              className={classNames(
+                                                projectcss.all,
+                                                projectcss.__wab_text,
+                                                sty.number2
+                                              )}
+                                            >
+                                              <React.Fragment>
+                                                {(() => {
+                                                  try {
+                                                    return (
+                                                      $queries.infractionsQuery
+                                                        .data ?? []
+                                                    ).reduce(
+                                                      (total, i) =>
+                                                        total + (i.points ?? 0),
+                                                      0
+                                                    );
+                                                  } catch (e) {
+                                                    if (
+                                                      e instanceof TypeError ||
+                                                      e?.plasmicType ===
+                                                        "PlasmicUndefinedDataError"
+                                                    ) {
+                                                      return "55";
+                                                    }
+                                                    throw e;
                                                   }
+                                                })()}
+                                              </React.Fragment>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.freeBox__jzVpm
+                                      )}
+                                    />
+
+                                    <div
+                                      data-plasmic-name={"inputAndText"}
+                                      data-plasmic-override={
+                                        overrides.inputAndText
+                                      }
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.inputAndText
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"iconAndText"}
+                                        data-plasmic-override={
+                                          overrides.iconAndText
+                                        }
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.iconAndText
+                                        )}
+                                      >
+                                        <div
+                                          data-plasmic-name={"text14"}
+                                          data-plasmic-override={
+                                            overrides.text14
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            projectcss.__wab_text,
+                                            sty.text14
+                                          )}
+                                        >
+                                          {"Infractions"}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div
+                                      data-plasmic-name={"frame1"}
+                                      data-plasmic-override={overrides.frame1}
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.frame1
+                                      )}
+                                    >
+                                      {(_par =>
+                                        !_par
+                                          ? []
+                                          : Array.isArray(_par)
+                                            ? _par
+                                            : [_par])(
+                                        (() => {
+                                          try {
+                                            return $queries.infractionsQuery
+                                              .data;
+                                          } catch (e) {
+                                            if (
+                                              e instanceof TypeError ||
+                                              e?.plasmicType ===
+                                                "PlasmicUndefinedDataError"
+                                            ) {
+                                              return [];
+                                            }
+                                            throw e;
+                                          }
+                                        })()
+                                      ).map(
+                                        (__plasmic_item_0, __plasmic_idx_0) => {
+                                          const infraction = __plasmic_item_0;
+                                          const currentIndex = __plasmic_idx_0;
+                                          return (
+                                            <SlideoutListItem2
+                                              className={classNames(
+                                                "__wab_instance",
+                                                sty.slideoutListItem2__kgkig
+                                              )}
+                                              date2={
+                                                <div
+                                                  data-plasmic-name={"date4"}
                                                   data-plasmic-override={
-                                                    overrides.pointValue8
+                                                    overrides.date4
                                                   }
                                                   className={classNames(
                                                     projectcss.all,
                                                     projectcss.__wab_text,
-                                                    sty.pointValue8
+                                                    sty.date4
                                                   )}
                                                 >
                                                   <React.Fragment>
                                                     {(() => {
                                                       try {
-                                                        return infraction.points;
+                                                        return infraction.infraction_date;
                                                       } catch (e) {
                                                         if (
                                                           e instanceof
@@ -1493,462 +1503,1157 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                           e?.plasmicType ===
                                                             "PlasmicUndefinedDataError"
                                                         ) {
-                                                          return "10";
+                                                          return "10/2/2025";
                                                         }
                                                         throw e;
                                                       }
                                                     })()}
                                                   </React.Fragment>
                                                 </div>
-                                              </div>
-                                            }
-                                          />
-                                        );
-                                      }
-                                    )}
-                                    {(() => {
-                                      try {
-                                        return (
-                                          ($queries.infractionsQuery.data ?? [])
-                                            .length === 0
-                                        );
-                                      } catch (e) {
-                                        if (
-                                          e instanceof TypeError ||
-                                          e?.plasmicType ===
-                                            "PlasmicUndefinedDataError"
-                                        ) {
-                                          return true;
-                                        }
-                                        throw e;
-                                      }
-                                    })() ? (
-                                      <div
-                                        data-plasmic-name={"listItem"}
-                                        data-plasmic-override={
-                                          overrides.listItem
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.listItem
-                                        )}
-                                      >
-                                        <div
-                                          data-plasmic-name={"contents"}
-                                          data-plasmic-override={
-                                            overrides.contents
-                                          }
-                                          className={classNames(
-                                            projectcss.all,
-                                            sty.contents
-                                          )}
-                                        >
-                                          <div
-                                            data-plasmic-name={"content11"}
-                                            data-plasmic-override={
-                                              overrides.content11
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.content11
-                                            )}
-                                          >
-                                            <div
-                                              data-plasmic-name={
-                                                "listItemDetails"
                                               }
-                                              data-plasmic-override={
-                                                overrides.listItemDetails
+                                              documentingLeader={
+                                                <div
+                                                  data-plasmic-name={"leader4"}
+                                                  data-plasmic-override={
+                                                    overrides.leader4
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.leader4
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return infraction.leader_name;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "Leader Name";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
                                               }
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.listItemDetails
-                                              )}
-                                            >
-                                              <div
-                                                data-plasmic-name={"text24"}
-                                                data-plasmic-override={
-                                                  overrides.text24
+                                              informed2={
+                                                <div
+                                                  data-plasmic-name={
+                                                    "informed4"
+                                                  }
+                                                  data-plasmic-override={
+                                                    overrides.informed4
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.informed4
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return infraction.acknowledgement;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "Informed";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
+                                              }
+                                              infractionType={(() => {
+                                                try {
+                                                  return infraction.points > 0
+                                                    ? "negative"
+                                                    : "positive";
+                                                } catch (e) {
+                                                  if (
+                                                    e instanceof TypeError ||
+                                                    e?.plasmicType ===
+                                                      "PlasmicUndefinedDataError"
+                                                  ) {
+                                                    return "negative";
+                                                  }
+                                                  throw e;
                                                 }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  sty.text24
-                                                )}
-                                              >
-                                                {renderPlasmicSlot({
-                                                  defaultContents:
-                                                    "No infractions in the last 90 days",
-                                                  value: args.itemName,
-                                                  className: classNames(
-                                                    sty.slotTargetItemName
-                                                  )
-                                                })}
-                                              </div>
-                                            </div>
-                                            <div
-                                              data-plasmic-name={"points"}
-                                              data-plasmic-override={
-                                                overrides.points
+                                              })()}
+                                              itemName={
+                                                <React.Fragment>
+                                                  {(() => {
+                                                    try {
+                                                      return infraction.infraction;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return "Item Name";
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                </React.Fragment>
                                               }
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.points
-                                              )}
-                                            >
-                                              {renderPlasmicSlot({
-                                                defaultContents: (
+                                              key={currentIndex}
+                                              pointValue2={
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.freeBox__birHi
+                                                  )}
+                                                >
                                                   <div
+                                                    data-plasmic-name={
+                                                      "pointValue8"
+                                                    }
+                                                    data-plasmic-override={
+                                                      overrides.pointValue8
+                                                    }
                                                     className={classNames(
                                                       projectcss.all,
-                                                      sty.freeBox__auyOl
+                                                      projectcss.__wab_text,
+                                                      sty.pointValue8
                                                     )}
                                                   >
-                                                    <div
-                                                      className={classNames(
-                                                        projectcss.all,
-                                                        projectcss.__wab_text,
-                                                        sty.text__aKcB
-                                                      )}
-                                                    >
-                                                      {"10"}
-                                                    </div>
+                                                    <React.Fragment>
+                                                      {(() => {
+                                                        try {
+                                                          return infraction.points;
+                                                        } catch (e) {
+                                                          if (
+                                                            e instanceof
+                                                              TypeError ||
+                                                            e?.plasmicType ===
+                                                              "PlasmicUndefinedDataError"
+                                                          ) {
+                                                            return "10";
+                                                          }
+                                                          throw e;
+                                                        }
+                                                      })()}
+                                                    </React.Fragment>
                                                   </div>
-                                                ),
-                                                value: args.pointValue3,
-                                                className: classNames(
-                                                  sty.slotTargetPointValue3
-                                                )
-                                              })}
-                                              <div
-                                                data-plasmic-name={"pointsText"}
-                                                data-plasmic-override={
-                                                  overrides.pointsText
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.pointsText
-                                                )}
-                                              >
-                                                {"points"}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ) : null}
-                                  </div>
-                                  <div
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.freeBox__wP2M3
-                                    )}
-                                  />
-
-                                  <div
-                                    data-plasmic-name={"inputAndText2"}
-                                    data-plasmic-override={
-                                      overrides.inputAndText2
-                                    }
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.inputAndText2
-                                    )}
-                                  >
-                                    <div
-                                      data-plasmic-name={"iconAndText2"}
-                                      data-plasmic-override={
-                                        overrides.iconAndText2
-                                      }
-                                      className={classNames(
-                                        projectcss.all,
-                                        sty.iconAndText2
+                                                </div>
+                                              }
+                                            />
+                                          );
+                                        }
                                       )}
-                                    >
-                                      <div
-                                        data-plasmic-name={"text27"}
-                                        data-plasmic-override={overrides.text27}
-                                        className={classNames(
-                                          projectcss.all,
-                                          projectcss.__wab_text,
-                                          sty.text27
-                                        )}
-                                      >
-                                        {"Disciplinary Actions"}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div
-                                    data-plasmic-name={"frame6"}
-                                    data-plasmic-override={overrides.frame6}
-                                    className={classNames(
-                                      projectcss.all,
-                                      sty.frame6
-                                    )}
-                                  >
-                                    {(_par =>
-                                      !_par
-                                        ? []
-                                        : Array.isArray(_par)
-                                          ? _par
-                                          : [_par])(
-                                      (() => {
+                                      {(() => {
                                         try {
-                                          return $queries.discActions.data;
+                                          return (
+                                            (
+                                              $queries.infractionsQuery.data ??
+                                              []
+                                            ).length === 0
+                                          );
                                         } catch (e) {
                                           if (
                                             e instanceof TypeError ||
                                             e?.plasmicType ===
                                               "PlasmicUndefinedDataError"
                                           ) {
-                                            return [];
+                                            return true;
                                           }
                                           throw e;
                                         }
-                                      })()
-                                    ).map(
-                                      (__plasmic_item_0, __plasmic_idx_0) => {
-                                        const action = __plasmic_item_0;
-                                        const currentIndex = __plasmic_idx_0;
-                                        return (
-                                          <SlideoutListItem2
-                                            className={classNames(
-                                              "__wab_instance",
-                                              sty.slideoutListItem2__o7OIj
-                                            )}
-                                            date2={
-                                              <div
-                                                data-plasmic-name={"date2"}
-                                                data-plasmic-override={
-                                                  overrides.date2
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.date2
-                                                )}
-                                              >
-                                                <React.Fragment>
-                                                  {(() => {
-                                                    try {
-                                                      return action.action_date;
-                                                    } catch (e) {
-                                                      if (
-                                                        e instanceof
-                                                          TypeError ||
-                                                        e?.plasmicType ===
-                                                          "PlasmicUndefinedDataError"
-                                                      ) {
-                                                        return "10/2/2025";
-                                                      }
-                                                      throw e;
-                                                    }
-                                                  })()}
-                                                </React.Fragment>
-                                              </div>
-                                            }
-                                            disciplinaryAction={true}
-                                            documentingLeader={
-                                              <div
-                                                data-plasmic-name={"leader2"}
-                                                data-plasmic-override={
-                                                  overrides.leader2
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.leader2
-                                                )}
-                                              >
-                                                <React.Fragment>
-                                                  {(() => {
-                                                    try {
-                                                      return action.leader_name;
-                                                    } catch (e) {
-                                                      if (
-                                                        e instanceof
-                                                          TypeError ||
-                                                        e?.plasmicType ===
-                                                          "PlasmicUndefinedDataError"
-                                                      ) {
-                                                        return "Leader Name";
-                                                      }
-                                                      throw e;
-                                                    }
-                                                  })()}
-                                                </React.Fragment>
-                                              </div>
-                                            }
-                                            itemName={
-                                              <React.Fragment>
-                                                {(() => {
-                                                  try {
-                                                    return action.action;
-                                                  } catch (e) {
-                                                    if (
-                                                      e instanceof TypeError ||
-                                                      e?.plasmicType ===
-                                                        "PlasmicUndefinedDataError"
-                                                    ) {
-                                                      return "Item Name";
-                                                    }
-                                                    throw e;
-                                                  }
-                                                })()}
-                                              </React.Fragment>
-                                            }
-                                            key={currentIndex}
-                                          />
-                                        );
-                                      }
-                                    )}
-                                    {(() => {
-                                      try {
-                                        return (
-                                          ($queries.discActions.data ?? [])
-                                            .length === 0
-                                        );
-                                      } catch (e) {
-                                        if (
-                                          e instanceof TypeError ||
-                                          e?.plasmicType ===
-                                            "PlasmicUndefinedDataError"
-                                        ) {
-                                          return true;
-                                        }
-                                        throw e;
-                                      }
-                                    })() ? (
-                                      <div
-                                        data-plasmic-name={"listItem2"}
-                                        data-plasmic-override={
-                                          overrides.listItem2
-                                        }
-                                        className={classNames(
-                                          projectcss.all,
-                                          sty.listItem2
-                                        )}
-                                      >
+                                      })() ? (
                                         <div
-                                          data-plasmic-name={"contents2"}
+                                          data-plasmic-name={"listItem"}
                                           data-plasmic-override={
-                                            overrides.contents2
+                                            overrides.listItem
                                           }
                                           className={classNames(
                                             projectcss.all,
-                                            sty.contents2
+                                            sty.listItem
                                           )}
                                         >
                                           <div
-                                            data-plasmic-name={"content12"}
+                                            data-plasmic-name={"contents"}
                                             data-plasmic-override={
-                                              overrides.content12
+                                              overrides.contents
                                             }
                                             className={classNames(
                                               projectcss.all,
-                                              sty.content12
+                                              sty.contents
                                             )}
                                           >
                                             <div
-                                              data-plasmic-name={
-                                                "listItemDetails2"
-                                              }
+                                              data-plasmic-name={"content11"}
                                               data-plasmic-override={
-                                                overrides.listItemDetails2
+                                                overrides.content11
                                               }
                                               className={classNames(
                                                 projectcss.all,
-                                                sty.listItemDetails2
+                                                sty.content11
                                               )}
                                             >
                                               <div
-                                                data-plasmic-name={"text25"}
+                                                data-plasmic-name={
+                                                  "listItemDetails"
+                                                }
                                                 data-plasmic-override={
-                                                  overrides.text25
+                                                  overrides.listItemDetails
                                                 }
                                                 className={classNames(
                                                   projectcss.all,
-                                                  sty.text25
+                                                  sty.listItemDetails
+                                                )}
+                                              >
+                                                <div
+                                                  data-plasmic-name={"text24"}
+                                                  data-plasmic-override={
+                                                    overrides.text24
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.text24
+                                                  )}
+                                                >
+                                                  {renderPlasmicSlot({
+                                                    defaultContents:
+                                                      "No infractions in the last 90 days",
+                                                    value: args.itemName,
+                                                    className: classNames(
+                                                      sty.slotTargetItemName
+                                                    )
+                                                  })}
+                                                </div>
+                                              </div>
+                                              <div
+                                                data-plasmic-name={"points"}
+                                                data-plasmic-override={
+                                                  overrides.points
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  sty.points
                                                 )}
                                               >
                                                 {renderPlasmicSlot({
-                                                  defaultContents:
-                                                    "No disciplinary actions in the last 90 days",
-                                                  value: args.itemName2,
-                                                  className: classNames(
-                                                    sty.slotTargetItemName2
-                                                  )
-                                                })}
-                                              </div>
-                                            </div>
-                                            <div
-                                              data-plasmic-name={"points2"}
-                                              data-plasmic-override={
-                                                overrides.points2
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.points2
-                                              )}
-                                            >
-                                              {renderPlasmicSlot({
-                                                defaultContents: (
-                                                  <div
-                                                    className={classNames(
-                                                      projectcss.all,
-                                                      sty.freeBox__wsOmu
-                                                    )}
-                                                  >
+                                                  defaultContents: (
                                                     <div
                                                       className={classNames(
                                                         projectcss.all,
-                                                        projectcss.__wab_text,
-                                                        sty.text__beuRy
+                                                        sty.freeBox__auyOl
                                                       )}
                                                     >
-                                                      {"10"}
+                                                      <div
+                                                        className={classNames(
+                                                          projectcss.all,
+                                                          projectcss.__wab_text,
+                                                          sty.text__aKcB
+                                                        )}
+                                                      >
+                                                        {"10"}
+                                                      </div>
                                                     </div>
-                                                  </div>
-                                                ),
-                                                value: args.pointValue5,
-                                                className: classNames(
-                                                  sty.slotTargetPointValue5
-                                                )
-                                              })}
-                                              <div
-                                                data-plasmic-name={
-                                                  "pointsText2"
-                                                }
-                                                data-plasmic-override={
-                                                  overrides.pointsText2
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.pointsText2
-                                                )}
-                                              >
-                                                {"points"}
+                                                  ),
+                                                  value: args.pointValue3,
+                                                  className: classNames(
+                                                    sty.slotTargetPointValue3
+                                                  )
+                                                })}
+                                                <div
+                                                  data-plasmic-name={
+                                                    "pointsText"
+                                                  }
+                                                  data-plasmic-override={
+                                                    overrides.pointsText
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.pointsText
+                                                  )}
+                                                >
+                                                  {"points"}
+                                                </div>
                                               </div>
                                             </div>
                                           </div>
                                         </div>
+                                      ) : null}
+                                    </div>
+                                    <div
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.freeBox__wP2M3
+                                      )}
+                                    />
+
+                                    <div
+                                      data-plasmic-name={"inputAndText2"}
+                                      data-plasmic-override={
+                                        overrides.inputAndText2
+                                      }
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.inputAndText2
+                                      )}
+                                    >
+                                      <div
+                                        data-plasmic-name={"iconAndText2"}
+                                        data-plasmic-override={
+                                          overrides.iconAndText2
+                                        }
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.iconAndText2
+                                        )}
+                                      >
+                                        <div
+                                          data-plasmic-name={"text27"}
+                                          data-plasmic-override={
+                                            overrides.text27
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            projectcss.__wab_text,
+                                            sty.text27
+                                          )}
+                                        >
+                                          {"Disciplinary Actions"}
+                                        </div>
+                                        <AntdModal
+                                          data-plasmic-name={"modal"}
+                                          data-plasmic-override={
+                                            overrides.modal
+                                          }
+                                          className={classNames(
+                                            "__wab_instance",
+                                            sty.modal
+                                          )}
+                                          defaultStylesClassName={classNames(
+                                            projectcss.root_reset,
+                                            projectcss.plasmic_default_styles,
+                                            projectcss.plasmic_mixins,
+                                            styleTokensClassNames
+                                          )}
+                                          hideFooter={true}
+                                          modalContentClassName={classNames({
+                                            [sty["pcls_PZU42Hw5ycxZ"]]: true
+                                          })}
+                                          modalScopeClassName={
+                                            sty["modal__modal"]
+                                          }
+                                          onOpenChange={async (
+                                            ...eventArgs: any
+                                          ) => {
+                                            generateStateOnChangeProp($state, [
+                                              "modal",
+                                              "open"
+                                            ]).apply(null, eventArgs);
+                                          }}
+                                          open={generateStateValueProp($state, [
+                                            "modal",
+                                            "open"
+                                          ])}
+                                          title={"Record a Disciplinary Action"}
+                                          trigger={
+                                            <LevelsetButton
+                                              className={classNames(
+                                                "__wab_instance",
+                                                sty.levelsetButton__l9Kf6
+                                              )}
+                                              color={"red"}
+                                              size={"compact"}
+                                              startIcon={
+                                                <SquarePlusIcon
+                                                  data-plasmic-name={"svg"}
+                                                  data-plasmic-override={
+                                                    overrides.svg
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.svg
+                                                  )}
+                                                  role={"img"}
+                                                />
+                                              }
+                                            >
+                                              <div
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  projectcss.__wab_text,
+                                                  sty.text__tvJBe
+                                                )}
+                                              >
+                                                {"Record an Action"}
+                                              </div>
+                                            </LevelsetButton>
+                                          }
+                                          wrapClassName={classNames({
+                                            [sty["pcls_WDsFMgDP4sp7"]]: true
+                                          })}
+                                        >
+                                          {(() => {
+                                            const child$Props = {
+                                              className: classNames(
+                                                "__wab_instance",
+                                                sty.form
+                                              ),
+                                              extendedOnValuesChange: async (
+                                                ...eventArgs: any
+                                              ) => {
+                                                generateStateOnChangePropForCodeComponents(
+                                                  $state,
+                                                  "value",
+                                                  ["form", "value"],
+                                                  FormWrapper_Helpers
+                                                ).apply(null, eventArgs);
+                                              },
+                                              formItems: undefined,
+                                              labelCol: {
+                                                span: 8,
+                                                horizontalOnly: true
+                                              },
+                                              layout: "vertical",
+                                              mode: undefined,
+                                              onFinish: async values => {
+                                                const $steps = {};
+
+                                                $steps["defaultSubmit"] = true
+                                                  ? (() => {
+                                                      const actionArgs = {
+                                                        dataOp: {
+                                                          sourceId:
+                                                            "wGi39M1g3x2KnbXK4J4Gyq",
+                                                          opId: "450c6db8-38b2-4eab-aacd-6151f69d3388",
+                                                          userArgs: {
+                                                            variables: [
+                                                              $state.form.value
+                                                            ]
+                                                          },
+                                                          cacheKey: null,
+                                                          invalidatedKeys: [
+                                                            "plasmic_refresh_all"
+                                                          ],
+                                                          roleId: null
+                                                        }
+                                                      };
+                                                      return (async ({
+                                                        dataOp,
+                                                        continueOnError
+                                                      }) => {
+                                                        try {
+                                                          const response =
+                                                            await executePlasmicDataOp(
+                                                              dataOp,
+                                                              {
+                                                                userAuthToken:
+                                                                  dataSourcesCtx?.userAuthToken,
+                                                                user: dataSourcesCtx?.user
+                                                              }
+                                                            );
+                                                          await plasmicInvalidate(
+                                                            dataOp.invalidatedKeys
+                                                          );
+                                                          return response;
+                                                        } catch (e) {
+                                                          if (
+                                                            !continueOnError
+                                                          ) {
+                                                            throw e;
+                                                          }
+                                                          return e;
+                                                        }
+                                                      })?.apply(null, [
+                                                        actionArgs
+                                                      ]);
+                                                    })()
+                                                  : undefined;
+                                                if (
+                                                  $steps["defaultSubmit"] !=
+                                                    null &&
+                                                  typeof $steps[
+                                                    "defaultSubmit"
+                                                  ] === "object" &&
+                                                  typeof $steps["defaultSubmit"]
+                                                    .then === "function"
+                                                ) {
+                                                  $steps["defaultSubmit"] =
+                                                    await $steps[
+                                                      "defaultSubmit"
+                                                    ];
+                                                }
+                                              },
+                                              onIsSubmittingChange: async (
+                                                ...eventArgs: any
+                                              ) => {
+                                                generateStateOnChangePropForCodeComponents(
+                                                  $state,
+                                                  "isSubmitting",
+                                                  ["form", "isSubmitting"],
+                                                  FormWrapper_Helpers
+                                                ).apply(null, eventArgs);
+                                              },
+                                              ref: ref => {
+                                                $refs["form"] = ref;
+                                              },
+                                              wrapperCol: {
+                                                span: 16,
+                                                horizontalOnly: true
+                                              }
+                                            };
+                                            initializeCodeComponentStates(
+                                              $state,
+                                              [
+                                                {
+                                                  name: "value",
+                                                  plasmicStateName: "form.value"
+                                                },
+                                                {
+                                                  name: "isSubmitting",
+                                                  plasmicStateName:
+                                                    "form.isSubmitting"
+                                                }
+                                              ],
+                                              [],
+                                              FormWrapper_Helpers ?? {},
+                                              child$Props
+                                            );
+
+                                            return (
+                                              <FormWrapper
+                                                data-plasmic-name={"form"}
+                                                data-plasmic-override={
+                                                  overrides.form
+                                                }
+                                                {...child$Props}
+                                              >
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__jpbXj
+                                                  )}
+                                                  initialValue={(() => {
+                                                    try {
+                                                      return $state
+                                                        .selectedEmployee?.id;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return undefined;
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                  label={"Employee"}
+                                                  name={"employee_id"}
+                                                  noStyle={false}
+                                                  rules={[]}
+                                                >
+                                                  <AntdInput
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.input__kncHv
+                                                    )}
+                                                  />
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__icxJe
+                                                  )}
+                                                  hidden={true}
+                                                  initialValue={undefined}
+                                                  label={"id"}
+                                                  name={"id"}
+                                                >
+                                                  <AntdInput
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.input__qHgqz
+                                                    )}
+                                                  />
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__piCbx
+                                                  )}
+                                                  initialValue={undefined}
+                                                  label={"Action Taken"}
+                                                  name={"action_id"}
+                                                >
+                                                  <AntdSelect
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.select__wnIly
+                                                    )}
+                                                    defaultStylesClassName={classNames(
+                                                      projectcss.root_reset,
+                                                      projectcss.plasmic_default_styles,
+                                                      projectcss.plasmic_mixins,
+                                                      styleTokensClassNames
+                                                    )}
+                                                    options={[
+                                                      {
+                                                        value: "option1",
+                                                        label: "Option 1",
+                                                        type: "option"
+                                                      },
+                                                      {
+                                                        value: "option2",
+                                                        label: "Option 2",
+                                                        type: "option"
+                                                      }
+                                                    ]}
+                                                    placeholder={"Select..."}
+                                                    popupScopeClassName={
+                                                      sty[
+                                                        "select__wnIly__popup"
+                                                      ]
+                                                    }
+                                                  />
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__f8Fcn
+                                                  )}
+                                                  initialValue={undefined}
+                                                  label={
+                                                    "Date action was taken"
+                                                  }
+                                                  name={"action_date"}
+                                                >
+                                                  <AntdDatePicker
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.dateTimePicker
+                                                    )}
+                                                    popupScopeClassName={
+                                                      sty[
+                                                        "dateTimePicker__datePickerPopup"
+                                                      ]
+                                                    }
+                                                  />
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__pjEp
+                                                  )}
+                                                  hidden={false}
+                                                  initialValue={(() => {
+                                                    try {
+                                                      return $queries
+                                                        .employeesDiscQuery
+                                                        .data[0].location_id;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return undefined;
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                  label={"location_id"}
+                                                  name={"location_id"}
+                                                  valuePropName={``}
+                                                >
+                                                  <AntdInput
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.input___492Md
+                                                    )}
+                                                  />
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__wy33X
+                                                  )}
+                                                  hidden={true}
+                                                  initialValue={(() => {
+                                                    try {
+                                                      return undefined;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return undefined;
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                  label={"leader_name"}
+                                                  name={"leader_name"}
+                                                >
+                                                  <AntdInput
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.input__hv8Eq
+                                                    )}
+                                                  />
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField___89ZXy
+                                                  )}
+                                                  hidden={true}
+                                                  initialValue={undefined}
+                                                  label={"created_at"}
+                                                  name={"created_at"}
+                                                >
+                                                  <AntdInput
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.input__eA4Fg
+                                                    )}
+                                                  />
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__te6Uo
+                                                  )}
+                                                  hidden={true}
+                                                  initialValue={undefined}
+                                                  label={"employee_name"}
+                                                  name={"employee_name"}
+                                                >
+                                                  <AntdInput
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.input___4WroT
+                                                    )}
+                                                  />
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__aqR7X
+                                                  )}
+                                                  hidden={true}
+                                                  initialValue={undefined}
+                                                  label={"action"}
+                                                  name={"action"}
+                                                >
+                                                  <AntdInput
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.input__vX2YC
+                                                    )}
+                                                  />
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__mAiK0
+                                                  )}
+                                                  initialValue={(() => {
+                                                    try {
+                                                      return $queries
+                                                        .employeesDiscQuery
+                                                        .data[0].org_id;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return undefined;
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                  label={"org_id"}
+                                                  name={"org_id"}
+                                                >
+                                                  <AntdInput
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.input__uTjce
+                                                    )}
+                                                  />
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__zNNas
+                                                  )}
+                                                  initialValue={(() => {
+                                                    try {
+                                                      return $ctx.auth.id;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return undefined;
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                  label={"Leader taking action"}
+                                                  name={"acting_leader"}
+                                                >
+                                                  <AntdSelect
+                                                    className={classNames(
+                                                      "__wab_instance",
+                                                      sty.select___3Epa8
+                                                    )}
+                                                    defaultStylesClassName={classNames(
+                                                      projectcss.root_reset,
+                                                      projectcss.plasmic_default_styles,
+                                                      projectcss.plasmic_mixins,
+                                                      styleTokensClassNames
+                                                    )}
+                                                    options={(() => {
+                                                      try {
+                                                        return $queries
+                                                          .directorsQuery.data;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return undefined;
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                    placeholder={"Select..."}
+                                                    popupScopeClassName={
+                                                      sty[
+                                                        "select___3Epa8__popup"
+                                                      ]
+                                                    }
+                                                  />
+                                                </FormItemWrapper>
+                                                <AntdButton
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.button
+                                                  )}
+                                                  submitsForm={true}
+                                                  type={"primary"}
+                                                >
+                                                  <div
+                                                    className={classNames(
+                                                      projectcss.all,
+                                                      projectcss.__wab_text,
+                                                      sty.text__sLkVx
+                                                    )}
+                                                  >
+                                                    {"Submit"}
+                                                  </div>
+                                                </AntdButton>
+                                              </FormWrapper>
+                                            );
+                                          })()}
+                                        </AntdModal>
                                       </div>
-                                    ) : null}
+                                    </div>
+                                    <div
+                                      data-plasmic-name={"frame6"}
+                                      data-plasmic-override={overrides.frame6}
+                                      className={classNames(
+                                        projectcss.all,
+                                        sty.frame6
+                                      )}
+                                    >
+                                      {(_par =>
+                                        !_par
+                                          ? []
+                                          : Array.isArray(_par)
+                                            ? _par
+                                            : [_par])(
+                                        (() => {
+                                          try {
+                                            return $queries.discActions.data;
+                                          } catch (e) {
+                                            if (
+                                              e instanceof TypeError ||
+                                              e?.plasmicType ===
+                                                "PlasmicUndefinedDataError"
+                                            ) {
+                                              return [];
+                                            }
+                                            throw e;
+                                          }
+                                        })()
+                                      ).map(
+                                        (__plasmic_item_0, __plasmic_idx_0) => {
+                                          const action = __plasmic_item_0;
+                                          const currentIndex = __plasmic_idx_0;
+                                          return (
+                                            <SlideoutListItem2
+                                              className={classNames(
+                                                "__wab_instance",
+                                                sty.slideoutListItem2__o7OIj
+                                              )}
+                                              date2={
+                                                <div
+                                                  data-plasmic-name={"date2"}
+                                                  data-plasmic-override={
+                                                    overrides.date2
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.date2
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return action.action_date;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "10/2/2025";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
+                                              }
+                                              disciplinaryAction={true}
+                                              documentingLeader={
+                                                <div
+                                                  data-plasmic-name={"leader2"}
+                                                  data-plasmic-override={
+                                                    overrides.leader2
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.leader2
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return action.leader_name;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "Leader Name";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
+                                              }
+                                              itemName={
+                                                <React.Fragment>
+                                                  {(() => {
+                                                    try {
+                                                      return action.action;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return "Item Name";
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                </React.Fragment>
+                                              }
+                                              key={currentIndex}
+                                            />
+                                          );
+                                        }
+                                      )}
+                                      {(() => {
+                                        try {
+                                          return (
+                                            ($queries.discActions.data ?? [])
+                                              .length === 0
+                                          );
+                                        } catch (e) {
+                                          if (
+                                            e instanceof TypeError ||
+                                            e?.plasmicType ===
+                                              "PlasmicUndefinedDataError"
+                                          ) {
+                                            return true;
+                                          }
+                                          throw e;
+                                        }
+                                      })() ? (
+                                        <div
+                                          data-plasmic-name={"listItem2"}
+                                          data-plasmic-override={
+                                            overrides.listItem2
+                                          }
+                                          className={classNames(
+                                            projectcss.all,
+                                            sty.listItem2
+                                          )}
+                                        >
+                                          <div
+                                            data-plasmic-name={"contents2"}
+                                            data-plasmic-override={
+                                              overrides.contents2
+                                            }
+                                            className={classNames(
+                                              projectcss.all,
+                                              sty.contents2
+                                            )}
+                                          >
+                                            <div
+                                              data-plasmic-name={"content12"}
+                                              data-plasmic-override={
+                                                overrides.content12
+                                              }
+                                              className={classNames(
+                                                projectcss.all,
+                                                sty.content12
+                                              )}
+                                            >
+                                              <div
+                                                data-plasmic-name={
+                                                  "listItemDetails2"
+                                                }
+                                                data-plasmic-override={
+                                                  overrides.listItemDetails2
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  sty.listItemDetails2
+                                                )}
+                                              >
+                                                <div
+                                                  data-plasmic-name={"text25"}
+                                                  data-plasmic-override={
+                                                    overrides.text25
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.text25
+                                                  )}
+                                                >
+                                                  {renderPlasmicSlot({
+                                                    defaultContents:
+                                                      "No disciplinary actions in the last 90 days",
+                                                    value: args.itemName2,
+                                                    className: classNames(
+                                                      sty.slotTargetItemName2
+                                                    )
+                                                  })}
+                                                </div>
+                                              </div>
+                                              <div
+                                                data-plasmic-name={"points2"}
+                                                data-plasmic-override={
+                                                  overrides.points2
+                                                }
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  sty.points2
+                                                )}
+                                              >
+                                                {renderPlasmicSlot({
+                                                  defaultContents: (
+                                                    <div
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        sty.freeBox__wsOmu
+                                                      )}
+                                                    >
+                                                      <div
+                                                        className={classNames(
+                                                          projectcss.all,
+                                                          projectcss.__wab_text,
+                                                          sty.text__beuRy
+                                                        )}
+                                                      >
+                                                        {"10"}
+                                                      </div>
+                                                    </div>
+                                                  ),
+                                                  value: args.pointValue5,
+                                                  className: classNames(
+                                                    sty.slotTargetPointValue5
+                                                  )
+                                                })}
+                                                <div
+                                                  data-plasmic-name={
+                                                    "pointsText2"
+                                                  }
+                                                  data-plasmic-override={
+                                                    overrides.pointsText2
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.pointsText2
+                                                  )}
+                                                >
+                                                  {"points"}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ) : null}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </TabContent>
+                              </TabContent>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </DataCtxReader__>
-                  </TabsContainer>
+                        )}
+                      </DataCtxReader__>
+                    </TabsContainer>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </DrawerV2>
+          </DrawerV2>
+        </RedirectIf>
       </div>
     </React.Fragment>
   ) as React.ReactElement | null;
@@ -1958,6 +2663,7 @@ const PlasmicDescendants = {
   root: [
     "root",
     "menuNavigation",
+    "redirectIf",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
@@ -2010,6 +2716,11 @@ const PlasmicDescendants = {
     "inputAndText2",
     "iconAndText2",
     "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg",
     "frame6",
     "leader2",
     "date2",
@@ -2022,6 +2733,76 @@ const PlasmicDescendants = {
     "pointsText2"
   ],
   menuNavigation: ["menuNavigation"],
+  redirectIf: [
+    "redirectIf",
+    "verticalStack",
+    "disciplineTable",
+    "verticalStack2",
+    "disciplineActionsTable",
+    "drawerV2",
+    "content2",
+    "textAndSupportingText2",
+    "textAndOnlineIndicator",
+    "text2",
+    "supportingText2",
+    "panel",
+    "header",
+    "container",
+    "statistics",
+    "tabsContainer",
+    "tabUnderline",
+    "pathwayContent",
+    "peContent",
+    "evalsContent",
+    "disciplineContent",
+    "discipline",
+    "row",
+    "text13",
+    "row2",
+    "metricItem",
+    "headingAndNumber",
+    "heading",
+    "numberAndBadge",
+    "number",
+    "metricItem2",
+    "headingAndNumber2",
+    "heading2",
+    "numberAndBadge2",
+    "number2",
+    "inputAndText",
+    "iconAndText",
+    "text14",
+    "frame1",
+    "date4",
+    "leader4",
+    "informed4",
+    "pointValue8",
+    "listItem",
+    "contents",
+    "content11",
+    "listItemDetails",
+    "text24",
+    "points",
+    "pointsText",
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg",
+    "frame6",
+    "leader2",
+    "date2",
+    "listItem2",
+    "contents2",
+    "content12",
+    "listItemDetails2",
+    "text25",
+    "points2",
+    "pointsText2"
+  ],
   verticalStack: ["verticalStack", "disciplineTable"],
   disciplineTable: ["disciplineTable"],
   verticalStack2: ["verticalStack2", "disciplineActionsTable"],
@@ -2075,6 +2856,11 @@ const PlasmicDescendants = {
     "inputAndText2",
     "iconAndText2",
     "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg",
     "frame6",
     "leader2",
     "date2",
@@ -2145,6 +2931,11 @@ const PlasmicDescendants = {
     "inputAndText2",
     "iconAndText2",
     "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg",
     "frame6",
     "leader2",
     "date2",
@@ -2198,6 +2989,11 @@ const PlasmicDescendants = {
     "inputAndText2",
     "iconAndText2",
     "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg",
     "frame6",
     "leader2",
     "date2",
@@ -2250,6 +3046,11 @@ const PlasmicDescendants = {
     "inputAndText2",
     "iconAndText2",
     "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg",
     "frame6",
     "leader2",
     "date2",
@@ -2301,6 +3102,11 @@ const PlasmicDescendants = {
     "inputAndText2",
     "iconAndText2",
     "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg",
     "frame6",
     "leader2",
     "date2",
@@ -2351,6 +3157,11 @@ const PlasmicDescendants = {
     "inputAndText2",
     "iconAndText2",
     "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg",
     "frame6",
     "leader2",
     "date2",
@@ -2400,6 +3211,11 @@ const PlasmicDescendants = {
     "inputAndText2",
     "iconAndText2",
     "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg",
     "frame6",
     "leader2",
     "date2",
@@ -2444,6 +3260,11 @@ const PlasmicDescendants = {
     "inputAndText2",
     "iconAndText2",
     "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg",
     "frame6",
     "leader2",
     "date2",
@@ -2540,9 +3361,31 @@ const PlasmicDescendants = {
   text24: ["text24"],
   points: ["points", "pointsText"],
   pointsText: ["pointsText"],
-  inputAndText2: ["inputAndText2", "iconAndText2", "text27"],
-  iconAndText2: ["iconAndText2", "text27"],
+  inputAndText2: [
+    "inputAndText2",
+    "iconAndText2",
+    "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg"
+  ],
+  iconAndText2: [
+    "iconAndText2",
+    "text27",
+    "modal",
+    "form",
+    "dateTimePicker",
+    "button",
+    "svg"
+  ],
   text27: ["text27"],
+  modal: ["modal", "form", "dateTimePicker", "button", "svg"],
+  form: ["form", "dateTimePicker", "button"],
+  dateTimePicker: ["dateTimePicker"],
+  button: ["button"],
+  svg: ["svg"],
   frame6: [
     "frame6",
     "leader2",
@@ -2592,6 +3435,7 @@ type DescendantsType<T extends NodeNameType> =
 type NodeDefaultElementType = {
   root: "div";
   menuNavigation: typeof MenuNavigation;
+  redirectIf: typeof RedirectIf;
   verticalStack: "div";
   disciplineTable: typeof DisciplineTable;
   verticalStack2: "div";
@@ -2644,6 +3488,11 @@ type NodeDefaultElementType = {
   inputAndText2: "div";
   iconAndText2: "div";
   text27: "div";
+  modal: typeof AntdModal;
+  form: typeof FormWrapper;
+  dateTimePicker: typeof AntdDatePicker;
+  button: typeof AntdButton;
+  svg: "svg";
   frame6: "div";
   leader2: "div";
   date2: "div";
@@ -2719,6 +3568,7 @@ export const PlasmicDiscipline = Object.assign(
   {
     // Helper components rendering sub-elements
     menuNavigation: makeNodeComponent("menuNavigation"),
+    redirectIf: makeNodeComponent("redirectIf"),
     verticalStack: makeNodeComponent("verticalStack"),
     disciplineTable: makeNodeComponent("disciplineTable"),
     verticalStack2: makeNodeComponent("verticalStack2"),
@@ -2771,6 +3621,11 @@ export const PlasmicDiscipline = Object.assign(
     inputAndText2: makeNodeComponent("inputAndText2"),
     iconAndText2: makeNodeComponent("iconAndText2"),
     text27: makeNodeComponent("text27"),
+    modal: makeNodeComponent("modal"),
+    form: makeNodeComponent("form"),
+    dateTimePicker: makeNodeComponent("dateTimePicker"),
+    button: makeNodeComponent("button"),
+    svg: makeNodeComponent("svg"),
     frame6: makeNodeComponent("frame6"),
     leader2: makeNodeComponent("leader2"),
     date2: makeNodeComponent("date2"),

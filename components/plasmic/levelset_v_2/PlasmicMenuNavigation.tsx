@@ -67,6 +67,8 @@ import {
 } from "@plasmicapp/react-web/lib/data-sources";
 
 import LevelsetButton from "../../LevelsetButton"; // plasmic-import: u704oB_4BUvT/component
+import { FormItemWrapper } from "@plasmicpkgs/antd5/skinny/FormItem";
+import { AntdSelect } from "@plasmicpkgs/antd5/skinny/registerSelect";
 import LogoutButton from "../../LogoutButton"; // plasmic-import: UwKJxxQFYiGw/component
 import { SupabaseUserLogOut } from "../../CodeComponents/auth/SupabaseUserLogOut"; // plasmic-import: l-xO2VjafQ7l/codeComponent
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
@@ -130,6 +132,8 @@ export const PlasmicMenuNavigation__ArgProps = new Array<ArgPropType>(
 export type PlasmicMenuNavigation__OverridesType = {
   root?: Flex__<"div">;
   logo?: Flex__<typeof PlasmicImg__>;
+  formField?: Flex__<typeof FormItemWrapper>;
+  select?: Flex__<typeof AntdSelect>;
   logoutButton?: Flex__<typeof LogoutButton>;
   account?: Flex__<typeof PlasmicImg__>;
   supabaseUserLogOut?: Flex__<typeof SupabaseUserLogOut>;
@@ -193,6 +197,9 @@ function PlasmicMenuNavigation__RenderFunc(props: {
   const refsRef = React.useRef({});
   const $refs = refsRef.current;
 
+  let [$queries, setDollarQueries] = React.useState<
+    Record<string, ReturnType<typeof usePlasmicDataOp>>
+  >({});
   const stateSpecs: Parameters<typeof useDollarState>[0] = React.useMemo(
     () => [
       {
@@ -238,6 +245,12 @@ function PlasmicMenuNavigation__RenderFunc(props: {
 
         valueProp: "lastName",
         onChangeProp: "onLastNameChange"
+      },
+      {
+        path: "select.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined
       }
     ],
     [$props, $ctx, $refs]
@@ -245,11 +258,31 @@ function PlasmicMenuNavigation__RenderFunc(props: {
   const $state = useDollarState(stateSpecs, {
     $props,
     $ctx,
-    $queries: {},
+    $queries: $queries,
     $refs
   });
   const dataSourcesCtx = usePlasmicDataSourceContext();
   const plasmicInvalidate = usePlasmicInvalidate();
+
+  const new$Queries: Record<string, ReturnType<typeof usePlasmicDataOp>> = {
+    locationsQuery: usePlasmicDataOp(() => {
+      return {
+        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
+        opId: "0a7fc49d-4b42-419a-bcc3-ee1bb69b703d",
+        userArgs: {
+          filters: ["54b9864f-9df9-4a15-a209-7b99e1c274f4"]
+        },
+        cacheKey: `plasmic.$.0a7fc49d-4b42-419a-bcc3-ee1bb69b703d.$.`,
+        invalidatedKeys: null,
+        roleId: null
+      };
+    })
+  };
+  if (Object.keys(new$Queries).some(k => new$Queries[k] !== $queries[k])) {
+    setDollarQueries(new$Queries);
+
+    $queries = new$Queries;
+  }
 
   const styleTokensClassNames = _useStyleTokens();
 
@@ -434,6 +467,143 @@ function PlasmicMenuNavigation__RenderFunc(props: {
         </div>
         <div className={classNames(projectcss.all, sty.freeBox__rkbjc)}>
           <div className={classNames(projectcss.all, sty.freeBox___1LyUp)}>
+            <div className={classNames(projectcss.all, sty.freeBox__agUzE)}>
+              <FormItemWrapper
+                data-plasmic-name={"formField"}
+                data-plasmic-override={overrides.formField}
+                className={classNames("__wab_instance", sty.formField)}
+                initialValue={(() => {
+                  try {
+                    return $queries.locationsQuery.data[0].id;
+                  } catch (e) {
+                    if (
+                      e instanceof TypeError ||
+                      e?.plasmicType === "PlasmicUndefinedDataError"
+                    ) {
+                      return undefined;
+                    }
+                    throw e;
+                  }
+                })()}
+                label={
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text__tx7SN
+                    )}
+                  >
+                    {"Label"}
+                  </div>
+                }
+                name={"header_location_id"}
+                noLabel={true}
+                noStyle={true}
+                valuePropName={"selectedLocation"}
+              >
+                <AntdSelect
+                  data-plasmic-name={"select"}
+                  data-plasmic-override={overrides.select}
+                  autoFocus={false}
+                  className={classNames("__wab_instance", sty.select)}
+                  defaultOpen={false}
+                  defaultStylesClassName={classNames(
+                    projectcss.root_reset,
+                    projectcss.plasmic_default_styles,
+                    projectcss.plasmic_mixins,
+                    styleTokensClassNames
+                  )}
+                  dropdownMatchSelectWidth={false}
+                  onChange={async (...eventArgs: any) => {
+                    generateStateOnChangeProp($state, [
+                      "select",
+                      "value"
+                    ]).apply(null, eventArgs);
+
+                    (async (value, option) => {
+                      const $steps = {};
+
+                      $steps["updateLocationName"] = true
+                        ? (() => {
+                            const actionArgs = {
+                              variable: {
+                                objRoot: $state,
+                                variablePath: ["locationName"]
+                              },
+                              operation: 0,
+                              value: value
+                            };
+                            return (({
+                              variable,
+                              value,
+                              startIndex,
+                              deleteCount
+                            }) => {
+                              if (!variable) {
+                                return;
+                              }
+                              const { objRoot, variablePath } = variable;
+
+                              $stateSet(objRoot, variablePath, value);
+                              return value;
+                            })?.apply(null, [actionArgs]);
+                          })()
+                        : undefined;
+                      if (
+                        $steps["updateLocationName"] != null &&
+                        typeof $steps["updateLocationName"] === "object" &&
+                        typeof $steps["updateLocationName"].then === "function"
+                      ) {
+                        $steps["updateLocationName"] =
+                          await $steps["updateLocationName"];
+                      }
+                    }).apply(null, eventArgs);
+                  }}
+                  optionClassName={classNames({
+                    [sty["pcls_BZ28At6cMHi9"]]: true
+                  })}
+                  options={(() => {
+                    const __composite = [
+                      { value: null, label: null, type: "option" },
+                      { value: null, label: null, type: "option" }
+                    ];
+                    __composite["0"]["value"] =
+                      $queries.locationsQuery.data[0].id;
+                    __composite["0"]["label"] =
+                      $queries.locationsQuery.data[0].name;
+                    __composite["1"]["value"] =
+                      $queries.locationsQuery.data[1].id;
+                    __composite["1"]["label"] =
+                      $queries.locationsQuery.data[1].name;
+                    return __composite;
+                  })()}
+                  placeholder={
+                    <div
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text__iqsX4
+                      )}
+                    >
+                      {"Location"}
+                    </div>
+                  }
+                  placeholderClassName={classNames({
+                    [sty["pcls_zlKJSz7y1vjm"]]: true
+                  })}
+                  popupClassName={classNames({
+                    [sty["pcls_JEVCdi_5eaiX"]]: true
+                  })}
+                  popupScopeClassName={sty["select__popup"]}
+                  showSearch={false}
+                  size={"large"}
+                  triggerClassName={classNames({
+                    [sty["pcls_pr4KJ05uDHc6"]]: true
+                  })}
+                  value={generateStateValueProp($state, ["select", "value"])}
+                />
+              </FormItemWrapper>
+            </div>
             <div className={classNames(projectcss.all, sty.freeBox__pKjWu)}>
               <div className={classNames(projectcss.all, sty.freeBox__cVk2)}>
                 {renderPlasmicSlot({
@@ -649,8 +819,18 @@ function PlasmicMenuNavigation__RenderFunc(props: {
 }
 
 const PlasmicDescendants = {
-  root: ["root", "logo", "logoutButton", "account", "supabaseUserLogOut"],
+  root: [
+    "root",
+    "logo",
+    "formField",
+    "select",
+    "logoutButton",
+    "account",
+    "supabaseUserLogOut"
+  ],
   logo: ["logo"],
+  formField: ["formField", "select"],
+  select: ["select"],
   logoutButton: ["logoutButton"],
   account: ["account"],
   supabaseUserLogOut: ["supabaseUserLogOut"]
@@ -661,6 +841,8 @@ type DescendantsType<T extends NodeNameType> =
 type NodeDefaultElementType = {
   root: "div";
   logo: typeof PlasmicImg__;
+  formField: typeof FormItemWrapper;
+  select: typeof AntdSelect;
   logoutButton: typeof LogoutButton;
   account: typeof PlasmicImg__;
   supabaseUserLogOut: typeof SupabaseUserLogOut;
@@ -729,6 +911,8 @@ export const PlasmicMenuNavigation = Object.assign(
   {
     // Helper components rendering sub-elements
     logo: makeNodeComponent("logo"),
+    formField: makeNodeComponent("formField"),
+    select: makeNodeComponent("select"),
     logoutButton: makeNodeComponent("logoutButton"),
     account: makeNodeComponent("account"),
     supabaseUserLogOut: makeNodeComponent("supabaseUserLogOut"),

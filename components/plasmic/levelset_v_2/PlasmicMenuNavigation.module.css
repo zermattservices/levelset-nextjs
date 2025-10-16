@@ -82,13 +82,13 @@
   color: var(--token-0Rg7d9VjUj_J);
   min-width: 0;
 }
-.svg__tpkY {
+.svg__hq4A4 {
   position: relative;
   object-fit: cover;
   width: auto;
   height: 1em;
 }
-.svg___2Chs {
+.svg__iOuO {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -109,13 +109,13 @@
   color: var(--token-0Rg7d9VjUj_J);
   min-width: 0;
 }
-.svg__jCMr7 {
+.svg__odb6 {
   position: relative;
   object-fit: cover;
   width: auto;
   height: 1em;
 }
-.svg__kc1T {
+.svg__fUovN {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -221,6 +221,72 @@
   min-height: 50px;
   border-radius: 12px;
   padding: 4px 0px;
+}
+.freeBox__agUzE {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: auto;
+  height: auto;
+  max-width: 200px;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 8px;
+}
+.formField:global(.__wab_instance) {
+  width: auto;
+  max-width: 100%;
+  object-fit: cover;
+  font-family: "Satoshi";
+  color: var(--token-0Rg7d9VjUj_J);
+  margin: 0px;
+}
+.select:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+  width: auto;
+  font-family: "Satoshi";
+  font-weight: 600;
+}
+.select__popup:global(.ant-select-dropdown) :global(.ant-select-item-option) {
+  font-weight: 600;
+  font-size: var(--token-fwZvoB_ZCfwn);
+  font-family: "Satoshi";
+  outline: none;
+}
+.select
+  :global(.ant-select-selector)
+  :global(.ant-select-selection-placeholder) {
+  font-weight: 600;
+  font-family: "Satoshi";
+  font-size: var(--token-7z5Kw5B89TZR);
+  outline: none;
+}
+.select :global(.ant-select-selector):global(.ant-select-selector) {
+  font-weight: 600;
+  font-family: "Satoshi";
+  font-size: var(--token-fwZvoB_ZCfwn);
+  outline: none;
+}
+.pcls_JEVCdi_5eaiX {
+  font-weight: 600;
+  font-family: "Satoshi";
+  font-size: var(--token-7z5Kw5B89TZR);
+  outline: none;
+}
+.text__iqsX4 {
+  font-family: "Satoshi";
+  font-weight: 600;
+  font-size: var(--token-7z5Kw5B89TZR);
+}
+.text__tx7SN {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  font-family: "Satoshi";
+  color: var(--token-0Rg7d9VjUj_J);
+  min-width: 0;
 }
 .freeBox__pKjWu {
   display: flex;
@@ -329,13 +395,13 @@
   font-weight: 600;
   min-width: 0;
 }
-.svg__bhPhh {
+.svg___2Io0S {
   position: relative;
   object-fit: cover;
   width: auto;
   height: 1em;
 }
-.svg__qbMt {
+.svg__fm88T {
   position: relative;
   object-fit: cover;
   width: auto;

@@ -525,6 +525,19 @@
           "cssFilePath": "plasmic/levelset_v_2/PlasmicDrawerTest.module.css",
           "scheme": "blackbox",
           "componentType": "component"
+        },
+        {
+          "id": "BjWS5eIFsQab",
+          "name": "DiscActionForm",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicDiscActionForm.tsx",
+          "importSpec": {
+            "modulePath": "DiscActionForm.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicDiscActionForm.module.css",
+          "scheme": "blackbox",
+          "componentType": "component"
         }
       ],
       "icons": [

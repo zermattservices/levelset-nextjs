@@ -51,6 +51,13 @@
   max-width: 100%;
   height: auto;
 }
+.redirectIf:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+  width: 100%;
+  grid-column-start: 1 !important;
+  grid-column-end: -1 !important;
+}
 .freeBox__jtUkZ {
   display: flex;
   flex-direction: column;
@@ -355,7 +362,7 @@
   min-width: 0;
   min-height: 0;
 }
-.svg__gKBr3 {
+.svg___0MDo0 {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -367,7 +374,7 @@
   font-weight: 600;
   font-size: var(--token-LGg-zkf2M2GB);
 }
-.svg__fZEji {
+.svg___7V9P1 {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -387,7 +394,7 @@
   min-width: 0;
   min-height: 0;
 }
-.svg___9DJzy {
+.svg__ljVaI {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -400,7 +407,7 @@
   font-size: var(--token-LGg-zkf2M2GB);
   white-space: pre-wrap;
 }
-.svg__ji6Bv {
+.svg__siSyk {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -419,7 +426,7 @@
   min-width: 0;
   min-height: 0;
 }
-.svg___9Zj6T {
+.svg__vgTPz {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -431,7 +438,7 @@
   font-weight: 600;
   font-size: var(--token-LGg-zkf2M2GB);
 }
-.svg__l5RTk {
+.svg__jj4Cz {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -450,7 +457,7 @@
   min-width: 0;
   min-height: 0;
 }
-.svg__o5Qeo {
+.svg___9Umj {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -462,7 +469,7 @@
   font-weight: 600;
   font-size: var(--token-LGg-zkf2M2GB);
 }
-.svg___6PWq {
+.svg__wlZnB {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -576,11 +583,11 @@
 .text13 {
   display: block;
   flex-grow: 1;
-  font-size: 14px;
+  font-size: var(--token-hYndcje43OGL);
   font-family: "Satoshi";
   font-weight: 600;
   letter-spacing: 0em;
-  line-height: 20px;
+  line-height: 24px;
   color: var(--token-b4D6G1fNo7IC);
   position: relative;
 }
@@ -623,7 +630,7 @@
 }
 .heading {
   display: block;
-  font-size: 16px;
+  font-size: 18px;
   text-align: center;
   font-family: "Satoshi";
   font-weight: 600;
@@ -684,7 +691,7 @@
 }
 .heading2 {
   display: block;
-  font-size: 16px;
+  font-size: 18px;
   text-align: center;
   font-family: "Satoshi";
   font-weight: 600;
@@ -750,14 +757,14 @@
 .text14 {
   display: block;
   flex-grow: 1;
-  font-size: 14px;
   font-family: "Satoshi";
   font-weight: 600;
   letter-spacing: 0em;
-  line-height: 20px;
+  line-height: 24px;
   color: var(--token-b4D6G1fNo7IC);
   position: relative;
   height: auto;
+  font-size: 18px;
 }
 .frame1 {
   height: auto;
@@ -845,7 +852,7 @@
   font-family: "Satoshi";
   font-size: 14px;
   font-weight: 500;
-  color: var(--token-b4D6G1fNo7IC);
+  color: var(--token-0Rg7d9VjUj_J);
   line-height: 20px;
   letter-spacing: 0em;
 }
@@ -950,13 +957,165 @@
 .text27 {
   display: block;
   flex-grow: 1;
-  font-size: 14px;
+  font-size: 18px;
   font-family: "Satoshi";
   font-weight: 600;
   letter-spacing: 0em;
-  line-height: 20px;
+  line-height: 24px;
   color: var(--token-b4D6G1fNo7IC);
   position: relative;
+}
+.modal:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+  font-family: "Satoshi";
+}
+.modal__modal :global(.ant-modal-content) {
+  font-family: "Satoshi";
+  color: var(--token-b4D6G1fNo7IC);
+  outline: none;
+}
+.form:global(.__wab_instance) {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  justify-content: flex-start;
+  align-items: flex-start;
+  object-fit: cover;
+  min-width: 0;
+  padding: 8px;
+}
+.formField__jpbXj:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.input__kncHv:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.formField__icxJe:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.input__qHgqz:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.formField__piCbx:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.select__wnIly:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.formField__f8Fcn:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.dateTimePicker:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.formField__pjEp:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.input___492Md:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.formField__wy33X:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.input__hv8Eq:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.formField___89ZXy:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.input__eA4Fg:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.formField__te6Uo:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.input___4WroT:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.formField__aqR7X:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.input__vX2YC:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.formField__mAiK0:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.input__uTjce:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.formField__zNNas:global(.__wab_instance) {
+  width: 100%;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.select___3Epa8:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.button:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.text__sLkVx {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  min-width: 0;
+}
+.levelsetButton__l9Kf6:global(.__wab_instance) {
+  max-width: 100%;
+}
+.svg {
+  position: relative;
+  object-fit: cover;
+  width: auto;
+  height: 1em;
+}
+.text__tvJBe {
+  font-family: "Satoshi";
+  font-weight: 600;
+}
+.svg__lrxXf {
+  position: relative;
+  object-fit: cover;
+  width: auto;
+  height: 1em;
 }
 .frame6 {
   height: auto;
@@ -1054,7 +1213,7 @@
   font-family: "Satoshi";
   font-size: 14px;
   font-weight: 500;
-  color: var(--token-b4D6G1fNo7IC);
+  color: var(--token-0Rg7d9VjUj_J);
   line-height: 20px;
   letter-spacing: 0em;
 }

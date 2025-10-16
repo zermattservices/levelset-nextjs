@@ -39,7 +39,7 @@
   border-radius: 0px;
 }
 .rootsize_compact {
-  padding: 6px 16px;
+  padding: 6px 12px;
 }
 .rootsize_minimal {
   padding: 0px;
@@ -54,7 +54,7 @@
   background: #f5d90a;
 }
 .rootcolor_red {
-  background: #e54d2e;
+  background: #d23230;
 }
 .rootcolor_sand {
   background: #717069;
