@@ -167,6 +167,7 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
           <LevelsetButton
             className={classNames("__wab_instance", sty.levelsetButton__fzAcG)}
             color={"clear"}
+            link={`/positional-excellence`}
             size={"compact"}
           >
             <div
@@ -197,6 +198,7 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
           <LevelsetButton
             className={classNames("__wab_instance", sty.levelsetButton__tGzU)}
             color={"clear"}
+            link={`/discipline`}
             size={"compact"}
           >
             <div
