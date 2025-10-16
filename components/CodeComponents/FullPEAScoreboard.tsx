@@ -458,7 +458,6 @@ export function FullPEAScoreboard({
 
       ratingsCountIdx = header.findIndex(h => typeof h === 'string' && /#\s*of\s*ratings/i.test(h));
       console.log('ratingsCountIdx set to:', ratingsCountIdx, 'header:', header);
-      console.log('Looking for # of Ratings column in header:', header.map((h, i) => `${i}: "${h}"`));
 
       // Include all non-empty trailing columns
       let last = lastNonEmptyIndex(header);
