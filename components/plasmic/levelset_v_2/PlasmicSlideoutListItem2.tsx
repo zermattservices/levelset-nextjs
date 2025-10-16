@@ -204,6 +204,11 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
         styleTokensClassNames,
         sty.listItem,
         {
+          [sty.listItemdisciplinaryAction]: hasVariant(
+            $state,
+            "disciplinaryAction",
+            "disciplinaryAction"
+          ),
           [sty.listIteminfractionType_negative]: hasVariant(
             $state,
             "infractionType",
@@ -220,7 +225,13 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
       <div
         data-plasmic-name={"contents"}
         data-plasmic-override={overrides.contents}
-        className={classNames(projectcss.all, sty.contents)}
+        className={classNames(projectcss.all, sty.contents, {
+          [sty.contentsdisciplinaryAction]: hasVariant(
+            $state,
+            "disciplinaryAction",
+            "disciplinaryAction"
+          )
+        })}
       >
         <div
           data-plasmic-name={"content11"}

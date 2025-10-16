@@ -26,6 +26,10 @@
   align-items: flex-start;
   justify-content: flex-start;
 }
+.contentsdisciplinaryAction {
+  width: 100%;
+  min-width: 0;
+}
 .content11 {
   height: auto;
   display: flex;
