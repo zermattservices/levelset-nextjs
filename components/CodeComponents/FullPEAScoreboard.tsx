@@ -64,7 +64,7 @@ export function FullPEAScoreboard({
     --pill-bg:#f3f4f6; --pill-on:#111827; --pill-off:#6b7280; --pill-border:#e5e7eb;
     --divider:#9ca3af;
     --row-h: 34px;
-    --dashboard-width: ${typeof dashboardWidth === 'number' ? `${dashboardWidth}px` : dashboardWidth};
+    --dashboard-width: 1280px;
   }
   /* ===== Dark override ===== */
   @media (prefers-color-scheme: dark){
