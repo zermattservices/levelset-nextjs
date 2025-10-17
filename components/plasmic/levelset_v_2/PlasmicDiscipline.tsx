@@ -2600,6 +2600,87 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                     })()}
                                                   </React.Fragment>
                                                 </div>
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.text__d9DZ5
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return $queries
+                                                          .employeesDiscQuery
+                                                          .data[0].id;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.text__sxq2D
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return $queries
+                                                          .employeesDiscQuery
+                                                          .data[0].location_id;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.text__rbaoo
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return $queries
+                                                          .employeesDiscQuery
+                                                          .data[0].org_id;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
