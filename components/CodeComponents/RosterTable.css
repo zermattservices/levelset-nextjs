@@ -215,6 +215,12 @@
   border-color: #fecaca;
 }
 
+.points-badge.points-0-grey {
+  background-color: #f3f4f6;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
 .points-badge.points-10 {
   background-color: #fee2e2;
   color: #dc2626;

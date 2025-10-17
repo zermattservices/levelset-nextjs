@@ -42,7 +42,7 @@ const roleChip = (role: string) => {
   
   if (normalized.includes("new hire")) return `${base} new-hire`;
   if (normalized.includes("team lead") || normalized.includes("lead")) return `${base} team-lead`;
-  if (normalized.includes("operator")) return `${base} operator`;
+  if (normalized.includes("operator") || normalized.includes("executive")) return `${base} operator`;
   if (normalized.includes("trainer")) return `${base} trainer`;
   if (normalized.includes("director")) return `${base} director`;
   return `${base} team-member`;
@@ -53,7 +53,7 @@ const pointsBadge = (points: number, disciplineActions: any[], customClass?: str
   let badgeClass = "role-badge points-badge";
   
   if (points === 0) {
-    badgeClass += " points-0"; // Keep 0 points styling as is
+    badgeClass += " points-0-grey"; // Light grey with black text for 0 points
   } else {
     // Find the highest threshold that the points exceed
     const applicableAction = disciplineActions
