@@ -137,15 +137,6 @@
   font-family: "Satoshi";
   min-width: 0;
 }
-.text__suZia {
-  position: relative;
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  font-size: var(--token-BlA-iDkaAWvO);
-  font-family: "Satoshi";
-  min-width: 0;
-}
 .freeBox__lKzxl {
   display: flex;
   flex-direction: row;
@@ -371,7 +362,7 @@
   min-width: 0;
   min-height: 0;
 }
-.svg__zArJx {
+.svg___4RrzX {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -383,7 +374,7 @@
   font-weight: 600;
   font-size: var(--token-LGg-zkf2M2GB);
 }
-.svg__fIVn {
+.svg__eJbui {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -403,7 +394,7 @@
   min-width: 0;
   min-height: 0;
 }
-.svg__hfLHd {
+.svg__mloem {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -416,7 +407,7 @@
   font-size: var(--token-LGg-zkf2M2GB);
   white-space: pre-wrap;
 }
-.svg__qh02I {
+.svg__fpXfh {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -435,7 +426,7 @@
   min-width: 0;
   min-height: 0;
 }
-.svg__ogffo {
+.svg__jBk3U {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -447,7 +438,7 @@
   font-weight: 600;
   font-size: var(--token-LGg-zkf2M2GB);
 }
-.svg__nrwn {
+.svg__xtQsD {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -466,7 +457,7 @@
   min-width: 0;
   min-height: 0;
 }
-.svg___1Yyfb {
+.svg__aLg3C {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -478,7 +469,7 @@
   font-weight: 600;
   font-size: var(--token-LGg-zkf2M2GB);
 }
-.svg__koAOr {
+.svg__xfMZ {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -568,6 +559,17 @@
   align-items: center;
   min-width: 0;
   padding: 8px;
+}
+.loadingBoundary:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.lottie:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+  height: 100%;
+  max-height: 600px;
+  min-height: 0;
 }
 .discipline {
   height: auto;
@@ -1119,7 +1121,7 @@
 .levelsetButton__yFGdG:global(.__wab_instance) {
   max-width: 100%;
 }
-.svg__nR7J {
+.svg__joSaO {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -1129,7 +1131,7 @@
   font-family: "Satoshi";
   font-weight: 600;
 }
-.svg__hCqNb {
+.svg__bNuUb {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -1169,7 +1171,7 @@
   font-family: "Satoshi";
   font-weight: 600;
 }
-.svg__gifKh {
+.svg___6JeRs {
   position: relative;
   object-fit: cover;
   width: auto;
