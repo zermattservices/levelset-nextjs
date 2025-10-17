@@ -392,7 +392,23 @@ function PlasmicHomepage__RenderFunc(props: {
                     className={classNames(projectcss.all, sty.freeBox__d45Ks)}
                   >
                     {renderPlasmicSlot({
-                      defaultContents: "Reece",
+                      defaultContents: (
+                        <React.Fragment>
+                          {(() => {
+                            try {
+                              return $state.menuNavigation.firstName;
+                            } catch (e) {
+                              if (
+                                e instanceof TypeError ||
+                                e?.plasmicType === "PlasmicUndefinedDataError"
+                              ) {
+                                return "Reece";
+                              }
+                              throw e;
+                            }
+                          })()}
+                        </React.Fragment>
+                      ),
                       value: args.children,
                       className: classNames(sty.slotTargetChildren)
                     })}
