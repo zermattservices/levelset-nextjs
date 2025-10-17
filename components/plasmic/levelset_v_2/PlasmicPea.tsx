@@ -61,6 +61,7 @@ import {
 
 import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_mCN/component
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
+import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
 import { FohBohSlider } from "../../CodeComponents/FohBohSlider"; // plasmic-import: 6LJFyJRGdgX4/codeComponent
 import { PositionButtons } from "../../CodeComponents/PositionButtons"; // plasmic-import: tQU-ID6-K3GO/codeComponent
 import { ScoreboardTable } from "../../CodeComponents/ScoreboardTable"; // plasmic-import: EURkS6Dky8BE/codeComponent
@@ -88,6 +89,7 @@ export const PlasmicPea__ArgProps = new Array<ArgPropType>();
 export type PlasmicPea__OverridesType = {
   root?: Flex__<"div">;
   menuNavigation?: Flex__<typeof MenuNavigation>;
+  redirectIf?: Flex__<typeof RedirectIf>;
   verticalStack?: Flex__<"div">;
   bohSlider?: Flex__<typeof FohBohSlider>;
   positionButtons?: Flex__<typeof PositionButtons>;
@@ -142,10 +144,23 @@ function PlasmicPea__RenderFunc(props: {
   const stateSpecs: Parameters<typeof useDollarState>[0] = React.useMemo(
     () => [
       {
-        path: "menuNavigation.locationName",
+        path: "menuNavigation.headerLocationId",
         type: "private",
         variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "Buda FSU"
+        initFunc: ({ $props, $state, $queries, $ctx }) =>
+          (() => {
+            try {
+              return $state.form.value.location_alt_id;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return undefined;
+              }
+              throw e;
+            }
+          })()
       },
       {
         path: "menuNavigation.firstName",
@@ -261,13 +276,13 @@ function PlasmicPea__RenderFunc(props: {
             "menuNavigation",
             "firstName"
           ])}
+          headerLocationId={generateStateValueProp($state, [
+            "menuNavigation",
+            "headerLocationId"
+          ])}
           lastName={generateStateValueProp($state, [
             "menuNavigation",
             "lastName"
-          ])}
-          locationName={generateStateValueProp($state, [
-            "menuNavigation",
-            "locationName"
           ])}
           onFirstNameChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
@@ -283,10 +298,10 @@ function PlasmicPea__RenderFunc(props: {
               return;
             }
           }}
-          onLastNameChange={async (...eventArgs: any) => {
+          onHeaderLocationIdChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
               "menuNavigation",
-              "lastName"
+              "headerLocationId"
             ]).apply(null, eventArgs);
 
             if (
@@ -297,10 +312,10 @@ function PlasmicPea__RenderFunc(props: {
               return;
             }
           }}
-          onLocationNameChange={async (...eventArgs: any) => {
+          onLastNameChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
               "menuNavigation",
-              "locationName"
+              "lastName"
             ]).apply(null, eventArgs);
 
             if (
@@ -331,146 +346,194 @@ function PlasmicPea__RenderFunc(props: {
           ])}
         />
 
-        <div className={classNames(projectcss.all, sty.freeBox__ktUyf)}>
-          <div className={classNames(projectcss.all, sty.freeBox__q2Oez)}>
-            <div className={classNames(projectcss.all, sty.freeBox___82DkP)}>
-              <div className={classNames(projectcss.all, sty.freeBox__igRkK)}>
-                <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text___3OfVz
-                  )}
-                >
-                  {"PEA Dashboard"}
+        <RedirectIf
+          data-plasmic-name={"redirectIf"}
+          data-plasmic-override={overrides.redirectIf}
+          className={classNames("__wab_instance", sty.redirectIf)}
+          condition={(() => {
+            try {
+              return $ctx.auth && !!$ctx.auth.email;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return undefined;
+              }
+              throw e;
+            }
+          })()}
+          onFalse={async () => {
+            const $steps = {};
+
+            $steps["goToLoginPage"] = true
+              ? (() => {
+                  const actionArgs = { destination: `/auth/login` };
+                  return (({ destination }) => {
+                    if (
+                      typeof destination === "string" &&
+                      destination.startsWith("#")
+                    ) {
+                      document
+                        .getElementById(destination.substr(1))
+                        .scrollIntoView({ behavior: "smooth" });
+                    } else {
+                      __nextRouter?.push(destination);
+                    }
+                  })?.apply(null, [actionArgs]);
+                })()
+              : undefined;
+            if (
+              $steps["goToLoginPage"] != null &&
+              typeof $steps["goToLoginPage"] === "object" &&
+              typeof $steps["goToLoginPage"].then === "function"
+            ) {
+              $steps["goToLoginPage"] = await $steps["goToLoginPage"];
+            }
+          }}
+        >
+          <div className={classNames(projectcss.all, sty.freeBox__ktUyf)}>
+            <div className={classNames(projectcss.all, sty.freeBox__q2Oez)}>
+              <div className={classNames(projectcss.all, sty.freeBox___82DkP)}>
+                <div className={classNames(projectcss.all, sty.freeBox__igRkK)}>
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text___3OfVz
+                    )}
+                  >
+                    {"PEA Dashboard"}
+                  </div>
                 </div>
-              </div>
-              <div className={classNames(projectcss.all, sty.freeBox__ixaur)}>
-                <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text__vFqtV
-                  )}
-                >
-                  {
-                    "Filter using the position buttons and click a Team Member to see their recent ratings.."
-                  }
-                </div>
-                <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text__r2U50
-                  )}
-                >
-                  <React.Fragment>
-                    <span
-                      className={"plasmic_default__all plasmic_default__span"}
-                      style={{ color: "#000000" }}
-                    >
-                      {"Coming soon!"}
-                    </span>
-                  </React.Fragment>
+                <div className={classNames(projectcss.all, sty.freeBox__ixaur)}>
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text__vFqtV
+                    )}
+                  >
+                    {
+                      "Filter using the position buttons and click a Team Member to see their recent ratings.."
+                    }
+                  </div>
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text__r2U50
+                    )}
+                  >
+                    <React.Fragment>
+                      <span
+                        className={"plasmic_default__all plasmic_default__span"}
+                        style={{ color: "#000000" }}
+                      >
+                        {"Coming soon!"}
+                      </span>
+                    </React.Fragment>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className={classNames(projectcss.all, sty.freeBox__de9Bv)}>
-          <div className={classNames(projectcss.all, sty.freeBox___64Wwo)}>
-            <div
-              data-plasmic-name={"verticalStack"}
-              data-plasmic-override={overrides.verticalStack}
-              className={classNames(projectcss.all, sty.verticalStack)}
-            >
+          <div className={classNames(projectcss.all, sty.freeBox__de9Bv)}>
+            <div className={classNames(projectcss.all, sty.freeBox___64Wwo)}>
               <div
-                className={classNames(
-                  projectcss.all,
-                  projectcss.__wab_text,
-                  sty.text__kYAs
-                )}
+                data-plasmic-name={"verticalStack"}
+                data-plasmic-override={overrides.verticalStack}
+                className={classNames(projectcss.all, sty.verticalStack)}
               >
-                {"Employees"}
-              </div>
-              <FohBohSlider
-                data-plasmic-name={"bohSlider"}
-                data-plasmic-override={overrides.bohSlider}
-                className={classNames("__wab_instance", sty.bohSlider)}
-              />
-
-              <PositionButtons
-                data-plasmic-name={"positionButtons"}
-                data-plasmic-override={overrides.positionButtons}
-                className={classNames("__wab_instance", sty.positionButtons)}
-              />
-
-              <div className={classNames(projectcss.all, sty.freeBox___2TFa)}>
-                <ScoreboardTable
-                  data-plasmic-name={"peaScoreboardTable"}
-                  data-plasmic-override={overrides.peaScoreboardTable}
-                  activeGroup={"FOH"}
-                  bundleUrl={
-                    "https://storage.googleapis.com/trainingapp-assets/snapshots/buda/all.json"
-                  }
+                <div
                   className={classNames(
-                    "__wab_instance",
-                    sty.peaScoreboardTable
+                    projectcss.all,
+                    projectcss.__wab_text,
+                    sty.text__kYAs
                   )}
-                  currentTab={(() => {
-                    try {
-                      return undefined;
-                    } catch (e) {
-                      if (
-                        e instanceof TypeError ||
-                        e?.plasmicType === "PlasmicUndefinedDataError"
-                      ) {
-                        return "FOH";
-                      }
-                      throw e;
+                >
+                  {"Employees"}
+                </div>
+                <FohBohSlider
+                  data-plasmic-name={"bohSlider"}
+                  data-plasmic-override={overrides.bohSlider}
+                  className={classNames("__wab_instance", sty.bohSlider)}
+                />
+
+                <PositionButtons
+                  data-plasmic-name={"positionButtons"}
+                  data-plasmic-override={overrides.positionButtons}
+                  className={classNames("__wab_instance", sty.positionButtons)}
+                />
+
+                <div className={classNames(projectcss.all, sty.freeBox___2TFa)}>
+                  <ScoreboardTable
+                    data-plasmic-name={"peaScoreboardTable"}
+                    data-plasmic-override={overrides.peaScoreboardTable}
+                    activeGroup={"FOH"}
+                    bundleUrl={
+                      "https://storage.googleapis.com/trainingapp-assets/snapshots/buda/all.json"
                     }
-                  })()}
+                    className={classNames(
+                      "__wab_instance",
+                      sty.peaScoreboardTable
+                    )}
+                    currentTab={(() => {
+                      try {
+                        return undefined;
+                      } catch (e) {
+                        if (
+                          e instanceof TypeError ||
+                          e?.plasmicType === "PlasmicUndefinedDataError"
+                        ) {
+                          return "FOH";
+                        }
+                        throw e;
+                      }
+                    })()}
+                  />
+                </div>
+              </div>
+              <div
+                data-plasmic-name={"verticalStack2"}
+                data-plasmic-override={overrides.verticalStack2}
+                className={classNames(projectcss.all, sty.verticalStack2)}
+              >
+                <div
+                  className={classNames(
+                    projectcss.all,
+                    projectcss.__wab_text,
+                    sty.text__nTbF
+                  )}
+                >
+                  {"Disciplinary Actions"}
+                </div>
+                <PEARubric
+                  data-plasmic-name={"peaRubric"}
+                  data-plasmic-override={overrides.peaRubric}
+                  className={classNames("__wab_instance", sty.peaRubric)}
                 />
               </div>
             </div>
-            <div
-              data-plasmic-name={"verticalStack2"}
-              data-plasmic-override={overrides.verticalStack2}
-              className={classNames(projectcss.all, sty.verticalStack2)}
-            >
-              <div
-                className={classNames(
-                  projectcss.all,
-                  projectcss.__wab_text,
-                  sty.text__nTbF
-                )}
-              >
-                {"Disciplinary Actions"}
-              </div>
-              <PEARubric
-                data-plasmic-name={"peaRubric"}
-                data-plasmic-override={overrides.peaRubric}
-                className={classNames("__wab_instance", sty.peaRubric)}
+          </div>
+          <div
+            data-plasmic-name={"verticalStack3"}
+            data-plasmic-override={overrides.verticalStack3}
+            className={classNames(projectcss.all, sty.verticalStack3)}
+          >
+            <div className={classNames(projectcss.all, sty.freeBox___9LQfr)}>
+              <FullPEAScoreboard
+                data-plasmic-name={"fullPeaScoreboard"}
+                data-plasmic-override={overrides.fullPeaScoreboard}
+                className={classNames("__wab_instance", sty.fullPeaScoreboard)}
+                dashboardWidth={"1280px"}
+                height={"800px"}
+                maxWidth={"1280px"}
+                variant={"buda"}
               />
             </div>
           </div>
-        </div>
-        <div
-          data-plasmic-name={"verticalStack3"}
-          data-plasmic-override={overrides.verticalStack3}
-          className={classNames(projectcss.all, sty.verticalStack3)}
-        >
-          <div className={classNames(projectcss.all, sty.freeBox___9LQfr)}>
-            <FullPEAScoreboard
-              data-plasmic-name={"fullPeaScoreboard"}
-              data-plasmic-override={overrides.fullPeaScoreboard}
-              className={classNames("__wab_instance", sty.fullPeaScoreboard)}
-              height={"800px"}
-              maxWidth={"1280px"}
-              variant={"buda"}
-            />
-          </div>
-        </div>
+        </RedirectIf>
       </div>
     </React.Fragment>
   ) as React.ReactElement | null;
@@ -480,6 +543,7 @@ const PlasmicDescendants = {
   root: [
     "root",
     "menuNavigation",
+    "redirectIf",
     "verticalStack",
     "bohSlider",
     "positionButtons",
@@ -490,6 +554,17 @@ const PlasmicDescendants = {
     "fullPeaScoreboard"
   ],
   menuNavigation: ["menuNavigation"],
+  redirectIf: [
+    "redirectIf",
+    "verticalStack",
+    "bohSlider",
+    "positionButtons",
+    "peaScoreboardTable",
+    "verticalStack2",
+    "peaRubric",
+    "verticalStack3",
+    "fullPeaScoreboard"
+  ],
   verticalStack: [
     "verticalStack",
     "bohSlider",
@@ -510,6 +585,7 @@ type DescendantsType<T extends NodeNameType> =
 type NodeDefaultElementType = {
   root: "div";
   menuNavigation: typeof MenuNavigation;
+  redirectIf: typeof RedirectIf;
   verticalStack: "div";
   bohSlider: typeof FohBohSlider;
   positionButtons: typeof PositionButtons;
@@ -583,6 +659,7 @@ export const PlasmicPea = Object.assign(
   {
     // Helper components rendering sub-elements
     menuNavigation: makeNodeComponent("menuNavigation"),
+    redirectIf: makeNodeComponent("redirectIf"),
     verticalStack: makeNodeComponent("verticalStack"),
     bohSlider: makeNodeComponent("bohSlider"),
     positionButtons: makeNodeComponent("positionButtons"),

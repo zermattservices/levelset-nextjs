@@ -39,7 +39,7 @@
   border-radius: 0px;
 }
 .rootsize_compact {
-  padding: 6px 16px;
+  padding: 6px 12px;
 }
 .rootsize_minimal {
   padding: 0px;
@@ -50,11 +50,11 @@
 .rootcolor_green {
   background: #f1f8f3;
 }
-.rootcolor_yellow {
-  background: #f5d90a;
+.rootcolor_brand {
+  background: #31664a;
 }
 .rootcolor_red {
-  background: #e54d2e;
+  background: #d23230;
 }
 .rootcolor_sand {
   background: #717069;
@@ -122,11 +122,11 @@
 .rootcolor_green:active {
   background: #deede2;
 }
-.rootcolor_yellow:hover {
-  background: #ffef5c;
+.rootcolor_brand:hover {
+  background: #28543d;
 }
-.rootcolor_yellow:active {
-  background: #f0c000;
+.rootcolor_brand:active {
+  background: #28543d;
 }
 .rootcolor_red:hover {
   background: #ec5e41;
@@ -201,7 +201,7 @@
 .slotTargetStartIcon {
   color: #ededec;
 }
-.slotTargetStartIconcolor_yellow {
+.slotTargetStartIconcolor_brand {
   color: #35290f;
 }
 .slotTargetStartIconcolor_white {
@@ -261,8 +261,8 @@
 .slotTargetChildrencolor_green {
   color: #28543d;
 }
-.slotTargetChildrencolor_yellow {
-  color: #35290f;
+.slotTargetChildrencolor_brand {
+  color: #ffffff;
 }
 .slotTargetChildrencolor_red {
   color: #ffffff;
@@ -431,7 +431,7 @@
 .slotTargetEndIcon {
   color: #ededec;
 }
-.slotTargetEndIconcolor_yellow {
+.slotTargetEndIconcolor_brand {
   color: #35290f;
 }
 .slotTargetEndIconcolor_white {

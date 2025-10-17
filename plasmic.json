@@ -525,6 +525,19 @@
           "cssFilePath": "plasmic/levelset_v_2/PlasmicDrawerTest.module.css",
           "scheme": "blackbox",
           "componentType": "component"
+        },
+        {
+          "id": "BjWS5eIFsQab",
+          "name": "DiscActionForm",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicDiscActionForm.tsx",
+          "importSpec": {
+            "modulePath": "DiscActionForm.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicDiscActionForm.module.css",
+          "scheme": "blackbox",
+          "componentType": "component"
         }
       ],
       "icons": [
@@ -27944,6 +27957,36 @@
           "name": "TabContent",
           "displayName": "hostless-tab-content",
           "componentImportPath": "@plasmicpkgs/plasmic-tabs"
+        }
+      ],
+      "customFunctions": []
+    },
+    {
+      "projectId": "5dGW8Awro3qq8Hh5MveXLP",
+      "projectApiToken": "wVHvHSTRyoO1MQddr5ypmW8AfwiMMy7h0Iaj4Q2YmYLLEo2A4L6pLn8Fydm8wQkTAJV9uAD5bJPo8bmGg",
+      "projectName": "lottie-react",
+      "version": ">0.0.0",
+      "cssFilePath": "plasmic/lottie_react/plasmic.module.css",
+      "components": [],
+      "icons": [],
+      "images": [],
+      "indirect": true,
+      "globalContextsFilePath": "",
+      "splitsProviderFilePath": "",
+      "styleTokensProviderFilePath": "plasmic/lottie_react/PlasmicStyleTokensProvider.tsx",
+      "projectModuleFilePath": "plasmic/lottie_react/plasmic.tsx",
+      "codeComponents": [
+        {
+          "id": "BPNsJ2qis6",
+          "name": "LottieWrapper",
+          "displayName": "hostless-lottie-react",
+          "componentImportPath": "@plasmicpkgs/lottie-react"
+        },
+        {
+          "id": "vbTFHH9P-cuM",
+          "name": "AsyncLottieWrapper",
+          "displayName": "hostless-lottie-async-react",
+          "componentImportPath": "@plasmicpkgs/lottie-react"
         }
       ],
       "customFunctions": []

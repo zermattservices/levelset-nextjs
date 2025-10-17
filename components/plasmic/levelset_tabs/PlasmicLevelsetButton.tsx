@@ -83,7 +83,7 @@ export type PlasmicLevelsetButton__VariantMembers = {
   color:
     | "blue"
     | "green"
-    | "yellow"
+    | "brand"
     | "red"
     | "sand"
     | "white"
@@ -104,7 +104,7 @@ export type PlasmicLevelsetButton__VariantsArgs = {
   color?: SingleChoiceArg<
     | "blue"
     | "green"
-    | "yellow"
+    | "brand"
     | "red"
     | "sand"
     | "white"
@@ -160,7 +160,7 @@ export interface DefaultLevelsetButtonProps extends pp.BaseButtonProps {
   color?: SingleChoiceArg<
     | "blue"
     | "green"
-    | "yellow"
+    | "brand"
     | "red"
     | "sand"
     | "white"
@@ -288,6 +288,7 @@ function PlasmicLevelsetButton__RenderFunc(props: {
         {
           [sty.root___focusVisibleWithin]: triggers.focusVisibleWithin_root,
           [sty.rootcolor_blue]: hasVariant($state, "color", "blue"),
+          [sty.rootcolor_brand]: hasVariant($state, "color", "brand"),
           [sty.rootcolor_clear]: hasVariant($state, "color", "clear"),
           [sty.rootcolor_green]: hasVariant($state, "color", "green"),
           [sty.rootcolor_link]: hasVariant($state, "color", "link"),
@@ -302,7 +303,6 @@ function PlasmicLevelsetButton__RenderFunc(props: {
           [sty.rootcolor_softSand]: hasVariant($state, "color", "softSand"),
           [sty.rootcolor_softYellow]: hasVariant($state, "color", "softYellow"),
           [sty.rootcolor_white]: hasVariant($state, "color", "white"),
-          [sty.rootcolor_yellow]: hasVariant($state, "color", "yellow"),
           [sty.rootisDisabled]: hasVariant($state, "isDisabled", "isDisabled"),
           [sty.rootshape_round]: hasVariant($state, "shape", "round"),
           [sty.rootshape_round_size_compact]:
@@ -380,6 +380,11 @@ function PlasmicLevelsetButton__RenderFunc(props: {
                 "color",
                 "blue"
               ),
+              [sty.slotTargetStartIconcolor_brand]: hasVariant(
+                $state,
+                "color",
+                "brand"
+              ),
               [sty.slotTargetStartIconcolor_clear]: hasVariant(
                 $state,
                 "color",
@@ -419,11 +424,6 @@ function PlasmicLevelsetButton__RenderFunc(props: {
                 $state,
                 "color",
                 "white"
-              ),
-              [sty.slotTargetStartIconcolor_yellow]: hasVariant(
-                $state,
-                "color",
-                "yellow"
               ),
               [sty.slotTargetStartIconshowStartIcon]: hasVariant(
                 $state,
@@ -467,6 +467,11 @@ function PlasmicLevelsetButton__RenderFunc(props: {
               $state,
               "color",
               "blue"
+            ),
+            [sty.slotTargetChildrencolor_brand]: hasVariant(
+              $state,
+              "color",
+              "brand"
             ),
             [sty.slotTargetChildrencolor_clear]: hasVariant(
               $state,
@@ -526,11 +531,6 @@ function PlasmicLevelsetButton__RenderFunc(props: {
               "color",
               "white"
             ),
-            [sty.slotTargetChildrencolor_yellow]: hasVariant(
-              $state,
-              "color",
-              "yellow"
-            ),
             [sty.slotTargetChildrenisDisabled]: hasVariant(
               $state,
               "isDisabled",
@@ -564,15 +564,15 @@ function PlasmicLevelsetButton__RenderFunc(props: {
           data-plasmic-name={"endIconContainer"}
           data-plasmic-override={overrides.endIconContainer}
           className={classNames(projectcss.all, sty.endIconContainer, {
+            [sty.endIconContainercolor_brand]: hasVariant(
+              $state,
+              "color",
+              "brand"
+            ),
             [sty.endIconContainercolor_white]: hasVariant(
               $state,
               "color",
               "white"
-            ),
-            [sty.endIconContainercolor_yellow]: hasVariant(
-              $state,
-              "color",
-              "yellow"
             ),
             [sty.endIconContainershowEndIcon]: hasVariant(
               $state,
@@ -591,6 +591,11 @@ function PlasmicLevelsetButton__RenderFunc(props: {
 
             value: args.endIcon,
             className: classNames(sty.slotTargetEndIcon, {
+              [sty.slotTargetEndIconcolor_brand]: hasVariant(
+                $state,
+                "color",
+                "brand"
+              ),
               [sty.slotTargetEndIconcolor_clear]: hasVariant(
                 $state,
                 "color",
@@ -630,11 +635,6 @@ function PlasmicLevelsetButton__RenderFunc(props: {
                 $state,
                 "color",
                 "white"
-              ),
-              [sty.slotTargetEndIconcolor_yellow]: hasVariant(
-                $state,
-                "color",
-                "yellow"
               ),
               [sty.slotTargetEndIconshowEndIcon]: hasVariant(
                 $state,

@@ -67,6 +67,7 @@ import "@plasmicapp/react-web/lib/plasmic.css";
 import projectcss from "../levelset_v2/plasmic_levelset_v2.module.css"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectcss
 import sty from "./PlasmicSlideoutListItem2.module.css"; // plasmic-import: 9Efhz4aeRJA1/css
 
+import CalendarIcon from "../library_tabler_3_2_icons/icons/PlasmicIcon__Calendar"; // plasmic-import: tgivdaKFbs_t/icon
 import Divider3Icon from "./icons/PlasmicIcon__Divider3"; // plasmic-import: K2tYHr-lcp8R/icon
 import User02Icon from "./icons/PlasmicIcon__User02"; // plasmic-import: 2Uwgk0NcERV_/icon
 
@@ -107,6 +108,7 @@ export type PlasmicSlideoutListItem2__OverridesType = {
   listItemDetails?: Flex__<"div">;
   text24?: Flex__<"div">;
   furtherDetails?: Flex__<"div">;
+  freeBox?: Flex__<"div">;
   divider?: Flex__<"svg">;
   iconAndLeader?: Flex__<"div">;
   points?: Flex__<"div">;
@@ -204,6 +206,11 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
         styleTokensClassNames,
         sty.listItem,
         {
+          [sty.listItemdisciplinaryAction]: hasVariant(
+            $state,
+            "disciplinaryAction",
+            "disciplinaryAction"
+          ),
           [sty.listIteminfractionType_negative]: hasVariant(
             $state,
             "infractionType",
@@ -220,7 +227,13 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
       <div
         data-plasmic-name={"contents"}
         data-plasmic-override={overrides.contents}
-        className={classNames(projectcss.all, sty.contents)}
+        className={classNames(projectcss.all, sty.contents, {
+          [sty.contentsdisciplinaryAction]: hasVariant(
+            $state,
+            "disciplinaryAction",
+            "disciplinaryAction"
+          )
+        })}
       >
         <div
           data-plasmic-name={"content11"}
@@ -254,27 +267,39 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
               data-plasmic-override={overrides.furtherDetails}
               className={classNames(projectcss.all, sty.furtherDetails)}
             >
-              {renderPlasmicSlot({
-                defaultContents: (
-                  <div
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.text__uhFn9
-                    )}
-                  >
-                    {"10/2/2025"}
-                  </div>
-                ),
-                value: args.date2,
-                className: classNames(sty.slotTargetDate2, {
-                  [sty.slotTargetDate2disciplinaryAction]: hasVariant(
-                    $state,
-                    "disciplinaryAction",
-                    "disciplinaryAction"
-                  )
-                })
-              })}
+              <div
+                data-plasmic-name={"freeBox"}
+                data-plasmic-override={overrides.freeBox}
+                className={classNames(projectcss.all, sty.freeBox)}
+                title={"Submitted on"}
+              >
+                <CalendarIcon
+                  className={classNames(projectcss.all, sty.svg__vtyx)}
+                  role={"img"}
+                />
+
+                {renderPlasmicSlot({
+                  defaultContents: (
+                    <div
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text__uhFn9
+                      )}
+                    >
+                      {"10/2/2025"}
+                    </div>
+                  ),
+                  value: args.date2,
+                  className: classNames(sty.slotTargetDate2, {
+                    [sty.slotTargetDate2disciplinaryAction]: hasVariant(
+                      $state,
+                      "disciplinaryAction",
+                      "disciplinaryAction"
+                    )
+                  })
+                })}
+              </div>
               <Divider3Icon
                 data-plasmic-name={"divider"}
                 data-plasmic-override={overrides.divider}
@@ -286,6 +311,7 @@ function PlasmicSlideoutListItem2__RenderFunc(props: {
                 data-plasmic-name={"iconAndLeader"}
                 data-plasmic-override={overrides.iconAndLeader}
                 className={classNames(projectcss.all, sty.iconAndLeader)}
+                title={"Submitted by"}
               >
                 <User02Icon
                   className={classNames(projectcss.all, sty.svg__q77Qt)}
@@ -425,6 +451,7 @@ const PlasmicDescendants = {
     "listItemDetails",
     "text24",
     "furtherDetails",
+    "freeBox",
     "divider",
     "iconAndLeader",
     "points",
@@ -436,6 +463,7 @@ const PlasmicDescendants = {
     "listItemDetails",
     "text24",
     "furtherDetails",
+    "freeBox",
     "divider",
     "iconAndLeader",
     "points",
@@ -446,6 +474,7 @@ const PlasmicDescendants = {
     "listItemDetails",
     "text24",
     "furtherDetails",
+    "freeBox",
     "divider",
     "iconAndLeader",
     "points",
@@ -455,11 +484,13 @@ const PlasmicDescendants = {
     "listItemDetails",
     "text24",
     "furtherDetails",
+    "freeBox",
     "divider",
     "iconAndLeader"
   ],
   text24: ["text24"],
-  furtherDetails: ["furtherDetails", "divider", "iconAndLeader"],
+  furtherDetails: ["furtherDetails", "freeBox", "divider", "iconAndLeader"],
+  freeBox: ["freeBox"],
   divider: ["divider"],
   iconAndLeader: ["iconAndLeader"],
   points: ["points", "pointsText"],
@@ -475,6 +506,7 @@ type NodeDefaultElementType = {
   listItemDetails: "div";
   text24: "div";
   furtherDetails: "div";
+  freeBox: "div";
   divider: "svg";
   iconAndLeader: "div";
   points: "div";
@@ -548,6 +580,7 @@ export const PlasmicSlideoutListItem2 = Object.assign(
     listItemDetails: makeNodeComponent("listItemDetails"),
     text24: makeNodeComponent("text24"),
     furtherDetails: makeNodeComponent("furtherDetails"),
+    freeBox: makeNodeComponent("freeBox"),
     divider: makeNodeComponent("divider"),
     iconAndLeader: makeNodeComponent("iconAndLeader"),
     points: makeNodeComponent("points"),
