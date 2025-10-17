@@ -87,7 +87,6 @@ import { inputHelpers as AntdInput_Helpers } from "@plasmicpkgs/antd5/skinny/reg
 import { AntdSelect } from "@plasmicpkgs/antd5/skinny/registerSelect";
 import { AntdDatePicker } from "@plasmicpkgs/antd5/skinny/registerDatePicker";
 import { datePickerHelpers as AntdDatePicker_Helpers } from "@plasmicpkgs/antd5/skinny/registerDatePicker";
-import { AntdButton } from "@plasmicpkgs/antd5/skinny/registerButton";
 import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
@@ -191,7 +190,6 @@ export type PlasmicDiscipline__OverridesType = {
   input7?: Flex__<typeof AntdInput>;
   input8?: Flex__<typeof AntdInput>;
   input9?: Flex__<typeof AntdInput>;
-  button?: Flex__<typeof AntdButton>;
   svg?: Flex__<"svg">;
   frame6?: Flex__<"div">;
   leader2?: Flex__<"div">;
@@ -257,7 +255,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => false
+        initFunc: ({ $props, $state, $queries, $ctx }) => true
       },
       {
         path: "selectedEmployee",
@@ -2039,7 +2037,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                 "__wab_instance",
                                                 sty.levelsetButton__l9Kf6
                                               )}
-                                              color={"red"}
+                                              color={"brand"}
                                               size={"compact"}
                                               startIcon={
                                                 <SquarePlusIcon
@@ -2054,6 +2052,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                   role={"img"}
                                                 />
                                               }
+                                              submitsForm={true}
                                             >
                                               <div
                                                 className={classNames(
@@ -2522,166 +2521,6 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                     )}
                                                   />
                                                 </FormItemWrapper>
-                                                <div
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    projectcss.__wab_text,
-                                                    sty.text__y3Zbo
-                                                  )}
-                                                >
-                                                  <React.Fragment>
-                                                    {(() => {
-                                                      try {
-                                                        return $state.form.value
-                                                          .action_id;
-                                                      } catch (e) {
-                                                        if (
-                                                          e instanceof
-                                                            TypeError ||
-                                                          e?.plasmicType ===
-                                                            "PlasmicUndefinedDataError"
-                                                        ) {
-                                                          return "";
-                                                        }
-                                                        throw e;
-                                                      }
-                                                    })()}
-                                                  </React.Fragment>
-                                                </div>
-                                                <div
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    projectcss.__wab_text,
-                                                    sty.text__eGh6
-                                                  )}
-                                                >
-                                                  <React.Fragment>
-                                                    {(() => {
-                                                      try {
-                                                        return $state.form.value
-                                                          .action_date;
-                                                      } catch (e) {
-                                                        if (
-                                                          e instanceof
-                                                            TypeError ||
-                                                          e?.plasmicType ===
-                                                            "PlasmicUndefinedDataError"
-                                                        ) {
-                                                          return "";
-                                                        }
-                                                        throw e;
-                                                      }
-                                                    })()}
-                                                  </React.Fragment>
-                                                </div>
-                                                <div
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    projectcss.__wab_text,
-                                                    sty.text__ulkJg
-                                                  )}
-                                                >
-                                                  <React.Fragment>
-                                                    {(() => {
-                                                      try {
-                                                        return $queries
-                                                          .activeAppUser.data[0]
-                                                          .employee_id;
-                                                      } catch (e) {
-                                                        if (
-                                                          e instanceof
-                                                            TypeError ||
-                                                          e?.plasmicType ===
-                                                            "PlasmicUndefinedDataError"
-                                                        ) {
-                                                          return "";
-                                                        }
-                                                        throw e;
-                                                      }
-                                                    })()}
-                                                  </React.Fragment>
-                                                </div>
-                                                <div
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    projectcss.__wab_text,
-                                                    sty.text__d9DZ5
-                                                  )}
-                                                >
-                                                  <React.Fragment>
-                                                    {(() => {
-                                                      try {
-                                                        return $queries
-                                                          .employeesDiscQuery
-                                                          .data[0].id;
-                                                      } catch (e) {
-                                                        if (
-                                                          e instanceof
-                                                            TypeError ||
-                                                          e?.plasmicType ===
-                                                            "PlasmicUndefinedDataError"
-                                                        ) {
-                                                          return "";
-                                                        }
-                                                        throw e;
-                                                      }
-                                                    })()}
-                                                  </React.Fragment>
-                                                </div>
-                                                <div
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    projectcss.__wab_text,
-                                                    sty.text__sxq2D
-                                                  )}
-                                                >
-                                                  <React.Fragment>
-                                                    {(() => {
-                                                      try {
-                                                        return $queries
-                                                          .employeesDiscQuery
-                                                          .data[0].location_id;
-                                                      } catch (e) {
-                                                        if (
-                                                          e instanceof
-                                                            TypeError ||
-                                                          e?.plasmicType ===
-                                                            "PlasmicUndefinedDataError"
-                                                        ) {
-                                                          return "";
-                                                        }
-                                                        throw e;
-                                                      }
-                                                    })()}
-                                                  </React.Fragment>
-                                                </div>
-                                                <div
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    projectcss.__wab_text,
-                                                    sty.text__rbaoo
-                                                  )}
-                                                >
-                                                  <React.Fragment>
-                                                    {(() => {
-                                                      try {
-                                                        return $queries
-                                                          .employeesDiscQuery
-                                                          .data[0].org_id;
-                                                      } catch (e) {
-                                                        if (
-                                                          e instanceof
-                                                            TypeError ||
-                                                          e?.plasmicType ===
-                                                            "PlasmicUndefinedDataError"
-                                                        ) {
-                                                          return "";
-                                                        }
-                                                        throw e;
-                                                      }
-                                                    })()}
-                                                  </React.Fragment>
-                                                </div>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
@@ -3362,28 +3201,25 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                     );
                                                   })()}
                                                 </FormItemWrapper>
-                                                <AntdButton
-                                                  data-plasmic-name={"button"}
-                                                  data-plasmic-override={
-                                                    overrides.button
-                                                  }
+                                                <LevelsetButton
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.button
+                                                    sty.levelsetButton__yFGdG
                                                   )}
+                                                  color={"brand"}
+                                                  size={"compact"}
                                                   submitsForm={true}
-                                                  type={"primary"}
                                                 >
                                                   <div
                                                     className={classNames(
                                                       projectcss.all,
                                                       projectcss.__wab_text,
-                                                      sty.text__y0Lnl
+                                                      sty.text__cfmDt
                                                     )}
                                                   >
                                                     {"Submit"}
                                                   </div>
-                                                </AntdButton>
+                                                </LevelsetButton>
                                               </FormWrapper>
                                             );
                                           })()}
@@ -3738,7 +3574,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg",
     "frame6",
     "leader2",
@@ -3819,7 +3654,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg",
     "frame6",
     "leader2",
@@ -3898,7 +3732,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg",
     "frame6",
     "leader2",
@@ -3983,7 +3816,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg",
     "frame6",
     "leader2",
@@ -4051,7 +3883,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg",
     "frame6",
     "leader2",
@@ -4118,7 +3949,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg",
     "frame6",
     "leader2",
@@ -4184,7 +4014,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg",
     "frame6",
     "leader2",
@@ -4249,7 +4078,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg",
     "frame6",
     "leader2",
@@ -4313,7 +4141,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg",
     "frame6",
     "leader2",
@@ -4372,7 +4199,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg",
     "frame6",
     "leader2",
@@ -4487,7 +4313,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg"
   ],
   iconAndText2: [
@@ -4506,7 +4331,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg"
   ],
   text27: ["text27"],
@@ -4524,7 +4348,6 @@ const PlasmicDescendants = {
     "input7",
     "input8",
     "input9",
-    "button",
     "svg"
   ],
   form: [
@@ -4539,8 +4362,7 @@ const PlasmicDescendants = {
     "input6",
     "input7",
     "input8",
-    "input9",
-    "button"
+    "input9"
   ],
   input: ["input"],
   select: ["select"],
@@ -4553,7 +4375,6 @@ const PlasmicDescendants = {
   input7: ["input7"],
   input8: ["input8"],
   input9: ["input9"],
-  button: ["button"],
   svg: ["svg"],
   frame6: [
     "frame6",
@@ -4670,7 +4491,6 @@ type NodeDefaultElementType = {
   input7: typeof AntdInput;
   input8: typeof AntdInput;
   input9: typeof AntdInput;
-  button: typeof AntdButton;
   svg: "svg";
   frame6: "div";
   leader2: "div";
@@ -4813,7 +4633,6 @@ export const PlasmicDiscipline = Object.assign(
     input7: makeNodeComponent("input7"),
     input8: makeNodeComponent("input8"),
     input9: makeNodeComponent("input9"),
-    button: makeNodeComponent("button"),
     svg: makeNodeComponent("svg"),
     frame6: makeNodeComponent("frame6"),
     leader2: makeNodeComponent("leader2"),
