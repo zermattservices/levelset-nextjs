@@ -198,13 +198,16 @@ export function DisciplineTable({
                 .eq('location_id', locationId)
                 .order('infraction_date', { ascending: false });
                 
-              if (infError) throw infError;
+              if (infError) {
+                console.warn('Error fetching infractions, continuing with empty infractions:', infError);
+                // Continue with empty infractions array instead of throwing
+              }
               
               // Calculate current points and last infraction for each employee
               transformedData = employees.map(emp => {
                 const empInfractions = infractions?.filter(inf => inf.employee_id === emp.id) || [];
                 const current_points = empInfractions.reduce((sum, inf) => sum + (inf.points || 0), 0);
-                const last_infraction = empInfractions.length > 0 ? empInfractions[0].infraction_date : null;
+                const last_infraction = empInfractions && empInfractions.length > 0 ? empInfractions[0]?.infraction_date : null;
                 
                 return {
                   id: emp.id,
@@ -216,6 +219,9 @@ export function DisciplineTable({
               }).sort((a, b) => a.full_name.localeCompare(b.full_name)); // Sort by name alphabetically
               
               console.log('Loaded discipline data from tables:', transformedData.length, 'entries');
+            } else {
+              console.log('No employees found for org:', orgId, 'location:', locationId);
+              transformedData = [];
             }
           }
         
@@ -244,29 +250,45 @@ export function DisciplineTable({
   React.useEffect(() => {
     if (!orgId || !locationId) return;
     
-    const channel = supabase
-      .channel('infractions-changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'infractions',
-          filter: `org_id=eq.${orgId}`
-        }, 
-        (payload) => {
-          console.log('Infraction data changed:', payload);
-          // Refetch data when infractions change
-          // Use the same fallback logic as the initial fetch
-          fetchDisciplineData();
-        }
-      )
-      .subscribe();
+    let channel: any = null;
+    
+    try {
+      channel = supabase
+        .channel(`infractions-changes-${orgId}-${locationId}`)
+        .on('postgres_changes', 
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'infractions',
+            filter: `org_id=eq.${orgId}`
+          }, 
+          (payload) => {
+            console.log('Infraction data changed:', payload);
+            // Refetch data when infractions change
+            fetchDisciplineData();
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Successfully subscribed to infraction changes');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.warn('Failed to subscribe to infraction changes - continuing without real-time updates');
+          }
+        });
+    } catch (error) {
+      console.warn('Error setting up real-time subscription:', error);
+    }
 
     return () => {
-      const supabase = createSupabaseClient();
-      supabase.removeChannel(channel);
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.warn('Error removing channel:', error);
+        }
+      }
     };
-  }, [orgId, locationId]);
+  }, [orgId, locationId, supabase, fetchDisciplineData]);
 
   if (loading && data.length === 0) {
     return (
