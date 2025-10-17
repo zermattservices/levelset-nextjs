@@ -172,6 +172,7 @@
   width: 100%;
   height: auto;
   max-width: 100%;
+  margin-bottom: 50px;
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
   padding: 8px;
@@ -357,24 +358,34 @@
   display: flex;
   flex-direction: row;
   position: relative;
-  align-items: stretch;
+  align-items: center;
   justify-content: flex-start;
   width: 100%;
   height: auto;
   max-width: 100%;
+  column-gap: 12px;
   min-width: 0;
   padding: 8px;
 }
 .text___3DmR3 {
   position: relative;
-  width: 100%;
+  width: auto;
   height: auto;
   max-width: 100%;
   font-size: var(--token-KlrAoGIT1za7);
   font-weight: 700;
   font-family: "Mont";
   color: var(--token-b4D6G1fNo7IC);
-  min-width: 0;
+}
+.text___1AVHs {
+  position: relative;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  font-size: var(--token-B10hUni6jzpI);
+  font-weight: 700;
+  font-family: "Mont";
+  color: var(--token-FTu687H3gT3S);
 }
 .freeBox__hvq52 {
   display: flex;

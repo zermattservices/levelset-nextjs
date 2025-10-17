@@ -159,6 +159,7 @@
   height: auto;
   max-width: 100%;
   background: #ffffff;
+  margin-bottom: 100px;
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
   padding: 8px;

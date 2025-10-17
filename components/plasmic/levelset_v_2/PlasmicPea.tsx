@@ -254,286 +254,304 @@ function PlasmicPea__RenderFunc(props: {
         }
       `}</style>
 
-      <div
-        data-plasmic-name={"root"}
-        data-plasmic-override={overrides.root}
-        data-plasmic-root={true}
-        data-plasmic-for-node={forNode}
-        className={classNames(
-          projectcss.all,
-          projectcss.root_reset,
-          projectcss.plasmic_default_styles,
-          projectcss.plasmic_mixins,
-          styleTokensClassNames,
-          sty.root
-        )}
-      >
-        <MenuNavigation
-          data-plasmic-name={"menuNavigation"}
-          data-plasmic-override={overrides.menuNavigation}
-          className={classNames("__wab_instance", sty.menuNavigation)}
-          firstName={generateStateValueProp($state, [
-            "menuNavigation",
-            "firstName"
-          ])}
-          headerLocationId={generateStateValueProp($state, [
-            "menuNavigation",
-            "headerLocationId"
-          ])}
-          lastName={generateStateValueProp($state, [
-            "menuNavigation",
-            "lastName"
-          ])}
-          onFirstNameChange={async (...eventArgs: any) => {
-            generateStateOnChangeProp($state, [
+      <div className={projectcss.plasmic_page_wrapper}>
+        <div
+          data-plasmic-name={"root"}
+          data-plasmic-override={overrides.root}
+          data-plasmic-root={true}
+          data-plasmic-for-node={forNode}
+          className={classNames(
+            projectcss.all,
+            projectcss.root_reset,
+            projectcss.plasmic_default_styles,
+            projectcss.plasmic_mixins,
+            styleTokensClassNames,
+            sty.root
+          )}
+        >
+          <MenuNavigation
+            data-plasmic-name={"menuNavigation"}
+            data-plasmic-override={overrides.menuNavigation}
+            className={classNames("__wab_instance", sty.menuNavigation)}
+            firstName={generateStateValueProp($state, [
               "menuNavigation",
               "firstName"
-            ]).apply(null, eventArgs);
-
-            if (
-              eventArgs.length > 1 &&
-              eventArgs[1] &&
-              eventArgs[1]._plasmic_state_init_
-            ) {
-              return;
-            }
-          }}
-          onHeaderLocationIdChange={async (...eventArgs: any) => {
-            generateStateOnChangeProp($state, [
+            ])}
+            headerLocationId={generateStateValueProp($state, [
               "menuNavigation",
               "headerLocationId"
-            ]).apply(null, eventArgs);
-
-            if (
-              eventArgs.length > 1 &&
-              eventArgs[1] &&
-              eventArgs[1]._plasmic_state_init_
-            ) {
-              return;
-            }
-          }}
-          onLastNameChange={async (...eventArgs: any) => {
-            generateStateOnChangeProp($state, [
+            ])}
+            lastName={generateStateValueProp($state, [
               "menuNavigation",
               "lastName"
-            ]).apply(null, eventArgs);
+            ])}
+            onFirstNameChange={async (...eventArgs: any) => {
+              generateStateOnChangeProp($state, [
+                "menuNavigation",
+                "firstName"
+              ]).apply(null, eventArgs);
 
-            if (
-              eventArgs.length > 1 &&
-              eventArgs[1] &&
-              eventArgs[1]._plasmic_state_init_
-            ) {
-              return;
-            }
-          }}
-          onUserRoleChange={async (...eventArgs: any) => {
-            generateStateOnChangeProp($state, [
+              if (
+                eventArgs.length > 1 &&
+                eventArgs[1] &&
+                eventArgs[1]._plasmic_state_init_
+              ) {
+                return;
+              }
+            }}
+            onHeaderLocationIdChange={async (...eventArgs: any) => {
+              generateStateOnChangeProp($state, [
+                "menuNavigation",
+                "headerLocationId"
+              ]).apply(null, eventArgs);
+
+              if (
+                eventArgs.length > 1 &&
+                eventArgs[1] &&
+                eventArgs[1]._plasmic_state_init_
+              ) {
+                return;
+              }
+            }}
+            onLastNameChange={async (...eventArgs: any) => {
+              generateStateOnChangeProp($state, [
+                "menuNavigation",
+                "lastName"
+              ]).apply(null, eventArgs);
+
+              if (
+                eventArgs.length > 1 &&
+                eventArgs[1] &&
+                eventArgs[1]._plasmic_state_init_
+              ) {
+                return;
+              }
+            }}
+            onUserRoleChange={async (...eventArgs: any) => {
+              generateStateOnChangeProp($state, [
+                "menuNavigation",
+                "userRole"
+              ]).apply(null, eventArgs);
+
+              if (
+                eventArgs.length > 1 &&
+                eventArgs[1] &&
+                eventArgs[1]._plasmic_state_init_
+              ) {
+                return;
+              }
+            }}
+            userRole={generateStateValueProp($state, [
               "menuNavigation",
               "userRole"
-            ]).apply(null, eventArgs);
+            ])}
+          />
 
-            if (
-              eventArgs.length > 1 &&
-              eventArgs[1] &&
-              eventArgs[1]._plasmic_state_init_
-            ) {
-              return;
-            }
-          }}
-          userRole={generateStateValueProp($state, [
-            "menuNavigation",
-            "userRole"
-          ])}
-        />
-
-        <RedirectIf
-          data-plasmic-name={"redirectIf"}
-          data-plasmic-override={overrides.redirectIf}
-          className={classNames("__wab_instance", sty.redirectIf)}
-          condition={(() => {
-            try {
-              return $ctx.auth && !!$ctx.auth.email;
-            } catch (e) {
-              if (
-                e instanceof TypeError ||
-                e?.plasmicType === "PlasmicUndefinedDataError"
-              ) {
-                return undefined;
+          <RedirectIf
+            data-plasmic-name={"redirectIf"}
+            data-plasmic-override={overrides.redirectIf}
+            className={classNames("__wab_instance", sty.redirectIf)}
+            condition={(() => {
+              try {
+                return $ctx.auth && !!$ctx.auth.email;
+              } catch (e) {
+                if (
+                  e instanceof TypeError ||
+                  e?.plasmicType === "PlasmicUndefinedDataError"
+                ) {
+                  return undefined;
+                }
+                throw e;
               }
-              throw e;
-            }
-          })()}
-          onFalse={async () => {
-            const $steps = {};
+            })()}
+            onFalse={async () => {
+              const $steps = {};
 
-            $steps["goToLoginPage"] = true
-              ? (() => {
-                  const actionArgs = { destination: `/auth/login` };
-                  return (({ destination }) => {
-                    if (
-                      typeof destination === "string" &&
-                      destination.startsWith("#")
-                    ) {
-                      document
-                        .getElementById(destination.substr(1))
-                        .scrollIntoView({ behavior: "smooth" });
-                    } else {
-                      __nextRouter?.push(destination);
-                    }
-                  })?.apply(null, [actionArgs]);
-                })()
-              : undefined;
-            if (
-              $steps["goToLoginPage"] != null &&
-              typeof $steps["goToLoginPage"] === "object" &&
-              typeof $steps["goToLoginPage"].then === "function"
-            ) {
-              $steps["goToLoginPage"] = await $steps["goToLoginPage"];
-            }
-          }}
-        >
-          <div className={classNames(projectcss.all, sty.freeBox__ktUyf)}>
-            <div className={classNames(projectcss.all, sty.freeBox__q2Oez)}>
-              <div className={classNames(projectcss.all, sty.freeBox___82DkP)}>
-                <div className={classNames(projectcss.all, sty.freeBox__igRkK)}>
+              $steps["goToLoginPage"] = true
+                ? (() => {
+                    const actionArgs = { destination: `/auth/login` };
+                    return (({ destination }) => {
+                      if (
+                        typeof destination === "string" &&
+                        destination.startsWith("#")
+                      ) {
+                        document
+                          .getElementById(destination.substr(1))
+                          .scrollIntoView({ behavior: "smooth" });
+                      } else {
+                        __nextRouter?.push(destination);
+                      }
+                    })?.apply(null, [actionArgs]);
+                  })()
+                : undefined;
+              if (
+                $steps["goToLoginPage"] != null &&
+                typeof $steps["goToLoginPage"] === "object" &&
+                typeof $steps["goToLoginPage"].then === "function"
+              ) {
+                $steps["goToLoginPage"] = await $steps["goToLoginPage"];
+              }
+            }}
+          >
+            <div className={classNames(projectcss.all, sty.freeBox__ktUyf)}>
+              <div className={classNames(projectcss.all, sty.freeBox__q2Oez)}>
+                <div
+                  className={classNames(projectcss.all, sty.freeBox___82DkP)}
+                >
                   <div
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.text___3OfVz
-                    )}
+                    className={classNames(projectcss.all, sty.freeBox__igRkK)}
                   >
-                    {"PEA Dashboard"}
-                  </div>
-                </div>
-                <div className={classNames(projectcss.all, sty.freeBox__ixaur)}>
-                  <div
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.text__vFqtV
-                    )}
-                  >
-                    {
-                      "Filter using the position buttons and click a Team Member to see their recent ratings.."
-                    }
+                    <div
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text___3OfVz
+                      )}
+                    >
+                      {"PEA Dashboard"}
+                    </div>
                   </div>
                   <div
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.text__r2U50
-                    )}
+                    className={classNames(projectcss.all, sty.freeBox__ixaur)}
                   >
-                    <React.Fragment>
-                      <span
-                        className={"plasmic_default__all plasmic_default__span"}
-                        style={{ color: "#000000" }}
-                      >
-                        {"Coming soon!"}
-                      </span>
-                    </React.Fragment>
+                    <div
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text__vFqtV
+                      )}
+                    >
+                      {
+                        "Filter using the position buttons and click a Team Member to see their recent ratings.."
+                      }
+                    </div>
+                    <div
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text__r2U50
+                      )}
+                    >
+                      <React.Fragment>
+                        <span
+                          className={
+                            "plasmic_default__all plasmic_default__span"
+                          }
+                          style={{ color: "#000000" }}
+                        >
+                          {"Coming soon!"}
+                        </span>
+                      </React.Fragment>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className={classNames(projectcss.all, sty.freeBox__de9Bv)}>
-            <div className={classNames(projectcss.all, sty.freeBox___64Wwo)}>
-              <div
-                data-plasmic-name={"verticalStack"}
-                data-plasmic-override={overrides.verticalStack}
-                className={classNames(projectcss.all, sty.verticalStack)}
-              >
+            <div className={classNames(projectcss.all, sty.freeBox__de9Bv)}>
+              <div className={classNames(projectcss.all, sty.freeBox___64Wwo)}>
                 <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text__kYAs
-                  )}
+                  data-plasmic-name={"verticalStack"}
+                  data-plasmic-override={overrides.verticalStack}
+                  className={classNames(projectcss.all, sty.verticalStack)}
                 >
-                  {"Employees"}
-                </div>
-                <FohBohSlider
-                  data-plasmic-name={"bohSlider"}
-                  data-plasmic-override={overrides.bohSlider}
-                  className={classNames("__wab_instance", sty.bohSlider)}
-                />
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text__kYAs
+                    )}
+                  >
+                    {"Employees"}
+                  </div>
+                  <FohBohSlider
+                    data-plasmic-name={"bohSlider"}
+                    data-plasmic-override={overrides.bohSlider}
+                    className={classNames("__wab_instance", sty.bohSlider)}
+                  />
 
-                <PositionButtons
-                  data-plasmic-name={"positionButtons"}
-                  data-plasmic-override={overrides.positionButtons}
-                  className={classNames("__wab_instance", sty.positionButtons)}
-                />
-
-                <div className={classNames(projectcss.all, sty.freeBox___2TFa)}>
-                  <ScoreboardTable
-                    data-plasmic-name={"peaScoreboardTable"}
-                    data-plasmic-override={overrides.peaScoreboardTable}
-                    activeGroup={"FOH"}
-                    bundleUrl={
-                      "https://storage.googleapis.com/trainingapp-assets/snapshots/buda/all.json"
-                    }
+                  <PositionButtons
+                    data-plasmic-name={"positionButtons"}
+                    data-plasmic-override={overrides.positionButtons}
                     className={classNames(
                       "__wab_instance",
-                      sty.peaScoreboardTable
+                      sty.positionButtons
                     )}
-                    currentTab={(() => {
-                      try {
-                        return undefined;
-                      } catch (e) {
-                        if (
-                          e instanceof TypeError ||
-                          e?.plasmicType === "PlasmicUndefinedDataError"
-                        ) {
-                          return "FOH";
-                        }
-                        throw e;
+                  />
+
+                  <div
+                    className={classNames(projectcss.all, sty.freeBox___2TFa)}
+                  >
+                    <ScoreboardTable
+                      data-plasmic-name={"peaScoreboardTable"}
+                      data-plasmic-override={overrides.peaScoreboardTable}
+                      activeGroup={"FOH"}
+                      bundleUrl={
+                        "https://storage.googleapis.com/trainingapp-assets/snapshots/buda/all.json"
                       }
-                    })()}
+                      className={classNames(
+                        "__wab_instance",
+                        sty.peaScoreboardTable
+                      )}
+                      currentTab={(() => {
+                        try {
+                          return undefined;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return "FOH";
+                          }
+                          throw e;
+                        }
+                      })()}
+                    />
+                  </div>
+                </div>
+                <div
+                  data-plasmic-name={"verticalStack2"}
+                  data-plasmic-override={overrides.verticalStack2}
+                  className={classNames(projectcss.all, sty.verticalStack2)}
+                >
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text__nTbF
+                    )}
+                  >
+                    {"Disciplinary Actions"}
+                  </div>
+                  <PEARubric
+                    data-plasmic-name={"peaRubric"}
+                    data-plasmic-override={overrides.peaRubric}
+                    className={classNames("__wab_instance", sty.peaRubric)}
                   />
                 </div>
               </div>
-              <div
-                data-plasmic-name={"verticalStack2"}
-                data-plasmic-override={overrides.verticalStack2}
-                className={classNames(projectcss.all, sty.verticalStack2)}
-              >
-                <div
+            </div>
+            <div
+              data-plasmic-name={"verticalStack3"}
+              data-plasmic-override={overrides.verticalStack3}
+              className={classNames(projectcss.all, sty.verticalStack3)}
+            >
+              <div className={classNames(projectcss.all, sty.freeBox___9LQfr)}>
+                <FullPEAScoreboard
+                  data-plasmic-name={"fullPeaScoreboard"}
+                  data-plasmic-override={overrides.fullPeaScoreboard}
                   className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text__nTbF
+                    "__wab_instance",
+                    sty.fullPeaScoreboard
                   )}
-                >
-                  {"Disciplinary Actions"}
-                </div>
-                <PEARubric
-                  data-plasmic-name={"peaRubric"}
-                  data-plasmic-override={overrides.peaRubric}
-                  className={classNames("__wab_instance", sty.peaRubric)}
+                  dashboardWidth={"1200px"}
+                  height={"800px"}
+                  maxWidth={"1200px"}
+                  variant={"buda"}
                 />
               </div>
             </div>
-          </div>
-          <div
-            data-plasmic-name={"verticalStack3"}
-            data-plasmic-override={overrides.verticalStack3}
-            className={classNames(projectcss.all, sty.verticalStack3)}
-          >
-            <div className={classNames(projectcss.all, sty.freeBox___9LQfr)}>
-              <FullPEAScoreboard
-                data-plasmic-name={"fullPeaScoreboard"}
-                data-plasmic-override={overrides.fullPeaScoreboard}
-                className={classNames("__wab_instance", sty.fullPeaScoreboard)}
-                dashboardWidth={"1280px"}
-                height={"800px"}
-                maxWidth={"1280px"}
-                variant={"buda"}
-              />
-            </div>
-          </div>
-        </RedirectIf>
+          </RedirectIf>
+        </div>
       </div>
     </React.Fragment>
   ) as React.ReactElement | null;
