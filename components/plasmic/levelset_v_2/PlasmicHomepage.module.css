@@ -172,10 +172,10 @@
   width: 100%;
   height: auto;
   max-width: 100%;
-  margin-bottom: 50px;
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
-  padding: 8px;
+  padding: 8px 8px 50px;
+  margin: 0px;
 }
 .freeBox__wp8V3 {
   display: flex;
