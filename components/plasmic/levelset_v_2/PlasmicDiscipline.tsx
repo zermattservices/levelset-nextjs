@@ -2586,7 +2586,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                       try {
                                                         return $queries
                                                           .activeAppUser.data[0]
-                                                          .id;
+                                                          .employee_id;
                                                       } catch (e) {
                                                         if (
                                                           e instanceof
