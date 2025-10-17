@@ -137,13 +137,13 @@ function PlasmicHomepage__RenderFunc(props: {
   const stateSpecs: Parameters<typeof useDollarState>[0] = React.useMemo(
     () => [
       {
-        path: "menuNavigation.locationName",
+        path: "menuNavigation.headerLocationId",
         type: "private",
         variableType: "text",
         initFunc: ({ $props, $state, $queries, $ctx }) =>
           (() => {
             try {
-              return undefined;
+              return $state.form.value.location_alt_id;
             } catch (e) {
               if (
                 e instanceof TypeError ||
@@ -269,13 +269,13 @@ function PlasmicHomepage__RenderFunc(props: {
             "menuNavigation",
             "firstName"
           ])}
+          headerLocationId={generateStateValueProp($state, [
+            "menuNavigation",
+            "headerLocationId"
+          ])}
           lastName={generateStateValueProp($state, [
             "menuNavigation",
             "lastName"
-          ])}
-          locationName={generateStateValueProp($state, [
-            "menuNavigation",
-            "locationName"
           ])}
           onFirstNameChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
@@ -291,10 +291,10 @@ function PlasmicHomepage__RenderFunc(props: {
               return;
             }
           }}
-          onLastNameChange={async (...eventArgs: any) => {
+          onHeaderLocationIdChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
               "menuNavigation",
-              "lastName"
+              "headerLocationId"
             ]).apply(null, eventArgs);
 
             if (
@@ -305,10 +305,10 @@ function PlasmicHomepage__RenderFunc(props: {
               return;
             }
           }}
-          onLocationNameChange={async (...eventArgs: any) => {
+          onLastNameChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
               "menuNavigation",
-              "locationName"
+              "lastName"
             ]).apply(null, eventArgs);
 
             if (

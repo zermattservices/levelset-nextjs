@@ -255,7 +255,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => true
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
       },
       {
         path: "selectedEmployee",
@@ -270,13 +270,13 @@ function PlasmicDiscipline__RenderFunc(props: {
         initFunc: ({ $props, $state, $queries, $ctx }) => "tab4"
       },
       {
-        path: "menuNavigation.locationName",
+        path: "menuNavigation.headerLocationId",
         type: "private",
         variableType: "text",
         initFunc: ({ $props, $state, $queries, $ctx }) =>
           (() => {
             try {
-              return undefined;
+              return $state.form.value.location_alt_id;
             } catch (e) {
               if (
                 e instanceof TypeError ||
@@ -349,7 +349,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "modal.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => true
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
       },
       {
         path: "form.value",
@@ -507,7 +507,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
         opId: "c3bd2802-6689-478d-a8a6-846360d08597",
         userArgs: {
-          filters: ["f69c9488-5636-4591-9e6a-10967db6075e"]
+          filters: [$state.selectedEmployee?.id]
         },
         cacheKey: `plasmic.$.c3bd2802-6689-478d-a8a6-846360d08597.$.`,
         invalidatedKeys: null,
@@ -590,13 +590,13 @@ function PlasmicDiscipline__RenderFunc(props: {
             "menuNavigation",
             "firstName"
           ])}
+          headerLocationId={generateStateValueProp($state, [
+            "menuNavigation",
+            "headerLocationId"
+          ])}
           lastName={generateStateValueProp($state, [
             "menuNavigation",
             "lastName"
-          ])}
-          locationName={generateStateValueProp($state, [
-            "menuNavigation",
-            "locationName"
           ])}
           onFirstNameChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
@@ -612,10 +612,10 @@ function PlasmicDiscipline__RenderFunc(props: {
               return;
             }
           }}
-          onLastNameChange={async (...eventArgs: any) => {
+          onHeaderLocationIdChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
               "menuNavigation",
-              "lastName"
+              "headerLocationId"
             ]).apply(null, eventArgs);
 
             if (
@@ -626,10 +626,10 @@ function PlasmicDiscipline__RenderFunc(props: {
               return;
             }
           }}
-          onLocationNameChange={async (...eventArgs: any) => {
+          onLastNameChange={async (...eventArgs: any) => {
             generateStateOnChangeProp($state, [
               "menuNavigation",
-              "locationName"
+              "lastName"
             ]).apply(null, eventArgs);
 
             if (
