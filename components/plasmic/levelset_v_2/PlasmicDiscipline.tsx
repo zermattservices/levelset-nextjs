@@ -2078,10 +2078,10 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                         dataOp: {
                                                           sourceId:
                                                             "wGi39M1g3x2KnbXK4J4Gyq",
-                                                          opId: "7d9a4c8f-ab89-4540-8077-e2db3b296905",
+                                                          opId: "a42b00c6-9c2e-4f56-8ae6-2ee207f3f05a",
                                                           userArgs: {
                                                             variables: [
-                                                              $ctx.auth.id,
+                                                              "f69c9488-5636-4591-9e6a-10967db6075e",
 
                                                               $queries
                                                                 .employeesDiscQuery
