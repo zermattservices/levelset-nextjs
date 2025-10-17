@@ -29,5 +29,8 @@
   object-fit: cover;
   display: flex;
   flex-direction: column;
-  height: auto;
+  height: 1000px;
+  width: 100%;
+  grid-column-start: 1 !important;
+  grid-column-end: -1 !important;
 }
