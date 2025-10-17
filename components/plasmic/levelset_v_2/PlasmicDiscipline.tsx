@@ -2118,7 +2118,8 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                             variables: [
                                                               $queries
                                                                 .activeAppUser
-                                                                .data[0].id,
+                                                                .data[0]
+                                                                .employee_id,
 
                                                               $queries
                                                                 .employeesDiscQuery
