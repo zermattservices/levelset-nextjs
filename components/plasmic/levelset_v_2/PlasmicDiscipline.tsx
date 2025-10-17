@@ -349,7 +349,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "modal.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => false
+        initFunc: ({ $props, $state, $queries, $ctx }) => true
       },
       {
         path: "form.value",
@@ -2076,10 +2076,37 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                         dataOp: {
                                                           sourceId:
                                                             "wGi39M1g3x2KnbXK4J4Gyq",
-                                                          opId: "450c6db8-38b2-4eab-aacd-6151f69d3388",
+                                                          opId: "0728d2cd-d039-48b3-8f09-e60280557e9b",
                                                           userArgs: {
                                                             variables: [
+                                                              $ctx.auth.id,
+
+                                                              null,
+
+                                                              $queries
+                                                                .employeesDiscQuery
+                                                                .data[0].id,
+
+                                                              $queries
+                                                                .employeesDiscQuery
+                                                                .data[0]
+                                                                .location_id,
+
+                                                              $queries
+                                                                .employeesDiscQuery
+                                                                .data[0].org_id,
+
                                                               $state.form.value
+                                                                .action_id,
+
+                                                              null,
+
+                                                              null,
+
+                                                              null,
+
+                                                              $state.form.value
+                                                                .action_date
                                                             ]
                                                           },
                                                           cacheKey: null,
@@ -2262,6 +2289,14 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                     </div>
                                                   }
                                                   name={"action_id"}
+                                                  rules={[
+                                                    {
+                                                      ruleType: "required",
+                                                      message:
+                                                        "Please select an action"
+                                                    }
+                                                  ]}
+                                                  valuePropName={"action_id"}
                                                 >
                                                   <AntdSelect
                                                     data-plasmic-name={"select"}
@@ -2272,6 +2307,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                       "__wab_instance",
                                                       sty.select
                                                     )}
+                                                    defaultOpen={false}
                                                     defaultStylesClassName={classNames(
                                                       projectcss.root_reset,
                                                       projectcss.plasmic_default_styles,
@@ -2377,6 +2413,13 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                     </div>
                                                   }
                                                   name={"action_date"}
+                                                  rules={[
+                                                    {
+                                                      ruleType: "required",
+                                                      message:
+                                                        "Please select a date"
+                                                    }
+                                                  ]}
                                                 >
                                                   {(() => {
                                                     const child$Props = {
@@ -2384,6 +2427,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                         "__wab_instance",
                                                         sty.timePicker
                                                       ),
+                                                      disabled: false,
                                                       onChange: async (
                                                         ...eventArgs: any
                                                       ) => {
