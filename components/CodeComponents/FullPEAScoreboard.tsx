@@ -47,8 +47,7 @@ export function FullPEAScoreboard({
 
 <!-- Favicons / theme -->
 <link rel="icon" href="https://storage.googleapis.com/trainingapp-assets/Circle%20C%20CFA.png" sizes="any">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#111317" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff">
 
 <style>
   @font-face{
@@ -57,7 +56,7 @@ export function FullPEAScoreboard({
     font-weight:500;font-style:normal;font-display:swap;
   }
 
-  /* ===== Light mode (default) ===== */
+  /* ===== Light theme (always) ===== */
   :root{
     --bg:#ffffff; --text:#101317; --muted:#6b7280; --border:#e5e7eb; --head:#f9fafb; --hover:#fafafa;
     --green:#249e6b; --yellow:#ffb549; --red:#ad2624;
@@ -65,14 +64,6 @@ export function FullPEAScoreboard({
     --divider:#9ca3af;
     --row-h: 34px;
     --dashboard-width: ${typeof dashboardWidth === 'number' ? `${dashboardWidth}px` : dashboardWidth};
-  }
-  /* ===== Dark override ===== */
-  @media (prefers-color-scheme: dark){
-    :root{
-      --bg:#111317; --text:#e5e7eb; --muted:#9ca3af; --border:#2b3036; --head:#1a1f24; --hover:#0e1114;
-      --pill-bg:#1b2026; --pill-on:#e5e7eb; --pill-off:#9ca3af; --pill-border:#2b3036;
-      --divider:#3b424a;
-    }
   }
 
   html, body {
