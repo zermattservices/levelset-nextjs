@@ -27,7 +27,7 @@
   z-index: 1;
   max-width: var(--token-eC7sN0TdrMwT);
   min-width: 0;
-  padding: 0px 8px;
+  padding: 0px 8px 0px 16px;
 }
 .freeBox__a3UdP {
   display: flex;
@@ -39,7 +39,7 @@
   max-width: 100%;
   column-gap: 12px;
   min-width: 0;
-  padding: 8px 0px;
+  padding: 8px;
 }
 .logo {
   object-fit: fill;
