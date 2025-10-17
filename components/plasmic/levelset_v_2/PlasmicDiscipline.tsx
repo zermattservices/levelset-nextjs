@@ -525,6 +525,18 @@ function PlasmicDiscipline__RenderFunc(props: {
         invalidatedKeys: null,
         roleId: null
       };
+    }),
+    activeAppUser: usePlasmicDataOp(() => {
+      return {
+        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
+        opId: "529cafaf-e958-44f9-9b3c-02174ee46a9d",
+        userArgs: {
+          filters: [$ctx.auth.id]
+        },
+        cacheKey: `plasmic.$.529cafaf-e958-44f9-9b3c-02174ee46a9d.$.`,
+        invalidatedKeys: null,
+        roleId: null
+      };
     })
   };
   if (Object.keys(new$Queries).some(k => new$Queries[k] !== $queries[k])) {
@@ -2081,7 +2093,9 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                           opId: "a42b00c6-9c2e-4f56-8ae6-2ee207f3f05a",
                                                           userArgs: {
                                                             variables: [
-                                                              "f69c9488-5636-4591-9e6a-10967db6075e",
+                                                              $queries
+                                                                .activeAppUser
+                                                                .data[0].id,
 
                                                               $queries
                                                                 .employeesDiscQuery
