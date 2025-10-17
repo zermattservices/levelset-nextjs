@@ -180,7 +180,10 @@ export function RosterTable({
     }
   }, [orgId, locationId]);
 
-  // Set up real-time subscription for employee changes
+  // Real-time subscription disabled - Realtime not enabled on employees table
+  // If you need real-time updates, enable Realtime on the employees table in Supabase
+  // Then uncomment the code below
+  /*
   React.useEffect(() => {
     if (!orgId || !locationId) return;
     
@@ -219,6 +222,7 @@ export function RosterTable({
       supabase.removeChannel(channel);
     };
   }, [orgId, locationId]);
+  */
 
   // Handle FOH/BOH changes with API calls
   const handleFohChange = async (id: string, checked: boolean) => {
