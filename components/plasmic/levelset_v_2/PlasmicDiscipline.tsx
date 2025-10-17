@@ -259,7 +259,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => true
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
       },
       {
         path: "selectedEmployee",
@@ -3137,6 +3137,49 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                         ] =
                                                           await $steps[
                                                             "updateModalOpen"
+                                                          ];
+                                                      }
+
+                                                      $steps[
+                                                        "runActionOnForm"
+                                                      ] = true
+                                                        ? (() => {
+                                                            const actionArgs = {
+                                                              tplRef: "form",
+                                                              action:
+                                                                "clearFields"
+                                                            };
+                                                            return (({
+                                                              tplRef,
+                                                              action,
+                                                              args
+                                                            }) => {
+                                                              return $refs?.[
+                                                                tplRef
+                                                              ]?.[action]?.(
+                                                                ...(args ?? [])
+                                                              );
+                                                            })?.apply(null, [
+                                                              actionArgs
+                                                            ]);
+                                                          })()
+                                                        : undefined;
+                                                      if (
+                                                        $steps[
+                                                          "runActionOnForm"
+                                                        ] != null &&
+                                                        typeof $steps[
+                                                          "runActionOnForm"
+                                                        ] === "object" &&
+                                                        typeof $steps[
+                                                          "runActionOnForm"
+                                                        ].then === "function"
+                                                      ) {
+                                                        $steps[
+                                                          "runActionOnForm"
+                                                        ] =
+                                                          await $steps[
+                                                            "runActionOnForm"
                                                           ];
                                                       }
                                                     },
