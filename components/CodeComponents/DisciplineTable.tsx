@@ -246,7 +246,12 @@ export function DisciplineTable({
     }
   }, [orgId, locationId, fetchDisciplineData]);
 
-  // Set up real-time subscription for infraction changes
+  // Real-time subscription disabled - views cannot be added to publications
+  // If you need real-time updates, enable Realtime on the underlying tables:
+  // - infractions table
+  // - employees table
+  // Then uncomment the code below
+  /*
   React.useEffect(() => {
     if (!orgId || !locationId) return;
     
@@ -264,7 +269,6 @@ export function DisciplineTable({
           }, 
           (payload) => {
             console.log('Infraction data changed:', payload);
-            // Refetch data when infractions change
             fetchDisciplineData();
           }
         )
@@ -289,6 +293,7 @@ export function DisciplineTable({
       }
     };
   }, [orgId, locationId, supabase, fetchDisciplineData]);
+  */
 
   if (loading && data.length === 0) {
     return (
