@@ -246,6 +246,8 @@ function PlasmicDiscipline__RenderFunc(props: {
   const refsRef = React.useRef({});
   const $refs = refsRef.current;
 
+  const $globalActions = useGlobalActions?.();
+
   let [$queries, setDollarQueries] = React.useState<
     Record<string, ReturnType<typeof usePlasmicDataOp>>
   >({});
@@ -2076,12 +2078,10 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                         dataOp: {
                                                           sourceId:
                                                             "wGi39M1g3x2KnbXK4J4Gyq",
-                                                          opId: "0728d2cd-d039-48b3-8f09-e60280557e9b",
+                                                          opId: "7d9a4c8f-ab89-4540-8077-e2db3b296905",
                                                           userArgs: {
                                                             variables: [
                                                               $ctx.auth.id,
-
-                                                              null,
 
                                                               $queries
                                                                 .employeesDiscQuery
@@ -2098,12 +2098,6 @@ function PlasmicDiscipline__RenderFunc(props: {
 
                                                               $state.form.value
                                                                 .action_id,
-
-                                                              null,
-
-                                                              null,
-
-                                                              null,
 
                                                               $state.form.value
                                                                 .action_date
@@ -2159,6 +2153,103 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                   $steps["defaultSubmit"] =
                                                     await $steps[
                                                       "defaultSubmit"
+                                                    ];
+                                                }
+
+                                                $steps["updateModalOpen"] = true
+                                                  ? (() => {
+                                                      const actionArgs = {
+                                                        variable: {
+                                                          objRoot: $state,
+                                                          variablePath: [
+                                                            "modal",
+                                                            "open"
+                                                          ]
+                                                        },
+                                                        operation: 4
+                                                      };
+                                                      return (({
+                                                        variable,
+                                                        value,
+                                                        startIndex,
+                                                        deleteCount
+                                                      }) => {
+                                                        if (!variable) {
+                                                          return;
+                                                        }
+                                                        const {
+                                                          objRoot,
+                                                          variablePath
+                                                        } = variable;
+
+                                                        const oldValue =
+                                                          $stateGet(
+                                                            objRoot,
+                                                            variablePath
+                                                          );
+                                                        $stateSet(
+                                                          objRoot,
+                                                          variablePath,
+                                                          !oldValue
+                                                        );
+                                                        return !oldValue;
+                                                      })?.apply(null, [
+                                                        actionArgs
+                                                      ]);
+                                                    })()
+                                                  : undefined;
+                                                if (
+                                                  $steps["updateModalOpen"] !=
+                                                    null &&
+                                                  typeof $steps[
+                                                    "updateModalOpen"
+                                                  ] === "object" &&
+                                                  typeof $steps[
+                                                    "updateModalOpen"
+                                                  ].then === "function"
+                                                ) {
+                                                  $steps["updateModalOpen"] =
+                                                    await $steps[
+                                                      "updateModalOpen"
+                                                    ];
+                                                }
+                                              },
+                                              onFinishFailed: async data => {
+                                                const $steps = {};
+
+                                                $steps["invokeGlobalAction"] =
+                                                  true
+                                                    ? (() => {
+                                                        const actionArgs = {
+                                                          args: [
+                                                            "error",
+                                                            "Form Error",
+                                                            "We were unable to record your inputs at this time. Please try again later",
+                                                            undefined,
+                                                            "bottom"
+                                                          ]
+                                                        };
+                                                        return $globalActions[
+                                                          "plasmic-antd5-config-provider.showNotification"
+                                                        ]?.apply(null, [
+                                                          ...actionArgs.args
+                                                        ]);
+                                                      })()
+                                                    : undefined;
+                                                if (
+                                                  $steps[
+                                                    "invokeGlobalAction"
+                                                  ] != null &&
+                                                  typeof $steps[
+                                                    "invokeGlobalAction"
+                                                  ] === "object" &&
+                                                  typeof $steps[
+                                                    "invokeGlobalAction"
+                                                  ].then === "function"
+                                                ) {
+                                                  $steps["invokeGlobalAction"] =
+                                                    await $steps[
+                                                      "invokeGlobalAction"
                                                     ];
                                                 }
                                               },
