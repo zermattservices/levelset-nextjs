@@ -257,7 +257,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => true
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
       },
       {
         path: "selectedEmployee",
@@ -351,7 +351,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "modal.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => true
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
       },
       {
         path: "form.value",
@@ -2521,33 +2521,6 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                     )}
                                                   />
                                                 </FormItemWrapper>
-                                                <div
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    projectcss.__wab_text,
-                                                    sty.text__xd0Q1
-                                                  )}
-                                                >
-                                                  <React.Fragment>
-                                                    {(() => {
-                                                      try {
-                                                        return $queries
-                                                          .activeAppUser.data[0]
-                                                          .id;
-                                                      } catch (e) {
-                                                        if (
-                                                          e instanceof
-                                                            TypeError ||
-                                                          e?.plasmicType ===
-                                                            "PlasmicUndefinedDataError"
-                                                        ) {
-                                                          return "";
-                                                        }
-                                                        throw e;
-                                                      }
-                                                    })()}
-                                                  </React.Fragment>
-                                                </div>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
