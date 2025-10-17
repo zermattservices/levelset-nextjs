@@ -68,6 +68,8 @@ import {
 
 import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_mCN/component
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
+import { LoadingBoundary } from "@plasmicpkgs/plasmic-basic-components";
+import { LottieWrapper } from "@plasmicpkgs/lottie-react";
 import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
 import { DisciplineTable } from "../../CodeComponents/DisciplineTable"; // plasmic-import: Gsr7FZewgF56/codeComponent
 import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTable"; // plasmic-import: gO99exJZ_N-6/codeComponent
@@ -77,8 +79,6 @@ import { TabButton } from "@plasmicpkgs/plasmic-tabs";
 import LevelsetButton from "../../LevelsetButton"; // plasmic-import: u704oB_4BUvT/component
 import { TabUnderline } from "@plasmicpkgs/plasmic-tabs";
 import { TabContent } from "@plasmicpkgs/plasmic-tabs";
-import { LoadingBoundary } from "@plasmicpkgs/plasmic-basic-components";
-import { LottieWrapper } from "@plasmicpkgs/lottie-react";
 import SlideoutListItem2 from "../../SlideoutListItem2"; // plasmic-import: 9Efhz4aeRJA1/component
 import { AntdModal } from "@plasmicpkgs/antd5/skinny/registerModal";
 import { FormWrapper } from "@plasmicpkgs/antd5/skinny/Form";
@@ -147,8 +147,6 @@ export type PlasmicDiscipline__OverridesType = {
   peContent?: Flex__<typeof TabContent>;
   evalsContent?: Flex__<typeof TabContent>;
   disciplineContent?: Flex__<typeof TabContent>;
-  loadingBoundary?: Flex__<typeof LoadingBoundary>;
-  lottie?: Flex__<typeof LottieWrapper>;
   discipline?: Flex__<"div">;
   row?: Flex__<"div">;
   text13?: Flex__<"div">;
@@ -664,1949 +662,2382 @@ function PlasmicDiscipline__RenderFunc(props: {
           ])}
         />
 
-        <RedirectIf
-          data-plasmic-name={"redirectIf"}
-          data-plasmic-override={overrides.redirectIf}
-          className={classNames("__wab_instance", sty.redirectIf)}
-          condition={true}
-          onFalse={async () => {
-            const $steps = {};
-
-            $steps["goToLoginPage"] = true
-              ? (() => {
-                  const actionArgs = { destination: `/auth/login` };
-                  return (({ destination }) => {
-                    if (
-                      typeof destination === "string" &&
-                      destination.startsWith("#")
-                    ) {
-                      document
-                        .getElementById(destination.substr(1))
-                        .scrollIntoView({ behavior: "smooth" });
-                    } else {
-                      __nextRouter?.push(destination);
-                    }
-                  })?.apply(null, [actionArgs]);
-                })()
-              : undefined;
-            if (
-              $steps["goToLoginPage"] != null &&
-              typeof $steps["goToLoginPage"] === "object" &&
-              typeof $steps["goToLoginPage"].then === "function"
-            ) {
-              $steps["goToLoginPage"] = await $steps["goToLoginPage"];
-            }
-          }}
-        >
-          <div className={classNames(projectcss.all, sty.freeBox__jtUkZ)}>
-            <div className={classNames(projectcss.all, sty.freeBox__ureDb)}>
-              <div className={classNames(projectcss.all, sty.freeBox__nlSty)}>
-                <div className={classNames(projectcss.all, sty.freeBox__mKhGx)}>
-                  <div
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.text__wQDeC
-                    )}
-                  >
-                    {"APS Dashboard"}
-                  </div>
-                </div>
-                <div className={classNames(projectcss.all, sty.freeBox__c457R)}>
-                  <div
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.text___8HOob
-                    )}
-                  >
-                    {
-                      "Here\u2019s your organization's current points. Click a Team Member to see their recent infractions."
-                    }
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={classNames(projectcss.all, sty.freeBox__lKzxl)}>
-            <div className={classNames(projectcss.all, sty.freeBox__cHwGk)}>
-              <div
-                data-plasmic-name={"verticalStack"}
-                data-plasmic-override={overrides.verticalStack}
-                className={classNames(projectcss.all, sty.verticalStack)}
-              >
-                <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text__of8Zu
-                  )}
-                >
-                  {"Employees"}
-                </div>
-                <DisciplineTable
-                  data-plasmic-name={"disciplineTable"}
-                  data-plasmic-override={overrides.disciplineTable}
-                  className={classNames("__wab_instance", sty.disciplineTable)}
-                  density={"comfortable"}
-                  locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                  onRowClick={async employee => {
-                    const $steps = {};
-
-                    $steps["updateSelectedEmployee"] = true
-                      ? (() => {
-                          const actionArgs = {
-                            variable: {
-                              objRoot: $state,
-                              variablePath: ["selectedEmployee"]
-                            },
-                            operation: 0,
-                            value: employee
-                          };
-                          return (({
-                            variable,
-                            value,
-                            startIndex,
-                            deleteCount
-                          }) => {
-                            if (!variable) {
-                              return;
-                            }
-                            const { objRoot, variablePath } = variable;
-
-                            $stateSet(objRoot, variablePath, value);
-                            return value;
-                          })?.apply(null, [actionArgs]);
-                        })()
-                      : undefined;
-                    if (
-                      $steps["updateSelectedEmployee"] != null &&
-                      typeof $steps["updateSelectedEmployee"] === "object" &&
-                      typeof $steps["updateSelectedEmployee"].then ===
-                        "function"
-                    ) {
-                      $steps["updateSelectedEmployee"] =
-                        await $steps["updateSelectedEmployee"];
-                    }
-
-                    $steps["updateDrawerV2Open"] = true
-                      ? (() => {
-                          const actionArgs = {
-                            variable: {
-                              objRoot: $state,
-                              variablePath: ["drawerV2", "open"]
-                            },
-                            operation: 0,
-                            value: true
-                          };
-                          return (({
-                            variable,
-                            value,
-                            startIndex,
-                            deleteCount
-                          }) => {
-                            if (!variable) {
-                              return;
-                            }
-                            const { objRoot, variablePath } = variable;
-
-                            $stateSet(objRoot, variablePath, value);
-                            return value;
-                          })?.apply(null, [actionArgs]);
-                        })()
-                      : undefined;
-                    if (
-                      $steps["updateDrawerV2Open"] != null &&
-                      typeof $steps["updateDrawerV2Open"] === "object" &&
-                      typeof $steps["updateDrawerV2Open"].then === "function"
-                    ) {
-                      $steps["updateDrawerV2Open"] =
-                        await $steps["updateDrawerV2Open"];
-                    }
+        <LoadingBoundary
+          loadingState={
+            <DataCtxReader__>
+              {$ctx => (
+                <LottieWrapper
+                  animationData={{
+                    nm: "Main Scene",
+                    ddd: 0,
+                    h: 540,
+                    w: 540,
+                    meta: { g: "@lottiefiles/creator 1.59.0" },
+                    layers: [
+                      {
+                        ty: 4,
+                        nm: "Dot4",
+                        sr: 1,
+                        st: 0,
+                        op: 360,
+                        ip: 0,
+                        hd: false,
+                        ddd: 0,
+                        bm: 0,
+                        hasMask: false,
+                        ao: 0,
+                        ks: {
+                          a: { a: 0, k: [-284, 92, 0], ix: 1 },
+                          s: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.167, y: 0.167 },
+                                i: { x: 0.833, y: 0.833 },
+                                s: [31, 31],
+                                t: 2
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [50, 50, 100],
+                                t: 25
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [75, 75, 100],
+                                t: 39
+                              },
+                              { s: [50, 50, 100], t: 55 }
+                            ],
+                            ix: 6
+                          },
+                          sk: { a: 0, k: 0 },
+                          p: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.167, y: 0.167 },
+                                i: { x: 0.833, y: 0.833 },
+                                s: [436, 270],
+                                t: 2
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [452, 270],
+                                t: 25
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [452, 230],
+                                t: 39
+                              },
+                              { s: [452, 270], t: 55 }
+                            ],
+                            ix: 2
+                          },
+                          r: { a: 0, k: 0, ix: 10 },
+                          sa: { a: 0, k: 0 },
+                          o: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [25],
+                                t: 25
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [100],
+                                t: 39
+                              },
+                              { s: [25], t: 55 }
+                            ],
+                            ix: 11
+                          }
+                        },
+                        shapes: [
+                          {
+                            ty: "gr",
+                            bm: 0,
+                            hd: false,
+                            mn: "ADBE Vector Group",
+                            nm: "Ellipse 1",
+                            ix: 1,
+                            cix: 2,
+                            np: 3,
+                            it: [
+                              {
+                                ty: "el",
+                                bm: 0,
+                                hd: false,
+                                mn: "ADBE Vector Shape - Ellipse",
+                                nm: "Ellipse Path 1",
+                                d: 1,
+                                p: { a: 0, k: [0, 0], ix: 3 },
+                                s: { a: 0, k: [120, 120], ix: 2 }
+                              },
+                              {
+                                ty: "fl",
+                                bm: 0,
+                                hd: false,
+                                mn: "ADBE Vector Graphic - Fill",
+                                nm: "Fill 1",
+                                c: { a: 0, k: [0.1922, 0.4, 0.2902], ix: 4 },
+                                r: 1,
+                                o: { a: 0, k: 100, ix: 5 }
+                              },
+                              {
+                                ty: "tr",
+                                a: { a: 0, k: [0, 0], ix: 1 },
+                                s: { a: 0, k: [100, 100], ix: 3 },
+                                sk: { a: 0, k: 0, ix: 4 },
+                                p: { a: 0, k: [-284, 92], ix: 2 },
+                                r: { a: 0, k: 0, ix: 6 },
+                                sa: { a: 0, k: 0, ix: 5 },
+                                o: { a: 0, k: 100, ix: 7 }
+                              }
+                            ]
+                          }
+                        ],
+                        ind: 1
+                      },
+                      {
+                        ty: 4,
+                        nm: "Dot3",
+                        sr: 1,
+                        st: 0,
+                        op: 360,
+                        ip: 0,
+                        hd: false,
+                        ddd: 0,
+                        bm: 0,
+                        hasMask: false,
+                        ao: 0,
+                        ks: {
+                          a: { a: 0, k: [-284, 92, 0], ix: 1 },
+                          s: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.167, y: 0.167 },
+                                i: { x: 0.833, y: 0.833 },
+                                s: [31, 31],
+                                t: 2
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [50, 50, 100],
+                                t: 17
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [75, 75, 100],
+                                t: 31
+                              },
+                              { s: [50, 50, 100], t: 47 }
+                            ],
+                            ix: 6
+                          },
+                          sk: { a: 0, k: 0 },
+                          p: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.167, y: 0.167 },
+                                i: { x: 0.833, y: 0.833 },
+                                s: [324, 270],
+                                t: 2
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [332, 270],
+                                t: 17
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [332, 230],
+                                t: 31
+                              },
+                              { s: [332, 270], t: 47 }
+                            ],
+                            ix: 2
+                          },
+                          r: { a: 0, k: 0, ix: 10 },
+                          sa: { a: 0, k: 0 },
+                          o: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [25],
+                                t: 17
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [100],
+                                t: 31
+                              },
+                              { s: [25], t: 47 }
+                            ],
+                            ix: 11
+                          }
+                        },
+                        shapes: [
+                          {
+                            ty: "gr",
+                            bm: 0,
+                            hd: false,
+                            mn: "ADBE Vector Group",
+                            nm: "Ellipse 1",
+                            ix: 1,
+                            cix: 2,
+                            np: 3,
+                            it: [
+                              {
+                                ty: "el",
+                                bm: 0,
+                                hd: false,
+                                mn: "ADBE Vector Shape - Ellipse",
+                                nm: "Ellipse Path 1",
+                                d: 1,
+                                p: { a: 0, k: [0, 0], ix: 3 },
+                                s: { a: 0, k: [120, 120], ix: 2 }
+                              },
+                              {
+                                ty: "fl",
+                                bm: 0,
+                                hd: false,
+                                mn: "ADBE Vector Graphic - Fill",
+                                nm: "Fill 1",
+                                c: { a: 0, k: [0.1922, 0.4, 0.2902], ix: 4 },
+                                r: 1,
+                                o: { a: 0, k: 100, ix: 5 }
+                              },
+                              {
+                                ty: "tr",
+                                a: { a: 0, k: [0, 0], ix: 1 },
+                                s: { a: 0, k: [100, 100], ix: 3 },
+                                sk: { a: 0, k: 0, ix: 4 },
+                                p: { a: 0, k: [-284, 92], ix: 2 },
+                                r: { a: 0, k: 0, ix: 6 },
+                                sa: { a: 0, k: 0, ix: 5 },
+                                o: { a: 0, k: 100, ix: 7 }
+                              }
+                            ]
+                          }
+                        ],
+                        ind: 2
+                      },
+                      {
+                        ty: 4,
+                        nm: "Dot2",
+                        sr: 1,
+                        st: 0,
+                        op: 360,
+                        ip: 0,
+                        hd: false,
+                        ddd: 0,
+                        bm: 0,
+                        hasMask: false,
+                        ao: 0,
+                        ks: {
+                          a: { a: 0, k: [-284, 92, 0], ix: 1 },
+                          s: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.167, y: 0.167 },
+                                i: { x: 0.833, y: 0.833 },
+                                s: [31, 31],
+                                t: 2
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [50, 50, 100],
+                                t: 9
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [75, 75, 100],
+                                t: 23
+                              },
+                              { s: [50, 50, 100], t: 39 }
+                            ],
+                            ix: 6
+                          },
+                          sk: { a: 0, k: 0 },
+                          p: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.167, y: 0.167 },
+                                i: { x: 0.833, y: 0.833 },
+                                s: [220, 270],
+                                t: 2
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [212, 270],
+                                t: 9
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [212, 230],
+                                t: 23
+                              },
+                              { s: [212, 270], t: 39 }
+                            ],
+                            ix: 2
+                          },
+                          r: { a: 0, k: 0, ix: 10 },
+                          sa: { a: 0, k: 0 },
+                          o: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [25],
+                                t: 9
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [100],
+                                t: 23
+                              },
+                              { s: [25], t: 39 }
+                            ],
+                            ix: 11
+                          }
+                        },
+                        shapes: [
+                          {
+                            ty: "gr",
+                            bm: 0,
+                            hd: false,
+                            mn: "ADBE Vector Group",
+                            nm: "Ellipse 1",
+                            ix: 1,
+                            cix: 2,
+                            np: 3,
+                            it: [
+                              {
+                                ty: "el",
+                                bm: 0,
+                                hd: false,
+                                mn: "ADBE Vector Shape - Ellipse",
+                                nm: "Ellipse Path 1",
+                                d: 1,
+                                p: { a: 0, k: [0, 0], ix: 3 },
+                                s: { a: 0, k: [120, 120], ix: 2 }
+                              },
+                              {
+                                ty: "fl",
+                                bm: 0,
+                                hd: false,
+                                mn: "ADBE Vector Graphic - Fill",
+                                nm: "Fill 1",
+                                c: { a: 0, k: [0.1922, 0.4, 0.2902], ix: 4 },
+                                r: 1,
+                                o: { a: 0, k: 100, ix: 5 }
+                              },
+                              {
+                                ty: "tr",
+                                a: { a: 0, k: [0, 0], ix: 1 },
+                                s: { a: 0, k: [100, 100], ix: 3 },
+                                sk: { a: 0, k: 0, ix: 4 },
+                                p: { a: 0, k: [-284, 92], ix: 2 },
+                                r: { a: 0, k: 0, ix: 6 },
+                                sa: { a: 0, k: 0, ix: 5 },
+                                o: { a: 0, k: 100, ix: 7 }
+                              }
+                            ]
+                          }
+                        ],
+                        ind: 3
+                      },
+                      {
+                        ty: 4,
+                        nm: "Dot1",
+                        sr: 1,
+                        st: 0,
+                        op: 360,
+                        ip: 0,
+                        hd: false,
+                        ddd: 0,
+                        bm: 0,
+                        hasMask: false,
+                        ao: 0,
+                        ks: {
+                          a: { a: 0, k: [-284, 92, 0], ix: 1 },
+                          s: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [50, 50, 100],
+                                t: 0
+                              },
+                              {
+                                o: { x: 0.167, y: 0.167 },
+                                i: { x: 0.833, y: 0.833 },
+                                s: [32.386446959656624, 32.386446959656624],
+                                t: 2
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [75, 75, 100],
+                                t: 14
+                              },
+                              { s: [50, 50, 100], t: 30 }
+                            ],
+                            ix: 6
+                          },
+                          sk: { a: 0, k: 0 },
+                          p: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [92, 270],
+                                t: 0
+                              },
+                              {
+                                o: { x: 0.167, y: 0.167 },
+                                i: { x: 0.833, y: 0.833 },
+                                s: [108, 270],
+                                t: 2
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [92, 230],
+                                t: 14
+                              },
+                              { s: [92, 270], t: 30 }
+                            ],
+                            ix: 2
+                          },
+                          r: { a: 0, k: 0, ix: 10 },
+                          sa: { a: 0, k: 0 },
+                          o: {
+                            a: 1,
+                            k: [
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [25],
+                                t: 0
+                              },
+                              {
+                                o: { x: 0.333, y: 0 },
+                                i: { x: 0.667, y: 1 },
+                                s: [100],
+                                t: 14
+                              },
+                              { s: [25], t: 30 }
+                            ],
+                            ix: 11
+                          }
+                        },
+                        shapes: [
+                          {
+                            ty: "gr",
+                            bm: 0,
+                            hd: false,
+                            mn: "ADBE Vector Group",
+                            nm: "Ellipse 1",
+                            ix: 1,
+                            cix: 2,
+                            np: 3,
+                            it: [
+                              {
+                                ty: "el",
+                                bm: 0,
+                                hd: false,
+                                mn: "ADBE Vector Shape - Ellipse",
+                                nm: "Ellipse Path 1",
+                                d: 1,
+                                p: { a: 0, k: [0, 0], ix: 3 },
+                                s: { a: 0, k: [120, 120], ix: 2 }
+                              },
+                              {
+                                ty: "fl",
+                                bm: 0,
+                                hd: false,
+                                mn: "ADBE Vector Graphic - Fill",
+                                nm: "Fill 1",
+                                c: { a: 0, k: [0.1922, 0.4, 0.2902], ix: 4 },
+                                r: 1,
+                                o: { a: 0, k: 100, ix: 5 }
+                              },
+                              {
+                                ty: "tr",
+                                a: { a: 0, k: [0, 0], ix: 1 },
+                                s: { a: 0, k: [100, 100], ix: 3 },
+                                sk: { a: 0, k: 0, ix: 4 },
+                                p: { a: 0, k: [-284, 92], ix: 2 },
+                                r: { a: 0, k: 0, ix: 6 },
+                                sa: { a: 0, k: 0, ix: 5 },
+                                o: { a: 0, k: 100, ix: 7 }
+                              }
+                            ]
+                          }
+                        ],
+                        ind: 4
+                      }
+                    ],
+                    v: "5.7.0",
+                    fr: 60,
+                    op: 81,
+                    ip: 0,
+                    assets: []
                   }}
-                  orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
-                  showActions={true}
+                  className={classNames("__wab_instance", sty.lottie__daVb)}
+                  preview={true}
                 />
-              </div>
-              <div
-                data-plasmic-name={"verticalStack2"}
-                data-plasmic-override={overrides.verticalStack2}
-                className={classNames(projectcss.all, sty.verticalStack2)}
+              )}
+            </DataCtxReader__>
+          }
+        >
+          <DataCtxReader__>
+            {$ctx => (
+              <RedirectIf
+                data-plasmic-name={"redirectIf"}
+                data-plasmic-override={overrides.redirectIf}
+                className={classNames("__wab_instance", sty.redirectIf)}
+                condition={true}
+                onFalse={async () => {
+                  const $steps = {};
+
+                  $steps["goToLoginPage"] = true
+                    ? (() => {
+                        const actionArgs = { destination: `/auth/login` };
+                        return (({ destination }) => {
+                          if (
+                            typeof destination === "string" &&
+                            destination.startsWith("#")
+                          ) {
+                            document
+                              .getElementById(destination.substr(1))
+                              .scrollIntoView({ behavior: "smooth" });
+                          } else {
+                            __nextRouter?.push(destination);
+                          }
+                        })?.apply(null, [actionArgs]);
+                      })()
+                    : undefined;
+                  if (
+                    $steps["goToLoginPage"] != null &&
+                    typeof $steps["goToLoginPage"] === "object" &&
+                    typeof $steps["goToLoginPage"].then === "function"
+                  ) {
+                    $steps["goToLoginPage"] = await $steps["goToLoginPage"];
+                  }
+                }}
               >
-                <div
-                  className={classNames(
-                    projectcss.all,
-                    projectcss.__wab_text,
-                    sty.text__oSxFd
-                  )}
-                >
-                  {"Disciplinary Actions"}
-                </div>
-                <DisciplineActionsTable
-                  data-plasmic-name={"disciplineActionsTable"}
-                  data-plasmic-override={overrides.disciplineActionsTable}
-                  className={classNames(
-                    "__wab_instance",
-                    sty.disciplineActionsTable
-                  )}
-                  density={"comfortable"}
-                  locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                  orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
-                  showActions={false}
-                />
-              </div>
-            </div>
-          </div>
-          <DrawerV2
-            data-plasmic-name={"drawerV2"}
-            data-plasmic-override={overrides.drawerV2}
-            className={classNames("__wab_instance", sty.drawerV2)}
-            closable={true}
-            closeButtonClassName={classNames({
-              [sty["pcls_1P0T8Swx7ssW"]]: true
-            })}
-            defaultStylesClassName={classNames(
-              projectcss.root_reset,
-              projectcss.plasmic_default_styles,
-              projectcss.plasmic_mixins,
-              styleTokensClassNames
-            )}
-            drawerBodyClassName={classNames({
-              [sty["pcls_0s1oo6MW753L"]]: true
-            })}
-            drawerContentWrapperClassName={classNames({
-              [sty["pcls_NIsXGOi-WC36"]]: true
-            })}
-            drawerScopeClassName={sty["drawerV2__drawer"]}
-            keyboard={false}
-            mask={false}
-            maskClosable={false}
-            onOpenChange={async (...eventArgs: any) => {
-              generateStateOnChangeProp($state, ["drawerV2", "open"]).apply(
-                null,
-                eventArgs
-              );
-            }}
-            open={generateStateValueProp($state, ["drawerV2", "open"])}
-            size={"default"}
-            title={
-              <div
-                data-plasmic-name={"content2"}
-                data-plasmic-override={overrides.content2}
-                className={classNames(projectcss.all, sty.content2)}
-              >
-                <div
-                  data-plasmic-name={"textAndSupportingText2"}
-                  data-plasmic-override={overrides.textAndSupportingText2}
-                  className={classNames(
-                    projectcss.all,
-                    sty.textAndSupportingText2
-                  )}
-                >
+                <div className={classNames(projectcss.all, sty.freeBox__jtUkZ)}>
                   <div
-                    data-plasmic-name={"textAndOnlineIndicator"}
-                    data-plasmic-override={overrides.textAndOnlineIndicator}
-                    className={classNames(
-                      projectcss.all,
-                      sty.textAndOnlineIndicator
-                    )}
+                    className={classNames(projectcss.all, sty.freeBox__ureDb)}
                   >
                     <div
-                      data-plasmic-name={"text2"}
-                      data-plasmic-override={overrides.text2}
-                      className={classNames(
-                        projectcss.all,
-                        projectcss.__wab_text,
-                        sty.text2
-                      )}
+                      className={classNames(projectcss.all, sty.freeBox__nlSty)}
                     >
-                      <React.Fragment>
-                        {(() => {
-                          try {
-                            return (() => {
-                              {
-                                {
-                                  return $state.selectedEmployee?.full_name;
-                                }
-                              }
-                            })();
-                          } catch (e) {
-                            if (
-                              e instanceof TypeError ||
-                              e?.plasmicType === "PlasmicUndefinedDataError"
-                            ) {
-                              return "Reece Howard";
-                            }
-                            throw e;
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          sty.freeBox__mKhGx
+                        )}
+                      >
+                        <div
+                          className={classNames(
+                            projectcss.all,
+                            projectcss.__wab_text,
+                            sty.text__wQDeC
+                          )}
+                        >
+                          {"APS Dashboard"}
+                        </div>
+                      </div>
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          sty.freeBox__c457R
+                        )}
+                      >
+                        <div
+                          className={classNames(
+                            projectcss.all,
+                            projectcss.__wab_text,
+                            sty.text___8HOob
+                          )}
+                        >
+                          {
+                            "Here\u2019s your organization's current points. Click a Team Member to see their recent infractions."
                           }
-                        })()}
-                      </React.Fragment>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                </div>
+                <div className={classNames(projectcss.all, sty.freeBox__lKzxl)}>
                   <div
-                    data-plasmic-name={"supportingText2"}
-                    data-plasmic-override={overrides.supportingText2}
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.supportingText2
-                    )}
+                    className={classNames(projectcss.all, sty.freeBox__cHwGk)}
                   >
-                    <React.Fragment>
-                      {(() => {
-                        try {
-                          return $state.selectedEmployee?.role;
-                        } catch (e) {
+                    <div
+                      data-plasmic-name={"verticalStack"}
+                      data-plasmic-override={overrides.verticalStack}
+                      className={classNames(projectcss.all, sty.verticalStack)}
+                    >
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          projectcss.__wab_text,
+                          sty.text__of8Zu
+                        )}
+                      >
+                        {"Employees"}
+                      </div>
+                      <DisciplineTable
+                        data-plasmic-name={"disciplineTable"}
+                        data-plasmic-override={overrides.disciplineTable}
+                        className={classNames(
+                          "__wab_instance",
+                          sty.disciplineTable
+                        )}
+                        density={"comfortable"}
+                        locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                        onRowClick={async employee => {
+                          const $steps = {};
+
+                          $steps["updateSelectedEmployee"] = true
+                            ? (() => {
+                                const actionArgs = {
+                                  variable: {
+                                    objRoot: $state,
+                                    variablePath: ["selectedEmployee"]
+                                  },
+                                  operation: 0,
+                                  value: employee
+                                };
+                                return (({
+                                  variable,
+                                  value,
+                                  startIndex,
+                                  deleteCount
+                                }) => {
+                                  if (!variable) {
+                                    return;
+                                  }
+                                  const { objRoot, variablePath } = variable;
+
+                                  $stateSet(objRoot, variablePath, value);
+                                  return value;
+                                })?.apply(null, [actionArgs]);
+                              })()
+                            : undefined;
                           if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
+                            $steps["updateSelectedEmployee"] != null &&
+                            typeof $steps["updateSelectedEmployee"] ===
+                              "object" &&
+                            typeof $steps["updateSelectedEmployee"].then ===
+                              "function"
                           ) {
-                            return "Owner/Operator";
+                            $steps["updateSelectedEmployee"] =
+                              await $steps["updateSelectedEmployee"];
                           }
-                          throw e;
-                        }
-                      })()}
-                    </React.Fragment>
+
+                          $steps["updateDrawerV2Open"] = true
+                            ? (() => {
+                                const actionArgs = {
+                                  variable: {
+                                    objRoot: $state,
+                                    variablePath: ["drawerV2", "open"]
+                                  },
+                                  operation: 0,
+                                  value: true
+                                };
+                                return (({
+                                  variable,
+                                  value,
+                                  startIndex,
+                                  deleteCount
+                                }) => {
+                                  if (!variable) {
+                                    return;
+                                  }
+                                  const { objRoot, variablePath } = variable;
+
+                                  $stateSet(objRoot, variablePath, value);
+                                  return value;
+                                })?.apply(null, [actionArgs]);
+                              })()
+                            : undefined;
+                          if (
+                            $steps["updateDrawerV2Open"] != null &&
+                            typeof $steps["updateDrawerV2Open"] === "object" &&
+                            typeof $steps["updateDrawerV2Open"].then ===
+                              "function"
+                          ) {
+                            $steps["updateDrawerV2Open"] =
+                              await $steps["updateDrawerV2Open"];
+                          }
+                        }}
+                        orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                        showActions={true}
+                      />
+                    </div>
+                    <div
+                      data-plasmic-name={"verticalStack2"}
+                      data-plasmic-override={overrides.verticalStack2}
+                      className={classNames(projectcss.all, sty.verticalStack2)}
+                    >
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          projectcss.__wab_text,
+                          sty.text__oSxFd
+                        )}
+                      >
+                        {"Disciplinary Actions"}
+                      </div>
+                      <DisciplineActionsTable
+                        data-plasmic-name={"disciplineActionsTable"}
+                        data-plasmic-override={overrides.disciplineActionsTable}
+                        className={classNames(
+                          "__wab_instance",
+                          sty.disciplineActionsTable
+                        )}
+                        density={"comfortable"}
+                        locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                        orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                        showActions={false}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            }
-            width={"620"}
-          >
-            <div
-              data-plasmic-name={"panel"}
-              data-plasmic-override={overrides.panel}
-              className={classNames(projectcss.all, sty.panel)}
-            >
-              <div
-                data-plasmic-name={"header"}
-                data-plasmic-override={overrides.header}
-                className={classNames(projectcss.all, sty.header)}
-              >
-                <div
-                  data-plasmic-name={"container"}
-                  data-plasmic-override={overrides.container}
-                  className={classNames(projectcss.all, sty.container)}
-                >
-                  <div
-                    data-plasmic-name={"statistics"}
-                    data-plasmic-override={overrides.statistics}
-                    className={classNames(projectcss.all, sty.statistics)}
-                  >
-                    <TabsContainer
-                      data-plasmic-name={"tabsContainer"}
-                      data-plasmic-override={overrides.tabsContainer}
-                      initialKey={(() => {
-                        try {
-                          return $state.initialProfileTab;
-                        } catch (e) {
-                          if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
-                          ) {
-                            return undefined;
-                          }
-                          throw e;
-                        }
-                      })()}
-                      mountMode={"mountAllEagerly"}
-                      previewAll={false}
-                      previewKey={"tab4"}
+                <DrawerV2
+                  data-plasmic-name={"drawerV2"}
+                  data-plasmic-override={overrides.drawerV2}
+                  className={classNames("__wab_instance", sty.drawerV2)}
+                  closable={true}
+                  closeButtonClassName={classNames({
+                    [sty["pcls_1P0T8Swx7ssW"]]: true
+                  })}
+                  defaultStylesClassName={classNames(
+                    projectcss.root_reset,
+                    projectcss.plasmic_default_styles,
+                    projectcss.plasmic_mixins,
+                    styleTokensClassNames
+                  )}
+                  drawerBodyClassName={classNames({
+                    [sty["pcls_0s1oo6MW753L"]]: true
+                  })}
+                  drawerContentWrapperClassName={classNames({
+                    [sty["pcls_NIsXGOi-WC36"]]: true
+                  })}
+                  drawerScopeClassName={sty["drawerV2__drawer"]}
+                  keyboard={false}
+                  mask={false}
+                  maskClosable={false}
+                  onOpenChange={async (...eventArgs: any) => {
+                    generateStateOnChangeProp($state, [
+                      "drawerV2",
+                      "open"
+                    ]).apply(null, eventArgs);
+                  }}
+                  open={generateStateValueProp($state, ["drawerV2", "open"])}
+                  size={"default"}
+                  title={
+                    <div
+                      data-plasmic-name={"content2"}
+                      data-plasmic-override={overrides.content2}
+                      className={classNames(projectcss.all, sty.content2)}
                     >
-                      <DataCtxReader__>
-                        {$ctx => (
+                      <div
+                        data-plasmic-name={"textAndSupportingText2"}
+                        data-plasmic-override={overrides.textAndSupportingText2}
+                        className={classNames(
+                          projectcss.all,
+                          sty.textAndSupportingText2
+                        )}
+                      >
+                        <div
+                          data-plasmic-name={"textAndOnlineIndicator"}
+                          data-plasmic-override={
+                            overrides.textAndOnlineIndicator
+                          }
+                          className={classNames(
+                            projectcss.all,
+                            sty.textAndOnlineIndicator
+                          )}
+                        >
                           <div
+                            data-plasmic-name={"text2"}
+                            data-plasmic-override={overrides.text2}
                             className={classNames(
                               projectcss.all,
-                              sty.freeBox___2R2C
+                              projectcss.__wab_text,
+                              sty.text2
                             )}
                           >
-                            <div
-                              className={classNames(
-                                projectcss.all,
-                                sty.freeBox__eLzb
-                              )}
-                            >
-                              <TabButton
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.tabButton__aqaGl
-                                )}
-                                tabKey={"tab1"}
-                              >
-                                <LevelsetButton
-                                  className={classNames(
-                                    "__wab_instance",
-                                    sty.levelsetButton__q81U
-                                  )}
-                                  color={(() => {
-                                    try {
-                                      return $ctx.currentTabKey === "tab1"
-                                        ? "green"
-                                        : "softSand";
-                                    } catch (e) {
-                                      if (
-                                        e instanceof TypeError ||
-                                        e?.plasmicType ===
-                                          "PlasmicUndefinedDataError"
-                                      ) {
-                                        return "green";
+                            <React.Fragment>
+                              {(() => {
+                                try {
+                                  return (() => {
+                                    {
+                                      {
+                                        return $state.selectedEmployee
+                                          ?.full_name;
                                       }
-                                      throw e;
                                     }
-                                  })()}
-                                >
-                                  <div
-                                    className={classNames(
-                                      projectcss.all,
-                                      projectcss.__wab_text,
-                                      sty.text___6KyZb
-                                    )}
-                                  >
-                                    {"Pathway"}
-                                  </div>
-                                </LevelsetButton>
-                              </TabButton>
-                              <TabButton
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.tabButton__hM9Qt
-                                )}
-                                tabKey={"tab2"}
-                              >
-                                <LevelsetButton
-                                  className={classNames(
-                                    "__wab_instance",
-                                    sty.levelsetButton__nUeV4
-                                  )}
-                                  color={(() => {
-                                    try {
-                                      return $ctx.currentTabKey === "tab2"
-                                        ? "green"
-                                        : "softSand";
-                                    } catch (e) {
-                                      if (
-                                        e instanceof TypeError ||
-                                        e?.plasmicType ===
-                                          "PlasmicUndefinedDataError"
-                                      ) {
-                                        return "green";
-                                      }
-                                      throw e;
-                                    }
-                                  })()}
-                                >
-                                  <div
-                                    className={classNames(
-                                      projectcss.all,
-                                      projectcss.__wab_text,
-                                      sty.text__l7T
-                                    )}
-                                  >
-                                    {"Positional Excellence"}
-                                  </div>
-                                </LevelsetButton>
-                              </TabButton>
-                              <TabButton
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.tabButton__mfDk
-                                )}
-                                tabKey={"tab3"}
-                              >
-                                <LevelsetButton
-                                  className={classNames(
-                                    "__wab_instance",
-                                    sty.levelsetButton__rd97
-                                  )}
-                                  color={(() => {
-                                    try {
-                                      return $ctx.currentTabKey === "tab3"
-                                        ? "green"
-                                        : "softSand";
-                                    } catch (e) {
-                                      if (
-                                        e instanceof TypeError ||
-                                        e?.plasmicType ===
-                                          "PlasmicUndefinedDataError"
-                                      ) {
-                                        return "green";
-                                      }
-                                      throw e;
-                                    }
-                                  })()}
-                                >
-                                  <div
-                                    className={classNames(
-                                      projectcss.all,
-                                      projectcss.__wab_text,
-                                      sty.text___4BkwJ
-                                    )}
-                                  >
-                                    {"Evaluations"}
-                                  </div>
-                                </LevelsetButton>
-                              </TabButton>
-                              <TabButton
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.tabButton__myaYm
-                                )}
-                                tabKey={"tab4"}
-                              >
-                                <LevelsetButton
-                                  className={classNames(
-                                    "__wab_instance",
-                                    sty.levelsetButton__twGtL
-                                  )}
-                                  color={(() => {
-                                    try {
-                                      return $ctx.currentTabKey === "tab4"
-                                        ? "green"
-                                        : "softSand";
-                                    } catch (e) {
-                                      if (
-                                        e instanceof TypeError ||
-                                        e?.plasmicType ===
-                                          "PlasmicUndefinedDataError"
-                                      ) {
-                                        return "green";
-                                      }
-                                      throw e;
-                                    }
-                                  })()}
-                                >
-                                  <div
-                                    className={classNames(
-                                      projectcss.all,
-                                      projectcss.__wab_text,
-                                      sty.text__rnFqb
-                                    )}
-                                  >
-                                    {"Discipline"}
-                                  </div>
-                                </LevelsetButton>
-                              </TabButton>
-                              <TabUnderline
-                                data-plasmic-name={"tabUnderline"}
-                                data-plasmic-override={overrides.tabUnderline}
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.tabUnderline
-                                )}
-                              />
-                            </div>
-                            <div
-                              className={classNames(
-                                projectcss.all,
-                                sty.freeBox__aRoag
-                              )}
-                            >
-                              <TabContent
-                                data-plasmic-name={"pathwayContent"}
-                                data-plasmic-override={overrides.pathwayContent}
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.pathwayContent
-                                )}
-                                tabKey={"tab1"}
-                              >
-                                <div
-                                  className={classNames(
-                                    projectcss.all,
-                                    sty.freeBox__eNnS6
-                                  )}
-                                >
-                                  <div
-                                    className={classNames(
-                                      projectcss.all,
-                                      projectcss.__wab_text,
-                                      sty.text__o774
-                                    )}
-                                  >
-                                    {"Coming soon!"}
-                                  </div>
-                                </div>
-                              </TabContent>
-                              <TabContent
-                                data-plasmic-name={"peContent"}
-                                data-plasmic-override={overrides.peContent}
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.peContent
-                                )}
-                                tabKey={"tab2"}
-                              >
-                                <div
-                                  className={classNames(
-                                    projectcss.all,
-                                    sty.freeBox__gmIt2
-                                  )}
-                                >
-                                  <div
-                                    className={classNames(
-                                      projectcss.all,
-                                      projectcss.__wab_text,
-                                      sty.text__ts6AM
-                                    )}
-                                  >
-                                    {"Coming soon!"}
-                                  </div>
-                                </div>
-                              </TabContent>
-                              <TabContent
-                                data-plasmic-name={"evalsContent"}
-                                data-plasmic-override={overrides.evalsContent}
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.evalsContent
-                                )}
-                                tabKey={"tab3"}
-                              >
-                                <div
-                                  className={classNames(
-                                    projectcss.all,
-                                    sty.freeBox__wMoxn
-                                  )}
-                                >
-                                  <div
-                                    className={classNames(
-                                      projectcss.all,
-                                      projectcss.__wab_text,
-                                      sty.text__jrDLj
-                                    )}
-                                  >
-                                    {"Coming soon!"}
-                                  </div>
-                                </div>
-                              </TabContent>
-                              <TabContent
-                                data-plasmic-name={"disciplineContent"}
-                                data-plasmic-override={
-                                  overrides.disciplineContent
+                                  })();
+                                } catch (e) {
+                                  if (
+                                    e instanceof TypeError ||
+                                    e?.plasmicType ===
+                                      "PlasmicUndefinedDataError"
+                                  ) {
+                                    return "Reece Howard";
+                                  }
+                                  throw e;
                                 }
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.disciplineContent
-                                )}
-                                tabKey={"tab4"}
-                              >
+                              })()}
+                            </React.Fragment>
+                          </div>
+                        </div>
+                        <div
+                          data-plasmic-name={"supportingText2"}
+                          data-plasmic-override={overrides.supportingText2}
+                          className={classNames(
+                            projectcss.all,
+                            projectcss.__wab_text,
+                            sty.supportingText2
+                          )}
+                        >
+                          <React.Fragment>
+                            {(() => {
+                              try {
+                                return $state.selectedEmployee?.role;
+                              } catch (e) {
+                                if (
+                                  e instanceof TypeError ||
+                                  e?.plasmicType === "PlasmicUndefinedDataError"
+                                ) {
+                                  return "Owner/Operator";
+                                }
+                                throw e;
+                              }
+                            })()}
+                          </React.Fragment>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  width={"620"}
+                >
+                  <div
+                    data-plasmic-name={"panel"}
+                    data-plasmic-override={overrides.panel}
+                    className={classNames(projectcss.all, sty.panel)}
+                  >
+                    <div
+                      data-plasmic-name={"header"}
+                      data-plasmic-override={overrides.header}
+                      className={classNames(projectcss.all, sty.header)}
+                    >
+                      <div
+                        data-plasmic-name={"container"}
+                        data-plasmic-override={overrides.container}
+                        className={classNames(projectcss.all, sty.container)}
+                      >
+                        <div
+                          data-plasmic-name={"statistics"}
+                          data-plasmic-override={overrides.statistics}
+                          className={classNames(projectcss.all, sty.statistics)}
+                        >
+                          <TabsContainer
+                            data-plasmic-name={"tabsContainer"}
+                            data-plasmic-override={overrides.tabsContainer}
+                            initialKey={(() => {
+                              try {
+                                return $state.initialProfileTab;
+                              } catch (e) {
+                                if (
+                                  e instanceof TypeError ||
+                                  e?.plasmicType === "PlasmicUndefinedDataError"
+                                ) {
+                                  return undefined;
+                                }
+                                throw e;
+                              }
+                            })()}
+                            mountMode={"mountAllEagerly"}
+                            previewAll={false}
+                            previewKey={"tab4"}
+                          >
+                            <DataCtxReader__>
+                              {$ctx => (
                                 <div
                                   className={classNames(
                                     projectcss.all,
-                                    sty.freeBox__imotp
+                                    sty.freeBox___2R2C
                                   )}
                                 >
-                                  <LoadingBoundary
-                                    data-plasmic-name={"loadingBoundary"}
-                                    data-plasmic-override={
-                                      overrides.loadingBoundary
-                                    }
-                                    loadingState={
-                                      <DataCtxReader__>
-                                        {$ctx => (
-                                          <LottieWrapper
-                                            data-plasmic-name={"lottie"}
-                                            data-plasmic-override={
-                                              overrides.lottie
-                                            }
-                                            animationData={{
-                                              nm: "Main Scene",
-                                              ddd: 0,
-                                              h: 540,
-                                              w: 540,
-                                              meta: {
-                                                g: "@lottiefiles/creator 1.59.0"
-                                              },
-                                              layers: [
-                                                {
-                                                  ty: 4,
-                                                  nm: "Dot4",
-                                                  sr: 1,
-                                                  st: 0,
-                                                  op: 360,
-                                                  ip: 0,
-                                                  hd: false,
-                                                  ddd: 0,
-                                                  bm: 0,
-                                                  hasMask: false,
-                                                  ao: 0,
-                                                  ks: {
-                                                    a: {
-                                                      a: 0,
-                                                      k: [-284, 92, 0],
-                                                      ix: 1
-                                                    },
-                                                    s: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: {
-                                                            x: 0.167,
-                                                            y: 0.167
-                                                          },
-                                                          i: {
-                                                            x: 0.833,
-                                                            y: 0.833
-                                                          },
-                                                          s: [31, 31],
-                                                          t: 2
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [50, 50, 100],
-                                                          t: 25
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [75, 75, 100],
-                                                          t: 39
-                                                        },
-                                                        {
-                                                          s: [50, 50, 100],
-                                                          t: 55
-                                                        }
-                                                      ],
-                                                      ix: 6
-                                                    },
-                                                    sk: { a: 0, k: 0 },
-                                                    p: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: {
-                                                            x: 0.167,
-                                                            y: 0.167
-                                                          },
-                                                          i: {
-                                                            x: 0.833,
-                                                            y: 0.833
-                                                          },
-                                                          s: [436, 270],
-                                                          t: 2
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [452, 270],
-                                                          t: 25
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [452, 230],
-                                                          t: 39
-                                                        },
-                                                        { s: [452, 270], t: 55 }
-                                                      ],
-                                                      ix: 2
-                                                    },
-                                                    r: { a: 0, k: 0, ix: 10 },
-                                                    sa: { a: 0, k: 0 },
-                                                    o: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [25],
-                                                          t: 25
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [100],
-                                                          t: 39
-                                                        },
-                                                        { s: [25], t: 55 }
-                                                      ],
-                                                      ix: 11
-                                                    }
-                                                  },
-                                                  shapes: [
-                                                    {
-                                                      ty: "gr",
-                                                      bm: 0,
-                                                      hd: false,
-                                                      mn: "ADBE Vector Group",
-                                                      nm: "Ellipse 1",
-                                                      ix: 1,
-                                                      cix: 2,
-                                                      np: 3,
-                                                      it: [
-                                                        {
-                                                          ty: "el",
-                                                          bm: 0,
-                                                          hd: false,
-                                                          mn: "ADBE Vector Shape - Ellipse",
-                                                          nm: "Ellipse Path 1",
-                                                          d: 1,
-                                                          p: {
-                                                            a: 0,
-                                                            k: [0, 0],
-                                                            ix: 3
-                                                          },
-                                                          s: {
-                                                            a: 0,
-                                                            k: [120, 120],
-                                                            ix: 2
-                                                          }
-                                                        },
-                                                        {
-                                                          ty: "fl",
-                                                          bm: 0,
-                                                          hd: false,
-                                                          mn: "ADBE Vector Graphic - Fill",
-                                                          nm: "Fill 1",
-                                                          c: {
-                                                            a: 0,
-                                                            k: [
-                                                              0.1922, 0.4,
-                                                              0.2902
-                                                            ],
-                                                            ix: 4
-                                                          },
-                                                          r: 1,
-                                                          o: {
-                                                            a: 0,
-                                                            k: 100,
-                                                            ix: 5
-                                                          }
-                                                        },
-                                                        {
-                                                          ty: "tr",
-                                                          a: {
-                                                            a: 0,
-                                                            k: [0, 0],
-                                                            ix: 1
-                                                          },
-                                                          s: {
-                                                            a: 0,
-                                                            k: [100, 100],
-                                                            ix: 3
-                                                          },
-                                                          sk: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 4
-                                                          },
-                                                          p: {
-                                                            a: 0,
-                                                            k: [-284, 92],
-                                                            ix: 2
-                                                          },
-                                                          r: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 6
-                                                          },
-                                                          sa: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 5
-                                                          },
-                                                          o: {
-                                                            a: 0,
-                                                            k: 100,
-                                                            ix: 7
-                                                          }
-                                                        }
-                                                      ]
-                                                    }
-                                                  ],
-                                                  ind: 1
-                                                },
-                                                {
-                                                  ty: 4,
-                                                  nm: "Dot3",
-                                                  sr: 1,
-                                                  st: 0,
-                                                  op: 360,
-                                                  ip: 0,
-                                                  hd: false,
-                                                  ddd: 0,
-                                                  bm: 0,
-                                                  hasMask: false,
-                                                  ao: 0,
-                                                  ks: {
-                                                    a: {
-                                                      a: 0,
-                                                      k: [-284, 92, 0],
-                                                      ix: 1
-                                                    },
-                                                    s: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: {
-                                                            x: 0.167,
-                                                            y: 0.167
-                                                          },
-                                                          i: {
-                                                            x: 0.833,
-                                                            y: 0.833
-                                                          },
-                                                          s: [31, 31],
-                                                          t: 2
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [50, 50, 100],
-                                                          t: 17
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [75, 75, 100],
-                                                          t: 31
-                                                        },
-                                                        {
-                                                          s: [50, 50, 100],
-                                                          t: 47
-                                                        }
-                                                      ],
-                                                      ix: 6
-                                                    },
-                                                    sk: { a: 0, k: 0 },
-                                                    p: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: {
-                                                            x: 0.167,
-                                                            y: 0.167
-                                                          },
-                                                          i: {
-                                                            x: 0.833,
-                                                            y: 0.833
-                                                          },
-                                                          s: [324, 270],
-                                                          t: 2
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [332, 270],
-                                                          t: 17
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [332, 230],
-                                                          t: 31
-                                                        },
-                                                        { s: [332, 270], t: 47 }
-                                                      ],
-                                                      ix: 2
-                                                    },
-                                                    r: { a: 0, k: 0, ix: 10 },
-                                                    sa: { a: 0, k: 0 },
-                                                    o: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [25],
-                                                          t: 17
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [100],
-                                                          t: 31
-                                                        },
-                                                        { s: [25], t: 47 }
-                                                      ],
-                                                      ix: 11
-                                                    }
-                                                  },
-                                                  shapes: [
-                                                    {
-                                                      ty: "gr",
-                                                      bm: 0,
-                                                      hd: false,
-                                                      mn: "ADBE Vector Group",
-                                                      nm: "Ellipse 1",
-                                                      ix: 1,
-                                                      cix: 2,
-                                                      np: 3,
-                                                      it: [
-                                                        {
-                                                          ty: "el",
-                                                          bm: 0,
-                                                          hd: false,
-                                                          mn: "ADBE Vector Shape - Ellipse",
-                                                          nm: "Ellipse Path 1",
-                                                          d: 1,
-                                                          p: {
-                                                            a: 0,
-                                                            k: [0, 0],
-                                                            ix: 3
-                                                          },
-                                                          s: {
-                                                            a: 0,
-                                                            k: [120, 120],
-                                                            ix: 2
-                                                          }
-                                                        },
-                                                        {
-                                                          ty: "fl",
-                                                          bm: 0,
-                                                          hd: false,
-                                                          mn: "ADBE Vector Graphic - Fill",
-                                                          nm: "Fill 1",
-                                                          c: {
-                                                            a: 0,
-                                                            k: [
-                                                              0.1922, 0.4,
-                                                              0.2902
-                                                            ],
-                                                            ix: 4
-                                                          },
-                                                          r: 1,
-                                                          o: {
-                                                            a: 0,
-                                                            k: 100,
-                                                            ix: 5
-                                                          }
-                                                        },
-                                                        {
-                                                          ty: "tr",
-                                                          a: {
-                                                            a: 0,
-                                                            k: [0, 0],
-                                                            ix: 1
-                                                          },
-                                                          s: {
-                                                            a: 0,
-                                                            k: [100, 100],
-                                                            ix: 3
-                                                          },
-                                                          sk: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 4
-                                                          },
-                                                          p: {
-                                                            a: 0,
-                                                            k: [-284, 92],
-                                                            ix: 2
-                                                          },
-                                                          r: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 6
-                                                          },
-                                                          sa: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 5
-                                                          },
-                                                          o: {
-                                                            a: 0,
-                                                            k: 100,
-                                                            ix: 7
-                                                          }
-                                                        }
-                                                      ]
-                                                    }
-                                                  ],
-                                                  ind: 2
-                                                },
-                                                {
-                                                  ty: 4,
-                                                  nm: "Dot2",
-                                                  sr: 1,
-                                                  st: 0,
-                                                  op: 360,
-                                                  ip: 0,
-                                                  hd: false,
-                                                  ddd: 0,
-                                                  bm: 0,
-                                                  hasMask: false,
-                                                  ao: 0,
-                                                  ks: {
-                                                    a: {
-                                                      a: 0,
-                                                      k: [-284, 92, 0],
-                                                      ix: 1
-                                                    },
-                                                    s: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: {
-                                                            x: 0.167,
-                                                            y: 0.167
-                                                          },
-                                                          i: {
-                                                            x: 0.833,
-                                                            y: 0.833
-                                                          },
-                                                          s: [31, 31],
-                                                          t: 2
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [50, 50, 100],
-                                                          t: 9
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [75, 75, 100],
-                                                          t: 23
-                                                        },
-                                                        {
-                                                          s: [50, 50, 100],
-                                                          t: 39
-                                                        }
-                                                      ],
-                                                      ix: 6
-                                                    },
-                                                    sk: { a: 0, k: 0 },
-                                                    p: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: {
-                                                            x: 0.167,
-                                                            y: 0.167
-                                                          },
-                                                          i: {
-                                                            x: 0.833,
-                                                            y: 0.833
-                                                          },
-                                                          s: [220, 270],
-                                                          t: 2
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [212, 270],
-                                                          t: 9
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [212, 230],
-                                                          t: 23
-                                                        },
-                                                        { s: [212, 270], t: 39 }
-                                                      ],
-                                                      ix: 2
-                                                    },
-                                                    r: { a: 0, k: 0, ix: 10 },
-                                                    sa: { a: 0, k: 0 },
-                                                    o: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [25],
-                                                          t: 9
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [100],
-                                                          t: 23
-                                                        },
-                                                        { s: [25], t: 39 }
-                                                      ],
-                                                      ix: 11
-                                                    }
-                                                  },
-                                                  shapes: [
-                                                    {
-                                                      ty: "gr",
-                                                      bm: 0,
-                                                      hd: false,
-                                                      mn: "ADBE Vector Group",
-                                                      nm: "Ellipse 1",
-                                                      ix: 1,
-                                                      cix: 2,
-                                                      np: 3,
-                                                      it: [
-                                                        {
-                                                          ty: "el",
-                                                          bm: 0,
-                                                          hd: false,
-                                                          mn: "ADBE Vector Shape - Ellipse",
-                                                          nm: "Ellipse Path 1",
-                                                          d: 1,
-                                                          p: {
-                                                            a: 0,
-                                                            k: [0, 0],
-                                                            ix: 3
-                                                          },
-                                                          s: {
-                                                            a: 0,
-                                                            k: [120, 120],
-                                                            ix: 2
-                                                          }
-                                                        },
-                                                        {
-                                                          ty: "fl",
-                                                          bm: 0,
-                                                          hd: false,
-                                                          mn: "ADBE Vector Graphic - Fill",
-                                                          nm: "Fill 1",
-                                                          c: {
-                                                            a: 0,
-                                                            k: [
-                                                              0.1922, 0.4,
-                                                              0.2902
-                                                            ],
-                                                            ix: 4
-                                                          },
-                                                          r: 1,
-                                                          o: {
-                                                            a: 0,
-                                                            k: 100,
-                                                            ix: 5
-                                                          }
-                                                        },
-                                                        {
-                                                          ty: "tr",
-                                                          a: {
-                                                            a: 0,
-                                                            k: [0, 0],
-                                                            ix: 1
-                                                          },
-                                                          s: {
-                                                            a: 0,
-                                                            k: [100, 100],
-                                                            ix: 3
-                                                          },
-                                                          sk: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 4
-                                                          },
-                                                          p: {
-                                                            a: 0,
-                                                            k: [-284, 92],
-                                                            ix: 2
-                                                          },
-                                                          r: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 6
-                                                          },
-                                                          sa: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 5
-                                                          },
-                                                          o: {
-                                                            a: 0,
-                                                            k: 100,
-                                                            ix: 7
-                                                          }
-                                                        }
-                                                      ]
-                                                    }
-                                                  ],
-                                                  ind: 3
-                                                },
-                                                {
-                                                  ty: 4,
-                                                  nm: "Dot1",
-                                                  sr: 1,
-                                                  st: 0,
-                                                  op: 360,
-                                                  ip: 0,
-                                                  hd: false,
-                                                  ddd: 0,
-                                                  bm: 0,
-                                                  hasMask: false,
-                                                  ao: 0,
-                                                  ks: {
-                                                    a: {
-                                                      a: 0,
-                                                      k: [-284, 92, 0],
-                                                      ix: 1
-                                                    },
-                                                    s: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [50, 50, 100],
-                                                          t: 0
-                                                        },
-                                                        {
-                                                          o: {
-                                                            x: 0.167,
-                                                            y: 0.167
-                                                          },
-                                                          i: {
-                                                            x: 0.833,
-                                                            y: 0.833
-                                                          },
-                                                          s: [
-                                                            32.386446959656624,
-                                                            32.386446959656624
-                                                          ],
-                                                          t: 2
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [75, 75, 100],
-                                                          t: 14
-                                                        },
-                                                        {
-                                                          s: [50, 50, 100],
-                                                          t: 30
-                                                        }
-                                                      ],
-                                                      ix: 6
-                                                    },
-                                                    sk: { a: 0, k: 0 },
-                                                    p: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [92, 270],
-                                                          t: 0
-                                                        },
-                                                        {
-                                                          o: {
-                                                            x: 0.167,
-                                                            y: 0.167
-                                                          },
-                                                          i: {
-                                                            x: 0.833,
-                                                            y: 0.833
-                                                          },
-                                                          s: [108, 270],
-                                                          t: 2
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [92, 230],
-                                                          t: 14
-                                                        },
-                                                        { s: [92, 270], t: 30 }
-                                                      ],
-                                                      ix: 2
-                                                    },
-                                                    r: { a: 0, k: 0, ix: 10 },
-                                                    sa: { a: 0, k: 0 },
-                                                    o: {
-                                                      a: 1,
-                                                      k: [
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [25],
-                                                          t: 0
-                                                        },
-                                                        {
-                                                          o: { x: 0.333, y: 0 },
-                                                          i: { x: 0.667, y: 1 },
-                                                          s: [100],
-                                                          t: 14
-                                                        },
-                                                        { s: [25], t: 30 }
-                                                      ],
-                                                      ix: 11
-                                                    }
-                                                  },
-                                                  shapes: [
-                                                    {
-                                                      ty: "gr",
-                                                      bm: 0,
-                                                      hd: false,
-                                                      mn: "ADBE Vector Group",
-                                                      nm: "Ellipse 1",
-                                                      ix: 1,
-                                                      cix: 2,
-                                                      np: 3,
-                                                      it: [
-                                                        {
-                                                          ty: "el",
-                                                          bm: 0,
-                                                          hd: false,
-                                                          mn: "ADBE Vector Shape - Ellipse",
-                                                          nm: "Ellipse Path 1",
-                                                          d: 1,
-                                                          p: {
-                                                            a: 0,
-                                                            k: [0, 0],
-                                                            ix: 3
-                                                          },
-                                                          s: {
-                                                            a: 0,
-                                                            k: [120, 120],
-                                                            ix: 2
-                                                          }
-                                                        },
-                                                        {
-                                                          ty: "fl",
-                                                          bm: 0,
-                                                          hd: false,
-                                                          mn: "ADBE Vector Graphic - Fill",
-                                                          nm: "Fill 1",
-                                                          c: {
-                                                            a: 0,
-                                                            k: [
-                                                              0.1922, 0.4,
-                                                              0.2902
-                                                            ],
-                                                            ix: 4
-                                                          },
-                                                          r: 1,
-                                                          o: {
-                                                            a: 0,
-                                                            k: 100,
-                                                            ix: 5
-                                                          }
-                                                        },
-                                                        {
-                                                          ty: "tr",
-                                                          a: {
-                                                            a: 0,
-                                                            k: [0, 0],
-                                                            ix: 1
-                                                          },
-                                                          s: {
-                                                            a: 0,
-                                                            k: [100, 100],
-                                                            ix: 3
-                                                          },
-                                                          sk: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 4
-                                                          },
-                                                          p: {
-                                                            a: 0,
-                                                            k: [-284, 92],
-                                                            ix: 2
-                                                          },
-                                                          r: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 6
-                                                          },
-                                                          sa: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 5
-                                                          },
-                                                          o: {
-                                                            a: 0,
-                                                            k: 100,
-                                                            ix: 7
-                                                          }
-                                                        }
-                                                      ]
-                                                    }
-                                                  ],
-                                                  ind: 4
-                                                }
-                                              ],
-                                              v: "5.7.0",
-                                              fr: 60,
-                                              op: 81,
-                                              ip: 0,
-                                              assets: []
-                                            }}
-                                            className={classNames(
-                                              "__wab_instance",
-                                              sty.lottie
-                                            )}
-                                            preview={false}
-                                          />
-                                        )}
-                                      </DataCtxReader__>
-                                    }
+                                  <div
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.freeBox__eLzb
+                                    )}
                                   >
-                                    <DataCtxReader__>
-                                      {$ctx => (
-                                        <div
-                                          data-plasmic-name={"discipline"}
-                                          data-plasmic-override={
-                                            overrides.discipline
+                                    <TabButton
+                                      className={classNames(
+                                        "__wab_instance",
+                                        sty.tabButton__aqaGl
+                                      )}
+                                      tabKey={"tab1"}
+                                    >
+                                      <LevelsetButton
+                                        className={classNames(
+                                          "__wab_instance",
+                                          sty.levelsetButton__q81U
+                                        )}
+                                        color={(() => {
+                                          try {
+                                            return $ctx.currentTabKey === "tab1"
+                                              ? "green"
+                                              : "softSand";
+                                          } catch (e) {
+                                            if (
+                                              e instanceof TypeError ||
+                                              e?.plasmicType ===
+                                                "PlasmicUndefinedDataError"
+                                            ) {
+                                              return "green";
+                                            }
+                                            throw e;
                                           }
+                                        })()}
+                                      >
+                                        <div
                                           className={classNames(
                                             projectcss.all,
-                                            sty.discipline
+                                            projectcss.__wab_text,
+                                            sty.text___6KyZb
                                           )}
                                         >
-                                          <div
-                                            data-plasmic-name={"row"}
-                                            data-plasmic-override={
-                                              overrides.row
+                                          {"Pathway"}
+                                        </div>
+                                      </LevelsetButton>
+                                    </TabButton>
+                                    <TabButton
+                                      className={classNames(
+                                        "__wab_instance",
+                                        sty.tabButton__hM9Qt
+                                      )}
+                                      tabKey={"tab2"}
+                                    >
+                                      <LevelsetButton
+                                        className={classNames(
+                                          "__wab_instance",
+                                          sty.levelsetButton__nUeV4
+                                        )}
+                                        color={(() => {
+                                          try {
+                                            return $ctx.currentTabKey === "tab2"
+                                              ? "green"
+                                              : "softSand";
+                                          } catch (e) {
+                                            if (
+                                              e instanceof TypeError ||
+                                              e?.plasmicType ===
+                                                "PlasmicUndefinedDataError"
+                                            ) {
+                                              return "green";
                                             }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.row
-                                            )}
-                                          >
-                                            <div
-                                              data-plasmic-name={"text13"}
-                                              data-plasmic-override={
-                                                overrides.text13
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                projectcss.__wab_text,
-                                                sty.text13
-                                              )}
-                                            >
-                                              {"Current Period (last 90 days)"}
-                                            </div>
-                                          </div>
-                                          <div
-                                            data-plasmic-name={"row2"}
-                                            data-plasmic-override={
-                                              overrides.row2
+                                            throw e;
+                                          }
+                                        })()}
+                                      >
+                                        <div
+                                          className={classNames(
+                                            projectcss.all,
+                                            projectcss.__wab_text,
+                                            sty.text__l7T
+                                          )}
+                                        >
+                                          {"Positional Excellence"}
+                                        </div>
+                                      </LevelsetButton>
+                                    </TabButton>
+                                    <TabButton
+                                      className={classNames(
+                                        "__wab_instance",
+                                        sty.tabButton__mfDk
+                                      )}
+                                      tabKey={"tab3"}
+                                    >
+                                      <LevelsetButton
+                                        className={classNames(
+                                          "__wab_instance",
+                                          sty.levelsetButton__rd97
+                                        )}
+                                        color={(() => {
+                                          try {
+                                            return $ctx.currentTabKey === "tab3"
+                                              ? "green"
+                                              : "softSand";
+                                          } catch (e) {
+                                            if (
+                                              e instanceof TypeError ||
+                                              e?.plasmicType ===
+                                                "PlasmicUndefinedDataError"
+                                            ) {
+                                              return "green";
                                             }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.row2
-                                            )}
-                                          >
-                                            <div
-                                              data-plasmic-name={"metricItem"}
-                                              data-plasmic-override={
-                                                overrides.metricItem
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.metricItem
+                                            throw e;
+                                          }
+                                        })()}
+                                      >
+                                        <div
+                                          className={classNames(
+                                            projectcss.all,
+                                            projectcss.__wab_text,
+                                            sty.text___4BkwJ
+                                          )}
+                                        >
+                                          {"Evaluations"}
+                                        </div>
+                                      </LevelsetButton>
+                                    </TabButton>
+                                    <TabButton
+                                      className={classNames(
+                                        "__wab_instance",
+                                        sty.tabButton__myaYm
+                                      )}
+                                      tabKey={"tab4"}
+                                    >
+                                      <LevelsetButton
+                                        className={classNames(
+                                          "__wab_instance",
+                                          sty.levelsetButton__twGtL
+                                        )}
+                                        color={(() => {
+                                          try {
+                                            return $ctx.currentTabKey === "tab4"
+                                              ? "green"
+                                              : "softSand";
+                                          } catch (e) {
+                                            if (
+                                              e instanceof TypeError ||
+                                              e?.plasmicType ===
+                                                "PlasmicUndefinedDataError"
+                                            ) {
+                                              return "green";
+                                            }
+                                            throw e;
+                                          }
+                                        })()}
+                                      >
+                                        <div
+                                          className={classNames(
+                                            projectcss.all,
+                                            projectcss.__wab_text,
+                                            sty.text__rnFqb
+                                          )}
+                                        >
+                                          {"Discipline"}
+                                        </div>
+                                      </LevelsetButton>
+                                    </TabButton>
+                                    <TabUnderline
+                                      data-plasmic-name={"tabUnderline"}
+                                      data-plasmic-override={
+                                        overrides.tabUnderline
+                                      }
+                                      className={classNames(
+                                        "__wab_instance",
+                                        sty.tabUnderline
+                                      )}
+                                    />
+                                  </div>
+                                  <div
+                                    className={classNames(
+                                      projectcss.all,
+                                      sty.freeBox__aRoag
+                                    )}
+                                  >
+                                    <TabContent
+                                      data-plasmic-name={"pathwayContent"}
+                                      data-plasmic-override={
+                                        overrides.pathwayContent
+                                      }
+                                      className={classNames(
+                                        "__wab_instance",
+                                        sty.pathwayContent
+                                      )}
+                                      tabKey={"tab1"}
+                                    >
+                                      <div
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.freeBox__eNnS6
+                                        )}
+                                      >
+                                        <div
+                                          className={classNames(
+                                            projectcss.all,
+                                            projectcss.__wab_text,
+                                            sty.text__o774
+                                          )}
+                                        >
+                                          {"Coming soon!"}
+                                        </div>
+                                      </div>
+                                    </TabContent>
+                                    <TabContent
+                                      data-plasmic-name={"peContent"}
+                                      data-plasmic-override={
+                                        overrides.peContent
+                                      }
+                                      className={classNames(
+                                        "__wab_instance",
+                                        sty.peContent
+                                      )}
+                                      tabKey={"tab2"}
+                                    >
+                                      <div
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.freeBox__gmIt2
+                                        )}
+                                      >
+                                        <div
+                                          className={classNames(
+                                            projectcss.all,
+                                            projectcss.__wab_text,
+                                            sty.text__ts6AM
+                                          )}
+                                        >
+                                          {"Coming soon!"}
+                                        </div>
+                                      </div>
+                                    </TabContent>
+                                    <TabContent
+                                      data-plasmic-name={"evalsContent"}
+                                      data-plasmic-override={
+                                        overrides.evalsContent
+                                      }
+                                      className={classNames(
+                                        "__wab_instance",
+                                        sty.evalsContent
+                                      )}
+                                      tabKey={"tab3"}
+                                    >
+                                      <div
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.freeBox__wMoxn
+                                        )}
+                                      >
+                                        <div
+                                          className={classNames(
+                                            projectcss.all,
+                                            projectcss.__wab_text,
+                                            sty.text__jrDLj
+                                          )}
+                                        >
+                                          {"Coming soon!"}
+                                        </div>
+                                      </div>
+                                    </TabContent>
+                                    <TabContent
+                                      data-plasmic-name={"disciplineContent"}
+                                      data-plasmic-override={
+                                        overrides.disciplineContent
+                                      }
+                                      className={classNames(
+                                        "__wab_instance",
+                                        sty.disciplineContent
+                                      )}
+                                      tabKey={"tab4"}
+                                    >
+                                      <div
+                                        className={classNames(
+                                          projectcss.all,
+                                          sty.freeBox__imotp
+                                        )}
+                                      >
+                                        <LoadingBoundary
+                                          loadingState={
+                                            <DataCtxReader__>
+                                              {$ctx => (
+                                                <LottieWrapper
+                                                  animationData={{
+                                                    nm: "Main Scene",
+                                                    ddd: 0,
+                                                    h: 540,
+                                                    w: 540,
+                                                    meta: {
+                                                      g: "@lottiefiles/creator 1.59.0"
+                                                    },
+                                                    layers: [
+                                                      {
+                                                        ty: 4,
+                                                        nm: "Dot4",
+                                                        sr: 1,
+                                                        st: 0,
+                                                        op: 360,
+                                                        ip: 0,
+                                                        hd: false,
+                                                        ddd: 0,
+                                                        bm: 0,
+                                                        hasMask: false,
+                                                        ao: 0,
+                                                        ks: {
+                                                          a: {
+                                                            a: 0,
+                                                            k: [-284, 92, 0],
+                                                            ix: 1
+                                                          },
+                                                          s: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.167,
+                                                                  y: 0.167
+                                                                },
+                                                                i: {
+                                                                  x: 0.833,
+                                                                  y: 0.833
+                                                                },
+                                                                s: [31, 31],
+                                                                t: 2
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [
+                                                                  50, 50, 100
+                                                                ],
+                                                                t: 25
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [
+                                                                  75, 75, 100
+                                                                ],
+                                                                t: 39
+                                                              },
+                                                              {
+                                                                s: [
+                                                                  50, 50, 100
+                                                                ],
+                                                                t: 55
+                                                              }
+                                                            ],
+                                                            ix: 6
+                                                          },
+                                                          sk: { a: 0, k: 0 },
+                                                          p: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.167,
+                                                                  y: 0.167
+                                                                },
+                                                                i: {
+                                                                  x: 0.833,
+                                                                  y: 0.833
+                                                                },
+                                                                s: [436, 270],
+                                                                t: 2
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [452, 270],
+                                                                t: 25
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [452, 230],
+                                                                t: 39
+                                                              },
+                                                              {
+                                                                s: [452, 270],
+                                                                t: 55
+                                                              }
+                                                            ],
+                                                            ix: 2
+                                                          },
+                                                          r: {
+                                                            a: 0,
+                                                            k: 0,
+                                                            ix: 10
+                                                          },
+                                                          sa: { a: 0, k: 0 },
+                                                          o: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [25],
+                                                                t: 25
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [100],
+                                                                t: 39
+                                                              },
+                                                              { s: [25], t: 55 }
+                                                            ],
+                                                            ix: 11
+                                                          }
+                                                        },
+                                                        shapes: [
+                                                          {
+                                                            ty: "gr",
+                                                            bm: 0,
+                                                            hd: false,
+                                                            mn: "ADBE Vector Group",
+                                                            nm: "Ellipse 1",
+                                                            ix: 1,
+                                                            cix: 2,
+                                                            np: 3,
+                                                            it: [
+                                                              {
+                                                                ty: "el",
+                                                                bm: 0,
+                                                                hd: false,
+                                                                mn: "ADBE Vector Shape - Ellipse",
+                                                                nm: "Ellipse Path 1",
+                                                                d: 1,
+                                                                p: {
+                                                                  a: 0,
+                                                                  k: [0, 0],
+                                                                  ix: 3
+                                                                },
+                                                                s: {
+                                                                  a: 0,
+                                                                  k: [120, 120],
+                                                                  ix: 2
+                                                                }
+                                                              },
+                                                              {
+                                                                ty: "fl",
+                                                                bm: 0,
+                                                                hd: false,
+                                                                mn: "ADBE Vector Graphic - Fill",
+                                                                nm: "Fill 1",
+                                                                c: {
+                                                                  a: 0,
+                                                                  k: [
+                                                                    0.1922, 0.4,
+                                                                    0.2902
+                                                                  ],
+                                                                  ix: 4
+                                                                },
+                                                                r: 1,
+                                                                o: {
+                                                                  a: 0,
+                                                                  k: 100,
+                                                                  ix: 5
+                                                                }
+                                                              },
+                                                              {
+                                                                ty: "tr",
+                                                                a: {
+                                                                  a: 0,
+                                                                  k: [0, 0],
+                                                                  ix: 1
+                                                                },
+                                                                s: {
+                                                                  a: 0,
+                                                                  k: [100, 100],
+                                                                  ix: 3
+                                                                },
+                                                                sk: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 4
+                                                                },
+                                                                p: {
+                                                                  a: 0,
+                                                                  k: [-284, 92],
+                                                                  ix: 2
+                                                                },
+                                                                r: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 6
+                                                                },
+                                                                sa: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 5
+                                                                },
+                                                                o: {
+                                                                  a: 0,
+                                                                  k: 100,
+                                                                  ix: 7
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        ],
+                                                        ind: 1
+                                                      },
+                                                      {
+                                                        ty: 4,
+                                                        nm: "Dot3",
+                                                        sr: 1,
+                                                        st: 0,
+                                                        op: 360,
+                                                        ip: 0,
+                                                        hd: false,
+                                                        ddd: 0,
+                                                        bm: 0,
+                                                        hasMask: false,
+                                                        ao: 0,
+                                                        ks: {
+                                                          a: {
+                                                            a: 0,
+                                                            k: [-284, 92, 0],
+                                                            ix: 1
+                                                          },
+                                                          s: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.167,
+                                                                  y: 0.167
+                                                                },
+                                                                i: {
+                                                                  x: 0.833,
+                                                                  y: 0.833
+                                                                },
+                                                                s: [31, 31],
+                                                                t: 2
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [
+                                                                  50, 50, 100
+                                                                ],
+                                                                t: 17
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [
+                                                                  75, 75, 100
+                                                                ],
+                                                                t: 31
+                                                              },
+                                                              {
+                                                                s: [
+                                                                  50, 50, 100
+                                                                ],
+                                                                t: 47
+                                                              }
+                                                            ],
+                                                            ix: 6
+                                                          },
+                                                          sk: { a: 0, k: 0 },
+                                                          p: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.167,
+                                                                  y: 0.167
+                                                                },
+                                                                i: {
+                                                                  x: 0.833,
+                                                                  y: 0.833
+                                                                },
+                                                                s: [324, 270],
+                                                                t: 2
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [332, 270],
+                                                                t: 17
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [332, 230],
+                                                                t: 31
+                                                              },
+                                                              {
+                                                                s: [332, 270],
+                                                                t: 47
+                                                              }
+                                                            ],
+                                                            ix: 2
+                                                          },
+                                                          r: {
+                                                            a: 0,
+                                                            k: 0,
+                                                            ix: 10
+                                                          },
+                                                          sa: { a: 0, k: 0 },
+                                                          o: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [25],
+                                                                t: 17
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [100],
+                                                                t: 31
+                                                              },
+                                                              { s: [25], t: 47 }
+                                                            ],
+                                                            ix: 11
+                                                          }
+                                                        },
+                                                        shapes: [
+                                                          {
+                                                            ty: "gr",
+                                                            bm: 0,
+                                                            hd: false,
+                                                            mn: "ADBE Vector Group",
+                                                            nm: "Ellipse 1",
+                                                            ix: 1,
+                                                            cix: 2,
+                                                            np: 3,
+                                                            it: [
+                                                              {
+                                                                ty: "el",
+                                                                bm: 0,
+                                                                hd: false,
+                                                                mn: "ADBE Vector Shape - Ellipse",
+                                                                nm: "Ellipse Path 1",
+                                                                d: 1,
+                                                                p: {
+                                                                  a: 0,
+                                                                  k: [0, 0],
+                                                                  ix: 3
+                                                                },
+                                                                s: {
+                                                                  a: 0,
+                                                                  k: [120, 120],
+                                                                  ix: 2
+                                                                }
+                                                              },
+                                                              {
+                                                                ty: "fl",
+                                                                bm: 0,
+                                                                hd: false,
+                                                                mn: "ADBE Vector Graphic - Fill",
+                                                                nm: "Fill 1",
+                                                                c: {
+                                                                  a: 0,
+                                                                  k: [
+                                                                    0.1922, 0.4,
+                                                                    0.2902
+                                                                  ],
+                                                                  ix: 4
+                                                                },
+                                                                r: 1,
+                                                                o: {
+                                                                  a: 0,
+                                                                  k: 100,
+                                                                  ix: 5
+                                                                }
+                                                              },
+                                                              {
+                                                                ty: "tr",
+                                                                a: {
+                                                                  a: 0,
+                                                                  k: [0, 0],
+                                                                  ix: 1
+                                                                },
+                                                                s: {
+                                                                  a: 0,
+                                                                  k: [100, 100],
+                                                                  ix: 3
+                                                                },
+                                                                sk: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 4
+                                                                },
+                                                                p: {
+                                                                  a: 0,
+                                                                  k: [-284, 92],
+                                                                  ix: 2
+                                                                },
+                                                                r: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 6
+                                                                },
+                                                                sa: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 5
+                                                                },
+                                                                o: {
+                                                                  a: 0,
+                                                                  k: 100,
+                                                                  ix: 7
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        ],
+                                                        ind: 2
+                                                      },
+                                                      {
+                                                        ty: 4,
+                                                        nm: "Dot2",
+                                                        sr: 1,
+                                                        st: 0,
+                                                        op: 360,
+                                                        ip: 0,
+                                                        hd: false,
+                                                        ddd: 0,
+                                                        bm: 0,
+                                                        hasMask: false,
+                                                        ao: 0,
+                                                        ks: {
+                                                          a: {
+                                                            a: 0,
+                                                            k: [-284, 92, 0],
+                                                            ix: 1
+                                                          },
+                                                          s: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.167,
+                                                                  y: 0.167
+                                                                },
+                                                                i: {
+                                                                  x: 0.833,
+                                                                  y: 0.833
+                                                                },
+                                                                s: [31, 31],
+                                                                t: 2
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [
+                                                                  50, 50, 100
+                                                                ],
+                                                                t: 9
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [
+                                                                  75, 75, 100
+                                                                ],
+                                                                t: 23
+                                                              },
+                                                              {
+                                                                s: [
+                                                                  50, 50, 100
+                                                                ],
+                                                                t: 39
+                                                              }
+                                                            ],
+                                                            ix: 6
+                                                          },
+                                                          sk: { a: 0, k: 0 },
+                                                          p: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.167,
+                                                                  y: 0.167
+                                                                },
+                                                                i: {
+                                                                  x: 0.833,
+                                                                  y: 0.833
+                                                                },
+                                                                s: [220, 270],
+                                                                t: 2
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [212, 270],
+                                                                t: 9
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [212, 230],
+                                                                t: 23
+                                                              },
+                                                              {
+                                                                s: [212, 270],
+                                                                t: 39
+                                                              }
+                                                            ],
+                                                            ix: 2
+                                                          },
+                                                          r: {
+                                                            a: 0,
+                                                            k: 0,
+                                                            ix: 10
+                                                          },
+                                                          sa: { a: 0, k: 0 },
+                                                          o: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [25],
+                                                                t: 9
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [100],
+                                                                t: 23
+                                                              },
+                                                              { s: [25], t: 39 }
+                                                            ],
+                                                            ix: 11
+                                                          }
+                                                        },
+                                                        shapes: [
+                                                          {
+                                                            ty: "gr",
+                                                            bm: 0,
+                                                            hd: false,
+                                                            mn: "ADBE Vector Group",
+                                                            nm: "Ellipse 1",
+                                                            ix: 1,
+                                                            cix: 2,
+                                                            np: 3,
+                                                            it: [
+                                                              {
+                                                                ty: "el",
+                                                                bm: 0,
+                                                                hd: false,
+                                                                mn: "ADBE Vector Shape - Ellipse",
+                                                                nm: "Ellipse Path 1",
+                                                                d: 1,
+                                                                p: {
+                                                                  a: 0,
+                                                                  k: [0, 0],
+                                                                  ix: 3
+                                                                },
+                                                                s: {
+                                                                  a: 0,
+                                                                  k: [120, 120],
+                                                                  ix: 2
+                                                                }
+                                                              },
+                                                              {
+                                                                ty: "fl",
+                                                                bm: 0,
+                                                                hd: false,
+                                                                mn: "ADBE Vector Graphic - Fill",
+                                                                nm: "Fill 1",
+                                                                c: {
+                                                                  a: 0,
+                                                                  k: [
+                                                                    0.1922, 0.4,
+                                                                    0.2902
+                                                                  ],
+                                                                  ix: 4
+                                                                },
+                                                                r: 1,
+                                                                o: {
+                                                                  a: 0,
+                                                                  k: 100,
+                                                                  ix: 5
+                                                                }
+                                                              },
+                                                              {
+                                                                ty: "tr",
+                                                                a: {
+                                                                  a: 0,
+                                                                  k: [0, 0],
+                                                                  ix: 1
+                                                                },
+                                                                s: {
+                                                                  a: 0,
+                                                                  k: [100, 100],
+                                                                  ix: 3
+                                                                },
+                                                                sk: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 4
+                                                                },
+                                                                p: {
+                                                                  a: 0,
+                                                                  k: [-284, 92],
+                                                                  ix: 2
+                                                                },
+                                                                r: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 6
+                                                                },
+                                                                sa: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 5
+                                                                },
+                                                                o: {
+                                                                  a: 0,
+                                                                  k: 100,
+                                                                  ix: 7
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        ],
+                                                        ind: 3
+                                                      },
+                                                      {
+                                                        ty: 4,
+                                                        nm: "Dot1",
+                                                        sr: 1,
+                                                        st: 0,
+                                                        op: 360,
+                                                        ip: 0,
+                                                        hd: false,
+                                                        ddd: 0,
+                                                        bm: 0,
+                                                        hasMask: false,
+                                                        ao: 0,
+                                                        ks: {
+                                                          a: {
+                                                            a: 0,
+                                                            k: [-284, 92, 0],
+                                                            ix: 1
+                                                          },
+                                                          s: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [
+                                                                  50, 50, 100
+                                                                ],
+                                                                t: 0
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.167,
+                                                                  y: 0.167
+                                                                },
+                                                                i: {
+                                                                  x: 0.833,
+                                                                  y: 0.833
+                                                                },
+                                                                s: [
+                                                                  32.386446959656624,
+                                                                  32.386446959656624
+                                                                ],
+                                                                t: 2
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [
+                                                                  75, 75, 100
+                                                                ],
+                                                                t: 14
+                                                              },
+                                                              {
+                                                                s: [
+                                                                  50, 50, 100
+                                                                ],
+                                                                t: 30
+                                                              }
+                                                            ],
+                                                            ix: 6
+                                                          },
+                                                          sk: { a: 0, k: 0 },
+                                                          p: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [92, 270],
+                                                                t: 0
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.167,
+                                                                  y: 0.167
+                                                                },
+                                                                i: {
+                                                                  x: 0.833,
+                                                                  y: 0.833
+                                                                },
+                                                                s: [108, 270],
+                                                                t: 2
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [92, 230],
+                                                                t: 14
+                                                              },
+                                                              {
+                                                                s: [92, 270],
+                                                                t: 30
+                                                              }
+                                                            ],
+                                                            ix: 2
+                                                          },
+                                                          r: {
+                                                            a: 0,
+                                                            k: 0,
+                                                            ix: 10
+                                                          },
+                                                          sa: { a: 0, k: 0 },
+                                                          o: {
+                                                            a: 1,
+                                                            k: [
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [25],
+                                                                t: 0
+                                                              },
+                                                              {
+                                                                o: {
+                                                                  x: 0.333,
+                                                                  y: 0
+                                                                },
+                                                                i: {
+                                                                  x: 0.667,
+                                                                  y: 1
+                                                                },
+                                                                s: [100],
+                                                                t: 14
+                                                              },
+                                                              { s: [25], t: 30 }
+                                                            ],
+                                                            ix: 11
+                                                          }
+                                                        },
+                                                        shapes: [
+                                                          {
+                                                            ty: "gr",
+                                                            bm: 0,
+                                                            hd: false,
+                                                            mn: "ADBE Vector Group",
+                                                            nm: "Ellipse 1",
+                                                            ix: 1,
+                                                            cix: 2,
+                                                            np: 3,
+                                                            it: [
+                                                              {
+                                                                ty: "el",
+                                                                bm: 0,
+                                                                hd: false,
+                                                                mn: "ADBE Vector Shape - Ellipse",
+                                                                nm: "Ellipse Path 1",
+                                                                d: 1,
+                                                                p: {
+                                                                  a: 0,
+                                                                  k: [0, 0],
+                                                                  ix: 3
+                                                                },
+                                                                s: {
+                                                                  a: 0,
+                                                                  k: [120, 120],
+                                                                  ix: 2
+                                                                }
+                                                              },
+                                                              {
+                                                                ty: "fl",
+                                                                bm: 0,
+                                                                hd: false,
+                                                                mn: "ADBE Vector Graphic - Fill",
+                                                                nm: "Fill 1",
+                                                                c: {
+                                                                  a: 0,
+                                                                  k: [
+                                                                    0.1922, 0.4,
+                                                                    0.2902
+                                                                  ],
+                                                                  ix: 4
+                                                                },
+                                                                r: 1,
+                                                                o: {
+                                                                  a: 0,
+                                                                  k: 100,
+                                                                  ix: 5
+                                                                }
+                                                              },
+                                                              {
+                                                                ty: "tr",
+                                                                a: {
+                                                                  a: 0,
+                                                                  k: [0, 0],
+                                                                  ix: 1
+                                                                },
+                                                                s: {
+                                                                  a: 0,
+                                                                  k: [100, 100],
+                                                                  ix: 3
+                                                                },
+                                                                sk: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 4
+                                                                },
+                                                                p: {
+                                                                  a: 0,
+                                                                  k: [-284, 92],
+                                                                  ix: 2
+                                                                },
+                                                                r: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 6
+                                                                },
+                                                                sa: {
+                                                                  a: 0,
+                                                                  k: 0,
+                                                                  ix: 5
+                                                                },
+                                                                o: {
+                                                                  a: 0,
+                                                                  k: 100,
+                                                                  ix: 7
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        ],
+                                                        ind: 4
+                                                      }
+                                                    ],
+                                                    v: "5.7.0",
+                                                    fr: 60,
+                                                    op: 81,
+                                                    ip: 0,
+                                                    assets: []
+                                                  }}
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.lottie___9839
+                                                  )}
+                                                  preview={false}
+                                                />
                                               )}
-                                            >
+                                            </DataCtxReader__>
+                                          }
+                                        >
+                                          <DataCtxReader__>
+                                            {$ctx => (
                                               <div
-                                                data-plasmic-name={
-                                                  "headingAndNumber"
-                                                }
+                                                data-plasmic-name={"discipline"}
                                                 data-plasmic-override={
-                                                  overrides.headingAndNumber
+                                                  overrides.discipline
                                                 }
                                                 className={classNames(
                                                   projectcss.all,
-                                                  sty.headingAndNumber
+                                                  sty.discipline
                                                 )}
                                               >
                                                 <div
-                                                  data-plasmic-name={"heading"}
+                                                  data-plasmic-name={"row"}
                                                   data-plasmic-override={
-                                                    overrides.heading
+                                                    overrides.row
                                                   }
                                                   className={classNames(
                                                     projectcss.all,
-                                                    projectcss.__wab_text,
-                                                    sty.heading
-                                                  )}
-                                                >
-                                                  {"Infractions"}
-                                                </div>
-                                                <div
-                                                  data-plasmic-name={
-                                                    "numberAndBadge"
-                                                  }
-                                                  data-plasmic-override={
-                                                    overrides.numberAndBadge
-                                                  }
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    sty.numberAndBadge
+                                                    sty.row
                                                   )}
                                                 >
                                                   <div
-                                                    data-plasmic-name={"number"}
+                                                    data-plasmic-name={"text13"}
                                                     data-plasmic-override={
-                                                      overrides.number
+                                                      overrides.text13
                                                     }
                                                     className={classNames(
                                                       projectcss.all,
                                                       projectcss.__wab_text,
-                                                      sty.number
+                                                      sty.text13
                                                     )}
                                                   >
-                                                    <React.Fragment>
-                                                      {(() => {
-                                                        try {
-                                                          return (
-                                                            $queries
-                                                              .infractionsQuery
-                                                              .data ?? []
-                                                          ).reduce(
-                                                            total => total + 1,
-                                                            0
-                                                          );
-                                                        } catch (e) {
-                                                          if (
-                                                            e instanceof
-                                                              TypeError ||
-                                                            e?.plasmicType ===
-                                                              "PlasmicUndefinedDataError"
-                                                          ) {
-                                                            return "4";
-                                                          }
-                                                          throw e;
-                                                        }
-                                                      })()}
-                                                    </React.Fragment>
+                                                    {
+                                                      "Current Period (last 90 days)"
+                                                    }
                                                   </div>
                                                 </div>
-                                              </div>
-                                            </div>
-                                            <div
-                                              data-plasmic-name={"metricItem2"}
-                                              data-plasmic-override={
-                                                overrides.metricItem2
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.metricItem2
-                                              )}
-                                            >
-                                              <div
-                                                data-plasmic-name={
-                                                  "headingAndNumber2"
-                                                }
-                                                data-plasmic-override={
-                                                  overrides.headingAndNumber2
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  sty.headingAndNumber2
-                                                )}
-                                              >
                                                 <div
-                                                  data-plasmic-name={"heading2"}
+                                                  data-plasmic-name={"row2"}
                                                   data-plasmic-override={
-                                                    overrides.heading2
+                                                    overrides.row2
                                                   }
                                                   className={classNames(
                                                     projectcss.all,
-                                                    projectcss.__wab_text,
-                                                    sty.heading2
-                                                  )}
-                                                >
-                                                  {"Discipline Points"}
-                                                </div>
-                                                <div
-                                                  data-plasmic-name={
-                                                    "numberAndBadge2"
-                                                  }
-                                                  data-plasmic-override={
-                                                    overrides.numberAndBadge2
-                                                  }
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    sty.numberAndBadge2
+                                                    sty.row2
                                                   )}
                                                 >
                                                   <div
                                                     data-plasmic-name={
-                                                      "number2"
+                                                      "metricItem"
                                                     }
                                                     data-plasmic-override={
-                                                      overrides.number2
+                                                      overrides.metricItem
                                                     }
                                                     className={classNames(
                                                       projectcss.all,
-                                                      projectcss.__wab_text,
-                                                      sty.number2
+                                                      sty.metricItem
                                                     )}
                                                   >
-                                                    <React.Fragment>
-                                                      {(() => {
-                                                        try {
-                                                          return (
-                                                            $queries
-                                                              .infractionsQuery
-                                                              .data ?? []
-                                                          ).reduce(
-                                                            (total, i) =>
-                                                              total +
-                                                              (i.points ?? 0),
-                                                            0
-                                                          );
-                                                        } catch (e) {
-                                                          if (
-                                                            e instanceof
-                                                              TypeError ||
-                                                            e?.plasmicType ===
-                                                              "PlasmicUndefinedDataError"
-                                                          ) {
-                                                            return "55";
-                                                          }
-                                                          throw e;
-                                                        }
-                                                      })()}
-                                                    </React.Fragment>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                          <div
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.freeBox__jzVpm
-                                            )}
-                                          />
-
-                                          <div
-                                            data-plasmic-name={"inputAndText"}
-                                            data-plasmic-override={
-                                              overrides.inputAndText
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.inputAndText
-                                            )}
-                                          >
-                                            <div
-                                              data-plasmic-name={"iconAndText"}
-                                              data-plasmic-override={
-                                                overrides.iconAndText
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.iconAndText
-                                              )}
-                                            >
-                                              <div
-                                                data-plasmic-name={"text14"}
-                                                data-plasmic-override={
-                                                  overrides.text14
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.text14
-                                                )}
-                                              >
-                                                {"Infractions"}
-                                              </div>
-                                            </div>
-                                          </div>
-                                          <div
-                                            data-plasmic-name={"frame1"}
-                                            data-plasmic-override={
-                                              overrides.frame1
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.frame1
-                                            )}
-                                          >
-                                            {(_par =>
-                                              !_par
-                                                ? []
-                                                : Array.isArray(_par)
-                                                  ? _par
-                                                  : [_par])(
-                                              (() => {
-                                                try {
-                                                  return $queries
-                                                    .infractionsQuery.data;
-                                                } catch (e) {
-                                                  if (
-                                                    e instanceof TypeError ||
-                                                    e?.plasmicType ===
-                                                      "PlasmicUndefinedDataError"
-                                                  ) {
-                                                    return [];
-                                                  }
-                                                  throw e;
-                                                }
-                                              })()
-                                            ).map(
-                                              (
-                                                __plasmic_item_0,
-                                                __plasmic_idx_0
-                                              ) => {
-                                                const infraction =
-                                                  __plasmic_item_0;
-                                                const currentIndex =
-                                                  __plasmic_idx_0;
-                                                return (
-                                                  <SlideoutListItem2
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.slideoutListItem2__kgkig
-                                                    )}
-                                                    date2={
-                                                      <div
-                                                        data-plasmic-name={
-                                                          "date4"
-                                                        }
-                                                        data-plasmic-override={
-                                                          overrides.date4
-                                                        }
-                                                        className={classNames(
-                                                          projectcss.all,
-                                                          projectcss.__wab_text,
-                                                          sty.date4
-                                                        )}
-                                                      >
-                                                        <React.Fragment>
-                                                          {(() => {
-                                                            try {
-                                                              return infraction.infraction_date;
-                                                            } catch (e) {
-                                                              if (
-                                                                e instanceof
-                                                                  TypeError ||
-                                                                e?.plasmicType ===
-                                                                  "PlasmicUndefinedDataError"
-                                                              ) {
-                                                                return "10/2/2025";
-                                                              }
-                                                              throw e;
-                                                            }
-                                                          })()}
-                                                        </React.Fragment>
-                                                      </div>
-                                                    }
-                                                    documentingLeader={
-                                                      <div
-                                                        data-plasmic-name={
-                                                          "leader4"
-                                                        }
-                                                        data-plasmic-override={
-                                                          overrides.leader4
-                                                        }
-                                                        className={classNames(
-                                                          projectcss.all,
-                                                          projectcss.__wab_text,
-                                                          sty.leader4
-                                                        )}
-                                                      >
-                                                        <React.Fragment>
-                                                          {(() => {
-                                                            try {
-                                                              return infraction.leader_name;
-                                                            } catch (e) {
-                                                              if (
-                                                                e instanceof
-                                                                  TypeError ||
-                                                                e?.plasmicType ===
-                                                                  "PlasmicUndefinedDataError"
-                                                              ) {
-                                                                return "Leader Name";
-                                                              }
-                                                              throw e;
-                                                            }
-                                                          })()}
-                                                        </React.Fragment>
-                                                      </div>
-                                                    }
-                                                    informed2={
-                                                      <div
-                                                        data-plasmic-name={
-                                                          "informed4"
-                                                        }
-                                                        data-plasmic-override={
-                                                          overrides.informed4
-                                                        }
-                                                        className={classNames(
-                                                          projectcss.all,
-                                                          projectcss.__wab_text,
-                                                          sty.informed4
-                                                        )}
-                                                      >
-                                                        <React.Fragment>
-                                                          {(() => {
-                                                            try {
-                                                              return infraction.acknowledgement;
-                                                            } catch (e) {
-                                                              if (
-                                                                e instanceof
-                                                                  TypeError ||
-                                                                e?.plasmicType ===
-                                                                  "PlasmicUndefinedDataError"
-                                                              ) {
-                                                                return "Informed";
-                                                              }
-                                                              throw e;
-                                                            }
-                                                          })()}
-                                                        </React.Fragment>
-                                                      </div>
-                                                    }
-                                                    infractionType={(() => {
-                                                      try {
-                                                        return infraction.points >
-                                                          0
-                                                          ? "negative"
-                                                          : "positive";
-                                                      } catch (e) {
-                                                        if (
-                                                          e instanceof
-                                                            TypeError ||
-                                                          e?.plasmicType ===
-                                                            "PlasmicUndefinedDataError"
-                                                        ) {
-                                                          return "negative";
-                                                        }
-                                                        throw e;
+                                                    <div
+                                                      data-plasmic-name={
+                                                        "headingAndNumber"
                                                       }
-                                                    })()}
-                                                    itemName={
-                                                      <React.Fragment>
-                                                        {(() => {
-                                                          try {
-                                                            return infraction.infraction;
-                                                          } catch (e) {
-                                                            if (
-                                                              e instanceof
-                                                                TypeError ||
-                                                              e?.plasmicType ===
-                                                                "PlasmicUndefinedDataError"
-                                                            ) {
-                                                              return "Item Name";
-                                                            }
-                                                            throw e;
-                                                          }
-                                                        })()}
-                                                      </React.Fragment>
-                                                    }
-                                                    key={currentIndex}
-                                                    pointValue2={
+                                                      data-plasmic-override={
+                                                        overrides.headingAndNumber
+                                                      }
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        sty.headingAndNumber
+                                                      )}
+                                                    >
                                                       <div
+                                                        data-plasmic-name={
+                                                          "heading"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.heading
+                                                        }
                                                         className={classNames(
                                                           projectcss.all,
-                                                          sty.freeBox__birHi
+                                                          projectcss.__wab_text,
+                                                          sty.heading
+                                                        )}
+                                                      >
+                                                        {"Infractions"}
+                                                      </div>
+                                                      <div
+                                                        data-plasmic-name={
+                                                          "numberAndBadge"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.numberAndBadge
+                                                        }
+                                                        className={classNames(
+                                                          projectcss.all,
+                                                          sty.numberAndBadge
                                                         )}
                                                       >
                                                         <div
                                                           data-plasmic-name={
-                                                            "pointValue8"
+                                                            "number"
                                                           }
                                                           data-plasmic-override={
-                                                            overrides.pointValue8
+                                                            overrides.number
                                                           }
                                                           className={classNames(
                                                             projectcss.all,
                                                             projectcss.__wab_text,
-                                                            sty.pointValue8
+                                                            sty.number
                                                           )}
                                                         >
                                                           <React.Fragment>
                                                             {(() => {
                                                               try {
-                                                                return infraction.points;
+                                                                return (
+                                                                  $queries
+                                                                    .infractionsQuery
+                                                                    .data ?? []
+                                                                ).reduce(
+                                                                  total =>
+                                                                    total + 1,
+                                                                  0
+                                                                );
                                                               } catch (e) {
                                                                 if (
                                                                   e instanceof
@@ -2614,7 +3045,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                                   e?.plasmicType ===
                                                                     "PlasmicUndefinedDataError"
                                                                 ) {
-                                                                  return "10";
+                                                                  return "4";
                                                                 }
                                                                 throw e;
                                                               }
@@ -2622,1943 +3053,2479 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                           </React.Fragment>
                                                         </div>
                                                       </div>
-                                                    }
-                                                  />
-                                                );
-                                              }
-                                            )}
-                                            {(() => {
-                                              try {
-                                                return (
-                                                  (
-                                                    $queries.infractionsQuery
-                                                      .data ?? []
-                                                  ).length === 0
-                                                );
-                                              } catch (e) {
-                                                if (
-                                                  e instanceof TypeError ||
-                                                  e?.plasmicType ===
-                                                    "PlasmicUndefinedDataError"
-                                                ) {
-                                                  return true;
-                                                }
-                                                throw e;
-                                              }
-                                            })() ? (
-                                              <div
-                                                data-plasmic-name={"listItem"}
-                                                data-plasmic-override={
-                                                  overrides.listItem
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  sty.listItem
-                                                )}
-                                              >
-                                                <div
-                                                  data-plasmic-name={"contents"}
-                                                  data-plasmic-override={
-                                                    overrides.contents
-                                                  }
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    sty.contents
-                                                  )}
-                                                >
+                                                    </div>
+                                                  </div>
                                                   <div
                                                     data-plasmic-name={
-                                                      "content11"
+                                                      "metricItem2"
                                                     }
                                                     data-plasmic-override={
-                                                      overrides.content11
+                                                      overrides.metricItem2
                                                     }
                                                     className={classNames(
                                                       projectcss.all,
-                                                      sty.content11
+                                                      sty.metricItem2
                                                     )}
                                                   >
                                                     <div
                                                       data-plasmic-name={
-                                                        "listItemDetails"
+                                                        "headingAndNumber2"
                                                       }
                                                       data-plasmic-override={
-                                                        overrides.listItemDetails
+                                                        overrides.headingAndNumber2
                                                       }
                                                       className={classNames(
                                                         projectcss.all,
-                                                        sty.listItemDetails
+                                                        sty.headingAndNumber2
                                                       )}
                                                     >
                                                       <div
                                                         data-plasmic-name={
-                                                          "text24"
+                                                          "heading2"
                                                         }
                                                         data-plasmic-override={
-                                                          overrides.text24
-                                                        }
-                                                        className={classNames(
-                                                          projectcss.all,
-                                                          sty.text24
-                                                        )}
-                                                      >
-                                                        {renderPlasmicSlot({
-                                                          defaultContents:
-                                                            "No infractions in the last 90 days",
-                                                          value: args.itemName,
-                                                          className: classNames(
-                                                            sty.slotTargetItemName
-                                                          )
-                                                        })}
-                                                      </div>
-                                                    </div>
-                                                    <div
-                                                      data-plasmic-name={
-                                                        "points"
-                                                      }
-                                                      data-plasmic-override={
-                                                        overrides.points
-                                                      }
-                                                      className={classNames(
-                                                        projectcss.all,
-                                                        sty.points
-                                                      )}
-                                                    >
-                                                      {renderPlasmicSlot({
-                                                        defaultContents: (
-                                                          <div
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              sty.freeBox__auyOl
-                                                            )}
-                                                          >
-                                                            <div
-                                                              className={classNames(
-                                                                projectcss.all,
-                                                                projectcss.__wab_text,
-                                                                sty.text__aKcB
-                                                              )}
-                                                            >
-                                                              {"10"}
-                                                            </div>
-                                                          </div>
-                                                        ),
-                                                        value: args.pointValue3,
-                                                        className: classNames(
-                                                          sty.slotTargetPointValue3
-                                                        )
-                                                      })}
-                                                      <div
-                                                        data-plasmic-name={
-                                                          "pointsText"
-                                                        }
-                                                        data-plasmic-override={
-                                                          overrides.pointsText
+                                                          overrides.heading2
                                                         }
                                                         className={classNames(
                                                           projectcss.all,
                                                           projectcss.__wab_text,
-                                                          sty.pointsText
+                                                          sty.heading2
                                                         )}
                                                       >
-                                                        {"points"}
+                                                        {"Discipline Points"}
                                                       </div>
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            ) : null}
-                                          </div>
-                                          <div
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.freeBox__wP2M3
-                                            )}
-                                          />
-
-                                          <div
-                                            data-plasmic-name={"inputAndText2"}
-                                            data-plasmic-override={
-                                              overrides.inputAndText2
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.inputAndText2
-                                            )}
-                                          >
-                                            <div
-                                              data-plasmic-name={"iconAndText2"}
-                                              data-plasmic-override={
-                                                overrides.iconAndText2
-                                              }
-                                              className={classNames(
-                                                projectcss.all,
-                                                sty.iconAndText2
-                                              )}
-                                            >
-                                              <div
-                                                data-plasmic-name={"text27"}
-                                                data-plasmic-override={
-                                                  overrides.text27
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  projectcss.__wab_text,
-                                                  sty.text27
-                                                )}
-                                              >
-                                                {"Disciplinary Actions"}
-                                              </div>
-                                              <AntdModal
-                                                data-plasmic-name={"modal"}
-                                                data-plasmic-override={
-                                                  overrides.modal
-                                                }
-                                                className={classNames(
-                                                  "__wab_instance",
-                                                  sty.modal
-                                                )}
-                                                defaultStylesClassName={classNames(
-                                                  projectcss.root_reset,
-                                                  projectcss.plasmic_default_styles,
-                                                  projectcss.plasmic_mixins,
-                                                  styleTokensClassNames
-                                                )}
-                                                hideFooter={true}
-                                                modalContentClassName={classNames(
-                                                  {
-                                                    [sty["pcls_PZU42Hw5ycxZ"]]:
-                                                      true
-                                                  }
-                                                )}
-                                                modalScopeClassName={
-                                                  sty["modal__modal"]
-                                                }
-                                                onOpenChange={async (
-                                                  ...eventArgs: any
-                                                ) => {
-                                                  generateStateOnChangeProp(
-                                                    $state,
-                                                    ["modal", "open"]
-                                                  ).apply(null, eventArgs);
-                                                }}
-                                                open={generateStateValueProp(
-                                                  $state,
-                                                  ["modal", "open"]
-                                                )}
-                                                title={
-                                                  <div
-                                                    className={classNames(
-                                                      projectcss.all,
-                                                      sty.freeBox__rv9Sl
-                                                    )}
-                                                  >
-                                                    <div
-                                                      className={classNames(
-                                                        projectcss.all,
-                                                        projectcss.__wab_text,
-                                                        sty.text___2JUNz
-                                                      )}
-                                                    >
-                                                      {
-                                                        "Record a Disciplinary Action for "
-                                                      }
-                                                    </div>
-                                                    <div
-                                                      className={classNames(
-                                                        projectcss.all,
-                                                        projectcss.__wab_text,
-                                                        sty.text__wcrdm
-                                                      )}
-                                                    >
-                                                      <React.Fragment>
-                                                        {(() => {
-                                                          try {
-                                                            return $state
-                                                              .selectedEmployee
-                                                              ?.full_name;
-                                                          } catch (e) {
-                                                            if (
-                                                              e instanceof
-                                                                TypeError ||
-                                                              e?.plasmicType ===
-                                                                "PlasmicUndefinedDataError"
-                                                            ) {
-                                                              return "Test Employee";
-                                                            }
-                                                            throw e;
-                                                          }
-                                                        })()}
-                                                      </React.Fragment>
-                                                    </div>
-                                                  </div>
-                                                }
-                                                trigger={
-                                                  <LevelsetButton
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.levelsetButton__l9Kf6
-                                                    )}
-                                                    color={"brand"}
-                                                    size={"compact"}
-                                                    startIcon={
-                                                      <SquarePlusIcon
+                                                      <div
                                                         data-plasmic-name={
-                                                          "svg"
+                                                          "numberAndBadge2"
                                                         }
                                                         data-plasmic-override={
-                                                          overrides.svg
+                                                          overrides.numberAndBadge2
                                                         }
                                                         className={classNames(
                                                           projectcss.all,
-                                                          sty.svg
+                                                          sty.numberAndBadge2
                                                         )}
-                                                        role={"img"}
-                                                      />
-                                                    }
-                                                    submitsForm={true}
-                                                  >
-                                                    <div
-                                                      className={classNames(
-                                                        projectcss.all,
-                                                        projectcss.__wab_text,
-                                                        sty.text__tvJBe
-                                                      )}
-                                                    >
-                                                      {"Record an Action"}
-                                                    </div>
-                                                  </LevelsetButton>
-                                                }
-                                                wrapClassName={classNames({
-                                                  [sty["pcls_WDsFMgDP4sp7"]]:
-                                                    true
-                                                })}
-                                              >
-                                                {(() => {
-                                                  const child$Props = {
-                                                    className: classNames(
-                                                      "__wab_instance",
-                                                      sty.form
-                                                    ),
-                                                    extendedOnValuesChange:
-                                                      async (
-                                                        ...eventArgs: any
-                                                      ) => {
-                                                        generateStateOnChangePropForCodeComponents(
-                                                          $state,
-                                                          "value",
-                                                          ["form", "value"],
-                                                          FormWrapper_Helpers
-                                                        ).apply(
-                                                          null,
-                                                          eventArgs
-                                                        );
-                                                      },
-                                                    formItems: [
-                                                      {
-                                                        label: "Name",
-                                                        name: "name",
-                                                        inputType: "Text"
-                                                      },
-                                                      {
-                                                        label: "Message",
-                                                        name: "message",
-                                                        inputType: "Text Area"
-                                                      }
-                                                    ],
-                                                    labelCol: {
-                                                      span: 8,
-                                                      horizontalOnly: true
-                                                    },
-                                                    layout: "vertical",
-                                                    mode: "advanced",
-                                                    onFinish: async values => {
-                                                      const $steps = {};
-
-                                                      $steps["defaultSubmit"] =
-                                                        true
-                                                          ? (() => {
-                                                              const actionArgs =
-                                                                {
-                                                                  dataOp: {
-                                                                    sourceId:
-                                                                      "wGi39M1g3x2KnbXK4J4Gyq",
-                                                                    opId: "a42b00c6-9c2e-4f56-8ae6-2ee207f3f05a",
-                                                                    userArgs: {
-                                                                      variables:
-                                                                        [
-                                                                          $queries
-                                                                            .activeAppUser
-                                                                            .data[0]
-                                                                            .employee_id,
-
-                                                                          $queries
-                                                                            .employeesDiscQuery
-                                                                            .data[0]
-                                                                            .id,
-
-                                                                          $queries
-                                                                            .employeesDiscQuery
-                                                                            .data[0]
-                                                                            .location_id,
-
-                                                                          $queries
-                                                                            .employeesDiscQuery
-                                                                            .data[0]
-                                                                            .org_id,
-
-                                                                          $state
-                                                                            .form
-                                                                            .value
-                                                                            .action_id,
-
-                                                                          $state
-                                                                            .form
-                                                                            .value
-                                                                            .action_date
-                                                                        ]
-                                                                    },
-                                                                    cacheKey:
-                                                                      null,
-                                                                    invalidatedKeys:
-                                                                      [
-                                                                        "plasmic_refresh_all"
-                                                                      ],
-                                                                    roleId: null
-                                                                  }
-                                                                };
-                                                              return (async ({
-                                                                dataOp,
-                                                                continueOnError
-                                                              }) => {
-                                                                try {
-                                                                  const response =
-                                                                    await executePlasmicDataOp(
-                                                                      dataOp,
-                                                                      {
-                                                                        userAuthToken:
-                                                                          dataSourcesCtx?.userAuthToken,
-                                                                        user: dataSourcesCtx?.user
-                                                                      }
-                                                                    );
-                                                                  await plasmicInvalidate(
-                                                                    dataOp.invalidatedKeys
-                                                                  );
-                                                                  return response;
-                                                                } catch (e) {
-                                                                  if (
-                                                                    !continueOnError
-                                                                  ) {
-                                                                    throw e;
-                                                                  }
-                                                                  return e;
-                                                                }
-                                                              })?.apply(null, [
-                                                                actionArgs
-                                                              ]);
-                                                            })()
-                                                          : undefined;
-                                                      if (
-                                                        $steps[
-                                                          "defaultSubmit"
-                                                        ] != null &&
-                                                        typeof $steps[
-                                                          "defaultSubmit"
-                                                        ] === "object" &&
-                                                        typeof $steps[
-                                                          "defaultSubmit"
-                                                        ].then === "function"
-                                                      ) {
-                                                        $steps[
-                                                          "defaultSubmit"
-                                                        ] =
-                                                          await $steps[
-                                                            "defaultSubmit"
-                                                          ];
-                                                      }
-
-                                                      $steps[
-                                                        "updateModalOpen"
-                                                      ] = true
-                                                        ? (() => {
-                                                            const actionArgs = {
-                                                              variable: {
-                                                                objRoot: $state,
-                                                                variablePath: [
-                                                                  "modal",
-                                                                  "open"
-                                                                ]
-                                                              },
-                                                              operation: 4
-                                                            };
-                                                            return (({
-                                                              variable,
-                                                              value,
-                                                              startIndex,
-                                                              deleteCount
-                                                            }) => {
-                                                              if (!variable) {
-                                                                return;
-                                                              }
-                                                              const {
-                                                                objRoot,
-                                                                variablePath
-                                                              } = variable;
-
-                                                              const oldValue =
-                                                                $stateGet(
-                                                                  objRoot,
-                                                                  variablePath
-                                                                );
-                                                              $stateSet(
-                                                                objRoot,
-                                                                variablePath,
-                                                                !oldValue
-                                                              );
-                                                              return !oldValue;
-                                                            })?.apply(null, [
-                                                              actionArgs
-                                                            ]);
-                                                          })()
-                                                        : undefined;
-                                                      if (
-                                                        $steps[
-                                                          "updateModalOpen"
-                                                        ] != null &&
-                                                        typeof $steps[
-                                                          "updateModalOpen"
-                                                        ] === "object" &&
-                                                        typeof $steps[
-                                                          "updateModalOpen"
-                                                        ].then === "function"
-                                                      ) {
-                                                        $steps[
-                                                          "updateModalOpen"
-                                                        ] =
-                                                          await $steps[
-                                                            "updateModalOpen"
-                                                          ];
-                                                      }
-
-                                                      $steps[
-                                                        "runActionOnForm"
-                                                      ] = true
-                                                        ? (() => {
-                                                            const actionArgs = {
-                                                              tplRef: "form",
-                                                              action:
-                                                                "clearFields"
-                                                            };
-                                                            return (({
-                                                              tplRef,
-                                                              action,
-                                                              args
-                                                            }) => {
-                                                              return $refs?.[
-                                                                tplRef
-                                                              ]?.[action]?.(
-                                                                ...(args ?? [])
-                                                              );
-                                                            })?.apply(null, [
-                                                              actionArgs
-                                                            ]);
-                                                          })()
-                                                        : undefined;
-                                                      if (
-                                                        $steps[
-                                                          "runActionOnForm"
-                                                        ] != null &&
-                                                        typeof $steps[
-                                                          "runActionOnForm"
-                                                        ] === "object" &&
-                                                        typeof $steps[
-                                                          "runActionOnForm"
-                                                        ].then === "function"
-                                                      ) {
-                                                        $steps[
-                                                          "runActionOnForm"
-                                                        ] =
-                                                          await $steps[
-                                                            "runActionOnForm"
-                                                          ];
-                                                      }
-                                                    },
-                                                    onFinishFailed:
-                                                      async data => {
-                                                        const $steps = {};
-
-                                                        $steps[
-                                                          "invokeGlobalAction"
-                                                        ] = true
-                                                          ? (() => {
-                                                              const actionArgs =
-                                                                {
-                                                                  args: [
-                                                                    "error",
-                                                                    "Form Error",
-                                                                    "We were unable to record your inputs at this time. Please try again later",
-                                                                    undefined,
-                                                                    "bottom"
-                                                                  ]
-                                                                };
-                                                              return $globalActions[
-                                                                "plasmic-antd5-config-provider.showNotification"
-                                                              ]?.apply(null, [
-                                                                ...actionArgs.args
-                                                              ]);
-                                                            })()
-                                                          : undefined;
-                                                        if (
-                                                          $steps[
-                                                            "invokeGlobalAction"
-                                                          ] != null &&
-                                                          typeof $steps[
-                                                            "invokeGlobalAction"
-                                                          ] === "object" &&
-                                                          typeof $steps[
-                                                            "invokeGlobalAction"
-                                                          ].then === "function"
-                                                        ) {
-                                                          $steps[
-                                                            "invokeGlobalAction"
-                                                          ] =
-                                                            await $steps[
-                                                              "invokeGlobalAction"
-                                                            ];
-                                                        }
-                                                      },
-                                                    onIsSubmittingChange:
-                                                      async (
-                                                        ...eventArgs: any
-                                                      ) => {
-                                                        generateStateOnChangePropForCodeComponents(
-                                                          $state,
-                                                          "isSubmitting",
-                                                          [
-                                                            "form",
-                                                            "isSubmitting"
-                                                          ],
-                                                          FormWrapper_Helpers
-                                                        ).apply(
-                                                          null,
-                                                          eventArgs
-                                                        );
-                                                      },
-                                                    ref: ref => {
-                                                      $refs["form"] = ref;
-                                                    },
-                                                    submitSlot: null,
-                                                    wrapperCol: {
-                                                      span: 16,
-                                                      horizontalOnly: true
-                                                    }
-                                                  };
-                                                  initializeCodeComponentStates(
-                                                    $state,
-                                                    [
-                                                      {
-                                                        name: "value",
-                                                        plasmicStateName:
-                                                          "form.value"
-                                                      },
-                                                      {
-                                                        name: "isSubmitting",
-                                                        plasmicStateName:
-                                                          "form.isSubmitting"
-                                                      }
-                                                    ],
-                                                    [],
-                                                    FormWrapper_Helpers ?? {},
-                                                    child$Props
-                                                  );
-
-                                                  return (
-                                                    <FormWrapper
-                                                      data-plasmic-name={"form"}
-                                                      data-plasmic-override={
-                                                        overrides.form
-                                                      }
-                                                      {...child$Props}
-                                                    >
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField__hzlcu
-                                                        )}
-                                                        hidden={true}
-                                                        initialValue={undefined}
-                                                        label={"id"}
-                                                        name={"id"}
-                                                      >
-                                                        {(() => {
-                                                          const child$Props = {
-                                                            className:
-                                                              classNames(
-                                                                "__wab_instance",
-                                                                sty.input
-                                                              ),
-                                                            onChange: async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "input",
-                                                                  "value"
-                                                                ],
-                                                                AntdInput_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                            value:
-                                                              generateStateValueProp(
-                                                                $state,
-                                                                [
-                                                                  "input",
-                                                                  "value"
-                                                                ]
-                                                              )
-                                                          };
-                                                          initializeCodeComponentStates(
-                                                            $state,
-                                                            [
-                                                              {
-                                                                name: "value",
-                                                                plasmicStateName:
-                                                                  "input.value"
-                                                              }
-                                                            ],
-                                                            [],
-                                                            AntdInput_Helpers ??
-                                                              {},
-                                                            child$Props
-                                                          );
-
-                                                          return (
-                                                            <AntdInput
-                                                              data-plasmic-name={
-                                                                "input"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.input
-                                                              }
-                                                              {...child$Props}
-                                                            />
-                                                          );
-                                                        })()}
-                                                      </FormItemWrapper>
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField__plrx5
-                                                        )}
-                                                        initialValue={undefined}
-                                                        label={
-                                                          <div
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              projectcss.__wab_text,
-                                                              sty.text__yaLw
-                                                            )}
-                                                          >
-                                                            {
-                                                              "Select the action taken"
-                                                            }
-                                                          </div>
-                                                        }
-                                                        name={"action_id"}
-                                                        rules={[
-                                                          {
-                                                            ruleType:
-                                                              "required",
-                                                            message:
-                                                              "Please select an action"
-                                                          }
-                                                        ]}
-                                                        valuePropName={
-                                                          "action_id"
-                                                        }
-                                                      >
-                                                        <AntdSelect
-                                                          data-plasmic-name={
-                                                            "select"
-                                                          }
-                                                          data-plasmic-override={
-                                                            overrides.select
-                                                          }
-                                                          className={classNames(
-                                                            "__wab_instance",
-                                                            sty.select
-                                                          )}
-                                                          defaultOpen={false}
-                                                          defaultStylesClassName={classNames(
-                                                            projectcss.root_reset,
-                                                            projectcss.plasmic_default_styles,
-                                                            projectcss.plasmic_mixins,
-                                                            styleTokensClassNames
-                                                          )}
-                                                          onChange={async (
-                                                            ...eventArgs: any
-                                                          ) => {
-                                                            generateStateOnChangeProp(
-                                                              $state,
-                                                              [
-                                                                "select",
-                                                                "value"
-                                                              ]
-                                                            ).apply(
-                                                              null,
-                                                              eventArgs
-                                                            );
-                                                          }}
-                                                          options={(() => {
-                                                            const __composite =
-                                                              [
-                                                                {
-                                                                  type: null,
-                                                                  label: null,
-                                                                  value: null
-                                                                },
-                                                                {
-                                                                  type: null,
-                                                                  label: null,
-                                                                  value: null
-                                                                },
-                                                                {
-                                                                  type: "option",
-                                                                  label: null,
-                                                                  value: null
-                                                                },
-                                                                {
-                                                                  type: "option",
-                                                                  label: null,
-                                                                  value: null
-                                                                }
-                                                              ];
-                                                            __composite["0"][
-                                                              "type"
-                                                            ] = "option";
-                                                            __composite["0"][
-                                                              "label"
-                                                            ] =
-                                                              $queries.discActionsRubric.data[0].action;
-                                                            __composite["0"][
-                                                              "value"
-                                                            ] =
-                                                              $queries.discActionsRubric.data[0].id;
-                                                            __composite["1"][
-                                                              "type"
-                                                            ] = "option";
-                                                            __composite["1"][
-                                                              "label"
-                                                            ] =
-                                                              $queries.discActionsRubric.data[1].action;
-                                                            __composite["1"][
-                                                              "value"
-                                                            ] =
-                                                              $queries.discActionsRubric.data[1].id;
-                                                            __composite["2"][
-                                                              "label"
-                                                            ] =
-                                                              $queries.discActionsRubric.data[2].action;
-                                                            __composite["2"][
-                                                              "value"
-                                                            ] =
-                                                              $queries.discActionsRubric.data[2].id;
-                                                            __composite["3"][
-                                                              "label"
-                                                            ] =
-                                                              $queries.discActionsRubric.data[3].action;
-                                                            __composite["3"][
-                                                              "value"
-                                                            ] =
-                                                              $queries.discActionsRubric.data[3].id;
-                                                            return __composite;
-                                                          })()}
-                                                          placeholder={
-                                                            "Select..."
-                                                          }
-                                                          popupScopeClassName={
-                                                            sty["select__popup"]
-                                                          }
-                                                          value={generateStateValueProp(
-                                                            $state,
-                                                            ["select", "value"]
-                                                          )}
-                                                        />
-                                                      </FormItemWrapper>
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField__rSlJ
-                                                        )}
-                                                        initialValue={undefined}
-                                                        label={
-                                                          <div
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              projectcss.__wab_text,
-                                                              sty.text___8Lr1T
-                                                            )}
-                                                          >
-                                                            {
-                                                              "Date the action was taken"
-                                                            }
-                                                          </div>
-                                                        }
-                                                        name={"action_date"}
-                                                        rules={[
-                                                          {
-                                                            ruleType:
-                                                              "required",
-                                                            message:
-                                                              "Please select a date"
-                                                          }
-                                                        ]}
-                                                      >
-                                                        {(() => {
-                                                          const child$Props = {
-                                                            className:
-                                                              classNames(
-                                                                "__wab_instance",
-                                                                sty.timePicker
-                                                              ),
-                                                            disabled: false,
-                                                            onChange: async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "timePicker",
-                                                                  "value"
-                                                                ],
-                                                                AntdDatePicker_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                            popupScopeClassName:
-                                                              sty[
-                                                                "timePicker__datePickerPopup"
-                                                              ],
-                                                            value:
-                                                              generateStateValueProp(
-                                                                $state,
-                                                                [
-                                                                  "timePicker",
-                                                                  "value"
-                                                                ]
-                                                              )
-                                                          };
-                                                          initializeCodeComponentStates(
-                                                            $state,
-                                                            [
-                                                              {
-                                                                name: "value",
-                                                                plasmicStateName:
-                                                                  "timePicker.value"
-                                                              }
-                                                            ],
-                                                            [],
-                                                            AntdDatePicker_Helpers ??
-                                                              {},
-                                                            child$Props
-                                                          );
-
-                                                          return (
-                                                            <AntdDatePicker
-                                                              data-plasmic-name={
-                                                                "timePicker"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.timePicker
-                                                              }
-                                                              {...child$Props}
-                                                            />
-                                                          );
-                                                        })()}
-                                                      </FormItemWrapper>
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField___3CkKw
-                                                        )}
-                                                        hidden={true}
-                                                        initialValue={(() => {
-                                                          try {
-                                                            return $queries
-                                                              .employeesDiscQuery
-                                                              .data[0]
-                                                              .location_id;
-                                                          } catch (e) {
-                                                            if (
-                                                              e instanceof
-                                                                TypeError ||
-                                                              e?.plasmicType ===
-                                                                "PlasmicUndefinedDataError"
-                                                            ) {
-                                                              return undefined;
-                                                            }
-                                                            throw e;
-                                                          }
-                                                        })()}
-                                                        label={
-                                                          <div
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              projectcss.__wab_text,
-                                                              sty.text__bxlc3
-                                                            )}
-                                                          >
-                                                            {"location_id"}
-                                                          </div>
-                                                        }
-                                                        name={"location_id"}
-                                                      >
-                                                        {(() => {
-                                                          const child$Props = {
-                                                            className:
-                                                              classNames(
-                                                                "__wab_instance",
-                                                                sty.input2
-                                                              ),
-                                                            onChange: async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "input2",
-                                                                  "value"
-                                                                ],
-                                                                AntdInput_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                            value:
-                                                              generateStateValueProp(
-                                                                $state,
-                                                                [
-                                                                  "input2",
-                                                                  "value"
-                                                                ]
-                                                              )
-                                                          };
-                                                          initializeCodeComponentStates(
-                                                            $state,
-                                                            [
-                                                              {
-                                                                name: "value",
-                                                                plasmicStateName:
-                                                                  "input2.value"
-                                                              }
-                                                            ],
-                                                            [],
-                                                            AntdInput_Helpers ??
-                                                              {},
-                                                            child$Props
-                                                          );
-
-                                                          return (
-                                                            <AntdInput
-                                                              data-plasmic-name={
-                                                                "input2"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.input2
-                                                              }
-                                                              {...child$Props}
-                                                            />
-                                                          );
-                                                        })()}
-                                                      </FormItemWrapper>
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField___6Kjrs
-                                                        )}
-                                                        hidden={true}
-                                                        initialValue={undefined}
-                                                        label={
-                                                          <div
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              projectcss.__wab_text,
-                                                              sty.text__q5YkF
-                                                            )}
-                                                          >
-                                                            {"leader_name"}
-                                                          </div>
-                                                        }
-                                                        name={"leader_name"}
-                                                      >
-                                                        {(() => {
-                                                          const child$Props = {
-                                                            className:
-                                                              classNames(
-                                                                "__wab_instance",
-                                                                sty.input3
-                                                              ),
-                                                            onChange: async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "input3",
-                                                                  "value"
-                                                                ],
-                                                                AntdInput_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                            value:
-                                                              generateStateValueProp(
-                                                                $state,
-                                                                [
-                                                                  "input3",
-                                                                  "value"
-                                                                ]
-                                                              )
-                                                          };
-                                                          initializeCodeComponentStates(
-                                                            $state,
-                                                            [
-                                                              {
-                                                                name: "value",
-                                                                plasmicStateName:
-                                                                  "input3.value"
-                                                              }
-                                                            ],
-                                                            [],
-                                                            AntdInput_Helpers ??
-                                                              {},
-                                                            child$Props
-                                                          );
-
-                                                          return (
-                                                            <AntdInput
-                                                              data-plasmic-name={
-                                                                "input3"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.input3
-                                                              }
-                                                              {...child$Props}
-                                                            />
-                                                          );
-                                                        })()}
-                                                      </FormItemWrapper>
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField__bFoUl
-                                                        )}
-                                                        hidden={true}
-                                                        initialValue={undefined}
-                                                        label={"created_at"}
-                                                        name={"created_at"}
-                                                      >
-                                                        {(() => {
-                                                          const child$Props = {
-                                                            className:
-                                                              classNames(
-                                                                "__wab_instance",
-                                                                sty.input4
-                                                              ),
-                                                            onChange: async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "input4",
-                                                                  "value"
-                                                                ],
-                                                                AntdInput_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                            value:
-                                                              generateStateValueProp(
-                                                                $state,
-                                                                [
-                                                                  "input4",
-                                                                  "value"
-                                                                ]
-                                                              )
-                                                          };
-                                                          initializeCodeComponentStates(
-                                                            $state,
-                                                            [
-                                                              {
-                                                                name: "value",
-                                                                plasmicStateName:
-                                                                  "input4.value"
-                                                              }
-                                                            ],
-                                                            [],
-                                                            AntdInput_Helpers ??
-                                                              {},
-                                                            child$Props
-                                                          );
-
-                                                          return (
-                                                            <AntdInput
-                                                              data-plasmic-name={
-                                                                "input4"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.input4
-                                                              }
-                                                              {...child$Props}
-                                                            />
-                                                          );
-                                                        })()}
-                                                      </FormItemWrapper>
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField__gfSku
-                                                        )}
-                                                        hidden={true}
-                                                        initialValue={undefined}
-                                                        label={"employee_name"}
-                                                        name={"employee_name"}
-                                                      >
-                                                        {(() => {
-                                                          const child$Props = {
-                                                            className:
-                                                              classNames(
-                                                                "__wab_instance",
-                                                                sty.input5
-                                                              ),
-                                                            onChange: async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "input5",
-                                                                  "value"
-                                                                ],
-                                                                AntdInput_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                            value:
-                                                              generateStateValueProp(
-                                                                $state,
-                                                                [
-                                                                  "input5",
-                                                                  "value"
-                                                                ]
-                                                              )
-                                                          };
-                                                          initializeCodeComponentStates(
-                                                            $state,
-                                                            [
-                                                              {
-                                                                name: "value",
-                                                                plasmicStateName:
-                                                                  "input5.value"
-                                                              }
-                                                            ],
-                                                            [],
-                                                            AntdInput_Helpers ??
-                                                              {},
-                                                            child$Props
-                                                          );
-
-                                                          return (
-                                                            <AntdInput
-                                                              data-plasmic-name={
-                                                                "input5"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.input5
-                                                              }
-                                                              {...child$Props}
-                                                            />
-                                                          );
-                                                        })()}
-                                                      </FormItemWrapper>
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField__cTGx
-                                                        )}
-                                                        hidden={true}
-                                                        initialValue={undefined}
-                                                        label={"action"}
-                                                        name={"action"}
-                                                      >
-                                                        {(() => {
-                                                          const child$Props = {
-                                                            className:
-                                                              classNames(
-                                                                "__wab_instance",
-                                                                sty.input6
-                                                              ),
-                                                            onChange: async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "input6",
-                                                                  "value"
-                                                                ],
-                                                                AntdInput_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                            value:
-                                                              generateStateValueProp(
-                                                                $state,
-                                                                [
-                                                                  "input6",
-                                                                  "value"
-                                                                ]
-                                                              )
-                                                          };
-                                                          initializeCodeComponentStates(
-                                                            $state,
-                                                            [
-                                                              {
-                                                                name: "value",
-                                                                plasmicStateName:
-                                                                  "input6.value"
-                                                              }
-                                                            ],
-                                                            [],
-                                                            AntdInput_Helpers ??
-                                                              {},
-                                                            child$Props
-                                                          );
-
-                                                          return (
-                                                            <AntdInput
-                                                              data-plasmic-name={
-                                                                "input6"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.input6
-                                                              }
-                                                              {...child$Props}
-                                                            />
-                                                          );
-                                                        })()}
-                                                      </FormItemWrapper>
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField__f0YPd
-                                                        )}
-                                                        hidden={true}
-                                                        initialValue={(() => {
-                                                          try {
-                                                            return $queries
-                                                              .employeesDiscQuery
-                                                              .data[0].org_id;
-                                                          } catch (e) {
-                                                            if (
-                                                              e instanceof
-                                                                TypeError ||
-                                                              e?.plasmicType ===
-                                                                "PlasmicUndefinedDataError"
-                                                            ) {
-                                                              return undefined;
-                                                            }
-                                                            throw e;
-                                                          }
-                                                        })()}
-                                                        label={
-                                                          <div
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              projectcss.__wab_text,
-                                                              sty.text__va9G
-                                                            )}
-                                                          >
-                                                            {"org_id"}
-                                                          </div>
-                                                        }
-                                                        name={"org_id"}
-                                                      >
-                                                        {(() => {
-                                                          const child$Props = {
-                                                            className:
-                                                              classNames(
-                                                                "__wab_instance",
-                                                                sty.input7
-                                                              ),
-                                                            onChange: async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "input7",
-                                                                  "value"
-                                                                ],
-                                                                AntdInput_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                            value:
-                                                              generateStateValueProp(
-                                                                $state,
-                                                                [
-                                                                  "input7",
-                                                                  "value"
-                                                                ]
-                                                              )
-                                                          };
-                                                          initializeCodeComponentStates(
-                                                            $state,
-                                                            [
-                                                              {
-                                                                name: "value",
-                                                                plasmicStateName:
-                                                                  "input7.value"
-                                                              }
-                                                            ],
-                                                            [],
-                                                            AntdInput_Helpers ??
-                                                              {},
-                                                            child$Props
-                                                          );
-
-                                                          return (
-                                                            <AntdInput
-                                                              data-plasmic-name={
-                                                                "input7"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.input7
-                                                              }
-                                                              {...child$Props}
-                                                            />
-                                                          );
-                                                        })()}
-                                                      </FormItemWrapper>
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField__p4Cge
-                                                        )}
-                                                        hidden={true}
-                                                        initialValue={(() => {
-                                                          try {
-                                                            return $queries
-                                                              .employeesDiscQuery
-                                                              .data[0].id;
-                                                          } catch (e) {
-                                                            if (
-                                                              e instanceof
-                                                                TypeError ||
-                                                              e?.plasmicType ===
-                                                                "PlasmicUndefinedDataError"
-                                                            ) {
-                                                              return undefined;
-                                                            }
-                                                            throw e;
-                                                          }
-                                                        })()}
-                                                        label={"employee_id"}
-                                                        name={"employee_id"}
-                                                      >
-                                                        {(() => {
-                                                          const child$Props = {
-                                                            className:
-                                                              classNames(
-                                                                "__wab_instance",
-                                                                sty.input8
-                                                              ),
-                                                            onChange: async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "input8",
-                                                                  "value"
-                                                                ],
-                                                                AntdInput_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                            value:
-                                                              generateStateValueProp(
-                                                                $state,
-                                                                [
-                                                                  "input8",
-                                                                  "value"
-                                                                ]
-                                                              )
-                                                          };
-                                                          initializeCodeComponentStates(
-                                                            $state,
-                                                            [
-                                                              {
-                                                                name: "value",
-                                                                plasmicStateName:
-                                                                  "input8.value"
-                                                              }
-                                                            ],
-                                                            [],
-                                                            AntdInput_Helpers ??
-                                                              {},
-                                                            child$Props
-                                                          );
-
-                                                          return (
-                                                            <AntdInput
-                                                              data-plasmic-name={
-                                                                "input8"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.input8
-                                                              }
-                                                              {...child$Props}
-                                                            />
-                                                          );
-                                                        })()}
-                                                      </FormItemWrapper>
-                                                      <FormItemWrapper
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.formField__nl4D
-                                                        )}
-                                                        hidden={true}
-                                                        initialValue={(() => {
-                                                          try {
-                                                            return $ctx.auth.id;
-                                                          } catch (e) {
-                                                            if (
-                                                              e instanceof
-                                                                TypeError ||
-                                                              e?.plasmicType ===
-                                                                "PlasmicUndefinedDataError"
-                                                            ) {
-                                                              return undefined;
-                                                            }
-                                                            throw e;
-                                                          }
-                                                        })()}
-                                                        label={"acting_leader"}
-                                                        name={"acting_leader"}
-                                                      >
-                                                        {(() => {
-                                                          const child$Props = {
-                                                            className:
-                                                              classNames(
-                                                                "__wab_instance",
-                                                                sty.input9
-                                                              ),
-                                                            onChange: async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "input9",
-                                                                  "value"
-                                                                ],
-                                                                AntdInput_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                            value:
-                                                              generateStateValueProp(
-                                                                $state,
-                                                                [
-                                                                  "input9",
-                                                                  "value"
-                                                                ]
-                                                              )
-                                                          };
-                                                          initializeCodeComponentStates(
-                                                            $state,
-                                                            [
-                                                              {
-                                                                name: "value",
-                                                                plasmicStateName:
-                                                                  "input9.value"
-                                                              }
-                                                            ],
-                                                            [],
-                                                            AntdInput_Helpers ??
-                                                              {},
-                                                            child$Props
-                                                          );
-
-                                                          return (
-                                                            <AntdInput
-                                                              data-plasmic-name={
-                                                                "input9"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.input9
-                                                              }
-                                                              {...child$Props}
-                                                            />
-                                                          );
-                                                        })()}
-                                                      </FormItemWrapper>
-                                                      <LevelsetButton
-                                                        className={classNames(
-                                                          "__wab_instance",
-                                                          sty.levelsetButton__yFGdG
-                                                        )}
-                                                        color={"brand"}
-                                                        size={"compact"}
-                                                        submitsForm={true}
                                                       >
                                                         <div
+                                                          data-plasmic-name={
+                                                            "number2"
+                                                          }
+                                                          data-plasmic-override={
+                                                            overrides.number2
+                                                          }
                                                           className={classNames(
                                                             projectcss.all,
                                                             projectcss.__wab_text,
-                                                            sty.text__cfmDt
+                                                            sty.number2
                                                           )}
                                                         >
-                                                          {"Submit"}
+                                                          <React.Fragment>
+                                                            {(() => {
+                                                              try {
+                                                                return (
+                                                                  $queries
+                                                                    .infractionsQuery
+                                                                    .data ?? []
+                                                                ).reduce(
+                                                                  (total, i) =>
+                                                                    total +
+                                                                    (i.points ??
+                                                                      0),
+                                                                  0
+                                                                );
+                                                              } catch (e) {
+                                                                if (
+                                                                  e instanceof
+                                                                    TypeError ||
+                                                                  e?.plasmicType ===
+                                                                    "PlasmicUndefinedDataError"
+                                                                ) {
+                                                                  return "55";
+                                                                }
+                                                                throw e;
+                                                              }
+                                                            })()}
+                                                          </React.Fragment>
                                                         </div>
-                                                      </LevelsetButton>
-                                                    </FormWrapper>
-                                                  );
-                                                })()}
-                                              </AntdModal>
-                                            </div>
-                                          </div>
-                                          <div
-                                            data-plasmic-name={"frame6"}
-                                            data-plasmic-override={
-                                              overrides.frame6
-                                            }
-                                            className={classNames(
-                                              projectcss.all,
-                                              sty.frame6
-                                            )}
-                                          >
-                                            {(_par =>
-                                              !_par
-                                                ? []
-                                                : Array.isArray(_par)
-                                                  ? _par
-                                                  : [_par])(
-                                              (() => {
-                                                try {
-                                                  return $queries.discActions
-                                                    .data;
-                                                } catch (e) {
-                                                  if (
-                                                    e instanceof TypeError ||
-                                                    e?.plasmicType ===
-                                                      "PlasmicUndefinedDataError"
-                                                  ) {
-                                                    return [];
-                                                  }
-                                                  throw e;
-                                                }
-                                              })()
-                                            ).map(
-                                              (
-                                                __plasmic_item_0,
-                                                __plasmic_idx_0
-                                              ) => {
-                                                const action = __plasmic_item_0;
-                                                const currentIndex =
-                                                  __plasmic_idx_0;
-                                                return (
-                                                  <SlideoutListItem2
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.slideoutListItem2__o7OIj
-                                                    )}
-                                                    date2={
-                                                      <div
-                                                        data-plasmic-name={
-                                                          "date2"
-                                                        }
-                                                        data-plasmic-override={
-                                                          overrides.date2
-                                                        }
-                                                        className={classNames(
-                                                          projectcss.all,
-                                                          projectcss.__wab_text,
-                                                          sty.date2
-                                                        )}
-                                                      >
-                                                        <React.Fragment>
-                                                          {(() => {
-                                                            try {
-                                                              return action.action_date;
-                                                            } catch (e) {
-                                                              if (
-                                                                e instanceof
-                                                                  TypeError ||
-                                                                e?.plasmicType ===
-                                                                  "PlasmicUndefinedDataError"
-                                                              ) {
-                                                                return "10/2/2025";
-                                                              }
-                                                              throw e;
-                                                            }
-                                                          })()}
-                                                        </React.Fragment>
-                                                      </div>
-                                                    }
-                                                    disciplinaryAction={true}
-                                                    documentingLeader={
-                                                      <div
-                                                        data-plasmic-name={
-                                                          "leader2"
-                                                        }
-                                                        data-plasmic-override={
-                                                          overrides.leader2
-                                                        }
-                                                        className={classNames(
-                                                          projectcss.all,
-                                                          projectcss.__wab_text,
-                                                          sty.leader2
-                                                        )}
-                                                      >
-                                                        <React.Fragment>
-                                                          {(() => {
-                                                            try {
-                                                              return action.leader_name;
-                                                            } catch (e) {
-                                                              if (
-                                                                e instanceof
-                                                                  TypeError ||
-                                                                e?.plasmicType ===
-                                                                  "PlasmicUndefinedDataError"
-                                                              ) {
-                                                                return "Leader Name";
-                                                              }
-                                                              throw e;
-                                                            }
-                                                          })()}
-                                                        </React.Fragment>
-                                                      </div>
-                                                    }
-                                                    itemName={
-                                                      <React.Fragment>
-                                                        {(() => {
-                                                          try {
-                                                            return action.action;
-                                                          } catch (e) {
-                                                            if (
-                                                              e instanceof
-                                                                TypeError ||
-                                                              e?.plasmicType ===
-                                                                "PlasmicUndefinedDataError"
-                                                            ) {
-                                                              return "Item Name";
-                                                            }
-                                                            throw e;
-                                                          }
-                                                        })()}
-                                                      </React.Fragment>
-                                                    }
-                                                    key={currentIndex}
-                                                  />
-                                                );
-                                              }
-                                            )}
-                                            {(() => {
-                                              try {
-                                                return (
-                                                  (
-                                                    $queries.discActions.data ??
-                                                    []
-                                                  ).length === 0
-                                                );
-                                              } catch (e) {
-                                                if (
-                                                  e instanceof TypeError ||
-                                                  e?.plasmicType ===
-                                                    "PlasmicUndefinedDataError"
-                                                ) {
-                                                  return true;
-                                                }
-                                                throw e;
-                                              }
-                                            })() ? (
-                                              <div
-                                                data-plasmic-name={"listItem2"}
-                                                data-plasmic-override={
-                                                  overrides.listItem2
-                                                }
-                                                className={classNames(
-                                                  projectcss.all,
-                                                  sty.listItem2
-                                                )}
-                                              >
-                                                <div
-                                                  data-plasmic-name={
-                                                    "contents2"
-                                                  }
-                                                  data-plasmic-override={
-                                                    overrides.contents2
-                                                  }
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    sty.contents2
-                                                  )}
-                                                >
-                                                  <div
-                                                    data-plasmic-name={
-                                                      "content12"
-                                                    }
-                                                    data-plasmic-override={
-                                                      overrides.content12
-                                                    }
-                                                    className={classNames(
-                                                      projectcss.all,
-                                                      sty.content12
-                                                    )}
-                                                  >
-                                                    <div
-                                                      data-plasmic-name={
-                                                        "listItemDetails2"
-                                                      }
-                                                      data-plasmic-override={
-                                                        overrides.listItemDetails2
-                                                      }
-                                                      className={classNames(
-                                                        projectcss.all,
-                                                        sty.listItemDetails2
-                                                      )}
-                                                    >
-                                                      <div
-                                                        data-plasmic-name={
-                                                          "text25"
-                                                        }
-                                                        data-plasmic-override={
-                                                          overrides.text25
-                                                        }
-                                                        className={classNames(
-                                                          projectcss.all,
-                                                          sty.text25
-                                                        )}
-                                                      >
-                                                        {renderPlasmicSlot({
-                                                          defaultContents:
-                                                            "No disciplinary actions in the last 90 days",
-                                                          value: args.itemName2,
-                                                          className: classNames(
-                                                            sty.slotTargetItemName2
-                                                          )
-                                                        })}
-                                                      </div>
-                                                    </div>
-                                                    <div
-                                                      data-plasmic-name={
-                                                        "points2"
-                                                      }
-                                                      data-plasmic-override={
-                                                        overrides.points2
-                                                      }
-                                                      className={classNames(
-                                                        projectcss.all,
-                                                        sty.points2
-                                                      )}
-                                                    >
-                                                      {renderPlasmicSlot({
-                                                        defaultContents: (
-                                                          <div
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              sty.freeBox__wsOmu
-                                                            )}
-                                                          >
-                                                            <div
-                                                              className={classNames(
-                                                                projectcss.all,
-                                                                projectcss.__wab_text,
-                                                                sty.text__beuRy
-                                                              )}
-                                                            >
-                                                              {"10"}
-                                                            </div>
-                                                          </div>
-                                                        ),
-                                                        value: args.pointValue5,
-                                                        className: classNames(
-                                                          sty.slotTargetPointValue5
-                                                        )
-                                                      })}
-                                                      <div
-                                                        data-plasmic-name={
-                                                          "pointsText2"
-                                                        }
-                                                        data-plasmic-override={
-                                                          overrides.pointsText2
-                                                        }
-                                                        className={classNames(
-                                                          projectcss.all,
-                                                          projectcss.__wab_text,
-                                                          sty.pointsText2
-                                                        )}
-                                                      >
-                                                        {"points"}
                                                       </div>
                                                     </div>
                                                   </div>
                                                 </div>
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.freeBox__jzVpm
+                                                  )}
+                                                />
+
+                                                <div
+                                                  data-plasmic-name={
+                                                    "inputAndText"
+                                                  }
+                                                  data-plasmic-override={
+                                                    overrides.inputAndText
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.inputAndText
+                                                  )}
+                                                >
+                                                  <div
+                                                    data-plasmic-name={
+                                                      "iconAndText"
+                                                    }
+                                                    data-plasmic-override={
+                                                      overrides.iconAndText
+                                                    }
+                                                    className={classNames(
+                                                      projectcss.all,
+                                                      sty.iconAndText
+                                                    )}
+                                                  >
+                                                    <div
+                                                      data-plasmic-name={
+                                                        "text14"
+                                                      }
+                                                      data-plasmic-override={
+                                                        overrides.text14
+                                                      }
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        projectcss.__wab_text,
+                                                        sty.text14
+                                                      )}
+                                                    >
+                                                      {"Infractions"}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                                <div
+                                                  data-plasmic-name={"frame1"}
+                                                  data-plasmic-override={
+                                                    overrides.frame1
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.frame1
+                                                  )}
+                                                >
+                                                  {(_par =>
+                                                    !_par
+                                                      ? []
+                                                      : Array.isArray(_par)
+                                                        ? _par
+                                                        : [_par])(
+                                                    (() => {
+                                                      try {
+                                                        return $queries
+                                                          .infractionsQuery
+                                                          .data;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return [];
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()
+                                                  ).map(
+                                                    (
+                                                      __plasmic_item_0,
+                                                      __plasmic_idx_0
+                                                    ) => {
+                                                      const infraction =
+                                                        __plasmic_item_0;
+                                                      const currentIndex =
+                                                        __plasmic_idx_0;
+                                                      return (
+                                                        <SlideoutListItem2
+                                                          className={classNames(
+                                                            "__wab_instance",
+                                                            sty.slideoutListItem2__kgkig
+                                                          )}
+                                                          date2={
+                                                            <div
+                                                              data-plasmic-name={
+                                                                "date4"
+                                                              }
+                                                              data-plasmic-override={
+                                                                overrides.date4
+                                                              }
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                projectcss.__wab_text,
+                                                                sty.date4
+                                                              )}
+                                                            >
+                                                              <React.Fragment>
+                                                                {(() => {
+                                                                  try {
+                                                                    return infraction.infraction_date;
+                                                                  } catch (e) {
+                                                                    if (
+                                                                      e instanceof
+                                                                        TypeError ||
+                                                                      e?.plasmicType ===
+                                                                        "PlasmicUndefinedDataError"
+                                                                    ) {
+                                                                      return "10/2/2025";
+                                                                    }
+                                                                    throw e;
+                                                                  }
+                                                                })()}
+                                                              </React.Fragment>
+                                                            </div>
+                                                          }
+                                                          documentingLeader={
+                                                            <div
+                                                              data-plasmic-name={
+                                                                "leader4"
+                                                              }
+                                                              data-plasmic-override={
+                                                                overrides.leader4
+                                                              }
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                projectcss.__wab_text,
+                                                                sty.leader4
+                                                              )}
+                                                            >
+                                                              <React.Fragment>
+                                                                {(() => {
+                                                                  try {
+                                                                    return infraction.leader_name;
+                                                                  } catch (e) {
+                                                                    if (
+                                                                      e instanceof
+                                                                        TypeError ||
+                                                                      e?.plasmicType ===
+                                                                        "PlasmicUndefinedDataError"
+                                                                    ) {
+                                                                      return "Leader Name";
+                                                                    }
+                                                                    throw e;
+                                                                  }
+                                                                })()}
+                                                              </React.Fragment>
+                                                            </div>
+                                                          }
+                                                          informed2={
+                                                            <div
+                                                              data-plasmic-name={
+                                                                "informed4"
+                                                              }
+                                                              data-plasmic-override={
+                                                                overrides.informed4
+                                                              }
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                projectcss.__wab_text,
+                                                                sty.informed4
+                                                              )}
+                                                            >
+                                                              <React.Fragment>
+                                                                {(() => {
+                                                                  try {
+                                                                    return infraction.acknowledgement;
+                                                                  } catch (e) {
+                                                                    if (
+                                                                      e instanceof
+                                                                        TypeError ||
+                                                                      e?.plasmicType ===
+                                                                        "PlasmicUndefinedDataError"
+                                                                    ) {
+                                                                      return "Informed";
+                                                                    }
+                                                                    throw e;
+                                                                  }
+                                                                })()}
+                                                              </React.Fragment>
+                                                            </div>
+                                                          }
+                                                          infractionType={(() => {
+                                                            try {
+                                                              return infraction.points >
+                                                                0
+                                                                ? "negative"
+                                                                : "positive";
+                                                            } catch (e) {
+                                                              if (
+                                                                e instanceof
+                                                                  TypeError ||
+                                                                e?.plasmicType ===
+                                                                  "PlasmicUndefinedDataError"
+                                                              ) {
+                                                                return "negative";
+                                                              }
+                                                              throw e;
+                                                            }
+                                                          })()}
+                                                          itemName={
+                                                            <React.Fragment>
+                                                              {(() => {
+                                                                try {
+                                                                  return infraction.infraction;
+                                                                } catch (e) {
+                                                                  if (
+                                                                    e instanceof
+                                                                      TypeError ||
+                                                                    e?.plasmicType ===
+                                                                      "PlasmicUndefinedDataError"
+                                                                  ) {
+                                                                    return "Item Name";
+                                                                  }
+                                                                  throw e;
+                                                                }
+                                                              })()}
+                                                            </React.Fragment>
+                                                          }
+                                                          key={currentIndex}
+                                                          pointValue2={
+                                                            <div
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                sty.freeBox__birHi
+                                                              )}
+                                                            >
+                                                              <div
+                                                                data-plasmic-name={
+                                                                  "pointValue8"
+                                                                }
+                                                                data-plasmic-override={
+                                                                  overrides.pointValue8
+                                                                }
+                                                                className={classNames(
+                                                                  projectcss.all,
+                                                                  projectcss.__wab_text,
+                                                                  sty.pointValue8
+                                                                )}
+                                                              >
+                                                                <React.Fragment>
+                                                                  {(() => {
+                                                                    try {
+                                                                      return infraction.points;
+                                                                    } catch (e) {
+                                                                      if (
+                                                                        e instanceof
+                                                                          TypeError ||
+                                                                        e?.plasmicType ===
+                                                                          "PlasmicUndefinedDataError"
+                                                                      ) {
+                                                                        return "10";
+                                                                      }
+                                                                      throw e;
+                                                                    }
+                                                                  })()}
+                                                                </React.Fragment>
+                                                              </div>
+                                                            </div>
+                                                          }
+                                                        />
+                                                      );
+                                                    }
+                                                  )}
+                                                  {(() => {
+                                                    try {
+                                                      return (
+                                                        (
+                                                          $queries
+                                                            .infractionsQuery
+                                                            .data ?? []
+                                                        ).length === 0
+                                                      );
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return true;
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })() ? (
+                                                    <div
+                                                      data-plasmic-name={
+                                                        "listItem"
+                                                      }
+                                                      data-plasmic-override={
+                                                        overrides.listItem
+                                                      }
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        sty.listItem
+                                                      )}
+                                                    >
+                                                      <div
+                                                        data-plasmic-name={
+                                                          "contents"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.contents
+                                                        }
+                                                        className={classNames(
+                                                          projectcss.all,
+                                                          sty.contents
+                                                        )}
+                                                      >
+                                                        <div
+                                                          data-plasmic-name={
+                                                            "content11"
+                                                          }
+                                                          data-plasmic-override={
+                                                            overrides.content11
+                                                          }
+                                                          className={classNames(
+                                                            projectcss.all,
+                                                            sty.content11
+                                                          )}
+                                                        >
+                                                          <div
+                                                            data-plasmic-name={
+                                                              "listItemDetails"
+                                                            }
+                                                            data-plasmic-override={
+                                                              overrides.listItemDetails
+                                                            }
+                                                            className={classNames(
+                                                              projectcss.all,
+                                                              sty.listItemDetails
+                                                            )}
+                                                          >
+                                                            <div
+                                                              data-plasmic-name={
+                                                                "text24"
+                                                              }
+                                                              data-plasmic-override={
+                                                                overrides.text24
+                                                              }
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                sty.text24
+                                                              )}
+                                                            >
+                                                              {renderPlasmicSlot(
+                                                                {
+                                                                  defaultContents:
+                                                                    "No infractions in the last 90 days",
+                                                                  value:
+                                                                    args.itemName,
+                                                                  className:
+                                                                    classNames(
+                                                                      sty.slotTargetItemName
+                                                                    )
+                                                                }
+                                                              )}
+                                                            </div>
+                                                          </div>
+                                                          <div
+                                                            data-plasmic-name={
+                                                              "points"
+                                                            }
+                                                            data-plasmic-override={
+                                                              overrides.points
+                                                            }
+                                                            className={classNames(
+                                                              projectcss.all,
+                                                              sty.points
+                                                            )}
+                                                          >
+                                                            {renderPlasmicSlot({
+                                                              defaultContents: (
+                                                                <div
+                                                                  className={classNames(
+                                                                    projectcss.all,
+                                                                    sty.freeBox__auyOl
+                                                                  )}
+                                                                >
+                                                                  <div
+                                                                    className={classNames(
+                                                                      projectcss.all,
+                                                                      projectcss.__wab_text,
+                                                                      sty.text__aKcB
+                                                                    )}
+                                                                  >
+                                                                    {"10"}
+                                                                  </div>
+                                                                </div>
+                                                              ),
+                                                              value:
+                                                                args.pointValue3,
+                                                              className:
+                                                                classNames(
+                                                                  sty.slotTargetPointValue3
+                                                                )
+                                                            })}
+                                                            <div
+                                                              data-plasmic-name={
+                                                                "pointsText"
+                                                              }
+                                                              data-plasmic-override={
+                                                                overrides.pointsText
+                                                              }
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                projectcss.__wab_text,
+                                                                sty.pointsText
+                                                              )}
+                                                            >
+                                                              {"points"}
+                                                            </div>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  ) : null}
+                                                </div>
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.freeBox__wP2M3
+                                                  )}
+                                                />
+
+                                                <div
+                                                  data-plasmic-name={
+                                                    "inputAndText2"
+                                                  }
+                                                  data-plasmic-override={
+                                                    overrides.inputAndText2
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.inputAndText2
+                                                  )}
+                                                >
+                                                  <div
+                                                    data-plasmic-name={
+                                                      "iconAndText2"
+                                                    }
+                                                    data-plasmic-override={
+                                                      overrides.iconAndText2
+                                                    }
+                                                    className={classNames(
+                                                      projectcss.all,
+                                                      sty.iconAndText2
+                                                    )}
+                                                  >
+                                                    <div
+                                                      data-plasmic-name={
+                                                        "text27"
+                                                      }
+                                                      data-plasmic-override={
+                                                        overrides.text27
+                                                      }
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        projectcss.__wab_text,
+                                                        sty.text27
+                                                      )}
+                                                    >
+                                                      {"Disciplinary Actions"}
+                                                    </div>
+                                                    <AntdModal
+                                                      data-plasmic-name={
+                                                        "modal"
+                                                      }
+                                                      data-plasmic-override={
+                                                        overrides.modal
+                                                      }
+                                                      className={classNames(
+                                                        "__wab_instance",
+                                                        sty.modal
+                                                      )}
+                                                      defaultStylesClassName={classNames(
+                                                        projectcss.root_reset,
+                                                        projectcss.plasmic_default_styles,
+                                                        projectcss.plasmic_mixins,
+                                                        styleTokensClassNames
+                                                      )}
+                                                      hideFooter={true}
+                                                      modalContentClassName={classNames(
+                                                        {
+                                                          [sty[
+                                                            "pcls_PZU42Hw5ycxZ"
+                                                          ]]: true
+                                                        }
+                                                      )}
+                                                      modalScopeClassName={
+                                                        sty["modal__modal"]
+                                                      }
+                                                      onOpenChange={async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangeProp(
+                                                          $state,
+                                                          ["modal", "open"]
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      }}
+                                                      open={generateStateValueProp(
+                                                        $state,
+                                                        ["modal", "open"]
+                                                      )}
+                                                      title={
+                                                        <div
+                                                          className={classNames(
+                                                            projectcss.all,
+                                                            sty.freeBox__rv9Sl
+                                                          )}
+                                                        >
+                                                          <div
+                                                            className={classNames(
+                                                              projectcss.all,
+                                                              projectcss.__wab_text,
+                                                              sty.text___2JUNz
+                                                            )}
+                                                          >
+                                                            {
+                                                              "Record a Disciplinary Action for "
+                                                            }
+                                                          </div>
+                                                          <div
+                                                            className={classNames(
+                                                              projectcss.all,
+                                                              projectcss.__wab_text,
+                                                              sty.text__wcrdm
+                                                            )}
+                                                          >
+                                                            <React.Fragment>
+                                                              {(() => {
+                                                                try {
+                                                                  return $state
+                                                                    .selectedEmployee
+                                                                    ?.full_name;
+                                                                } catch (e) {
+                                                                  if (
+                                                                    e instanceof
+                                                                      TypeError ||
+                                                                    e?.plasmicType ===
+                                                                      "PlasmicUndefinedDataError"
+                                                                  ) {
+                                                                    return "Test Employee";
+                                                                  }
+                                                                  throw e;
+                                                                }
+                                                              })()}
+                                                            </React.Fragment>
+                                                          </div>
+                                                        </div>
+                                                      }
+                                                      trigger={
+                                                        <LevelsetButton
+                                                          className={classNames(
+                                                            "__wab_instance",
+                                                            sty.levelsetButton__l9Kf6
+                                                          )}
+                                                          color={"brand"}
+                                                          size={"compact"}
+                                                          startIcon={
+                                                            <SquarePlusIcon
+                                                              data-plasmic-name={
+                                                                "svg"
+                                                              }
+                                                              data-plasmic-override={
+                                                                overrides.svg
+                                                              }
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                sty.svg
+                                                              )}
+                                                              role={"img"}
+                                                            />
+                                                          }
+                                                          submitsForm={true}
+                                                        >
+                                                          <div
+                                                            className={classNames(
+                                                              projectcss.all,
+                                                              projectcss.__wab_text,
+                                                              sty.text__tvJBe
+                                                            )}
+                                                          >
+                                                            {"Record an Action"}
+                                                          </div>
+                                                        </LevelsetButton>
+                                                      }
+                                                      wrapClassName={classNames(
+                                                        {
+                                                          [sty[
+                                                            "pcls_WDsFMgDP4sp7"
+                                                          ]]: true
+                                                        }
+                                                      )}
+                                                    >
+                                                      {(() => {
+                                                        const child$Props = {
+                                                          className: classNames(
+                                                            "__wab_instance",
+                                                            sty.form
+                                                          ),
+                                                          extendedOnValuesChange:
+                                                            async (
+                                                              ...eventArgs: any
+                                                            ) => {
+                                                              generateStateOnChangePropForCodeComponents(
+                                                                $state,
+                                                                "value",
+                                                                [
+                                                                  "form",
+                                                                  "value"
+                                                                ],
+                                                                FormWrapper_Helpers
+                                                              ).apply(
+                                                                null,
+                                                                eventArgs
+                                                              );
+                                                            },
+                                                          formItems: [
+                                                            {
+                                                              label: "Name",
+                                                              name: "name",
+                                                              inputType: "Text"
+                                                            },
+                                                            {
+                                                              label: "Message",
+                                                              name: "message",
+                                                              inputType:
+                                                                "Text Area"
+                                                            }
+                                                          ],
+                                                          labelCol: {
+                                                            span: 8,
+                                                            horizontalOnly: true
+                                                          },
+                                                          layout: "vertical",
+                                                          mode: "advanced",
+                                                          onFinish:
+                                                            async values => {
+                                                              const $steps = {};
+
+                                                              $steps[
+                                                                "defaultSubmit"
+                                                              ] = true
+                                                                ? (() => {
+                                                                    const actionArgs =
+                                                                      {
+                                                                        dataOp:
+                                                                          {
+                                                                            sourceId:
+                                                                              "wGi39M1g3x2KnbXK4J4Gyq",
+                                                                            opId: "a42b00c6-9c2e-4f56-8ae6-2ee207f3f05a",
+                                                                            userArgs:
+                                                                              {
+                                                                                variables:
+                                                                                  [
+                                                                                    $queries
+                                                                                      .activeAppUser
+                                                                                      .data[0]
+                                                                                      .employee_id,
+
+                                                                                    $queries
+                                                                                      .employeesDiscQuery
+                                                                                      .data[0]
+                                                                                      .id,
+
+                                                                                    $queries
+                                                                                      .employeesDiscQuery
+                                                                                      .data[0]
+                                                                                      .location_id,
+
+                                                                                    $queries
+                                                                                      .employeesDiscQuery
+                                                                                      .data[0]
+                                                                                      .org_id,
+
+                                                                                    $state
+                                                                                      .form
+                                                                                      .value
+                                                                                      .action_id,
+
+                                                                                    $state
+                                                                                      .form
+                                                                                      .value
+                                                                                      .action_date
+                                                                                  ]
+                                                                              },
+                                                                            cacheKey:
+                                                                              null,
+                                                                            invalidatedKeys:
+                                                                              [
+                                                                                "plasmic_refresh_all"
+                                                                              ],
+                                                                            roleId:
+                                                                              null
+                                                                          }
+                                                                      };
+                                                                    return (async ({
+                                                                      dataOp,
+                                                                      continueOnError
+                                                                    }) => {
+                                                                      try {
+                                                                        const response =
+                                                                          await executePlasmicDataOp(
+                                                                            dataOp,
+                                                                            {
+                                                                              userAuthToken:
+                                                                                dataSourcesCtx?.userAuthToken,
+                                                                              user: dataSourcesCtx?.user
+                                                                            }
+                                                                          );
+                                                                        await plasmicInvalidate(
+                                                                          dataOp.invalidatedKeys
+                                                                        );
+                                                                        return response;
+                                                                      } catch (e) {
+                                                                        if (
+                                                                          !continueOnError
+                                                                        ) {
+                                                                          throw e;
+                                                                        }
+                                                                        return e;
+                                                                      }
+                                                                    })?.apply(
+                                                                      null,
+                                                                      [
+                                                                        actionArgs
+                                                                      ]
+                                                                    );
+                                                                  })()
+                                                                : undefined;
+                                                              if (
+                                                                $steps[
+                                                                  "defaultSubmit"
+                                                                ] != null &&
+                                                                typeof $steps[
+                                                                  "defaultSubmit"
+                                                                ] ===
+                                                                  "object" &&
+                                                                typeof $steps[
+                                                                  "defaultSubmit"
+                                                                ].then ===
+                                                                  "function"
+                                                              ) {
+                                                                $steps[
+                                                                  "defaultSubmit"
+                                                                ] =
+                                                                  await $steps[
+                                                                    "defaultSubmit"
+                                                                  ];
+                                                              }
+
+                                                              $steps[
+                                                                "updateModalOpen"
+                                                              ] = true
+                                                                ? (() => {
+                                                                    const actionArgs =
+                                                                      {
+                                                                        variable:
+                                                                          {
+                                                                            objRoot:
+                                                                              $state,
+                                                                            variablePath:
+                                                                              [
+                                                                                "modal",
+                                                                                "open"
+                                                                              ]
+                                                                          },
+                                                                        operation: 4
+                                                                      };
+                                                                    return (({
+                                                                      variable,
+                                                                      value,
+                                                                      startIndex,
+                                                                      deleteCount
+                                                                    }) => {
+                                                                      if (
+                                                                        !variable
+                                                                      ) {
+                                                                        return;
+                                                                      }
+                                                                      const {
+                                                                        objRoot,
+                                                                        variablePath
+                                                                      } =
+                                                                        variable;
+
+                                                                      const oldValue =
+                                                                        $stateGet(
+                                                                          objRoot,
+                                                                          variablePath
+                                                                        );
+                                                                      $stateSet(
+                                                                        objRoot,
+                                                                        variablePath,
+                                                                        !oldValue
+                                                                      );
+                                                                      return !oldValue;
+                                                                    })?.apply(
+                                                                      null,
+                                                                      [
+                                                                        actionArgs
+                                                                      ]
+                                                                    );
+                                                                  })()
+                                                                : undefined;
+                                                              if (
+                                                                $steps[
+                                                                  "updateModalOpen"
+                                                                ] != null &&
+                                                                typeof $steps[
+                                                                  "updateModalOpen"
+                                                                ] ===
+                                                                  "object" &&
+                                                                typeof $steps[
+                                                                  "updateModalOpen"
+                                                                ].then ===
+                                                                  "function"
+                                                              ) {
+                                                                $steps[
+                                                                  "updateModalOpen"
+                                                                ] =
+                                                                  await $steps[
+                                                                    "updateModalOpen"
+                                                                  ];
+                                                              }
+
+                                                              $steps[
+                                                                "runActionOnForm"
+                                                              ] = true
+                                                                ? (() => {
+                                                                    const actionArgs =
+                                                                      {
+                                                                        tplRef:
+                                                                          "form",
+                                                                        action:
+                                                                          "clearFields"
+                                                                      };
+                                                                    return (({
+                                                                      tplRef,
+                                                                      action,
+                                                                      args
+                                                                    }) => {
+                                                                      return $refs?.[
+                                                                        tplRef
+                                                                      ]?.[
+                                                                        action
+                                                                      ]?.(
+                                                                        ...(args ??
+                                                                          [])
+                                                                      );
+                                                                    })?.apply(
+                                                                      null,
+                                                                      [
+                                                                        actionArgs
+                                                                      ]
+                                                                    );
+                                                                  })()
+                                                                : undefined;
+                                                              if (
+                                                                $steps[
+                                                                  "runActionOnForm"
+                                                                ] != null &&
+                                                                typeof $steps[
+                                                                  "runActionOnForm"
+                                                                ] ===
+                                                                  "object" &&
+                                                                typeof $steps[
+                                                                  "runActionOnForm"
+                                                                ].then ===
+                                                                  "function"
+                                                              ) {
+                                                                $steps[
+                                                                  "runActionOnForm"
+                                                                ] =
+                                                                  await $steps[
+                                                                    "runActionOnForm"
+                                                                  ];
+                                                              }
+                                                            },
+                                                          onFinishFailed:
+                                                            async data => {
+                                                              const $steps = {};
+
+                                                              $steps[
+                                                                "invokeGlobalAction"
+                                                              ] = true
+                                                                ? (() => {
+                                                                    const actionArgs =
+                                                                      {
+                                                                        args: [
+                                                                          "error",
+                                                                          "Form Error",
+                                                                          "We were unable to record your inputs at this time. Please try again later",
+                                                                          undefined,
+                                                                          "bottom"
+                                                                        ]
+                                                                      };
+                                                                    return $globalActions[
+                                                                      "plasmic-antd5-config-provider.showNotification"
+                                                                    ]?.apply(
+                                                                      null,
+                                                                      [
+                                                                        ...actionArgs.args
+                                                                      ]
+                                                                    );
+                                                                  })()
+                                                                : undefined;
+                                                              if (
+                                                                $steps[
+                                                                  "invokeGlobalAction"
+                                                                ] != null &&
+                                                                typeof $steps[
+                                                                  "invokeGlobalAction"
+                                                                ] ===
+                                                                  "object" &&
+                                                                typeof $steps[
+                                                                  "invokeGlobalAction"
+                                                                ].then ===
+                                                                  "function"
+                                                              ) {
+                                                                $steps[
+                                                                  "invokeGlobalAction"
+                                                                ] =
+                                                                  await $steps[
+                                                                    "invokeGlobalAction"
+                                                                  ];
+                                                              }
+                                                            },
+                                                          onIsSubmittingChange:
+                                                            async (
+                                                              ...eventArgs: any
+                                                            ) => {
+                                                              generateStateOnChangePropForCodeComponents(
+                                                                $state,
+                                                                "isSubmitting",
+                                                                [
+                                                                  "form",
+                                                                  "isSubmitting"
+                                                                ],
+                                                                FormWrapper_Helpers
+                                                              ).apply(
+                                                                null,
+                                                                eventArgs
+                                                              );
+                                                            },
+                                                          ref: ref => {
+                                                            $refs["form"] = ref;
+                                                          },
+                                                          submitSlot: null,
+                                                          wrapperCol: {
+                                                            span: 16,
+                                                            horizontalOnly: true
+                                                          }
+                                                        };
+                                                        initializeCodeComponentStates(
+                                                          $state,
+                                                          [
+                                                            {
+                                                              name: "value",
+                                                              plasmicStateName:
+                                                                "form.value"
+                                                            },
+                                                            {
+                                                              name: "isSubmitting",
+                                                              plasmicStateName:
+                                                                "form.isSubmitting"
+                                                            }
+                                                          ],
+                                                          [],
+                                                          FormWrapper_Helpers ??
+                                                            {},
+                                                          child$Props
+                                                        );
+
+                                                        return (
+                                                          <FormWrapper
+                                                            data-plasmic-name={
+                                                              "form"
+                                                            }
+                                                            data-plasmic-override={
+                                                              overrides.form
+                                                            }
+                                                            {...child$Props}
+                                                          >
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField__hzlcu
+                                                              )}
+                                                              hidden={true}
+                                                              initialValue={
+                                                                undefined
+                                                              }
+                                                              label={"id"}
+                                                              name={"id"}
+                                                            >
+                                                              {(() => {
+                                                                const child$Props =
+                                                                  {
+                                                                    className:
+                                                                      classNames(
+                                                                        "__wab_instance",
+                                                                        sty.input
+                                                                      ),
+                                                                    onChange:
+                                                                      async (
+                                                                        ...eventArgs: any
+                                                                      ) => {
+                                                                        generateStateOnChangePropForCodeComponents(
+                                                                          $state,
+                                                                          "value",
+                                                                          [
+                                                                            "input",
+                                                                            "value"
+                                                                          ],
+                                                                          AntdInput_Helpers
+                                                                        ).apply(
+                                                                          null,
+                                                                          eventArgs
+                                                                        );
+                                                                      },
+                                                                    value:
+                                                                      generateStateValueProp(
+                                                                        $state,
+                                                                        [
+                                                                          "input",
+                                                                          "value"
+                                                                        ]
+                                                                      )
+                                                                  };
+                                                                initializeCodeComponentStates(
+                                                                  $state,
+                                                                  [
+                                                                    {
+                                                                      name: "value",
+                                                                      plasmicStateName:
+                                                                        "input.value"
+                                                                    }
+                                                                  ],
+                                                                  [],
+                                                                  AntdInput_Helpers ??
+                                                                    {},
+                                                                  child$Props
+                                                                );
+
+                                                                return (
+                                                                  <AntdInput
+                                                                    data-plasmic-name={
+                                                                      "input"
+                                                                    }
+                                                                    data-plasmic-override={
+                                                                      overrides.input
+                                                                    }
+                                                                    {...child$Props}
+                                                                  />
+                                                                );
+                                                              })()}
+                                                            </FormItemWrapper>
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField__plrx5
+                                                              )}
+                                                              initialValue={
+                                                                undefined
+                                                              }
+                                                              label={
+                                                                <div
+                                                                  className={classNames(
+                                                                    projectcss.all,
+                                                                    projectcss.__wab_text,
+                                                                    sty.text__yaLw
+                                                                  )}
+                                                                >
+                                                                  {
+                                                                    "Select the action taken"
+                                                                  }
+                                                                </div>
+                                                              }
+                                                              name={"action_id"}
+                                                              rules={[
+                                                                {
+                                                                  ruleType:
+                                                                    "required",
+                                                                  message:
+                                                                    "Please select an action"
+                                                                }
+                                                              ]}
+                                                              valuePropName={
+                                                                "action_id"
+                                                              }
+                                                            >
+                                                              <AntdSelect
+                                                                data-plasmic-name={
+                                                                  "select"
+                                                                }
+                                                                data-plasmic-override={
+                                                                  overrides.select
+                                                                }
+                                                                className={classNames(
+                                                                  "__wab_instance",
+                                                                  sty.select
+                                                                )}
+                                                                defaultOpen={
+                                                                  false
+                                                                }
+                                                                defaultStylesClassName={classNames(
+                                                                  projectcss.root_reset,
+                                                                  projectcss.plasmic_default_styles,
+                                                                  projectcss.plasmic_mixins,
+                                                                  styleTokensClassNames
+                                                                )}
+                                                                onChange={async (
+                                                                  ...eventArgs: any
+                                                                ) => {
+                                                                  generateStateOnChangeProp(
+                                                                    $state,
+                                                                    [
+                                                                      "select",
+                                                                      "value"
+                                                                    ]
+                                                                  ).apply(
+                                                                    null,
+                                                                    eventArgs
+                                                                  );
+                                                                }}
+                                                                options={(() => {
+                                                                  const __composite =
+                                                                    [
+                                                                      {
+                                                                        type: null,
+                                                                        label:
+                                                                          null,
+                                                                        value:
+                                                                          null
+                                                                      },
+                                                                      {
+                                                                        type: null,
+                                                                        label:
+                                                                          null,
+                                                                        value:
+                                                                          null
+                                                                      },
+                                                                      {
+                                                                        type: "option",
+                                                                        label:
+                                                                          null,
+                                                                        value:
+                                                                          null
+                                                                      },
+                                                                      {
+                                                                        type: "option",
+                                                                        label:
+                                                                          null,
+                                                                        value:
+                                                                          null
+                                                                      }
+                                                                    ];
+                                                                  __composite[
+                                                                    "0"
+                                                                  ]["type"] =
+                                                                    "option";
+                                                                  __composite[
+                                                                    "0"
+                                                                  ]["label"] =
+                                                                    $queries.discActionsRubric.data[0].action;
+                                                                  __composite[
+                                                                    "0"
+                                                                  ]["value"] =
+                                                                    $queries.discActionsRubric.data[0].id;
+                                                                  __composite[
+                                                                    "1"
+                                                                  ]["type"] =
+                                                                    "option";
+                                                                  __composite[
+                                                                    "1"
+                                                                  ]["label"] =
+                                                                    $queries.discActionsRubric.data[1].action;
+                                                                  __composite[
+                                                                    "1"
+                                                                  ]["value"] =
+                                                                    $queries.discActionsRubric.data[1].id;
+                                                                  __composite[
+                                                                    "2"
+                                                                  ]["label"] =
+                                                                    $queries.discActionsRubric.data[2].action;
+                                                                  __composite[
+                                                                    "2"
+                                                                  ]["value"] =
+                                                                    $queries.discActionsRubric.data[2].id;
+                                                                  __composite[
+                                                                    "3"
+                                                                  ]["label"] =
+                                                                    $queries.discActionsRubric.data[3].action;
+                                                                  __composite[
+                                                                    "3"
+                                                                  ]["value"] =
+                                                                    $queries.discActionsRubric.data[3].id;
+                                                                  return __composite;
+                                                                })()}
+                                                                placeholder={
+                                                                  "Select..."
+                                                                }
+                                                                popupScopeClassName={
+                                                                  sty[
+                                                                    "select__popup"
+                                                                  ]
+                                                                }
+                                                                value={generateStateValueProp(
+                                                                  $state,
+                                                                  [
+                                                                    "select",
+                                                                    "value"
+                                                                  ]
+                                                                )}
+                                                              />
+                                                            </FormItemWrapper>
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField__rSlJ
+                                                              )}
+                                                              initialValue={
+                                                                undefined
+                                                              }
+                                                              label={
+                                                                <div
+                                                                  className={classNames(
+                                                                    projectcss.all,
+                                                                    projectcss.__wab_text,
+                                                                    sty.text___8Lr1T
+                                                                  )}
+                                                                >
+                                                                  {
+                                                                    "Date the action was taken"
+                                                                  }
+                                                                </div>
+                                                              }
+                                                              name={
+                                                                "action_date"
+                                                              }
+                                                              rules={[
+                                                                {
+                                                                  ruleType:
+                                                                    "required",
+                                                                  message:
+                                                                    "Please select a date"
+                                                                }
+                                                              ]}
+                                                            >
+                                                              {(() => {
+                                                                const child$Props =
+                                                                  {
+                                                                    className:
+                                                                      classNames(
+                                                                        "__wab_instance",
+                                                                        sty.timePicker
+                                                                      ),
+                                                                    disabled: false,
+                                                                    onChange:
+                                                                      async (
+                                                                        ...eventArgs: any
+                                                                      ) => {
+                                                                        generateStateOnChangePropForCodeComponents(
+                                                                          $state,
+                                                                          "value",
+                                                                          [
+                                                                            "timePicker",
+                                                                            "value"
+                                                                          ],
+                                                                          AntdDatePicker_Helpers
+                                                                        ).apply(
+                                                                          null,
+                                                                          eventArgs
+                                                                        );
+                                                                      },
+                                                                    popupScopeClassName:
+                                                                      sty[
+                                                                        "timePicker__datePickerPopup"
+                                                                      ],
+                                                                    value:
+                                                                      generateStateValueProp(
+                                                                        $state,
+                                                                        [
+                                                                          "timePicker",
+                                                                          "value"
+                                                                        ]
+                                                                      )
+                                                                  };
+                                                                initializeCodeComponentStates(
+                                                                  $state,
+                                                                  [
+                                                                    {
+                                                                      name: "value",
+                                                                      plasmicStateName:
+                                                                        "timePicker.value"
+                                                                    }
+                                                                  ],
+                                                                  [],
+                                                                  AntdDatePicker_Helpers ??
+                                                                    {},
+                                                                  child$Props
+                                                                );
+
+                                                                return (
+                                                                  <AntdDatePicker
+                                                                    data-plasmic-name={
+                                                                      "timePicker"
+                                                                    }
+                                                                    data-plasmic-override={
+                                                                      overrides.timePicker
+                                                                    }
+                                                                    {...child$Props}
+                                                                  />
+                                                                );
+                                                              })()}
+                                                            </FormItemWrapper>
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField___3CkKw
+                                                              )}
+                                                              hidden={true}
+                                                              initialValue={(() => {
+                                                                try {
+                                                                  return $queries
+                                                                    .employeesDiscQuery
+                                                                    .data[0]
+                                                                    .location_id;
+                                                                } catch (e) {
+                                                                  if (
+                                                                    e instanceof
+                                                                      TypeError ||
+                                                                    e?.plasmicType ===
+                                                                      "PlasmicUndefinedDataError"
+                                                                  ) {
+                                                                    return undefined;
+                                                                  }
+                                                                  throw e;
+                                                                }
+                                                              })()}
+                                                              label={
+                                                                <div
+                                                                  className={classNames(
+                                                                    projectcss.all,
+                                                                    projectcss.__wab_text,
+                                                                    sty.text__bxlc3
+                                                                  )}
+                                                                >
+                                                                  {
+                                                                    "location_id"
+                                                                  }
+                                                                </div>
+                                                              }
+                                                              name={
+                                                                "location_id"
+                                                              }
+                                                            >
+                                                              {(() => {
+                                                                const child$Props =
+                                                                  {
+                                                                    className:
+                                                                      classNames(
+                                                                        "__wab_instance",
+                                                                        sty.input2
+                                                                      ),
+                                                                    onChange:
+                                                                      async (
+                                                                        ...eventArgs: any
+                                                                      ) => {
+                                                                        generateStateOnChangePropForCodeComponents(
+                                                                          $state,
+                                                                          "value",
+                                                                          [
+                                                                            "input2",
+                                                                            "value"
+                                                                          ],
+                                                                          AntdInput_Helpers
+                                                                        ).apply(
+                                                                          null,
+                                                                          eventArgs
+                                                                        );
+                                                                      },
+                                                                    value:
+                                                                      generateStateValueProp(
+                                                                        $state,
+                                                                        [
+                                                                          "input2",
+                                                                          "value"
+                                                                        ]
+                                                                      )
+                                                                  };
+                                                                initializeCodeComponentStates(
+                                                                  $state,
+                                                                  [
+                                                                    {
+                                                                      name: "value",
+                                                                      plasmicStateName:
+                                                                        "input2.value"
+                                                                    }
+                                                                  ],
+                                                                  [],
+                                                                  AntdInput_Helpers ??
+                                                                    {},
+                                                                  child$Props
+                                                                );
+
+                                                                return (
+                                                                  <AntdInput
+                                                                    data-plasmic-name={
+                                                                      "input2"
+                                                                    }
+                                                                    data-plasmic-override={
+                                                                      overrides.input2
+                                                                    }
+                                                                    {...child$Props}
+                                                                  />
+                                                                );
+                                                              })()}
+                                                            </FormItemWrapper>
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField___6Kjrs
+                                                              )}
+                                                              hidden={true}
+                                                              initialValue={
+                                                                undefined
+                                                              }
+                                                              label={
+                                                                <div
+                                                                  className={classNames(
+                                                                    projectcss.all,
+                                                                    projectcss.__wab_text,
+                                                                    sty.text__q5YkF
+                                                                  )}
+                                                                >
+                                                                  {
+                                                                    "leader_name"
+                                                                  }
+                                                                </div>
+                                                              }
+                                                              name={
+                                                                "leader_name"
+                                                              }
+                                                            >
+                                                              {(() => {
+                                                                const child$Props =
+                                                                  {
+                                                                    className:
+                                                                      classNames(
+                                                                        "__wab_instance",
+                                                                        sty.input3
+                                                                      ),
+                                                                    onChange:
+                                                                      async (
+                                                                        ...eventArgs: any
+                                                                      ) => {
+                                                                        generateStateOnChangePropForCodeComponents(
+                                                                          $state,
+                                                                          "value",
+                                                                          [
+                                                                            "input3",
+                                                                            "value"
+                                                                          ],
+                                                                          AntdInput_Helpers
+                                                                        ).apply(
+                                                                          null,
+                                                                          eventArgs
+                                                                        );
+                                                                      },
+                                                                    value:
+                                                                      generateStateValueProp(
+                                                                        $state,
+                                                                        [
+                                                                          "input3",
+                                                                          "value"
+                                                                        ]
+                                                                      )
+                                                                  };
+                                                                initializeCodeComponentStates(
+                                                                  $state,
+                                                                  [
+                                                                    {
+                                                                      name: "value",
+                                                                      plasmicStateName:
+                                                                        "input3.value"
+                                                                    }
+                                                                  ],
+                                                                  [],
+                                                                  AntdInput_Helpers ??
+                                                                    {},
+                                                                  child$Props
+                                                                );
+
+                                                                return (
+                                                                  <AntdInput
+                                                                    data-plasmic-name={
+                                                                      "input3"
+                                                                    }
+                                                                    data-plasmic-override={
+                                                                      overrides.input3
+                                                                    }
+                                                                    {...child$Props}
+                                                                  />
+                                                                );
+                                                              })()}
+                                                            </FormItemWrapper>
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField__bFoUl
+                                                              )}
+                                                              hidden={true}
+                                                              initialValue={
+                                                                undefined
+                                                              }
+                                                              label={
+                                                                "created_at"
+                                                              }
+                                                              name={
+                                                                "created_at"
+                                                              }
+                                                            >
+                                                              {(() => {
+                                                                const child$Props =
+                                                                  {
+                                                                    className:
+                                                                      classNames(
+                                                                        "__wab_instance",
+                                                                        sty.input4
+                                                                      ),
+                                                                    onChange:
+                                                                      async (
+                                                                        ...eventArgs: any
+                                                                      ) => {
+                                                                        generateStateOnChangePropForCodeComponents(
+                                                                          $state,
+                                                                          "value",
+                                                                          [
+                                                                            "input4",
+                                                                            "value"
+                                                                          ],
+                                                                          AntdInput_Helpers
+                                                                        ).apply(
+                                                                          null,
+                                                                          eventArgs
+                                                                        );
+                                                                      },
+                                                                    value:
+                                                                      generateStateValueProp(
+                                                                        $state,
+                                                                        [
+                                                                          "input4",
+                                                                          "value"
+                                                                        ]
+                                                                      )
+                                                                  };
+                                                                initializeCodeComponentStates(
+                                                                  $state,
+                                                                  [
+                                                                    {
+                                                                      name: "value",
+                                                                      plasmicStateName:
+                                                                        "input4.value"
+                                                                    }
+                                                                  ],
+                                                                  [],
+                                                                  AntdInput_Helpers ??
+                                                                    {},
+                                                                  child$Props
+                                                                );
+
+                                                                return (
+                                                                  <AntdInput
+                                                                    data-plasmic-name={
+                                                                      "input4"
+                                                                    }
+                                                                    data-plasmic-override={
+                                                                      overrides.input4
+                                                                    }
+                                                                    {...child$Props}
+                                                                  />
+                                                                );
+                                                              })()}
+                                                            </FormItemWrapper>
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField__gfSku
+                                                              )}
+                                                              hidden={true}
+                                                              initialValue={
+                                                                undefined
+                                                              }
+                                                              label={
+                                                                "employee_name"
+                                                              }
+                                                              name={
+                                                                "employee_name"
+                                                              }
+                                                            >
+                                                              {(() => {
+                                                                const child$Props =
+                                                                  {
+                                                                    className:
+                                                                      classNames(
+                                                                        "__wab_instance",
+                                                                        sty.input5
+                                                                      ),
+                                                                    onChange:
+                                                                      async (
+                                                                        ...eventArgs: any
+                                                                      ) => {
+                                                                        generateStateOnChangePropForCodeComponents(
+                                                                          $state,
+                                                                          "value",
+                                                                          [
+                                                                            "input5",
+                                                                            "value"
+                                                                          ],
+                                                                          AntdInput_Helpers
+                                                                        ).apply(
+                                                                          null,
+                                                                          eventArgs
+                                                                        );
+                                                                      },
+                                                                    value:
+                                                                      generateStateValueProp(
+                                                                        $state,
+                                                                        [
+                                                                          "input5",
+                                                                          "value"
+                                                                        ]
+                                                                      )
+                                                                  };
+                                                                initializeCodeComponentStates(
+                                                                  $state,
+                                                                  [
+                                                                    {
+                                                                      name: "value",
+                                                                      plasmicStateName:
+                                                                        "input5.value"
+                                                                    }
+                                                                  ],
+                                                                  [],
+                                                                  AntdInput_Helpers ??
+                                                                    {},
+                                                                  child$Props
+                                                                );
+
+                                                                return (
+                                                                  <AntdInput
+                                                                    data-plasmic-name={
+                                                                      "input5"
+                                                                    }
+                                                                    data-plasmic-override={
+                                                                      overrides.input5
+                                                                    }
+                                                                    {...child$Props}
+                                                                  />
+                                                                );
+                                                              })()}
+                                                            </FormItemWrapper>
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField__cTGx
+                                                              )}
+                                                              hidden={true}
+                                                              initialValue={
+                                                                undefined
+                                                              }
+                                                              label={"action"}
+                                                              name={"action"}
+                                                            >
+                                                              {(() => {
+                                                                const child$Props =
+                                                                  {
+                                                                    className:
+                                                                      classNames(
+                                                                        "__wab_instance",
+                                                                        sty.input6
+                                                                      ),
+                                                                    onChange:
+                                                                      async (
+                                                                        ...eventArgs: any
+                                                                      ) => {
+                                                                        generateStateOnChangePropForCodeComponents(
+                                                                          $state,
+                                                                          "value",
+                                                                          [
+                                                                            "input6",
+                                                                            "value"
+                                                                          ],
+                                                                          AntdInput_Helpers
+                                                                        ).apply(
+                                                                          null,
+                                                                          eventArgs
+                                                                        );
+                                                                      },
+                                                                    value:
+                                                                      generateStateValueProp(
+                                                                        $state,
+                                                                        [
+                                                                          "input6",
+                                                                          "value"
+                                                                        ]
+                                                                      )
+                                                                  };
+                                                                initializeCodeComponentStates(
+                                                                  $state,
+                                                                  [
+                                                                    {
+                                                                      name: "value",
+                                                                      plasmicStateName:
+                                                                        "input6.value"
+                                                                    }
+                                                                  ],
+                                                                  [],
+                                                                  AntdInput_Helpers ??
+                                                                    {},
+                                                                  child$Props
+                                                                );
+
+                                                                return (
+                                                                  <AntdInput
+                                                                    data-plasmic-name={
+                                                                      "input6"
+                                                                    }
+                                                                    data-plasmic-override={
+                                                                      overrides.input6
+                                                                    }
+                                                                    {...child$Props}
+                                                                  />
+                                                                );
+                                                              })()}
+                                                            </FormItemWrapper>
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField__f0YPd
+                                                              )}
+                                                              hidden={true}
+                                                              initialValue={(() => {
+                                                                try {
+                                                                  return $queries
+                                                                    .employeesDiscQuery
+                                                                    .data[0]
+                                                                    .org_id;
+                                                                } catch (e) {
+                                                                  if (
+                                                                    e instanceof
+                                                                      TypeError ||
+                                                                    e?.plasmicType ===
+                                                                      "PlasmicUndefinedDataError"
+                                                                  ) {
+                                                                    return undefined;
+                                                                  }
+                                                                  throw e;
+                                                                }
+                                                              })()}
+                                                              label={
+                                                                <div
+                                                                  className={classNames(
+                                                                    projectcss.all,
+                                                                    projectcss.__wab_text,
+                                                                    sty.text__va9G
+                                                                  )}
+                                                                >
+                                                                  {"org_id"}
+                                                                </div>
+                                                              }
+                                                              name={"org_id"}
+                                                            >
+                                                              {(() => {
+                                                                const child$Props =
+                                                                  {
+                                                                    className:
+                                                                      classNames(
+                                                                        "__wab_instance",
+                                                                        sty.input7
+                                                                      ),
+                                                                    onChange:
+                                                                      async (
+                                                                        ...eventArgs: any
+                                                                      ) => {
+                                                                        generateStateOnChangePropForCodeComponents(
+                                                                          $state,
+                                                                          "value",
+                                                                          [
+                                                                            "input7",
+                                                                            "value"
+                                                                          ],
+                                                                          AntdInput_Helpers
+                                                                        ).apply(
+                                                                          null,
+                                                                          eventArgs
+                                                                        );
+                                                                      },
+                                                                    value:
+                                                                      generateStateValueProp(
+                                                                        $state,
+                                                                        [
+                                                                          "input7",
+                                                                          "value"
+                                                                        ]
+                                                                      )
+                                                                  };
+                                                                initializeCodeComponentStates(
+                                                                  $state,
+                                                                  [
+                                                                    {
+                                                                      name: "value",
+                                                                      plasmicStateName:
+                                                                        "input7.value"
+                                                                    }
+                                                                  ],
+                                                                  [],
+                                                                  AntdInput_Helpers ??
+                                                                    {},
+                                                                  child$Props
+                                                                );
+
+                                                                return (
+                                                                  <AntdInput
+                                                                    data-plasmic-name={
+                                                                      "input7"
+                                                                    }
+                                                                    data-plasmic-override={
+                                                                      overrides.input7
+                                                                    }
+                                                                    {...child$Props}
+                                                                  />
+                                                                );
+                                                              })()}
+                                                            </FormItemWrapper>
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField__p4Cge
+                                                              )}
+                                                              hidden={true}
+                                                              initialValue={(() => {
+                                                                try {
+                                                                  return $queries
+                                                                    .employeesDiscQuery
+                                                                    .data[0].id;
+                                                                } catch (e) {
+                                                                  if (
+                                                                    e instanceof
+                                                                      TypeError ||
+                                                                    e?.plasmicType ===
+                                                                      "PlasmicUndefinedDataError"
+                                                                  ) {
+                                                                    return undefined;
+                                                                  }
+                                                                  throw e;
+                                                                }
+                                                              })()}
+                                                              label={
+                                                                "employee_id"
+                                                              }
+                                                              name={
+                                                                "employee_id"
+                                                              }
+                                                            >
+                                                              {(() => {
+                                                                const child$Props =
+                                                                  {
+                                                                    className:
+                                                                      classNames(
+                                                                        "__wab_instance",
+                                                                        sty.input8
+                                                                      ),
+                                                                    onChange:
+                                                                      async (
+                                                                        ...eventArgs: any
+                                                                      ) => {
+                                                                        generateStateOnChangePropForCodeComponents(
+                                                                          $state,
+                                                                          "value",
+                                                                          [
+                                                                            "input8",
+                                                                            "value"
+                                                                          ],
+                                                                          AntdInput_Helpers
+                                                                        ).apply(
+                                                                          null,
+                                                                          eventArgs
+                                                                        );
+                                                                      },
+                                                                    value:
+                                                                      generateStateValueProp(
+                                                                        $state,
+                                                                        [
+                                                                          "input8",
+                                                                          "value"
+                                                                        ]
+                                                                      )
+                                                                  };
+                                                                initializeCodeComponentStates(
+                                                                  $state,
+                                                                  [
+                                                                    {
+                                                                      name: "value",
+                                                                      plasmicStateName:
+                                                                        "input8.value"
+                                                                    }
+                                                                  ],
+                                                                  [],
+                                                                  AntdInput_Helpers ??
+                                                                    {},
+                                                                  child$Props
+                                                                );
+
+                                                                return (
+                                                                  <AntdInput
+                                                                    data-plasmic-name={
+                                                                      "input8"
+                                                                    }
+                                                                    data-plasmic-override={
+                                                                      overrides.input8
+                                                                    }
+                                                                    {...child$Props}
+                                                                  />
+                                                                );
+                                                              })()}
+                                                            </FormItemWrapper>
+                                                            <FormItemWrapper
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.formField__nl4D
+                                                              )}
+                                                              hidden={true}
+                                                              initialValue={(() => {
+                                                                try {
+                                                                  return $ctx
+                                                                    .auth.id;
+                                                                } catch (e) {
+                                                                  if (
+                                                                    e instanceof
+                                                                      TypeError ||
+                                                                    e?.plasmicType ===
+                                                                      "PlasmicUndefinedDataError"
+                                                                  ) {
+                                                                    return undefined;
+                                                                  }
+                                                                  throw e;
+                                                                }
+                                                              })()}
+                                                              label={
+                                                                "acting_leader"
+                                                              }
+                                                              name={
+                                                                "acting_leader"
+                                                              }
+                                                            >
+                                                              {(() => {
+                                                                const child$Props =
+                                                                  {
+                                                                    className:
+                                                                      classNames(
+                                                                        "__wab_instance",
+                                                                        sty.input9
+                                                                      ),
+                                                                    onChange:
+                                                                      async (
+                                                                        ...eventArgs: any
+                                                                      ) => {
+                                                                        generateStateOnChangePropForCodeComponents(
+                                                                          $state,
+                                                                          "value",
+                                                                          [
+                                                                            "input9",
+                                                                            "value"
+                                                                          ],
+                                                                          AntdInput_Helpers
+                                                                        ).apply(
+                                                                          null,
+                                                                          eventArgs
+                                                                        );
+                                                                      },
+                                                                    value:
+                                                                      generateStateValueProp(
+                                                                        $state,
+                                                                        [
+                                                                          "input9",
+                                                                          "value"
+                                                                        ]
+                                                                      )
+                                                                  };
+                                                                initializeCodeComponentStates(
+                                                                  $state,
+                                                                  [
+                                                                    {
+                                                                      name: "value",
+                                                                      plasmicStateName:
+                                                                        "input9.value"
+                                                                    }
+                                                                  ],
+                                                                  [],
+                                                                  AntdInput_Helpers ??
+                                                                    {},
+                                                                  child$Props
+                                                                );
+
+                                                                return (
+                                                                  <AntdInput
+                                                                    data-plasmic-name={
+                                                                      "input9"
+                                                                    }
+                                                                    data-plasmic-override={
+                                                                      overrides.input9
+                                                                    }
+                                                                    {...child$Props}
+                                                                  />
+                                                                );
+                                                              })()}
+                                                            </FormItemWrapper>
+                                                            <LevelsetButton
+                                                              className={classNames(
+                                                                "__wab_instance",
+                                                                sty.levelsetButton__yFGdG
+                                                              )}
+                                                              color={"brand"}
+                                                              size={"compact"}
+                                                              submitsForm={true}
+                                                            >
+                                                              <div
+                                                                className={classNames(
+                                                                  projectcss.all,
+                                                                  projectcss.__wab_text,
+                                                                  sty.text__cfmDt
+                                                                )}
+                                                              >
+                                                                {"Submit"}
+                                                              </div>
+                                                            </LevelsetButton>
+                                                          </FormWrapper>
+                                                        );
+                                                      })()}
+                                                    </AntdModal>
+                                                  </div>
+                                                </div>
+                                                <div
+                                                  data-plasmic-name={"frame6"}
+                                                  data-plasmic-override={
+                                                    overrides.frame6
+                                                  }
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    sty.frame6
+                                                  )}
+                                                >
+                                                  {(_par =>
+                                                    !_par
+                                                      ? []
+                                                      : Array.isArray(_par)
+                                                        ? _par
+                                                        : [_par])(
+                                                    (() => {
+                                                      try {
+                                                        return $queries
+                                                          .discActions.data;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return [];
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()
+                                                  ).map(
+                                                    (
+                                                      __plasmic_item_0,
+                                                      __plasmic_idx_0
+                                                    ) => {
+                                                      const action =
+                                                        __plasmic_item_0;
+                                                      const currentIndex =
+                                                        __plasmic_idx_0;
+                                                      return (
+                                                        <SlideoutListItem2
+                                                          className={classNames(
+                                                            "__wab_instance",
+                                                            sty.slideoutListItem2__o7OIj
+                                                          )}
+                                                          date2={
+                                                            <div
+                                                              data-plasmic-name={
+                                                                "date2"
+                                                              }
+                                                              data-plasmic-override={
+                                                                overrides.date2
+                                                              }
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                projectcss.__wab_text,
+                                                                sty.date2
+                                                              )}
+                                                            >
+                                                              <React.Fragment>
+                                                                {(() => {
+                                                                  try {
+                                                                    return action.action_date;
+                                                                  } catch (e) {
+                                                                    if (
+                                                                      e instanceof
+                                                                        TypeError ||
+                                                                      e?.plasmicType ===
+                                                                        "PlasmicUndefinedDataError"
+                                                                    ) {
+                                                                      return "10/2/2025";
+                                                                    }
+                                                                    throw e;
+                                                                  }
+                                                                })()}
+                                                              </React.Fragment>
+                                                            </div>
+                                                          }
+                                                          disciplinaryAction={
+                                                            true
+                                                          }
+                                                          documentingLeader={
+                                                            <div
+                                                              data-plasmic-name={
+                                                                "leader2"
+                                                              }
+                                                              data-plasmic-override={
+                                                                overrides.leader2
+                                                              }
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                projectcss.__wab_text,
+                                                                sty.leader2
+                                                              )}
+                                                            >
+                                                              <React.Fragment>
+                                                                {(() => {
+                                                                  try {
+                                                                    return action.leader_name;
+                                                                  } catch (e) {
+                                                                    if (
+                                                                      e instanceof
+                                                                        TypeError ||
+                                                                      e?.plasmicType ===
+                                                                        "PlasmicUndefinedDataError"
+                                                                    ) {
+                                                                      return "Leader Name";
+                                                                    }
+                                                                    throw e;
+                                                                  }
+                                                                })()}
+                                                              </React.Fragment>
+                                                            </div>
+                                                          }
+                                                          itemName={
+                                                            <React.Fragment>
+                                                              {(() => {
+                                                                try {
+                                                                  return action.action;
+                                                                } catch (e) {
+                                                                  if (
+                                                                    e instanceof
+                                                                      TypeError ||
+                                                                    e?.plasmicType ===
+                                                                      "PlasmicUndefinedDataError"
+                                                                  ) {
+                                                                    return "Item Name";
+                                                                  }
+                                                                  throw e;
+                                                                }
+                                                              })()}
+                                                            </React.Fragment>
+                                                          }
+                                                          key={currentIndex}
+                                                        />
+                                                      );
+                                                    }
+                                                  )}
+                                                  {(() => {
+                                                    try {
+                                                      return (
+                                                        (
+                                                          $queries.discActions
+                                                            .data ?? []
+                                                        ).length === 0
+                                                      );
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return true;
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })() ? (
+                                                    <div
+                                                      data-plasmic-name={
+                                                        "listItem2"
+                                                      }
+                                                      data-plasmic-override={
+                                                        overrides.listItem2
+                                                      }
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        sty.listItem2
+                                                      )}
+                                                    >
+                                                      <div
+                                                        data-plasmic-name={
+                                                          "contents2"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.contents2
+                                                        }
+                                                        className={classNames(
+                                                          projectcss.all,
+                                                          sty.contents2
+                                                        )}
+                                                      >
+                                                        <div
+                                                          data-plasmic-name={
+                                                            "content12"
+                                                          }
+                                                          data-plasmic-override={
+                                                            overrides.content12
+                                                          }
+                                                          className={classNames(
+                                                            projectcss.all,
+                                                            sty.content12
+                                                          )}
+                                                        >
+                                                          <div
+                                                            data-plasmic-name={
+                                                              "listItemDetails2"
+                                                            }
+                                                            data-plasmic-override={
+                                                              overrides.listItemDetails2
+                                                            }
+                                                            className={classNames(
+                                                              projectcss.all,
+                                                              sty.listItemDetails2
+                                                            )}
+                                                          >
+                                                            <div
+                                                              data-plasmic-name={
+                                                                "text25"
+                                                              }
+                                                              data-plasmic-override={
+                                                                overrides.text25
+                                                              }
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                sty.text25
+                                                              )}
+                                                            >
+                                                              {renderPlasmicSlot(
+                                                                {
+                                                                  defaultContents:
+                                                                    "No disciplinary actions in the last 90 days",
+                                                                  value:
+                                                                    args.itemName2,
+                                                                  className:
+                                                                    classNames(
+                                                                      sty.slotTargetItemName2
+                                                                    )
+                                                                }
+                                                              )}
+                                                            </div>
+                                                          </div>
+                                                          <div
+                                                            data-plasmic-name={
+                                                              "points2"
+                                                            }
+                                                            data-plasmic-override={
+                                                              overrides.points2
+                                                            }
+                                                            className={classNames(
+                                                              projectcss.all,
+                                                              sty.points2
+                                                            )}
+                                                          >
+                                                            {renderPlasmicSlot({
+                                                              defaultContents: (
+                                                                <div
+                                                                  className={classNames(
+                                                                    projectcss.all,
+                                                                    sty.freeBox__wsOmu
+                                                                  )}
+                                                                >
+                                                                  <div
+                                                                    className={classNames(
+                                                                      projectcss.all,
+                                                                      projectcss.__wab_text,
+                                                                      sty.text__beuRy
+                                                                    )}
+                                                                  >
+                                                                    {"10"}
+                                                                  </div>
+                                                                </div>
+                                                              ),
+                                                              value:
+                                                                args.pointValue5,
+                                                              className:
+                                                                classNames(
+                                                                  sty.slotTargetPointValue5
+                                                                )
+                                                            })}
+                                                            <div
+                                                              data-plasmic-name={
+                                                                "pointsText2"
+                                                              }
+                                                              data-plasmic-override={
+                                                                overrides.pointsText2
+                                                              }
+                                                              className={classNames(
+                                                                projectcss.all,
+                                                                projectcss.__wab_text,
+                                                                sty.pointsText2
+                                                              )}
+                                                            >
+                                                              {"points"}
+                                                            </div>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  ) : null}
+                                                </div>
                                               </div>
-                                            ) : null}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </DataCtxReader__>
-                                  </LoadingBoundary>
+                                            )}
+                                          </DataCtxReader__>
+                                        </LoadingBoundary>
+                                      </div>
+                                    </TabContent>
+                                  </div>
                                 </div>
-                              </TabContent>
-                            </div>
-                          </div>
-                        )}
-                      </DataCtxReader__>
-                    </TabsContainer>
+                              )}
+                            </DataCtxReader__>
+                          </TabsContainer>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </DrawerV2>
-        </RedirectIf>
+                </DrawerV2>
+              </RedirectIf>
+            )}
+          </DataCtxReader__>
+        </LoadingBoundary>
       </div>
     </React.Fragment>
   ) as React.ReactElement | null;
@@ -4589,8 +5556,6 @@ const PlasmicDescendants = {
     "peContent",
     "evalsContent",
     "disciplineContent",
-    "loadingBoundary",
-    "lottie",
     "discipline",
     "row",
     "text13",
@@ -4671,8 +5636,6 @@ const PlasmicDescendants = {
     "peContent",
     "evalsContent",
     "disciplineContent",
-    "loadingBoundary",
-    "lottie",
     "discipline",
     "row",
     "text13",
@@ -4751,8 +5714,6 @@ const PlasmicDescendants = {
     "peContent",
     "evalsContent",
     "disciplineContent",
-    "loadingBoundary",
-    "lottie",
     "discipline",
     "row",
     "text13",
@@ -4837,8 +5798,6 @@ const PlasmicDescendants = {
     "peContent",
     "evalsContent",
     "disciplineContent",
-    "loadingBoundary",
-    "lottie",
     "discipline",
     "row",
     "text13",
@@ -4906,8 +5865,6 @@ const PlasmicDescendants = {
     "peContent",
     "evalsContent",
     "disciplineContent",
-    "loadingBoundary",
-    "lottie",
     "discipline",
     "row",
     "text13",
@@ -4974,8 +5931,6 @@ const PlasmicDescendants = {
     "peContent",
     "evalsContent",
     "disciplineContent",
-    "loadingBoundary",
-    "lottie",
     "discipline",
     "row",
     "text13",
@@ -5041,8 +5996,6 @@ const PlasmicDescendants = {
     "peContent",
     "evalsContent",
     "disciplineContent",
-    "loadingBoundary",
-    "lottie",
     "discipline",
     "row",
     "text13",
@@ -5107,8 +6060,6 @@ const PlasmicDescendants = {
     "peContent",
     "evalsContent",
     "disciplineContent",
-    "loadingBoundary",
-    "lottie",
     "discipline",
     "row",
     "text13",
@@ -5172,8 +6123,6 @@ const PlasmicDescendants = {
   evalsContent: ["evalsContent"],
   disciplineContent: [
     "disciplineContent",
-    "loadingBoundary",
-    "lottie",
     "discipline",
     "row",
     "text13",
@@ -5231,67 +6180,6 @@ const PlasmicDescendants = {
     "points2",
     "pointsText2"
   ],
-  loadingBoundary: [
-    "loadingBoundary",
-    "lottie",
-    "discipline",
-    "row",
-    "text13",
-    "row2",
-    "metricItem",
-    "headingAndNumber",
-    "heading",
-    "numberAndBadge",
-    "number",
-    "metricItem2",
-    "headingAndNumber2",
-    "heading2",
-    "numberAndBadge2",
-    "number2",
-    "inputAndText",
-    "iconAndText",
-    "text14",
-    "frame1",
-    "date4",
-    "leader4",
-    "informed4",
-    "pointValue8",
-    "listItem",
-    "contents",
-    "content11",
-    "listItemDetails",
-    "text24",
-    "points",
-    "pointsText",
-    "inputAndText2",
-    "iconAndText2",
-    "text27",
-    "modal",
-    "form",
-    "input",
-    "select",
-    "timePicker",
-    "input2",
-    "input3",
-    "input4",
-    "input5",
-    "input6",
-    "input7",
-    "input8",
-    "input9",
-    "svg",
-    "frame6",
-    "leader2",
-    "date2",
-    "listItem2",
-    "contents2",
-    "content12",
-    "listItemDetails2",
-    "text25",
-    "points2",
-    "pointsText2"
-  ],
-  lottie: ["lottie"],
   discipline: [
     "discipline",
     "row",
@@ -5585,8 +6473,6 @@ type NodeDefaultElementType = {
   peContent: typeof TabContent;
   evalsContent: typeof TabContent;
   disciplineContent: typeof TabContent;
-  loadingBoundary: typeof LoadingBoundary;
-  lottie: typeof LottieWrapper;
   discipline: "div";
   row: "div";
   text13: "div";
@@ -5729,8 +6615,6 @@ export const PlasmicDiscipline = Object.assign(
     peContent: makeNodeComponent("peContent"),
     evalsContent: makeNodeComponent("evalsContent"),
     disciplineContent: makeNodeComponent("disciplineContent"),
-    loadingBoundary: makeNodeComponent("loadingBoundary"),
-    lottie: makeNodeComponent("lottie"),
     discipline: makeNodeComponent("discipline"),
     row: makeNodeComponent("row"),
     text13: makeNodeComponent("text13"),

@@ -74,6 +74,23 @@
   align-items: center;
   justify-content: flex-start;
 }
+.freeBox {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  align-items: center;
+  justify-content: flex-start;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  column-gap: 4px;
+  padding: 0px;
+}
+.svg__vtyx {
+  object-fit: cover;
+  max-width: 100%;
+  height: 1em;
+}
 .slotTargetDate2 {
   font-family: "Satoshi";
   font-size: 14px;

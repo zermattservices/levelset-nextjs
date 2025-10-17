@@ -51,6 +51,14 @@
   max-width: 100%;
   height: auto;
 }
+.loadingBoundary__whu9:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
+.lottie__daVb:global(.__wab_instance) {
+  max-width: 100%;
+  object-fit: cover;
+}
 .redirectIf:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
@@ -560,11 +568,11 @@
   min-width: 0;
   padding: 8px;
 }
-.loadingBoundary:global(.__wab_instance) {
+.loadingBoundary__fo4VO:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.lottie:global(.__wab_instance) {
+.lottie___9839:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
   height: 100%;
