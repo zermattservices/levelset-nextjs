@@ -526,9 +526,9 @@ function PlasmicPea__RenderFunc(props: {
                 data-plasmic-name={"fullPeaScoreboard"}
                 data-plasmic-override={overrides.fullPeaScoreboard}
                 className={classNames("__wab_instance", sty.fullPeaScoreboard)}
-                dashboardWidth={"1280px"}
+                dashboardWidth={"1200px"}
                 height={"800px"}
-                maxWidth={"1280px"}
+                maxWidth={"1200px"}
                 variant={"buda"}
               />
             </div>

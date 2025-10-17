@@ -750,7 +750,16 @@ function PlasmicHomepage__RenderFunc(props: {
                       sty.text___3DmR3
                     )}
                   >
-                    {"Operational Excellence (Coming Soon)"}
+                    {"Operational Excellence"}
+                  </div>
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text___1AVHs
+                    )}
+                  >
+                    {"(Coming Soon)"}
                   </div>
                 </div>
                 <div className={classNames(projectcss.all, sty.freeBox__hvq52)}>
