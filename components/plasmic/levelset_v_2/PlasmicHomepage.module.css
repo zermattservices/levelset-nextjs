@@ -165,10 +165,10 @@
 }
 .freeBox__vZ6X {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   position: relative;
-  align-items: flex-start;
-  justify-content: center;
+  align-items: center;
+  justify-content: flex-start;
   width: 100%;
   height: auto;
   max-width: 100%;
@@ -192,11 +192,12 @@
 ._360Stack {
   display: flex;
   flex-direction: column;
-  width: auto;
+  width: 100%;
   height: auto;
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
+  min-width: 0;
   padding: 8px;
 }
 .freeBox__ipxsc {
@@ -269,6 +270,14 @@
 .heading3 {
   padding-right: 0px;
 }
+.trendCard__qIe85:global(.__wab_instance) {
+  animation: none;
+  max-width: 100%;
+}
+.text__glpCg {
+  padding-right: 0px;
+  color: #249e6b;
+}
 .freeBox__zfJd9 {
   display: flex;
   flex-direction: row;
@@ -289,6 +298,14 @@
   -webkit-transition-property: all;
   -webkit-transition-duration: 1s;
 }
+.trendCard2:global(.__wab_instance) {
+  animation: none;
+  max-width: 100%;
+}
+.text2 {
+  padding-right: 0px;
+  color: #249e6b;
+}
 .blurredStack {
   display: flex;
   flex-direction: column;
@@ -305,18 +322,35 @@
 .metricCard__cbTb:global(.__wab_instance) {
   max-width: 100%;
 }
+.trendCard__nlaL2:global(.__wab_instance) {
+  animation: none;
+  max-width: 100%;
+}
+.text__eeV7S {
+  padding-right: 0px;
+  color: #249e6b;
+}
 .metricCard__ahd6K:global(.__wab_instance) {
   max-width: 100%;
+}
+.trendCard__mpAiO:global(.__wab_instance) {
+  animation: none;
+  max-width: 100%;
+}
+.text__xi6Ak {
+  padding-right: 0px;
+  color: #249e6b;
 }
 .whedStack {
   display: flex;
   flex-direction: column;
   position: relative;
-  width: auto;
+  width: 100%;
   height: auto;
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
+  min-width: 0;
   padding: 8px;
 }
 .freeBox___6YHFb {
@@ -376,11 +410,27 @@
 .text__cToMc {
   font-size: var(--token-B10hUni6jzpI);
 }
+.trendCard___6Ptgz:global(.__wab_instance) {
+  animation: none;
+  max-width: 100%;
+}
+.text___6Bd7T {
+  padding-right: 0px;
+  color: #249e6b;
+}
 .metricCard__nLige:global(.__wab_instance) {
   max-width: 100%;
 }
 .text___6CLr {
   font-size: var(--token-B10hUni6jzpI);
+}
+.trendCard__jm55L:global(.__wab_instance) {
+  animation: none;
+  max-width: 100%;
+}
+.text__lZby3 {
+  padding-right: 0px;
+  color: #249e6b;
 }
 .metricCard__msF2:global(.__wab_instance) {
   max-width: 100%;
@@ -388,11 +438,27 @@
 .text__aaKts {
   font-size: var(--token-B10hUni6jzpI);
 }
+.trendCard__bjhn0:global(.__wab_instance) {
+  animation: none;
+  max-width: 100%;
+}
+.text__bgmUg {
+  padding-right: 0px;
+  color: #249e6b;
+}
 .metricCard__r453M:global(.__wab_instance) {
   max-width: 100%;
 }
 .text__gn7Ek {
   font-size: var(--token-B10hUni6jzpI);
+}
+.trendCard__ib4Xd:global(.__wab_instance) {
+  animation: none;
+  max-width: 100%;
+}
+.text__g9ZqQ {
+  padding-right: 0px;
+  color: #249e6b;
 }
 .metricCard__zoe3T:global(.__wab_instance) {
   max-width: 100%;
@@ -400,4 +466,12 @@
 .text___4Uzfe {
   font-size: var(--token-B10hUni6jzpI);
   padding-bottom: 0px;
+}
+.trendCard__jIoU:global(.__wab_instance) {
+  animation: none;
+  max-width: 100%;
+}
+.text__d4Hqp {
+  padding-right: 0px;
+  color: #249e6b;
 }

@@ -47,10 +47,11 @@
   line-height: 32px;
   letter-spacing: 0em;
 }
-.trendCard:global(.__wab_instance) {
+.trendCard__xu1Ph:global(.__wab_instance) {
+  animation: none;
   max-width: 100%;
 }
-.text__pDxek {
+.text__yElZe {
   padding-right: 0px;
   color: #249e6b;
 }

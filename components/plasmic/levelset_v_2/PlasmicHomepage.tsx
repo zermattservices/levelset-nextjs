@@ -63,6 +63,7 @@ import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_m
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
 import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
 import MetricCard from "../../MetricCard"; // plasmic-import: 7uoOAZgc5EOu/component
+import TrendCard from "../../TrendCard"; // plasmic-import: V-0rig617-gC/component
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -89,6 +90,10 @@ export type PlasmicHomepage__OverridesType = {
   img?: Flex__<typeof PlasmicImg__>;
   _360Stack?: Flex__<"div">;
   heading3?: Flex__<"div">;
+  heading7?: Flex__<"div">;
+  heading9?: Flex__<"div">;
+  trendCard2?: Flex__<typeof TrendCard>;
+  text2?: Flex__<"div">;
   blurredStack?: Flex__<"div">;
   whedStack?: Flex__<"div">;
 };
@@ -211,6 +216,60 @@ function PlasmicHomepage__RenderFunc(props: {
               throw e;
             }
           })()
+      },
+      {
+        path: "trendCard.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
+      },
+      {
+        path: "trendCard2.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
+      },
+      {
+        path: "trendCard3.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
+      },
+      {
+        path: "trendCard4.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
+      },
+      {
+        path: "trendCard5.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
+      },
+      {
+        path: "trendCard6.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
+      },
+      {
+        path: "trendCard7.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
+      },
+      {
+        path: "trendCard8.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
+      },
+      {
+        path: "trendCard9.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
       }
     ],
     [$props, $ctx, $refs]
@@ -524,6 +583,19 @@ function PlasmicHomepage__RenderFunc(props: {
                             {"+27"}
                           </div>
                         }
+                        heading5={
+                          <div
+                            data-plasmic-name={"heading7"}
+                            data-plasmic-override={overrides.heading7}
+                            className={classNames(
+                              projectcss.all,
+                              projectcss.__wab_text,
+                              sty.heading7
+                            )}
+                          >
+                            {"October"}
+                          </div>
+                        }
                         metricName={"PEA Ratings"}
                         metricTotal2={"863"}
                       />
@@ -565,8 +637,77 @@ function PlasmicHomepage__RenderFunc(props: {
                           "__wab_instance",
                           sty.metricCard__zxCMh
                         )}
+                        heading5={
+                          <div
+                            data-plasmic-name={"heading9"}
+                            data-plasmic-override={overrides.heading9}
+                            className={classNames(
+                              projectcss.all,
+                              projectcss.__wab_text,
+                              sty.heading9
+                            )}
+                          >
+                            {"October"}
+                          </div>
+                        }
                         metricName={"Accountability Points"}
                         metricTotal2={"55"}
+                        trendCard2={
+                          <TrendCard
+                            data-plasmic-name={"trendCard2"}
+                            data-plasmic-override={overrides.trendCard2}
+                            className={classNames(
+                              "__wab_instance",
+                              sty.trendCard2
+                            )}
+                            onValueChange={async (...eventArgs: any) => {
+                              generateStateOnChangeProp($state, [
+                                "trendCard2",
+                                "value"
+                              ]).apply(null, eventArgs);
+
+                              if (
+                                eventArgs.length > 1 &&
+                                eventArgs[1] &&
+                                eventArgs[1]._plasmic_state_init_
+                              ) {
+                                return;
+                              }
+                            }}
+                            text3={
+                              <div
+                                data-plasmic-name={"text2"}
+                                data-plasmic-override={overrides.text2}
+                                className={classNames(
+                                  projectcss.all,
+                                  projectcss.__wab_text,
+                                  sty.text2
+                                )}
+                              >
+                                <React.Fragment>
+                                  {(() => {
+                                    try {
+                                      return $state.value;
+                                    } catch (e) {
+                                      if (
+                                        e instanceof TypeError ||
+                                        e?.plasmicType ===
+                                          "PlasmicUndefinedDataError"
+                                      ) {
+                                        return "5.8";
+                                      }
+                                      throw e;
+                                    }
+                                  })()}
+                                </React.Fragment>
+                              </div>
+                            }
+                            value={generateStateValueProp($state, [
+                              "trendCard2",
+                              "value"
+                            ])}
+                          />
+                        }
                       >
                         {"Average:"}
                       </MetricCard>
@@ -724,6 +865,10 @@ const PlasmicDescendants = {
     "img",
     "_360Stack",
     "heading3",
+    "heading7",
+    "heading9",
+    "trendCard2",
+    "text2",
     "blurredStack",
     "whedStack"
   ],
@@ -733,12 +878,28 @@ const PlasmicDescendants = {
     "img",
     "_360Stack",
     "heading3",
+    "heading7",
+    "heading9",
+    "trendCard2",
+    "text2",
     "blurredStack",
     "whedStack"
   ],
   img: ["img"],
-  _360Stack: ["_360Stack", "heading3", "blurredStack"],
+  _360Stack: [
+    "_360Stack",
+    "heading3",
+    "heading7",
+    "heading9",
+    "trendCard2",
+    "text2",
+    "blurredStack"
+  ],
   heading3: ["heading3"],
+  heading7: ["heading7"],
+  heading9: ["heading9"],
+  trendCard2: ["trendCard2", "text2"],
+  text2: ["text2"],
   blurredStack: ["blurredStack"],
   whedStack: ["whedStack"]
 } as const;
@@ -752,6 +913,10 @@ type NodeDefaultElementType = {
   img: typeof PlasmicImg__;
   _360Stack: "div";
   heading3: "div";
+  heading7: "div";
+  heading9: "div";
+  trendCard2: typeof TrendCard;
+  text2: "div";
   blurredStack: "div";
   whedStack: "div";
 };
@@ -823,6 +988,10 @@ export const PlasmicHomepage = Object.assign(
     img: makeNodeComponent("img"),
     _360Stack: makeNodeComponent("_360Stack"),
     heading3: makeNodeComponent("heading3"),
+    heading7: makeNodeComponent("heading7"),
+    heading9: makeNodeComponent("heading9"),
+    trendCard2: makeNodeComponent("trendCard2"),
+    text2: makeNodeComponent("text2"),
     blurredStack: makeNodeComponent("blurredStack"),
     whedStack: makeNodeComponent("whedStack"),
 
