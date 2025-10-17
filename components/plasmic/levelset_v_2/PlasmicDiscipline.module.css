@@ -137,6 +137,15 @@
   font-family: "Satoshi";
   min-width: 0;
 }
+.text__suZia {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  font-size: var(--token-BlA-iDkaAWvO);
+  font-family: "Satoshi";
+  min-width: 0;
+}
 .freeBox__lKzxl {
   display: flex;
   flex-direction: row;

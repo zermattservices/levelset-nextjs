@@ -722,6 +722,29 @@ function PlasmicDiscipline__RenderFunc(props: {
                       "Here\u2019s your organization's current points. Click a Team Member to see their recent infractions."
                     }
                   </div>
+                  <div
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.__wab_text,
+                      sty.text__suZia
+                    )}
+                  >
+                    <React.Fragment>
+                      {(() => {
+                        try {
+                          return $ctx.auth.id;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return "Here\u2019s your organization's current points. Click a Team Member to see their recent infractions.";
+                          }
+                          throw e;
+                        }
+                      })()}
+                    </React.Fragment>
+                  </div>
                 </div>
               </div>
             </div>
