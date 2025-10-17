@@ -1019,6 +1019,27 @@
   max-width: 100%;
   object-fit: cover;
 }
+.text__y3Zbo {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  min-width: 0;
+}
+.text__eGh6 {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  min-width: 0;
+}
+.text__ulkJg {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  min-width: 0;
+}
 .formField__rSlJ:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;

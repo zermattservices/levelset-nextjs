@@ -351,7 +351,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "modal.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => false
+        initFunc: ({ $props, $state, $queries, $ctx }) => true
       },
       {
         path: "form.value",
@@ -2521,6 +2521,85 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                     )}
                                                   />
                                                 </FormItemWrapper>
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.text__y3Zbo
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return $state.form.value
+                                                          .action_id;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.text__eGh6
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return $state.form.value
+                                                          .action_date;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
+                                                <div
+                                                  className={classNames(
+                                                    projectcss.all,
+                                                    projectcss.__wab_text,
+                                                    sty.text__ulkJg
+                                                  )}
+                                                >
+                                                  <React.Fragment>
+                                                    {(() => {
+                                                      try {
+                                                        return $queries
+                                                          .activeAppUser.data[0]
+                                                          .id;
+                                                      } catch (e) {
+                                                        if (
+                                                          e instanceof
+                                                            TypeError ||
+                                                          e?.plasmicType ===
+                                                            "PlasmicUndefinedDataError"
+                                                        ) {
+                                                          return "";
+                                                        }
+                                                        throw e;
+                                                      }
+                                                    })()}
+                                                  </React.Fragment>
+                                                </div>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
