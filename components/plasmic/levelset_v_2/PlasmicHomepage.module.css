@@ -271,11 +271,11 @@
 .heading3 {
   padding-right: 0px;
 }
-.trendCard__qIe85:global(.__wab_instance) {
+.trendCard:global(.__wab_instance) {
   animation: none;
   max-width: 100%;
 }
-.text__glpCg {
+.text {
   padding-right: 0px;
   color: #249e6b;
 }
