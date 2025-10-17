@@ -159,7 +159,7 @@ function PlasmicMetricCard__RenderFunc(props: {
         path: "trendCard.value",
         type: "private",
         variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "21.4"
+        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
       }
     ],
     [$props, $ctx, $refs]

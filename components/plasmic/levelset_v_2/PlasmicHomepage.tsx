@@ -525,7 +525,7 @@ function PlasmicHomepage__RenderFunc(props: {
                           </div>
                         }
                         metricName={"PEA Ratings"}
-                        metricTotal2={"485"}
+                        metricTotal2={"863"}
                       />
                     </div>
                     <div
@@ -832,7 +832,7 @@ export const PlasmicHomepage = Object.assign(
 
     // Page metadata
     pageMetadata: {
-      title: "Levelset",
+      title: "Home | Levelset",
       description: "",
       ogImageSrc: "",
       canonical: ""

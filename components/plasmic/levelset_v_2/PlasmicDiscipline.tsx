@@ -6678,7 +6678,7 @@ export const PlasmicDiscipline = Object.assign(
 
     // Page metadata
     pageMetadata: {
-      title: "Levelset.io",
+      title: "APS Dashboard | Levelset",
       description: "",
       ogImageSrc: "",
       canonical: ""

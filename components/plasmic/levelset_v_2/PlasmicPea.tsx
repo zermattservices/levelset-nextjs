@@ -675,7 +675,7 @@ export const PlasmicPea = Object.assign(
 
     // Page metadata
     pageMetadata: {
-      title: "Levelset.io",
+      title: "PEA Dashboard | Levelset",
       description: "",
       ogImageSrc: "",
       canonical: ""

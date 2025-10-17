@@ -285,7 +285,7 @@ export const PlasmicLoginPage = Object.assign(
 
     // Page metadata
     pageMetadata: {
-      title: "Levelset | Sign In",
+      title: "Sign In | Levelset",
       description: "",
       ogImageSrc: "",
       canonical: ""
