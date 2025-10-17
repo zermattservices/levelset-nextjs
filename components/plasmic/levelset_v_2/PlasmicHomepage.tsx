@@ -392,7 +392,23 @@ function PlasmicHomepage__RenderFunc(props: {
                     className={classNames(projectcss.all, sty.freeBox__d45Ks)}
                   >
                     {renderPlasmicSlot({
-                      defaultContents: "Reece",
+                      defaultContents: (
+                        <React.Fragment>
+                          {(() => {
+                            try {
+                              return $state.menuNavigation.firstName;
+                            } catch (e) {
+                              if (
+                                e instanceof TypeError ||
+                                e?.plasmicType === "PlasmicUndefinedDataError"
+                              ) {
+                                return "Reece";
+                              }
+                              throw e;
+                            }
+                          })()}
+                        </React.Fragment>
+                      ),
                       value: args.children,
                       className: classNames(sty.slotTargetChildren)
                     })}
@@ -509,7 +525,7 @@ function PlasmicHomepage__RenderFunc(props: {
                           </div>
                         }
                         metricName={"PEA Ratings"}
-                        metricTotal2={"485"}
+                        metricTotal2={"863"}
                       />
                     </div>
                     <div
@@ -816,7 +832,7 @@ export const PlasmicHomepage = Object.assign(
 
     // Page metadata
     pageMetadata: {
-      title: "Levelset",
+      title: "Home | Levelset",
       description: "",
       ogImageSrc: "",
       canonical: ""

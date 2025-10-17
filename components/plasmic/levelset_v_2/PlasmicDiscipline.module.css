@@ -209,7 +209,7 @@
   justify-content: flex-start;
   align-items: center;
   row-gap: var(--token-rX_8jNE36opk);
-  padding: 8px;
+  padding: 0px;
 }
 .text__oSxFd {
   position: relative;
@@ -225,6 +225,8 @@
 .disciplineActionsTable:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
+  font-family: "Satoshi";
+  color: var(--token-b4D6G1fNo7IC);
 }
 .drawerV2:global(.__wab_instance) {
   max-width: 100%;
