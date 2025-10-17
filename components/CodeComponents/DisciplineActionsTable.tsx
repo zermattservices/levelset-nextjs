@@ -122,7 +122,10 @@ export function DisciplineActionsTable({
     }
   }, [orgId, locationId, fetchDisciplineActions]);
 
-  // Set up real-time subscription for discipline actions changes
+  // Real-time subscription disabled - Realtime not enabled on disc_actions_rubric table
+  // If you need real-time updates, enable Realtime on the disc_actions_rubric table in Supabase
+  // Then uncomment the code below
+  /*
   React.useEffect(() => {
     if (!orgId || !locationId) return;
     
@@ -148,6 +151,7 @@ export function DisciplineActionsTable({
       supabase.removeChannel(channel);
     };
   }, [orgId, locationId, fetchDisciplineActions]);
+  */
 
   if (loading && data.length === 0) {
     return (
