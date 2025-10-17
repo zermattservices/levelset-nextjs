@@ -77,6 +77,7 @@ export const PlasmicMetricCard__VariantProps = new Array<VariantPropType>();
 
 export type PlasmicMetricCard__ArgsType = {
   metricName?: React.ReactNode;
+  trendCard2?: React.ReactNode;
   children?: React.ReactNode;
   metricTotal2?: React.ReactNode;
   delta?: React.ReactNode;
@@ -85,6 +86,7 @@ export type PlasmicMetricCard__ArgsType = {
 type ArgPropType = keyof PlasmicMetricCard__ArgsType;
 export const PlasmicMetricCard__ArgProps = new Array<ArgPropType>(
   "metricName",
+  "trendCard2",
   "children",
   "metricTotal2",
   "delta",
@@ -96,7 +98,6 @@ export type PlasmicMetricCard__OverridesType = {
   metricItem?: Flex__<"div">;
   titleAndTrend?: Flex__<"div">;
   number?: Flex__<"div">;
-  trendCard?: Flex__<typeof TrendCard>;
   supportingMetrics?: Flex__<"div">;
   numberAndBadge?: Flex__<"div">;
   heading?: Flex__<"div">;
@@ -107,6 +108,7 @@ export type PlasmicMetricCard__OverridesType = {
 
 export interface DefaultMetricCardProps {
   metricName?: React.ReactNode;
+  trendCard2?: React.ReactNode;
   children?: React.ReactNode;
   metricTotal2?: React.ReactNode;
   delta?: React.ReactNode;
@@ -152,24 +154,6 @@ function PlasmicMetricCard__RenderFunc(props: {
   const $ctx = useDataEnv?.() || {};
   const refsRef = React.useRef({});
   const $refs = refsRef.current;
-
-  const stateSpecs: Parameters<typeof useDollarState>[0] = React.useMemo(
-    () => [
-      {
-        path: "trendCard.value",
-        type: "private",
-        variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
-      }
-    ],
-    [$props, $ctx, $refs]
-  );
-  const $state = useDollarState(stateSpecs, {
-    $props,
-    $ctx,
-    $queries: {},
-    $refs
-  });
 
   const styleTokensClassNames = _useStyleTokens();
 
@@ -251,26 +235,16 @@ function PlasmicMetricCard__RenderFunc(props: {
               className: classNames(sty.slotTargetMetricName)
             })}
           </div>
-          <TrendCard
-            data-plasmic-name={"trendCard"}
-            data-plasmic-override={overrides.trendCard}
-            className={classNames("__wab_instance", sty.trendCard)}
-            onValueChange={async (...eventArgs: any) => {
-              generateStateOnChangeProp($state, ["trendCard", "value"]).apply(
-                null,
-                eventArgs
-              );
+          {renderPlasmicSlot({
+            defaultContents: (
+              <TrendCard
+                className={classNames("__wab_instance", sty.trendCard__xu1Ph)}
+                value={"5.8"}
+              />
+            ),
 
-              if (
-                eventArgs.length > 1 &&
-                eventArgs[1] &&
-                eventArgs[1]._plasmic_state_init_
-              ) {
-                return;
-              }
-            }}
-            value={generateStateValueProp($state, ["trendCard", "value"])}
-          />
+            value: args.trendCard2
+          })}
         </div>
         <div
           data-plasmic-name={"supportingMetrics"}
@@ -364,7 +338,6 @@ const PlasmicDescendants = {
     "metricItem",
     "titleAndTrend",
     "number",
-    "trendCard",
     "supportingMetrics",
     "numberAndBadge",
     "heading",
@@ -376,7 +349,6 @@ const PlasmicDescendants = {
     "metricItem",
     "titleAndTrend",
     "number",
-    "trendCard",
     "supportingMetrics",
     "numberAndBadge",
     "heading",
@@ -384,9 +356,8 @@ const PlasmicDescendants = {
     "heading3",
     "numberAndBadge2"
   ],
-  titleAndTrend: ["titleAndTrend", "number", "trendCard"],
+  titleAndTrend: ["titleAndTrend", "number"],
   number: ["number"],
-  trendCard: ["trendCard"],
   supportingMetrics: [
     "supportingMetrics",
     "numberAndBadge",
@@ -409,7 +380,6 @@ type NodeDefaultElementType = {
   metricItem: "div";
   titleAndTrend: "div";
   number: "div";
-  trendCard: typeof TrendCard;
   supportingMetrics: "div";
   numberAndBadge: "div";
   heading: "div";
@@ -483,7 +453,6 @@ export const PlasmicMetricCard = Object.assign(
     metricItem: makeNodeComponent("metricItem"),
     titleAndTrend: makeNodeComponent("titleAndTrend"),
     number: makeNodeComponent("number"),
-    trendCard: makeNodeComponent("trendCard"),
     supportingMetrics: makeNodeComponent("supportingMetrics"),
     numberAndBadge: makeNodeComponent("numberAndBadge"),
     heading: makeNodeComponent("heading"),
