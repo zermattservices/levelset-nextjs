@@ -988,102 +988,122 @@
   min-width: 0;
   padding: 8px;
 }
-.formField__jpbXj:global(.__wab_instance) {
+.formField__hzlcu:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
   min-width: 0;
 }
-.input__kncHv:global(.__wab_instance) {
+.input:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.formField__icxJe:global(.__wab_instance) {
+.formField__plrx5:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
   min-width: 0;
 }
-.input__qHgqz:global(.__wab_instance) {
+.text__yaLw {
+  color: var(--token-b4D6G1fNo7IC);
+  font-family: "Satoshi";
+}
+.select:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.formField__piCbx:global(.__wab_instance) {
+.formField__rSlJ:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
   min-width: 0;
 }
-.select__wnIly:global(.__wab_instance) {
+.text___8Lr1T {
+  font-family: "Satoshi";
+  color: var(--token-b4D6G1fNo7IC);
+}
+.timePicker:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.formField__f8Fcn:global(.__wab_instance) {
+.formField___3CkKw:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
+  font-family: "Satoshi";
   min-width: 0;
 }
-.dateTimePicker:global(.__wab_instance) {
+.text__bxlc3 {
+  font-family: "Satoshi";
+}
+.input2:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.formField__pjEp:global(.__wab_instance) {
+.formField___6Kjrs:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
+  font-family: "Satoshi";
   min-width: 0;
 }
-.input___492Md:global(.__wab_instance) {
+.text__q5YkF {
+  font-family: "Satoshi";
+}
+.input3:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.formField__wy33X:global(.__wab_instance) {
+.formField__bFoUl:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
   min-width: 0;
 }
-.input__hv8Eq:global(.__wab_instance) {
+.input4:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.formField___89ZXy:global(.__wab_instance) {
+.formField__gfSku:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
   min-width: 0;
 }
-.input__eA4Fg:global(.__wab_instance) {
+.input5:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.formField__te6Uo:global(.__wab_instance) {
+.formField__cTGx:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
   min-width: 0;
 }
-.input___4WroT:global(.__wab_instance) {
+.input6:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.formField__aqR7X:global(.__wab_instance) {
+.formField__f0YPd:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
+  font-family: "Satoshi";
   min-width: 0;
 }
-.input__vX2YC:global(.__wab_instance) {
+.text__va9G {
+  font-family: "Satoshi";
+}
+.input7:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.formField__mAiK0:global(.__wab_instance) {
+.formField__p4Cge:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
   min-width: 0;
 }
-.input__uTjce:global(.__wab_instance) {
+.input8:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
-.formField__zNNas:global(.__wab_instance) {
+.formField__nl4D:global(.__wab_instance) {
   width: 100%;
   margin-bottom: 24px;
   min-width: 0;
 }
-.select___3Epa8:global(.__wab_instance) {
+.input9:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
 }
@@ -1091,12 +1111,35 @@
   max-width: 100%;
   object-fit: cover;
 }
-.text__sLkVx {
+.text__y0Lnl {
   position: relative;
   width: 100%;
   height: auto;
   max-width: 100%;
+  font-family: "Satoshi";
+  font-weight: 500;
   min-width: 0;
+}
+.freeBox__rv9Sl {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  min-width: 0;
+  padding: 8px;
+}
+.text___2JUNz {
+  font-family: "Satoshi";
+  color: var(--token-0Rg7d9VjUj_J);
+}
+.text__wcrdm {
+  font-weight: 600;
+  font-family: "Satoshi";
+  color: var(--token-FTu687H3gT3S);
 }
 .levelsetButton__l9Kf6:global(.__wab_instance) {
   max-width: 100%;

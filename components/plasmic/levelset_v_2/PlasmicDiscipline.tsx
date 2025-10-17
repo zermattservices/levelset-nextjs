@@ -180,7 +180,17 @@ export type PlasmicDiscipline__OverridesType = {
   text27?: Flex__<"div">;
   modal?: Flex__<typeof AntdModal>;
   form?: Flex__<typeof FormWrapper>;
-  dateTimePicker?: Flex__<typeof AntdDatePicker>;
+  input?: Flex__<typeof AntdInput>;
+  select?: Flex__<typeof AntdSelect>;
+  timePicker?: Flex__<typeof AntdDatePicker>;
+  input2?: Flex__<typeof AntdInput>;
+  input3?: Flex__<typeof AntdInput>;
+  input4?: Flex__<typeof AntdInput>;
+  input5?: Flex__<typeof AntdInput>;
+  input6?: Flex__<typeof AntdInput>;
+  input7?: Flex__<typeof AntdInput>;
+  input8?: Flex__<typeof AntdInput>;
+  input9?: Flex__<typeof AntdInput>;
   button?: Flex__<typeof AntdButton>;
   svg?: Flex__<"svg">;
   frame6?: Flex__<"div">;
@@ -245,7 +255,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => true
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
       },
       {
         path: "selectedEmployee",
@@ -339,7 +349,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "modal.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => true
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
       },
       {
         path: "form.value",
@@ -358,6 +368,92 @@ function PlasmicDiscipline__RenderFunc(props: {
 
         refName: "form",
         onMutate: generateOnMutateForSpec("isSubmitting", FormWrapper_Helpers)
+      },
+      {
+        path: "input.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        onMutate: generateOnMutateForSpec("value", AntdInput_Helpers)
+      },
+      {
+        path: "select.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined
+      },
+      {
+        path: "timePicker.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        onMutate: generateOnMutateForSpec("value", AntdDatePicker_Helpers)
+      },
+      {
+        path: "input2.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        onMutate: generateOnMutateForSpec("value", AntdInput_Helpers)
+      },
+      {
+        path: "input3.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        onMutate: generateOnMutateForSpec("value", AntdInput_Helpers)
+      },
+      {
+        path: "input4.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        onMutate: generateOnMutateForSpec("value", AntdInput_Helpers)
+      },
+      {
+        path: "input5.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        onMutate: generateOnMutateForSpec("value", AntdInput_Helpers)
+      },
+      {
+        path: "input6.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        onMutate: generateOnMutateForSpec("value", AntdInput_Helpers)
+      },
+      {
+        path: "input7.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        onMutate: generateOnMutateForSpec("value", AntdInput_Helpers)
+      },
+      {
+        path: "input8.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        onMutate: generateOnMutateForSpec("value", AntdInput_Helpers)
+      },
+      {
+        path: "input9.value",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
+
+        onMutate: generateOnMutateForSpec("value", AntdInput_Helpers)
       }
     ],
     [$props, $ctx, $refs]
@@ -399,9 +495,9 @@ function PlasmicDiscipline__RenderFunc(props: {
     discActionsRubric: usePlasmicDataOp(() => {
       return {
         sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
-        opId: "c90e2291-f41b-447d-9c4b-806b8f841be0",
+        opId: "16d21f59-38ef-44d0-868d-b5a0c1746cfa",
         userArgs: {},
-        cacheKey: `plasmic.$.c90e2291-f41b-447d-9c4b-806b8f841be0.$.`,
+        cacheKey: `plasmic.$.16d21f59-38ef-44d0-868d-b5a0c1746cfa.$.`,
         invalidatedKeys: null,
         roleId: null
       };
@@ -556,19 +652,7 @@ function PlasmicDiscipline__RenderFunc(props: {
           data-plasmic-name={"redirectIf"}
           data-plasmic-override={overrides.redirectIf}
           className={classNames("__wab_instance", sty.redirectIf)}
-          condition={(() => {
-            try {
-              return $ctx.auth && !!$ctx.auth.email;
-            } catch (e) {
-              if (
-                e instanceof TypeError ||
-                e?.plasmicType === "PlasmicUndefinedDataError"
-              ) {
-                return true;
-              }
-              throw e;
-            }
-          })()}
+          condition={true}
           onFalse={async () => {
             const $steps = {};
 
@@ -1865,7 +1949,53 @@ function PlasmicDiscipline__RenderFunc(props: {
                                             "modal",
                                             "open"
                                           ])}
-                                          title={"Record a Disciplinary Action"}
+                                          title={
+                                            <div
+                                              className={classNames(
+                                                projectcss.all,
+                                                sty.freeBox__rv9Sl
+                                              )}
+                                            >
+                                              <div
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  projectcss.__wab_text,
+                                                  sty.text___2JUNz
+                                                )}
+                                              >
+                                                {
+                                                  "Record a Disciplinary Action for "
+                                                }
+                                              </div>
+                                              <div
+                                                className={classNames(
+                                                  projectcss.all,
+                                                  projectcss.__wab_text,
+                                                  sty.text__wcrdm
+                                                )}
+                                              >
+                                                <React.Fragment>
+                                                  {(() => {
+                                                    try {
+                                                      return $state
+                                                        .selectedEmployee
+                                                        ?.full_name;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return "Test Employee";
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                </React.Fragment>
+                                              </div>
+                                            </div>
+                                          }
                                           trigger={
                                             <LevelsetButton
                                               className={classNames(
@@ -1919,13 +2049,24 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                   FormWrapper_Helpers
                                                 ).apply(null, eventArgs);
                                               },
-                                              formItems: undefined,
+                                              formItems: [
+                                                {
+                                                  label: "Name",
+                                                  name: "name",
+                                                  inputType: "Text"
+                                                },
+                                                {
+                                                  label: "Message",
+                                                  name: "message",
+                                                  inputType: "Text Area"
+                                                }
+                                              ],
                                               labelCol: {
                                                 span: 8,
                                                 horizontalOnly: true
                                               },
                                               layout: "vertical",
-                                              mode: undefined,
+                                              mode: "advanced",
                                               onFinish: async values => {
                                                 const $steps = {};
 
@@ -2007,6 +2148,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                               ref: ref => {
                                                 $refs["form"] = ref;
                                               },
+                                              submitSlot: null,
                                               wrapperCol: {
                                                 span: 16,
                                                 horizontalOnly: true
@@ -2041,66 +2183,94 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.formField__jpbXj
-                                                  )}
-                                                  initialValue={(() => {
-                                                    try {
-                                                      return $state
-                                                        .selectedEmployee?.id;
-                                                    } catch (e) {
-                                                      if (
-                                                        e instanceof
-                                                          TypeError ||
-                                                        e?.plasmicType ===
-                                                          "PlasmicUndefinedDataError"
-                                                      ) {
-                                                        return undefined;
-                                                      }
-                                                      throw e;
-                                                    }
-                                                  })()}
-                                                  label={"Employee"}
-                                                  name={"employee_id"}
-                                                  noStyle={false}
-                                                  rules={[]}
-                                                >
-                                                  <AntdInput
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.input__kncHv
-                                                    )}
-                                                  />
-                                                </FormItemWrapper>
-                                                <FormItemWrapper
-                                                  className={classNames(
-                                                    "__wab_instance",
-                                                    sty.formField__icxJe
+                                                    sty.formField__hzlcu
                                                   )}
                                                   hidden={true}
                                                   initialValue={undefined}
                                                   label={"id"}
                                                   name={"id"}
                                                 >
-                                                  <AntdInput
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.input__qHgqz
-                                                    )}
-                                                  />
+                                                  {(() => {
+                                                    const child$Props = {
+                                                      className: classNames(
+                                                        "__wab_instance",
+                                                        sty.input
+                                                      ),
+                                                      onChange: async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangePropForCodeComponents(
+                                                          $state,
+                                                          "value",
+                                                          ["input", "value"],
+                                                          AntdInput_Helpers
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      },
+                                                      value:
+                                                        generateStateValueProp(
+                                                          $state,
+                                                          ["input", "value"]
+                                                        )
+                                                    };
+                                                    initializeCodeComponentStates(
+                                                      $state,
+                                                      [
+                                                        {
+                                                          name: "value",
+                                                          plasmicStateName:
+                                                            "input.value"
+                                                        }
+                                                      ],
+                                                      [],
+                                                      AntdInput_Helpers ?? {},
+                                                      child$Props
+                                                    );
+
+                                                    return (
+                                                      <AntdInput
+                                                        data-plasmic-name={
+                                                          "input"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.input
+                                                        }
+                                                        {...child$Props}
+                                                      />
+                                                    );
+                                                  })()}
                                                 </FormItemWrapper>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.formField__piCbx
+                                                    sty.formField__plrx5
                                                   )}
                                                   initialValue={undefined}
-                                                  label={"Action Taken"}
+                                                  label={
+                                                    <div
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        projectcss.__wab_text,
+                                                        sty.text__yaLw
+                                                      )}
+                                                    >
+                                                      {
+                                                        "Select the action taken"
+                                                      }
+                                                    </div>
+                                                  }
                                                   name={"action_id"}
                                                 >
                                                   <AntdSelect
+                                                    data-plasmic-name={"select"}
+                                                    data-plasmic-override={
+                                                      overrides.select
+                                                    }
                                                     className={classNames(
                                                       "__wab_instance",
-                                                      sty.select__wnIly
+                                                      sty.select
                                                     )}
                                                     defaultStylesClassName={classNames(
                                                       projectcss.root_reset,
@@ -2108,55 +2278,175 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                       projectcss.plasmic_mixins,
                                                       styleTokensClassNames
                                                     )}
-                                                    options={[
-                                                      {
-                                                        value: "option1",
-                                                        label: "Option 1",
-                                                        type: "option"
-                                                      },
-                                                      {
-                                                        value: "option2",
-                                                        label: "Option 2",
-                                                        type: "option"
-                                                      }
-                                                    ]}
+                                                    onChange={async (
+                                                      ...eventArgs: any
+                                                    ) => {
+                                                      generateStateOnChangeProp(
+                                                        $state,
+                                                        ["select", "value"]
+                                                      ).apply(null, eventArgs);
+                                                    }}
+                                                    options={(() => {
+                                                      const __composite = [
+                                                        {
+                                                          type: null,
+                                                          label: null,
+                                                          value: null
+                                                        },
+                                                        {
+                                                          type: null,
+                                                          label: null,
+                                                          value: null
+                                                        },
+                                                        {
+                                                          type: "option",
+                                                          label: null,
+                                                          value: null
+                                                        },
+                                                        {
+                                                          type: "option",
+                                                          label: null,
+                                                          value: null
+                                                        }
+                                                      ];
+                                                      __composite["0"]["type"] =
+                                                        "option";
+                                                      __composite["0"][
+                                                        "label"
+                                                      ] =
+                                                        $queries.discActionsRubric.data[0].action;
+                                                      __composite["0"][
+                                                        "value"
+                                                      ] =
+                                                        $queries.discActionsRubric.data[0].id;
+                                                      __composite["1"]["type"] =
+                                                        "option";
+                                                      __composite["1"][
+                                                        "label"
+                                                      ] =
+                                                        $queries.discActionsRubric.data[1].action;
+                                                      __composite["1"][
+                                                        "value"
+                                                      ] =
+                                                        $queries.discActionsRubric.data[1].id;
+                                                      __composite["2"][
+                                                        "label"
+                                                      ] =
+                                                        $queries.discActionsRubric.data[2].action;
+                                                      __composite["2"][
+                                                        "value"
+                                                      ] =
+                                                        $queries.discActionsRubric.data[2].id;
+                                                      __composite["3"][
+                                                        "label"
+                                                      ] =
+                                                        $queries.discActionsRubric.data[3].action;
+                                                      __composite["3"][
+                                                        "value"
+                                                      ] =
+                                                        $queries.discActionsRubric.data[3].id;
+                                                      return __composite;
+                                                    })()}
                                                     placeholder={"Select..."}
                                                     popupScopeClassName={
-                                                      sty[
-                                                        "select__wnIly__popup"
-                                                      ]
+                                                      sty["select__popup"]
                                                     }
+                                                    value={generateStateValueProp(
+                                                      $state,
+                                                      ["select", "value"]
+                                                    )}
                                                   />
                                                 </FormItemWrapper>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.formField__f8Fcn
+                                                    sty.formField__rSlJ
                                                   )}
                                                   initialValue={undefined}
                                                   label={
-                                                    "Date action was taken"
+                                                    <div
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        projectcss.__wab_text,
+                                                        sty.text___8Lr1T
+                                                      )}
+                                                    >
+                                                      {
+                                                        "Date the action was taken"
+                                                      }
+                                                    </div>
                                                   }
                                                   name={"action_date"}
                                                 >
-                                                  <AntdDatePicker
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.dateTimePicker
-                                                    )}
-                                                    popupScopeClassName={
-                                                      sty[
-                                                        "dateTimePicker__datePickerPopup"
-                                                      ]
-                                                    }
-                                                  />
+                                                  {(() => {
+                                                    const child$Props = {
+                                                      className: classNames(
+                                                        "__wab_instance",
+                                                        sty.timePicker
+                                                      ),
+                                                      onChange: async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangePropForCodeComponents(
+                                                          $state,
+                                                          "value",
+                                                          [
+                                                            "timePicker",
+                                                            "value"
+                                                          ],
+                                                          AntdDatePicker_Helpers
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      },
+                                                      popupScopeClassName:
+                                                        sty[
+                                                          "timePicker__datePickerPopup"
+                                                        ],
+                                                      value:
+                                                        generateStateValueProp(
+                                                          $state,
+                                                          [
+                                                            "timePicker",
+                                                            "value"
+                                                          ]
+                                                        )
+                                                    };
+                                                    initializeCodeComponentStates(
+                                                      $state,
+                                                      [
+                                                        {
+                                                          name: "value",
+                                                          plasmicStateName:
+                                                            "timePicker.value"
+                                                        }
+                                                      ],
+                                                      [],
+                                                      AntdDatePicker_Helpers ??
+                                                        {},
+                                                      child$Props
+                                                    );
+
+                                                    return (
+                                                      <AntdDatePicker
+                                                        data-plasmic-name={
+                                                          "timePicker"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.timePicker
+                                                        }
+                                                        {...child$Props}
+                                                      />
+                                                    );
+                                                  })()}
                                                 </FormItemWrapper>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.formField__pjEp
+                                                    sty.formField___3CkKw
                                                   )}
-                                                  hidden={false}
+                                                  hidden={true}
                                                   initialValue={(() => {
                                                     try {
                                                       return $queries
@@ -2174,104 +2464,335 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                       throw e;
                                                     }
                                                   })()}
-                                                  label={"location_id"}
+                                                  label={
+                                                    <div
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        projectcss.__wab_text,
+                                                        sty.text__bxlc3
+                                                      )}
+                                                    >
+                                                      {"location_id"}
+                                                    </div>
+                                                  }
                                                   name={"location_id"}
-                                                  valuePropName={``}
                                                 >
-                                                  <AntdInput
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.input___492Md
-                                                    )}
-                                                  />
+                                                  {(() => {
+                                                    const child$Props = {
+                                                      className: classNames(
+                                                        "__wab_instance",
+                                                        sty.input2
+                                                      ),
+                                                      onChange: async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangePropForCodeComponents(
+                                                          $state,
+                                                          "value",
+                                                          ["input2", "value"],
+                                                          AntdInput_Helpers
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      },
+                                                      value:
+                                                        generateStateValueProp(
+                                                          $state,
+                                                          ["input2", "value"]
+                                                        )
+                                                    };
+                                                    initializeCodeComponentStates(
+                                                      $state,
+                                                      [
+                                                        {
+                                                          name: "value",
+                                                          plasmicStateName:
+                                                            "input2.value"
+                                                        }
+                                                      ],
+                                                      [],
+                                                      AntdInput_Helpers ?? {},
+                                                      child$Props
+                                                    );
+
+                                                    return (
+                                                      <AntdInput
+                                                        data-plasmic-name={
+                                                          "input2"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.input2
+                                                        }
+                                                        {...child$Props}
+                                                      />
+                                                    );
+                                                  })()}
                                                 </FormItemWrapper>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.formField__wy33X
+                                                    sty.formField___6Kjrs
                                                   )}
                                                   hidden={true}
-                                                  initialValue={(() => {
-                                                    try {
-                                                      return undefined;
-                                                    } catch (e) {
-                                                      if (
-                                                        e instanceof
-                                                          TypeError ||
-                                                        e?.plasmicType ===
-                                                          "PlasmicUndefinedDataError"
-                                                      ) {
-                                                        return undefined;
-                                                      }
-                                                      throw e;
-                                                    }
-                                                  })()}
-                                                  label={"leader_name"}
+                                                  initialValue={undefined}
+                                                  label={
+                                                    <div
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        projectcss.__wab_text,
+                                                        sty.text__q5YkF
+                                                      )}
+                                                    >
+                                                      {"leader_name"}
+                                                    </div>
+                                                  }
                                                   name={"leader_name"}
                                                 >
-                                                  <AntdInput
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.input__hv8Eq
-                                                    )}
-                                                  />
+                                                  {(() => {
+                                                    const child$Props = {
+                                                      className: classNames(
+                                                        "__wab_instance",
+                                                        sty.input3
+                                                      ),
+                                                      onChange: async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangePropForCodeComponents(
+                                                          $state,
+                                                          "value",
+                                                          ["input3", "value"],
+                                                          AntdInput_Helpers
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      },
+                                                      value:
+                                                        generateStateValueProp(
+                                                          $state,
+                                                          ["input3", "value"]
+                                                        )
+                                                    };
+                                                    initializeCodeComponentStates(
+                                                      $state,
+                                                      [
+                                                        {
+                                                          name: "value",
+                                                          plasmicStateName:
+                                                            "input3.value"
+                                                        }
+                                                      ],
+                                                      [],
+                                                      AntdInput_Helpers ?? {},
+                                                      child$Props
+                                                    );
+
+                                                    return (
+                                                      <AntdInput
+                                                        data-plasmic-name={
+                                                          "input3"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.input3
+                                                        }
+                                                        {...child$Props}
+                                                      />
+                                                    );
+                                                  })()}
                                                 </FormItemWrapper>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.formField___89ZXy
+                                                    sty.formField__bFoUl
                                                   )}
                                                   hidden={true}
                                                   initialValue={undefined}
                                                   label={"created_at"}
                                                   name={"created_at"}
                                                 >
-                                                  <AntdInput
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.input__eA4Fg
-                                                    )}
-                                                  />
+                                                  {(() => {
+                                                    const child$Props = {
+                                                      className: classNames(
+                                                        "__wab_instance",
+                                                        sty.input4
+                                                      ),
+                                                      onChange: async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangePropForCodeComponents(
+                                                          $state,
+                                                          "value",
+                                                          ["input4", "value"],
+                                                          AntdInput_Helpers
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      },
+                                                      value:
+                                                        generateStateValueProp(
+                                                          $state,
+                                                          ["input4", "value"]
+                                                        )
+                                                    };
+                                                    initializeCodeComponentStates(
+                                                      $state,
+                                                      [
+                                                        {
+                                                          name: "value",
+                                                          plasmicStateName:
+                                                            "input4.value"
+                                                        }
+                                                      ],
+                                                      [],
+                                                      AntdInput_Helpers ?? {},
+                                                      child$Props
+                                                    );
+
+                                                    return (
+                                                      <AntdInput
+                                                        data-plasmic-name={
+                                                          "input4"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.input4
+                                                        }
+                                                        {...child$Props}
+                                                      />
+                                                    );
+                                                  })()}
                                                 </FormItemWrapper>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.formField__te6Uo
+                                                    sty.formField__gfSku
                                                   )}
                                                   hidden={true}
                                                   initialValue={undefined}
                                                   label={"employee_name"}
                                                   name={"employee_name"}
                                                 >
-                                                  <AntdInput
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.input___4WroT
-                                                    )}
-                                                  />
+                                                  {(() => {
+                                                    const child$Props = {
+                                                      className: classNames(
+                                                        "__wab_instance",
+                                                        sty.input5
+                                                      ),
+                                                      onChange: async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangePropForCodeComponents(
+                                                          $state,
+                                                          "value",
+                                                          ["input5", "value"],
+                                                          AntdInput_Helpers
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      },
+                                                      value:
+                                                        generateStateValueProp(
+                                                          $state,
+                                                          ["input5", "value"]
+                                                        )
+                                                    };
+                                                    initializeCodeComponentStates(
+                                                      $state,
+                                                      [
+                                                        {
+                                                          name: "value",
+                                                          plasmicStateName:
+                                                            "input5.value"
+                                                        }
+                                                      ],
+                                                      [],
+                                                      AntdInput_Helpers ?? {},
+                                                      child$Props
+                                                    );
+
+                                                    return (
+                                                      <AntdInput
+                                                        data-plasmic-name={
+                                                          "input5"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.input5
+                                                        }
+                                                        {...child$Props}
+                                                      />
+                                                    );
+                                                  })()}
                                                 </FormItemWrapper>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.formField__aqR7X
+                                                    sty.formField__cTGx
                                                   )}
                                                   hidden={true}
                                                   initialValue={undefined}
                                                   label={"action"}
                                                   name={"action"}
                                                 >
-                                                  <AntdInput
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.input__vX2YC
-                                                    )}
-                                                  />
+                                                  {(() => {
+                                                    const child$Props = {
+                                                      className: classNames(
+                                                        "__wab_instance",
+                                                        sty.input6
+                                                      ),
+                                                      onChange: async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangePropForCodeComponents(
+                                                          $state,
+                                                          "value",
+                                                          ["input6", "value"],
+                                                          AntdInput_Helpers
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      },
+                                                      value:
+                                                        generateStateValueProp(
+                                                          $state,
+                                                          ["input6", "value"]
+                                                        )
+                                                    };
+                                                    initializeCodeComponentStates(
+                                                      $state,
+                                                      [
+                                                        {
+                                                          name: "value",
+                                                          plasmicStateName:
+                                                            "input6.value"
+                                                        }
+                                                      ],
+                                                      [],
+                                                      AntdInput_Helpers ?? {},
+                                                      child$Props
+                                                    );
+
+                                                    return (
+                                                      <AntdInput
+                                                        data-plasmic-name={
+                                                          "input6"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.input6
+                                                        }
+                                                        {...child$Props}
+                                                      />
+                                                    );
+                                                  })()}
                                                 </FormItemWrapper>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.formField__mAiK0
+                                                    sty.formField__f0YPd
                                                   )}
+                                                  hidden={true}
                                                   initialValue={(() => {
                                                     try {
                                                       return $queries
@@ -2289,21 +2810,155 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                       throw e;
                                                     }
                                                   })()}
-                                                  label={"org_id"}
+                                                  label={
+                                                    <div
+                                                      className={classNames(
+                                                        projectcss.all,
+                                                        projectcss.__wab_text,
+                                                        sty.text__va9G
+                                                      )}
+                                                    >
+                                                      {"org_id"}
+                                                    </div>
+                                                  }
                                                   name={"org_id"}
                                                 >
-                                                  <AntdInput
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.input__uTjce
-                                                    )}
-                                                  />
+                                                  {(() => {
+                                                    const child$Props = {
+                                                      className: classNames(
+                                                        "__wab_instance",
+                                                        sty.input7
+                                                      ),
+                                                      onChange: async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangePropForCodeComponents(
+                                                          $state,
+                                                          "value",
+                                                          ["input7", "value"],
+                                                          AntdInput_Helpers
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      },
+                                                      value:
+                                                        generateStateValueProp(
+                                                          $state,
+                                                          ["input7", "value"]
+                                                        )
+                                                    };
+                                                    initializeCodeComponentStates(
+                                                      $state,
+                                                      [
+                                                        {
+                                                          name: "value",
+                                                          plasmicStateName:
+                                                            "input7.value"
+                                                        }
+                                                      ],
+                                                      [],
+                                                      AntdInput_Helpers ?? {},
+                                                      child$Props
+                                                    );
+
+                                                    return (
+                                                      <AntdInput
+                                                        data-plasmic-name={
+                                                          "input7"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.input7
+                                                        }
+                                                        {...child$Props}
+                                                      />
+                                                    );
+                                                  })()}
                                                 </FormItemWrapper>
                                                 <FormItemWrapper
                                                   className={classNames(
                                                     "__wab_instance",
-                                                    sty.formField__zNNas
+                                                    sty.formField__p4Cge
                                                   )}
+                                                  hidden={true}
+                                                  initialValue={(() => {
+                                                    try {
+                                                      return $queries
+                                                        .employeesDiscQuery
+                                                        .data[0].id;
+                                                    } catch (e) {
+                                                      if (
+                                                        e instanceof
+                                                          TypeError ||
+                                                        e?.plasmicType ===
+                                                          "PlasmicUndefinedDataError"
+                                                      ) {
+                                                        return undefined;
+                                                      }
+                                                      throw e;
+                                                    }
+                                                  })()}
+                                                  label={"employee_id"}
+                                                  name={"employee_id"}
+                                                >
+                                                  {(() => {
+                                                    const child$Props = {
+                                                      className: classNames(
+                                                        "__wab_instance",
+                                                        sty.input8
+                                                      ),
+                                                      onChange: async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangePropForCodeComponents(
+                                                          $state,
+                                                          "value",
+                                                          ["input8", "value"],
+                                                          AntdInput_Helpers
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      },
+                                                      value:
+                                                        generateStateValueProp(
+                                                          $state,
+                                                          ["input8", "value"]
+                                                        )
+                                                    };
+                                                    initializeCodeComponentStates(
+                                                      $state,
+                                                      [
+                                                        {
+                                                          name: "value",
+                                                          plasmicStateName:
+                                                            "input8.value"
+                                                        }
+                                                      ],
+                                                      [],
+                                                      AntdInput_Helpers ?? {},
+                                                      child$Props
+                                                    );
+
+                                                    return (
+                                                      <AntdInput
+                                                        data-plasmic-name={
+                                                          "input8"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.input8
+                                                        }
+                                                        {...child$Props}
+                                                      />
+                                                    );
+                                                  })()}
+                                                </FormItemWrapper>
+                                                <FormItemWrapper
+                                                  className={classNames(
+                                                    "__wab_instance",
+                                                    sty.formField__nl4D
+                                                  )}
+                                                  hidden={true}
                                                   initialValue={(() => {
                                                     try {
                                                       return $ctx.auth.id;
@@ -2319,45 +2974,66 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                       throw e;
                                                     }
                                                   })()}
-                                                  label={"Leader taking action"}
+                                                  label={"acting_leader"}
                                                   name={"acting_leader"}
                                                 >
-                                                  <AntdSelect
-                                                    className={classNames(
-                                                      "__wab_instance",
-                                                      sty.select___3Epa8
-                                                    )}
-                                                    defaultStylesClassName={classNames(
-                                                      projectcss.root_reset,
-                                                      projectcss.plasmic_default_styles,
-                                                      projectcss.plasmic_mixins,
-                                                      styleTokensClassNames
-                                                    )}
-                                                    options={(() => {
-                                                      try {
-                                                        return $queries
-                                                          .directorsQuery.data;
-                                                      } catch (e) {
-                                                        if (
-                                                          e instanceof
-                                                            TypeError ||
-                                                          e?.plasmicType ===
-                                                            "PlasmicUndefinedDataError"
-                                                        ) {
-                                                          return undefined;
+                                                  {(() => {
+                                                    const child$Props = {
+                                                      className: classNames(
+                                                        "__wab_instance",
+                                                        sty.input9
+                                                      ),
+                                                      onChange: async (
+                                                        ...eventArgs: any
+                                                      ) => {
+                                                        generateStateOnChangePropForCodeComponents(
+                                                          $state,
+                                                          "value",
+                                                          ["input9", "value"],
+                                                          AntdInput_Helpers
+                                                        ).apply(
+                                                          null,
+                                                          eventArgs
+                                                        );
+                                                      },
+                                                      value:
+                                                        generateStateValueProp(
+                                                          $state,
+                                                          ["input9", "value"]
+                                                        )
+                                                    };
+                                                    initializeCodeComponentStates(
+                                                      $state,
+                                                      [
+                                                        {
+                                                          name: "value",
+                                                          plasmicStateName:
+                                                            "input9.value"
                                                         }
-                                                        throw e;
-                                                      }
-                                                    })()}
-                                                    placeholder={"Select..."}
-                                                    popupScopeClassName={
-                                                      sty[
-                                                        "select___3Epa8__popup"
-                                                      ]
-                                                    }
-                                                  />
+                                                      ],
+                                                      [],
+                                                      AntdInput_Helpers ?? {},
+                                                      child$Props
+                                                    );
+
+                                                    return (
+                                                      <AntdInput
+                                                        data-plasmic-name={
+                                                          "input9"
+                                                        }
+                                                        data-plasmic-override={
+                                                          overrides.input9
+                                                        }
+                                                        {...child$Props}
+                                                      />
+                                                    );
+                                                  })()}
                                                 </FormItemWrapper>
                                                 <AntdButton
+                                                  data-plasmic-name={"button"}
+                                                  data-plasmic-override={
+                                                    overrides.button
+                                                  }
                                                   className={classNames(
                                                     "__wab_instance",
                                                     sty.button
@@ -2369,7 +3045,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                                                     className={classNames(
                                                       projectcss.all,
                                                       projectcss.__wab_text,
-                                                      sty.text__sLkVx
+                                                      sty.text__y0Lnl
                                                     )}
                                                   >
                                                     {"Submit"}
@@ -2718,7 +3394,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg",
     "frame6",
@@ -2789,7 +3475,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg",
     "frame6",
@@ -2858,7 +3554,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg",
     "frame6",
@@ -2933,7 +3639,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg",
     "frame6",
@@ -2991,7 +3707,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg",
     "frame6",
@@ -3048,7 +3774,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg",
     "frame6",
@@ -3104,7 +3840,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg",
     "frame6",
@@ -3159,7 +3905,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg",
     "frame6",
@@ -3213,7 +3969,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg",
     "frame6",
@@ -3262,7 +4028,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg",
     "frame6",
@@ -3367,7 +4143,17 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg"
   ],
@@ -3376,14 +4162,64 @@ const PlasmicDescendants = {
     "text27",
     "modal",
     "form",
-    "dateTimePicker",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
     "button",
     "svg"
   ],
   text27: ["text27"],
-  modal: ["modal", "form", "dateTimePicker", "button", "svg"],
-  form: ["form", "dateTimePicker", "button"],
-  dateTimePicker: ["dateTimePicker"],
+  modal: [
+    "modal",
+    "form",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
+    "button",
+    "svg"
+  ],
+  form: [
+    "form",
+    "input",
+    "select",
+    "timePicker",
+    "input2",
+    "input3",
+    "input4",
+    "input5",
+    "input6",
+    "input7",
+    "input8",
+    "input9",
+    "button"
+  ],
+  input: ["input"],
+  select: ["select"],
+  timePicker: ["timePicker"],
+  input2: ["input2"],
+  input3: ["input3"],
+  input4: ["input4"],
+  input5: ["input5"],
+  input6: ["input6"],
+  input7: ["input7"],
+  input8: ["input8"],
+  input9: ["input9"],
   button: ["button"],
   svg: ["svg"],
   frame6: [
@@ -3490,7 +4326,17 @@ type NodeDefaultElementType = {
   text27: "div";
   modal: typeof AntdModal;
   form: typeof FormWrapper;
-  dateTimePicker: typeof AntdDatePicker;
+  input: typeof AntdInput;
+  select: typeof AntdSelect;
+  timePicker: typeof AntdDatePicker;
+  input2: typeof AntdInput;
+  input3: typeof AntdInput;
+  input4: typeof AntdInput;
+  input5: typeof AntdInput;
+  input6: typeof AntdInput;
+  input7: typeof AntdInput;
+  input8: typeof AntdInput;
+  input9: typeof AntdInput;
   button: typeof AntdButton;
   svg: "svg";
   frame6: "div";
@@ -3623,7 +4469,17 @@ export const PlasmicDiscipline = Object.assign(
     text27: makeNodeComponent("text27"),
     modal: makeNodeComponent("modal"),
     form: makeNodeComponent("form"),
-    dateTimePicker: makeNodeComponent("dateTimePicker"),
+    input: makeNodeComponent("input"),
+    select: makeNodeComponent("select"),
+    timePicker: makeNodeComponent("timePicker"),
+    input2: makeNodeComponent("input2"),
+    input3: makeNodeComponent("input3"),
+    input4: makeNodeComponent("input4"),
+    input5: makeNodeComponent("input5"),
+    input6: makeNodeComponent("input6"),
+    input7: makeNodeComponent("input7"),
+    input8: makeNodeComponent("input8"),
+    input9: makeNodeComponent("input9"),
     button: makeNodeComponent("button"),
     svg: makeNodeComponent("svg"),
     frame6: makeNodeComponent("frame6"),
