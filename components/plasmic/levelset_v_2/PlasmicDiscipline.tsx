@@ -257,7 +257,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "drawerV2.open",
         type: "private",
         variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => false
+        initFunc: ({ $props, $state, $queries, $ctx }) => true
       },
       {
         path: "selectedEmployee",
@@ -1293,7 +1293,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                           )}
                         >
                           {
-                            "Here\u2019s your organization's current points. Click a Team Member to see their recent infractions."
+                            "Here\u2019s your organization's current discipline health. Click a Team Member to see their recent infractions."
                           }
                         </div>
                       </div>
