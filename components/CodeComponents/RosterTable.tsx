@@ -25,7 +25,8 @@ export type Role =
   | "New Hire"
   | "Team Member"
   | "Team Lead"
-  | "Director";
+  | "Director"
+  | "Trainer";
 
 export interface RosterEntry {
   id: string;
@@ -77,6 +78,7 @@ const sampleData: RosterEntry[] = [
   { id: "6", name: "Casey Howard",      currentRole: "Director",  foh: true,  boh: true  },
   { id: "7", name: "Celia Barrera",     currentRole: "New Hire",  foh: true,  boh: false },
   { id: "8", name: "Daniel Millan",     currentRole: "Team Member", foh: true, boh: false },
+  { id: "9", name: "Sarah Johnson",     currentRole: "Trainer",   foh: true,  boh: true  },
 ];
 
 // role → chip colors (can still be overridden via roleBadgeClass)
@@ -91,6 +93,8 @@ const roleChip = (role: Role) => {
       return `${base} team-member`;
     case "Director":
       return `${base} director`;
+    case "Trainer":
+      return `${base} trainer`;
     default:
       return `${base} new-hire`;
   }
@@ -184,6 +188,10 @@ const RoleChip = styled(Box)(() => ({
   "&.director": {
     backgroundColor: "#f3e8ff",
     color: "#7c3aed",
+  },
+  "&.trainer": {
+    backgroundColor: "#fef2f2",
+    color: "#dc2626",
   },
 }));
 
@@ -615,7 +623,7 @@ export function RosterTable({
                     }
                   }}
                 >
-                  {(["New Hire", "Team Member", "Team Lead", "Director"] as Role[]).map((role) => (
+                  {(["New Hire", "Team Member", "Team Lead", "Director", "Trainer"] as Role[]).map((role) => (
                     <RoleMenuItem
                       key={role}
                       onClick={() => handleRoleSelect(e.id, role)}
