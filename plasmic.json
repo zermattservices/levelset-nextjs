@@ -538,6 +538,20 @@
           "cssFilePath": "plasmic/levelset_v_2/PlasmicDiscActionForm.module.css",
           "scheme": "blackbox",
           "componentType": "component"
+        },
+        {
+          "id": "_BgwMJSaZ9Nz",
+          "name": "Admin",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicAdmin.tsx",
+          "importSpec": {
+            "modulePath": "../pages/admin.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicAdmin.module.css",
+          "scheme": "blackbox",
+          "componentType": "page",
+          "path": "/admin"
         }
       ],
       "icons": [
