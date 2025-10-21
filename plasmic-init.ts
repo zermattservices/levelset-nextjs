@@ -239,6 +239,14 @@ PLASMIC.registerComponent(RosterTable, {
       ],
       description: "Called when BOH checkbox changes"
     },
+    onRoleChange: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "newRole", type: "string" }
+      ],
+      description: "Called when employee role is changed"
+    },
     onEdit: {
       type: "eventHandler",
       argTypes: [{ name: "id", type: "string" }],

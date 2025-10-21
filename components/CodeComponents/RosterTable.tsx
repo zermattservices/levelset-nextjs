@@ -12,9 +12,14 @@ import {
   Typography,
   IconButton,
   Stack,
+  Menu,
+  MenuItem,
+  Button,
+  Box,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export type Role =
   | "New Hire"
@@ -54,6 +59,7 @@ export interface RosterTableProps {
   // handlers
   onFohChange?: (id: string, checked: boolean) => void;
   onBohChange?: (id: string, checked: boolean) => void;
+  onRoleChange?: (id: string, newRole: Role) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onEmployeeCreate?: (employee: Partial<Employee>) => void;
@@ -148,6 +154,52 @@ const ActionsButton = styled(IconButton)(() => ({
   },
 }));
 
+const RoleChip = styled(Box)(() => ({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 4,
+  padding: "4px 8px",
+  borderRadius: 12,
+  fontSize: 12,
+  fontWeight: 500,
+  cursor: "pointer",
+  transition: "all 0.15s ease-in-out",
+  "&:hover": {
+    opacity: 0.8,
+    transform: "translateY(-1px)",
+  },
+  "&.new-hire": {
+    backgroundColor: "#fef3c7",
+    color: "#92400e",
+  },
+  "&.team-member": {
+    backgroundColor: "#dbeafe",
+    color: "#1e40af",
+  },
+  "&.team-lead": {
+    backgroundColor: "#d1fae5",
+    color: "#065f46",
+  },
+  "&.director": {
+    backgroundColor: "#f3e8ff",
+    color: "#7c3aed",
+  },
+}));
+
+const SaveButton = styled(Button)(() => ({
+  marginTop: 8,
+  backgroundColor: "#31664a",
+  color: "white",
+  fontSize: 12,
+  fontWeight: 500,
+  padding: "6px 12px",
+  borderRadius: 6,
+  textTransform: "none",
+  "&:hover": {
+    backgroundColor: "#2d5a42",
+  },
+}));
+
 export function RosterTable({
   orgId,
   locationId,
@@ -168,6 +220,7 @@ export function RosterTable({
 
   onFohChange,
   onBohChange,
+  onRoleChange,
   onEdit,
   onDelete,
   onEmployeeCreate,
@@ -177,6 +230,10 @@ export function RosterTable({
   const [data, setData] = React.useState<RosterEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  
+  // Role dropdown state
+  const [roleMenuAnchor, setRoleMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
+  const [pendingRoleChanges, setPendingRoleChanges] = React.useState<{ [key: string]: Role }>({});
 
   const cellPadding = density === "compact" ? 1 : 1.5;
   
@@ -320,6 +377,73 @@ export function RosterTable({
     }
   };
 
+  // Role dropdown handlers
+  const handleRoleMenuOpen = (event: React.MouseEvent<HTMLElement>, employeeId: string) => {
+    setRoleMenuAnchor(prev => ({
+      ...prev,
+      [employeeId]: event.currentTarget
+    }));
+  };
+
+  const handleRoleMenuClose = (employeeId: string) => {
+    setRoleMenuAnchor(prev => ({
+      ...prev,
+      [employeeId]: null
+    }));
+    // Clear pending changes when closing without saving
+    setPendingRoleChanges(prev => {
+      const newPending = { ...prev };
+      delete newPending[employeeId];
+      return newPending;
+    });
+  };
+
+  const handleRoleSelect = (employeeId: string, newRole: Role) => {
+    setPendingRoleChanges(prev => ({
+      ...prev,
+      [employeeId]: newRole
+    }));
+  };
+
+  const handleSaveRoleChange = async (employeeId: string) => {
+    const newRole = pendingRoleChanges[employeeId];
+    if (!newRole) return;
+
+    if (onRoleChange) {
+      onRoleChange(employeeId, newRole);
+    }
+
+    // Update via API
+    try {
+      const formData = new FormData();
+      formData.append('intent', 'update');
+      formData.append('id', employeeId);
+      formData.append('role', newRole);
+      
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) throw new Error('Failed to update employee role');
+      
+      // Optimistic update
+      setData(prev => prev.map(emp => 
+        emp.id === employeeId ? { ...emp, currentRole: newRole } : emp
+      ));
+      
+      // Clear pending changes and close menu
+      setPendingRoleChanges(prev => {
+        const newPending = { ...prev };
+        delete newPending[employeeId];
+        return newPending;
+      });
+      handleRoleMenuClose(employeeId);
+    } catch (err) {
+      console.error('Error updating employee role:', err);
+    }
+  };
+
   if (loading && data.length === 0) {
     return (
       <StyledContainer
@@ -442,13 +566,54 @@ export function RosterTable({
                 className={cellClass}
                 sx={{ py: cellPadding }}
               >
-                <span
-                  className={`${roleChip(e.currentRole)} ${
-                    roleBadgeClass || ""
-                  }`}
+                <RoleChip
+                  className={`${roleChip(e.currentRole)} ${roleBadgeClass || ""}`}
+                  onClick={(event) => handleRoleMenuOpen(event, e.id)}
                 >
-                  {e.currentRole}
-                </span>
+                  {pendingRoleChanges[e.id] || e.currentRole}
+                  <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
+                </RoleChip>
+                
+                <Menu
+                  anchorEl={roleMenuAnchor[e.id]}
+                  open={Boolean(roleMenuAnchor[e.id])}
+                  onClose={() => handleRoleMenuClose(e.id)}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }}
+                >
+                  {(["New Hire", "Team Member", "Team Lead", "Director"] as Role[]).map((role) => (
+                    <MenuItem
+                      key={role}
+                      onClick={() => handleRoleSelect(e.id, role)}
+                      selected={pendingRoleChanges[e.id] === role}
+                      sx={{
+                        fontSize: 12,
+                        py: 1,
+                        px: 2,
+                      }}
+                    >
+                      {role}
+                    </MenuItem>
+                  ))}
+                  
+                  {pendingRoleChanges[e.id] && (
+                    <Box sx={{ px: 2, py: 1, borderTop: '1px solid #e5e7eb' }}>
+                      <SaveButton
+                        fullWidth
+                        onClick={() => handleSaveRoleChange(e.id)}
+                        size="small"
+                      >
+                        Save Changes
+                      </SaveButton>
+                    </Box>
+                  )}
+                </Menu>
               </TableCell>
               <TableCell
                 className={cellClass}
