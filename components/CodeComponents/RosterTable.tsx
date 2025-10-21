@@ -624,9 +624,14 @@ export function RosterTable({
                     className={`${roleChip(e.currentRole)} ${roleBadgeClass || ""}`}
                     sx={{ 
                       cursor: "default",
+                      outline: "none",
                       "&:hover": { 
                         opacity: 1, 
-                        transform: "none" 
+                        transform: "none",
+                        outline: "none"
+                      },
+                      "&:focus": {
+                        outline: "none"
                       }
                     }}
                   >
