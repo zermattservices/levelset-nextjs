@@ -162,6 +162,7 @@ const RoleChip = styled(Box)(() => ({
   borderRadius: 12,
   fontSize: 12,
   fontWeight: 500,
+  fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
   cursor: "pointer",
   transition: "all 0.15s ease-in-out",
   "&:hover": {
@@ -186,12 +187,31 @@ const RoleChip = styled(Box)(() => ({
   },
 }));
 
+const RoleMenuItem = styled(MenuItem)(() => ({
+  fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+  fontSize: 12,
+  fontWeight: 500,
+  padding: "8px 12px",
+  margin: "2px 8px",
+  borderRadius: 8,
+  "&.Mui-selected": {
+    backgroundColor: "#f3f4f6",
+    "&:hover": {
+      backgroundColor: "#e5e7eb",
+    },
+  },
+  "&:hover": {
+    backgroundColor: "#f9fafb",
+  },
+}));
+
 const SaveButton = styled(Button)(() => ({
   marginTop: 8,
   backgroundColor: "#31664a",
   color: "white",
   fontSize: 12,
   fontWeight: 500,
+  fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
   padding: "6px 12px",
   borderRadius: 6,
   textTransform: "none",
@@ -586,20 +606,34 @@ export function RosterTable({
                     vertical: 'top',
                     horizontal: 'left',
                   }}
+                  PaperProps={{
+                    sx: {
+                      fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+                      borderRadius: 2,
+                      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                      border: "1px solid #e5e7eb",
+                    }
+                  }}
                 >
                   {(["New Hire", "Team Member", "Team Lead", "Director"] as Role[]).map((role) => (
-                    <MenuItem
+                    <RoleMenuItem
                       key={role}
                       onClick={() => handleRoleSelect(e.id, role)}
                       selected={pendingRoleChanges[e.id] === role}
-                      sx={{
-                        fontSize: 12,
-                        py: 1,
-                        px: 2,
-                      }}
                     >
-                      {role}
-                    </MenuItem>
+                      <RoleChip
+                        className={`${roleChip(role)} ${roleBadgeClass || ""}`}
+                        sx={{ 
+                          cursor: "default",
+                          "&:hover": { 
+                            opacity: 1, 
+                            transform: "none" 
+                          }
+                        }}
+                      >
+                        {role}
+                      </RoleChip>
+                    </RoleMenuItem>
                   ))}
                   
                   {pendingRoleChanges[e.id] && (
