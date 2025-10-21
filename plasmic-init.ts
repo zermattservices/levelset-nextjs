@@ -159,9 +159,114 @@ PLASMIC.registerComponent(RosterTable, {
   name: "RosterTable",
   displayName: "Roster Table",
   props: {
-    orgId: "string",
-    locationId: "string",
+    orgId: {
+      type: "string",
+      defaultValue: "default-org",
+      description: "Organization ID for filtering employee data"
+    },
+    locationId: {
+      type: "string",
+      defaultValue: "default-location", 
+      description: "Location ID for filtering employee data"
+    },
     className: "string",
+    density: {
+      type: "choice",
+      options: ["comfortable", "compact"],
+      defaultValue: "comfortable",
+      description: "Table density/spacing"
+    },
+    showActions: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Whether to show action buttons"
+    },
+    // Style override props for Plasmic design control
+    tableClass: {
+      type: "string",
+      description: "CSS class for the table element"
+    },
+    headerRowClass: {
+      type: "string", 
+      description: "CSS class for header row"
+    },
+    headerCellClass: {
+      type: "string",
+      description: "CSS class for header cells"
+    },
+    rowClass: {
+      type: "string",
+      description: "CSS class for data rows"
+    },
+    cellClass: {
+      type: "string",
+      description: "CSS class for data cells"
+    },
+    nameCellClass: {
+      type: "string",
+      description: "CSS class for name cells"
+    },
+    roleBadgeClass: {
+      type: "string",
+      description: "CSS class for role badges"
+    },
+    checkboxOnClass: {
+      type: "string",
+      description: "CSS class for checked checkboxes"
+    },
+    checkboxOffClass: {
+      type: "string", 
+      description: "CSS class for unchecked checkboxes"
+    },
+    actionsCellClass: {
+      type: "string",
+      description: "CSS class for actions cell"
+    },
+    // Event handlers
+    onFohChange: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "checked", type: "boolean" }
+      ],
+      description: "Called when FOH checkbox changes"
+    },
+    onBohChange: {
+      type: "eventHandler", 
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "checked", type: "boolean" }
+      ],
+      description: "Called when BOH checkbox changes"
+    },
+    onEdit: {
+      type: "eventHandler",
+      argTypes: [{ name: "id", type: "string" }],
+      description: "Called when edit action is clicked"
+    },
+    onDelete: {
+      type: "eventHandler",
+      argTypes: [{ name: "id", type: "string" }],
+      description: "Called when delete action is clicked"
+    },
+    onEmployeeCreate: {
+      type: "eventHandler",
+      argTypes: [{ name: "employee", type: "object" }],
+      description: "Called when creating a new employee"
+    },
+    onEmployeeUpdate: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "employee", type: "object" }
+      ],
+      description: "Called when updating an employee"
+    },
+    onEmployeeDelete: {
+      type: "eventHandler",
+      argTypes: [{ name: "id", type: "string" }],
+      description: "Called when deleting an employee"
+    }
   },
   importPath: "./components/CodeComponents/RosterTable",
 });
