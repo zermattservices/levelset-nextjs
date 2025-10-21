@@ -202,12 +202,12 @@ const RoleChip = styled(Box)(() => ({
     color: "#7c3aed",
   },
   "&.executive": {
-    backgroundColor: "#f3e8ff",
-    color: "#7c3aed",
+    backgroundColor: "#F0F0FF",
+    color: "#483D8B",
   },
   "&.operator": {
-    backgroundColor: "#f3e8ff",
-    color: "#7c3aed",
+    backgroundColor: "#F0F0FF",
+    color: "#483D8B",
   },
 }));
 
@@ -375,14 +375,16 @@ export function RosterTable({
     
     // Update via API
     try {
-      const formData = new FormData();
-      formData.append('intent', 'update');
-      formData.append('id', id);
-      formData.append('is_foh', checked.toString());
-      
       const response = await fetch('/api/employees', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          intent: 'update',
+          id: id,
+          is_foh: checked
+        })
       });
       
       if (!response.ok) throw new Error('Failed to update employee');
@@ -403,14 +405,16 @@ export function RosterTable({
     
     // Update via API
     try {
-      const formData = new FormData();
-      formData.append('intent', 'update');
-      formData.append('id', id);
-      formData.append('is_boh', checked.toString());
-      
       const response = await fetch('/api/employees', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          intent: 'update',
+          id: id,
+          is_boh: checked
+        })
       });
       
       if (!response.ok) throw new Error('Failed to update employee');
@@ -462,14 +466,16 @@ export function RosterTable({
 
     // Update via API
     try {
-      const formData = new FormData();
-      formData.append('intent', 'update');
-      formData.append('id', employeeId);
-      formData.append('role', newRole);
-      
       const response = await fetch('/api/employees', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          intent: 'update',
+          id: employeeId,
+          role: newRole
+        })
       });
       
       if (!response.ok) throw new Error('Failed to update employee role');
