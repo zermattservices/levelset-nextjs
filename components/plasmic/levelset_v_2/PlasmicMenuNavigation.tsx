@@ -331,8 +331,24 @@ function PlasmicMenuNavigation__RenderFunc(props: {
         }
       )}
     >
-      <div className={classNames(projectcss.all, sty.freeBox__qAtX2)}>
-        <div className={classNames(projectcss.all, sty.freeBox__a3UdP)}>
+      <div
+        className={classNames(projectcss.all, sty.freeBox__qAtX2, {
+          [sty.freeBoxdashboardOpen__qAtX2KDcoZ]: hasVariant(
+            $state,
+            "dashboardOpen",
+            "dashboardOpen"
+          )
+        })}
+      >
+        <div
+          className={classNames(projectcss.all, sty.freeBox__a3UdP, {
+            [sty.freeBoxdashboardOpen__a3UdPkDcoZ]: hasVariant(
+              $state,
+              "dashboardOpen",
+              "dashboardOpen"
+            )
+          })}
+        >
           <PlasmicImg__
             data-plasmic-name={"logo"}
             data-plasmic-override={overrides.logo}

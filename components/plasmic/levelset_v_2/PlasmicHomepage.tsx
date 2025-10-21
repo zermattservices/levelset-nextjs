@@ -91,6 +91,8 @@ export type PlasmicHomepage__OverridesType = {
   _360Stack?: Flex__<"div">;
   heading3?: Flex__<"div">;
   heading7?: Flex__<"div">;
+  trendCard?: Flex__<typeof TrendCard>;
+  text?: Flex__<"div">;
   heading9?: Flex__<"div">;
   trendCard2?: Flex__<typeof TrendCard>;
   text2?: Flex__<"div">;
@@ -598,6 +600,47 @@ function PlasmicHomepage__RenderFunc(props: {
                         }
                         metricName={"PEA Ratings"}
                         metricTotal2={"863"}
+                        trendCard2={
+                          <TrendCard
+                            data-plasmic-name={"trendCard"}
+                            data-plasmic-override={overrides.trendCard}
+                            className={classNames(
+                              "__wab_instance",
+                              sty.trendCard
+                            )}
+                            onValueChange={async (...eventArgs: any) => {
+                              generateStateOnChangeProp($state, [
+                                "trendCard",
+                                "value"
+                              ]).apply(null, eventArgs);
+
+                              if (
+                                eventArgs.length > 1 &&
+                                eventArgs[1] &&
+                                eventArgs[1]._plasmic_state_init_
+                              ) {
+                                return;
+                              }
+                            }}
+                            text3={
+                              <div
+                                data-plasmic-name={"text"}
+                                data-plasmic-override={overrides.text}
+                                className={classNames(
+                                  projectcss.all,
+                                  projectcss.__wab_text,
+                                  sty.text
+                                )}
+                              >
+                                {"11.1"}
+                              </div>
+                            }
+                            value={generateStateValueProp($state, [
+                              "trendCard",
+                              "value"
+                            ])}
+                          />
+                        }
                       />
                     </div>
                     <div
@@ -684,22 +727,7 @@ function PlasmicHomepage__RenderFunc(props: {
                                   sty.text2
                                 )}
                               >
-                                <React.Fragment>
-                                  {(() => {
-                                    try {
-                                      return $state.value;
-                                    } catch (e) {
-                                      if (
-                                        e instanceof TypeError ||
-                                        e?.plasmicType ===
-                                          "PlasmicUndefinedDataError"
-                                      ) {
-                                        return "5.8";
-                                      }
-                                      throw e;
-                                    }
-                                  })()}
-                                </React.Fragment>
+                                {"5.8"}
                               </div>
                             }
                             value={generateStateValueProp($state, [
@@ -875,6 +903,8 @@ const PlasmicDescendants = {
     "_360Stack",
     "heading3",
     "heading7",
+    "trendCard",
+    "text",
     "heading9",
     "trendCard2",
     "text2",
@@ -888,6 +918,8 @@ const PlasmicDescendants = {
     "_360Stack",
     "heading3",
     "heading7",
+    "trendCard",
+    "text",
     "heading9",
     "trendCard2",
     "text2",
@@ -899,6 +931,8 @@ const PlasmicDescendants = {
     "_360Stack",
     "heading3",
     "heading7",
+    "trendCard",
+    "text",
     "heading9",
     "trendCard2",
     "text2",
@@ -906,6 +940,8 @@ const PlasmicDescendants = {
   ],
   heading3: ["heading3"],
   heading7: ["heading7"],
+  trendCard: ["trendCard", "text"],
+  text: ["text"],
   heading9: ["heading9"],
   trendCard2: ["trendCard2", "text2"],
   text2: ["text2"],
@@ -923,6 +959,8 @@ type NodeDefaultElementType = {
   _360Stack: "div";
   heading3: "div";
   heading7: "div";
+  trendCard: typeof TrendCard;
+  text: "div";
   heading9: "div";
   trendCard2: typeof TrendCard;
   text2: "div";
@@ -998,6 +1036,8 @@ export const PlasmicHomepage = Object.assign(
     _360Stack: makeNodeComponent("_360Stack"),
     heading3: makeNodeComponent("heading3"),
     heading7: makeNodeComponent("heading7"),
+    trendCard: makeNodeComponent("trendCard"),
+    text: makeNodeComponent("text"),
     heading9: makeNodeComponent("heading9"),
     trendCard2: makeNodeComponent("trendCard2"),
     text2: makeNodeComponent("text2"),
