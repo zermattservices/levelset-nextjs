@@ -56,6 +56,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'No valid fields to update' });
       }
 
+      updateData.updated_at = new Date().toISOString();
+
       const { data, error } = await supabase
         .from('employees')
         .update(updateData)
