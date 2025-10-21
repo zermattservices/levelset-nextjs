@@ -1,6 +1,20 @@
 import * as React from "react";
-import { createSupabaseClient } from "@/util/supabase/component";
 import type { Employee } from "@/lib/supabase.types";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
+  CircularProgress,
+  Typography,
+  IconButton,
+  Stack,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 export type Role =
   | "New Hire"
@@ -63,51 +77,76 @@ const sampleData: RosterEntry[] = [
 const roleChip = (role: Role) => {
   const base = "role-badge";
   switch (role) {
-    case "New Hire":   return `${base} new-hire`;
-    case "Team Lead":  return `${base} team-lead`;
-    case "Team Member":return `${base} team-member`;
-    case "Director":   return `${base} director`;
-    default:           return `${base} new-hire`;
+    case "New Hire":
+      return `${base} new-hire`;
+    case "Team Lead":
+      return `${base} team-lead`;
+    case "Team Member":
+      return `${base} team-member`;
+    case "Director":
+      return `${base} director`;
+    default:
+      return `${base} new-hire`;
   }
 };
 
-// pill checkbox
-function Pill({ checked, onToggle, onLabel, offLabel, onClass, offClass }:{
-  checked: boolean;
-  onToggle?: (next: boolean)=>void;
-  onLabel?: string;
-  offLabel?: string;
-  onClass?: string;
-  offClass?: string;
-}) {
-  const baseClass = onClass || offClass ? "pill-checkbox" : "pill-checkbox";
-  const checkedClass = checked ? "checked" : "unchecked";
-  return (
-    <button
-      type="button"
-      onClick={() => onToggle?.(!checked)}
-      aria-pressed={checked}
-      className={`${baseClass} ${checkedClass}`}
-      style={onClass || offClass ? {
-        backgroundColor: checked ? '#059669' : 'white',
-        color: checked ? 'white' : '#6b7280',
-        borderColor: checked ? '#059669' : '#d1d5db'
-      } : undefined}
-    >
-      {checked ? (
-        // checkmark
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M5 10l3 3 7-7" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ) : (
-        // empty
-        <span style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
-          {offLabel || "Unchecked"}
-        </span>
-      )}
-    </button>
-  );
-}
+const fontFamily = `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+
+const StyledContainer = styled(TableContainer)(() => ({
+  borderRadius: 16,
+  border: "1px solid #e5e7eb",
+  backgroundColor: "#ffffff",
+  overflow: "hidden",
+  boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
+  fontFamily,
+}));
+
+const StyledTable = styled(Table)(() => ({
+  "& th": {
+    borderBottom: "1px solid #e5e7eb",
+    backgroundColor: "#f9fafb",
+    fontWeight: 600,
+    fontSize: 12,
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+    color: "#111827",
+    lineHeight: 1.2,
+    fontFamily,
+  },
+  "& td": {
+    borderBottom: "1px solid #e5e7eb",
+    color: "#111827",
+    fontSize: 14,
+    lineHeight: 1.2,
+    fontFamily,
+  },
+  "& tbody tr:hover": {
+    backgroundColor: "#f9fafb",
+  },
+}));
+
+const BrandCheckbox = styled(Checkbox)(() => ({
+  color: "#9ca3af",
+  padding: 0,
+  "&.Mui-checked": {
+    color: "#31664a",
+  },
+  "&:hover": {
+    backgroundColor: "rgba(49, 102, 74, 0.08)",
+  },
+}));
+
+const ActionsButton = styled(IconButton)(() => ({
+  height: 28,
+  width: 28,
+  borderRadius: "50%",
+  color: "#9ca3af",
+  transition: "background-color 0.15s ease-in-out, color 0.15s ease-in-out",
+  "&:hover": {
+    backgroundColor: "#f3f4f6",
+    color: "#4b5563",
+  },
+}));
 
 export function RosterTable({
   orgId,
@@ -139,7 +178,7 @@ export function RosterTable({
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
-  const padY = density === "compact" ? "py-2" : "py-3";
+  const cellPadding = density === "compact" ? 1 : 1.5;
   
   // Fetch employees from Supabase
   React.useEffect(() => {
@@ -283,82 +322,189 @@ export function RosterTable({
 
   if (loading && data.length === 0) {
     return (
-      <div className={`roster-table-container ${className}`}>
-        <div className="flex items-center justify-center p-8">
-          <div className="text-gray-500">Loading roster...</div>
-        </div>
-      </div>
+      <StyledContainer
+        className={`roster-table-container ${className}`}
+        data-plasmic-name="roster-table-container"
+      >
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          justifyContent="center"
+          sx={{ py: 6, px: 4 }}
+        >
+          <CircularProgress size={20} thickness={5} sx={{ color: "#31664a" }} />
+          <Typography
+            variant="body2"
+            sx={{ color: "#6b7280", fontFamily }}
+          >
+            Loading roster...
+          </Typography>
+        </Stack>
+      </StyledContainer>
     );
   }
 
   if (error && data.length === 0) {
     return (
-      <div className={`roster-table-container ${className}`}>
-        <div className="flex items-center justify-center p-8">
-          <div className="text-red-500">{error}</div>
-        </div>
-      </div>
+      <StyledContainer
+        className={`roster-table-container ${className}`}
+        data-plasmic-name="roster-table-container"
+      >
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          justifyContent="center"
+          sx={{ py: 6, px: 4 }}
+        >
+          <Typography
+            variant="body2"
+            sx={{ color: "#b91c1c", fontFamily }}
+          >
+            {error}
+          </Typography>
+        </Stack>
+      </StyledContainer>
     );
   }
 
   return (
-    <div className={`roster-table-container ${className}`} data-plasmic-name="roster-table-container">
-      <div style={{ overflowX: 'auto' }} data-plasmic-name="table-wrapper">
-        <table className={`roster-table ${tableClass}`} data-plasmic-name="roster-table">
-          <thead data-plasmic-name="table-header">
-            <tr data-plasmic-name="header-row">
-              <th data-plasmic-name="name-header">Name</th>
-              <th data-plasmic-name="role-header">Current Role</th>
-              <th data-plasmic-name="foh-header">FOH</th>
-              <th data-plasmic-name="boh-header">BOH</th>
-              {showActions && <th style={{ textAlign: 'right' }} data-plasmic-name="actions-header"></th>}
-            </tr>
-          </thead>
+    <StyledContainer
+      className={`roster-table-container ${className}`}
+      data-plasmic-name="roster-table-container"
+    >
+      <StyledTable
+        className={`roster-table ${tableClass}`}
+        data-plasmic-name="roster-table"
+      >
+        <TableHead data-plasmic-name="table-header">
+          <TableRow
+            data-plasmic-name="header-row"
+            className={headerRowClass}
+          >
+            <TableCell
+              data-plasmic-name="name-header"
+              className={headerCellClass}
+            >
+              Name
+            </TableCell>
+            <TableCell
+              data-plasmic-name="role-header"
+              className={headerCellClass}
+            >
+              Current Role
+            </TableCell>
+            <TableCell
+              data-plasmic-name="foh-header"
+              className={headerCellClass}
+              align="center"
+            >
+              FOH
+            </TableCell>
+            <TableCell
+              data-plasmic-name="boh-header"
+              className={headerCellClass}
+              align="center"
+            >
+              BOH
+            </TableCell>
+            {showActions && (
+              <TableCell
+                data-plasmic-name="actions-header"
+                className={headerCellClass}
+                align="right"
+              ></TableCell>
+            )}
+          </TableRow>
+        </TableHead>
 
-          <tbody>
-            {data.map((e, i) => (
-              <tr key={e.id}>
-                <td className="name-cell">{e.name}</td>
-                <td>
-                  <span className={`${roleChip(e.currentRole)} ${roleBadgeClass || ""}`}>{e.currentRole}</span>
-                </td>
-                <td>
-                  <Pill
-                    checked={e.foh}
-                    onToggle={(next)=> handleFohChange(e.id, next)}
-                    onClass={checkboxOnClass}
-                    offClass={checkboxOffClass}
-                    onLabel="FOH on" offLabel="FOH off"
-                  />
-                </td>
-                <td>
-                  <Pill
-                    checked={e.boh}
-                    onToggle={(next)=> handleBohChange(e.id, next)}
-                    onClass={checkboxOnClass}
-                    offClass={checkboxOffClass}
-                    onLabel="BOH on" offLabel="BOH off"
-                  />
-                </td>
-                {showActions && (
-                  <td style={{ textAlign: 'right' }}>
-                    <button
-                      type="button"
-                      onClick={() => onEdit?.(e.id)}
-                      className="actions-button"
-                      aria-label={`Actions for ${e.name}`}
-                    >
-                      <svg viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10 4a2 2 0 110-4 2 2 0 010 4zm0 8a2 2 0 110-4 2 2 0 010 4zm0 8a2 2 0 110-4 2 2 0 010 4z"/>
-                      </svg>
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+        <TableBody>
+          {data.map((e) => (
+            <TableRow
+              key={e.id}
+              hover
+              className={rowClass}
+            >
+              <TableCell
+                className={`name-cell ${nameCellClass || ""}`}
+                sx={{ py: cellPadding }}
+              >
+                <Typography
+                  component="span"
+                  variant="body2"
+                  sx={{ fontFamily, fontWeight: 500, color: "#111827" }}
+                >
+                  {e.name}
+                </Typography>
+              </TableCell>
+              <TableCell
+                className={cellClass}
+                sx={{ py: cellPadding }}
+              >
+                <span
+                  className={`${roleChip(e.currentRole)} ${
+                    roleBadgeClass || ""
+                  }`}
+                >
+                  {e.currentRole}
+                </span>
+              </TableCell>
+              <TableCell
+                className={cellClass}
+                align="center"
+                sx={{ py: cellPadding }}
+              >
+                <BrandCheckbox
+                  checked={e.foh}
+                  onChange={(_, checked) => handleFohChange(e.id, checked)}
+                  className={
+                    checkboxOnClass || checkboxOffClass
+                      ? e.foh
+                        ? checkboxOnClass
+                        : checkboxOffClass
+                      : undefined
+                  }
+                  inputProps={{ "aria-label": `FOH access for ${e.name}` }}
+                />
+              </TableCell>
+              <TableCell
+                className={cellClass}
+                align="center"
+                sx={{ py: cellPadding }}
+              >
+                <BrandCheckbox
+                  checked={e.boh}
+                  onChange={(_, checked) => handleBohChange(e.id, checked)}
+                  className={
+                    checkboxOnClass || checkboxOffClass
+                      ? e.boh
+                        ? checkboxOnClass
+                        : checkboxOffClass
+                      : undefined
+                  }
+                  inputProps={{ "aria-label": `BOH access for ${e.name}` }}
+                />
+              </TableCell>
+              {showActions && (
+                <TableCell
+                  className={actionsCellClass || cellClass}
+                  align="right"
+                  sx={{ py: cellPadding }}
+                >
+                  <ActionsButton
+                    onClick={() => onEdit?.(e.id)}
+                    className="actions-button"
+                    aria-label={`Actions for ${e.name}`}
+                  >
+                    <MoreVertIcon fontSize="small" />
+                  </ActionsButton>
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+        </TableBody>
+      </StyledTable>
+    </StyledContainer>
   );
 }

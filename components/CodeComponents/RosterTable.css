@@ -5,6 +5,7 @@
   border: 1px solid #e5e7eb;
   overflow: hidden;
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  box-shadow: 0px 2px 6px rgba(15, 23, 42, 0.04);
 }
 
 .roster-table {
@@ -139,40 +140,6 @@
   background-color: #F5F0FF;
   color: #6A5ACD;
   border-color: #F5F0FF;
-}
-
-/* Pill Checkbox Styles */
-.pill-checkbox {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 1.5rem;
-  width: 1.5rem;
-  border-radius: 0.375rem;
-  border: 1px solid;
-  transition: all 0.15s ease-in-out;
-  cursor: pointer;
-}
-
-.pill-checkbox.checked {
-  background-color: #059669;
-  color: white;
-  border-color: #059669;
-}
-
-.pill-checkbox.unchecked {
-  background-color: white;
-  color: #6b7280;
-  border-color: #d1d5db;
-}
-
-.pill-checkbox:hover {
-  border-color: #059669;
-}
-
-.pill-checkbox svg {
-  height: 1rem;
-  width: 1rem;
 }
 
 /* Actions Button */
