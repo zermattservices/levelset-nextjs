@@ -24,9 +24,11 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 export type Role =
   | "New Hire"
   | "Team Member"
+  | "Trainer"
   | "Team Lead"
   | "Director"
-  | "Trainer";
+  | "Executive"
+  | "Operator";
 
 export interface RosterEntry {
   id: string;
@@ -79,6 +81,8 @@ const sampleData: RosterEntry[] = [
   { id: "7", name: "Celia Barrera",     currentRole: "New Hire",  foh: true,  boh: false },
   { id: "8", name: "Daniel Millan",     currentRole: "Team Member", foh: true, boh: false },
   { id: "9", name: "Sarah Johnson",     currentRole: "Trainer",   foh: true,  boh: true  },
+  { id: "10", name: "Michael Chen",     currentRole: "Executive", foh: true,  boh: true  },
+  { id: "11", name: "Lisa Rodriguez",   currentRole: "Operator",  foh: true,  boh: true  },
 ];
 
 // role → chip colors (can still be overridden via roleBadgeClass)
@@ -87,14 +91,18 @@ const roleChip = (role: Role) => {
   switch (role) {
     case "New Hire":
       return `${base} new-hire`;
-    case "Team Lead":
-      return `${base} team-lead`;
     case "Team Member":
       return `${base} team-member`;
-    case "Director":
-      return `${base} director`;
     case "Trainer":
       return `${base} trainer`;
+    case "Team Lead":
+      return `${base} team-lead`;
+    case "Director":
+      return `${base} director`;
+    case "Executive":
+      return `${base} executive`;
+    case "Operator":
+      return `${base} operator`;
     default:
       return `${base} new-hire`;
   }
@@ -174,24 +182,32 @@ const RoleChip = styled(Box)(() => ({
     transform: "translateY(-1px)",
   },
   "&.new-hire": {
-    backgroundColor: "#fef3c7",
-    color: "#92400e",
+    backgroundColor: "#f0fdf4",
+    color: "#166534",
   },
   "&.team-member": {
-    backgroundColor: "#dbeafe",
-    color: "#1e40af",
+    backgroundColor: "#eff6ff",
+    color: "#1d4ed8",
+  },
+  "&.trainer": {
+    backgroundColor: "#fef2f2",
+    color: "#dc2626",
   },
   "&.team-lead": {
-    backgroundColor: "#d1fae5",
-    color: "#065f46",
+    backgroundColor: "#fef3c7",
+    color: "#d97706",
   },
   "&.director": {
     backgroundColor: "#f3e8ff",
     color: "#7c3aed",
   },
-  "&.trainer": {
-    backgroundColor: "#fef2f2",
-    color: "#dc2626",
+  "&.executive": {
+    backgroundColor: "#f3e8ff",
+    color: "#7c3aed",
+  },
+  "&.operator": {
+    backgroundColor: "#f3e8ff",
+    color: "#7c3aed",
   },
 }));
 
@@ -262,6 +278,9 @@ export function RosterTable({
   // Role dropdown state
   const [roleMenuAnchor, setRoleMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
   const [pendingRoleChanges, setPendingRoleChanges] = React.useState<{ [key: string]: Role }>({});
+
+  // Unchangeable roles
+  const unchangeableRoles: Role[] = ["Operator", "Executive"];
 
   const cellPadding = density === "compact" ? 1 : 1.5;
   
@@ -594,68 +613,85 @@ export function RosterTable({
                 className={cellClass}
                 sx={{ py: cellPadding }}
               >
-                <RoleChip
-                  className={`${roleChip(e.currentRole)} ${roleBadgeClass || ""}`}
-                  onClick={(event) => handleRoleMenuOpen(event, e.id)}
-                >
-                  {pendingRoleChanges[e.id] || e.currentRole}
-                  <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
-                </RoleChip>
-                
-                <Menu
-                  anchorEl={roleMenuAnchor[e.id]}
-                  open={Boolean(roleMenuAnchor[e.id])}
-                  onClose={() => handleRoleMenuClose(e.id)}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                  }}
-                  PaperProps={{
-                    sx: {
-                      fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
-                      borderRadius: 2,
-                      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                      border: "1px solid #e5e7eb",
-                    }
-                  }}
-                >
-                  {(["New Hire", "Team Member", "Team Lead", "Director", "Trainer"] as Role[]).map((role) => (
-                    <RoleMenuItem
-                      key={role}
-                      onClick={() => handleRoleSelect(e.id, role)}
-                      selected={pendingRoleChanges[e.id] === role}
+                {unchangeableRoles.includes(e.currentRole) ? (
+                  <RoleChip
+                    className={`${roleChip(e.currentRole)} ${roleBadgeClass || ""}`}
+                    sx={{ 
+                      cursor: "default",
+                      "&:hover": { 
+                        opacity: 1, 
+                        transform: "none" 
+                      }
+                    }}
+                  >
+                    {e.currentRole}
+                  </RoleChip>
+                ) : (
+                  <>
+                    <RoleChip
+                      className={`${roleChip(pendingRoleChanges[e.id] || e.currentRole)} ${roleBadgeClass || ""}`}
+                      onClick={(event) => handleRoleMenuOpen(event, e.id)}
                     >
-                      <RoleChip
-                        className={`${roleChip(role)} ${roleBadgeClass || ""}`}
-                        sx={{ 
-                          cursor: "default",
-                          "&:hover": { 
-                            opacity: 1, 
-                            transform: "none" 
-                          }
-                        }}
-                      >
-                        {role}
-                      </RoleChip>
-                    </RoleMenuItem>
-                  ))}
-                  
-                  {pendingRoleChanges[e.id] && (
-                    <Box sx={{ px: 2, py: 1, borderTop: '1px solid #e5e7eb' }}>
-                      <SaveButton
-                        fullWidth
-                        onClick={() => handleSaveRoleChange(e.id)}
-                        size="small"
-                      >
-                        Save Changes
-                      </SaveButton>
-                    </Box>
-                  )}
-                </Menu>
+                      {pendingRoleChanges[e.id] || e.currentRole}
+                      <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
+                    </RoleChip>
+                    
+                    <Menu
+                      anchorEl={roleMenuAnchor[e.id]}
+                      open={Boolean(roleMenuAnchor[e.id])}
+                      onClose={() => handleRoleMenuClose(e.id)}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                      }}
+                      PaperProps={{
+                        sx: {
+                          fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+                          borderRadius: 2,
+                          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                          border: "1px solid #e5e7eb",
+                        }
+                      }}
+                    >
+                      {(["New Hire", "Team Member", "Trainer", "Team Lead", "Director"] as Role[]).map((role) => (
+                        <RoleMenuItem
+                          key={role}
+                          onClick={() => handleRoleSelect(e.id, role)}
+                          selected={pendingRoleChanges[e.id] === role}
+                        >
+                          <RoleChip
+                            className={`${roleChip(role)} ${roleBadgeClass || ""}`}
+                            sx={{ 
+                              cursor: "default",
+                              "&:hover": { 
+                                opacity: 1, 
+                                transform: "none" 
+                              }
+                            }}
+                          >
+                            {role}
+                          </RoleChip>
+                        </RoleMenuItem>
+                      ))}
+                      
+                      {pendingRoleChanges[e.id] && (
+                        <Box sx={{ px: 2, py: 1, borderTop: '1px solid #e5e7eb' }}>
+                          <SaveButton
+                            fullWidth
+                            onClick={() => handleSaveRoleChange(e.id)}
+                            size="small"
+                          >
+                            Save Changes
+                          </SaveButton>
+                        </Box>
+                      )}
+                    </Menu>
+                  </>
+                )}
               </TableCell>
               <TableCell
                 className={cellClass}
