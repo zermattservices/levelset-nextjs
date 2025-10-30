@@ -284,7 +284,7 @@
   position: relative;
   width: 100%;
   height: auto;
-  max-width: 100%;
+  max-width: 1200px;
   justify-content: flex-start;
   align-items: center;
   min-width: 0;
@@ -301,4 +301,6 @@
 .positionalRatingsTable:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
+  width: 100%;
+  min-width: 0;
 }
