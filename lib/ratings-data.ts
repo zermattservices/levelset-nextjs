@@ -6,30 +6,30 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Rating, EmployeeRatingAggregate, LeaderRatingAggregate, PositionBig5Labels } from './supabase.types';
 
-// Position lists matching current Google Sheets implementation
+// Position lists matching actual database values
 export const FOH_POSITIONS = [
   'iPOS',
-  'Host | Anfitrión',
+  'Host',
   'OMD',
   'Runner',
-  'Bagging | Embolsado',
-  'Drinks 1/3 | Bebidas 1/3',
-  'Drinks 2 | Bebidas 2',
+  'Bagging',
+  'Drinks 1/3',
+  'Drinks 2',
   '3H Week FOH',
   'Trainer FOH',
-  'FOH Team Lead'
+  'Leadership FOH'
 ];
 
 export const BOH_POSITIONS = [
-  'Breader | Empanizar',
-  'Secondary | Secundario',
-  'Fries | Papas',
-  'Primary | Primario',
-  'Machines | Maquinas',
+  'Breader',
+  'Secondary',
+  'Fries',
+  'Primary',
+  'Machines',
   'Prep',
   '3H Week BOH',
   'Trainer BOH',
-  'BOH Team Lead'
+  'Leadership BOH'
 ];
 
 /**

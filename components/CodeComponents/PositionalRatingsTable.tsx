@@ -115,7 +115,7 @@ const RatingCell = styled(TableCell)<{ $rating?: number | null }>(({ $rating }) 
       textColor = '#fff';
     } else if ($rating >= 1.75) {
       bgColor = '#ffb549';
-      textColor = '#111';
+      textColor = '#fff'; // White text for yellow background
     } else if ($rating >= 1.0) {
       bgColor = '#ad2624';
       textColor = '#fff';
@@ -277,6 +277,9 @@ export function PositionalRatingsTable({
     async function loadData() {
       setLoading(true);
       setError(null);
+      
+      // Reset expanded rows when changing views
+      setExpandedRows(new Set());
 
       try {
         let endpoint = `/api/ratings?org_id=${orgId}&location_id=${locationId}&area=${area}`;
@@ -600,45 +603,19 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
     <StyledContainer>
       <StyledTable>
         <TableHead>
-          {/* First Header Row */}
+          {/* First Header Row - Generic headers */}
           <TableRow>
             <TableCell sx={{ width: 40 }}></TableCell>
             <TableCell>Name</TableCell>
             <TableCell align="center">Last Rating</TableCell>
-            <TableCell align="center">Rating 1</TableCell>
-            <TableCell align="center">Rating 2</TableCell>
-            <TableCell align="center">Rating 3</TableCell>
-            <TableCell align="center">Rating 4</TableCell>
-            <TableCell align="center">Rating 5</TableCell>
+            <TableCell align="center" sx={{ textTransform: 'none' }}>{big5Labels?.label_1 || 'Rating 1'}</TableCell>
+            <TableCell align="center" sx={{ textTransform: 'none' }}>{big5Labels?.label_2 || 'Rating 2'}</TableCell>
+            <TableCell align="center" sx={{ textTransform: 'none' }}>{big5Labels?.label_3 || 'Rating 3'}</TableCell>
+            <TableCell align="center" sx={{ textTransform: 'none' }}>{big5Labels?.label_4 || 'Rating 4'}</TableCell>
+            <TableCell align="center" sx={{ textTransform: 'none' }}>{big5Labels?.label_5 || 'Rating 5'}</TableCell>
             <TableCell align="center">Avg</TableCell>
             <TableCell align="center"># Ratings</TableCell>
           </TableRow>
-          
-          {/* Second Sticky Header - Big 5 Labels */}
-          {big5Labels && (
-            <SecondStickyHeader>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-              <TableCell align="center" sx={{ fontSize: 11, fontWeight: 500, textTransform: 'none' }}>
-                {big5Labels.label_1}
-              </TableCell>
-              <TableCell align="center" sx={{ fontSize: 11, fontWeight: 500, textTransform: 'none' }}>
-                {big5Labels.label_2}
-              </TableCell>
-              <TableCell align="center" sx={{ fontSize: 11, fontWeight: 500, textTransform: 'none' }}>
-                {big5Labels.label_3}
-              </TableCell>
-              <TableCell align="center" sx={{ fontSize: 11, fontWeight: 500, textTransform: 'none' }}>
-                {big5Labels.label_4}
-              </TableCell>
-              <TableCell align="center" sx={{ fontSize: 11, fontWeight: 500, textTransform: 'none' }}>
-                {big5Labels.label_5}
-              </TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-            </SecondStickyHeader>
-          )}
         </TableHead>
         <TableBody>
           {data.map((employee) => {
@@ -788,7 +765,7 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding }: L
                     </ExpandIcon>
                   </TableCell>
                   <TableCell sx={{ py: cellPadding, fontWeight: 500 }}>
-                    Leader: {leader.leader_name}
+                    {leader.leader_name}
                   </TableCell>
                   <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: '#6b7280' }}>
                     {leader.last_rating_date ? formatRatingDate(leader.last_rating_date) : '—'}

@@ -19,12 +19,12 @@ ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- Host | Anfitrión
+-- Host
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Host | Anfitrión',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Host',
    'Smile & Shine', 'Greet & Seat', 'Lead, Offer, Repeat', 'Welcoming Environment & PPG', 'Friendly Farewell'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Host | Anfitrión',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Host',
    'Smile & Shine', 'Greet & Seat', 'Lead, Offer, Repeat', 'Welcoming Environment & PPG', 'Friendly Farewell')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
@@ -52,40 +52,40 @@ ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- Bagging | Embolsado
+-- Bagging
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Bagging | Embolsado',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Bagging',
    'Bump & Bag', 'Pull & Organize', 'Flow & Go', 'Print & Stage', 'Echo Holds'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Bagging | Embolsado',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Bagging',
    'Bump & Bag', 'Pull & Organize', 'Flow & Go', 'Print & Stage', 'Echo Holds')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- Drinks 1/3 | Bebidas 1/3
+-- Drinks 1/3
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Drinks 1/3 | Bebidas 1/3',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Drinks 1/3',
    'Scoop & Serve', 'Clean & Crisp', 'Lid & Label', 'Slide & Organize', 'Communicate & Team Up'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Drinks 1/3 | Bebidas 1/3',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Drinks 1/3',
    'Scoop & Serve', 'Clean & Crisp', 'Lid & Label', 'Slide & Organize', 'Communicate & Team Up')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- Drinks 2 | Bebidas 2
+-- Drinks 2
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Drinks 2 | Bebidas 2',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Drinks 2',
    'Supply & Boost', 'Prep & Pour', 'Dessert & Deliver', 'Clean & Clear', 'Prioritize & Respond'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Drinks 2 | Bebidas 2',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Drinks 2',
    'Supply & Boost', 'Prep & Pour', 'Dessert & Deliver', 'Clean & Clear', 'Prioritize & Respond')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- 3H Week FOH
+-- 3H Week FOH (Note: "3H Values" in original becomes "3H Week FOH" in database)
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
   ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', '3H Week FOH',
@@ -98,56 +98,56 @@ ON CONFLICT (org_id, location_id, position) DO UPDATE SET
 
 -- ===== BOH POSITIONS =====
 
--- Breader | Empanizar
+-- Breader
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Breader | Empanizar',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Breader',
    'Drop with Purpose', 'Bread with Precision', 'Load with Discipline', 'Clean as You Go', 'Protect the Zone'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Breader | Empanizar',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Breader',
    'Drop with Purpose', 'Bread with Precision', 'Load with Discipline', 'Clean as You Go', 'Protect the Zone')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- Secondary | Secundario
+-- Secondary
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Secondary | Secundario',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Secondary',
    'Assemble with Accuracy', 'Stock & Support the Line', 'Check Quality & Temp Everything', 'Flow & Rotate', 'Protect the Zone'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Secondary | Secundario',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Secondary',
    'Assemble with Accuracy', 'Stock & Support the Line', 'Check Quality & Temp Everything', 'Flow & Rotate', 'Protect the Zone')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- Fries | Papas
+-- Fries
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Fries | Papas',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Fries',
    'Drop with Timing', 'Fry & Finish Right', 'Stage for Quality & Speed', 'Watch & Rotate', 'Protect the Zone'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Fries | Papas',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Fries',
    'Drop with Timing', 'Fry & Finish Right', 'Stage for Quality & Speed', 'Watch & Rotate', 'Protect the Zone')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- Primary | Primario
+-- Primary
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Primary | Primario',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Primary',
    'Assemble with Accuracy', 'Stock & Support the Line', 'Check Quality & Temp Everything', 'Flow & Rotate', 'Protect the Zone'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Primary | Primario',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Primary',
    'Assemble with Accuracy', 'Stock & Support the Line', 'Check Quality & Temp Everything', 'Flow & Rotate', 'Protect the Zone')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- Machines | Maquinas
+-- Machines
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Machines | Maquinas',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Machines',
    'Drop with Discipline', 'Set & Secure', 'Watch & Rotate', 'Call the Drops', 'Protect the Zone'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Machines | Maquinas',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Machines',
    'Drop with Discipline', 'Set & Secure', 'Watch & Rotate', 'Call the Drops', 'Protect the Zone')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
@@ -164,7 +164,7 @@ ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- 3H Week BOH
+-- 3H Week BOH (Note: "3H Values" in original becomes "3H Week BOH" in database)
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
   ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', '3H Week BOH',
@@ -175,7 +175,7 @@ ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- ===== TRAINER POSITIONS (shared FOH & BOH) =====
+-- ===== TRAINER POSITIONS =====
 
 -- Trainer FOH
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
@@ -199,25 +199,25 @@ ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- ===== TEAM LEAD POSITIONS (shared FOH & BOH) =====
+-- ===== LEADERSHIP POSITIONS =====
 
--- FOH Team Lead
+-- Leadership FOH (Note: This is shown in Leadership View, not as a position tab)
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'FOH Team Lead',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Leadership FOH',
    'Lead the Zone', 'Engage the team', 'Champion the Guest Experience', 'Hold the Standards', 'Lead Yourself First'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'FOH Team Lead',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Leadership FOH',
    'Lead the Zone', 'Engage the team', 'Champion the Guest Experience', 'Hold the Standards', 'Lead Yourself First')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
   label_4 = EXCLUDED.label_4, label_5 = EXCLUDED.label_5, updated_at = NOW();
 
--- BOH Team Lead
+-- Leadership BOH
 INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
 VALUES 
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'BOH Team Lead',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'Leadership BOH',
    'Lead the Zone', 'Engage the team', 'Champion the Guest Experience', 'Hold the Standards', 'Lead Yourself First'),
-  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'BOH Team Lead',
+  ('54b9864f-9df9-4a15-a209-7b99e1c274f4', 'e437119c-27d9-4114-9273-350925016738', 'Leadership BOH',
    'Lead the Zone', 'Engage the team', 'Champion the Guest Experience', 'Hold the Standards', 'Lead Yourself First')
 ON CONFLICT (org_id, location_id, position) DO UPDATE SET
   label_1 = EXCLUDED.label_1, label_2 = EXCLUDED.label_2, label_3 = EXCLUDED.label_3,
