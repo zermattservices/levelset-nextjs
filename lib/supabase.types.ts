@@ -35,3 +35,55 @@ export interface Infraction {
   description?: string;
 }
 
+export interface Rating {
+  id: string;
+  employee_id: string;
+  employee_name?: string; // from JOIN with employees table
+  rater_user_id: string;
+  rater_name?: string; // from JOIN with employees table
+  position: string;
+  rating_1: number | null;
+  rating_2: number | null;
+  rating_3: number | null;
+  rating_4: number | null;
+  rating_5: number | null;
+  rating_avg: number | null;
+  created_at: string;
+  location_id: string;
+  org_id: string;
+}
+
+export interface PositionBig5Labels {
+  id: string;
+  org_id: string;
+  location_id: string;
+  position: string;
+  label_1: string;
+  label_2: string;
+  label_3: string;
+  label_4: string;
+  label_5: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface EmployeeRatingAggregate {
+  employee_id: string;
+  employee_name: string;
+  last_rating_date: string | null;
+  positions: Record<string, number | null>; // position -> avg rating
+  overall_avg: number | null;
+  total_count_90d: number; // 90-day rolling count
+  recent_ratings: Rating[]; // last 4 for expandable rows
+}
+
+export interface LeaderRatingAggregate {
+  leader_id: string;
+  leader_name: string;
+  last_rating_date: string | null;
+  positions: Record<string, number | null>; // position -> avg rating
+  overall_avg: number | null;
+  total_count_90d: number; // 90-day rolling count
+  recent_ratings: Rating[]; // last 10 for expandable rows
+}
+
