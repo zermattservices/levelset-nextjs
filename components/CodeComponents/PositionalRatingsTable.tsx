@@ -73,7 +73,7 @@ const StyledTable = styled(Table)(() => ({
     fontWeight: 600,
     fontSize: 12,
     letterSpacing: "0.05em",
-    textTransform: "uppercase",
+    textTransform: "none", // Changed from uppercase to none
     color: "#111827",
     lineHeight: 1.2,
     fontFamily,
@@ -115,7 +115,7 @@ const RatingCell = styled(TableCell)<{ $rating?: number | null }>(({ $rating }) 
       textColor = '#fff';
     } else if ($rating >= 1.75) {
       bgColor = '#ffb549';
-      textColor = '#fff'; // White text for yellow background
+      textColor = '#fff';
     } else if ($rating >= 1.0) {
       bgColor = '#ad2624';
       textColor = '#fff';
@@ -124,7 +124,7 @@ const RatingCell = styled(TableCell)<{ $rating?: number | null }>(({ $rating }) 
 
   return {
     backgroundColor: bgColor,
-    color: textColor,
+    color: `${textColor} !important`, // Force white text with !important
     fontWeight,
     textAlign: 'center',
     padding: '8px 4px'
@@ -184,7 +184,8 @@ const ExpandedTable = styled(Table)(() => ({
     padding: '6px 8px',
     fontSize: 11,
     fontWeight: 600,
-    borderBottom: '1px solid #d1d5db'
+    borderBottom: '1px solid #d1d5db',
+    textTransform: 'none'
   },
   '& td': {
     padding: '6px 8px',
@@ -548,7 +549,7 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding }: Ove
                       <ExpandedTable size="small">
                         <TableHead>
                           <TableRow>
-                            <TableCell>Rater</TableCell>
+                            <TableCell>Leader</TableCell>
                             <TableCell>Date</TableCell>
                             <TableCell>Position</TableCell>
                             <TableCell align="center">Rating 1</TableCell>
@@ -603,16 +604,16 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
     <StyledContainer>
       <StyledTable>
         <TableHead>
-          {/* First Header Row - Generic headers */}
+          {/* First Header Row - Big 5 Labels */}
           <TableRow>
             <TableCell sx={{ width: 40 }}></TableCell>
             <TableCell>Name</TableCell>
             <TableCell align="center">Last Rating</TableCell>
-            <TableCell align="center" sx={{ textTransform: 'none' }}>{big5Labels?.label_1 || 'Rating 1'}</TableCell>
-            <TableCell align="center" sx={{ textTransform: 'none' }}>{big5Labels?.label_2 || 'Rating 2'}</TableCell>
-            <TableCell align="center" sx={{ textTransform: 'none' }}>{big5Labels?.label_3 || 'Rating 3'}</TableCell>
-            <TableCell align="center" sx={{ textTransform: 'none' }}>{big5Labels?.label_4 || 'Rating 4'}</TableCell>
-            <TableCell align="center" sx={{ textTransform: 'none' }}>{big5Labels?.label_5 || 'Rating 5'}</TableCell>
+            <TableCell align="center">{big5Labels?.label_1 || 'Rating 1'}</TableCell>
+            <TableCell align="center">{big5Labels?.label_2 || 'Rating 2'}</TableCell>
+            <TableCell align="center">{big5Labels?.label_3 || 'Rating 3'}</TableCell>
+            <TableCell align="center">{big5Labels?.label_4 || 'Rating 4'}</TableCell>
+            <TableCell align="center">{big5Labels?.label_5 || 'Rating 5'}</TableCell>
             <TableCell align="center">Avg</TableCell>
             <TableCell align="center"># Ratings</TableCell>
           </TableRow>
@@ -680,13 +681,13 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
                       <ExpandedTable size="small">
                         <TableHead>
                           <TableRow>
-                            <TableCell>Rater</TableCell>
+                            <TableCell>Leader</TableCell>
                             <TableCell>Date</TableCell>
-                            <TableCell align="center">Rating 1</TableCell>
-                            <TableCell align="center">Rating 2</TableCell>
-                            <TableCell align="center">Rating 3</TableCell>
-                            <TableCell align="center">Rating 4</TableCell>
-                            <TableCell align="center">Rating 5</TableCell>
+                            <TableCell align="center">{big5Labels?.label_1 || 'Rating 1'}</TableCell>
+                            <TableCell align="center">{big5Labels?.label_2 || 'Rating 2'}</TableCell>
+                            <TableCell align="center">{big5Labels?.label_3 || 'Rating 3'}</TableCell>
+                            <TableCell align="center">{big5Labels?.label_4 || 'Rating 4'}</TableCell>
+                            <TableCell align="center">{big5Labels?.label_5 || 'Rating 5'}</TableCell>
                             <TableCell align="center">Avg</TableCell>
                           </TableRow>
                         </TableHead>

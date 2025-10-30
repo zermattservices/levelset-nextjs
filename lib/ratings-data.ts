@@ -40,8 +40,9 @@ export function getPositionsByArea(area: 'FOH' | 'BOH'): string[] {
 }
 
 /**
- * Fetch Overview data - employees with ratings across all positions
+ * Fetch Overview data - ALL employees (from roster) with their ratings across positions
  * Shows averages per position (last 4 ratings) with expandable rows for last 4 individual ratings
+ * Includes employees without ratings (matching original Google Sheets behavior)
  */
 export async function fetchOverviewData(
   supabase: SupabaseClient,
@@ -50,6 +51,22 @@ export async function fetchOverviewData(
   area: 'FOH' | 'BOH'
 ): Promise<EmployeeRatingAggregate[]> {
   const positions = getPositionsByArea(area);
+  const fohBohField = area === 'FOH' ? 'is_foh' : 'is_boh';
+
+  // First, get ALL employees from roster who are marked as FOH or BOH
+  const { data: allEmployees, error: empError } = await supabase
+    .from('employees')
+    .select('id, full_name, first_name, last_name')
+    .eq('org_id', orgId)
+    .eq('location_id', locationId)
+    .eq('active', true)
+    .eq(fohBohField, true)
+    .order('full_name');
+
+  if (empError || !allEmployees) {
+    console.error('Error fetching employees:', empError);
+    return [];
+  }
 
   // Get all ratings for this area with employee names
   const { data: ratings, error } = await supabase
@@ -64,36 +81,41 @@ export async function fetchOverviewData(
     .in('position', positions)
     .order('created_at', { ascending: false });
 
-  if (error || !ratings) {
+  if (error) {
     console.error('Error fetching overview ratings:', error);
-    return [];
+    // Continue with empty ratings - show all employees even if ratings fail
   }
 
-  // Group by employee_id
-  const employeeMap = new Map<string, Rating[]>();
+  // Group ratings by employee_id
+  const ratingsMap = new Map<string, Rating[]>();
   
-  ratings.forEach((rating: any) => {
-    const employeeName = rating.employee?.full_name || 
-                        `${rating.employee?.first_name || ''} ${rating.employee?.last_name || ''}`.trim();
-    const raterName = rating.rater?.full_name || 'Unknown';
-    
-    const ratingWithNames: Rating = {
-      ...rating,
-      employee_name: employeeName,
-      rater_name: raterName
-    };
+  if (ratings) {
+    ratings.forEach((rating: any) => {
+      const employeeName = rating.employee?.full_name || 
+                          `${rating.employee?.first_name || ''} ${rating.employee?.last_name || ''}`.trim();
+      const raterName = rating.rater?.full_name || 'Unknown';
+      
+      const ratingWithNames: Rating = {
+        ...rating,
+        employee_name: employeeName,
+        rater_name: raterName
+      };
 
-    if (!employeeMap.has(rating.employee_id)) {
-      employeeMap.set(rating.employee_id, []);
-    }
-    employeeMap.get(rating.employee_id)!.push(ratingWithNames);
-  });
+      if (!ratingsMap.has(rating.employee_id)) {
+        ratingsMap.set(rating.employee_id, []);
+      }
+      ratingsMap.get(rating.employee_id)!.push(ratingWithNames);
+    });
+  }
 
-  // Calculate aggregates for each employee
+  // Calculate aggregates for ALL employees (including those without ratings)
   const aggregates: EmployeeRatingAggregate[] = [];
 
-  employeeMap.forEach((empRatings, employeeId) => {
-    const employeeName = empRatings[0]?.employee_name || 'Unknown';
+  allEmployees.forEach(employee => {
+    const employeeId = employee.id;
+    const employeeName = employee.full_name || 
+                        `${employee.first_name || ''} ${employee.last_name || ''}`.trim();
+    const empRatings = ratingsMap.get(employeeId) || [];
     
     // Calculate average per position (last 4 ratings)
     const positionAverages: Record<string, number | null> = {};
@@ -103,12 +125,23 @@ export async function fetchOverviewData(
         .slice(0, 4); // last 4
       
       if (posRatings.length > 0) {
-        const validAvgs = posRatings
-          .map(r => r.rating_avg)
-          .filter(avg => avg !== null) as number[];
+        const avgs: number[] = [];
+        posRatings.forEach(r => {
+          if (r.rating_avg !== null) {
+            avgs.push(r.rating_avg);
+          } else {
+            // Calculate avg from rating_1-5 if rating_avg is null
+            const individualRatings = [r.rating_1, r.rating_2, r.rating_3, r.rating_4, r.rating_5]
+              .filter(v => v !== null) as number[];
+            if (individualRatings.length > 0) {
+              const calculatedAvg = individualRatings.reduce((sum, v) => sum + v, 0) / individualRatings.length;
+              avgs.push(calculatedAvg);
+            }
+          }
+        });
         
-        positionAverages[position] = validAvgs.length > 0
-          ? validAvgs.reduce((sum, avg) => sum + avg, 0) / validAvgs.length
+        positionAverages[position] = avgs.length > 0
+          ? avgs.reduce((sum, avg) => sum + avg, 0) / avgs.length
           : null;
       } else {
         positionAverages[position] = null;
@@ -310,12 +343,24 @@ export async function fetchLeadershipData(
         .slice(0, 10); // last 10
       
       if (posRatings.length > 0) {
-        const validAvgs = posRatings
-          .map(r => r.rating_avg)
-          .filter(avg => avg !== null) as number[];
+        // Calculate average from individual ratings if rating_avg is null
+        const avgs: number[] = [];
+        posRatings.forEach(r => {
+          if (r.rating_avg !== null) {
+            avgs.push(r.rating_avg);
+          } else {
+            // Calculate avg from rating_1-5 if rating_avg is null
+            const individualRatings = [r.rating_1, r.rating_2, r.rating_3, r.rating_4, r.rating_5]
+              .filter(v => v !== null) as number[];
+            if (individualRatings.length > 0) {
+              const calculatedAvg = individualRatings.reduce((sum, v) => sum + v, 0) / individualRatings.length;
+              avgs.push(calculatedAvg);
+            }
+          }
+        });
         
-        positionAverages[position] = validAvgs.length > 0
-          ? validAvgs.reduce((sum, avg) => sum + avg, 0) / validAvgs.length
+        positionAverages[position] = avgs.length > 0
+          ? avgs.reduce((sum, avg) => sum + avg, 0) / avgs.length
           : null;
       } else {
         positionAverages[position] = null;
@@ -323,13 +368,23 @@ export async function fetchLeadershipData(
     });
 
     // Calculate overall average (average of all ratings they've given)
-    const last10Avgs = leaderRatings
-      .slice(0, 10)
-      .map(r => r.rating_avg)
-      .filter(avg => avg !== null) as number[];
+    const avgs: number[] = [];
+    leaderRatings.slice(0, 10).forEach(r => {
+      if (r.rating_avg !== null) {
+        avgs.push(r.rating_avg);
+      } else {
+        // Calculate avg from rating_1-5 if rating_avg is null
+        const individualRatings = [r.rating_1, r.rating_2, r.rating_3, r.rating_4, r.rating_5]
+          .filter(v => v !== null) as number[];
+        if (individualRatings.length > 0) {
+          const calculatedAvg = individualRatings.reduce((sum, v) => sum + v, 0) / individualRatings.length;
+          avgs.push(calculatedAvg);
+        }
+      }
+    });
     
-    const overall_avg = last10Avgs.length > 0
-      ? last10Avgs.reduce((sum, avg) => sum + avg, 0) / last10Avgs.length
+    const overall_avg = avgs.length > 0
+      ? avgs.reduce((sum, avg) => sum + avg, 0) / avgs.length
       : null;
 
     // 90-day count
