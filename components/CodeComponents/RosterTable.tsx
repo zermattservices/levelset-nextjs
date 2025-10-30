@@ -686,20 +686,6 @@ export function RosterTable({
               Current Role
             </TableCell>
             <TableCell
-              data-plasmic-name="availability-header"
-              className={headerCellClass}
-              align="center"
-            >
-              Availability
-            </TableCell>
-            <TableCell
-              data-plasmic-name="certified-header"
-              className={headerCellClass}
-              align="center"
-            >
-              Certified
-            </TableCell>
-            <TableCell
               data-plasmic-name="foh-header"
               className={headerCellClass}
               align="center"
@@ -714,11 +700,25 @@ export function RosterTable({
               BOH
             </TableCell>
             <TableCell
+              data-plasmic-name="availability-header"
+              className={headerCellClass}
+              align="center"
+            >
+              Availability
+            </TableCell>
+            <TableCell
+              data-plasmic-name="certified-header"
+              className={headerCellClass}
+              align="center"
+            >
+              Certified
+            </TableCell>
+            <TableCell
               data-plasmic-name="pay-header"
               className={headerCellClass}
               align="center"
             >
-              Calculated Pay
+              Suggested Pay
             </TableCell>
             {showActions && (
               <TableCell
@@ -843,6 +843,42 @@ export function RosterTable({
                 align="center"
                 sx={{ py: cellPadding }}
               >
+                <BrandCheckbox
+                  checked={e.foh}
+                  onChange={(_, checked) => handleFohChange(e.id, checked)}
+                  className={
+                    checkboxOnClass || checkboxOffClass
+                      ? e.foh
+                        ? checkboxOnClass
+                        : checkboxOffClass
+                      : undefined
+                  }
+                  inputProps={{ "aria-label": `FOH access for ${e.name}` }}
+                />
+              </TableCell>
+              <TableCell
+                className={cellClass}
+                align="center"
+                sx={{ py: cellPadding }}
+              >
+                <BrandCheckbox
+                  checked={e.boh}
+                  onChange={(_, checked) => handleBohChange(e.id, checked)}
+                  className={
+                    checkboxOnClass || checkboxOffClass
+                      ? e.boh
+                        ? checkboxOnClass
+                        : checkboxOffClass
+                      : undefined
+                  }
+                  inputProps={{ "aria-label": `BOH access for ${e.name}` }}
+                />
+              </TableCell>
+              <TableCell
+                className={cellClass}
+                align="center"
+                sx={{ py: cellPadding }}
+              >
                 <AvailabilityChip
                   className={e.availability.toLowerCase()}
                   onClick={(event) => handleAvailabilityMenuOpen(event, e.id)}
@@ -910,42 +946,6 @@ export function RosterTable({
                       : undefined
                   }
                   inputProps={{ "aria-label": `Certified status for ${e.name}` }}
-                />
-              </TableCell>
-              <TableCell
-                className={cellClass}
-                align="center"
-                sx={{ py: cellPadding }}
-              >
-                <BrandCheckbox
-                  checked={e.foh}
-                  onChange={(_, checked) => handleFohChange(e.id, checked)}
-                  className={
-                    checkboxOnClass || checkboxOffClass
-                      ? e.foh
-                        ? checkboxOnClass
-                        : checkboxOffClass
-                      : undefined
-                  }
-                  inputProps={{ "aria-label": `FOH access for ${e.name}` }}
-                />
-              </TableCell>
-              <TableCell
-                className={cellClass}
-                align="center"
-                sx={{ py: cellPadding }}
-              >
-                <BrandCheckbox
-                  checked={e.boh}
-                  onChange={(_, checked) => handleBohChange(e.id, checked)}
-                  className={
-                    checkboxOnClass || checkboxOffClass
-                      ? e.boh
-                        ? checkboxOnClass
-                        : checkboxOffClass
-                      : undefined
-                  }
-                  inputProps={{ "aria-label": `BOH access for ${e.name}` }}
                 />
               </TableCell>
               <TableCell
