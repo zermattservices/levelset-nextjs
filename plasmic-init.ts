@@ -19,6 +19,7 @@ import { LogoutButton } from "./components/CodeComponents/auth/LogoutButton";
 import { SupabaseUserLogOut } from "./components/CodeComponents/auth/SupabaseUserLogOut";
 import { SimpleLogoutButton } from "./components/CodeComponents/auth/SimpleLogoutButton";
 import { FullPEAScoreboard } from "./components/CodeComponents/FullPEAScoreboard";
+import { PositionalRatingsTable } from "./components/CodeComponents/PositionalRatingsTable";
 import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
@@ -495,6 +496,48 @@ PLASMIC.registerComponent(SimpleLogoutButton, {
       },
       importPath: "./components/CodeComponents/FullPEAScoreboard",
     });
+
+// Register PositionalRatingsTable component - Supabase-based PEA ratings dashboard
+PLASMIC.registerComponent(PositionalRatingsTable, {
+  name: "PositionalRatingsTable",
+  displayName: "Positional Ratings Table",
+  props: {
+    orgId: {
+      type: "string",
+      defaultValue: "54b9864f-9df9-4a15-a209-7b99e1c274f4",
+      description: "Organization ID"
+    },
+    locationId: {
+      type: "string",
+      defaultValue: "67e00fb2-29f5-41ce-9c1c-93e2f7f392dd",
+      description: "Location ID (CFA Buda or West Buda)"
+    },
+    className: "string",
+    density: {
+      type: "choice",
+      options: ["comfortable", "compact"],
+      defaultValue: "comfortable",
+      description: "Table density/spacing"
+    },
+    defaultTab: {
+      type: "choice",
+      options: ["overview", "employees", "leadership"],
+      defaultValue: "overview",
+      description: "Initial tab to display"
+    },
+    defaultArea: {
+      type: "choice",
+      options: ["FOH", "BOH"],
+      defaultValue: "FOH",
+      description: "Initial FOH/BOH area"
+    },
+    logoUrl: {
+      type: "string",
+      description: "URL for location logo (optional)"
+    }
+  },
+  importPath: "./components/CodeComponents/PositionalRatingsTable",
+});
 
 // Register DrawerV2 component - Enhanced version of Plasmic's default Drawer with size prop
 PLASMIC.registerComponent(DrawerV2, {
