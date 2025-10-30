@@ -207,6 +207,20 @@ const ExpandedTable = styled(Table)(() => ({
   }
 }));
 
+const LoadingOverlay = styled(Box)(() => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  zIndex: 10,
+  backdropFilter: 'blur(2px)'
+}));
+
 // ===== Main Component =====
 
 export function PositionalRatingsTable({
@@ -376,7 +390,10 @@ export function PositionalRatingsTable({
     setExpandedRows(new Set());
   };
 
-  if (loading && (overviewData.length === 0 && positionData.length === 0 && leadershipData.length === 0)) {
+  // Only show loading screen on initial load (no data at all)
+  const isInitialLoad = loading && (overviewData.length === 0 && positionData.length === 0 && leadershipData.length === 0);
+  
+  if (isInitialLoad) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
         <CircularProgress sx={{ color: '#31664a' }} />
@@ -384,7 +401,7 @@ export function PositionalRatingsTable({
     );
   }
 
-  if (error) {
+  if (error && !loading) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
         <Typography color="error">{error}</Typography>
@@ -458,37 +475,45 @@ export function PositionalRatingsTable({
         )}
       </ControlsContainer>
 
-      {/* Table Content - Render based on active tab */}
-      {activeTab === 'overview' && (
-        <OverviewTable 
-          data={overviewData}
-          area={area}
-          expandedRows={expandedRows}
-          toggleRow={toggleRow}
-          cellPadding={cellPadding}
-        />
-      )}
+      {/* Table Content - Render based on active tab with loading overlay */}
+      <Box sx={{ position: 'relative', minHeight: 400 }}>
+        {loading && (
+          <LoadingOverlay>
+            <CircularProgress sx={{ color: '#31664a' }} />
+          </LoadingOverlay>
+        )}
+        
+        {activeTab === 'overview' && (
+          <OverviewTable 
+            data={overviewData}
+            area={area}
+            expandedRows={expandedRows}
+            toggleRow={toggleRow}
+            cellPadding={cellPadding}
+          />
+        )}
 
-      {activeTab === 'employees' && selectedPosition && (
-        <PositionTable
-          data={positionData}
-          position={selectedPosition}
-          big5Labels={big5Labels}
-          expandedRows={expandedRows}
-          toggleRow={toggleRow}
-          cellPadding={cellPadding}
-        />
-      )}
+        {activeTab === 'employees' && selectedPosition && (
+          <PositionTable
+            data={positionData}
+            position={selectedPosition}
+            big5Labels={big5Labels}
+            expandedRows={expandedRows}
+            toggleRow={toggleRow}
+            cellPadding={cellPadding}
+          />
+        )}
 
-      {activeTab === 'leadership' && (
-        <LeadershipTable
-          data={leadershipData}
-          area={area}
-          expandedRows={expandedRows}
-          toggleRow={toggleRow}
-          cellPadding={cellPadding}
-        />
-      )}
+        {activeTab === 'leadership' && (
+          <LeadershipTable
+            data={leadershipData}
+            area={area}
+            expandedRows={expandedRows}
+            toggleRow={toggleRow}
+            cellPadding={cellPadding}
+          />
+        )}
+      </Box>
     </Box>
   );
 }
