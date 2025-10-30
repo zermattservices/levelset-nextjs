@@ -913,6 +913,12 @@
           "name": "FullPEAScoreboard",
           "displayName": "FullPEAScoreboard",
           "componentImportPath": "./components/CodeComponents/FullPEAScoreboard"
+        },
+        {
+          "id": "kyzw2LPuXPny",
+          "name": "PositionalRatingsTable",
+          "displayName": "PositionalRatingsTable",
+          "componentImportPath": "./components/CodeComponents/PositionalRatingsTable"
         }
       ],
       "splitsProviderFilePath": "",
