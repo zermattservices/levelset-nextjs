@@ -452,6 +452,7 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                 sty.levelsetButton__fBkbv
               )}
               color={"clear"}
+              link={`/admin`}
               size={"compact"}
             >
               <div

@@ -202,7 +202,8 @@
 .rosterTable:global(.__wab_instance) {
   max-width: 100%;
   object-fit: cover;
-  width: 593px;
+  width: 100%;
+  min-width: 0;
 }
 .drawerV2:global(.__wab_instance) {
   max-width: 100%;
