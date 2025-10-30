@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { Employee } from "@/lib/supabase.types";
+import type { Employee, AvailabilityType } from "@/lib/supabase.types";
 import {
   Table,
   TableBody,
@@ -34,6 +34,9 @@ export interface RosterEntry {
   id: string;
   name: string;
   currentRole: Role;
+  certified: boolean;
+  availability: AvailabilityType;
+  calculatedPay: number | null;
   foh: boolean;
   boh: boolean;
 }
@@ -60,6 +63,8 @@ export interface RosterTableProps {
   actionsCellClass?: string;
 
   // handlers
+  onCertifiedChange?: (id: string, checked: boolean) => void;
+  onAvailabilityChange?: (id: string, availability: AvailabilityType) => void;
   onFohChange?: (id: string, checked: boolean) => void;
   onBohChange?: (id: string, checked: boolean) => void;
   onRoleChange?: (id: string, newRole: Role) => void;
@@ -72,17 +77,17 @@ export interface RosterTableProps {
 
 // sample data (design preview)
 const sampleData: RosterEntry[] = [
-  { id: "1", name: "Alexandra Nolasco", currentRole: "New Hire", foh: true,  boh: false },
-  { id: "2", name: "Amanda Luna",       currentRole: "Team Lead", foh: true,  boh: false },
-  { id: "3", name: "Angeles Carbajal",  currentRole: "Team Lead", foh: false, boh: true  },
-  { id: "4", name: "Ashley Ramirez",    currentRole: "Team Lead", foh: true,  boh: false },
-  { id: "5", name: "Caidyn Spann",      currentRole: "Team Member", foh: true, boh: false },
-  { id: "6", name: "Casey Howard",      currentRole: "Director",  foh: true,  boh: true  },
-  { id: "7", name: "Celia Barrera",     currentRole: "New Hire",  foh: true,  boh: false },
-  { id: "8", name: "Daniel Millan",     currentRole: "Team Member", foh: true, boh: false },
-  { id: "9", name: "Sarah Johnson",     currentRole: "Trainer",   foh: true,  boh: true  },
-  { id: "10", name: "Michael Chen",     currentRole: "Executive", foh: true,  boh: true  },
-  { id: "11", name: "Lisa Rodriguez",   currentRole: "Operator",  foh: true,  boh: true  },
+  { id: "1", name: "Alexandra Nolasco", currentRole: "New Hire", certified: false, availability: "Available", calculatedPay: 15, foh: true,  boh: false },
+  { id: "2", name: "Amanda Luna",       currentRole: "Team Lead", certified: true, availability: "Available", calculatedPay: 25, foh: true,  boh: false },
+  { id: "3", name: "Angeles Carbajal",  currentRole: "Team Lead", certified: true, availability: "Available", calculatedPay: 25, foh: false, boh: true  },
+  { id: "4", name: "Ashley Ramirez",    currentRole: "Team Lead", certified: true, availability: "Available", calculatedPay: 25, foh: true,  boh: false },
+  { id: "5", name: "Caidyn Spann",      currentRole: "Team Member", certified: false, availability: "Limited", calculatedPay: 14, foh: true, boh: false },
+  { id: "6", name: "Casey Howard",      currentRole: "Director",  certified: true, availability: "Available", calculatedPay: 30, foh: true,  boh: true  },
+  { id: "7", name: "Celia Barrera",     currentRole: "New Hire",  certified: false, availability: "Available", calculatedPay: 15, foh: true,  boh: false },
+  { id: "8", name: "Daniel Millan",     currentRole: "Team Member", certified: true, availability: "Available", calculatedPay: 18, foh: true, boh: false },
+  { id: "9", name: "Sarah Johnson",     currentRole: "Trainer",   certified: true, availability: "Available", calculatedPay: 20, foh: true,  boh: true  },
+  { id: "10", name: "Michael Chen",     currentRole: "Executive", certified: true, availability: "Available", calculatedPay: 36, foh: true,  boh: true  },
+  { id: "11", name: "Lisa Rodriguez",   currentRole: "Operator",  certified: true, availability: "Available", calculatedPay: null, foh: true,  boh: true  },
 ];
 
 // role → chip colors (can still be overridden via roleBadgeClass)
@@ -244,6 +249,31 @@ const SaveButton = styled(Button)(() => ({
   },
 }));
 
+const AvailabilityChip = styled(Box)(() => ({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 4,
+  padding: "4px 12px",
+  borderRadius: 12,
+  fontSize: 12,
+  fontWeight: 500,
+  fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+  cursor: "pointer",
+  transition: "all 0.15s ease-in-out",
+  "&:hover": {
+    opacity: 0.8,
+    transform: "translateY(-1px)",
+  },
+  "&.available": {
+    backgroundColor: "#dcfce7",
+    color: "#166534",
+  },
+  "&.limited": {
+    backgroundColor: "#fef3c7",
+    color: "#d97706",
+  },
+}));
+
 export function RosterTable({
   orgId,
   locationId,
@@ -262,6 +292,8 @@ export function RosterTable({
   checkboxOffClass,
   actionsCellClass,
 
+  onCertifiedChange,
+  onAvailabilityChange,
   onFohChange,
   onBohChange,
   onRoleChange,
@@ -278,6 +310,9 @@ export function RosterTable({
   // Role dropdown state
   const [roleMenuAnchor, setRoleMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
   const [pendingRoleChanges, setPendingRoleChanges] = React.useState<{ [key: string]: Role }>({});
+  
+  // Availability dropdown state
+  const [availabilityMenuAnchor, setAvailabilityMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
 
   // Unchangeable roles
   const unchangeableRoles: Role[] = ["Operator", "Executive"];
@@ -300,6 +335,9 @@ export function RosterTable({
           id: emp.id,
           name: emp.full_name || `${emp.first_name} ${emp.last_name || ''}`.trim(),
           currentRole: emp.role as Role,
+          certified: emp.is_certified ?? false,
+          availability: emp.availability || 'Available',
+          calculatedPay: emp.calculated_pay ?? null,
           foh: emp.is_foh ?? false,
           boh: emp.is_boh ?? false
         }));
@@ -367,7 +405,37 @@ export function RosterTable({
   }, [orgId, locationId]);
   */
 
-  // Handle FOH/BOH changes with API calls
+  // Handle Certified/FOH/BOH changes with API calls
+  const handleCertifiedChange = async (id: string, checked: boolean) => {
+    if (onCertifiedChange) {
+      onCertifiedChange(id, checked);
+    }
+    
+    // Update via API
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          intent: 'update',
+          id: id,
+          is_certified: checked
+        })
+      });
+      
+      if (!response.ok) throw new Error('Failed to update employee');
+      
+      // Optimistic update
+      setData(prev => prev.map(emp => 
+        emp.id === id ? { ...emp, certified: checked } : emp
+      ));
+    } catch (err) {
+      console.error('Error updating Certified status:', err);
+    }
+  };
+
   const handleFohChange = async (id: string, checked: boolean) => {
     if (onFohChange) {
       onFohChange(id, checked);
@@ -425,6 +493,51 @@ export function RosterTable({
       ));
     } catch (err) {
       console.error('Error updating BOH status:', err);
+    }
+  };
+
+  // Availability dropdown handlers
+  const handleAvailabilityMenuOpen = (event: React.MouseEvent<HTMLElement>, employeeId: string) => {
+    setAvailabilityMenuAnchor(prev => ({ ...prev, [employeeId]: event.currentTarget }));
+  };
+
+  const handleAvailabilityMenuClose = (employeeId: string) => {
+    setAvailabilityMenuAnchor(prev => ({ ...prev, [employeeId]: null }));
+  };
+
+  const handleAvailabilitySelect = async (id: string, availability: AvailabilityType) => {
+    handleAvailabilityMenuClose(id);
+    
+    if (onAvailabilityChange) {
+      onAvailabilityChange(id, availability);
+    }
+
+    // Update via API (which will trigger pay recalculation)
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          intent: 'update',
+          id: id,
+          availability: availability
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to update employee');
+
+      const result = await response.json();
+      
+      // Update both availability and calculated_pay from API response
+      setData(prev => prev.map(emp =>
+        emp.id === id 
+          ? { ...emp, availability, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
+          : emp
+      ));
+    } catch (err) {
+      console.error('Error updating availability:', err);
     }
   };
 
@@ -573,6 +686,20 @@ export function RosterTable({
               Current Role
             </TableCell>
             <TableCell
+              data-plasmic-name="availability-header"
+              className={headerCellClass}
+              align="center"
+            >
+              Availability
+            </TableCell>
+            <TableCell
+              data-plasmic-name="certified-header"
+              className={headerCellClass}
+              align="center"
+            >
+              Certified
+            </TableCell>
+            <TableCell
               data-plasmic-name="foh-header"
               className={headerCellClass}
               align="center"
@@ -585,6 +712,13 @@ export function RosterTable({
               align="center"
             >
               BOH
+            </TableCell>
+            <TableCell
+              data-plasmic-name="pay-header"
+              className={headerCellClass}
+              align="center"
+            >
+              Calculated Pay
             </TableCell>
             {showActions && (
               <TableCell
@@ -709,6 +843,80 @@ export function RosterTable({
                 align="center"
                 sx={{ py: cellPadding }}
               >
+                <AvailabilityChip
+                  className={e.availability.toLowerCase()}
+                  onClick={(event) => handleAvailabilityMenuOpen(event, e.id)}
+                >
+                  {e.availability}
+                  <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
+                </AvailabilityChip>
+                
+                <Menu
+                  anchorEl={availabilityMenuAnchor[e.id]}
+                  open={Boolean(availabilityMenuAnchor[e.id])}
+                  onClose={() => handleAvailabilityMenuClose(e.id)}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }}
+                  PaperProps={{
+                    sx: {
+                      fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+                      borderRadius: 2,
+                      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                      border: "1px solid #e5e7eb",
+                    }
+                  }}
+                >
+                  {(['Available', 'Limited'] as AvailabilityType[]).map((avail) => (
+                    <RoleMenuItem
+                      key={avail}
+                      onClick={() => handleAvailabilitySelect(e.id, avail)}
+                      selected={e.availability === avail}
+                    >
+                      <AvailabilityChip
+                        className={avail.toLowerCase()}
+                        sx={{ 
+                          cursor: "default",
+                          "&:hover": { 
+                            opacity: 1, 
+                            transform: "none" 
+                          }
+                        }}
+                      >
+                        {avail}
+                      </AvailabilityChip>
+                    </RoleMenuItem>
+                  ))}
+                </Menu>
+              </TableCell>
+              <TableCell
+                className={cellClass}
+                align="center"
+                sx={{ py: cellPadding }}
+              >
+                <BrandCheckbox
+                  checked={e.certified}
+                  onChange={(_, checked) => handleCertifiedChange(e.id, checked)}
+                  className={
+                    checkboxOnClass || checkboxOffClass
+                      ? e.certified
+                        ? checkboxOnClass
+                        : checkboxOffClass
+                      : undefined
+                  }
+                  inputProps={{ "aria-label": `Certified status for ${e.name}` }}
+                />
+              </TableCell>
+              <TableCell
+                className={cellClass}
+                align="center"
+                sx={{ py: cellPadding }}
+              >
                 <BrandCheckbox
                   checked={e.foh}
                   onChange={(_, checked) => handleFohChange(e.id, checked)}
@@ -739,6 +947,24 @@ export function RosterTable({
                   }
                   inputProps={{ "aria-label": `BOH access for ${e.name}` }}
                 />
+              </TableCell>
+              <TableCell
+                className={cellClass}
+                align="center"
+                sx={{ py: cellPadding }}
+              >
+                <Typography
+                  component="span"
+                  variant="body2"
+                  sx={{ 
+                    fontFamily, 
+                    fontWeight: 600, 
+                    color: e.calculatedPay ? "#166534" : "#9ca3af",
+                    fontSize: 14
+                  }}
+                >
+                  {e.calculatedPay ? `$${e.calculatedPay.toFixed(2)}/hr` : '—'}
+                </Typography>
               </TableCell>
               {showActions && (
                 <TableCell
