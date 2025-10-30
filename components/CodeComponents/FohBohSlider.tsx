@@ -46,11 +46,14 @@ export function FohBohSlider({
   }, [selectedValue, plasmicUpdateVariant]);
 
   const handleChange = (newValue: "FOH" | "BOH") => {
+    console.log('[FohBohSlider] handleChange called with:', newValue);
     setSelectedValue(newValue);
     // Call onChange with the new value
     if (onChange) {
-      // Pass the value in the format Plasmic expects
+      console.log('[FohBohSlider] Calling parent onChange with:', newValue);
       onChange(newValue);
+    } else {
+      console.warn('[FohBohSlider] No onChange handler provided');
     }
   };
 
@@ -101,6 +104,10 @@ export function FohBohSlider({
         htmlFor="segFOH" 
         role="tab" 
         aria-selected={selectedValue === "FOH"}
+        onClick={(e) => {
+          e.preventDefault();
+          handleChange("FOH");
+        }}
         style={{
           padding: '8px 14px',
           cursor: 'pointer',
@@ -135,6 +142,10 @@ export function FohBohSlider({
         htmlFor="segBOH" 
         role="tab" 
         aria-selected={selectedValue === "BOH"}
+        onClick={(e) => {
+          e.preventDefault();
+          handleChange("BOH");
+        }}
         style={{
           padding: '8px 14px',
           cursor: 'pointer',

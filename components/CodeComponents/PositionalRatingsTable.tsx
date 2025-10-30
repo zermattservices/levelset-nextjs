@@ -348,6 +348,8 @@ export function PositionalRatingsTable({
 
   // Handle area change (FOH/BOH slider)
   const handleAreaChange = (newArea: "FOH" | "BOH") => {
+    console.log('[PositionalRatingsTable] handleAreaChange called with:', newArea);
+    console.log('[PositionalRatingsTable] Current area:', area, '-> New area:', newArea);
     setArea(newArea);
     setSelectedPosition(null); // reset position selection
     setExpandedRows(new Set());
