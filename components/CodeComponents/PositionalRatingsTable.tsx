@@ -41,6 +41,15 @@ import type {
 } from "@/lib/supabase.types";
 import { createSupabaseClient } from "@/util/supabase/component";
 
+// Helper function to remove "FOH" or "BOH" from position names for display
+const cleanPositionName = (positionName: string): string => {
+  // Remove " FOH" or " BOH" from 3H Week, Trainer, and Leadership positions
+  if (positionName.includes('3H Week') || positionName.includes('Trainer') || positionName.includes('Leadership')) {
+    return positionName.replace(/ (FOH|BOH)$/i, '');
+  }
+  return positionName;
+};
+
 export interface PositionalRatingsTableProps {
   orgId: string;
   locationId: string;
@@ -49,13 +58,17 @@ export interface PositionalRatingsTableProps {
   defaultTab?: "overview" | "employees" | "leadership";
   defaultArea?: "FOH" | "BOH";
   logoUrl?: string;
+  width?: string | number;
+  maxWidth?: string | number;
 }
 
 const fontFamily = `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
 
 // ===== Styled Components =====
 
-const StyledContainer = styled(TableContainer)(() => ({
+const StyledContainer = styled(TableContainer)<{ componentwidth?: string | number; componentmaxwidth?: string | number }>(({ componentwidth, componentmaxwidth }) => ({
+  width: componentwidth || '100%',
+  maxWidth: componentmaxwidth || '100%',
   borderRadius: 16,
   border: "1px solid #e5e7eb",
   backgroundColor: "#ffffff",
@@ -203,7 +216,9 @@ export function PositionalRatingsTable({
   density = "comfortable",
   defaultTab = "overview",
   defaultArea = "FOH",
-  logoUrl
+  logoUrl,
+  width,
+  maxWidth
 }: PositionalRatingsTableProps) {
   const [activeTab, setActiveTab] = React.useState<"overview" | "employees" | "leadership">(defaultTab);
   const [area, setArea] = React.useState<"FOH" | "BOH">(defaultArea);
@@ -378,7 +393,13 @@ export function PositionalRatingsTable({
   }
 
   return (
-    <Box className={`positional-ratings-table ${className}`}>
+    <Box 
+      className={`positional-ratings-table ${className}`}
+      sx={{
+        width: width || '100%',
+        maxWidth: maxWidth || '100%'
+      }}
+    >
       {/* Header with Rubric and Logo */}
       <Box sx={{ 
         display: 'grid', 
@@ -429,7 +450,7 @@ export function PositionalRatingsTable({
             >
               {positions.map(pos => (
                 <MenuItem key={pos} value={pos} sx={{ fontFamily }}>
-                  {pos}
+                  {cleanPositionName(pos)}
                 </MenuItem>
               ))}
             </Select>
@@ -495,7 +516,7 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding }: Ove
             <TableCell align="center">Last Rating</TableCell>
             {positions.map(pos => (
               <TableCell key={pos} align="center" sx={{ whiteSpace: 'nowrap' }}>
-                {pos}
+                {cleanPositionName(pos)}
               </TableCell>
             ))}
             <TableCell align="center">Overall Avg</TableCell>
@@ -567,7 +588,7 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding }: Ove
                             <TableRow key={idx}>
                               <TableCell>{rating.rater_name}</TableCell>
                               <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
-                              <TableCell>{rating.position}</TableCell>
+                              <TableCell>{cleanPositionName(rating.position)}</TableCell>
                               <RatingCell $rating={rating.rating_1}>{formatRating(rating.rating_1)}</RatingCell>
                               <RatingCell $rating={rating.rating_2}>{formatRating(rating.rating_2)}</RatingCell>
                               <RatingCell $rating={rating.rating_3}>{formatRating(rating.rating_3)}</RatingCell>
@@ -743,7 +764,7 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding }: L
             <TableCell align="center">Last Rating</TableCell>
             {positions.map(pos => (
               <TableCell key={pos} align="center" sx={{ whiteSpace: 'nowrap' }}>
-                {pos}
+                {cleanPositionName(pos)}
               </TableCell>
             ))}
             <TableCell align="center">Overall Avg</TableCell>
@@ -815,7 +836,7 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding }: L
                             <TableRow key={idx}>
                               <TableCell>{rating.employee_name}</TableCell>
                               <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
-                              <TableCell>{rating.position}</TableCell>
+                              <TableCell>{cleanPositionName(rating.position)}</TableCell>
                               <RatingCell $rating={rating.rating_1}>{formatRating(rating.rating_1)}</RatingCell>
                               <RatingCell $rating={rating.rating_2}>{formatRating(rating.rating_2)}</RatingCell>
                               <RatingCell $rating={rating.rating_3}>{formatRating(rating.rating_3)}</RatingCell>

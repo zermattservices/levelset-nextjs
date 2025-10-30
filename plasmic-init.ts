@@ -513,6 +513,16 @@ PLASMIC.registerComponent(PositionalRatingsTable, {
       description: "Location ID (CFA Buda or West Buda)"
     },
     className: "string",
+    width: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Width of the component (e.g., '100%', '1200px')"
+    },
+    maxWidth: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Maximum width of the component (e.g., '100%', '1400px')"
+    },
     density: {
       type: "choice",
       options: ["comfortable", "compact"],
