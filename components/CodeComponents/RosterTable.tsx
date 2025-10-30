@@ -427,9 +427,13 @@ export function RosterTable({
       
       if (!response.ok) throw new Error('Failed to update employee');
       
-      // Optimistic update
+      const result = await response.json();
+      
+      // Update with both certified status and calculated_pay from API response
       setData(prev => prev.map(emp => 
-        emp.id === id ? { ...emp, certified: checked } : emp
+        emp.id === id 
+          ? { ...emp, certified: checked, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
+          : emp
       ));
     } catch (err) {
       console.error('Error updating Certified status:', err);
@@ -457,9 +461,13 @@ export function RosterTable({
       
       if (!response.ok) throw new Error('Failed to update employee');
       
-      // Optimistic update
+      const result = await response.json();
+      
+      // Update with both FOH status and calculated_pay from API response
       setData(prev => prev.map(emp => 
-        emp.id === id ? { ...emp, foh: checked } : emp
+        emp.id === id 
+          ? { ...emp, foh: checked, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
+          : emp
       ));
     } catch (err) {
       console.error('Error updating FOH status:', err);
@@ -487,9 +495,13 @@ export function RosterTable({
       
       if (!response.ok) throw new Error('Failed to update employee');
       
-      // Optimistic update
+      const result = await response.json();
+      
+      // Update with both BOH status and calculated_pay from API response
       setData(prev => prev.map(emp => 
-        emp.id === id ? { ...emp, boh: checked } : emp
+        emp.id === id 
+          ? { ...emp, boh: checked, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
+          : emp
       ));
     } catch (err) {
       console.error('Error updating BOH status:', err);
@@ -593,9 +605,13 @@ export function RosterTable({
       
       if (!response.ok) throw new Error('Failed to update employee role');
       
-      // Optimistic update
+      const result = await response.json();
+      
+      // Update with both role and calculated_pay from API response
       setData(prev => prev.map(emp => 
-        emp.id === employeeId ? { ...emp, currentRole: newRole } : emp
+        emp.id === employeeId 
+          ? { ...emp, currentRole: newRole, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
+          : emp
       ));
       
       // Clear pending changes and close menu
@@ -759,13 +775,16 @@ export function RosterTable({
                     sx={{ 
                       cursor: "default",
                       outline: "none",
+                      border: "none",
                       "&:hover": { 
                         opacity: 1, 
                         transform: "none",
-                        outline: "none"
+                        outline: "none",
+                        border: "none"
                       },
                       "&:focus": {
-                        outline: "none"
+                        outline: "none",
+                        border: "none"
                       }
                     }}
                   >
