@@ -186,7 +186,10 @@ export async function fetchOverviewData(
 
 /**
  * Fetch Position-specific data
- * Shows all employees with their Big 5 breakdown for a specific position
+ * Shows ALL eligible employees for a position (not just those with ratings)
+ * Filtering rules match original Google Sheets:
+ * - Regular positions: All FOH/BOH employees
+ * - Trainer positions: Only trainers (is_trainer=true)
  */
 export async function fetchPositionData(
   supabase: SupabaseClient,
@@ -194,6 +197,36 @@ export async function fetchPositionData(
   locationId: string,
   position: string
 ): Promise<EmployeeRatingAggregate[]> {
+  // Determine filtering rules based on position
+  const isTrainerPosition = position.includes('Trainer');
+  const isLeaderPosition = position.includes('Leadership') || position.includes('3H Week');
+  const isFOH = FOH_POSITIONS.includes(position);
+  const isBOH = BOH_POSITIONS.includes(position);
+  const fohBohField = isFOH ? 'is_foh' : 'is_boh';
+
+  // Build employee filter
+  let employeeQuery = supabase
+    .from('employees')
+    .select('id, full_name, first_name, last_name')
+    .eq('org_id', orgId)
+    .eq('location_id', locationId)
+    .eq('active', true)
+    .eq(fohBohField, true);
+
+  // Additional filters for special positions
+  if (isTrainerPosition) {
+    employeeQuery = employeeQuery.eq('is_trainer', true);
+  } else if (isLeaderPosition) {
+    employeeQuery = employeeQuery.eq('is_leader', true);
+  }
+
+  const { data: allEmployees, error: empError } = await employeeQuery.order('full_name');
+
+  if (empError || !allEmployees) {
+    console.error('Error fetching employees for position:', empError);
+    return [];
+  }
+
   // Get all ratings for this position with employee names
   const { data: ratings, error } = await supabase
     .from('ratings')
@@ -207,47 +240,63 @@ export async function fetchPositionData(
     .eq('position', position)
     .order('created_at', { ascending: false });
 
-  if (error || !ratings) {
+  if (error) {
     console.error('Error fetching position ratings:', error);
-    return [];
+    // Continue with empty ratings
   }
 
-  // Group by employee_id
-  const employeeMap = new Map<string, Rating[]>();
+  // Group ratings by employee_id
+  const ratingsMap = new Map<string, Rating[]>();
   
-  ratings.forEach((rating: any) => {
-    const employeeName = rating.employee?.full_name || 
-                        `${rating.employee?.first_name || ''} ${rating.employee?.last_name || ''}`.trim();
-    const raterName = rating.rater?.full_name || 'Unknown';
-    
-    const ratingWithNames: Rating = {
-      ...rating,
-      employee_name: employeeName,
-      rater_name: raterName
-    };
+  if (ratings) {
+    ratings.forEach((rating: any) => {
+      const employeeName = rating.employee?.full_name || 
+                          `${rating.employee?.first_name || ''} ${rating.employee?.last_name || ''}`.trim();
+      const raterName = rating.rater?.full_name || 'Unknown';
+      
+      const ratingWithNames: Rating = {
+        ...rating,
+        employee_name: employeeName,
+        rater_name: raterName
+      };
 
-    if (!employeeMap.has(rating.employee_id)) {
-      employeeMap.set(rating.employee_id, []);
-    }
-    employeeMap.get(rating.employee_id)!.push(ratingWithNames);
-  });
+      if (!ratingsMap.has(rating.employee_id)) {
+        ratingsMap.set(rating.employee_id, []);
+      }
+      ratingsMap.get(rating.employee_id)!.push(ratingWithNames);
+    });
+  }
 
-  // Calculate aggregates
+  // Calculate aggregates for ALL employees (including those without ratings)
   const aggregates: EmployeeRatingAggregate[] = [];
 
-  employeeMap.forEach((empRatings, employeeId) => {
-    const employeeName = empRatings[0]?.employee_name || 'Unknown';
+  allEmployees.forEach(employee => {
+    const employeeId = employee.id;
+    const employeeName = employee.full_name || 
+                        `${employee.first_name || ''} ${employee.last_name || ''}`.trim();
+    const empRatings = ratingsMap.get(employeeId) || [];
     
     // Last 4 ratings for this position
     const last4 = empRatings.slice(0, 4);
     
     // Calculate average from last 4
-    const validAvgs = last4
-      .map(r => r.rating_avg)
-      .filter(avg => avg !== null) as number[];
+    const avgs: number[] = [];
+    last4.forEach(r => {
+      if (r.rating_avg !== null) {
+        avgs.push(r.rating_avg);
+      } else {
+        // Calculate avg from rating_1-5 if rating_avg is null
+        const individualRatings = [r.rating_1, r.rating_2, r.rating_3, r.rating_4, r.rating_5]
+          .filter(v => v !== null) as number[];
+        if (individualRatings.length > 0) {
+          const calculatedAvg = individualRatings.reduce((sum, v) => sum + v, 0) / individualRatings.length;
+          avgs.push(calculatedAvg);
+        }
+      }
+    });
     
-    const overall_avg = validAvgs.length > 0
-      ? validAvgs.reduce((sum, avg) => sum + avg, 0) / validAvgs.length
+    const overall_avg = avgs.length > 0
+      ? avgs.reduce((sum, avg) => sum + avg, 0) / avgs.length
       : null;
 
     // 90-day count

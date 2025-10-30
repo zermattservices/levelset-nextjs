@@ -414,7 +414,7 @@ export function PositionalRatingsTable({
 
       {/* Controls */}
       <ControlsContainer>
-        <FohBohSlider value={area} onChange={handleAreaChange} />
+        <FohBohSlider key={`slider-${area}`} value={area} onChange={handleAreaChange} />
         
         {activeTab === 'employees' && (
           <FormControl size="small" sx={{ minWidth: 200 }}>
