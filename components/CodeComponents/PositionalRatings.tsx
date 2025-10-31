@@ -93,17 +93,18 @@ const DateRangeContainer = styled(Box)({
 const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
   fontFamily,
   fontSize: 13,
-  fontWeight: 500,
+  fontWeight: 600,
   padding: '6px 16px',
   borderRadius: 20,
   textTransform: 'none',
   border: 'none',
   boxShadow: 'none',
   backgroundColor: selected ? levelsetGreen : '#f3f4f6',
-  color: selected ? '#fff' : '#6b7280',
+  color: selected ? '#ffffff !important' : '#6b7280',
   '&:hover': {
     backgroundColor: selected ? levelsetGreen : '#e5e7eb',
     boxShadow: 'none',
+    color: selected ? '#ffffff !important' : '#6b7280',
   },
 }));
 
@@ -189,15 +190,20 @@ const StyledDataGrid = styled(DataGridPro)({
     },
   },
   '& .MuiDataGrid-columnSeparator': {
-    display: 'none',
+    display: 'none !important',
+  },
+  '& .MuiDataGrid-iconSeparator': {
+    display: 'none !important',
   },
   '& .MuiDataGrid-cell': {
     borderBottom: '1px solid #f3f4f6',
+    borderRight: 'none !important',
     fontSize: 13,
     color: '#111827',
     fontFamily,
     display: 'flex',
     alignItems: 'center',
+    padding: '0 8px',
     '&:focus': {
       outline: 'none',
     },
@@ -241,7 +247,8 @@ const StyledDataGrid = styled(DataGridPro)({
     padding: '16px',
     gap: '16px',
   },
-  '& .MuiDataGrid-filterFormColumnInput, & .MuiDataGrid-filterFormOperatorInput, & .MuiDataGrid-filterFormValueInput': {
+  '& .MuiDataGrid-filterFormColumnInput': {
+    minWidth: '150px',
     '& .MuiInputLabel-root': {
       fontFamily,
       fontSize: 11,
@@ -253,35 +260,92 @@ const StyledDataGrid = styled(DataGridPro)({
     '& .MuiInputBase-root': {
       fontFamily,
       fontSize: 12,
+    },
+    '& .MuiOutlinedInput-root': {
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#e5e7eb',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#d1d5db',
+      },
       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: levelsetGreen,
+        borderWidth: '2px',
       },
-    },
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#e5e7eb',
     },
     '& .MuiSelect-select': {
       fontFamily,
       fontSize: 12,
-      padding: '8px 12px',
+      padding: '8.5px 14px',
+    },
+  },
+  '& .MuiDataGrid-filterFormOperatorInput': {
+    minWidth: '120px',
+    '& .MuiInputLabel-root': {
+      fontFamily,
+      fontSize: 11,
+      color: '#6b7280',
+      '&.Mui-focused': {
+        color: levelsetGreen,
+      },
+    },
+    '& .MuiInputBase-root': {
+      fontFamily,
+      fontSize: 12,
+    },
+    '& .MuiOutlinedInput-root': {
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#e5e7eb',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#d1d5db',
+      },
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: levelsetGreen,
+        borderWidth: '2px',
+      },
+    },
+    '& .MuiSelect-select': {
+      fontFamily,
+      fontSize: 12,
+      padding: '8.5px 14px',
+    },
+  },
+  '& .MuiDataGrid-filterFormValueInput': {
+    minWidth: '150px',
+    '& .MuiInputLabel-root': {
+      fontFamily,
+      fontSize: 11,
+      color: '#6b7280',
+      '&.Mui-focused': {
+        color: levelsetGreen,
+      },
+    },
+    '& .MuiInputBase-root': {
+      fontFamily,
+      fontSize: 12,
+    },
+    '& .MuiOutlinedInput-root': {
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#e5e7eb',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#d1d5db',
+      },
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: levelsetGreen,
+        borderWidth: '2px',
+      },
+    },
+    '& .MuiSelect-select': {
+      fontFamily,
+      fontSize: 12,
+      padding: '8.5px 14px',
     },
     '& .MuiInputBase-input': {
       fontFamily,
       fontSize: 12,
-      padding: '8px 12px',
-    },
-  },
-  // Make filter value input match outlined style
-  '& .MuiDataGrid-filterFormValueInput .MuiInputBase-root': {
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#e5e7eb',
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#d1d5db',
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: levelsetGreen,
-      borderWidth: '2px',
+      padding: '8.5px 14px',
     },
   },
   // Filter form delete icon
@@ -469,7 +533,7 @@ function SelectFilterInput(props: SelectFilterInputProps) {
   const { item, applyValue, options } = props;
 
   return (
-    <FormControl fullWidth size="small">
+    <FormControl fullWidth size="small" variant="outlined">
       <Select
         value={item.value || ''}
         onChange={(event) => {
@@ -480,6 +544,12 @@ function SelectFilterInput(props: SelectFilterInputProps) {
         sx={{ 
           fontFamily, 
           fontSize: 12,
+          minWidth: '150px',
+          '& .MuiSelect-select': {
+            fontFamily,
+            fontSize: 12,
+            padding: '8.5px 14px',
+          },
           '& .MuiOutlinedInput-notchedOutline': {
             borderColor: '#e5e7eb',
           },
