@@ -39,6 +39,7 @@ const nextConfig = {
     '@mui/x-data-grid',
     '@mui/x-data-grid-pro',
     '@mui/x-data-grid-premium',
+    '@mui/x-date-pickers',
   ],
 };
 

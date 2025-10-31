@@ -2,8 +2,6 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  Checkbox,
-  FormControlLabel,
   TextField,
   Typography,
   IconButton,
@@ -13,9 +11,14 @@ import {
   DialogActions,
   Tooltip,
   Stack,
-  Chip
+  Chip,
+  ToggleButton,
+  ToggleButtonGroup
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import {
   DataGridPro,
   GridColDef,
@@ -29,9 +32,12 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { createSupabaseClient } from '@/util/supabase/component';
 import type { Rating, PositionBig5Labels } from '@/lib/supabase.types';
-import { cleanPositionName } from '@/lib/ratings-data';
+import { cleanPositionName, FOH_POSITIONS, BOH_POSITIONS } from '@/lib/ratings-data';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+const levelsetGreen = '#31664a';
+const fohColor = '#3b82f6'; // Blue for FOH
+const bohColor = '#f59e0b'; // Gold/Yellow for BOH
 
 export interface PositionalRatingsProps {
   orgId: string;
@@ -61,20 +67,93 @@ const StyledContainer = styled(Box)<{ componentwidth?: string | number; componen
 
 const FilterContainer = styled(Box)({
   display: 'flex',
-  flexDirection: 'column',
   gap: 16,
   marginBottom: 16,
-  padding: 16,
-  backgroundColor: '#f9fafb',
-  borderRadius: 8,
-  border: '1px solid #e5e7eb',
+  alignItems: 'center',
+  justifyContent: 'space-between',
 });
 
 const DateRangeContainer = styled(Box)({
   display: 'flex',
   gap: 8,
-  flexWrap: 'wrap',
   alignItems: 'center',
+});
+
+const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
+  fontFamily,
+  fontSize: 13,
+  fontWeight: 500,
+  padding: '6px 16px',
+  borderRadius: 20,
+  textTransform: 'none',
+  border: 'none',
+  boxShadow: 'none',
+  backgroundColor: selected ? levelsetGreen : '#f3f4f6',
+  color: selected ? '#fff' : '#6b7280',
+  '&:hover': {
+    backgroundColor: selected ? levelsetGreen : '#e5e7eb',
+    boxShadow: 'none',
+  },
+}));
+
+const AreaPill = styled(Box)<{ selected?: boolean; area: 'FOH' | 'BOH' }>(({ selected, area }) => {
+  const baseColor = area === 'FOH' ? fohColor : bohColor;
+  const lightColor = area === 'FOH' ? '#eff6ff' : '#fef3c7';
+  
+  return {
+    fontFamily,
+    fontSize: 13,
+    fontWeight: 600,
+    padding: '6px 16px',
+    borderRadius: 20,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    backgroundColor: selected ? baseColor : lightColor,
+    color: selected ? '#fff' : baseColor,
+    border: selected ? 'none' : `2px solid ${baseColor}`,
+    '&:hover': {
+      opacity: 0.9,
+    },
+  };
+});
+
+const PositionChip = styled(Chip)<{ positiontype: 'FOH' | 'BOH' }>(({ positiontype }) => {
+  const color = positiontype === 'FOH' ? fohColor : bohColor;
+  return {
+    fontFamily,
+    fontSize: 12,
+    fontWeight: 600,
+    backgroundColor: color,
+    color: '#fff',
+    borderRadius: 16,
+    height: 24,
+  };
+});
+
+const RoleChip = styled(Box)<{ role: string }>(({ role }) => {
+  const styles: Record<string, { bg: string; color: string }> = {
+    'New Hire': { bg: '#f0fdf4', color: '#166534' },
+    'Team Member': { bg: '#eff6ff', color: '#1d4ed8' },
+    'Trainer': { bg: '#fef2f2', color: '#dc2626' },
+    'Team Lead': { bg: '#fef3c7', color: '#d97706' },
+    'Director': { bg: '#f3e8ff', color: '#7c3aed' },
+    'Executive': { bg: '#F0F0FF', color: '#483D8B' },
+    'Operator': { bg: '#F0F0FF', color: '#483D8B' },
+  };
+  
+  const style = styles[role] || styles['Team Member'];
+  
+  return {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '4px 12px',
+    borderRadius: 16,
+    fontSize: 12,
+    fontWeight: 500,
+    fontFamily,
+    backgroundColor: style.bg,
+    color: style.color,
+  };
 });
 
 const StyledDataGrid = styled(DataGridPro)({
@@ -86,16 +165,33 @@ const StyledDataGrid = styled(DataGridPro)({
     fontWeight: 600,
     fontSize: 12,
     color: '#111827',
+    fontFamily,
   },
   '& .MuiDataGrid-cell': {
-    fontSize: 14,
+    fontSize: 13,
     color: '#111827',
+    fontFamily,
+    padding: '4px 8px',
+  },
+  '& .MuiDataGrid-row': {
+    minHeight: '36px !important',
+    maxHeight: '36px !important',
   },
   '& .MuiDataGrid-row:hover': {
     backgroundColor: '#f9fafb',
   },
   '& .MuiDataGrid-columnHeaderTitle': {
     fontWeight: 600,
+    fontFamily,
+  },
+  '& .MuiDataGrid-toolbarContainer': {
+    padding: '8px',
+    gap: '8px',
+    '& .MuiButton-root': {
+      fontFamily,
+      fontSize: 12,
+      textTransform: 'none',
+    },
   },
 });
 
@@ -129,7 +225,7 @@ export function PositionalRatings({
   className = '',
   width,
   maxWidth,
-  density = 'comfortable'
+  density = 'compact'
 }: PositionalRatingsProps) {
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [loading, setLoading] = React.useState(true);
@@ -141,7 +237,6 @@ export function PositionalRatings({
   const [dateRange, setDateRange] = React.useState<'mtd' | 'qtd' | '30d' | '90d' | 'custom'>('30d');
   const [startDate, setStartDate] = React.useState<Date | null>(null);
   const [endDate, setEndDate] = React.useState<Date | null>(null);
-  const [searchQuery, setSearchQuery] = React.useState('');
   
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
@@ -320,55 +415,70 @@ export function PositionalRatings({
     setEndDate(null);
   };
 
+  // Handle custom date range
+  const handleStartDateChange = (date: Date | null) => {
+    setStartDate(date);
+    setDateRange('custom');
+  };
+
+  const handleEndDateChange = (date: Date | null) => {
+    setEndDate(date);
+    setDateRange('custom');
+  };
+
   // Define columns
   const columns: GridColDef[] = [
     {
       field: 'formatted_date',
       headerName: 'Date',
-      width: 150,
-      groupable: true,
+      width: 140,
       sortable: true,
       filterable: true,
     },
     {
       field: 'employee_name',
       headerName: 'Employee',
-      width: 180,
-      groupable: true,
+      width: 160,
       sortable: true,
       filterable: true,
     },
     {
       field: 'employee_role',
       headerName: 'Employee Role',
-      width: 140,
-      groupable: true,
+      width: 130,
       sortable: true,
       filterable: true,
+      renderCell: (params) => {
+        const role = params.value as string;
+        return <RoleChip role={role}>{role}</RoleChip>;
+      },
     },
     {
       field: 'rater_name',
       headerName: 'Leader',
-      width: 180,
-      groupable: true,
+      width: 160,
       sortable: true,
       filterable: true,
     },
     {
       field: 'position_cleaned',
       headerName: 'Position',
-      width: 140,
-      groupable: true,
+      width: 120,
       sortable: true,
       filterable: true,
+      renderCell: (params) => {
+        const row = params.row as RatingRow;
+        const isFOH = FOH_POSITIONS.includes(row.position);
+        const positionType = isFOH ? 'FOH' : 'BOH';
+        return <PositionChip label={params.value} size="small" positiontype={positionType} />;
+      },
     },
     {
       field: 'rating_1',
       headerName: 'Criteria 1',
-      width: 100,
+      width: 90,
       sortable: false,
       filterable: false,
-      groupable: false,
       renderCell: (params) => {
         const rating = params.value as number | null;
         const row = params.row as RatingRow;
@@ -386,6 +496,7 @@ export function PositionalRatings({
                 backgroundColor: getRatingColor(rating),
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
+                fontFamily,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -397,10 +508,9 @@ export function PositionalRatings({
     {
       field: 'rating_2',
       headerName: 'Criteria 2',
-      width: 100,
+      width: 90,
       sortable: false,
       filterable: false,
-      groupable: false,
       renderCell: (params) => {
         const rating = params.value as number | null;
         const row = params.row as RatingRow;
@@ -418,6 +528,7 @@ export function PositionalRatings({
                 backgroundColor: getRatingColor(rating),
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
+                fontFamily,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -429,10 +540,9 @@ export function PositionalRatings({
     {
       field: 'rating_3',
       headerName: 'Criteria 3',
-      width: 100,
+      width: 90,
       sortable: false,
       filterable: false,
-      groupable: false,
       renderCell: (params) => {
         const rating = params.value as number | null;
         const row = params.row as RatingRow;
@@ -450,6 +560,7 @@ export function PositionalRatings({
                 backgroundColor: getRatingColor(rating),
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
+                fontFamily,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -461,10 +572,9 @@ export function PositionalRatings({
     {
       field: 'rating_4',
       headerName: 'Criteria 4',
-      width: 100,
+      width: 90,
       sortable: false,
       filterable: false,
-      groupable: false,
       renderCell: (params) => {
         const rating = params.value as number | null;
         const row = params.row as RatingRow;
@@ -482,6 +592,7 @@ export function PositionalRatings({
                 backgroundColor: getRatingColor(rating),
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
+                fontFamily,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -493,10 +604,9 @@ export function PositionalRatings({
     {
       field: 'rating_5',
       headerName: 'Criteria 5',
-      width: 100,
+      width: 90,
       sortable: false,
       filterable: false,
-      groupable: false,
       renderCell: (params) => {
         const rating = params.value as number | null;
         const row = params.row as RatingRow;
@@ -514,6 +624,7 @@ export function PositionalRatings({
                 backgroundColor: getRatingColor(rating),
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
+                fontFamily,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -525,10 +636,9 @@ export function PositionalRatings({
     {
       field: 'rating_avg',
       headerName: 'Overall',
-      width: 100,
+      width: 90,
       sortable: true,
       filterable: true,
-      groupable: false,
       renderCell: (params) => {
         const rating = params.value as number | null;
         
@@ -543,6 +653,7 @@ export function PositionalRatings({
               backgroundColor: getRatingColor(rating),
               color: rating ? '#fff !important' : '#111827',
               fontWeight: rating ? 600 : 400,
+              fontFamily,
             }}
           >
             {rating?.toFixed(2) || '—'}
@@ -553,10 +664,9 @@ export function PositionalRatings({
     {
       field: 'actions',
       headerName: '',
-      width: 80,
+      width: 60,
       sortable: false,
       filterable: false,
-      groupable: false,
       disableColumnMenu: true,
       renderCell: (params) => {
         const row = params.row as RatingRow;
@@ -567,7 +677,7 @@ export function PositionalRatings({
             size="small"
             sx={{ color: '#dc2626' }}
           >
-            <DeleteIcon />
+            <DeleteIcon fontSize="small" />
           </IconButton>
         );
       },
@@ -575,195 +685,216 @@ export function PositionalRatings({
   ];
 
   return (
-    <StyledContainer className={className} componentwidth={width} componentmaxwidth={maxWidth}>
-      <Typography variant="h5" sx={{ fontFamily, fontWeight: 600, mb: 2 }}>
-        Positional Ratings
-      </Typography>
-      
-      {/* Filters */}
-      <FilterContainer>
-        {/* Date Range */}
-        <Box>
-          <Typography variant="subtitle2" sx={{ fontFamily, fontWeight: 600, mb: 1 }}>
-            Date Range
-          </Typography>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <StyledContainer className={className} componentwidth={width} componentmaxwidth={maxWidth}>
+        <Typography variant="h5" sx={{ fontFamily, fontWeight: 600, mb: 2, color: '#111827' }}>
+          Positional Ratings
+        </Typography>
+        
+        {/* Filters */}
+        <FilterContainer>
+          {/* FOH/BOH Pills on left */}
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <AreaPill
+              selected={showFOH}
+              area="FOH"
+              onClick={() => setShowFOH(!showFOH)}
+            >
+              FOH
+            </AreaPill>
+            <AreaPill
+              selected={showBOH}
+              area="BOH"
+              onClick={() => setShowBOH(!showBOH)}
+            >
+              BOH
+            </AreaPill>
+          </Box>
+          
+          {/* Date Range on right */}
           <DateRangeContainer>
-            <Button
-              variant={dateRange === 'mtd' ? 'contained' : 'outlined'}
-              size="small"
+            <PillButton
+              selected={dateRange === 'mtd'}
               onClick={() => handleDateRangePreset('mtd')}
-              sx={{ fontFamily }}
             >
               MTD
-            </Button>
-            <Button
-              variant={dateRange === 'qtd' ? 'contained' : 'outlined'}
-              size="small"
+            </PillButton>
+            <PillButton
+              selected={dateRange === 'qtd'}
               onClick={() => handleDateRangePreset('qtd')}
-              sx={{ fontFamily }}
             >
               QTD
-            </Button>
-            <Button
-              variant={dateRange === '30d' ? 'contained' : 'outlined'}
-              size="small"
+            </PillButton>
+            <PillButton
+              selected={dateRange === '30d'}
               onClick={() => handleDateRangePreset('30d')}
-              sx={{ fontFamily }}
             >
               Last 30 Days
-            </Button>
-            <Button
-              variant={dateRange === '90d' ? 'contained' : 'outlined'}
-              size="small"
+            </PillButton>
+            <PillButton
+              selected={dateRange === '90d'}
               onClick={() => handleDateRangePreset('90d')}
-              sx={{ fontFamily }}
             >
               Last 90 Days
-            </Button>
+            </PillButton>
+            
+            <DatePicker
+              label="Start Date"
+              value={startDate}
+              onChange={handleStartDateChange}
+              slotProps={{
+                textField: {
+                  size: 'small',
+                  sx: {
+                    width: 140,
+                    '& .MuiInputBase-input': {
+                      fontFamily,
+                      fontSize: 13,
+                    },
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 13,
+                    },
+                  },
+                },
+              }}
+            />
+            
+            <DatePicker
+              label="End Date"
+              value={endDate}
+              onChange={handleEndDateChange}
+              slotProps={{
+                textField: {
+                  size: 'small',
+                  sx: {
+                    width: 140,
+                    '& .MuiInputBase-input': {
+                      fontFamily,
+                      fontSize: 13,
+                    },
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 13,
+                    },
+                  },
+                },
+              }}
+            />
           </DateRangeContainer>
-        </Box>
+        </FilterContainer>
         
-        {/* FOH/BOH Checkboxes */}
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={showFOH}
-                onChange={(e) => setShowFOH(e.target.checked)}
-              />
-            }
-            label="FOH"
-            sx={{ fontFamily }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={showBOH}
-                onChange={(e) => setShowBOH(e.target.checked)}
-              />
-            }
-            label="BOH"
-            sx={{ fontFamily }}
-          />
-        </Box>
-        
-        {/* Search Bar */}
-        <TextField
-          placeholder="Search by employee, leader, role, or position..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          size="small"
-          fullWidth
-          sx={{ fontFamily }}
-        />
-      </FilterContainer>
-      
-      {/* Error Display */}
-      {error && (
-        <Typography color="error" sx={{ mb: 2 }}>
-          {error}
-        </Typography>
-      )}
-      
-      {/* Data Grid */}
-      <Box sx={{ height: 600, width: '100%' }}>
-        <StyledDataGrid
-          rows={rows}
-          columns={columns}
-          loading={loading}
-          pagination
-          pageSizeOptions={[25, 50, 100, 250]}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 50 },
-            },
-            sorting: {
-              sortModel: [{ field: 'formatted_date', sort: 'desc' }],
-            },
-          }}
-          disableRowSelectionOnClick
-          density={density}
-          slots={{
-            toolbar: GridToolbarContainer,
-          }}
-          slotProps={{
-            toolbar: {
-              children: (
-                <>
-                  <GridToolbarColumnsButton />
-                  <GridToolbarFilterButton />
-                  <GridToolbarDensitySelector />
-                  <GridToolbarExport />
-                </>
-              ),
-            },
-          }}
-        />
-      </Box>
-      
-      {/* Delete Confirmation Modal */}
-      <Dialog
-        open={deleteModalOpen}
-        onClose={handleDeleteCancel}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle sx={{ fontFamily, fontWeight: 600 }}>
-          Confirm Delete
-        </DialogTitle>
-        <DialogContent>
-          <Typography sx={{ fontFamily, mb: 2 }}>
-            Are you sure you want to delete this rating submission?
+        {/* Error Display */}
+        {error && (
+          <Typography color="error" sx={{ mb: 2, fontFamily }}>
+            {error}
           </Typography>
-          {ratingToDelete && (
-            <Stack spacing={1}>
-              <Typography sx={{ fontFamily }}>
-                <strong>Employee:</strong> {ratingToDelete.employee_name}
-              </Typography>
-              <Typography sx={{ fontFamily }}>
-                <strong>Leader:</strong> {ratingToDelete.rater_name}
-              </Typography>
-              <Typography sx={{ fontFamily }}>
-                <strong>Position:</strong> {ratingToDelete.position_cleaned}
-              </Typography>
-              <Typography sx={{ fontFamily }}>
-                <strong>Date:</strong> {ratingToDelete.formatted_date}
-              </Typography>
-              <Typography sx={{ fontFamily }}>
-                <strong>Overall Rating:</strong>{' '}
-                <Chip
-                  label={ratingToDelete.rating_avg?.toFixed(2) || '—'}
-                  size="small"
-                  sx={{
-                    backgroundColor: getRatingColor(ratingToDelete.rating_avg),
-                    color: '#fff',
-                    fontWeight: 600,
-                  }}
-                />
-              </Typography>
-            </Stack>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleDeleteCancel}
-            disabled={deleting}
-            sx={{ fontFamily, color: '#6b7280' }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleDeleteConfirm}
-            disabled={deleting}
-            variant="contained"
-            color="error"
-            sx={{ fontFamily }}
-          >
-            {deleting ? 'Deleting...' : 'Delete'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </StyledContainer>
+        )}
+        
+        {/* Data Grid */}
+        <Box sx={{ height: 600, width: '100%' }}>
+          <StyledDataGrid
+            rows={rows}
+            columns={columns}
+            loading={loading}
+            pagination
+            pageSizeOptions={[25, 50, 100, 250]}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 50 },
+              },
+              sorting: {
+                sortModel: [{ field: 'formatted_date', sort: 'desc' }],
+              },
+            }}
+            disableRowSelectionOnClick
+            density={density}
+            slots={{
+              toolbar: GridToolbarContainer,
+            }}
+            slotProps={{
+              toolbar: {
+                children: (
+                  <>
+                    <GridToolbarColumnsButton />
+                    <GridToolbarFilterButton />
+                    <GridToolbarDensitySelector />
+                    <GridToolbarExport />
+                  </>
+                ),
+              },
+            }}
+            sx={{
+              '& .MuiDataGrid-columnSeparator': {
+                display: 'none',
+              },
+            }}
+          />
+        </Box>
+        
+        {/* Delete Confirmation Modal */}
+        <Dialog
+          open={deleteModalOpen}
+          onClose={handleDeleteCancel}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ fontFamily, fontWeight: 600 }}>
+            Confirm Delete
+          </DialogTitle>
+          <DialogContent>
+            <Typography sx={{ fontFamily, mb: 2 }}>
+              Are you sure you want to delete this rating submission?
+            </Typography>
+            {ratingToDelete && (
+              <Stack spacing={1}>
+                <Typography sx={{ fontFamily }}>
+                  <strong>Employee:</strong> {ratingToDelete.employee_name}
+                </Typography>
+                <Typography sx={{ fontFamily }}>
+                  <strong>Leader:</strong> {ratingToDelete.rater_name}
+                </Typography>
+                <Typography sx={{ fontFamily }}>
+                  <strong>Position:</strong> {ratingToDelete.position_cleaned}
+                </Typography>
+                <Typography sx={{ fontFamily }}>
+                  <strong>Date:</strong> {ratingToDelete.formatted_date}
+                </Typography>
+                <Typography sx={{ fontFamily }}>
+                  <strong>Overall Rating:</strong>{' '}
+                  <Chip
+                    label={ratingToDelete.rating_avg?.toFixed(2) || '—'}
+                    size="small"
+                    sx={{
+                      backgroundColor: getRatingColor(ratingToDelete.rating_avg),
+                      color: '#fff',
+                      fontWeight: 600,
+                      fontFamily,
+                    }}
+                  />
+                </Typography>
+              </Stack>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleDeleteCancel}
+              disabled={deleting}
+              sx={{ fontFamily, color: '#6b7280' }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              variant="contained"
+              sx={{ fontFamily, backgroundColor: '#dc2626', '&:hover': { backgroundColor: '#b91c1c' } }}
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </StyledContainer>
+    </LocalizationProvider>
   );
 }
-
