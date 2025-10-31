@@ -12,8 +12,14 @@ import {
   Tooltip,
   Stack,
   Chip,
-  ToggleButton,
-  ToggleButtonGroup
+  Badge,
+  Menu,
+  MenuItem,
+  Divider,
+  InputAdornment,
+  Select,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -23,23 +29,33 @@ import {
   DataGridPro,
   GridColDef,
   GridRowsProp,
-  GridToolbarContainer,
-  GridToolbarColumnsButton,
-  GridToolbarFilterButton,
-  GridToolbarDensitySelector,
-  GridToolbarExport
+  Toolbar,
+  ToolbarButton,
+  FilterPanelTrigger,
+  ColumnsPanelTrigger,
+  QuickFilter,
+  QuickFilterTrigger,
+  QuickFilterControl,
+  QuickFilterClear,
+  getGridNumericOperators,
+  getGridStringOperators,
+  GridFilterOperator
 } from '@mui/x-data-grid-pro';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ViewColumnIcon from '@mui/icons-material/ViewColumn';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import SearchIcon from '@mui/icons-material/Search';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { createSupabaseClient } from '@/util/supabase/component';
 import type { Rating, PositionBig5Labels } from '@/lib/supabase.types';
 import { cleanPositionName, FOH_POSITIONS, BOH_POSITIONS } from '@/lib/ratings-data';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
-const fohColor = '#006391'; // Blue for FOH
-const bohColor = '#ffcc5b'; // Gold/Yellow for BOH
-const fohColorLight = '#eaf9ff'; // Light blue for unselected FOH
-const bohColorLight = '#fffcf0'; // Light yellow for unselected BOH
+const fohColor = '#006391';
+const bohColor = '#ffcc5b';
+const fohColorLight = '#eaf9ff';
+const bohColorLight = '#fffcf0';
 
 export interface PositionalRatingsProps {
   orgId: string;
@@ -47,7 +63,6 @@ export interface PositionalRatingsProps {
   className?: string;
   width?: string | number;
   maxWidth?: string | number;
-  density?: 'comfortable' | 'compact' | 'standard';
 }
 
 interface RatingRow extends Rating {
@@ -58,6 +73,10 @@ interface RatingRow extends Rating {
   position_cleaned: string;
   formatted_date: string;
 }
+
+type OwnerState = {
+  expanded: boolean;
+};
 
 const StyledContainer = styled(Box)<{ componentwidth?: string | number; componentmaxwidth?: string | number }>(
   ({ componentwidth, componentmaxwidth }) => ({
@@ -182,11 +201,6 @@ const StyledDataGrid = styled(DataGridPro)({
   '& .MuiDataGrid-row': {
     minHeight: '48px !important',
     maxHeight: '48px !important',
-    height: '48px !important',
-  },
-  '& .MuiDataGrid-virtualScrollerRenderZone .MuiDataGrid-row': {
-    minHeight: '48px !important',
-    maxHeight: '48px !important',
   },
   '& .MuiDataGrid-row:hover': {
     backgroundColor: '#f9fafb',
@@ -222,6 +236,33 @@ const StyledDataGrid = styled(DataGridPro)({
   },
 });
 
+const StyledQuickFilter = styled(QuickFilter)({
+  display: 'grid',
+  alignItems: 'center',
+});
+
+const StyledToolbarButton = styled(ToolbarButton)<{ ownerState: OwnerState }>(
+  ({ theme, ownerState }) => ({
+    gridArea: '1 / 1',
+    width: 'min-content',
+    height: 'min-content',
+    zIndex: 1,
+    opacity: ownerState.expanded ? 0 : 1,
+    pointerEvents: ownerState.expanded ? 'none' : 'auto',
+    transition: theme.transitions.create(['opacity']),
+  }),
+);
+
+const StyledTextField = styled(TextField)<{ ownerState: OwnerState }>(
+  ({ theme, ownerState }) => ({
+    gridArea: '1 / 1',
+    overflowX: 'clip',
+    width: ownerState.expanded ? 260 : 'var(--trigger-width)',
+    opacity: ownerState.expanded ? 1 : 0,
+    transition: theme.transitions.create(['width', 'opacity']),
+  }),
+);
+
 // Helper to format date
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -252,7 +293,6 @@ export function PositionalRatings({
   className = '',
   width,
   maxWidth,
-  density = 'compact'
 }: PositionalRatingsProps) {
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [loading, setLoading] = React.useState(true);
@@ -464,6 +504,192 @@ export function PositionalRatings({
     setDateRange('custom');
   };
 
+  // Custom toolbar
+  function CustomToolbar() {
+    return (
+      <Toolbar>
+        {/* Left side - FOH/BOH and Date filters */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <AreaPill
+              selected={showFOH}
+              area="FOH"
+              onClick={() => setShowFOH(!showFOH)}
+            >
+              FOH
+            </AreaPill>
+            <AreaPill
+              selected={showBOH}
+              area="BOH"
+              onClick={() => setShowBOH(!showBOH)}
+            >
+              BOH
+            </AreaPill>
+          </Box>
+          
+          <DateRangeContainer>
+            <PillButton
+              selected={dateRange === 'mtd'}
+              onClick={() => handleDateRangePreset('mtd')}
+            >
+              MTD
+            </PillButton>
+            <PillButton
+              selected={dateRange === 'qtd'}
+              onClick={() => handleDateRangePreset('qtd')}
+            >
+              QTD
+            </PillButton>
+            <PillButton
+              selected={dateRange === '30d'}
+              onClick={() => handleDateRangePreset('30d')}
+            >
+              Last 30 Days
+            </PillButton>
+            <PillButton
+              selected={dateRange === '90d'}
+              onClick={() => handleDateRangePreset('90d')}
+            >
+              Last 90 Days
+            </PillButton>
+            
+            <DatePicker
+              label="Start Date"
+              value={startDate}
+              onChange={handleStartDateChange}
+              format="M/d/yyyy"
+              slotProps={{
+                textField: {
+                  size: 'small',
+                  InputProps: {
+                    sx: {
+                      fontFamily,
+                      fontSize: 11,
+                    },
+                  },
+                  InputLabelProps: {
+                    sx: {
+                      fontFamily,
+                      fontSize: 11,
+                    },
+                  },
+                  sx: {
+                    width: 130,
+                  },
+                },
+              }}
+            />
+            
+            <DatePicker
+              label="End Date"
+              value={endDate}
+              onChange={handleEndDateChange}
+              format="M/d/yyyy"
+              slotProps={{
+                textField: {
+                  size: 'small',
+                  InputProps: {
+                    sx: {
+                      fontFamily,
+                      fontSize: 11,
+                    },
+                  },
+                  InputLabelProps: {
+                    sx: {
+                      fontFamily,
+                      fontSize: 11,
+                    },
+                  },
+                  sx: {
+                    width: 130,
+                  },
+                },
+              }}
+            />
+          </DateRangeContainer>
+        </Box>
+
+        {/* Right side - Toolbar buttons */}
+        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          <Tooltip title="Columns">
+            <ColumnsPanelTrigger render={<ToolbarButton />}>
+              <ViewColumnIcon fontSize="small" />
+            </ColumnsPanelTrigger>
+          </Tooltip>
+
+          <Tooltip title="Filters">
+            <FilterPanelTrigger
+              render={(props, state) => (
+                <ToolbarButton {...props} color="default">
+                  <Badge badgeContent={state.filterCount} color="primary" variant="dot">
+                    <FilterListIcon fontSize="small" />
+                  </Badge>
+                </ToolbarButton>
+              )}
+            />
+          </Tooltip>
+
+          <StyledQuickFilter>
+            <QuickFilterTrigger
+              render={(triggerProps, state) => (
+                <Tooltip title="Search" enterDelay={0}>
+                  <StyledToolbarButton
+                    {...triggerProps}
+                    ownerState={{ expanded: state.expanded }}
+                    color="default"
+                    aria-disabled={state.expanded}
+                  >
+                    <SearchIcon fontSize="small" />
+                  </StyledToolbarButton>
+                </Tooltip>
+              )}
+            />
+            <QuickFilterControl
+              render={({ ref, ...controlProps }, state) => (
+                <StyledTextField
+                  {...controlProps}
+                  ownerState={{ expanded: state.expanded }}
+                  inputRef={ref}
+                  aria-label="Search"
+                  placeholder="Search..."
+                  size="small"
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                      endAdornment: state.value ? (
+                        <InputAdornment position="end">
+                          <QuickFilterClear
+                            edge="end"
+                            size="small"
+                            aria-label="Clear search"
+                            material={{ sx: { marginRight: -0.75 } }}
+                          >
+                            <CancelIcon fontSize="small" />
+                          </QuickFilterClear>
+                        </InputAdornment>
+                      ) : null,
+                      ...controlProps.slotProps?.input,
+                      sx: { fontFamily, fontSize: 12 },
+                    },
+                    ...controlProps.slotProps,
+                  }}
+                />
+              )}
+            />
+          </StyledQuickFilter>
+        </Box>
+      </Toolbar>
+    );
+  }
+
+  // Custom numeric operators for rating columns
+  const ratingOperators: GridFilterOperator[] = getGridNumericOperators()
+    .filter(op => ['>', '<', '>=', '<=', '='].includes(op.value));
+
   // Define columns
   const columns: GridColDef[] = [
     {
@@ -524,6 +750,7 @@ export function PositionalRatings({
       field: 'rating_1',
       headerName: 'Criteria 1',
       width: 95,
+      type: 'number',
       sortable: false,
       filterable: false,
       headerAlign: 'center',
@@ -558,6 +785,7 @@ export function PositionalRatings({
       field: 'rating_2',
       headerName: 'Criteria 2',
       width: 95,
+      type: 'number',
       sortable: false,
       filterable: false,
       headerAlign: 'center',
@@ -592,6 +820,7 @@ export function PositionalRatings({
       field: 'rating_3',
       headerName: 'Criteria 3',
       width: 95,
+      type: 'number',
       sortable: false,
       filterable: false,
       headerAlign: 'center',
@@ -626,6 +855,7 @@ export function PositionalRatings({
       field: 'rating_4',
       headerName: 'Criteria 4',
       width: 95,
+      type: 'number',
       sortable: false,
       filterable: false,
       headerAlign: 'center',
@@ -660,6 +890,7 @@ export function PositionalRatings({
       field: 'rating_5',
       headerName: 'Criteria 5',
       width: 95,
+      type: 'number',
       sortable: false,
       filterable: false,
       headerAlign: 'center',
@@ -694,10 +925,12 @@ export function PositionalRatings({
       field: 'rating_avg',
       headerName: 'Overall',
       width: 95,
+      type: 'number',
       sortable: true,
       filterable: true,
       headerAlign: 'center',
       align: 'center',
+      filterOperators: ratingOperators,
       renderCell: (params) => {
         const rating = params.value as number | null;
         
@@ -727,6 +960,7 @@ export function PositionalRatings({
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
+      disableExport: true,
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => {
@@ -752,116 +986,6 @@ export function PositionalRatings({
           Positional Ratings
         </Typography>
         
-        {/* Filters */}
-        <FilterContainer>
-          {/* FOH/BOH Pills on left */}
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <AreaPill
-                selected={showFOH}
-                area="FOH"
-                onClick={() => setShowFOH(!showFOH)}
-              >
-                FOH
-              </AreaPill>
-              <AreaPill
-                selected={showBOH}
-                area="BOH"
-                onClick={() => setShowBOH(!showBOH)}
-              >
-                BOH
-              </AreaPill>
-            </Box>
-            
-            {/* Global Search Bar */}
-            <TextField
-              placeholder="Search employee, leader, role, or position..."
-              size="small"
-              sx={{
-                width: 320,
-                '& .MuiInputBase-input': {
-                  fontFamily,
-                  fontSize: 13,
-                },
-              }}
-            />
-          </Box>
-          
-          {/* Date Range on right */}
-          <DateRangeContainer>
-            <PillButton
-              selected={dateRange === 'mtd'}
-              onClick={() => handleDateRangePreset('mtd')}
-            >
-              MTD
-            </PillButton>
-            <PillButton
-              selected={dateRange === 'qtd'}
-              onClick={() => handleDateRangePreset('qtd')}
-            >
-              QTD
-            </PillButton>
-            <PillButton
-              selected={dateRange === '30d'}
-              onClick={() => handleDateRangePreset('30d')}
-            >
-              Last 30 Days
-            </PillButton>
-            <PillButton
-              selected={dateRange === '90d'}
-              onClick={() => handleDateRangePreset('90d')}
-            >
-              Last 90 Days
-            </PillButton>
-            
-            <DatePicker
-              label="Start Date"
-              value={startDate}
-              onChange={handleStartDateChange}
-              format="MM/dd/yyyy"
-              slotProps={{
-                textField: {
-                  size: 'small',
-                  sx: {
-                    width: 160,
-                    '& .MuiInputBase-input': {
-                      fontFamily,
-                      fontSize: 11,
-                    },
-                    '& .MuiInputLabel-root': {
-                      fontFamily,
-                      fontSize: 11,
-                    },
-                  },
-                },
-              }}
-            />
-            
-            <DatePicker
-              label="End Date"
-              value={endDate}
-              onChange={handleEndDateChange}
-              format="MM/dd/yyyy"
-              slotProps={{
-                textField: {
-                  size: 'small',
-                  sx: {
-                    width: 160,
-                    '& .MuiInputBase-input': {
-                      fontFamily,
-                      fontSize: 11,
-                    },
-                    '& .MuiInputLabel-root': {
-                      fontFamily,
-                      fontSize: 11,
-                    },
-                  },
-                },
-              }}
-            />
-          </DateRangeContainer>
-        </FilterContainer>
-        
         {/* Error Display */}
         {error && (
           <Typography color="error" sx={{ mb: 2, fontFamily }}>
@@ -884,24 +1008,18 @@ export function PositionalRatings({
               sorting: {
                 sortModel: [{ field: 'formatted_date', sort: 'desc' }],
               },
+              columns: {
+                columnVisibilityModel: {
+                  actions: true,
+                },
+              },
             }}
             disableRowSelectionOnClick
             rowHeight={48}
             slots={{
-              toolbar: GridToolbarContainer,
+              toolbar: CustomToolbar,
             }}
-            slotProps={{
-              toolbar: {
-                children: (
-                  <>
-                    <GridToolbarColumnsButton />
-                    <GridToolbarFilterButton />
-                    <GridToolbarDensitySelector />
-                    <GridToolbarExport />
-                  </>
-                ),
-              },
-            }}
+            showToolbar
             sx={{
               '& .MuiDataGrid-cell--withRenderer': {
                 padding: '0 !important',
