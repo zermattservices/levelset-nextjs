@@ -537,7 +537,7 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding }: Ove
         <TableHead>
           <TableRow>
             <TableCell sx={{ width: 40 }}></TableCell>
-            <TableCell>Name</TableCell>
+            <TableCell sx={{ pl: 1 }}>Name</TableCell>
             <TableCell align="center">Last Rating</TableCell>
             {positions.map(pos => (
               <TableCell key={pos} align="center" sx={{ whiteSpace: 'nowrap' }}>
@@ -565,7 +565,7 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding }: Ove
                       <ExpandMoreIcon />
                     </ExpandIcon>
                   </TableCell>
-                  <TableCell sx={{ py: cellPadding, fontWeight: 500 }}>
+                  <TableCell sx={{ py: cellPadding, pl: 1, fontWeight: 500 }}>
                     {employee.employee_name}
                   </TableCell>
                   <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: '#6b7280' }}>
@@ -655,7 +655,7 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
           {/* First Header Row - Big 5 Labels */}
           <TableRow>
             <TableCell sx={{ width: 40 }}></TableCell>
-            <TableCell>Name</TableCell>
+            <TableCell sx={{ pl: 1 }}>Name</TableCell>
             <TableCell align="center">Last Rating</TableCell>
             <TableCell align="center">{big5Labels?.label_1 || 'Rating 1'}</TableCell>
             <TableCell align="center">{big5Labels?.label_2 || 'Rating 2'}</TableCell>
@@ -686,7 +686,7 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
                       <ExpandMoreIcon />
                     </ExpandIcon>
                   </TableCell>
-                  <TableCell sx={{ py: cellPadding, fontWeight: 500 }}>
+                  <TableCell sx={{ py: cellPadding, pl: 1, fontWeight: 500 }}>
                     {employee.employee_name}
                   </TableCell>
                   <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: '#6b7280' }}>
@@ -785,7 +785,7 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding }: L
         <TableHead>
           <TableRow>
             <TableCell sx={{ width: 40 }}></TableCell>
-            <TableCell>Leader Name</TableCell>
+            <TableCell sx={{ pl: 1 }}>Leader Name</TableCell>
             <TableCell align="center">Last Rating</TableCell>
             {positions.map(pos => (
               <TableCell key={pos} align="center" sx={{ whiteSpace: 'nowrap' }}>
@@ -813,7 +813,7 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding }: L
                       <ExpandMoreIcon />
                     </ExpandIcon>
                   </TableCell>
-                  <TableCell sx={{ py: cellPadding, fontWeight: 500 }}>
+                  <TableCell sx={{ py: cellPadding, pl: 1, fontWeight: 500 }}>
                     {leader.leader_name}
                   </TableCell>
                   <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: '#6b7280' }}>

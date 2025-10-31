@@ -33,6 +33,17 @@ export const BOH_POSITIONS = [
 ];
 
 /**
+ * Remove "FOH" or "BOH" from position names for display
+ */
+export function cleanPositionName(positionName: string): string {
+  // Remove " FOH" or " BOH" from 3H Week, Trainer, and Leadership positions
+  if (positionName.includes('3H Week') || positionName.includes('Trainer') || positionName.includes('Leadership')) {
+    return positionName.replace(/ (FOH|BOH)$/i, '');
+  }
+  return positionName;
+}
+
+/**
  * Get positions list filtered by area
  */
 export function getPositionsByArea(area: 'FOH' | 'BOH'): string[] {

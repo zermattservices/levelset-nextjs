@@ -20,6 +20,7 @@ import { SupabaseUserLogOut } from "./components/CodeComponents/auth/SupabaseUse
 import { SimpleLogoutButton } from "./components/CodeComponents/auth/SimpleLogoutButton";
 import { FullPEAScoreboard } from "./components/CodeComponents/FullPEAScoreboard";
 import { PositionalRatingsTable } from "./components/CodeComponents/PositionalRatingsTable";
+import { PositionalRatings } from "./components/CodeComponents/PositionalRatings";
 import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
@@ -547,6 +548,42 @@ PLASMIC.registerComponent(PositionalRatingsTable, {
     }
   },
   importPath: "./components/CodeComponents/PositionalRatingsTable",
+});
+
+// Register PositionalRatings component - All ratings in one table with advanced data grid features
+PLASMIC.registerComponent(PositionalRatings, {
+  name: "PositionalRatings",
+  displayName: "Positional Ratings",
+  props: {
+    orgId: {
+      type: "string",
+      defaultValue: "54b9864f-9df9-4a15-a209-7b99e1c274f4",
+      description: "Organization ID"
+    },
+    locationId: {
+      type: "string",
+      defaultValue: "67e00fb2-29f5-41ce-9c1c-93e2f7f392dd",
+      description: "Location ID (CFA Buda or West Buda)"
+    },
+    className: "string",
+    width: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Width of the component (e.g., '100%', '1200px')"
+    },
+    maxWidth: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Maximum width of the component (e.g., '100%', '1400px')"
+    },
+    density: {
+      type: "choice",
+      options: ["comfortable", "compact", "standard"],
+      defaultValue: "comfortable",
+      description: "Data grid density/spacing"
+    }
+  },
+  importPath: "./components/CodeComponents/PositionalRatings",
 });
 
 // Register DrawerV2 component - Enhanced version of Plasmic's default Drawer with size prop
