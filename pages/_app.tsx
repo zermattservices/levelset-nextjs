@@ -1,7 +1,7 @@
 import { PlasmicRootProvider } from "@plasmicapp/react-web";
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import { LicenseInfo } from '@mui/x-license-pro';
+import { LicenseInfo } from '@mui/x-license';
 import "../styles/globals.css";
 import "../components/CodeComponents/scoreboard.css";
 import "../components/CodeComponents/RosterTable.css";
