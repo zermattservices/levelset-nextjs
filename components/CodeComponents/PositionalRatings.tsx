@@ -166,7 +166,7 @@ const StyledDataGrid = styled(DataGridPro)({
   '& .MuiDataGrid-columnHeader': {
     backgroundColor: '#f9fafb',
     fontWeight: 600,
-    fontSize: 12,
+    fontSize: 14,
     color: '#111827',
     fontFamily,
   },
@@ -174,13 +174,13 @@ const StyledDataGrid = styled(DataGridPro)({
     fontSize: 13,
     color: '#111827',
     fontFamily,
-    padding: '8px',
+    padding: '0 8px',
     display: 'flex',
     alignItems: 'center',
   },
   '& .MuiDataGrid-row': {
-    minHeight: '44px !important',
-    maxHeight: '44px !important',
+    minHeight: '48px !important',
+    maxHeight: '48px !important',
   },
   '& .MuiDataGrid-row:hover': {
     backgroundColor: '#f9fafb',
@@ -197,6 +197,15 @@ const StyledDataGrid = styled(DataGridPro)({
       fontFamily,
       fontSize: 12,
       textTransform: 'none',
+    },
+  },
+  '& .MuiCircularProgress-root': {
+    color: levelsetGreen,
+  },
+  '& .MuiLinearProgress-root': {
+    backgroundColor: '#e5e7eb',
+    '& .MuiLinearProgress-bar': {
+      backgroundColor: levelsetGreen,
     },
   },
 });
@@ -440,6 +449,11 @@ export function PositionalRatings({
       width: 140,
       sortable: true,
       filterable: true,
+      renderCell: (params) => (
+        <Box sx={{ fontFamily, fontSize: 11 }}>
+          {params.value}
+        </Box>
+      ),
     },
     {
       field: 'employee_name',
@@ -794,11 +808,11 @@ export function PositionalRatings({
                     width: 140,
                     '& .MuiInputBase-input': {
                       fontFamily,
-                      fontSize: 13,
+                      fontSize: 11,
                     },
                     '& .MuiInputLabel-root': {
                       fontFamily,
-                      fontSize: 13,
+                      fontSize: 11,
                     },
                   },
                 },
@@ -816,11 +830,11 @@ export function PositionalRatings({
                     width: 140,
                     '& .MuiInputBase-input': {
                       fontFamily,
-                      fontSize: 13,
+                      fontSize: 11,
                     },
                     '& .MuiInputLabel-root': {
                       fontFamily,
-                      fontSize: 13,
+                      fontSize: 11,
                     },
                   },
                 },
@@ -877,9 +891,14 @@ export function PositionalRatings({
                 padding: '0 8px',
                 display: 'flex',
                 alignItems: 'center',
+                overflow: 'visible',
               },
               '& .MuiDataGrid-cell--withRenderer': {
                 padding: 0,
+                overflow: 'visible',
+              },
+              '& .MuiDataGrid-virtualScrollerContent': {
+                minHeight: '400px !important',
               },
             }}
           />

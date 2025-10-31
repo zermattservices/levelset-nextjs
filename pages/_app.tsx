@@ -7,9 +7,13 @@ import "../components/CodeComponents/scoreboard.css";
 import "../components/CodeComponents/RosterTable.css";
 import "../lib/logout"; // Initialize global logout function
 
-// Initialize MUI X Pro license
-if (process.env.NEXT_PUBLIC_MUI_X_LICENSE_KEY) {
-  LicenseInfo.setLicenseKey(process.env.NEXT_PUBLIC_MUI_X_LICENSE_KEY);
+// Initialize MUI X Pro license - must be called before rendering
+const licenseKey = process.env.NEXT_PUBLIC_MUI_X_LICENSE_KEY;
+if (licenseKey) {
+  LicenseInfo.setLicenseKey(licenseKey);
+  console.log('[MUI X License] License key initialized');
+} else {
+  console.warn('[MUI X License] No license key found in NEXT_PUBLIC_MUI_X_LICENSE_KEY');
 }
 
 export default function MyApp({ Component, pageProps }: AppProps) {
