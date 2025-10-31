@@ -919,6 +919,12 @@
           "name": "PositionalRatingsTable",
           "displayName": "PositionalRatingsTable",
           "componentImportPath": "./components/CodeComponents/PositionalRatingsTable"
+        },
+        {
+          "id": "LAVhHSecbW0h",
+          "name": "PositionalRatings",
+          "displayName": "PositionalRatings",
+          "componentImportPath": "./components/CodeComponents/PositionalRatings"
         }
       ],
       "splitsProviderFilePath": "",
