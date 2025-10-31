@@ -24,9 +24,7 @@ import {
   GridToolbarColumnsButton,
   GridToolbarFilterButton,
   GridToolbarDensitySelector,
-  GridToolbarExport,
-  GridRowParams,
-  GridValueGetterParams
+  GridToolbarExport
 } from '@mui/x-data-grid-pro';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { createSupabaseClient } from '@/util/supabase/component';
@@ -683,7 +681,6 @@ export function PositionalRatings({
               sortModel: [{ field: 'formatted_date', sort: 'desc' }],
             },
           }}
-          rowGroupingColumnMode="single"
           disableRowSelectionOnClick
           density={density}
           slots={{
