@@ -181,6 +181,11 @@ const StyledDataGrid = styled(DataGridPro)({
   '& .MuiDataGrid-row': {
     minHeight: '48px !important',
     maxHeight: '48px !important',
+    height: '48px !important',
+  },
+  '& .MuiDataGrid-virtualScrollerRenderZone .MuiDataGrid-row': {
+    minHeight: '48px !important',
+    maxHeight: '48px !important',
   },
   '& .MuiDataGrid-row:hover': {
     backgroundColor: '#f9fafb',
@@ -804,10 +809,11 @@ export function PositionalRatings({
                 textField: {
                   size: 'small',
                   sx: {
-                    width: 140,
+                    width: 150,
                     '& .MuiInputBase-input': {
                       fontFamily,
                       fontSize: 11,
+                      padding: '6px 8px',
                     },
                     '& .MuiInputLabel-root': {
                       fontFamily,
@@ -826,10 +832,11 @@ export function PositionalRatings({
                 textField: {
                   size: 'small',
                   sx: {
-                    width: 140,
+                    width: 150,
                     '& .MuiInputBase-input': {
                       fontFamily,
                       fontSize: 11,
+                      padding: '6px 8px',
                     },
                     '& .MuiInputLabel-root': {
                       fontFamily,
@@ -882,9 +889,13 @@ export function PositionalRatings({
                 ),
               },
             }}
+            getRowHeight={() => 48}
             sx={{
               '& .MuiDataGrid-columnSeparator': {
-                display: 'none',
+                display: 'none !important',
+              },
+              '& .MuiDataGrid-iconSeparator': {
+                display: 'none !important',
               },
               '& .MuiDataGrid-cell': {
                 padding: '0 8px',
@@ -895,9 +906,6 @@ export function PositionalRatings({
               '& .MuiDataGrid-cell--withRenderer': {
                 padding: 0,
                 overflow: 'visible',
-              },
-              '& .MuiDataGrid-virtualScrollerContent': {
-                minHeight: '400px !important',
               },
             }}
           />
