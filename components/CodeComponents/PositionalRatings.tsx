@@ -177,6 +177,7 @@ const StyledDataGrid = styled(DataGridPro)({
     padding: '0 8px',
     display: 'flex',
     alignItems: 'center',
+    borderRight: 'none !important',
   },
   '& .MuiDataGrid-row': {
     minHeight: '48px !important',
@@ -193,6 +194,12 @@ const StyledDataGrid = styled(DataGridPro)({
   '& .MuiDataGrid-columnHeaderTitle': {
     fontWeight: 600,
     fontFamily,
+  },
+  '& .MuiDataGrid-columnSeparator': {
+    display: 'none !important',
+  },
+  '& .MuiDataGrid-iconSeparator': {
+    display: 'none !important',
   },
   '& .MuiDataGrid-toolbarContainer': {
     padding: '12px',
@@ -484,6 +491,8 @@ export function PositionalRatings({
       width: 140,
       sortable: true,
       filterable: true,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params) => {
         const role = params.value as string;
         return <RoleChip label={role} size="small" roletype={role} />;
@@ -502,6 +511,8 @@ export function PositionalRatings({
       width: 120,
       sortable: true,
       filterable: true,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params) => {
         const row = params.row as RatingRow;
         const isFOH = FOH_POSITIONS.includes(row.position);
@@ -523,10 +534,11 @@ export function PositionalRatings({
         const labels = big5LabelsCache.get(row.position);
         
         return (
-          <Tooltip title={labels?.label_1 || 'Criteria 1'} arrow>
+          <Tooltip title={labels?.label_1 || 'Criteria 1'} arrow placement="bottom">
             <Box
               sx={{
                 width: '100%',
+                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -534,7 +546,6 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
-                py: 0.5,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -557,10 +568,11 @@ export function PositionalRatings({
         const labels = big5LabelsCache.get(row.position);
         
         return (
-          <Tooltip title={labels?.label_2 || 'Criteria 2'} arrow>
+          <Tooltip title={labels?.label_2 || 'Criteria 2'} arrow placement="bottom">
             <Box
               sx={{
                 width: '100%',
+                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -568,7 +580,6 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
-                py: 0.5,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -591,10 +602,11 @@ export function PositionalRatings({
         const labels = big5LabelsCache.get(row.position);
         
         return (
-          <Tooltip title={labels?.label_3 || 'Criteria 3'} arrow>
+          <Tooltip title={labels?.label_3 || 'Criteria 3'} arrow placement="bottom">
             <Box
               sx={{
                 width: '100%',
+                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -602,7 +614,6 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
-                py: 0.5,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -625,10 +636,11 @@ export function PositionalRatings({
         const labels = big5LabelsCache.get(row.position);
         
         return (
-          <Tooltip title={labels?.label_4 || 'Criteria 4'} arrow>
+          <Tooltip title={labels?.label_4 || 'Criteria 4'} arrow placement="bottom">
             <Box
               sx={{
                 width: '100%',
+                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -636,7 +648,6 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
-                py: 0.5,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -659,10 +670,11 @@ export function PositionalRatings({
         const labels = big5LabelsCache.get(row.position);
         
         return (
-          <Tooltip title={labels?.label_5 || 'Criteria 5'} arrow>
+          <Tooltip title={labels?.label_5 || 'Criteria 5'} arrow placement="bottom">
             <Box
               sx={{
                 width: '100%',
+                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -670,7 +682,6 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
-                py: 0.5,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -694,6 +705,7 @@ export function PositionalRatings({
           <Box
             sx={{
               width: '100%',
+              height: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -701,7 +713,6 @@ export function PositionalRatings({
               color: rating ? '#fff !important' : '#111827',
               fontWeight: rating ? 600 : 400,
               fontFamily,
-              py: 0.5,
             }}
           >
             {rating?.toFixed(2) || '—'}
@@ -716,6 +727,8 @@ export function PositionalRatings({
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params) => {
         const row = params.row as RatingRow;
         
@@ -805,6 +818,7 @@ export function PositionalRatings({
               label="Start Date"
               value={startDate}
               onChange={handleStartDateChange}
+              format="MM/dd/yyyy"
               slotProps={{
                 textField: {
                   size: 'small',
@@ -812,8 +826,8 @@ export function PositionalRatings({
                     width: 150,
                     '& .MuiInputBase-input': {
                       fontFamily,
-                      fontSize: 11,
-                      padding: '6px 8px',
+                      fontSize: 12,
+                      padding: '8px 10px',
                     },
                     '& .MuiInputLabel-root': {
                       fontFamily,
@@ -828,6 +842,7 @@ export function PositionalRatings({
               label="End Date"
               value={endDate}
               onChange={handleEndDateChange}
+              format="MM/dd/yyyy"
               slotProps={{
                 textField: {
                   size: 'small',
@@ -835,8 +850,8 @@ export function PositionalRatings({
                     width: 150,
                     '& .MuiInputBase-input': {
                       fontFamily,
-                      fontSize: 11,
-                      padding: '6px 8px',
+                      fontSize: 12,
+                      padding: '8px 10px',
                     },
                     '& .MuiInputLabel-root': {
                       fontFamily,
@@ -857,7 +872,7 @@ export function PositionalRatings({
         )}
         
         {/* Data Grid */}
-        <Box sx={{ height: 600, width: '100%' }}>
+        <Box sx={{ width: '100%' }}>
           <StyledDataGrid
             rows={rows}
             columns={columns}
@@ -873,7 +888,9 @@ export function PositionalRatings({
               },
             }}
             disableRowSelectionOnClick
+            autoHeight
             density={density}
+            rowHeight={48}
             slots={{
               toolbar: GridToolbarContainer,
             }}
@@ -889,23 +906,9 @@ export function PositionalRatings({
                 ),
               },
             }}
-            getRowHeight={() => 48}
             sx={{
-              '& .MuiDataGrid-columnSeparator': {
-                display: 'none !important',
-              },
-              '& .MuiDataGrid-iconSeparator': {
-                display: 'none !important',
-              },
-              '& .MuiDataGrid-cell': {
-                padding: '0 8px',
-                display: 'flex',
-                alignItems: 'center',
-                overflow: 'visible',
-              },
               '& .MuiDataGrid-cell--withRenderer': {
-                padding: 0,
-                overflow: 'visible',
+                padding: '0 !important',
               },
             }}
           />
