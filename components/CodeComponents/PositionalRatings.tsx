@@ -823,11 +823,10 @@ export function PositionalRatings({
                 textField: {
                   size: 'small',
                   sx: {
-                    width: 150,
+                    width: 160,
                     '& .MuiInputBase-input': {
                       fontFamily,
-                      fontSize: 12,
-                      padding: '8px 10px',
+                      fontSize: 11,
                     },
                     '& .MuiInputLabel-root': {
                       fontFamily,
@@ -847,11 +846,10 @@ export function PositionalRatings({
                 textField: {
                   size: 'small',
                   sx: {
-                    width: 150,
+                    width: 160,
                     '& .MuiInputBase-input': {
                       fontFamily,
-                      fontSize: 12,
-                      padding: '8px 10px',
+                      fontSize: 11,
                     },
                     '& .MuiInputLabel-root': {
                       fontFamily,
@@ -872,7 +870,7 @@ export function PositionalRatings({
         )}
         
         {/* Data Grid */}
-        <Box sx={{ width: '100%' }}>
+        <Box sx={{ height: 650, width: '100%' }}>
           <StyledDataGrid
             rows={rows}
             columns={columns}
@@ -888,8 +886,6 @@ export function PositionalRatings({
               },
             }}
             disableRowSelectionOnClick
-            autoHeight
-            density={density}
             rowHeight={48}
             slots={{
               toolbar: GridToolbarContainer,
