@@ -13,13 +13,10 @@ import {
   Stack,
   Chip,
   Badge,
-  Menu,
-  MenuItem,
-  Divider,
   InputAdornment,
   Select,
-  FormControl,
-  InputLabel
+  MenuItem as MuiMenuItem,
+  FormControl
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -38,8 +35,9 @@ import {
   QuickFilterControl,
   QuickFilterClear,
   getGridNumericOperators,
-  getGridStringOperators,
-  GridFilterOperator
+  GridFilterOperator,
+  GridFilterInputValueProps,
+  GridFilterItem
 } from '@mui/x-data-grid-pro';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
@@ -85,14 +83,6 @@ const StyledContainer = styled(Box)<{ componentwidth?: string | number; componen
     fontFamily,
   })
 );
-
-const FilterContainer = styled(Box)({
-  display: 'flex',
-  gap: 16,
-  marginBottom: 16,
-  alignItems: 'center',
-  justifyContent: 'space-between',
-});
 
 const DateRangeContainer = styled(Box)({
   display: 'flex',
@@ -182,48 +172,59 @@ const StyledDataGrid = styled(DataGridPro)({
   fontFamily,
   border: '1px solid #e5e7eb',
   borderRadius: 8,
+  '& .MuiDataGrid-columnHeaders': {
+    borderBottom: '1px solid #e5e7eb',
+  },
   '& .MuiDataGrid-columnHeader': {
     backgroundColor: '#f9fafb',
     fontWeight: 600,
     fontSize: 14,
     color: '#111827',
     fontFamily,
+    '&:focus': {
+      outline: 'none',
+    },
+    '&:focus-within': {
+      outline: 'none',
+    },
+  },
+  '& .MuiDataGrid-columnSeparator': {
+    display: 'none',
   },
   '& .MuiDataGrid-cell': {
+    borderBottom: '1px solid #f3f4f6',
     fontSize: 13,
     color: '#111827',
     fontFamily,
-    padding: '0 8px',
     display: 'flex',
     alignItems: 'center',
-    borderRight: 'none !important',
+    '&:focus': {
+      outline: 'none',
+    },
+    '&:focus-within': {
+      outline: 'none',
+    },
   },
   '& .MuiDataGrid-row': {
-    minHeight: '48px !important',
-    maxHeight: '48px !important',
+    '&:hover': {
+      backgroundColor: '#f9fafb',
+    },
   },
-  '& .MuiDataGrid-row:hover': {
-    backgroundColor: '#f9fafb',
-  },
-  '& .MuiDataGrid-columnHeaderTitle': {
-    fontWeight: 600,
+  '& .MuiDataGrid-footerContainer': {
+    borderTop: '1px solid #e5e7eb',
     fontFamily,
   },
-  '& .MuiDataGrid-columnSeparator': {
-    display: 'none !important',
+  '& .MuiTablePagination-root': {
+    fontFamily,
+    color: '#6b7280',
   },
-  '& .MuiDataGrid-iconSeparator': {
-    display: 'none !important',
+  '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+    fontFamily,
+    fontSize: 13,
   },
-  '& .MuiDataGrid-toolbarContainer': {
-    padding: '12px',
-    gap: '8px',
-    borderBottom: '1px solid #e5e7eb',
-    '& .MuiButton-root': {
-      fontFamily,
-      fontSize: 12,
-      textTransform: 'none',
-    },
+  '& .MuiSelect-select': {
+    fontFamily,
+    fontSize: 13,
   },
   '& .MuiCircularProgress-root': {
     color: levelsetGreen,
@@ -233,6 +234,21 @@ const StyledDataGrid = styled(DataGridPro)({
     '& .MuiLinearProgress-bar': {
       backgroundColor: levelsetGreen,
     },
+  },
+  '& .MuiDataGrid-filterForm': {
+    fontFamily,
+  },
+  '& .MuiDataGrid-filterFormValueInput input': {
+    fontFamily,
+  },
+  '& .MuiInputBase-root': {
+    fontFamily,
+  },
+  '& .MuiInputLabel-root': {
+    fontFamily,
+  },
+  '& .MuiMenuItem-root': {
+    fontFamily,
   },
 });
 
@@ -250,6 +266,7 @@ const StyledToolbarButton = styled(ToolbarButton)<{ ownerState: OwnerState }>(
     opacity: ownerState.expanded ? 0 : 1,
     pointerEvents: ownerState.expanded ? 'none' : 'auto',
     transition: theme.transitions.create(['opacity']),
+    fontFamily,
   }),
 );
 
@@ -260,6 +277,9 @@ const StyledTextField = styled(TextField)<{ ownerState: OwnerState }>(
     width: ownerState.expanded ? 260 : 'var(--trigger-width)',
     opacity: ownerState.expanded ? 1 : 0,
     transition: theme.transitions.create(['width', 'opacity']),
+    '& .MuiInputBase-root': {
+      fontFamily,
+    },
   }),
 );
 
@@ -287,6 +307,37 @@ const getRatingColor = (rating: number | null): string => {
   return 'transparent';
 };
 
+// Custom input component for dropdown filters
+interface SelectFilterInputProps extends GridFilterInputValueProps {
+  options?: string[];
+}
+
+function SelectFilterInput(props: SelectFilterInputProps) {
+  const { item, applyValue, options } = props;
+
+  return (
+    <FormControl fullWidth variant="standard">
+      <Select
+        value={item.value || ''}
+        onChange={(event) => {
+          applyValue({ ...item, value: event.target.value });
+        }}
+        displayEmpty
+        sx={{ fontFamily, fontSize: 13 }}
+      >
+        <MuiMenuItem value="" sx={{ fontFamily }}>
+          <em>Filter value</em>
+        </MuiMenuItem>
+        {options?.map((option: any) => (
+          <MuiMenuItem key={option} value={option} sx={{ fontFamily }}>
+            {option}
+          </MuiMenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+}
+
 export function PositionalRatings({
   orgId,
   locationId,
@@ -312,6 +363,12 @@ export function PositionalRatings({
   
   // Big 5 labels cache
   const [big5LabelsCache, setBig5LabelsCache] = React.useState<Map<string, PositionBig5Labels>>(new Map());
+  
+  // Unique values for filter dropdowns
+  const [uniqueEmployees, setUniqueEmployees] = React.useState<string[]>([]);
+  const [uniqueLeaders, setUniqueLeaders] = React.useState<string[]>([]);
+  const [uniqueRoles, setUniqueRoles] = React.useState<string[]>([]);
+  const [uniquePositions, setUniquePositions] = React.useState<string[]>([]);
 
   // Calculate date range based on preset
   const getDateRange = React.useCallback((preset: string): [Date, Date] => {
@@ -339,6 +396,13 @@ export function PositionalRatings({
     
     return [start, end];
   }, []);
+
+  // Initialize dates
+  React.useEffect(() => {
+    const [start, end] = getDateRange('30d');
+    setStartDate(start);
+    setEndDate(end);
+  }, [getDateRange]);
 
   // Fetch Big 5 labels for a position
   const fetchBig5Labels = React.useCallback(async (position: string) => {
@@ -370,9 +434,8 @@ export function PositionalRatings({
     
     try {
       const supabase = createSupabaseClient();
-      const [startDateFilter, endDateFilter] = startDate && endDate 
-        ? [startDate, endDate]
-        : getDateRange(dateRange);
+      const startDateFilter = startDate || getDateRange(dateRange)[0];
+      const endDateFilter = endDate || getDateRange(dateRange)[1];
       
       // Build query
       let query = supabase
@@ -395,20 +458,14 @@ export function PositionalRatings({
       // Transform data
       const transformedRows: RatingRow[] = (ratings || [])
         .filter((rating: any) => {
-          // Filter by FOH/BOH based on position, not employee flags
+          // Filter by FOH/BOH based on position
           const isFOHPosition = FOH_POSITIONS.includes(rating.position);
           const isBOHPosition = BOH_POSITIONS.includes(rating.position);
           
-          // If both unchecked, show nothing
           if (!showFOH && !showBOH) return false;
-          
-          // If only FOH checked, show only FOH positions
           if (showFOH && !showBOH) return isFOHPosition;
-          
-          // If only BOH checked, show only BOH positions
           if (!showFOH && showBOH) return isBOHPosition;
           
-          // If both checked, show all
           return true;
         })
         .map((rating: any) => {
@@ -431,10 +488,21 @@ export function PositionalRatings({
       
       setRows(transformedRows);
       
+      // Extract unique values for filters
+      const employees = Array.from(new Set(transformedRows.map(r => r.employee_name))).sort();
+      const leaders = Array.from(new Set(transformedRows.map(r => r.rater_name))).sort();
+      const roles = Array.from(new Set(transformedRows.map(r => r.employee_role))).sort();
+      const positions = Array.from(new Set(transformedRows.map(r => r.position_cleaned))).sort();
+      
+      setUniqueEmployees(employees);
+      setUniqueLeaders(leaders);
+      setUniqueRoles(roles);
+      setUniquePositions(positions);
+      
       // Prefetch Big 5 labels for all positions
       const positionsSet = new Set(transformedRows.map(r => r.position));
-      const uniquePositions = Array.from(positionsSet);
-      uniquePositions.forEach(pos => fetchBig5Labels(pos));
+      const uniquePos = Array.from(positionsSet);
+      uniquePos.forEach(pos => fetchBig5Labels(pos));
       
     } catch (err) {
       console.error('Error fetching ratings:', err);
@@ -444,10 +512,12 @@ export function PositionalRatings({
     }
   }, [orgId, locationId, showFOH, showBOH, dateRange, startDate, endDate, getDateRange, fetchBig5Labels]);
 
-  // Initial load
+  // Initial load and refetch when filters change
   React.useEffect(() => {
-    fetchRatings();
-  }, [fetchRatings]);
+    if (startDate && endDate) {
+      fetchRatings();
+    }
+  }, [startDate, endDate, showFOH, showBOH]);
 
   // Handle delete
   const handleDeleteClick = (row: RatingRow) => {
@@ -486,11 +556,12 @@ export function PositionalRatings({
     setRatingToDelete(null);
   };
 
-  // Handle date range preset
+  // Handle date range preset - updates both the preset and the date pickers
   const handleDateRangePreset = (preset: 'mtd' | 'qtd' | '30d' | '90d') => {
     setDateRange(preset);
-    setStartDate(null);
-    setEndDate(null);
+    const [start, end] = getDateRange(preset);
+    setStartDate(start);
+    setEndDate(end);
   };
 
   // Handle custom date range
@@ -502,6 +573,54 @@ export function PositionalRatings({
   const handleEndDateChange = (date: Date | null) => {
     setEndDate(date);
     setDateRange('custom');
+  };
+
+  // Create custom filter operators for dropdown columns
+  const createDropdownOperators = (options: string[]): GridFilterOperator[] => {
+    return [
+      {
+        label: 'is',
+        value: 'is',
+        getApplyFilterFn: (filterItem: GridFilterItem) => {
+          if (!filterItem.value) {
+            return null;
+          }
+          return (value: any) => {
+            return value === filterItem.value;
+          };
+        },
+        InputComponent: SelectFilterInput,
+        InputComponentProps: { options } as any,
+      },
+      {
+        label: 'is not',
+        value: 'not',
+        getApplyFilterFn: (filterItem: GridFilterItem) => {
+          if (!filterItem.value) {
+            return null;
+          }
+          return (value: any) => {
+            return value !== filterItem.value;
+          };
+        },
+        InputComponent: SelectFilterInput,
+        InputComponentProps: { options } as any,
+      },
+      {
+        label: 'is any of',
+        value: 'isAnyOf',
+        getApplyFilterFn: (filterItem: GridFilterItem) => {
+          if (!filterItem.value || !Array.isArray(filterItem.value)) {
+            return null;
+          }
+          return (value: any) => {
+            return filterItem.value.includes(value);
+          };
+        },
+        InputComponent: SelectFilterInput,
+        InputComponentProps: { options } as any,
+      },
+    ];
   };
 
   // Custom toolbar
@@ -561,20 +680,17 @@ export function PositionalRatings({
               slotProps={{
                 textField: {
                   size: 'small',
-                  InputProps: {
-                    sx: {
-                      fontFamily,
-                      fontSize: 11,
-                    },
-                  },
-                  InputLabelProps: {
-                    sx: {
-                      fontFamily,
-                      fontSize: 11,
-                    },
-                  },
                   sx: {
                     width: 130,
+                    '& .MuiInputBase-input': {
+                      fontFamily,
+                      fontSize: 11,
+                      padding: '8px 10px',
+                    },
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 11,
+                    },
                   },
                 },
               }}
@@ -588,20 +704,17 @@ export function PositionalRatings({
               slotProps={{
                 textField: {
                   size: 'small',
-                  InputProps: {
-                    sx: {
-                      fontFamily,
-                      fontSize: 11,
-                    },
-                  },
-                  InputLabelProps: {
-                    sx: {
-                      fontFamily,
-                      fontSize: 11,
-                    },
-                  },
                   sx: {
                     width: 130,
+                    '& .MuiInputBase-input': {
+                      fontFamily,
+                      fontSize: 11,
+                      padding: '8px 10px',
+                    },
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 11,
+                    },
                   },
                 },
               }}
@@ -621,7 +734,11 @@ export function PositionalRatings({
             <FilterPanelTrigger
               render={(props, state) => (
                 <ToolbarButton {...props} color="default">
-                  <Badge badgeContent={state.filterCount} color="primary" variant="dot">
+                  <Badge badgeContent={state.filterCount} color="primary" variant="dot" sx={{
+                    '& .MuiBadge-badge': {
+                      backgroundColor: levelsetGreen,
+                    }
+                  }}>
                     <FilterListIcon fontSize="small" />
                   </Badge>
                 </ToolbarButton>
@@ -673,7 +790,6 @@ export function PositionalRatings({
                         </InputAdornment>
                       ) : null,
                       ...controlProps.slotProps?.input,
-                      sx: { fontFamily, fontSize: 12 },
                     },
                     ...controlProps.slotProps,
                   }}
@@ -697,7 +813,7 @@ export function PositionalRatings({
       headerName: 'Date',
       width: 140,
       sortable: true,
-      filterable: true,
+      filterable: false, // Date column not filterable
       renderCell: (params) => (
         <Box sx={{ fontFamily, fontSize: 11 }}>
           {params.value}
@@ -710,6 +826,7 @@ export function PositionalRatings({
       width: 160,
       sortable: true,
       filterable: true,
+      filterOperators: createDropdownOperators(uniqueEmployees),
     },
     {
       field: 'employee_role',
@@ -717,6 +834,7 @@ export function PositionalRatings({
       width: 140,
       sortable: true,
       filterable: true,
+      filterOperators: createDropdownOperators(uniqueRoles),
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => {
@@ -730,6 +848,7 @@ export function PositionalRatings({
       width: 160,
       sortable: true,
       filterable: true,
+      filterOperators: createDropdownOperators(uniqueLeaders),
     },
     {
       field: 'position_cleaned',
@@ -737,6 +856,7 @@ export function PositionalRatings({
       width: 120,
       sortable: true,
       filterable: true,
+      filterOperators: createDropdownOperators(uniquePositions),
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => {
@@ -761,7 +881,23 @@ export function PositionalRatings({
         const labels = big5LabelsCache.get(row.position);
         
         return (
-          <Tooltip title={labels?.label_1 || 'Criteria 1'} arrow placement="bottom">
+          <Tooltip 
+            title={labels?.label_1 || 'Criteria 1'} 
+            arrow 
+            placement="bottom"
+            slotProps={{
+              popper: {
+                modifiers: [
+                  {
+                    name: 'offset',
+                    options: {
+                      offset: [0, -8],
+                    },
+                  },
+                ],
+              },
+            }}
+          >
             <Box
               sx={{
                 width: '100%',
@@ -796,7 +932,23 @@ export function PositionalRatings({
         const labels = big5LabelsCache.get(row.position);
         
         return (
-          <Tooltip title={labels?.label_2 || 'Criteria 2'} arrow placement="bottom">
+          <Tooltip 
+            title={labels?.label_2 || 'Criteria 2'} 
+            arrow 
+            placement="bottom"
+            slotProps={{
+              popper: {
+                modifiers: [
+                  {
+                    name: 'offset',
+                    options: {
+                      offset: [0, -8],
+                    },
+                  },
+                ],
+              },
+            }}
+          >
             <Box
               sx={{
                 width: '100%',
@@ -831,7 +983,23 @@ export function PositionalRatings({
         const labels = big5LabelsCache.get(row.position);
         
         return (
-          <Tooltip title={labels?.label_3 || 'Criteria 3'} arrow placement="bottom">
+          <Tooltip 
+            title={labels?.label_3 || 'Criteria 3'} 
+            arrow 
+            placement="bottom"
+            slotProps={{
+              popper: {
+                modifiers: [
+                  {
+                    name: 'offset',
+                    options: {
+                      offset: [0, -8],
+                    },
+                  },
+                ],
+              },
+            }}
+          >
             <Box
               sx={{
                 width: '100%',
@@ -866,7 +1034,23 @@ export function PositionalRatings({
         const labels = big5LabelsCache.get(row.position);
         
         return (
-          <Tooltip title={labels?.label_4 || 'Criteria 4'} arrow placement="bottom">
+          <Tooltip 
+            title={labels?.label_4 || 'Criteria 4'} 
+            arrow 
+            placement="bottom"
+            slotProps={{
+              popper: {
+                modifiers: [
+                  {
+                    name: 'offset',
+                    options: {
+                      offset: [0, -8],
+                    },
+                  },
+                ],
+              },
+            }}
+          >
             <Box
               sx={{
                 width: '100%',
@@ -901,7 +1085,23 @@ export function PositionalRatings({
         const labels = big5LabelsCache.get(row.position);
         
         return (
-          <Tooltip title={labels?.label_5 || 'Criteria 5'} arrow placement="bottom">
+          <Tooltip 
+            title={labels?.label_5 || 'Criteria 5'} 
+            arrow 
+            placement="bottom"
+            slotProps={{
+              popper: {
+                modifiers: [
+                  {
+                    name: 'offset',
+                    options: {
+                      offset: [0, -8],
+                    },
+                  },
+                ],
+              },
+            }}
+          >
             <Box
               sx={{
                 width: '100%',
@@ -961,6 +1161,7 @@ export function PositionalRatings({
       filterable: false,
       disableColumnMenu: true,
       disableExport: true,
+      hideable: false, // Prevent from showing in columns panel
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => {
@@ -1008,11 +1209,6 @@ export function PositionalRatings({
               sorting: {
                 sortModel: [{ field: 'formatted_date', sort: 'desc' }],
               },
-              columns: {
-                columnVisibilityModel: {
-                  actions: true,
-                },
-              },
             }}
             disableRowSelectionOnClick
             rowHeight={48}
@@ -1020,11 +1216,6 @@ export function PositionalRatings({
               toolbar: CustomToolbar,
             }}
             showToolbar
-            sx={{
-              '& .MuiDataGrid-cell--withRenderer': {
-                padding: '0 !important',
-              },
-            }}
           />
         </Box>
         
@@ -1084,7 +1275,11 @@ export function PositionalRatings({
               onClick={handleDeleteConfirm}
               disabled={deleting}
               variant="contained"
-              sx={{ fontFamily, backgroundColor: '#dc2626', '&:hover': { backgroundColor: '#b91c1c' } }}
+              sx={{ 
+                fontFamily, 
+                backgroundColor: '#dc2626', 
+                '&:hover': { backgroundColor: '#b91c1c' } 
+              }}
             >
               {deleting ? 'Deleting...' : 'Delete'}
             </Button>
