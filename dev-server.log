@@ -7,18 +7,4 @@
   - Environments: .env.local
 
  ✓ Starting...
- ✓ Ready in 11.7s
- ⚠ Found a change in next.config.mjs. Restarting the server to apply the changes...
-  ▲ Next.js 14.2.33
-  - Local:        http://localhost:3000
-  - Environments: .env.local
-
- ✓ Starting...
- ✓ Ready in 1558ms
- ⚠ Found a change in next.config.mjs. Restarting the server to apply the changes...
-  ▲ Next.js 14.2.33
-  - Local:        http://localhost:3000
-  - Environments: .env.local
-
- ✓ Starting...
- ✓ Ready in 1663ms
+ ✓ Ready in 1331ms

@@ -169,7 +169,7 @@ const RoleChip = styled(Chip)<{ roletype: string }>(({ roletype }) => {
   };
 });
 
-const StyledDataGrid = styled(DataGridPro)({
+const StyledDataGrid = styled(DataGridPro)(({ theme }) => ({
   fontFamily,
   border: '1px solid #e5e7eb',
   borderRadius: 8,
@@ -189,11 +189,20 @@ const StyledDataGrid = styled(DataGridPro)({
       outline: 'none',
     },
   },
-  '& .MuiDataGrid-columnSeparator': {
+  // Aggressively hide column separators
+  '& .MuiDataGrid-columnSeparator, & .MuiDataGrid-columnSeparator--resizable, & .MuiDataGrid-columnSeparator--sideRight, & .MuiDataGrid-columnSeparator--sideLeft': {
     display: 'none !important',
+    visibility: 'hidden !important',
+    width: '0px !important',
+    minWidth: '0px !important',
+    maxWidth: '0px !important',
+    opacity: '0 !important',
+    pointerEvents: 'none !important',
   },
   '& .MuiDataGrid-iconSeparator': {
     display: 'none !important',
+    visibility: 'hidden !important',
+    opacity: '0 !important',
   },
   '& .MuiDataGrid-cell': {
     borderBottom: '1px solid #f3f4f6',
@@ -467,7 +476,7 @@ const StyledDataGrid = styled(DataGridPro)({
       },
     },
   },
-});
+}));
 
 const StyledQuickFilter = styled(QuickFilter)({
   display: 'grid',
@@ -1535,6 +1544,43 @@ export function PositionalRatings({
               toolbar: CustomToolbar,
             }}
             showToolbar
+            sx={{
+              // CRITICAL: Hide all column separators with maximum specificity
+              '&&& .MuiDataGrid-columnSeparator': {
+                display: 'none !important',
+                visibility: 'hidden !important',
+                width: '0px !important',
+                minWidth: '0px !important',
+                maxWidth: '0px !important',
+                opacity: '0 !important',
+                pointerEvents: 'none !important',
+              },
+              '&&& .MuiDataGrid-columnSeparator--resizable': {
+                display: 'none !important',
+                visibility: 'hidden !important',
+                width: '0px !important',
+              },
+              '&&& .MuiDataGrid-columnSeparator--sideRight': {
+                display: 'none !important',
+                width: '0px !important',
+              },
+              '&&& .MuiDataGrid-columnSeparator--sideLeft': {
+                display: 'none !important',
+                width: '0px !important',
+              },
+              '&&& .MuiDataGrid-iconSeparator': {
+                display: 'none !important',
+                visibility: 'hidden !important',
+                opacity: '0 !important',
+              },
+              '&&& .MuiDataGrid-columnHeader .MuiDataGrid-columnSeparator': {
+                display: 'none !important',
+              },
+              // Also hide any SVG icons in separators
+              '&&& .MuiDataGrid-columnSeparator svg': {
+                display: 'none !important',
+              },
+            }}
           />
         </Box>
         
