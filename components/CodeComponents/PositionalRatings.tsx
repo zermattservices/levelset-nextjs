@@ -224,7 +224,7 @@ const StyledDataGrid = styled(DataGridPro)({
   },
   '& .MuiSelect-select': {
     fontFamily,
-    fontSize: 13,
+    fontSize: 12,
   },
   '& .MuiCircularProgress-root': {
     color: levelsetGreen,
@@ -235,20 +235,173 @@ const StyledDataGrid = styled(DataGridPro)({
       backgroundColor: levelsetGreen,
     },
   },
+  // Filter panel styling
   '& .MuiDataGrid-filterForm': {
     fontFamily,
+    padding: '16px',
+    gap: '16px',
   },
-  '& .MuiDataGrid-filterFormValueInput input': {
-    fontFamily,
+  '& .MuiDataGrid-filterFormColumnInput, & .MuiDataGrid-filterFormOperatorInput, & .MuiDataGrid-filterFormValueInput': {
+    '& .MuiInputLabel-root': {
+      fontFamily,
+      fontSize: 11,
+      color: '#6b7280',
+      '&.Mui-focused': {
+        color: levelsetGreen,
+      },
+    },
+    '& .MuiInputBase-root': {
+      fontFamily,
+      fontSize: 12,
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: levelsetGreen,
+      },
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#e5e7eb',
+    },
+    '& .MuiSelect-select': {
+      fontFamily,
+      fontSize: 12,
+      padding: '8px 12px',
+    },
+    '& .MuiInputBase-input': {
+      fontFamily,
+      fontSize: 12,
+      padding: '8px 12px',
+    },
   },
-  '& .MuiInputBase-root': {
-    fontFamily,
+  // Make filter value input match outlined style
+  '& .MuiDataGrid-filterFormValueInput .MuiInputBase-root': {
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#e5e7eb',
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#d1d5db',
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: levelsetGreen,
+      borderWidth: '2px',
+    },
   },
-  '& .MuiInputLabel-root': {
-    fontFamily,
+  // Filter form delete icon
+  '& .MuiDataGrid-filterFormDeleteIcon': {
+    color: '#6b7280',
+    '&:hover': {
+      color: '#dc2626',
+    },
   },
+  // Filter form logic operator
+  '& .MuiDataGrid-filterFormLogicOperatorInput': {
+    '& .MuiInputBase-root': {
+      fontFamily,
+      fontSize: 12,
+    },
+  },
+  // Menu items in dropdowns
   '& .MuiMenuItem-root': {
     fontFamily,
+    fontSize: 12,
+    '&.Mui-selected': {
+      backgroundColor: `${levelsetGreen}15`,
+      '&:hover': {
+        backgroundColor: `${levelsetGreen}25`,
+      },
+    },
+    '&:hover': {
+      backgroundColor: '#f9fafb',
+    },
+  },
+  // Input labels
+  '& .MuiInputLabel-root': {
+    fontFamily,
+    fontSize: 11,
+    '&.Mui-focused': {
+      color: levelsetGreen,
+    },
+  },
+  // Input base
+  '& .MuiInputBase-root': {
+    fontFamily,
+    fontSize: 12,
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: levelsetGreen,
+    },
+  },
+  // Outlined input
+  '& .MuiOutlinedInput-root': {
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#e5e7eb',
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#d1d5db',
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: levelsetGreen,
+      borderWidth: '2px',
+    },
+  },
+  // Columns panel styling
+  '& .MuiDataGrid-columnsPanel': {
+    '& .MuiFormControlLabel-label': {
+      fontFamily,
+      fontSize: 12,
+    },
+    '& .MuiCheckbox-root': {
+      color: '#d1d5db',
+      '&.Mui-checked': {
+        color: levelsetGreen,
+      },
+    },
+  },
+  // Panel header
+  '& .MuiDataGrid-panelHeader': {
+    fontFamily,
+    fontSize: 13,
+    fontWeight: 600,
+  },
+  // Panel content
+  '& .MuiDataGrid-panelContent': {
+    fontFamily,
+  },
+  // Panel footer
+  '& .MuiDataGrid-panelFooter': {
+    '& .MuiButton-root': {
+      fontFamily,
+      fontSize: 12,
+      textTransform: 'none',
+      '&:hover': {
+        backgroundColor: `${levelsetGreen}15`,
+      },
+    },
+  },
+  // Checkbox in general
+  '& .MuiCheckbox-root': {
+    color: '#d1d5db',
+    '&.Mui-checked': {
+      color: levelsetGreen,
+    },
+  },
+  // Switch
+  '& .MuiSwitch-root': {
+    '& .MuiSwitch-switchBase.Mui-checked': {
+      color: levelsetGreen,
+      '& + .MuiSwitch-track': {
+        backgroundColor: levelsetGreen,
+      },
+    },
+  },
+  // Buttons
+  '& .MuiButton-root': {
+    fontFamily,
+    fontSize: 12,
+    textTransform: 'none',
+    '&.MuiButton-text': {
+      color: levelsetGreen,
+      '&:hover': {
+        backgroundColor: `${levelsetGreen}15`,
+      },
+    },
   },
 });
 
@@ -316,20 +469,34 @@ function SelectFilterInput(props: SelectFilterInputProps) {
   const { item, applyValue, options } = props;
 
   return (
-    <FormControl fullWidth variant="standard">
+    <FormControl fullWidth size="small">
       <Select
         value={item.value || ''}
         onChange={(event) => {
           applyValue({ ...item, value: event.target.value });
         }}
         displayEmpty
-        sx={{ fontFamily, fontSize: 13 }}
+        variant="outlined"
+        sx={{ 
+          fontFamily, 
+          fontSize: 12,
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#e5e7eb',
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#d1d5db',
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: levelsetGreen,
+            borderWidth: '2px',
+          },
+        }}
       >
-        <MuiMenuItem value="" sx={{ fontFamily }}>
-          <em>Filter value</em>
+        <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: '#9ca3af' }}>
+          Filter value
         </MuiMenuItem>
         {options?.map((option: any) => (
-          <MuiMenuItem key={option} value={option} sx={{ fontFamily }}>
+          <MuiMenuItem key={option} value={option} sx={{ fontFamily, fontSize: 12 }}>
             {option}
           </MuiMenuItem>
         ))}
@@ -691,6 +858,47 @@ export function PositionalRatings({
                       fontFamily,
                       fontSize: 11,
                     },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#e5e7eb',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#d1d5db',
+                    },
+                    '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: levelsetGreen,
+                    },
+                  },
+                },
+                popper: {
+                  sx: {
+                    '& .MuiPaper-root': {
+                      fontFamily,
+                    },
+                    '& .MuiTypography-root': {
+                      fontFamily,
+                      fontSize: 11,
+                    },
+                    '& .MuiPickersDay-root': {
+                      fontFamily,
+                      fontSize: 11,
+                      '&.Mui-selected': {
+                        backgroundColor: levelsetGreen,
+                        '&:hover': {
+                          backgroundColor: levelsetGreen,
+                        },
+                      },
+                    },
+                    '& .MuiPickersCalendarHeader-label': {
+                      fontFamily,
+                      fontSize: 12,
+                    },
+                    '& .MuiDayCalendar-weekDayLabel': {
+                      fontFamily,
+                      fontSize: 10,
+                    },
+                    '& .MuiButtonBase-root': {
+                      fontFamily,
+                    },
                   },
                 },
               }}
@@ -714,6 +922,47 @@ export function PositionalRatings({
                     '& .MuiInputLabel-root': {
                       fontFamily,
                       fontSize: 11,
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#e5e7eb',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#d1d5db',
+                    },
+                    '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: levelsetGreen,
+                    },
+                  },
+                },
+                popper: {
+                  sx: {
+                    '& .MuiPaper-root': {
+                      fontFamily,
+                    },
+                    '& .MuiTypography-root': {
+                      fontFamily,
+                      fontSize: 11,
+                    },
+                    '& .MuiPickersDay-root': {
+                      fontFamily,
+                      fontSize: 11,
+                      '&.Mui-selected': {
+                        backgroundColor: levelsetGreen,
+                        '&:hover': {
+                          backgroundColor: levelsetGreen,
+                        },
+                      },
+                    },
+                    '& .MuiPickersCalendarHeader-label': {
+                      fontFamily,
+                      fontSize: 12,
+                    },
+                    '& .MuiDayCalendar-weekDayLabel': {
+                      fontFamily,
+                      fontSize: 10,
+                    },
+                    '& .MuiButtonBase-root': {
+                      fontFamily,
                     },
                   },
                 },
