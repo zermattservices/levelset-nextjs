@@ -343,9 +343,20 @@ export function PositionalRatings({
       // Transform data
       const transformedRows: RatingRow[] = (ratings || [])
         .filter((rating: any) => {
-          // Filter by FOH/BOH
-          if (!showFOH && rating.employee?.is_foh) return false;
-          if (!showBOH && rating.employee?.is_boh) return false;
+          // Filter by FOH/BOH based on position, not employee flags
+          const isFOHPosition = FOH_POSITIONS.includes(rating.position);
+          const isBOHPosition = BOH_POSITIONS.includes(rating.position);
+          
+          // If both unchecked, show nothing
+          if (!showFOH && !showBOH) return false;
+          
+          // If only FOH checked, show only FOH positions
+          if (showFOH && !showBOH) return isFOHPosition;
+          
+          // If only BOH checked, show only BOH positions
+          if (!showFOH && showBOH) return isBOHPosition;
+          
+          // If both checked, show all
           return true;
         })
         .map((rating: any) => {
@@ -511,7 +522,6 @@ export function PositionalRatings({
             <Box
               sx={{
                 width: '100%',
-                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -519,8 +529,7 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
-                margin: 0,
-                padding: 0,
+                py: 0.5,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -547,7 +556,6 @@ export function PositionalRatings({
             <Box
               sx={{
                 width: '100%',
-                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -555,8 +563,7 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
-                margin: 0,
-                padding: 0,
+                py: 0.5,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -583,7 +590,6 @@ export function PositionalRatings({
             <Box
               sx={{
                 width: '100%',
-                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -591,8 +597,7 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
-                margin: 0,
-                padding: 0,
+                py: 0.5,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -619,7 +624,6 @@ export function PositionalRatings({
             <Box
               sx={{
                 width: '100%',
-                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -627,8 +631,7 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
-                margin: 0,
-                padding: 0,
+                py: 0.5,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -655,7 +658,6 @@ export function PositionalRatings({
             <Box
               sx={{
                 width: '100%',
-                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -663,8 +665,7 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
-                margin: 0,
-                padding: 0,
+                py: 0.5,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -688,7 +689,6 @@ export function PositionalRatings({
           <Box
             sx={{
               width: '100%',
-              height: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -696,8 +696,7 @@ export function PositionalRatings({
               color: rating ? '#fff !important' : '#111827',
               fontWeight: rating ? 600 : 400,
               fontFamily,
-              margin: 0,
-              padding: 0,
+              py: 0.5,
             }}
           >
             {rating?.toFixed(2) || '—'}
