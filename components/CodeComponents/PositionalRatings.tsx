@@ -36,8 +36,10 @@ import { cleanPositionName, FOH_POSITIONS, BOH_POSITIONS } from '@/lib/ratings-d
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
-const fohColor = '#3b82f6'; // Blue for FOH
-const bohColor = '#f59e0b'; // Gold/Yellow for BOH
+const fohColor = '#006391'; // Blue for FOH
+const bohColor = '#ffcc5b'; // Gold/Yellow for BOH
+const fohColorLight = '#eaf9ff'; // Light blue for unselected FOH
+const bohColorLight = '#fffcf0'; // Light yellow for unselected BOH
 
 export interface PositionalRatingsProps {
   orgId: string;
@@ -98,7 +100,7 @@ const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
 
 const AreaPill = styled(Box)<{ selected?: boolean; area: 'FOH' | 'BOH' }>(({ selected, area }) => {
   const baseColor = area === 'FOH' ? fohColor : bohColor;
-  const lightColor = area === 'FOH' ? '#eff6ff' : '#fef3c7';
+  const lightColor = area === 'FOH' ? fohColorLight : bohColorLight;
   
   return {
     fontFamily,
@@ -109,8 +111,8 @@ const AreaPill = styled(Box)<{ selected?: boolean; area: 'FOH' | 'BOH' }>(({ sel
     cursor: 'pointer',
     transition: 'all 0.15s ease',
     backgroundColor: selected ? baseColor : lightColor,
-    color: selected ? '#fff' : baseColor,
-    border: selected ? 'none' : `2px solid ${baseColor}`,
+    color: selected ? '#ffffff' : baseColor,
+    border: `2px solid ${baseColor}`,
     '&:hover': {
       opacity: 0.9,
     },
@@ -130,7 +132,7 @@ const PositionChip = styled(Chip)<{ positiontype: 'FOH' | 'BOH' }>(({ positionty
   };
 });
 
-const RoleChip = styled(Box)<{ role: string }>(({ role }) => {
+const RoleChip = styled(Chip)<{ roletype: string }>(({ roletype }) => {
   const styles: Record<string, { bg: string; color: string }> = {
     'New Hire': { bg: '#f0fdf4', color: '#166534' },
     'Team Member': { bg: '#eff6ff', color: '#1d4ed8' },
@@ -141,18 +143,19 @@ const RoleChip = styled(Box)<{ role: string }>(({ role }) => {
     'Operator': { bg: '#F0F0FF', color: '#483D8B' },
   };
   
-  const style = styles[role] || styles['Team Member'];
+  const style = styles[roletype] || styles['Team Member'];
   
   return {
-    display: 'inline-flex',
-    alignItems: 'center',
-    padding: '4px 12px',
-    borderRadius: 16,
+    fontFamily,
     fontSize: 12,
     fontWeight: 500,
-    fontFamily,
     backgroundColor: style.bg,
     color: style.color,
+    height: 24,
+    borderRadius: 12,
+    '& .MuiChip-label': {
+      padding: '0 8px',
+    },
   };
 });
 
@@ -171,11 +174,13 @@ const StyledDataGrid = styled(DataGridPro)({
     fontSize: 13,
     color: '#111827',
     fontFamily,
-    padding: '4px 8px',
+    padding: '8px',
+    display: 'flex',
+    alignItems: 'center',
   },
   '& .MuiDataGrid-row': {
-    minHeight: '36px !important',
-    maxHeight: '36px !important',
+    minHeight: '44px !important',
+    maxHeight: '44px !important',
   },
   '& .MuiDataGrid-row:hover': {
     backgroundColor: '#f9fafb',
@@ -185,8 +190,9 @@ const StyledDataGrid = styled(DataGridPro)({
     fontFamily,
   },
   '& .MuiDataGrid-toolbarContainer': {
-    padding: '8px',
+    padding: '12px',
     gap: '8px',
+    borderBottom: '1px solid #e5e7eb',
     '& .MuiButton-root': {
       fontFamily,
       fontSize: 12,
@@ -445,12 +451,12 @@ export function PositionalRatings({
     {
       field: 'employee_role',
       headerName: 'Employee Role',
-      width: 130,
+      width: 140,
       sortable: true,
       filterable: true,
       renderCell: (params) => {
         const role = params.value as string;
-        return <RoleChip role={role}>{role}</RoleChip>;
+        return <RoleChip label={role} size="small" roletype={role} />;
       },
     },
     {
@@ -476,9 +482,11 @@ export function PositionalRatings({
     {
       field: 'rating_1',
       headerName: 'Criteria 1',
-      width: 90,
+      width: 95,
       sortable: false,
       filterable: false,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params) => {
         const rating = params.value as number | null;
         const row = params.row as RatingRow;
@@ -497,6 +505,8 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
+                margin: 0,
+                padding: 0,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -508,9 +518,11 @@ export function PositionalRatings({
     {
       field: 'rating_2',
       headerName: 'Criteria 2',
-      width: 90,
+      width: 95,
       sortable: false,
       filterable: false,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params) => {
         const rating = params.value as number | null;
         const row = params.row as RatingRow;
@@ -529,6 +541,8 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
+                margin: 0,
+                padding: 0,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -540,9 +554,11 @@ export function PositionalRatings({
     {
       field: 'rating_3',
       headerName: 'Criteria 3',
-      width: 90,
+      width: 95,
       sortable: false,
       filterable: false,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params) => {
         const rating = params.value as number | null;
         const row = params.row as RatingRow;
@@ -561,6 +577,8 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
+                margin: 0,
+                padding: 0,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -572,9 +590,11 @@ export function PositionalRatings({
     {
       field: 'rating_4',
       headerName: 'Criteria 4',
-      width: 90,
+      width: 95,
       sortable: false,
       filterable: false,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params) => {
         const rating = params.value as number | null;
         const row = params.row as RatingRow;
@@ -593,6 +613,8 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
+                margin: 0,
+                padding: 0,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -604,9 +626,11 @@ export function PositionalRatings({
     {
       field: 'rating_5',
       headerName: 'Criteria 5',
-      width: 90,
+      width: 95,
       sortable: false,
       filterable: false,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params) => {
         const rating = params.value as number | null;
         const row = params.row as RatingRow;
@@ -625,6 +649,8 @@ export function PositionalRatings({
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
+                margin: 0,
+                padding: 0,
               }}
             >
               {rating?.toFixed(2) || '—'}
@@ -636,9 +662,11 @@ export function PositionalRatings({
     {
       field: 'rating_avg',
       headerName: 'Overall',
-      width: 90,
+      width: 95,
       sortable: true,
       filterable: true,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params) => {
         const rating = params.value as number | null;
         
@@ -654,6 +682,8 @@ export function PositionalRatings({
               color: rating ? '#fff !important' : '#111827',
               fontWeight: rating ? 600 : 400,
               fontFamily,
+              margin: 0,
+              padding: 0,
             }}
           >
             {rating?.toFixed(2) || '—'}
@@ -694,21 +724,36 @@ export function PositionalRatings({
         {/* Filters */}
         <FilterContainer>
           {/* FOH/BOH Pills on left */}
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <AreaPill
-              selected={showFOH}
-              area="FOH"
-              onClick={() => setShowFOH(!showFOH)}
-            >
-              FOH
-            </AreaPill>
-            <AreaPill
-              selected={showBOH}
-              area="BOH"
-              onClick={() => setShowBOH(!showBOH)}
-            >
-              BOH
-            </AreaPill>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <AreaPill
+                selected={showFOH}
+                area="FOH"
+                onClick={() => setShowFOH(!showFOH)}
+              >
+                FOH
+              </AreaPill>
+              <AreaPill
+                selected={showBOH}
+                area="BOH"
+                onClick={() => setShowBOH(!showBOH)}
+              >
+                BOH
+              </AreaPill>
+            </Box>
+            
+            {/* Global Search Bar */}
+            <TextField
+              placeholder="Search employee, leader, role, or position..."
+              size="small"
+              sx={{
+                width: 320,
+                '& .MuiInputBase-input': {
+                  fontFamily,
+                  fontSize: 13,
+                },
+              }}
+            />
           </Box>
           
           {/* Date Range on right */}
@@ -827,6 +872,14 @@ export function PositionalRatings({
             sx={{
               '& .MuiDataGrid-columnSeparator': {
                 display: 'none',
+              },
+              '& .MuiDataGrid-cell': {
+                padding: '0 8px',
+                display: 'flex',
+                alignItems: 'center',
+              },
+              '& .MuiDataGrid-cell--withRenderer': {
+                padding: 0,
               },
             }}
           />
