@@ -1110,6 +1110,7 @@ export function PositionalRatings({
           display: 'flex', 
           gap: 1, 
           alignItems: 'center',
+          marginLeft: 'auto', // Push to the right
         }}>
           <GridToolbarFilterButton 
             slotProps={{
@@ -1118,7 +1119,13 @@ export function PositionalRatings({
               },
             }}
           />
-          <GridToolbarQuickFilter />
+          <GridToolbarQuickFilter 
+            sx={{
+              '& .MuiSvgIcon-root': {
+                color: `${levelsetGreen} !important`,
+              },
+            }}
+          />
         </Box>
       </GridToolbarContainer>
     );
