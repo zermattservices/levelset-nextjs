@@ -728,6 +728,7 @@ export function PositionalRatings({
       width: 140,
       sortable: true,
       filterable: false, // Date column not filterable
+      resizable: false, // Disable column resize to hide separators
       renderCell: (params) => (
         <Box sx={{ fontFamily, fontSize: 11 }}>
           {params.value}
@@ -740,6 +741,7 @@ export function PositionalRatings({
       width: 160,
       sortable: true,
       filterable: true,
+      resizable: false, // Disable column resize to hide separators
       filterOperators: createDropdownOperators(uniqueEmployees),
     },
     {
@@ -748,6 +750,7 @@ export function PositionalRatings({
       width: 140,
       sortable: true,
       filterable: true,
+      resizable: false, // Disable column resize to hide separators
       filterOperators: createDropdownOperators(uniqueRoles),
       headerAlign: 'center',
       align: 'center',
@@ -762,6 +765,7 @@ export function PositionalRatings({
       width: 160,
       sortable: true,
       filterable: true,
+      resizable: false, // Disable column resize to hide separators
       filterOperators: createDropdownOperators(uniqueLeaders),
     },
     {
@@ -770,6 +774,7 @@ export function PositionalRatings({
       width: 120,
       sortable: true,
       filterable: true,
+      resizable: false, // Disable column resize to hide separators
       filterOperators: createDropdownOperators(uniquePositions),
       headerAlign: 'center',
       align: 'center',
@@ -787,6 +792,7 @@ export function PositionalRatings({
       type: 'number',
       sortable: false,
       filterable: false,
+      resizable: false, // Disable column resize to hide separators
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => {
@@ -838,6 +844,7 @@ export function PositionalRatings({
       type: 'number',
       sortable: false,
       filterable: false,
+      resizable: false, // Disable column resize to hide separators
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => {
@@ -889,6 +896,7 @@ export function PositionalRatings({
       type: 'number',
       sortable: false,
       filterable: false,
+      resizable: false, // Disable column resize to hide separators
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => {
@@ -940,6 +948,7 @@ export function PositionalRatings({
       type: 'number',
       sortable: false,
       filterable: false,
+      resizable: false, // Disable column resize to hide separators
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => {
@@ -991,6 +1000,7 @@ export function PositionalRatings({
       type: 'number',
       sortable: false,
       filterable: false,
+      resizable: false, // Disable column resize to hide separators
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => {
@@ -1042,6 +1052,7 @@ export function PositionalRatings({
       type: 'number',
       sortable: true,
       filterable: true,
+      resizable: false, // Disable column resize to hide separators
       headerAlign: 'center',
       align: 'center',
       filterOperators: ratingOperators,
@@ -1073,6 +1084,7 @@ export function PositionalRatings({
       width: 60,
       sortable: false,
       filterable: false,
+      resizable: false, // Disable column resize to hide separators
       disableColumnMenu: true,
       disableExport: true,
       hideable: false, // Prevent from showing in columns panel
