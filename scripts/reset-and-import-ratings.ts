@@ -90,78 +90,66 @@ function parseTimestamp(timestamp: string): string {
 }
 
 async function main() {
-  console.log('Starting ratings import...');
+  console.log('=== RESET AND IMPORT RATINGS ===\n');
   
-  // Read CSV file
+  // Step 1: Delete all existing ratings
+  console.log('Step 1: Deleting all existing ratings...');
+  
+  const { error: deleteError, count } = await supabase
+    .from('ratings')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+  
+  if (deleteError) {
+    console.error('Error deleting ratings:', deleteError);
+    process.exit(1);
+  }
+  
+  console.log(`✅ Deleted all existing ratings\n`);
+  
+  // Step 2: Parse CSV file
+  console.log('Step 2: Parsing CSV file...');
   const csvPath = path.join(process.cwd(), 'updated_ratings.csv');
   const csvContent = fs.readFileSync(csvPath, 'utf-8');
   const rows = parseCSV(csvContent);
   
-  console.log(`Parsed ${rows.length} rows from CSV`);
+  console.log(`✅ Parsed ${rows.length} rows from CSV\n`);
   
-  // Fetch all employees to create name-to-ID mapping
+  // Step 3: Fetch all employees to create name-to-ID mapping
+  console.log('Step 3: Loading employee mappings...');
   const { data: employees, error: empError } = await supabase
     .from('employees')
-    .select('id, full_name');
+    .select('id, full_name, org_id, location_id');
   
   if (empError || !employees) {
     console.error('Error fetching employees:', empError);
     process.exit(1);
   }
   
-  const nameToIdMap = new Map<string, string>();
+  const nameToEmployeeMap = new Map<string, any>();
   employees.forEach(emp => {
     if (emp.full_name) {
-      nameToIdMap.set(emp.full_name, emp.id);
+      nameToEmployeeMap.set(emp.full_name, emp);
     }
   });
   
-  console.log(`Loaded ${nameToIdMap.size} employee name mappings`);
+  console.log(`✅ Loaded ${nameToEmployeeMap.size} employee mappings\n`);
   
-  // Fetch existing ratings to avoid duplicates
-  const { data: existingRatings, error: ratingsError } = await supabase
-    .from('ratings')
-    .select('employee_id, rater_user_id, position, created_at');
-  
-  if (ratingsError || !existingRatings) {
-    console.error('Error fetching existing ratings:', ratingsError);
-    process.exit(1);
-  }
-  
-  console.log(`Found ${existingRatings.length} existing ratings in database`);
-  
-  // Create a Set of existing rating keys for quick lookup (using minute precision)
-  const existingKeys = new Set<string>();
-  existingRatings.forEach(r => {
-    // Normalize timestamp to minute precision
-    const timestamp = new Date(r.created_at);
-    const normalizedTime = new Date(
-      timestamp.getFullYear(),
-      timestamp.getMonth(),
-      timestamp.getDate(),
-      timestamp.getHours(),
-      timestamp.getMinutes()
-    ).toISOString();
-    
-    const key = `${r.employee_id}|${r.rater_user_id}|${r.position}|${normalizedTime}`;
-    existingKeys.add(key);
-  });
-  
-  // Process each CSV row
+  // Step 4: Process each CSV row
+  console.log('Step 4: Processing CSV rows...');
   const newRatings: any[] = [];
-  const skipped: string[] = [];
   const errors: string[] = [];
   
   for (const row of rows) {
-    const employeeId = nameToIdMap.get(row.tmName);
-    const raterId = nameToIdMap.get(row.leaderName);
+    const employee = nameToEmployeeMap.get(row.tmName);
+    const rater = nameToEmployeeMap.get(row.leaderName);
     
-    if (!employeeId) {
+    if (!employee) {
       errors.push(`Employee not found: ${row.tmName}`);
       continue;
     }
     
-    if (!raterId) {
+    if (!rater) {
       errors.push(`Rater not found: ${row.leaderName}`);
       continue;
     }
@@ -171,83 +159,47 @@ async function main() {
     const rating3 = extractNumericRating(row.criteria3);
     const rating4 = extractNumericRating(row.criteria4);
     const rating5 = extractNumericRating(row.criteria5);
-    const ratingAvg = parseFloat(row.rating);
     
     const createdAt = parseTimestamp(row.timestamp);
     
-    // Normalize to minute precision for duplicate check
-    const normalizedTime = new Date(createdAt);
-    const normalizedKey = new Date(
-      normalizedTime.getFullYear(),
-      normalizedTime.getMonth(),
-      normalizedTime.getDate(),
-      normalizedTime.getHours(),
-      normalizedTime.getMinutes()
-    ).toISOString();
-    
-    // Check if this rating already exists
-    const key = `${employeeId}|${raterId}|${row.position}|${normalizedKey}`;
-    if (existingKeys.has(key)) {
-      skipped.push(`Already exists: ${row.tmName} rated by ${row.leaderName} on ${row.timestamp}`);
-      continue;
-    }
-    
-    // Get org_id and location_id from the employee
-    const employee = employees.find(e => e.id === employeeId);
-    
-    // Fetch full employee data for org_id and location_id
-    const { data: employeeData, error: empDataError } = await supabase
-      .from('employees')
-      .select('org_id, location_id')
-      .eq('id', employeeId)
-      .single();
-    
-    if (empDataError || !employeeData) {
-      errors.push(`Could not fetch org/location for employee: ${row.tmName}`);
-      continue;
-    }
-    
     newRatings.push({
-      employee_id: employeeId,
-      rater_user_id: raterId,
+      employee_id: employee.id,
+      rater_user_id: rater.id,
       position: row.position,
       rating_1: rating1,
       rating_2: rating2,
       rating_3: rating3,
       rating_4: rating4,
       rating_5: rating5,
-      // rating_avg is a generated column - don't insert it
       created_at: createdAt,
-      org_id: employeeData.org_id,
-      location_id: employeeData.location_id,
+      org_id: employee.org_id,
+      location_id: employee.location_id,
     });
   }
   
-  console.log(`\n=== IMPORT SUMMARY ===`);
+  console.log(`\n=== PROCESSING SUMMARY ===`);
   console.log(`Total CSV rows: ${rows.length}`);
-  console.log(`New ratings to import: ${newRatings.length}`);
-  console.log(`Skipped (already exist): ${skipped.length}`);
-  console.log(`Errors: ${errors.length}`);
+  console.log(`Valid ratings to import: ${newRatings.length}`);
+  console.log(`Errors (employees not found): ${errors.length}`);
   
   if (errors.length > 0) {
-    console.log('\nErrors encountered:');
-    errors.slice(0, 10).forEach(e => console.log(`  - ${e}`));
-    if (errors.length > 10) {
-      console.log(`  ... and ${errors.length - 10} more`);
-    }
+    console.log('\nEmployees not found:');
+    const uniqueErrors = [...new Set(errors)];
+    uniqueErrors.forEach(e => console.log(`  - ${e}`));
   }
   
   if (newRatings.length === 0) {
-    console.log('\nNo new ratings to import.');
+    console.log('\nNo ratings to import.');
     return;
   }
   
-  console.log(`\nReady to import ${newRatings.length} new ratings.`);
+  console.log(`\nReady to import ${newRatings.length} ratings.`);
   console.log('Press Ctrl+C to cancel, or wait 5 seconds to proceed...');
   
   await new Promise(resolve => setTimeout(resolve, 5000));
   
-  // Insert in batches of 100
+  // Step 5: Insert in batches of 100
+  console.log('\nStep 5: Inserting ratings...');
   const batchSize = 100;
   let inserted = 0;
   
@@ -260,13 +212,15 @@ async function main() {
     
     if (insertError) {
       console.error(`Error inserting batch ${i / batchSize + 1}:`, insertError);
+      break;
     } else {
       inserted += batch.length;
       console.log(`Inserted batch ${i / batchSize + 1} (${inserted}/${newRatings.length})`);
     }
   }
   
-  console.log(`\n✅ Import complete! Inserted ${inserted} new ratings.`);
+  console.log(`\n✅ Import complete!`);
+  console.log(`Total ratings inserted: ${inserted}`);
 }
 
 main().catch(console.error);
