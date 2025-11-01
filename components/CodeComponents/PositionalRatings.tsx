@@ -643,7 +643,8 @@ export function PositionalRatings({
             employee_role: employeeRole,
             rater_name: raterName,
             position_cleaned: cleanPositionName(rating.position),
-            formatted_date: formatDate(rating.created_at)
+            formatted_date: formatDate(rating.created_at), // Keep for display
+            created_at: rating.created_at // Keep raw date for sorting
           };
         });
       
@@ -787,9 +788,9 @@ export function PositionalRatings({
   // Custom toolbar
   function CustomToolbar() {
     return (
-      <GridToolbarContainer sx={{ p: 2, gap: 2, display: 'flex', flexWrap: 'nowrap', justifyContent: 'space-between', alignItems: 'center' }}>
+      <GridToolbarContainer sx={{ p: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}>
         {/* Left side - FOH/BOH and Date filters */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1, flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <AreaPill
               selected={showFOH}
@@ -1110,6 +1111,7 @@ export function PositionalRatings({
           display: 'flex', 
           gap: 1, 
           alignItems: 'center',
+          marginLeft: 'auto',
         }}>
           <GridToolbarFilterButton 
             slotProps={{
@@ -1143,9 +1145,14 @@ export function PositionalRatings({
       sortable: true,
       filterable: false, // Date column not filterable
       resizable: false, // Disable column resize to hide separators
+      valueGetter: (value, row) => row.created_at, // Use created_at for sorting
+      sortComparator: (v1, v2) => {
+        // Sort by actual date values
+        return new Date(v1).getTime() - new Date(v2).getTime();
+      },
       renderCell: (params) => (
         <Box sx={{ fontFamily, fontSize: 11 }}>
-          {params.value}
+          {formatDate(params.row.created_at)}
         </Box>
       ),
     },

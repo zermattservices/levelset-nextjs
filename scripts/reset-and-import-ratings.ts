@@ -184,7 +184,7 @@ async function main() {
   
   if (errors.length > 0) {
     console.log('\nEmployees not found:');
-    const uniqueErrors = [...new Set(errors)];
+    const uniqueErrors = Array.from(new Set(errors));
     uniqueErrors.forEach(e => console.log(`  - ${e}`));
   }
   
