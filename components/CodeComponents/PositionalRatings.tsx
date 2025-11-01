@@ -1183,6 +1183,26 @@ export function PositionalRatings({
                 },
               },
               
+              // Remove padding from rating cells so colored backgrounds fill entire width
+              [`& .${gridClasses.cell}[data-field="rating_1"]`]: {
+                padding: 0,
+              },
+              [`& .${gridClasses.cell}[data-field="rating_2"]`]: {
+                padding: 0,
+              },
+              [`& .${gridClasses.cell}[data-field="rating_3"]`]: {
+                padding: 0,
+              },
+              [`& .${gridClasses.cell}[data-field="rating_4"]`]: {
+                padding: 0,
+              },
+              [`& .${gridClasses.cell}[data-field="rating_5"]`]: {
+                padding: 0,
+              },
+              [`& .${gridClasses.cell}[data-field="rating_avg"]`]: {
+                padding: 0,
+              },
+              
               // Rows - Use gridClasses
               [`& .${gridClasses.row}:hover`]: {
                 backgroundColor: '#f9fafb',
