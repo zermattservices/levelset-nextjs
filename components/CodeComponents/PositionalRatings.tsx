@@ -833,6 +833,37 @@ export function PositionalRatings({
                 textField: CustomDateTextField,
               }}
               slotProps={{
+                textField: {
+                  sx: {
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 11,
+                      color: '#6b7280 !important',
+                      '&.Mui-focused': {
+                        color: `${levelsetGreen} !important`,
+                      },
+                    },
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#e5e7eb !important',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#d1d5db !important',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: `${levelsetGreen} !important`,
+                        borderWidth: '2px !important',
+                      },
+                    },
+                    '& .MuiInputAdornment-root .MuiIconButton-root': {
+                      color: '#6b7280 !important',
+                      '&:hover': {
+                        color: `${levelsetGreen} !important`,
+                        backgroundColor: 'rgba(49, 102, 74, 0.04) !important',
+                      },
+                    },
+                  },
+                },
                 popper: {
                   sx: {
                     '& .MuiPaper-root': {
@@ -933,6 +964,37 @@ export function PositionalRatings({
                 textField: CustomDateTextField,
               }}
               slotProps={{
+                textField: {
+                  sx: {
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 11,
+                      color: '#6b7280 !important',
+                      '&.Mui-focused': {
+                        color: `${levelsetGreen} !important`,
+                      },
+                    },
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#e5e7eb !important',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#d1d5db !important',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: `${levelsetGreen} !important`,
+                        borderWidth: '2px !important',
+                      },
+                    },
+                    '& .MuiInputAdornment-root .MuiIconButton-root': {
+                      color: '#6b7280 !important',
+                      '&:hover': {
+                        color: `${levelsetGreen} !important`,
+                        backgroundColor: 'rgba(49, 102, 74, 0.04) !important',
+                      },
+                    },
+                  },
+                },
                 popper: {
                   sx: {
                     '& .MuiPaper-root': {
@@ -1839,26 +1901,37 @@ export function PositionalRatings({
                 },
               },
               
-              // Columns panel search
+              // Columns panel search - AGGRESSIVE overrides
               '& .MuiDataGrid-columnsManagementSearchInput': {
                 padding: '8px 16px',
                 '& .MuiInputBase-root': {
-                  fontFamily,
-                  fontSize: 12,
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '12px !important',
+                  '&.Mui-focused': {
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: `${levelsetGreen} !important`,
+                      borderWidth: '2px !important',
+                    },
+                  },
+                  '&:hover': {
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#d1d5db !important',
+                    },
+                  },
                 },
                 '& .MuiInputBase-input': {
-                  fontFamily,
-                  fontSize: 12,
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '12px !important',
                 },
                 '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#e5e7eb',
+                  borderColor: '#e5e7eb !important',
                 },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#d1d5db',
-                },
-                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: levelsetGreen,
-                  borderWidth: '2px',
+                '& .MuiInputLabel-root': {
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '12px !important',
+                  '&.Mui-focused': {
+                    color: `${levelsetGreen} !important`,
+                  },
                 },
               },
             }}

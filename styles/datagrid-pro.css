@@ -22,3 +22,27 @@
   opacity: 0 !important;
 }
 
+/* FILTER PANEL - Force Levelset green (#31664a) on all active/focus states */
+.MuiDataGrid-filterFormColumnInput .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+.MuiDataGrid-filterFormOperatorInput .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+.MuiDataGrid-filterFormValueInput .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+.MuiDataGrid-filterFormColumnInput .MuiInputLabel-root.Mui-focused,
+.MuiDataGrid-filterFormOperatorInput .MuiInputLabel-root.Mui-focused,
+.MuiDataGrid-filterFormValueInput .MuiInputLabel-root.Mui-focused {
+  color: #31664a !important;
+}
+
+/* COLUMNS PANEL - Force Levelset green on search input */
+.MuiDataGrid-columnsManagementSearchInput .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+.MuiDataGrid-columnsManagementSearchInput .MuiInputLabel-root.Mui-focused {
+  color: #31664a !important;
+}
+
