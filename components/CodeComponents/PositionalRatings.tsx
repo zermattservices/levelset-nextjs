@@ -787,9 +787,9 @@ export function PositionalRatings({
   // Custom toolbar
   function CustomToolbar() {
     return (
-      <GridToolbarContainer sx={{ p: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}>
+      <GridToolbarContainer sx={{ p: 2, gap: 2, display: 'flex', flexWrap: 'nowrap', justifyContent: 'space-between', alignItems: 'center' }}>
         {/* Left side - FOH/BOH and Date filters */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <AreaPill
               selected={showFOH}
@@ -1110,7 +1110,6 @@ export function PositionalRatings({
           display: 'flex', 
           gap: 1, 
           alignItems: 'center',
-          marginLeft: 'auto', // Push to the right
         }}>
           <GridToolbarFilterButton 
             slotProps={{
