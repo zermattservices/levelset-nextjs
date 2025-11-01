@@ -3,6 +3,7 @@ import type { AppProps } from "next/app";
 import Head from "next/head";
 import { LicenseInfo } from '@mui/x-license';
 import "../styles/globals.css";
+import "../styles/datagrid-pro.css";
 import "../components/CodeComponents/scoreboard.css";
 import "../components/CodeComponents/RosterTable.css";
 import "../lib/logout"; // Initialize global logout function

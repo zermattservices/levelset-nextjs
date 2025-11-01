@@ -1203,27 +1203,6 @@ export function PositionalRatings({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <style jsx global>{`
-        .MuiDataGridPro-columnSeparator,
-        .MuiDataGridPro-columnSeparator--resizable,
-        .MuiDataGridPro-columnSeparator--sideRight,
-        .MuiDataGridPro-columnSeparator--sideLeft {
-          display: none !important;
-          visibility: hidden !important;
-          width: 0px !important;
-          min-width: 0px !important;
-          max-width: 0px !important;
-          opacity: 0 !important;
-          pointer-events: none !important;
-        }
-        
-        .MuiDataGridPro-iconSeparator,
-        .MuiDataGridPro-iconSeparator svg {
-          display: none !important;
-          visibility: hidden !important;
-          opacity: 0 !important;
-        }
-      `}</style>
       <StyledContainer className={className} componentwidth={width} componentmaxwidth={maxWidth}>
         <Typography variant="h5" sx={{ fontFamily, fontWeight: 600, mb: 2, color: '#111827' }}>
           Positional Ratings
