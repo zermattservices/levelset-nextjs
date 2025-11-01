@@ -781,6 +781,7 @@ export function PositionalRatings({
               value={startDate}
               onChange={handleStartDateChange}
               format="M/d/yyyy"
+              enableAccessibleFieldDOMStructure={false}
               slots={{
                 textField: CustomDateTextField,
               }}
@@ -859,6 +860,7 @@ export function PositionalRatings({
               value={endDate}
               onChange={handleEndDateChange}
               format="M/d/yyyy"
+              enableAccessibleFieldDOMStructure={false}
               slots={{
                 textField: CustomDateTextField,
               }}
