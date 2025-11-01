@@ -1539,6 +1539,7 @@ export function PositionalRatings({
               },
             }}
             disableRowSelectionOnClick
+            disableColumnResize
             rowHeight={48}
             slots={{
               toolbar: CustomToolbar,
