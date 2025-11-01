@@ -17,7 +17,8 @@ import {
   Select,
   MenuItem as MuiMenuItem,
   FormControl,
-  Checkbox
+  Checkbox,
+  InputLabel
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -273,11 +274,24 @@ function SelectFilterInput(props: SelectFilterInputProps) {
 
   return (
     <FormControl fullWidth size="small" variant="outlined">
+      <InputLabel 
+        sx={{ 
+          fontFamily, 
+          fontSize: 11,
+          color: '#6b7280',
+          '&.Mui-focused': {
+            color: levelsetGreen,
+          },
+        }}
+      >
+        Filter value
+      </InputLabel>
       <Select
         value={item.value || ''}
         onChange={(event) => {
           applyValue({ ...item, value: event.target.value });
         }}
+        label="Filter value"
         displayEmpty
         variant="outlined"
         sx={{ 
@@ -302,7 +316,7 @@ function SelectFilterInput(props: SelectFilterInputProps) {
         }}
       >
         <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: '#9ca3af' }}>
-          Filter value
+          Select value
         </MuiMenuItem>
         {options?.map((option: any) => (
           <MuiMenuItem key={option} value={option} sx={{ fontFamily, fontSize: 12 }}>
@@ -322,11 +336,24 @@ function ColumnFilterInput(props: any) {
 
   return (
     <FormControl fullWidth size="small" variant="outlined">
+      <InputLabel 
+        sx={{ 
+          fontFamily, 
+          fontSize: 11,
+          color: '#6b7280',
+          '&.Mui-focused': {
+            color: levelsetGreen,
+          },
+        }}
+      >
+        Columns
+      </InputLabel>
       <Select
         value={item.field || ''}
         onChange={(event) => {
           applyValue({ ...item, field: event.target.value });
         }}
+        label="Columns"
         displayEmpty
         variant="outlined"
         sx={{ 
@@ -369,11 +396,24 @@ function OperatorFilterInput(props: any) {
 
   return (
     <FormControl fullWidth size="small" variant="outlined">
+      <InputLabel 
+        sx={{ 
+          fontFamily, 
+          fontSize: 11,
+          color: '#6b7280',
+          '&.Mui-focused': {
+            color: levelsetGreen,
+          },
+        }}
+      >
+        Operator
+      </InputLabel>
       <Select
         value={item.operator || ''}
         onChange={(event) => {
           applyValue({ ...item, operator: event.target.value });
         }}
+        label="Operator"
         displayEmpty
         variant="outlined"
         sx={{ 
@@ -436,6 +476,13 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
       '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: levelsetGreen,
         borderWidth: '2px',
+      },
+      // Calendar icon button - reduce size
+      '& .MuiIconButton-root': {
+        padding: '6px',
+        '& .MuiSvgIcon-root': {
+          fontSize: '1rem', // Smaller icon
+        },
       },
       ...props.sx,
     }}
@@ -799,9 +846,13 @@ export function PositionalRatings({
                       fontFamily,
                       fontSize: 11,
                       '&.Mui-selected': {
-                        backgroundColor: levelsetGreen,
+                        backgroundColor: `${levelsetGreen} !important`,
+                        color: '#fff !important',
                         '&:hover': {
-                          backgroundColor: levelsetGreen,
+                          backgroundColor: `${levelsetGreen} !important`,
+                        },
+                        '&:focus': {
+                          backgroundColor: `${levelsetGreen} !important`,
                         },
                       },
                       '&:hover': {
@@ -825,19 +876,25 @@ export function PositionalRatings({
                       color: levelsetGreen,
                     },
                     '& .MuiIconButton-root': {
-                      color: levelsetGreen,
+                      color: `${levelsetGreen} !important`,
                       '&:hover': {
                         backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                      },
+                      '&:focus': {
+                        backgroundColor: 'rgba(49, 102, 74, 0.12)',
                       },
                     },
                     '& .MuiPickersYear-yearButton': {
                       fontFamily,
                       fontSize: 12,
                       '&.Mui-selected': {
-                        backgroundColor: levelsetGreen,
-                        color: '#fff',
+                        backgroundColor: `${levelsetGreen} !important`,
+                        color: '#fff !important',
                         '&:hover': {
-                          backgroundColor: levelsetGreen,
+                          backgroundColor: `${levelsetGreen} !important`,
+                        },
+                        '&:focus': {
+                          backgroundColor: `${levelsetGreen} !important`,
                         },
                       },
                       '&:hover': {
@@ -849,6 +906,17 @@ export function PositionalRatings({
                       fontSize: 12,
                       color: levelsetGreen,
                       textTransform: 'none',
+                    },
+                    // Override ALL potential blue colors
+                    '& .MuiButton-root': {
+                      color: `${levelsetGreen} !important`,
+                      fontFamily,
+                    },
+                    '& .MuiPickersArrowSwitcher-button': {
+                      color: `${levelsetGreen} !important`,
+                    },
+                    '& .MuiPickersCalendarHeader-switchViewButton': {
+                      color: `${levelsetGreen} !important`,
                     },
                   },
                 },
@@ -878,9 +946,13 @@ export function PositionalRatings({
                       fontFamily,
                       fontSize: 11,
                       '&.Mui-selected': {
-                        backgroundColor: levelsetGreen,
+                        backgroundColor: `${levelsetGreen} !important`,
+                        color: '#fff !important',
                         '&:hover': {
-                          backgroundColor: levelsetGreen,
+                          backgroundColor: `${levelsetGreen} !important`,
+                        },
+                        '&:focus': {
+                          backgroundColor: `${levelsetGreen} !important`,
                         },
                       },
                       '&:hover': {
@@ -904,19 +976,25 @@ export function PositionalRatings({
                       color: levelsetGreen,
                     },
                     '& .MuiIconButton-root': {
-                      color: levelsetGreen,
+                      color: `${levelsetGreen} !important`,
                       '&:hover': {
                         backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                      },
+                      '&:focus': {
+                        backgroundColor: 'rgba(49, 102, 74, 0.12)',
                       },
                     },
                     '& .MuiPickersYear-yearButton': {
                       fontFamily,
                       fontSize: 12,
                       '&.Mui-selected': {
-                        backgroundColor: levelsetGreen,
-                        color: '#fff',
+                        backgroundColor: `${levelsetGreen} !important`,
+                        color: '#fff !important',
                         '&:hover': {
-                          backgroundColor: levelsetGreen,
+                          backgroundColor: `${levelsetGreen} !important`,
+                        },
+                        '&:focus': {
+                          backgroundColor: `${levelsetGreen} !important`,
                         },
                       },
                       '&:hover': {
@@ -928,6 +1006,17 @@ export function PositionalRatings({
                       fontSize: 12,
                       color: levelsetGreen,
                       textTransform: 'none',
+                    },
+                    // Override ALL potential blue colors
+                    '& .MuiButton-root': {
+                      color: `${levelsetGreen} !important`,
+                      fontFamily,
+                    },
+                    '& .MuiPickersArrowSwitcher-button': {
+                      color: `${levelsetGreen} !important`,
+                    },
+                    '& .MuiPickersCalendarHeader-switchViewButton': {
+                      color: `${levelsetGreen} !important`,
                     },
                   },
                 },
@@ -1503,110 +1592,110 @@ export function PositionalRatings({
                 fontFamily,
               },
               
-              // Column selector dropdown - Use gridClasses
+              // Column selector dropdown - Use gridClasses with !important
               [`& .${gridClasses.filterFormColumnInput}`]: {
                 minWidth: 150,
                 '& .MuiInputLabel-root': {
-                  fontFamily,
-                  fontSize: 11,
-                  color: '#6b7280',
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '11px !important',
+                  color: '#6b7280 !important',
                   '&.Mui-focused': {
-                    color: levelsetGreen,
+                    color: `${levelsetGreen} !important`,
                   },
                 },
                 '& .MuiInputBase-root': {
-                  fontFamily,
-                  fontSize: 12,
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '12px !important',
                 },
                 '& .MuiOutlinedInput-root': {
                   '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#e5e7eb',
+                    borderColor: '#e5e7eb !important',
                   },
                   '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#d1d5db',
+                    borderColor: '#d1d5db !important',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: levelsetGreen,
-                    borderWidth: 2,
+                    borderColor: `${levelsetGreen} !important`,
+                    borderWidth: '2px !important',
                   },
                 },
                 '& .MuiSelect-select': {
-                  fontFamily,
-                  fontSize: 12,
-                  padding: '8.5px 14px',
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '12px !important',
+                  padding: '8.5px 14px !important',
                 },
               },
               
-              // Operator selector dropdown - Use gridClasses
+              // Operator selector dropdown - Use gridClasses with !important
               [`& .${gridClasses.filterFormOperatorInput}`]: {
                 minWidth: 120,
                 '& .MuiInputLabel-root': {
-                  fontFamily,
-                  fontSize: 11,
-                  color: '#6b7280',
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '11px !important',
+                  color: '#6b7280 !important',
                   '&.Mui-focused': {
-                    color: levelsetGreen,
+                    color: `${levelsetGreen} !important`,
                   },
                 },
                 '& .MuiInputBase-root': {
-                  fontFamily,
-                  fontSize: 12,
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '12px !important',
                 },
                 '& .MuiOutlinedInput-root': {
                   '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#e5e7eb',
+                    borderColor: '#e5e7eb !important',
                   },
                   '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#d1d5db',
+                    borderColor: '#d1d5db !important',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: levelsetGreen,
-                    borderWidth: 2,
+                    borderColor: `${levelsetGreen} !important`,
+                    borderWidth: '2px !important',
                   },
                 },
                 '& .MuiSelect-select': {
-                  fontFamily,
-                  fontSize: 12,
-                  padding: '8.5px 14px',
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '12px !important',
+                  padding: '8.5px 14px !important',
                 },
               },
               
-              // Value input/dropdown - Use gridClasses
+              // Value input/dropdown - Use gridClasses with !important
               [`& .${gridClasses.filterFormValueInput}`]: {
                 minWidth: 150,
                 '& .MuiInputLabel-root': {
-                  fontFamily,
-                  fontSize: 11,
-                  color: '#6b7280',
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '11px !important',
+                  color: '#6b7280 !important',
                   '&.Mui-focused': {
-                    color: levelsetGreen,
+                    color: `${levelsetGreen} !important`,
                   },
                 },
                 '& .MuiInputBase-root': {
-                  fontFamily,
-                  fontSize: 12,
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '12px !important',
                 },
                 '& .MuiOutlinedInput-root': {
                   '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#e5e7eb',
+                    borderColor: '#e5e7eb !important',
                   },
                   '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#d1d5db',
+                    borderColor: '#d1d5db !important',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: levelsetGreen,
-                    borderWidth: 2,
+                    borderColor: `${levelsetGreen} !important`,
+                    borderWidth: '2px !important',
                   },
                 },
                 '& .MuiSelect-select': {
-                  fontFamily,
-                  fontSize: 12,
-                  padding: '8.5px 14px',
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '12px !important',
+                  padding: '8.5px 14px !important',
                 },
                 '& .MuiInputBase-input': {
-                  fontFamily,
-                  fontSize: 12,
-                  padding: '8.5px 14px',
+                  fontFamily: `${fontFamily} !important`,
+                  fontSize: '12px !important',
+                  padding: '8.5px 14px !important',
                 },
               },
               
@@ -1698,21 +1787,61 @@ export function PositionalRatings({
                 padding: '8.5px 14px',
               },
               
-              // Columns panel styling
+              // Columns panel styling - ensure labels are visible
               '& .MuiDataGrid-columnsManagement': {
+                fontFamily,
                 '& .MuiFormControlLabel-root': {
+                  marginLeft: 0,
+                  marginRight: 0,
                   '& .MuiTypography-root': {
                     fontFamily,
                     fontSize: 13,
+                    color: '#111827',
+                    marginLeft: '8px',
+                  },
+                  '& .MuiCheckbox-root': {
+                    color: '#6b7280',
+                    '&.Mui-checked': {
+                      color: `${levelsetGreen} !important`,
+                    },
                   },
                 },
                 '& .MuiDataGrid-columnsManagementRow': {
                   fontFamily,
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '4px 0',
+                },
+              },
+              
+              // Columns panel header
+              '& .MuiDataGrid-columnsManagementHeader': {
+                fontFamily,
+                fontSize: 13,
+                fontWeight: 600,
+                padding: '12px 16px',
+              },
+              
+              // Columns panel footer (Show/Hide All, Reset)
+              '& .MuiDataGrid-columnsManagementFooter': {
+                fontFamily,
+                padding: '12px 16px',
+                borderTop: '1px solid #e5e7eb',
+                '& .MuiFormControlLabel-root .MuiTypography-root': {
+                  fontFamily,
+                  fontSize: 13,
+                },
+                '& .MuiButton-root': {
+                  fontFamily,
+                  fontSize: 12,
+                  textTransform: 'none',
+                  color: levelsetGreen,
                 },
               },
               
               // Columns panel search
               '& .MuiDataGrid-columnsManagementSearchInput': {
+                padding: '8px 16px',
                 '& .MuiInputBase-root': {
                   fontFamily,
                   fontSize: 12,
