@@ -27,7 +27,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import {
   DataGridPro,
   GridToolbarContainer,
-  GridToolbarColumnsButton,
   GridToolbarFilterButton,
   GridToolbarQuickFilter,
   getGridNumericOperators,
@@ -293,11 +292,6 @@ function SelectFilterInput(props: SelectFilterInputProps) {
         label="Filter value"
         displayEmpty
         variant="outlined"
-        slotProps={{
-          input: {
-            notched: true,
-          } as any,
-        }}
         sx={{ 
           fontFamily: `${fontFamily} !important`,
           fontSize: '12px !important',
@@ -306,6 +300,16 @@ function SelectFilterInput(props: SelectFilterInputProps) {
             fontFamily: `${fontFamily} !important`,
             fontSize: '12px !important',
             padding: '8.5px 14px',
+          },
+        }}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              '& .MuiMenuItem-root': {
+                fontFamily: `${fontFamily} !important`,
+                fontSize: 12,
+              },
+            },
           },
         }}
       >
@@ -366,6 +370,16 @@ function ColumnFilterInput(props: any) {
             padding: '8.5px 14px',
           },
         }}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              '& .MuiMenuItem-root': {
+                fontFamily: `${fontFamily} !important`,
+                fontSize: 12,
+              },
+            },
+          },
+        }}
       >
         <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: '#9ca3af' }}>
           Select column
@@ -420,6 +434,16 @@ function OperatorFilterInput(props: any) {
             fontFamily: `${fontFamily} !important`,
             fontSize: '12px !important',
             padding: '8.5px 14px',
+          },
+        }}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              '& .MuiMenuItem-root': {
+                fontFamily: `${fontFamily} !important`,
+                fontSize: 12,
+              },
+            },
           },
         }}
       >
@@ -1079,13 +1103,6 @@ export function PositionalRatings({
           gap: 1, 
           alignItems: 'center',
         }}>
-          <GridToolbarColumnsButton 
-            slotProps={{
-              button: {
-                'aria-label': 'Show columns',
-              },
-            }}
-          />
           <GridToolbarFilterButton 
             slotProps={{
               button: {
