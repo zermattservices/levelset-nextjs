@@ -1258,6 +1258,30 @@ export function PositionalRatings({
             slots={{
               toolbar: CustomToolbar,
             }}
+            slotProps={{
+              filterPanel: {
+                sx: {
+                  '& .MuiDataGrid-filterForm': {
+                    gap: 2,
+                    p: 2,
+                  },
+                  '& .MuiDataGrid-filterFormColumnInput, & .MuiDataGrid-filterFormOperatorInput, & .MuiDataGrid-filterFormValueInput': {
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 11,
+                    },
+                    '& .MuiInputBase-root': {
+                      fontFamily,
+                      fontSize: 12,
+                    },
+                    '& .MuiSelect-select': {
+                      fontFamily,
+                      fontSize: 12,
+                    },
+                  },
+                },
+              },
+            }}
             showToolbar
             sx={{
               // Base grid styling
