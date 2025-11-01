@@ -169,314 +169,7 @@ const RoleChip = styled(Chip)<{ roletype: string }>(({ roletype }) => {
   };
 });
 
-const StyledDataGrid = styled(DataGridPro)(({ theme }) => ({
-  fontFamily,
-  border: '1px solid #e5e7eb',
-  borderRadius: 8,
-  '& .MuiDataGrid-columnHeaders': {
-    borderBottom: '1px solid #e5e7eb',
-  },
-  '& .MuiDataGrid-columnHeader': {
-    backgroundColor: '#f9fafb',
-    fontWeight: 600,
-    fontSize: 14,
-    color: '#111827',
-    fontFamily,
-    '&:focus': {
-      outline: 'none',
-    },
-    '&:focus-within': {
-      outline: 'none',
-    },
-  },
-  // Aggressively hide column separators
-  '& .MuiDataGrid-columnSeparator, & .MuiDataGrid-columnSeparator--resizable, & .MuiDataGrid-columnSeparator--sideRight, & .MuiDataGrid-columnSeparator--sideLeft': {
-    display: 'none !important',
-    visibility: 'hidden !important',
-    width: '0px !important',
-    minWidth: '0px !important',
-    maxWidth: '0px !important',
-    opacity: '0 !important',
-    pointerEvents: 'none !important',
-  },
-  '& .MuiDataGrid-iconSeparator': {
-    display: 'none !important',
-    visibility: 'hidden !important',
-    opacity: '0 !important',
-  },
-  '& .MuiDataGrid-cell': {
-    borderBottom: '1px solid #f3f4f6',
-    borderRight: 'none !important',
-    fontSize: 13,
-    color: '#111827',
-    fontFamily,
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 8px',
-    '&:focus': {
-      outline: 'none',
-    },
-    '&:focus-within': {
-      outline: 'none',
-    },
-  },
-  '& .MuiDataGrid-row': {
-    '&:hover': {
-      backgroundColor: '#f9fafb',
-    },
-  },
-  '& .MuiDataGrid-footerContainer': {
-    borderTop: '1px solid #e5e7eb',
-    fontFamily,
-  },
-  '& .MuiTablePagination-root': {
-    fontFamily,
-    color: '#6b7280',
-  },
-  '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-    fontFamily,
-    fontSize: 13,
-  },
-  '& .MuiSelect-select': {
-    fontFamily,
-    fontSize: 12,
-  },
-  '& .MuiCircularProgress-root': {
-    color: levelsetGreen,
-  },
-  '& .MuiLinearProgress-root': {
-    backgroundColor: '#e5e7eb',
-    '& .MuiLinearProgress-bar': {
-      backgroundColor: levelsetGreen,
-    },
-  },
-  // Filter panel styling
-  '& .MuiDataGrid-filterForm': {
-    fontFamily,
-    padding: '16px',
-    gap: '16px',
-  },
-  '& .MuiDataGrid-filterFormColumnInput': {
-    minWidth: '150px',
-    '& .MuiInputLabel-root': {
-      fontFamily,
-      fontSize: 11,
-      color: '#6b7280',
-      '&.Mui-focused': {
-        color: levelsetGreen,
-      },
-    },
-    '& .MuiInputBase-root': {
-      fontFamily,
-      fontSize: 12,
-    },
-    '& .MuiOutlinedInput-root': {
-      '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#e5e7eb',
-      },
-      '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d1d5db',
-      },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: levelsetGreen,
-        borderWidth: '2px',
-      },
-    },
-    '& .MuiSelect-select': {
-      fontFamily,
-      fontSize: 12,
-      padding: '8.5px 14px',
-    },
-  },
-  '& .MuiDataGrid-filterFormOperatorInput': {
-    minWidth: '120px',
-    '& .MuiInputLabel-root': {
-      fontFamily,
-      fontSize: 11,
-      color: '#6b7280',
-      '&.Mui-focused': {
-        color: levelsetGreen,
-      },
-    },
-    '& .MuiInputBase-root': {
-      fontFamily,
-      fontSize: 12,
-    },
-    '& .MuiOutlinedInput-root': {
-      '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#e5e7eb',
-      },
-      '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d1d5db',
-      },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: levelsetGreen,
-        borderWidth: '2px',
-      },
-    },
-    '& .MuiSelect-select': {
-      fontFamily,
-      fontSize: 12,
-      padding: '8.5px 14px',
-    },
-  },
-  '& .MuiDataGrid-filterFormValueInput': {
-    minWidth: '150px',
-    '& .MuiInputLabel-root': {
-      fontFamily,
-      fontSize: 11,
-      color: '#6b7280',
-      '&.Mui-focused': {
-        color: levelsetGreen,
-      },
-    },
-    '& .MuiInputBase-root': {
-      fontFamily,
-      fontSize: 12,
-    },
-    '& .MuiOutlinedInput-root': {
-      '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#e5e7eb',
-      },
-      '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d1d5db',
-      },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: levelsetGreen,
-        borderWidth: '2px',
-      },
-    },
-    '& .MuiSelect-select': {
-      fontFamily,
-      fontSize: 12,
-      padding: '8.5px 14px',
-    },
-    '& .MuiInputBase-input': {
-      fontFamily,
-      fontSize: 12,
-      padding: '8.5px 14px',
-    },
-  },
-  // Filter form delete icon
-  '& .MuiDataGrid-filterFormDeleteIcon': {
-    color: '#6b7280',
-    '&:hover': {
-      color: '#dc2626',
-    },
-  },
-  // Filter form logic operator
-  '& .MuiDataGrid-filterFormLogicOperatorInput': {
-    '& .MuiInputBase-root': {
-      fontFamily,
-      fontSize: 12,
-    },
-  },
-  // Menu items in dropdowns
-  '& .MuiMenuItem-root': {
-    fontFamily,
-    fontSize: 12,
-    '&.Mui-selected': {
-      backgroundColor: `${levelsetGreen}15`,
-      '&:hover': {
-        backgroundColor: `${levelsetGreen}25`,
-      },
-    },
-    '&:hover': {
-      backgroundColor: '#f9fafb',
-    },
-  },
-  // Input labels
-  '& .MuiInputLabel-root': {
-    fontFamily,
-    fontSize: 11,
-    '&.Mui-focused': {
-      color: levelsetGreen,
-    },
-  },
-  // Input base
-  '& .MuiInputBase-root': {
-    fontFamily,
-    fontSize: 12,
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: levelsetGreen,
-    },
-  },
-  // Outlined input
-  '& .MuiOutlinedInput-root': {
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#e5e7eb',
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#d1d5db',
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: levelsetGreen,
-      borderWidth: '2px',
-    },
-  },
-  // Columns panel styling
-  '& .MuiDataGrid-columnsPanel': {
-    '& .MuiFormControlLabel-label': {
-      fontFamily,
-      fontSize: 12,
-    },
-    '& .MuiCheckbox-root': {
-      color: '#d1d5db',
-      '&.Mui-checked': {
-        color: levelsetGreen,
-      },
-    },
-  },
-  // Panel header
-  '& .MuiDataGrid-panelHeader': {
-    fontFamily,
-    fontSize: 13,
-    fontWeight: 600,
-  },
-  // Panel content
-  '& .MuiDataGrid-panelContent': {
-    fontFamily,
-  },
-  // Panel footer
-  '& .MuiDataGrid-panelFooter': {
-    '& .MuiButton-root': {
-      fontFamily,
-      fontSize: 12,
-      textTransform: 'none',
-      '&:hover': {
-        backgroundColor: `${levelsetGreen}15`,
-      },
-    },
-  },
-  // Checkbox in general
-  '& .MuiCheckbox-root': {
-    color: '#d1d5db',
-    '&.Mui-checked': {
-      color: levelsetGreen,
-    },
-  },
-  // Switch
-  '& .MuiSwitch-root': {
-    '& .MuiSwitch-switchBase.Mui-checked': {
-      color: levelsetGreen,
-      '& + .MuiSwitch-track': {
-        backgroundColor: levelsetGreen,
-      },
-    },
-  },
-  // Buttons
-  '& .MuiButton-root': {
-    fontFamily,
-    fontSize: 12,
-    textTransform: 'none',
-    '&.MuiButton-text': {
-      color: levelsetGreen,
-      '&:hover': {
-        backgroundColor: `${levelsetGreen}15`,
-      },
-    },
-  },
-}));
+// Remove styled wrapper - use plain DataGridPro with sx prop only
 
 const StyledQuickFilter = styled(QuickFilter)({
   display: 'grid',
@@ -1545,7 +1238,7 @@ export function PositionalRatings({
         
         {/* Data Grid */}
         <Box sx={{ height: 650, width: '100%' }}>
-          <StyledDataGrid
+          <DataGridPro
             rows={rows}
             columns={columns}
             loading={loading}
@@ -1567,49 +1260,68 @@ export function PositionalRatings({
             }}
             showToolbar
             sx={{
-              // NUCLEAR OPTION: Hide separators with absolute maximum specificity
-              '.MuiDataGrid-root .MuiDataGrid-columnSeparator': {
-                display: 'none !important',
-                visibility: 'hidden !important',
-                width: '0px !important',
-                minWidth: '0px !important',
-                maxWidth: '0px !important',
-                opacity: '0 !important',
-                pointerEvents: 'none !important',
+              // Base grid styling
+              fontFamily,
+              border: '1px solid #e5e7eb',
+              borderRadius: 2,
+              
+              // Column headers
+              '& .MuiDataGrid-columnHeaders': {
+                borderBottom: '1px solid #e5e7eb',
               },
-              '.MuiDataGrid-root .MuiDataGrid-columnSeparator--resizable': {
-                display: 'none !important',
-                visibility: 'hidden !important',
-                width: '0px !important',
+              '& .MuiDataGrid-columnHeader': {
+                backgroundColor: '#f9fafb',
+                fontWeight: 600,
+                fontSize: 14,
+                color: '#111827',
+                fontFamily,
+                '&:focus, &:focus-within': {
+                  outline: 'none',
+                },
               },
-              '.MuiDataGrid-root .MuiDataGrid-columnSeparator--sideRight': {
-                display: 'none !important',
-                width: '0px !important',
+              
+              // COLUMN SEPARATORS - Hide completely
+              '& .MuiDataGrid-columnSeparator': {
+                display: 'none',
               },
-              '.MuiDataGrid-root .MuiDataGrid-columnSeparator--sideLeft': {
-                display: 'none !important',
-                width: '0px !important',
+              
+              // Cells
+              '& .MuiDataGrid-cell': {
+                borderBottom: '1px solid #f3f4f6',
+                borderRight: 'none',
+                fontSize: 13,
+                color: '#111827',
+                fontFamily,
+                '&:focus, &:focus-within': {
+                  outline: 'none',
+                },
               },
-              '.MuiDataGrid-root .MuiDataGrid-iconSeparator': {
-                display: 'none !important',
-                visibility: 'hidden !important',
-                opacity: '0 !important',
+              
+              // Rows
+              '& .MuiDataGrid-row:hover': {
+                backgroundColor: '#f9fafb',
               },
-              '.MuiDataGrid-columnSeparator': {
-                display: 'none !important',
+              
+              // Footer
+              '& .MuiDataGrid-footerContainer': {
+                borderTop: '1px solid #e5e7eb',
+                fontFamily,
               },
-              '.MuiDataGrid-columnSeparator--resizable': {
-                display: 'none !important',
+              '& .MuiTablePagination-root': {
+                fontFamily,
+                color: '#6b7280',
               },
-              '.MuiDataGrid-iconSeparator': {
-                display: 'none !important',
+              '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                fontFamily,
+                fontSize: 13,
               },
-              // Target by style attribute
-              'div[class*="columnSeparator"]': {
-                display: 'none !important',
+              
+              // Loading
+              '& .MuiCircularProgress-root': {
+                color: levelsetGreen,
               },
-              'svg[class*="iconSeparator"]': {
-                display: 'none !important',
+              '& .MuiLinearProgress-bar': {
+                backgroundColor: levelsetGreen,
               },
             }}
           />
