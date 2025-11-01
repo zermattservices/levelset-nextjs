@@ -171,23 +171,17 @@ div[class*="DatePicker"] .MuiInputLabel-root.Mui-focused {
 }
 
 /* TOOLBAR BUTTONS - Hide text, keep icons only */
-.MuiDataGrid-toolbarContainer .MuiButton-root {
-  min-width: auto !important;
-  padding: 8px !important;
-}
-
-.MuiDataGrid-toolbarContainer .MuiButton-root .MuiButton-startIcon {
-  margin: 0 !important;
-}
-
-/* Hide ALL text in toolbar buttons (except QuickFilter search) */
+/* Only target filter/columns buttons, NOT date pill buttons */
 .MuiDataGrid-toolbarContainer button[aria-label="Show columns"],
 .MuiDataGrid-toolbarContainer button[aria-label="Show filters"] {
+  min-width: auto !important;
+  padding: 8px !important;
   font-size: 0 !important;
 }
 
 .MuiDataGrid-toolbarContainer button[aria-label="Show columns"] .MuiButton-startIcon,
 .MuiDataGrid-toolbarContainer button[aria-label="Show filters"] .MuiButton-startIcon {
+  margin: 0 !important;
   font-size: 1.5rem !important;
 }
 
