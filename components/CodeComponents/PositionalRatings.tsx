@@ -1138,11 +1138,11 @@ export function PositionalRatings({
               border: '1px solid #e5e7eb',
               borderRadius: 2,
               
-              // Column headers
-              '& .MuiDataGrid-columnHeaders': {
+              // Column headers - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-columnHeaders, & .MuiDataGrid-columnHeaders': {
                 borderBottom: '1px solid #e5e7eb',
               },
-              '& .MuiDataGrid-columnHeader': {
+              '& .MuiDataGridPro-columnHeader, & .MuiDataGrid-columnHeader': {
                 backgroundColor: '#f9fafb',
                 fontWeight: 600,
                 fontSize: 14,
@@ -1153,13 +1153,13 @@ export function PositionalRatings({
                 },
               },
               
-              // COLUMN SEPARATORS - Use Pro class names
-              '& .MuiDataGrid-columnSeparator': {
+              // COLUMN SEPARATORS - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-columnSeparator, & .MuiDataGrid-columnSeparator': {
                 display: 'none',
               },
               
-              // Cells
-              '& .MuiDataGrid-cell': {
+              // Cells - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-cell, & .MuiDataGrid-cell': {
                 borderBottom: '1px solid #f3f4f6',
                 borderRight: 'none',
                 fontSize: 13,
@@ -1170,13 +1170,13 @@ export function PositionalRatings({
                 },
               },
               
-              // Rows
-              '& .MuiDataGrid-row:hover': {
+              // Rows - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-row:hover, & .MuiDataGrid-row:hover': {
                 backgroundColor: '#f9fafb',
               },
               
-              // Footer
-              '& .MuiDataGrid-footerContainer': {
+              // Footer - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-footerContainer, & .MuiDataGrid-footerContainer': {
                 borderTop: '1px solid #e5e7eb',
                 fontFamily,
               },
@@ -1197,15 +1197,15 @@ export function PositionalRatings({
                 backgroundColor: levelsetGreen,
               },
               
-              // FILTER PANEL - Use Pro class names
-              '& .MuiDataGrid-filterForm': {
+              // FILTER PANEL - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-filterForm, & .MuiDataGrid-filterForm': {
                 gap: 2,
                 p: 2,
                 fontFamily,
               },
               
-              // Column selector dropdown
-              '& .MuiDataGrid-filterFormColumnInput': {
+              // Column selector dropdown - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-filterFormColumnInput, & .MuiDataGrid-filterFormColumnInput': {
                 minWidth: 150,
                 '& .MuiInputLabel-root': {
                   fontFamily,
@@ -1238,8 +1238,8 @@ export function PositionalRatings({
                 },
               },
               
-              // Operator selector dropdown
-              '& .MuiDataGrid-filterFormOperatorInput': {
+              // Operator selector dropdown - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-filterFormOperatorInput, & .MuiDataGrid-filterFormOperatorInput': {
                 minWidth: 120,
                 '& .MuiInputLabel-root': {
                   fontFamily,
@@ -1272,8 +1272,8 @@ export function PositionalRatings({
                 },
               },
               
-              // Value input/dropdown
-              '& .MuiDataGrid-filterFormValueInput': {
+              // Value input/dropdown - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-filterFormValueInput, & .MuiDataGrid-filterFormValueInput': {
                 minWidth: 150,
                 '& .MuiInputLabel-root': {
                   fontFamily,
@@ -1311,8 +1311,8 @@ export function PositionalRatings({
                 },
               },
               
-              // Filter delete icon
-              '& .MuiDataGrid-filterFormDeleteIcon': {
+              // Filter delete icon - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-filterFormDeleteIcon, & .MuiDataGrid-filterFormDeleteIcon': {
                 color: '#6b7280',
                 '&:hover': {
                   color: '#dc2626',
@@ -1331,11 +1331,11 @@ export function PositionalRatings({
                 },
               },
               
-              // Panels - Use Pro class names
-              '& .MuiDataGrid-panel': {
+              // Panels - Target both Pro (docs) and standard (DOM) classes
+              '& .MuiDataGridPro-panel, & .MuiDataGrid-panel': {
                 fontFamily,
               },
-              '& .MuiDataGrid-panelHeader': {
+              '& .MuiDataGridPro-panelHeader, & .MuiDataGrid-panelHeader': {
                 fontFamily,
                 fontSize: 13,
                 fontWeight: 600,

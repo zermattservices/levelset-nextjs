@@ -1,7 +1,13 @@
 /* MUI X DataGridPro global overrides for Positional Ratings component */
-/* NOTE: DataGridPro uses MuiDataGrid-* class names, not MuiDataGridPro-* */
+/* Targeting both MuiDataGridPro-* (documentation) and MuiDataGrid-* (DOM) for maximum compatibility */
 
-/* COLUMN SEPARATORS - Hide completely */
+/* COLUMN SEPARATORS - Hide completely (DataGridPro documentation classes) */
+.MuiDataGridPro-columnSeparator,
+.MuiDataGridPro-columnSeparator--resizable,
+.MuiDataGridPro-columnSeparator--sideRight,
+.MuiDataGridPro-columnSeparator--sideLeft,
+.MuiDataGridPro-columnSeparator--resizing,
+/* Also target DOM classes (rendered HTML) */
 .MuiDataGrid-columnSeparator,
 .MuiDataGrid-columnSeparator--resizable,
 .MuiDataGrid-columnSeparator--sideRight,
@@ -14,6 +20,7 @@
   opacity: 0 !important;
 }
 
+.MuiDataGridPro-iconSeparator,
 .MuiDataGrid-iconSeparator {
   display: none !important;
   visibility: hidden !important;
