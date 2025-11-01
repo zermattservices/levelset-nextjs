@@ -807,6 +807,14 @@ export function PositionalRatings({
             </AreaPill>
           </Box>
           
+          {/* Grey divider */}
+          <Box sx={{ 
+            width: '1px', 
+            height: '24px', 
+            backgroundColor: 'rgba(0, 0, 0, 0.23)', // Match unfocused input border
+            mx: 1 
+          }} />
+          
           <DateRangeContainer>
             <PillButton
               selected={dateRange === 'mtd'}
