@@ -276,8 +276,8 @@ function SelectFilterInput(props: SelectFilterInputProps) {
         shrink
         sx={{ 
           fontFamily: `${fontFamily} !important`,
-          fontSize: '13px !important', // Match calendar labels
-          color: '#6b7280 !important',
+          fontSize: '16px !important',
+          color: 'rgba(0, 0, 0, 0.6) !important',
           '&.Mui-focused': {
             color: `${levelsetGreen} !important`,
           },
@@ -292,8 +292,12 @@ function SelectFilterInput(props: SelectFilterInputProps) {
         }}
         label="Filter value"
         displayEmpty
-        notched
         variant="outlined"
+        slotProps={{
+          input: {
+            notched: true,
+          } as any,
+        }}
         sx={{ 
           fontFamily: `${fontFamily} !important`,
           fontSize: '12px !important',
@@ -302,16 +306,6 @@ function SelectFilterInput(props: SelectFilterInputProps) {
             fontFamily: `${fontFamily} !important`,
             fontSize: '12px !important',
             padding: '8.5px 14px',
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#e5e7eb !important',
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#d1d5db !important',
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: `${levelsetGreen} !important`,
-            borderWidth: '2px !important',
           },
         }}
       >
@@ -340,8 +334,8 @@ function ColumnFilterInput(props: any) {
         shrink
         sx={{ 
           fontFamily: `${fontFamily} !important`,
-          fontSize: '13px !important', // Match calendar labels
-          color: '#6b7280 !important',
+          fontSize: '16px !important',
+          color: 'rgba(0, 0, 0, 0.6) !important',
           '&.Mui-focused': {
             color: `${levelsetGreen} !important`,
           },
@@ -356,8 +350,12 @@ function ColumnFilterInput(props: any) {
         }}
         label="Columns"
         displayEmpty
-        notched
         variant="outlined"
+        slotProps={{
+          input: {
+            notched: true,
+          } as any,
+        }}
         sx={{ 
           fontFamily: `${fontFamily} !important`,
           fontSize: '12px !important',
@@ -366,16 +364,6 @@ function ColumnFilterInput(props: any) {
             fontFamily: `${fontFamily} !important`,
             fontSize: '12px !important',
             padding: '8.5px 14px',
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#e5e7eb !important',
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#d1d5db !important',
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: `${levelsetGreen} !important`,
-            borderWidth: '2px !important',
           },
         }}
       >
@@ -402,8 +390,8 @@ function OperatorFilterInput(props: any) {
         shrink
         sx={{ 
           fontFamily: `${fontFamily} !important`,
-          fontSize: '13px !important', // Match calendar labels
-          color: '#6b7280 !important',
+          fontSize: '16px !important',
+          color: 'rgba(0, 0, 0, 0.6) !important',
           '&.Mui-focused': {
             color: `${levelsetGreen} !important`,
           },
@@ -418,8 +406,12 @@ function OperatorFilterInput(props: any) {
         }}
         label="Operator"
         displayEmpty
-        notched
         variant="outlined"
+        slotProps={{
+          input: {
+            notched: true,
+          } as any,
+        }}
         sx={{ 
           fontFamily: `${fontFamily} !important`,
           fontSize: '12px !important',
@@ -428,16 +420,6 @@ function OperatorFilterInput(props: any) {
             fontFamily: `${fontFamily} !important`,
             fontSize: '12px !important',
             padding: '8.5px 14px',
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#e5e7eb !important',
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#d1d5db !important',
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: `${levelsetGreen} !important`,
-            borderWidth: '2px !important',
           },
         }}
       >
@@ -841,8 +823,8 @@ export function PositionalRatings({
                   sx: {
                     '& .MuiInputLabel-root': {
                       fontFamily: `${fontFamily} !important`,
-                      fontSize: '13px !important', // Increased by 2px from 11px
-                      color: '#6b7280 !important',
+                      fontSize: '16px !important',
+                      color: 'rgba(0, 0, 0, 0.6) !important',
                       '&.Mui-focused': {
                         color: `${levelsetGreen} !important`,
                       },
@@ -972,8 +954,8 @@ export function PositionalRatings({
                   sx: {
                     '& .MuiInputLabel-root': {
                       fontFamily: `${fontFamily} !important`,
-                      fontSize: '13px !important', // Increased by 2px from 11px
-                      color: '#6b7280 !important',
+                      fontSize: '16px !important',
+                      color: 'rgba(0, 0, 0, 0.6) !important',
                       '&.Mui-focused': {
                         color: `${levelsetGreen} !important`,
                       },
@@ -1096,29 +1078,21 @@ export function PositionalRatings({
           display: 'flex', 
           gap: 1, 
           alignItems: 'center',
-          // Hide button text, keep icons and badge indicator
-          '& .MuiButton-root': {
-            minWidth: 'auto !important',
-            padding: '8px !important',
-            color: `${levelsetGreen} !important`,
-            // Hide all text content but keep icon and badge
-            '& .MuiButton-startIcon': {
-              margin: '0 !important',
-            },
-            '& > span:not(.MuiButton-startIcon):not(.MuiBadge-root)': {
-              display: 'none !important',
-            },
-          },
-          // Style the filter indicator dot - keep it visible
-          '& .MuiBadge-badge': {
-            backgroundColor: `${levelsetGreen} !important`,
-            color: '#fff !important',
-            fontFamily: `${fontFamily} !important`,
-            fontSize: '10px !important',
-          },
         }}>
-          <GridToolbarColumnsButton />
-          <GridToolbarFilterButton />
+          <GridToolbarColumnsButton 
+            slotProps={{
+              button: {
+                'aria-label': 'Show columns',
+              },
+            }}
+          />
+          <GridToolbarFilterButton 
+            slotProps={{
+              button: {
+                'aria-label': 'Show filters',
+              },
+            }}
+          />
           <GridToolbarQuickFilter />
         </Box>
       </GridToolbarContainer>

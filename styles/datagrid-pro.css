@@ -22,7 +22,15 @@
   opacity: 0 !important;
 }
 
-/* FILTER PANEL - Force Levelset green (#31664a) on all active/focus states */
+/* FILTER PANEL - Force Levelset green on focus & correct border colors */
+/* Default border color - match Filter value field (darker grey) */
+.MuiDataGrid-filterFormColumnInput .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline,
+.MuiDataGrid-filterFormOperatorInput .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline,
+.MuiDataGrid-filterFormValueInput .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(0, 0, 0, 0.23) !important;
+}
+
+/* Focus state - Levelset green */
 .MuiDataGrid-filterFormColumnInput .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
 .MuiDataGrid-filterFormOperatorInput .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
 .MuiDataGrid-filterFormValueInput .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
@@ -72,7 +80,8 @@
 /* ALL InputLabels - Force Satoshi font and size */
 .MuiInputLabel-root {
   font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-  font-size: 13px !important;
+  font-size: 16px !important;
+  color: rgba(0, 0, 0, 0.6) !important;
 }
 
 /* ALL Select components - Force Satoshi font */
@@ -116,15 +125,16 @@ div[class*="DatePicker"] .MuiInputLabel-root.Mui-focused {
   padding: 8.5px 14px !important;
 }
 
-/* COLUMNS MENU - Force labels to be visible */
+/* COLUMNS MENU - Force labels to be visible with MAXIMUM specificity */
 .MuiDataGrid-columnsManagement .MuiFormControlLabel-root {
   margin-left: 0 !important;
   margin-right: 0 !important;
   width: 100% !important;
   display: flex !important;
+  flex-direction: row !important;
 }
 
-.MuiDataGrid-columnsManagement .MuiFormControlLabel-root .MuiTypography-root {
+.MuiDataGrid-columnsManagement .MuiFormControlLabel-root .MuiFormControlLabel-label {
   font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
   font-size: 13px !important;
   color: #111827 !important;
@@ -133,7 +143,23 @@ div[class*="DatePicker"] .MuiInputLabel-root.Mui-focused {
   visibility: visible !important;
   opacity: 1 !important;
   width: auto !important;
+  max-width: none !important;
   overflow: visible !important;
+  flex: 1 !important;
+  white-space: normal !important;
+}
+
+.MuiDataGrid-columnsManagement .MuiFormControlLabel-root .MuiTypography-root {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 13px !important;
+  color: #111827 !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
 }
 
 .MuiDataGrid-columnsManagementRow {
@@ -142,5 +168,39 @@ div[class*="DatePicker"] .MuiInputLabel-root.Mui-focused {
   align-items: center !important;
   padding: 4px 16px !important;
   width: 100% !important;
+}
+
+/* TOOLBAR BUTTONS - Hide text, keep icons only */
+.MuiDataGrid-toolbarContainer .MuiButton-root {
+  min-width: auto !important;
+  padding: 8px !important;
+}
+
+.MuiDataGrid-toolbarContainer .MuiButton-root .MuiButton-startIcon {
+  margin: 0 !important;
+}
+
+/* Hide ALL text in toolbar buttons (except QuickFilter search) */
+.MuiDataGrid-toolbarContainer button[aria-label="Show columns"],
+.MuiDataGrid-toolbarContainer button[aria-label="Show filters"] {
+  font-size: 0 !important;
+}
+
+.MuiDataGrid-toolbarContainer button[aria-label="Show columns"] .MuiButton-startIcon,
+.MuiDataGrid-toolbarContainer button[aria-label="Show filters"] .MuiButton-startIcon {
+  font-size: 1.5rem !important;
+}
+
+.MuiDataGrid-toolbarContainer button[aria-label="Show columns"] .MuiButton-startIcon svg,
+.MuiDataGrid-toolbarContainer button[aria-label="Show filters"] .MuiButton-startIcon svg {
+  font-size: 20px !important;
+}
+
+/* Filter indicator badge - Levelset green */
+.MuiDataGrid-toolbarContainer .MuiBadge-badge {
+  background-color: #31664a !important;
+  color: #fff !important;
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 10px !important;
 }
 
