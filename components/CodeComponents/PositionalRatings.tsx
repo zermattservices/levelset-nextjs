@@ -16,7 +16,8 @@ import {
   InputAdornment,
   Select,
   MenuItem as MuiMenuItem,
-  FormControl
+  FormControl,
+  Checkbox
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -165,6 +166,78 @@ const RoleChip = styled(Chip)<{ roletype: string }>(({ roletype }) => {
   };
 });
 
+// Custom base components for DataGrid slots - with Levelset styling
+// These need to be functional components, not styled components, for proper type compatibility
+const CustomBaseTextField = React.forwardRef((props: any, ref: any) => (
+  <TextField
+    {...props}
+    ref={ref}
+    sx={{
+      '& .MuiInputLabel-root': {
+        fontFamily,
+        fontSize: 11,
+        color: '#6b7280',
+        '&.Mui-focused': {
+          color: levelsetGreen,
+        },
+      },
+      '& .MuiInputBase-root': {
+        fontFamily,
+        fontSize: 12,
+      },
+      '& .MuiInputBase-input': {
+        fontFamily,
+        fontSize: 12,
+        padding: '8.5px 14px',
+      },
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#e5e7eb',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#d1d5db',
+      },
+      '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: levelsetGreen,
+        borderWidth: '2px',
+      },
+      ...props.sx,
+    }}
+  />
+));
+
+const CustomBaseButton = React.forwardRef((props: any, ref: any) => (
+  <Button
+    {...props}
+    ref={ref}
+    sx={{
+      fontFamily,
+      fontSize: 12,
+      textTransform: 'none',
+      color: levelsetGreen,
+      '&:hover': {
+        backgroundColor: 'rgba(49, 102, 74, 0.04)',
+      },
+      ...props.sx,
+    }}
+  />
+));
+
+const CustomBaseCheckbox = React.forwardRef((props: any, ref: any) => (
+  <Checkbox
+    {...props}
+    ref={ref}
+    sx={{
+      color: '#6b7280',
+      '&.Mui-checked': {
+        color: levelsetGreen,
+      },
+      '&:hover': {
+        backgroundColor: 'rgba(49, 102, 74, 0.04)',
+      },
+      ...props.sx,
+    }}
+  />
+));
 
 // Helper to format date
 const formatDate = (dateString: string): string => {
@@ -602,6 +675,7 @@ export function PositionalRatings({
                     },
                     '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                       borderColor: levelsetGreen,
+                      borderWidth: '2px',
                     },
                   },
                 },
@@ -623,6 +697,12 @@ export function PositionalRatings({
                           backgroundColor: levelsetGreen,
                         },
                       },
+                      '&:hover': {
+                        backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                      },
+                      '&:focus': {
+                        backgroundColor: 'rgba(49, 102, 74, 0.12)',
+                      },
                     },
                     '& .MuiPickersCalendarHeader-label': {
                       fontFamily,
@@ -634,6 +714,34 @@ export function PositionalRatings({
                     },
                     '& .MuiButtonBase-root': {
                       fontFamily,
+                      fontSize: 11,
+                      color: levelsetGreen,
+                    },
+                    '& .MuiIconButton-root': {
+                      color: levelsetGreen,
+                      '&:hover': {
+                        backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                      },
+                    },
+                    '& .MuiPickersYear-yearButton': {
+                      fontFamily,
+                      fontSize: 12,
+                      '&.Mui-selected': {
+                        backgroundColor: levelsetGreen,
+                        color: '#fff',
+                        '&:hover': {
+                          backgroundColor: levelsetGreen,
+                        },
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                      },
+                    },
+                    '& .MuiDialogActions-root .MuiButton-root': {
+                      fontFamily,
+                      fontSize: 12,
+                      color: levelsetGreen,
+                      textTransform: 'none',
                     },
                   },
                 },
@@ -667,6 +775,7 @@ export function PositionalRatings({
                     },
                     '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                       borderColor: levelsetGreen,
+                      borderWidth: '2px',
                     },
                   },
                 },
@@ -688,6 +797,12 @@ export function PositionalRatings({
                           backgroundColor: levelsetGreen,
                         },
                       },
+                      '&:hover': {
+                        backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                      },
+                      '&:focus': {
+                        backgroundColor: 'rgba(49, 102, 74, 0.12)',
+                      },
                     },
                     '& .MuiPickersCalendarHeader-label': {
                       fontFamily,
@@ -699,6 +814,34 @@ export function PositionalRatings({
                     },
                     '& .MuiButtonBase-root': {
                       fontFamily,
+                      fontSize: 11,
+                      color: levelsetGreen,
+                    },
+                    '& .MuiIconButton-root': {
+                      color: levelsetGreen,
+                      '&:hover': {
+                        backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                      },
+                    },
+                    '& .MuiPickersYear-yearButton': {
+                      fontFamily,
+                      fontSize: 12,
+                      '&.Mui-selected': {
+                        backgroundColor: levelsetGreen,
+                        color: '#fff',
+                        '&:hover': {
+                          backgroundColor: levelsetGreen,
+                        },
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                      },
+                    },
+                    '& .MuiDialogActions-root .MuiButton-root': {
+                      fontFamily,
+                      fontSize: 12,
+                      color: levelsetGreen,
+                      textTransform: 'none',
                     },
                   },
                 },
@@ -1143,6 +1286,9 @@ export function PositionalRatings({
             rowHeight={48}
             slots={{
               toolbar: CustomToolbar,
+              baseTextField: CustomBaseTextField,
+              baseButton: CustomBaseButton,
+              baseCheckbox: CustomBaseCheckbox,
             }}
             showToolbar
             sx={{
@@ -1381,6 +1527,55 @@ export function PositionalRatings({
                 fontSize: 12,
                 textTransform: 'none',
                 color: levelsetGreen,
+              },
+              
+              // Toolbar buttons styling
+              [`& .${gridClasses.toolbarContainer}`]: {
+                gap: 2,
+                p: 2,
+                fontFamily,
+                '& button': {
+                  fontFamily,
+                  fontSize: 12,
+                  textTransform: 'none',
+                  color: levelsetGreen,
+                },
+              },
+              
+              // Quick filter (search bar) styling
+              '& .MuiDataGrid-toolbarQuickFilter': {
+                '& .MuiInputBase-root': {
+                  fontFamily,
+                  fontSize: 12,
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e5e7eb',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#d1d5db',
+                },
+                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: levelsetGreen,
+                  borderWidth: '2px',
+                },
+                '& .MuiInputBase-input': {
+                  fontFamily,
+                  fontSize: 12,
+                },
+                '& .MuiSvgIcon-root': {
+                  color: '#6b7280',
+                },
+              },
+              
+              // Global Select styling for filter dropdowns
+              '& .MuiSelect-root': {
+                fontFamily,
+                fontSize: 12,
+              },
+              '& .MuiSelect-select': {
+                fontFamily,
+                fontSize: 12,
+                padding: '8.5px 14px',
               },
             }}
           />
