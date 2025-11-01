@@ -275,12 +275,13 @@ function SelectFilterInput(props: SelectFilterInputProps) {
   return (
     <FormControl fullWidth size="small" variant="outlined">
       <InputLabel 
+        shrink
         sx={{ 
-          fontFamily, 
-          fontSize: 11,
-          color: '#6b7280',
+          fontFamily: `${fontFamily} !important`,
+          fontSize: '13px !important', // Match calendar labels
+          color: '#6b7280 !important',
           '&.Mui-focused': {
-            color: levelsetGreen,
+            color: `${levelsetGreen} !important`,
           },
         }}
       >
@@ -293,25 +294,26 @@ function SelectFilterInput(props: SelectFilterInputProps) {
         }}
         label="Filter value"
         displayEmpty
+        notched
         variant="outlined"
         sx={{ 
-          fontFamily, 
-          fontSize: 12,
+          fontFamily: `${fontFamily} !important`,
+          fontSize: '12px !important',
           minWidth: '150px',
           '& .MuiSelect-select': {
-            fontFamily,
-            fontSize: 12,
+            fontFamily: `${fontFamily} !important`,
+            fontSize: '12px !important',
             padding: '8.5px 14px',
           },
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#e5e7eb',
+            borderColor: '#e5e7eb !important',
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#d1d5db',
+            borderColor: '#d1d5db !important',
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: levelsetGreen,
-            borderWidth: '2px',
+            borderColor: `${levelsetGreen} !important`,
+            borderWidth: '2px !important',
           },
         }}
       >
@@ -337,12 +339,13 @@ function ColumnFilterInput(props: any) {
   return (
     <FormControl fullWidth size="small" variant="outlined">
       <InputLabel 
+        shrink
         sx={{ 
-          fontFamily, 
-          fontSize: 11,
-          color: '#6b7280',
+          fontFamily: `${fontFamily} !important`,
+          fontSize: '13px !important', // Match calendar labels
+          color: '#6b7280 !important',
           '&.Mui-focused': {
-            color: levelsetGreen,
+            color: `${levelsetGreen} !important`,
           },
         }}
       >
@@ -355,25 +358,26 @@ function ColumnFilterInput(props: any) {
         }}
         label="Columns"
         displayEmpty
+        notched
         variant="outlined"
         sx={{ 
-          fontFamily, 
-          fontSize: 12,
+          fontFamily: `${fontFamily} !important`,
+          fontSize: '12px !important',
           minWidth: '150px',
           '& .MuiSelect-select': {
-            fontFamily,
-            fontSize: 12,
+            fontFamily: `${fontFamily} !important`,
+            fontSize: '12px !important',
             padding: '8.5px 14px',
           },
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#e5e7eb',
+            borderColor: '#e5e7eb !important',
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#d1d5db',
+            borderColor: '#d1d5db !important',
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: levelsetGreen,
-            borderWidth: '2px',
+            borderColor: `${levelsetGreen} !important`,
+            borderWidth: '2px !important',
           },
         }}
       >
@@ -397,12 +401,13 @@ function OperatorFilterInput(props: any) {
   return (
     <FormControl fullWidth size="small" variant="outlined">
       <InputLabel 
+        shrink
         sx={{ 
-          fontFamily, 
-          fontSize: 11,
-          color: '#6b7280',
+          fontFamily: `${fontFamily} !important`,
+          fontSize: '13px !important', // Match calendar labels
+          color: '#6b7280 !important',
           '&.Mui-focused': {
-            color: levelsetGreen,
+            color: `${levelsetGreen} !important`,
           },
         }}
       >
@@ -415,25 +420,26 @@ function OperatorFilterInput(props: any) {
         }}
         label="Operator"
         displayEmpty
+        notched
         variant="outlined"
         sx={{ 
-          fontFamily, 
-          fontSize: 12,
+          fontFamily: `${fontFamily} !important`,
+          fontSize: '12px !important',
           minWidth: '120px',
           '& .MuiSelect-select': {
-            fontFamily,
-            fontSize: 12,
+            fontFamily: `${fontFamily} !important`,
+            fontSize: '12px !important',
             padding: '8.5px 14px',
           },
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#e5e7eb',
+            borderColor: '#e5e7eb !important',
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#d1d5db',
+            borderColor: '#d1d5db !important',
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: levelsetGreen,
-            borderWidth: '2px',
+            borderColor: `${levelsetGreen} !important`,
+            borderWidth: '2px !important',
           },
         }}
       >
@@ -836,8 +842,8 @@ export function PositionalRatings({
                 textField: {
                   sx: {
                     '& .MuiInputLabel-root': {
-                      fontFamily,
-                      fontSize: 11,
+                      fontFamily: `${fontFamily} !important`,
+                      fontSize: '13px !important', // Increased by 2px from 11px
                       color: '#6b7280 !important',
                       '&.Mui-focused': {
                         color: `${levelsetGreen} !important`,
@@ -967,8 +973,8 @@ export function PositionalRatings({
                 textField: {
                   sx: {
                     '& .MuiInputLabel-root': {
-                      fontFamily,
-                      fontSize: 11,
+                      fontFamily: `${fontFamily} !important`,
+                      fontSize: '13px !important', // Increased by 2px from 11px
                       color: '#6b7280 !important',
                       '&.Mui-focused': {
                         color: `${levelsetGreen} !important`,
@@ -1088,7 +1094,28 @@ export function PositionalRatings({
         </Box>
 
         {/* Right side - Toolbar buttons */}
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 1, 
+          alignItems: 'center',
+          // Hide button text, only show icons
+          '& .MuiButton-root': {
+            minWidth: 'auto !important',
+            padding: '6px 8px !important',
+            '& .MuiButton-startIcon': {
+              margin: '0 !important',
+            },
+            // Hide the text content of buttons
+            fontSize: 0,
+            '& .MuiButton-startIcon + *': {
+              display: 'none',
+            },
+          },
+          // Hide filter count badge
+          '& .MuiBadge-badge': {
+            display: 'none !important',
+          },
+        }}>
           <GridToolbarColumnsButton />
           <GridToolbarFilterButton />
           <GridToolbarQuickFilter />
@@ -1849,30 +1876,37 @@ export function PositionalRatings({
                 padding: '8.5px 14px',
               },
               
-              // Columns panel styling - ensure labels are visible
+              // Columns panel styling - AGGRESSIVE label visibility
               '& .MuiDataGrid-columnsManagement': {
-                fontFamily,
+                fontFamily: `${fontFamily} !important`,
                 '& .MuiFormControlLabel-root': {
-                  marginLeft: 0,
-                  marginRight: 0,
+                  marginLeft: '0 !important',
+                  marginRight: '0 !important',
+                  width: '100%',
+                  display: 'flex !important',
+                  alignItems: 'center',
                   '& .MuiTypography-root': {
-                    fontFamily,
-                    fontSize: 13,
-                    color: '#111827',
-                    marginLeft: '8px',
+                    fontFamily: `${fontFamily} !important`,
+                    fontSize: '13px !important',
+                    color: '#111827 !important',
+                    marginLeft: '8px !important',
+                    display: 'block !important',
+                    visibility: 'visible !important',
+                    opacity: '1 !important',
                   },
                   '& .MuiCheckbox-root': {
-                    color: '#6b7280',
+                    color: '#6b7280 !important',
                     '&.Mui-checked': {
                       color: `${levelsetGreen} !important`,
                     },
                   },
                 },
                 '& .MuiDataGrid-columnsManagementRow': {
-                  fontFamily,
-                  display: 'flex',
+                  fontFamily: `${fontFamily} !important`,
+                  display: 'flex !important',
                   alignItems: 'center',
-                  padding: '4px 0',
+                  padding: '4px 16px !important',
+                  width: '100%',
                 },
               },
               
