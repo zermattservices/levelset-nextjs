@@ -1510,6 +1510,27 @@ export function PositionalRatings({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <style jsx global>{`
+        .MuiDataGrid-columnSeparator,
+        .MuiDataGrid-columnSeparator--resizable,
+        .MuiDataGrid-columnSeparator--sideRight,
+        .MuiDataGrid-columnSeparator--sideLeft {
+          display: none !important;
+          visibility: hidden !important;
+          width: 0px !important;
+          min-width: 0px !important;
+          max-width: 0px !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+        
+        .MuiDataGrid-iconSeparator,
+        .MuiDataGrid-iconSeparator svg {
+          display: none !important;
+          visibility: hidden !important;
+          opacity: 0 !important;
+        }
+      `}</style>
       <StyledContainer className={className} componentwidth={width} componentmaxwidth={maxWidth}>
         <Typography variant="h5" sx={{ fontFamily, fontWeight: 600, mb: 2, color: '#111827' }}>
           Positional Ratings
@@ -1546,8 +1567,8 @@ export function PositionalRatings({
             }}
             showToolbar
             sx={{
-              // CRITICAL: Hide all column separators with maximum specificity
-              '&&& .MuiDataGrid-columnSeparator': {
+              // NUCLEAR OPTION: Hide separators with absolute maximum specificity
+              '.MuiDataGrid-root .MuiDataGrid-columnSeparator': {
                 display: 'none !important',
                 visibility: 'hidden !important',
                 width: '0px !important',
@@ -1556,29 +1577,38 @@ export function PositionalRatings({
                 opacity: '0 !important',
                 pointerEvents: 'none !important',
               },
-              '&&& .MuiDataGrid-columnSeparator--resizable': {
+              '.MuiDataGrid-root .MuiDataGrid-columnSeparator--resizable': {
                 display: 'none !important',
                 visibility: 'hidden !important',
                 width: '0px !important',
               },
-              '&&& .MuiDataGrid-columnSeparator--sideRight': {
+              '.MuiDataGrid-root .MuiDataGrid-columnSeparator--sideRight': {
                 display: 'none !important',
                 width: '0px !important',
               },
-              '&&& .MuiDataGrid-columnSeparator--sideLeft': {
+              '.MuiDataGrid-root .MuiDataGrid-columnSeparator--sideLeft': {
                 display: 'none !important',
                 width: '0px !important',
               },
-              '&&& .MuiDataGrid-iconSeparator': {
+              '.MuiDataGrid-root .MuiDataGrid-iconSeparator': {
                 display: 'none !important',
                 visibility: 'hidden !important',
                 opacity: '0 !important',
               },
-              '&&& .MuiDataGrid-columnHeader .MuiDataGrid-columnSeparator': {
+              '.MuiDataGrid-columnSeparator': {
                 display: 'none !important',
               },
-              // Also hide any SVG icons in separators
-              '&&& .MuiDataGrid-columnSeparator svg': {
+              '.MuiDataGrid-columnSeparator--resizable': {
+                display: 'none !important',
+              },
+              '.MuiDataGrid-iconSeparator': {
+                display: 'none !important',
+              },
+              // Target by style attribute
+              'div[class*="columnSeparator"]': {
+                display: 'none !important',
+              },
+              'svg[class*="iconSeparator"]': {
                 display: 'none !important',
               },
             }}
