@@ -314,6 +314,134 @@ function SelectFilterInput(props: SelectFilterInputProps) {
   );
 }
 
+// Custom Column Filter Input - matches SelectFilterInput pattern
+function ColumnFilterInput(props: any) {
+  const { item, applyValue, apiRef } = props;
+  const columns = apiRef?.current?.getAllColumns?.() || [];
+  const filterableColumns = columns.filter((col: any) => col.filterable !== false);
+
+  return (
+    <FormControl fullWidth size="small" variant="outlined">
+      <Select
+        value={item.field || ''}
+        onChange={(event) => {
+          applyValue({ ...item, field: event.target.value });
+        }}
+        displayEmpty
+        variant="outlined"
+        sx={{ 
+          fontFamily, 
+          fontSize: 12,
+          minWidth: '150px',
+          '& .MuiSelect-select': {
+            fontFamily,
+            fontSize: 12,
+            padding: '8.5px 14px',
+          },
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#e5e7eb',
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#d1d5db',
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: levelsetGreen,
+            borderWidth: '2px',
+          },
+        }}
+      >
+        <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: '#9ca3af' }}>
+          Select column
+        </MuiMenuItem>
+        {filterableColumns.map((column: any) => (
+          <MuiMenuItem key={column.field} value={column.field} sx={{ fontFamily, fontSize: 12 }}>
+            {column.headerName || column.field}
+          </MuiMenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+}
+
+// Custom Operator Filter Input - matches SelectFilterInput pattern
+function OperatorFilterInput(props: any) {
+  const { item, applyValue, operators } = props;
+
+  return (
+    <FormControl fullWidth size="small" variant="outlined">
+      <Select
+        value={item.operator || ''}
+        onChange={(event) => {
+          applyValue({ ...item, operator: event.target.value });
+        }}
+        displayEmpty
+        variant="outlined"
+        sx={{ 
+          fontFamily, 
+          fontSize: 12,
+          minWidth: '120px',
+          '& .MuiSelect-select': {
+            fontFamily,
+            fontSize: 12,
+            padding: '8.5px 14px',
+          },
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#e5e7eb',
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#d1d5db',
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: levelsetGreen,
+            borderWidth: '2px',
+          },
+        }}
+      >
+        <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: '#9ca3af' }}>
+          Select operator
+        </MuiMenuItem>
+        {operators?.map((operator: any) => (
+          <MuiMenuItem key={operator.value} value={operator.value} sx={{ fontFamily, fontSize: 12 }}>
+            {operator.label}
+          </MuiMenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+}
+
+// Custom DatePicker TextField - with Satoshi font for date values
+const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
+  <TextField
+    {...props}
+    ref={ref}
+    size="small"
+    sx={{
+      width: 130,
+      '& .MuiInputBase-input': {
+        fontFamily,
+        fontSize: 11,
+        padding: '8px 10px',
+      },
+      '& .MuiInputLabel-root': {
+        fontFamily,
+        fontSize: 11,
+      },
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#e5e7eb',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#d1d5db',
+      },
+      '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: levelsetGreen,
+        borderWidth: '2px',
+      },
+      ...props.sx,
+    }}
+  />
+));
+
 export function PositionalRatings({
   orgId,
   locationId,
@@ -653,32 +781,10 @@ export function PositionalRatings({
               value={startDate}
               onChange={handleStartDateChange}
               format="M/d/yyyy"
+              slots={{
+                textField: CustomDateTextField,
+              }}
               slotProps={{
-                textField: {
-                  size: 'small',
-                  sx: {
-                    width: 130,
-                    '& .MuiInputBase-input': {
-                      fontFamily,
-                      fontSize: 11,
-                      padding: '8px 10px',
-                    },
-                    '& .MuiInputLabel-root': {
-                      fontFamily,
-                      fontSize: 11,
-                    },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#e5e7eb',
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#d1d5db',
-                    },
-                    '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: levelsetGreen,
-                      borderWidth: '2px',
-                    },
-                  },
-                },
                 popper: {
                   sx: {
                     '& .MuiPaper-root': {
@@ -753,32 +859,10 @@ export function PositionalRatings({
               value={endDate}
               onChange={handleEndDateChange}
               format="M/d/yyyy"
+              slots={{
+                textField: CustomDateTextField,
+              }}
               slotProps={{
-                textField: {
-                  size: 'small',
-                  sx: {
-                    width: 130,
-                    '& .MuiInputBase-input': {
-                      fontFamily,
-                      fontSize: 11,
-                      padding: '8px 10px',
-                    },
-                    '& .MuiInputLabel-root': {
-                      fontFamily,
-                      fontSize: 11,
-                    },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#e5e7eb',
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#d1d5db',
-                    },
-                    '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: levelsetGreen,
-                      borderWidth: '2px',
-                    },
-                  },
-                },
                 popper: {
                   sx: {
                     '& .MuiPaper-root': {
@@ -1290,6 +1374,40 @@ export function PositionalRatings({
               baseButton: CustomBaseButton,
               baseCheckbox: CustomBaseCheckbox,
             }}
+            slotProps={{
+              filterPanel: {
+                // Use our custom column input component
+                columnsSort: 'asc',
+                sx: {
+                  '& .MuiDataGrid-filterFormColumnInput': {
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 11,
+                    },
+                    '& .MuiInputBase-root': {
+                      fontFamily,
+                    },
+                    '& .MuiSelect-select': {
+                      fontFamily,
+                      fontSize: 12,
+                    },
+                  },
+                  '& .MuiDataGrid-filterFormOperatorInput': {
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 11,
+                    },
+                    '& .MuiInputBase-root': {
+                      fontFamily,
+                    },
+                    '& .MuiSelect-select': {
+                      fontFamily,
+                      fontSize: 12,
+                    },
+                  },
+                },
+              },
+            }}
             showToolbar
             sx={{
               // Base grid styling
@@ -1576,6 +1694,41 @@ export function PositionalRatings({
                 fontFamily,
                 fontSize: 12,
                 padding: '8.5px 14px',
+              },
+              
+              // Columns panel styling
+              '& .MuiDataGrid-columnsManagement': {
+                '& .MuiFormControlLabel-root': {
+                  '& .MuiTypography-root': {
+                    fontFamily,
+                    fontSize: 13,
+                  },
+                },
+                '& .MuiDataGrid-columnsManagementRow': {
+                  fontFamily,
+                },
+              },
+              
+              // Columns panel search
+              '& .MuiDataGrid-columnsManagementSearchInput': {
+                '& .MuiInputBase-root': {
+                  fontFamily,
+                  fontSize: 12,
+                },
+                '& .MuiInputBase-input': {
+                  fontFamily,
+                  fontSize: 12,
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e5e7eb',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#d1d5db',
+                },
+                '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: levelsetGreen,
+                  borderWidth: '2px',
+                },
               },
             }}
           />
