@@ -31,9 +31,7 @@ import {
   GridToolbarFilterButton,
   GridToolbarQuickFilter,
   getGridNumericOperators,
-  gridClasses,
-  useGridApiRef,
-  GridPreferencePanelsValue
+  gridClasses
 } from '@mui/x-data-grid-pro';
 import type {
   GridColDef,
@@ -43,8 +41,6 @@ import type {
   GridFilterItem
 } from '@mui/x-data-grid-pro';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ViewColumnIcon from '@mui/icons-material/ViewColumn';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import SearchIcon from '@mui/icons-material/Search';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { createSupabaseClient } from '@/util/supabase/component';
@@ -504,8 +500,6 @@ export function PositionalRatings({
   width,
   maxWidth,
 }: PositionalRatingsProps) {
-  const apiRef = useGridApiRef();
-  
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -1102,41 +1096,29 @@ export function PositionalRatings({
           display: 'flex', 
           gap: 1, 
           alignItems: 'center',
+          // Hide button text, keep icons and badge indicator
+          '& .MuiButton-root': {
+            minWidth: 'auto !important',
+            padding: '8px !important',
+            color: `${levelsetGreen} !important`,
+            // Hide all text content but keep icon and badge
+            '& .MuiButton-startIcon': {
+              margin: '0 !important',
+            },
+            '& > span:not(.MuiButton-startIcon):not(.MuiBadge-root)': {
+              display: 'none !important',
+            },
+          },
+          // Style the filter indicator dot - keep it visible
+          '& .MuiBadge-badge': {
+            backgroundColor: `${levelsetGreen} !important`,
+            color: '#fff !important',
+            fontFamily: `${fontFamily} !important`,
+            fontSize: '10px !important',
+          },
         }}>
-          <Tooltip title="Show columns">
-            <IconButton
-              size="small"
-              onClick={() => {
-                apiRef.current?.showPreferences?.(GridPreferencePanelsValue.columns);
-              }}
-              sx={{
-                color: levelsetGreen,
-                '&:hover': {
-                  backgroundColor: 'rgba(49, 102, 74, 0.04)',
-                },
-              }}
-            >
-              <ViewColumnIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          
-          <Tooltip title="Show filters">
-            <IconButton
-              size="small"
-              onClick={() => {
-                apiRef.current?.showFilterPanel?.();
-              }}
-              sx={{
-                color: levelsetGreen,
-                '&:hover': {
-                  backgroundColor: 'rgba(49, 102, 74, 0.04)',
-                },
-              }}
-            >
-              <FilterListIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          
+          <GridToolbarColumnsButton />
+          <GridToolbarFilterButton />
           <GridToolbarQuickFilter />
         </Box>
       </GridToolbarContainer>
@@ -1550,7 +1532,6 @@ export function PositionalRatings({
         {/* Data Grid */}
         <Box sx={{ height: 650, width: '100%' }}>
           <DataGridPro
-            apiRef={apiRef}
             rows={rows}
             columns={columns}
             loading={loading}
