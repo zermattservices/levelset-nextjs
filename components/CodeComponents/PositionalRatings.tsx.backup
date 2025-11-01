@@ -70,6 +70,9 @@ interface RatingRow extends Rating {
   formatted_date: string;
 }
 
+type OwnerState = {
+  expanded: boolean;
+};
 
 const StyledContainer = styled(Box)<{ componentwidth?: string | number; componentmaxwidth?: string | number }>(
   ({ componentwidth, componentmaxwidth }) => ({
@@ -164,6 +167,38 @@ const RoleChip = styled(Chip)<{ roletype: string }>(({ roletype }) => {
   };
 });
 
+// Remove styled wrapper - use plain DataGridPro with sx prop only
+
+const StyledQuickFilter = styled(QuickFilter)({
+  display: 'grid',
+  alignItems: 'center',
+});
+
+const StyledToolbarButton = styled(ToolbarButton)<{ ownerState: OwnerState }>(
+  ({ theme, ownerState }) => ({
+    gridArea: '1 / 1',
+    width: 'min-content',
+    height: 'min-content',
+    zIndex: 1,
+    opacity: ownerState.expanded ? 0 : 1,
+    pointerEvents: ownerState.expanded ? 'none' : 'auto',
+    transition: theme.transitions.create(['opacity']),
+    fontFamily,
+  }),
+);
+
+const StyledTextField = styled(TextField)<{ ownerState: OwnerState }>(
+  ({ theme, ownerState }) => ({
+    gridArea: '1 / 1',
+    overflowX: 'clip',
+    width: ownerState.expanded ? 260 : 'var(--trigger-width)',
+    opacity: ownerState.expanded ? 1 : 0,
+    transition: theme.transitions.create(['width', 'opacity']),
+    '& .MuiInputBase-root': {
+      fontFamily,
+    },
+  }),
+);
 
 // Helper to format date
 const formatDate = (dateString: string): string => {
@@ -528,9 +563,9 @@ export function PositionalRatings({
   // Custom toolbar
   function CustomToolbar() {
     return (
-      <GridToolbarContainer sx={{ p: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}>
+      <Toolbar>
         {/* Left side - FOH/BOH and Date filters */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1 }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <AreaPill
               selected={showFOH}
@@ -707,12 +742,82 @@ export function PositionalRatings({
         </Box>
 
         {/* Right side - Toolbar buttons */}
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <GridToolbarColumnsButton />
-          <GridToolbarFilterButton />
-          <GridToolbarQuickFilter />
+        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          <Tooltip title="Columns">
+            <ColumnsPanelTrigger render={<ToolbarButton />}>
+              <ViewColumnIcon fontSize="small" />
+            </ColumnsPanelTrigger>
+          </Tooltip>
+
+          <Tooltip title="Filters">
+            <FilterPanelTrigger
+              render={(props, state) => (
+                <ToolbarButton {...props} color="default">
+                  <Badge badgeContent={state.filterCount} color="primary" variant="dot" sx={{
+                    '& .MuiBadge-badge': {
+                      backgroundColor: levelsetGreen,
+                    }
+                  }}>
+                    <FilterListIcon fontSize="small" />
+                  </Badge>
+                </ToolbarButton>
+              )}
+            />
+          </Tooltip>
+
+          <StyledQuickFilter>
+            <QuickFilterTrigger
+              render={(triggerProps, state) => (
+                <Tooltip title="Search" enterDelay={0}>
+                  <StyledToolbarButton
+                    {...triggerProps}
+                    ownerState={{ expanded: state.expanded }}
+                    color="default"
+                    aria-disabled={state.expanded}
+                  >
+                    <SearchIcon fontSize="small" />
+                  </StyledToolbarButton>
+                </Tooltip>
+              )}
+            />
+            <QuickFilterControl
+              render={({ ref, ...controlProps }, state) => (
+                <StyledTextField
+                  {...controlProps}
+                  ownerState={{ expanded: state.expanded }}
+                  inputRef={ref}
+                  aria-label="Search"
+                  placeholder="Search..."
+                  size="small"
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                      endAdornment: state.value ? (
+                        <InputAdornment position="end">
+                          <QuickFilterClear
+                            edge="end"
+                            size="small"
+                            aria-label="Clear search"
+                            material={{ sx: { marginRight: -0.75 } }}
+                          >
+                            <CancelIcon fontSize="small" />
+                          </QuickFilterClear>
+                        </InputAdornment>
+                      ) : null,
+                      ...controlProps.slotProps?.input,
+                    },
+                    ...controlProps.slotProps,
+                  }}
+                />
+              )}
+            />
+          </StyledQuickFilter>
         </Box>
-      </GridToolbarContainer>
+      </Toolbar>
     );
   }
 
