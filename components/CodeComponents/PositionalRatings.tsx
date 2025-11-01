@@ -1204,10 +1204,10 @@ export function PositionalRatings({
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <style jsx global>{`
-        .MuiDataGrid-columnSeparator,
-        .MuiDataGrid-columnSeparator--resizable,
-        .MuiDataGrid-columnSeparator--sideRight,
-        .MuiDataGrid-columnSeparator--sideLeft {
+        .MuiDataGridPro-columnSeparator,
+        .MuiDataGridPro-columnSeparator--resizable,
+        .MuiDataGridPro-columnSeparator--sideRight,
+        .MuiDataGridPro-columnSeparator--sideLeft {
           display: none !important;
           visibility: hidden !important;
           width: 0px !important;
@@ -1217,8 +1217,8 @@ export function PositionalRatings({
           pointer-events: none !important;
         }
         
-        .MuiDataGrid-iconSeparator,
-        .MuiDataGrid-iconSeparator svg {
+        .MuiDataGridPro-iconSeparator,
+        .MuiDataGridPro-iconSeparator svg {
           display: none !important;
           visibility: hidden !important;
           opacity: 0 !important;
@@ -1254,6 +1254,7 @@ export function PositionalRatings({
             }}
             disableRowSelectionOnClick
             disableColumnResize
+            showColumnVerticalBorder={false}
             rowHeight={48}
             slots={{
               toolbar: CustomToolbar,
@@ -1266,10 +1267,10 @@ export function PositionalRatings({
               borderRadius: 2,
               
               // Column headers
-              '& .MuiDataGrid-columnHeaders': {
+              '& .MuiDataGridPro-columnHeaders': {
                 borderBottom: '1px solid #e5e7eb',
               },
-              '& .MuiDataGrid-columnHeader': {
+              '& .MuiDataGridPro-columnHeader': {
                 backgroundColor: '#f9fafb',
                 fontWeight: 600,
                 fontSize: 14,
@@ -1280,13 +1281,13 @@ export function PositionalRatings({
                 },
               },
               
-              // COLUMN SEPARATORS - Hide completely per documentation
-              '& .MuiDataGrid-columnSeparator': {
+              // COLUMN SEPARATORS - Use Pro class names
+              '& .MuiDataGridPro-columnSeparator': {
                 display: 'none',
               },
               
               // Cells
-              '& .MuiDataGrid-cell': {
+              '& .MuiDataGridPro-cell': {
                 borderBottom: '1px solid #f3f4f6',
                 borderRight: 'none',
                 fontSize: 13,
@@ -1298,12 +1299,12 @@ export function PositionalRatings({
               },
               
               // Rows
-              '& .MuiDataGrid-row:hover': {
+              '& .MuiDataGridPro-row:hover': {
                 backgroundColor: '#f9fafb',
               },
               
               // Footer
-              '& .MuiDataGrid-footerContainer': {
+              '& .MuiDataGridPro-footerContainer': {
                 borderTop: '1px solid #e5e7eb',
                 fontFamily,
               },
@@ -1324,15 +1325,15 @@ export function PositionalRatings({
                 backgroundColor: levelsetGreen,
               },
               
-              // FILTER PANEL - Complete styling per documentation
-              '& .MuiDataGrid-filterForm': {
+              // FILTER PANEL - Use Pro class names
+              '& .MuiDataGridPro-filterForm': {
                 gap: 2,
                 p: 2,
                 fontFamily,
               },
               
               // Column selector dropdown
-              '& .MuiDataGrid-filterFormColumnInput': {
+              '& .MuiDataGridPro-filterFormColumnInput': {
                 minWidth: 150,
                 '& .MuiInputLabel-root': {
                   fontFamily,
@@ -1366,7 +1367,7 @@ export function PositionalRatings({
               },
               
               // Operator selector dropdown
-              '& .MuiDataGrid-filterFormOperatorInput': {
+              '& .MuiDataGridPro-filterFormOperatorInput': {
                 minWidth: 120,
                 '& .MuiInputLabel-root': {
                   fontFamily,
@@ -1400,7 +1401,7 @@ export function PositionalRatings({
               },
               
               // Value input/dropdown
-              '& .MuiDataGrid-filterFormValueInput': {
+              '& .MuiDataGridPro-filterFormValueInput': {
                 minWidth: 150,
                 '& .MuiInputLabel-root': {
                   fontFamily,
@@ -1439,7 +1440,7 @@ export function PositionalRatings({
               },
               
               // Filter delete icon
-              '& .MuiDataGrid-filterFormDeleteIcon': {
+              '& .MuiDataGridPro-filterFormDeleteIcon': {
                 color: '#6b7280',
                 '&:hover': {
                   color: '#dc2626',
@@ -1458,11 +1459,11 @@ export function PositionalRatings({
                 },
               },
               
-              // Panels
-              '& .MuiDataGrid-panel': {
+              // Panels - Use Pro class names
+              '& .MuiDataGridPro-panel': {
                 fontFamily,
               },
-              '& .MuiDataGrid-panelHeader': {
+              '& .MuiDataGridPro-panelHeader': {
                 fontFamily,
                 fontSize: 13,
                 fontWeight: 600,
