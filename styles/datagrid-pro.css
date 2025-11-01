@@ -46,3 +46,44 @@
   color: #31664a !important;
 }
 
+/* GLOBAL TEXTFIELD OVERRIDES - Force Levelset green for ALL TextField focus states */
+
+/* All outlined TextField focus states */
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+/* All TextField label focus states */
+.MuiInputLabel-root.Mui-focused {
+  color: #31664a !important;
+}
+
+/* All FormControl focus states */
+.MuiFormControl-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+.MuiFormControl-root .MuiInputLabel-root.Mui-focused {
+  color: #31664a !important;
+}
+
+/* DatePicker specific overrides */
+.MuiPickersPopper-root ~ div .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+div[class*="DatePicker"] .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+.MuiPickersPopper-root ~ div .MuiInputLabel-root.Mui-focused,
+div[class*="DatePicker"] .MuiInputLabel-root.Mui-focused {
+  color: #31664a !important;
+}
+
+/* Select component focus states */
+.MuiSelect-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
