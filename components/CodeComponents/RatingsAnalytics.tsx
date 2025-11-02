@@ -197,7 +197,7 @@ export function RatingsAnalytics({
         trendCard={
           hasPriorData ? (
             <TrendCard
-              text3={`${Math.abs(calculatePercentChange(currentMetrics.count, priorMetrics.count)).toFixed(1)}%`}
+              text3={`${Math.abs(calculatePercentChange(currentMetrics.count, priorMetrics.count)).toFixed(1)}`}
               negative={calculatePercentChange(currentMetrics.count, priorMetrics.count) < 0 ? 'negative' : undefined}
             />
           ) : (
@@ -232,7 +232,7 @@ export function RatingsAnalytics({
         trendCard={
           hasPriorData ? (
             <TrendCard
-              text3={`${Math.abs(calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating)).toFixed(1)}%`}
+              text3={`${Math.abs(calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating)).toFixed(1)}`}
               negative={calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating) < 0 ? 'negative' : undefined}
             />
           ) : (
@@ -267,7 +267,7 @@ export function RatingsAnalytics({
         trendCard={
           hasPriorData ? (
             <TrendCard
-              text3={`${Math.abs(calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay)).toFixed(1)}%`}
+              text3={`${Math.abs(calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay)).toFixed(1)}`}
               negative={calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay) < 0 ? 'negative' : undefined}
             />
           ) : (

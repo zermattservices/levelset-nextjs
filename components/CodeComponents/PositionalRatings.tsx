@@ -692,33 +692,37 @@ export function PositionalRatings({
   }, [startDate, endDate, showFOH, showBOH]);
 
   // Update filtered rows from DataGrid API whenever filters or data changes
-  const updateFilteredRows = React.useCallback(() => {
-    if (!apiRef.current) return;
-    
-    try {
-      // Get all row IDs that match current filters
-      const filteredRowIds = apiRef.current.getSortedRowIds?.() || [];
-      
-      // Get the actual row data for these IDs
-      const visibleRows: any[] = [];
-      filteredRowIds.forEach((id) => {
-        const row = apiRef.current.getRow(id);
-        if (row) {
-          visibleRows.push(row);
-        }
-      });
-      
-      setFilteredRows(visibleRows);
-    } catch (error) {
-      console.error('Error getting filtered rows:', error);
-      // Fallback to all rows if there's an error
-      setFilteredRows(rows);
-    }
-  }, [rows]);
-
   React.useEffect(() => {
-    updateFilteredRows();
-  }, [rows, filterModel, searchText, updateFilteredRows]);
+    // Use a small delay to ensure DataGrid has processed filters
+    const timer = setTimeout(() => {
+      if (!apiRef.current) {
+        setFilteredRows(rows);
+        return;
+      }
+      
+      try {
+        // Get all row IDs that match current filters
+        const filteredRowIds = apiRef.current.getSortedRowIds?.() || [];
+        
+        // Get the actual row data for these IDs
+        const visibleRows: any[] = [];
+        filteredRowIds.forEach((id) => {
+          const row = apiRef.current.getRow(id);
+          if (row) {
+            visibleRows.push(row);
+          }
+        });
+        
+        setFilteredRows(visibleRows);
+      } catch (error) {
+        console.error('Error getting filtered rows:', error);
+        // Fallback to all rows if there's an error
+        setFilteredRows(rows);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [rows, filterModel, searchText]);
 
   // Handle delete
   const handleDeleteClick = (row: RatingRow) => {
@@ -1605,13 +1609,7 @@ export function PositionalRatings({
             rows={rows}
             columns={columns}
             loading={loading}
-            onFilterModelChange={(newModel) => {
-              setFilterModel(newModel);
-              updateFilteredRows();
-            }}
-            onStateChange={() => {
-              updateFilteredRows();
-            }}
+            onFilterModelChange={(newModel) => setFilterModel(newModel)}
             pagination
             pageSizeOptions={[25, 50, 100, 250]}
             initialState={{
