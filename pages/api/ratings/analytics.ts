@@ -51,25 +51,47 @@ export default async function handler(
       searchText,
     } = req.query;
 
+    console.log('[Analytics API] Request params:', { orgId, locationId, startDate, endDate, showFOH, showBOH, searchText });
+
     if (!orgId || !locationId || !startDate || !endDate) {
+      console.error('[Analytics API] Missing required parameters');
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    // Parse filter params
+    // Validate dates
+    const startDateObj = new Date(startDate as string);
+    const endDateObj = new Date(endDate as string);
+    
+    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+      console.error('[Analytics API] Invalid dates:', { startDate, endDate });
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+
+    // Parse filter params safely
     const filters: Array<{ field: string; operator: string; value: string }> = [];
-    Object.keys(req.query).forEach(key => {
-      if (key.startsWith('filter_') && key.endsWith('_field')) {
-        const index = key.split('_')[1];
-        const field = req.query[`filter_${index}_field`] as string;
-        const operator = req.query[`filter_${index}_operator`] as string;
-        const value = req.query[`filter_${index}_value`] as string;
-        if (field && operator && value) {
-          filters.push({ field, operator, value });
+    try {
+      Object.keys(req.query).forEach(key => {
+        if (key.startsWith('filter_') && key.endsWith('_field')) {
+          const parts = key.split('_');
+          if (parts.length >= 2) {
+            const index = parts[1];
+            const field = req.query[`filter_${index}_field`] as string;
+            const operator = req.query[`filter_${index}_operator`] as string;
+            const value = req.query[`filter_${index}_value`] as string;
+            if (field && operator && value) {
+              filters.push({ field, operator, value });
+            }
+          }
         }
-      }
-    });
+      });
+      console.log('[Analytics API] Parsed filters:', filters);
+    } catch (filterError) {
+      console.error('[Analytics API] Error parsing filters:', filterError);
+      // Continue without filters if parsing fails
+    }
 
     // Build query
+    console.log('[Analytics API] Building query...');
     let query = supabase
       .from('ratings')
       .select(`
@@ -81,12 +103,14 @@ export default async function handler(
       `)
       .eq('org_id', orgId as string)
       .eq('location_id', locationId as string)
-      .gte('created_at', startDate as string)
-      .lte('created_at', endDate as string);
+      .gte('created_at', startDateObj.toISOString())
+      .lte('created_at', endDateObj.toISOString());
 
     // Apply FOH/BOH filter
     const isFOH = showFOH === 'true';
     const isBOH = showBOH === 'true';
+    
+    console.log('[Analytics API] FOH/BOH filter:', { isFOH, isBOH });
     
     if (isFOH && !isBOH) {
       query = query.in('position', FOH_POSITIONS);
@@ -94,12 +118,15 @@ export default async function handler(
       query = query.in('position', BOH_POSITIONS);
     }
 
+    console.log('[Analytics API] Executing query...');
     const { data: ratings, error } = await query;
 
     if (error) {
-      console.error('Error fetching ratings:', error);
-      return res.status(500).json({ error: 'Failed to fetch ratings' });
+      console.error('[Analytics API] Supabase error:', error);
+      return res.status(500).json({ error: 'Failed to fetch ratings', details: error.message });
     }
+
+    console.log('[Analytics API] Query returned', ratings?.length || 0, 'ratings');
 
     if (!ratings) {
       return res.status(200).json({
@@ -109,10 +136,12 @@ export default async function handler(
     }
 
     // Apply client-side filters (search, employee, leader, role, position)
+    console.log('[Analytics API] Applying client-side filters...');
     let filteredRatings = ratings;
 
     // Search filter
     if (searchText) {
+      console.log('[Analytics API] Applying search filter:', searchText);
       const searchLower = (searchText as string).toLowerCase();
       filteredRatings = filteredRatings.filter((r: any) => {
         const employeeName = r.employees?.full_name || '';
@@ -127,11 +156,14 @@ export default async function handler(
           position.toLowerCase().includes(searchLower)
         );
       });
+      console.log('[Analytics API] After search filter:', filteredRatings.length, 'ratings');
     }
 
     // Grid filter model filters
-    filters.forEach(filter => {
+    console.log('[Analytics API] Applying', filters.length, 'grid filters');
+    filters.forEach((filter, idx) => {
       if (!filter.value) return; // Skip if no value
+      console.log(`[Analytics API] Applying filter ${idx}:`, filter);
 
       if (filter.field === 'employee_name') {
         if (filter.operator === 'is') {
@@ -179,22 +211,32 @@ export default async function handler(
     });
 
     // Calculate current period metrics
+    console.log('[Analytics API] Calculating current period metrics...');
+    console.log('[Analytics API] Filtered ratings count:', filteredRatings.length);
+    
     const count = filteredRatings.length;
     const totalRating = filteredRatings.reduce((sum: number, r: any) => sum + (r.rating_avg || 0), 0);
     const avgRating = count > 0 ? totalRating / count : 0;
 
-    const start = new Date(startDate as string);
-    const end = new Date(endDate as string);
-    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const days = Math.ceil((endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24));
     const ratingsPerDay = count > 0 ? count / days : 0;
 
+    console.log('[Analytics API] Current metrics:', { count, avgRating, ratingsPerDay, days });
+
     // Fetch PRIOR period data (same length, ending at current start date)
+    console.log('[Analytics API] Fetching prior period data...');
     let priorMetrics = null;
 
     try {
-      const priorEnd = new Date(start);
-      const priorStart = new Date(start);
+      const priorEnd = new Date(startDateObj);
+      const priorStart = new Date(startDateObj);
       priorStart.setDate(priorStart.getDate() - days);
+      
+      console.log('[Analytics API] Prior period range:', { 
+        priorStart: priorStart.toISOString(), 
+        priorEnd: priorEnd.toISOString(),
+        days 
+      });
 
       let priorQuery = supabase
         .from('ratings')
@@ -217,7 +259,14 @@ export default async function handler(
         priorQuery = priorQuery.in('position', BOH_POSITIONS);
       }
 
+      console.log('[Analytics API] Executing prior period query...');
       const { data: priorRatings, error: priorError } = await priorQuery;
+
+      if (priorError) {
+        console.error('[Analytics API] Prior period query error:', priorError);
+      } else {
+        console.log('[Analytics API] Prior period query returned', priorRatings?.length || 0, 'ratings');
+      }
 
       if (!priorError && priorRatings) {
       // Apply same client-side filters to prior data
@@ -302,9 +351,14 @@ export default async function handler(
       };
       }
     } catch (priorError) {
-      console.error('Error fetching prior period data:', priorError);
+      console.error('[Analytics API] Error fetching prior period data:', priorError);
       // priorMetrics remains null, will show "% --" and "+0"
     }
+
+    console.log('[Analytics API] Returning response:', {
+      current: { count, avgRating, ratingsPerDay },
+      prior: priorMetrics
+    });
 
     return res.status(200).json({
       current: {
