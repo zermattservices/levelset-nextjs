@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Box, Skeleton } from '@mui/material';
-import MetricCard from '../MetricCard';
+import AnalyticsMetricCard from './AnalyticsMetricCard';
 import TrendCard from '../TrendCard';
 import type { GridRowsProp, GridFilterModel } from '@mui/x-data-grid-pro';
 
@@ -144,138 +144,120 @@ export function RatingsAnalytics({
 
   if (loading) {
     return (
-      <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2 }}>
-        <Skeleton variant="rectangular" sx={{ flex: 1, height: 120, borderRadius: 2 }} />
-        <Skeleton variant="rectangular" sx={{ flex: 1, height: 120, borderRadius: 2 }} />
-        <Skeleton variant="rectangular" sx={{ flex: 1, height: 120, borderRadius: 2 }} />
+      <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap' }}>
+        <Skeleton variant="rectangular" sx={{ flex: 1, height: 140, borderRadius: 2 }} />
+        <Skeleton variant="rectangular" sx={{ flex: 1, height: 140, borderRadius: 2 }} />
+        <Skeleton variant="rectangular" sx={{ flex: 1, height: 140, borderRadius: 2 }} />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+    <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap' }}>
       {/* Metric 1: # of Ratings */}
-      <Box sx={{ flex: 1, minWidth: 250 }}>
-        <MetricCard
-          metricName="# of Ratings"
-          metricTotal2={currentMetrics.count.toString()}
-          trendCard2={
-            hasPriorData ? (
-              <TrendCard
-                text3={`${Math.abs(calculatePercentChange(currentMetrics.count, priorMetrics.count)).toFixed(1)} %`}
-                negative={calculatePercentChange(currentMetrics.count, priorMetrics.count) < 0 ? 'negative' : undefined}
-              />
-            ) : (
-              <Box sx={{ 
-                backgroundColor: '#e5e7eb', 
-                color: '#6b7280', 
-                padding: '4px 12px', 
-                borderRadius: 2,
-                fontSize: 14,
-                fontWeight: 600,
-              }}>
-                % --
-              </Box>
-            )
-          }
-          delta={
-            hasPriorData ? (
-              <span style={{ color: currentMetrics.count >= priorMetrics.count ? '#38A169' : '#E53E3E' }}>
-                {formatChange(currentMetrics.count, priorMetrics.count)}
-              </span>
-            ) : (
-              <span style={{ color: '#6b7280' }}>+0</span>
-            )
-          }
-          children={
-            <span style={{ color: '#6b7280', fontSize: 14 }}>
-              {hasPriorData ? `over prior ${periodText}` : 'over prior period'}
+      <AnalyticsMetricCard
+        metricName="# of Ratings"
+        metricValue={currentMetrics.count.toLocaleString()}
+        trendCard={
+          hasPriorData ? (
+            <TrendCard
+              text3={`${Math.abs(calculatePercentChange(currentMetrics.count, priorMetrics.count)).toFixed(1)} %`}
+              negative={calculatePercentChange(currentMetrics.count, priorMetrics.count) < 0 ? 'negative' : undefined}
+            />
+          ) : (
+            <Box sx={{ 
+              backgroundColor: '#e5e7eb', 
+              color: '#6b7280', 
+              padding: '4px 12px', 
+              borderRadius: 2,
+              fontSize: 12,
+              fontWeight: 600,
+            }}>
+              % --
+            </Box>
+          )
+        }
+        delta={
+          hasPriorData ? (
+            <span style={{ color: currentMetrics.count >= priorMetrics.count ? '#38A169' : '#E53E3E', fontWeight: 600 }}>
+              {formatChange(currentMetrics.count, priorMetrics.count)}
             </span>
-          }
-        />
-      </Box>
+          ) : (
+            <span style={{ color: '#6b7280', fontWeight: 600 }}>+0</span>
+          )
+        }
+        periodText={hasPriorData ? `over prior ${periodText}` : 'over prior period'}
+      />
 
       {/* Metric 2: Avg. Rating */}
-      <Box sx={{ flex: 1, minWidth: 250 }}>
-        <MetricCard
-          metricName="Avg. Rating"
-          metricTotal2={currentMetrics.avgRating.toFixed(2)}
-          trendCard2={
-            hasPriorData ? (
-              <TrendCard
-                text3={`${Math.abs(calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating)).toFixed(1)} %`}
-                negative={calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating) < 0 ? 'negative' : undefined}
-              />
-            ) : (
-              <Box sx={{ 
-                backgroundColor: '#e5e7eb', 
-                color: '#6b7280', 
-                padding: '4px 12px', 
-                borderRadius: 2,
-                fontSize: 14,
-                fontWeight: 600,
-              }}>
-                % --
-              </Box>
-            )
-          }
-          delta={
-            hasPriorData ? (
-              <span style={{ color: currentMetrics.avgRating >= priorMetrics.avgRating ? '#38A169' : '#E53E3E' }}>
-                {(currentMetrics.avgRating - priorMetrics.avgRating).toFixed(2)}
-              </span>
-            ) : (
-              <span style={{ color: '#6b7280' }}>+0</span>
-            )
-          }
-          children={
-            <span style={{ color: '#6b7280', fontSize: 14 }}>
-              {hasPriorData ? `over prior ${periodText}` : 'over prior period'}
+      <AnalyticsMetricCard
+        metricName="Avg. Rating"
+        metricValue={currentMetrics.avgRating.toFixed(2)}
+        trendCard={
+          hasPriorData ? (
+            <TrendCard
+              text3={`${Math.abs(calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating)).toFixed(1)} %`}
+              negative={calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating) < 0 ? 'negative' : undefined}
+            />
+          ) : (
+            <Box sx={{ 
+              backgroundColor: '#e5e7eb', 
+              color: '#6b7280', 
+              padding: '4px 12px', 
+              borderRadius: 2,
+              fontSize: 12,
+              fontWeight: 600,
+            }}>
+              % --
+            </Box>
+          )
+        }
+        delta={
+          hasPriorData ? (
+            <span style={{ color: currentMetrics.avgRating >= priorMetrics.avgRating ? '#38A169' : '#E53E3E', fontWeight: 600 }}>
+              {(currentMetrics.avgRating - priorMetrics.avgRating >= 0 ? '+' : '')}{(currentMetrics.avgRating - priorMetrics.avgRating).toFixed(2)}
             </span>
-          }
-        />
-      </Box>
+          ) : (
+            <span style={{ color: '#6b7280', fontWeight: 600 }}>+0.00</span>
+          )
+        }
+        periodText={hasPriorData ? `over prior ${periodText}` : 'over prior period'}
+      />
 
       {/* Metric 3: Ratings per Day */}
-      <Box sx={{ flex: 1, minWidth: 250 }}>
-        <MetricCard
-          metricName="Ratings per Day"
-          metricTotal2={currentMetrics.ratingsPerDay.toFixed(1)}
-          trendCard2={
-            hasPriorData ? (
-              <TrendCard
-                text3={`${Math.abs(calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay)).toFixed(1)} %`}
-                negative={calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay) < 0 ? 'negative' : undefined}
-              />
-            ) : (
-              <Box sx={{ 
-                backgroundColor: '#e5e7eb', 
-                color: '#6b7280', 
-                padding: '4px 12px', 
-                borderRadius: 2,
-                fontSize: 14,
-                fontWeight: 600,
-              }}>
-                % --
-              </Box>
-            )
-          }
-          delta={
-            hasPriorData ? (
-              <span style={{ color: currentMetrics.ratingsPerDay >= priorMetrics.ratingsPerDay ? '#38A169' : '#E53E3E' }}>
-                {(currentMetrics.ratingsPerDay - priorMetrics.ratingsPerDay).toFixed(1)}
-              </span>
-            ) : (
-              <span style={{ color: '#6b7280' }}>+0</span>
-            )
-          }
-          children={
-            <span style={{ color: '#6b7280', fontSize: 14 }}>
-              {hasPriorData ? `over prior ${periodText}` : 'over prior period'}
+      <AnalyticsMetricCard
+        metricName="Ratings per Day"
+        metricValue={currentMetrics.ratingsPerDay.toFixed(1)}
+        trendCard={
+          hasPriorData ? (
+            <TrendCard
+              text3={`${Math.abs(calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay)).toFixed(1)} %`}
+              negative={calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay) < 0 ? 'negative' : undefined}
+            />
+          ) : (
+            <Box sx={{ 
+              backgroundColor: '#e5e7eb', 
+              color: '#6b7280', 
+              padding: '4px 12px', 
+              borderRadius: 2,
+              fontSize: 12,
+              fontWeight: 600,
+            }}>
+              % --
+            </Box>
+          )
+        }
+        delta={
+          hasPriorData ? (
+            <span style={{ color: currentMetrics.ratingsPerDay >= priorMetrics.ratingsPerDay ? '#38A169' : '#E53E3E', fontWeight: 600 }}>
+              {(currentMetrics.ratingsPerDay - priorMetrics.ratingsPerDay >= 0 ? '+' : '')}{(currentMetrics.ratingsPerDay - priorMetrics.ratingsPerDay).toFixed(1)}
             </span>
-          }
-        />
-      </Box>
+          ) : (
+            <span style={{ color: '#6b7280', fontWeight: 600 }}>+0.0</span>
+          )
+        }
+        periodText={hasPriorData ? `over prior ${periodText}` : 'over prior period'}
+      />
     </Box>
   );
 }
