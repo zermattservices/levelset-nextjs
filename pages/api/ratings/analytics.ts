@@ -176,7 +176,7 @@ export default async function handler(
       }
     });
 
-    // Calculate metrics
+    // Calculate current period metrics
     const count = filteredRatings.length;
     const totalRating = filteredRatings.reduce((sum: number, r: any) => sum + (r.rating_avg || 0), 0);
     const avgRating = count > 0 ? totalRating / count : 0;
@@ -184,7 +184,118 @@ export default async function handler(
     const start = new Date(startDate as string);
     const end = new Date(endDate as string);
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    const ratingsPerDay = count / days;
+    const ratingsPerDay = count > 0 ? count / days : 0;
+
+    // Fetch PRIOR period data (same length, ending at current start date)
+    const priorEnd = new Date(start);
+    const priorStart = new Date(start);
+    priorStart.setDate(priorStart.getDate() - days);
+
+    let priorQuery = supabase
+      .from('ratings')
+      .select(`
+        id,
+        rating_avg,
+        position,
+        employees:employees!ratings_employee_id_fkey(id, full_name, first_name, last_name, role),
+        rater:employees!ratings_rater_user_id_fkey(id, full_name, first_name, last_name)
+      `)
+      .eq('org_id', orgId as string)
+      .eq('location_id', locationId as string)
+      .gte('created_at', priorStart.toISOString())
+      .lt('created_at', priorEnd.toISOString());
+
+    // Apply same FOH/BOH filter
+    if (isFOH && !isBOH) {
+      priorQuery = priorQuery.in('position', FOH_POSITIONS);
+    } else if (isBOH && !isFOH) {
+      priorQuery = priorQuery.in('position', BOH_POSITIONS);
+    }
+
+    const { data: priorRatings, error: priorError } = await priorQuery;
+
+    let priorMetrics = null;
+
+    if (!priorError && priorRatings) {
+      // Apply same client-side filters to prior data
+      let filteredPriorRatings = priorRatings;
+
+      // Search filter
+      if (searchText) {
+        const searchLower = (searchText as string).toLowerCase();
+        filteredPriorRatings = filteredPriorRatings.filter((r: any) => {
+          const employeeName = r.employees?.full_name || '';
+          const raterName = r.rater?.full_name || '';
+          const role = r.employees?.role || '';
+          const position = r.position || '';
+          
+          return (
+            employeeName.toLowerCase().includes(searchLower) ||
+            raterName.toLowerCase().includes(searchLower) ||
+            role.toLowerCase().includes(searchLower) ||
+            position.toLowerCase().includes(searchLower)
+          );
+        });
+      }
+
+      // Grid filter model filters
+      filters.forEach(filter => {
+        if (filter.field === 'employee_name') {
+          if (filter.operator === 'is') {
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.employees?.full_name === filter.value);
+          } else if (filter.operator === 'isNot') {
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.employees?.full_name !== filter.value);
+          } else if (filter.operator === 'isAnyOf') {
+            const values = filter.value.split(',');
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.employees?.full_name));
+          }
+        }
+        
+        if (filter.field === 'rater_name') {
+          if (filter.operator === 'is') {
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.rater?.full_name === filter.value);
+          } else if (filter.operator === 'isNot') {
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.rater?.full_name !== filter.value);
+          } else if (filter.operator === 'isAnyOf') {
+            const values = filter.value.split(',');
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.rater?.full_name));
+          }
+        }
+        
+        if (filter.field === 'employee_role') {
+          if (filter.operator === 'is') {
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.employees?.role === filter.value);
+          } else if (filter.operator === 'isNot') {
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.employees?.role !== filter.value);
+          } else if (filter.operator === 'isAnyOf') {
+            const values = filter.value.split(',');
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.employees?.role));
+          }
+        }
+        
+        if (filter.field === 'position_cleaned') {
+          if (filter.operator === 'is') {
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.position === filter.value);
+          } else if (filter.operator === 'isNot') {
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.position !== filter.value);
+          } else if (filter.operator === 'isAnyOf') {
+            const values = filter.value.split(',');
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.position));
+          }
+        }
+      });
+
+      const priorCount = filteredPriorRatings.length;
+      const priorTotalRating = filteredPriorRatings.reduce((sum: number, r: any) => sum + (r.rating_avg || 0), 0);
+      const priorAvgRating = priorCount > 0 ? priorTotalRating / priorCount : 0;
+      const priorRatingsPerDay = priorCount > 0 ? priorCount / days : 0;
+
+      priorMetrics = {
+        count: priorCount,
+        avgRating: priorAvgRating,
+        ratingsPerDay: priorRatingsPerDay,
+      };
+    }
 
     return res.status(200).json({
       current: {
@@ -192,11 +303,7 @@ export default async function handler(
         avgRating,
         ratingsPerDay,
       },
-      prior: {
-        count,
-        avgRating,
-        ratingsPerDay,
-      },
+      prior: priorMetrics,
     });
   } catch (error) {
     console.error('Error in analytics API:', error);

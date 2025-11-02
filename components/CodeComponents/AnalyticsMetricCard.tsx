@@ -33,7 +33,7 @@ export function AnalyticsMetricCard({
       }}
     >
       {/* Title and Trend Badge */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <Box
           sx={{
             fontFamily,
@@ -47,32 +47,33 @@ export function AnalyticsMetricCard({
         {trendCard}
       </Box>
 
-      {/* Main Metric Value */}
-      <Box
-        sx={{
-          fontFamily,
-          fontSize: 28,
-          fontWeight: 700,
-          color: '#111827',
-          lineHeight: 1,
-        }}
-      >
-        {metricValue}
-      </Box>
+      {/* Main Metric Value and Delta/Period Text (same row) */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        {/* Left: Main Metric Value */}
+        <Box
+          sx={{
+            fontFamily,
+            fontSize: 28,
+            fontWeight: 700,
+            color: '#111827',
+            lineHeight: 1,
+          }}
+        >
+          {metricValue}
+        </Box>
 
-      {/* Delta and Period Text */}
-      <Box
-        sx={{
-          fontFamily,
-          fontSize: 12,
-          color: '#6b7280',
-          display: 'flex',
-          gap: 0.5,
-        }}
-      >
-        {delta}
-        {' '}
-        {periodText}
+        {/* Right: Delta and Period Text (below trend card) */}
+        <Box
+          sx={{
+            fontFamily,
+            fontSize: 12,
+            color: '#6b7280',
+            textAlign: 'right',
+            lineHeight: 1.4,
+          }}
+        >
+          {delta} {periodText}
+        </Box>
       </Box>
     </Box>
   );
