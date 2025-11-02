@@ -27,7 +27,7 @@ export function AnalyticsMetricCard({
         padding: 2,
         display: 'flex',
         flexDirection: 'column',
-        gap: 1.5,
+        gap: 1, // 8px gap (reduced from 12px)
         flex: 1,
         minWidth: 0, // Allow flex shrinking
       }}

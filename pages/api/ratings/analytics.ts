@@ -131,14 +131,16 @@ export default async function handler(
 
     // Grid filter model filters
     filters.forEach(filter => {
+      if (!filter.value) return; // Skip if no value
+
       if (filter.field === 'employee_name') {
         if (filter.operator === 'is') {
           filteredRatings = filteredRatings.filter((r: any) => r.employees?.full_name === filter.value);
         } else if (filter.operator === 'isNot') {
           filteredRatings = filteredRatings.filter((r: any) => r.employees?.full_name !== filter.value);
-        } else if (filter.operator === 'isAnyOf') {
+        } else if (filter.operator === 'isAnyOf' && typeof filter.value === 'string') {
           const values = filter.value.split(',');
-          filteredRatings = filteredRatings.filter((r: any) => values.includes(r.employees?.full_name));
+          filteredRatings = filteredRatings.filter((r: any) => values.includes(r.employees?.full_name || ''));
         }
       }
       
@@ -147,9 +149,9 @@ export default async function handler(
           filteredRatings = filteredRatings.filter((r: any) => r.rater?.full_name === filter.value);
         } else if (filter.operator === 'isNot') {
           filteredRatings = filteredRatings.filter((r: any) => r.rater?.full_name !== filter.value);
-        } else if (filter.operator === 'isAnyOf') {
+        } else if (filter.operator === 'isAnyOf' && typeof filter.value === 'string') {
           const values = filter.value.split(',');
-          filteredRatings = filteredRatings.filter((r: any) => values.includes(r.rater?.full_name));
+          filteredRatings = filteredRatings.filter((r: any) => values.includes(r.rater?.full_name || ''));
         }
       }
       
@@ -158,9 +160,9 @@ export default async function handler(
           filteredRatings = filteredRatings.filter((r: any) => r.employees?.role === filter.value);
         } else if (filter.operator === 'isNot') {
           filteredRatings = filteredRatings.filter((r: any) => r.employees?.role !== filter.value);
-        } else if (filter.operator === 'isAnyOf') {
+        } else if (filter.operator === 'isAnyOf' && typeof filter.value === 'string') {
           const values = filter.value.split(',');
-          filteredRatings = filteredRatings.filter((r: any) => values.includes(r.employees?.role));
+          filteredRatings = filteredRatings.filter((r: any) => values.includes(r.employees?.role || ''));
         }
       }
       
@@ -169,9 +171,9 @@ export default async function handler(
           filteredRatings = filteredRatings.filter((r: any) => r.position === filter.value);
         } else if (filter.operator === 'isNot') {
           filteredRatings = filteredRatings.filter((r: any) => r.position !== filter.value);
-        } else if (filter.operator === 'isAnyOf') {
+        } else if (filter.operator === 'isAnyOf' && typeof filter.value === 'string') {
           const values = filter.value.split(',');
-          filteredRatings = filteredRatings.filter((r: any) => values.includes(r.position));
+          filteredRatings = filteredRatings.filter((r: any) => values.includes(r.position || ''));
         }
       }
     });
@@ -187,36 +189,37 @@ export default async function handler(
     const ratingsPerDay = count > 0 ? count / days : 0;
 
     // Fetch PRIOR period data (same length, ending at current start date)
-    const priorEnd = new Date(start);
-    const priorStart = new Date(start);
-    priorStart.setDate(priorStart.getDate() - days);
-
-    let priorQuery = supabase
-      .from('ratings')
-      .select(`
-        id,
-        rating_avg,
-        position,
-        employees:employees!ratings_employee_id_fkey(id, full_name, first_name, last_name, role),
-        rater:employees!ratings_rater_user_id_fkey(id, full_name, first_name, last_name)
-      `)
-      .eq('org_id', orgId as string)
-      .eq('location_id', locationId as string)
-      .gte('created_at', priorStart.toISOString())
-      .lt('created_at', priorEnd.toISOString());
-
-    // Apply same FOH/BOH filter
-    if (isFOH && !isBOH) {
-      priorQuery = priorQuery.in('position', FOH_POSITIONS);
-    } else if (isBOH && !isFOH) {
-      priorQuery = priorQuery.in('position', BOH_POSITIONS);
-    }
-
-    const { data: priorRatings, error: priorError } = await priorQuery;
-
     let priorMetrics = null;
 
-    if (!priorError && priorRatings) {
+    try {
+      const priorEnd = new Date(start);
+      const priorStart = new Date(start);
+      priorStart.setDate(priorStart.getDate() - days);
+
+      let priorQuery = supabase
+        .from('ratings')
+        .select(`
+          id,
+          rating_avg,
+          position,
+          employees:employees!ratings_employee_id_fkey(id, full_name, first_name, last_name, role),
+          rater:employees!ratings_rater_user_id_fkey(id, full_name, first_name, last_name)
+        `)
+        .eq('org_id', orgId as string)
+        .eq('location_id', locationId as string)
+        .gte('created_at', priorStart.toISOString())
+        .lt('created_at', priorEnd.toISOString());
+
+      // Apply same FOH/BOH filter
+      if (isFOH && !isBOH) {
+        priorQuery = priorQuery.in('position', FOH_POSITIONS);
+      } else if (isBOH && !isFOH) {
+        priorQuery = priorQuery.in('position', BOH_POSITIONS);
+      }
+
+      const { data: priorRatings, error: priorError } = await priorQuery;
+
+      if (!priorError && priorRatings) {
       // Apply same client-side filters to prior data
       let filteredPriorRatings = priorRatings;
 
@@ -240,14 +243,16 @@ export default async function handler(
 
       // Grid filter model filters
       filters.forEach(filter => {
+        if (!filter.value) return; // Skip if no value
+
         if (filter.field === 'employee_name') {
           if (filter.operator === 'is') {
             filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.employees?.full_name === filter.value);
           } else if (filter.operator === 'isNot') {
             filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.employees?.full_name !== filter.value);
-          } else if (filter.operator === 'isAnyOf') {
+          } else if (filter.operator === 'isAnyOf' && typeof filter.value === 'string') {
             const values = filter.value.split(',');
-            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.employees?.full_name));
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.employees?.full_name || ''));
           }
         }
         
@@ -256,9 +261,9 @@ export default async function handler(
             filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.rater?.full_name === filter.value);
           } else if (filter.operator === 'isNot') {
             filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.rater?.full_name !== filter.value);
-          } else if (filter.operator === 'isAnyOf') {
+          } else if (filter.operator === 'isAnyOf' && typeof filter.value === 'string') {
             const values = filter.value.split(',');
-            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.rater?.full_name));
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.rater?.full_name || ''));
           }
         }
         
@@ -267,9 +272,9 @@ export default async function handler(
             filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.employees?.role === filter.value);
           } else if (filter.operator === 'isNot') {
             filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.employees?.role !== filter.value);
-          } else if (filter.operator === 'isAnyOf') {
+          } else if (filter.operator === 'isAnyOf' && typeof filter.value === 'string') {
             const values = filter.value.split(',');
-            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.employees?.role));
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.employees?.role || ''));
           }
         }
         
@@ -278,9 +283,9 @@ export default async function handler(
             filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.position === filter.value);
           } else if (filter.operator === 'isNot') {
             filteredPriorRatings = filteredPriorRatings.filter((r: any) => r.position !== filter.value);
-          } else if (filter.operator === 'isAnyOf') {
+          } else if (filter.operator === 'isAnyOf' && typeof filter.value === 'string') {
             const values = filter.value.split(',');
-            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.position));
+            filteredPriorRatings = filteredPriorRatings.filter((r: any) => values.includes(r.position || ''));
           }
         }
       });
@@ -295,6 +300,10 @@ export default async function handler(
         avgRating: priorAvgRating,
         ratingsPerDay: priorRatingsPerDay,
       };
+      }
+    } catch (priorError) {
+      console.error('Error fetching prior period data:', priorError);
+      // priorMetrics remains null, will show "% --" and "+0"
     }
 
     return res.status(200).json({
@@ -307,7 +316,14 @@ export default async function handler(
     });
   } catch (error) {
     console.error('Error in analytics API:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 }
 

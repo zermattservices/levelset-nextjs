@@ -124,8 +124,16 @@ export function RatingsAnalytics({
         }
 
         const response = await fetch(`/api/ratings/analytics?${params.toString()}`);
-        const data = await response.json();
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Analytics API error:', response.status, errorText);
+          setAnalyticsData(null);
+          setAnalyticsLoading(false);
+          return;
+        }
 
+        const data = await response.json();
         setAnalyticsData(data);
       } catch (error) {
         console.error('Error fetching prior period:', error);
