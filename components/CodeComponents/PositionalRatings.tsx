@@ -30,7 +30,8 @@ import {
   GridToolbarFilterButton,
   GridToolbarQuickFilter,
   getGridNumericOperators,
-  gridClasses
+  gridClasses,
+  useGridApiRef
 } from '@mui/x-data-grid-pro';
 import type {
   GridColDef,
@@ -38,7 +39,8 @@ import type {
   GridFilterOperator,
   GridFilterInputValueProps,
   GridFilterItem,
-  GridFilterModel
+  GridFilterModel,
+  GridApi
 } from '@mui/x-data-grid-pro';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
@@ -512,6 +514,10 @@ export function PositionalRatings({
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   
+  // DataGrid API ref to access filtered rows
+  const apiRef = useGridApiRef();
+  const [filteredRows, setFilteredRows] = React.useState<GridRowsProp>([]);
+  
   // Filter states
   const [showFOH, setShowFOH] = React.useState(true);
   const [showBOH, setShowBOH] = React.useState(true);
@@ -684,6 +690,35 @@ export function PositionalRatings({
       fetchRatings();
     }
   }, [startDate, endDate, showFOH, showBOH]);
+
+  // Update filtered rows from DataGrid API whenever filters or data changes
+  const updateFilteredRows = React.useCallback(() => {
+    if (!apiRef.current) return;
+    
+    try {
+      // Get all row IDs that match current filters
+      const filteredRowIds = apiRef.current.getSortedRowIds?.() || [];
+      
+      // Get the actual row data for these IDs
+      const visibleRows: any[] = [];
+      filteredRowIds.forEach((id) => {
+        const row = apiRef.current.getRow(id);
+        if (row) {
+          visibleRows.push(row);
+        }
+      });
+      
+      setFilteredRows(visibleRows);
+    } catch (error) {
+      console.error('Error getting filtered rows:', error);
+      // Fallback to all rows if there's an error
+      setFilteredRows(rows);
+    }
+  }, [rows]);
+
+  React.useEffect(() => {
+    updateFilteredRows();
+  }, [rows, filterModel, searchText, updateFilteredRows]);
 
   // Handle delete
   const handleDeleteClick = (row: RatingRow) => {
@@ -1553,7 +1588,7 @@ export function PositionalRatings({
         <RatingsAnalytics
           orgId={orgId}
           locationId={locationId}
-          currentRows={rows}
+          currentRows={filteredRows}
           startDate={startDate}
           endDate={endDate}
           showFOH={showFOH}
@@ -1566,10 +1601,17 @@ export function PositionalRatings({
         {/* Data Grid */}
         <Box sx={{ height: 650, width: '100%' }}>
           <DataGridPro
+            apiRef={apiRef}
             rows={rows}
             columns={columns}
             loading={loading}
-            onFilterModelChange={(newModel) => setFilterModel(newModel)}
+            onFilterModelChange={(newModel) => {
+              setFilterModel(newModel);
+              updateFilteredRows();
+            }}
+            onStateChange={() => {
+              updateFilteredRows();
+            }}
             pagination
             pageSizeOptions={[25, 50, 100, 250]}
             initialState={{
