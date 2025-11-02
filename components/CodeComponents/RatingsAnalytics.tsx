@@ -150,12 +150,40 @@ export function RatingsAnalytics({
   const priorMetrics = analyticsData?.prior;
   const hasPriorData = priorMetrics && priorMetrics.count > 0;
 
-  if (loading) {
+  // Show skeleton during analytics loading (not parent loading)
+  if (analyticsLoading) {
     return (
       <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap' }}>
-        <Skeleton variant="rectangular" sx={{ flex: 1, height: 140, borderRadius: 2 }} />
-        <Skeleton variant="rectangular" sx={{ flex: 1, height: 140, borderRadius: 2 }} />
-        <Skeleton variant="rectangular" sx={{ flex: 1, height: 140, borderRadius: 2 }} />
+        <Skeleton 
+          variant="rectangular" 
+          animation="wave"
+          sx={{ 
+            flex: 1, 
+            height: 106, // Match actual card height (padding + title row + gap + metric row)
+            borderRadius: 2,
+            backgroundColor: '#e5e7eb',
+          }} 
+        />
+        <Skeleton 
+          variant="rectangular" 
+          animation="wave"
+          sx={{ 
+            flex: 1, 
+            height: 106,
+            borderRadius: 2,
+            backgroundColor: '#e5e7eb',
+          }} 
+        />
+        <Skeleton 
+          variant="rectangular" 
+          animation="wave"
+          sx={{ 
+            flex: 1, 
+            height: 106,
+            borderRadius: 2,
+            backgroundColor: '#e5e7eb',
+          }} 
+        />
       </Box>
     );
   }
