@@ -37,7 +37,8 @@ import type {
   GridRowsProp,
   GridFilterOperator,
   GridFilterInputValueProps,
-  GridFilterItem
+  GridFilterItem,
+  GridFilterModel
 } from '@mui/x-data-grid-pro';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
@@ -45,6 +46,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { createSupabaseClient } from '@/util/supabase/component';
 import type { Rating, PositionBig5Labels } from '@/lib/supabase.types';
 import { cleanPositionName, FOH_POSITIONS, BOH_POSITIONS } from '@/lib/ratings-data';
+import RatingsAnalytics from './RatingsAnalytics';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
@@ -516,6 +518,8 @@ export function PositionalRatings({
   const [dateRange, setDateRange] = React.useState<'mtd' | 'qtd' | '30d' | '90d' | 'custom'>('30d');
   const [startDate, setStartDate] = React.useState<Date | null>(null);
   const [endDate, setEndDate] = React.useState<Date | null>(null);
+  const [searchText, setSearchText] = React.useState('');
+  const [filterModel, setFilterModel] = React.useState<any>(undefined);
   
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
@@ -1121,6 +1125,10 @@ export function PositionalRatings({
             }}
           />
           <GridToolbarQuickFilter 
+            quickFilterParser={(searchInput) => {
+              setSearchText(searchInput);
+              return searchInput.split(' ').filter(word => word !== '');
+            }}
             sx={{
               '& .MuiSvgIcon-root': {
                 color: `${levelsetGreen} !important`,
@@ -1541,12 +1549,27 @@ export function PositionalRatings({
           </Typography>
         )}
         
+        {/* Analytics Metrics */}
+        <RatingsAnalytics
+          orgId={orgId}
+          locationId={locationId}
+          currentRows={rows}
+          startDate={startDate}
+          endDate={endDate}
+          showFOH={showFOH}
+          showBOH={showBOH}
+          searchText={searchText}
+          filterModel={filterModel}
+          loading={loading}
+        />
+        
         {/* Data Grid */}
         <Box sx={{ height: 650, width: '100%' }}>
           <DataGridPro
             rows={rows}
             columns={columns}
             loading={loading}
+            onFilterModelChange={(newModel) => setFilterModel(newModel)}
             pagination
             pageSizeOptions={[25, 50, 100, 250]}
             initialState={{
