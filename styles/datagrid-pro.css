@@ -193,15 +193,41 @@ div[class*="DatePicker"] .MuiInputLabel-root.Mui-focused {
   font-size: 20px !important;
 }
 
-/* QUICK FILTER (Search Bar) - Reduce width by 25% */
+/* QUICK FILTER (Search Bar) - Collapse when not focused */
 .MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter {
-  width: 150px !important; /* Reduced from ~200px */
-  max-width: 150px !important;
+  width: auto !important;
+  transition: width 0.2s ease !important;
 }
 
 .MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root {
+  width: 0 !important;
+  transition: width 0.2s ease !important;
+  overflow: hidden !important;
+}
+
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root .MuiInputBase-root {
+  width: 0 !important;
+  padding: 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Expand search bar when focused or has value */
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root:focus-within,
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root:has(input:not(:placeholder-shown)) {
   width: 150px !important;
-  max-width: 150px !important;
+}
+
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root:focus-within .MuiInputBase-root,
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root:has(input:not(:placeholder-shown)) .MuiInputBase-root {
+  width: 150px !important;
+  padding: 8px 10px !important;
+}
+
+/* Keep search icon visible */
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiInputAdornment-root {
+  margin: 0 !important;
+  padding: 8px !important;
+  cursor: pointer !important;
 }
 
 /* Filter indicator badge - Levelset green */
