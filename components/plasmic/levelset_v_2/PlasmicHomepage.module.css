@@ -228,13 +228,14 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  width: auto;
+  width: 100%;
   height: auto;
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
   background: #fafafa;
   row-gap: var(--token-5qBYYrKVDrlB);
+  min-width: 0;
   border-radius: 16px;
   padding: 20px;
 }
@@ -242,13 +243,14 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  width: auto;
+  width: 100%;
   height: auto;
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
   background: none;
   row-gap: var(--token-5qBYYrKVDrlB);
+  min-width: 0;
   border-radius: 16px;
 }
 .freeBox__fqNlw {
@@ -267,6 +269,12 @@
 .metricCard__x6EnB:global(.__wab_instance) {
   max-width: 100%;
   transform: none;
+  width: 100%;
+  transform-style: preserve-3d;
+  min-width: 0;
+}
+.metricCard__x6EnB * {
+  transform-style: preserve-3d;
 }
 .heading3 {
   padding-right: 0px;
@@ -296,6 +304,8 @@
   max-width: 100%;
   transition-property: all;
   transition-duration: 1s;
+  width: 100%;
+  min-width: 0;
   -webkit-transition-property: all;
   -webkit-transition-duration: 1s;
 }
@@ -322,6 +332,8 @@
 }
 .metricCard__cbTb:global(.__wab_instance) {
   max-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 .trendCard__nlaL2:global(.__wab_instance) {
   animation: none;
@@ -333,6 +345,8 @@
 }
 .metricCard__ahd6K:global(.__wab_instance) {
   max-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 .trendCard__mpAiO:global(.__wab_instance) {
   animation: none;
@@ -391,13 +405,14 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  width: auto;
+  width: 100%;
   height: auto;
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
   background: #fafafa;
   row-gap: var(--token-5qBYYrKVDrlB);
+  min-width: 0;
   border-radius: 16px;
   padding: 20px;
 }
@@ -405,7 +420,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  width: auto;
+  width: 100%;
   height: auto;
   max-width: 100%;
   justify-content: flex-start;
@@ -413,10 +428,13 @@
   background: none;
   row-gap: var(--token-5qBYYrKVDrlB);
   filter: blur(4px);
+  min-width: 0;
   border-radius: 16px;
 }
 .metricCard__n5Vp1:global(.__wab_instance) {
   max-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 .text__cToMc {
   font-size: var(--token-B10hUni6jzpI);
@@ -431,6 +449,8 @@
 }
 .metricCard__nLige:global(.__wab_instance) {
   max-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 .text___6CLr {
   font-size: var(--token-B10hUni6jzpI);
@@ -445,6 +465,8 @@
 }
 .metricCard__msF2:global(.__wab_instance) {
   max-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 .text__aaKts {
   font-size: var(--token-B10hUni6jzpI);
@@ -459,6 +481,8 @@
 }
 .metricCard__r453M:global(.__wab_instance) {
   max-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 .text__gn7Ek {
   font-size: var(--token-B10hUni6jzpI);
@@ -473,6 +497,8 @@
 }
 .metricCard__zoe3T:global(.__wab_instance) {
   max-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 .text___4Uzfe {
   font-size: var(--token-B10hUni6jzpI);
@@ -507,7 +533,7 @@
 .levelsetButton:global(.__wab_instance) {
   max-width: 100%;
 }
-.svg__hmyoj {
+.svg__vi4Oz {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -517,7 +543,7 @@
   font-family: "Satoshi";
   font-weight: 600;
 }
-.svg__chlXo {
+.svg___5OWw {
   position: relative;
   object-fit: cover;
   width: auto;

@@ -4,23 +4,23 @@ import * as React from "react";
 import { PageParamsProvider as PageParamsProvider__ } from "@plasmicapp/react-web/lib/host";
 import GlobalContextsProvider from "../components/plasmic/levelset_v2/PlasmicGlobalContextsProvider";
 
-import { PlasmicPositionalExcellence } from "../components/plasmic/levelset_v_2/PlasmicPositionalExcellence";
+import { PlasmicPeaClassic } from "../components/plasmic/levelset_v_2/PlasmicPeaClassic";
 import { useRouter } from "next/router";
 
-function PositionalExcellence() {
-  // Use PlasmicPositionalExcellence to render this component as it was
+function PeaClassic() {
+  // Use PlasmicPeaClassic to render this component as it was
   // designed in Plasmic, by activating the appropriate variants,
   // attaching the appropriate event handlers, etc.  You
   // can also install whatever React hooks you need here to manage state or
   // fetch data.
   //
-  // Props you can pass into PlasmicPositionalExcellence are:
+  // Props you can pass into PlasmicPeaClassic are:
   // 1. Variants you want to activate,
   // 2. Contents for slots you want to fill,
   // 3. Overrides for any named node in the component to attach behavior and data,
   // 4. Props to set on the root node.
   //
-  // By default, PlasmicPositionalExcellence is wrapped by your project's global
+  // By default, PlasmicPeaClassic is wrapped by your project's global
   // variant context providers. These wrappers may be moved to
   // Next.js Custom App component
   // (https://nextjs.org/docs/advanced-features/custom-app).
@@ -32,10 +32,10 @@ function PositionalExcellence() {
         params={useRouter()?.query}
         query={useRouter()?.query}
       >
-        <PlasmicPositionalExcellence />
+        <PlasmicPeaClassic />
       </PageParamsProvider__>
     </GlobalContextsProvider>
   );
 }
 
-export default PositionalExcellence;
+export default PeaClassic;

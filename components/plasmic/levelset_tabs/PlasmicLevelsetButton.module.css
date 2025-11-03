@@ -80,8 +80,9 @@
 .rootcolor_clear {
   background: #ffffff00;
 }
-.rootcolor_link {
+.rootcolor_brandOutline {
   background: #ffffff00;
+  border: 1px solid #31664a;
 }
 .rootshowStartIcon_shape_rounded {
   padding-left: 16px;
@@ -182,10 +183,10 @@
 .rootcolor_clear:active {
   background: #e3e3e0;
 }
-.rootcolor_link:hover {
+.rootcolor_brandOutline:hover {
   background: #ffffff00;
 }
-.rootcolor_link:active {
+.rootcolor_brandOutline:active {
   background: #ffffff00;
 }
 .startIconContainer {
@@ -225,13 +226,13 @@
 .slotTargetStartIconcolor_clear {
   color: #1b1b18;
 }
-.slotTargetStartIconcolor_link {
+.slotTargetStartIconcolor_brandOutline {
   color: #0091ff;
 }
-.rootcolor_link:hover .slotTargetStartIconcolor_link {
+.rootcolor_brandOutline:hover .slotTargetStartIconcolor_brandOutline {
   color: #0081f1;
 }
-.rootcolor_link:active .slotTargetStartIconcolor_link {
+.rootcolor_brandOutline:active .slotTargetStartIconcolor_brandOutline {
   color: #006adc;
 }
 .svg__yZRhm {
@@ -291,8 +292,8 @@
 .slotTargetChildrencolor_clear {
   color: #1b1b18;
 }
-.slotTargetChildrencolor_link {
-  color: #0091ff;
+.slotTargetChildrencolor_brandOutline {
+  color: #31664a;
 }
 .root:focus-within .slotTargetChildren > *,
 .root:focus-within .slotTargetChildren > :global(.__wab_slot) > *,
@@ -358,65 +359,67 @@
   > img {
   outline: none;
 }
-.rootcolor_link:hover .slotTargetChildrencolor_link {
-  color: #0081f1;
+.rootcolor_brandOutline:hover .slotTargetChildrencolor_brandOutline {
+  color: #31664a;
 }
-.rootcolor_link:hover .slotTargetChildrencolor_link > :global(.__wab_text),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
+  > :global(.__wab_text),
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
   > :global(.__wab_expr_html_text),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
   > :global(.__wab_slot-string-wrapper),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
   > :global(.__wab_slot)
   > :global(.__wab_text),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
   > :global(.__wab_slot)
   > :global(.__wab_expr_html_text),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
   > :global(.__wab_slot)
   > :global(.__wab_slot-string-wrapper),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
-  > :global(.__wab_slot)
-  > :global(.__wab_slot)
-  > :global(.__wab_text),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
-  > :global(.__wab_slot)
-  > :global(.__wab_slot)
-  > :global(.__wab_expr_html_text),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
-  > :global(.__wab_slot)
-  > :global(.__wab_slot)
-  > :global(.__wab_slot-string-wrapper),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
-  > :global(.__wab_slot)
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
   > :global(.__wab_slot)
   > :global(.__wab_slot)
   > :global(.__wab_text),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
+  > :global(.__wab_slot)
+  > :global(.__wab_slot)
+  > :global(.__wab_expr_html_text),
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
+  > :global(.__wab_slot)
+  > :global(.__wab_slot)
+  > :global(.__wab_slot-string-wrapper),
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
+  > :global(.__wab_slot)
+  > :global(.__wab_slot)
+  > :global(.__wab_slot)
+  > :global(.__wab_text),
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
   > :global(.__wab_slot)
   > :global(.__wab_slot)
   > :global(.__wab_slot)
   > :global(.__wab_expr_html_text),
-.rootcolor_link:hover
-  .slotTargetChildrencolor_link
+.rootcolor_brandOutline:hover
+  .slotTargetChildrencolor_brandOutline
   > :global(.__wab_slot)
   > :global(.__wab_slot)
   > :global(.__wab_slot)
   > :global(.__wab_slot-string-wrapper) {
   text-decoration-line: underline;
 }
-.rootcolor_link:active .slotTargetChildrencolor_link {
-  color: #006adc;
+.rootcolor_brandOutline:active .slotTargetChildrencolor_brandOutline {
+  color: #31664a;
 }
 .endIconContainer {
   display: flex;
@@ -455,13 +458,13 @@
 .slotTargetEndIconcolor_clear {
   color: #1b1b18;
 }
-.slotTargetEndIconcolor_link {
+.slotTargetEndIconcolor_brandOutline {
   color: #0091ff;
 }
-.rootcolor_link:hover .slotTargetEndIconcolor_link {
+.rootcolor_brandOutline:hover .slotTargetEndIconcolor_brandOutline {
   color: #0081f1;
 }
-.rootcolor_link:active .slotTargetEndIconcolor_link {
+.rootcolor_brandOutline:active .slotTargetEndIconcolor_brandOutline {
   color: #006adc;
 }
 .svg__sejRg {

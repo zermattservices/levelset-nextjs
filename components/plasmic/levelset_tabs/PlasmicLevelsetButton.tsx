@@ -93,7 +93,7 @@ export type PlasmicLevelsetButton__VariantMembers = {
     | "softRed"
     | "softSand"
     | "clear"
-    | "link";
+    | "brandOutline";
 };
 export type PlasmicLevelsetButton__VariantsArgs = {
   showStartIcon?: SingleBooleanChoiceArg<"showStartIcon">;
@@ -114,7 +114,7 @@ export type PlasmicLevelsetButton__VariantsArgs = {
     | "softRed"
     | "softSand"
     | "clear"
-    | "link"
+    | "brandOutline"
   >;
 };
 type VariantPropType = keyof PlasmicLevelsetButton__VariantsArgs;
@@ -170,7 +170,7 @@ export interface DefaultLevelsetButtonProps extends pp.BaseButtonProps {
     | "softRed"
     | "softSand"
     | "clear"
-    | "link"
+    | "brandOutline"
   >;
 }
 
@@ -288,13 +288,17 @@ function PlasmicLevelsetButton__RenderFunc(props: {
         {
           [sty.root___focusVisibleWithin]: triggers.focusVisibleWithin_root,
           [sty.rootcolor_blue]: hasVariant($state, "color", "blue"),
+          [sty.rootcolor_brandOutline]: hasVariant(
+            $state,
+            "color",
+            "brandOutline"
+          ),
+          [sty.rootcolor_brandOutline_size_minimal]:
+            hasVariant($state, "color", "brandOutline") &&
+            hasVariant($state, "size", "minimal"),
           [sty.rootcolor_brand]: hasVariant($state, "color", "brand"),
           [sty.rootcolor_clear]: hasVariant($state, "color", "clear"),
           [sty.rootcolor_green]: hasVariant($state, "color", "green"),
-          [sty.rootcolor_link]: hasVariant($state, "color", "link"),
-          [sty.rootcolor_link_size_minimal]:
-            hasVariant($state, "color", "link") &&
-            hasVariant($state, "size", "minimal"),
           [sty.rootcolor_red]: hasVariant($state, "color", "red"),
           [sty.rootcolor_sand]: hasVariant($state, "color", "sand"),
           [sty.rootcolor_softBlue]: hasVariant($state, "color", "softBlue"),
@@ -380,6 +384,11 @@ function PlasmicLevelsetButton__RenderFunc(props: {
                 "color",
                 "blue"
               ),
+              [sty.slotTargetStartIconcolor_brandOutline]: hasVariant(
+                $state,
+                "color",
+                "brandOutline"
+              ),
               [sty.slotTargetStartIconcolor_brand]: hasVariant(
                 $state,
                 "color",
@@ -389,11 +398,6 @@ function PlasmicLevelsetButton__RenderFunc(props: {
                 $state,
                 "color",
                 "clear"
-              ),
-              [sty.slotTargetStartIconcolor_link]: hasVariant(
-                $state,
-                "color",
-                "link"
               ),
               [sty.slotTargetStartIconcolor_softBlue]: hasVariant(
                 $state,
@@ -468,6 +472,14 @@ function PlasmicLevelsetButton__RenderFunc(props: {
               "color",
               "blue"
             ),
+            [sty.slotTargetChildrencolor_brandOutline]: hasVariant(
+              $state,
+              "color",
+              "brandOutline"
+            ),
+            [sty.slotTargetChildrencolor_brandOutline_size_minimal]:
+              hasVariant($state, "color", "brandOutline") &&
+              hasVariant($state, "size", "minimal"),
             [sty.slotTargetChildrencolor_brand]: hasVariant(
               $state,
               "color",
@@ -483,14 +495,6 @@ function PlasmicLevelsetButton__RenderFunc(props: {
               "color",
               "green"
             ),
-            [sty.slotTargetChildrencolor_link]: hasVariant(
-              $state,
-              "color",
-              "link"
-            ),
-            [sty.slotTargetChildrencolor_link_size_minimal]:
-              hasVariant($state, "color", "link") &&
-              hasVariant($state, "size", "minimal"),
             [sty.slotTargetChildrencolor_red]: hasVariant(
               $state,
               "color",
@@ -591,6 +595,11 @@ function PlasmicLevelsetButton__RenderFunc(props: {
 
             value: args.endIcon,
             className: classNames(sty.slotTargetEndIcon, {
+              [sty.slotTargetEndIconcolor_brandOutline]: hasVariant(
+                $state,
+                "color",
+                "brandOutline"
+              ),
               [sty.slotTargetEndIconcolor_brand]: hasVariant(
                 $state,
                 "color",
@@ -600,11 +609,6 @@ function PlasmicLevelsetButton__RenderFunc(props: {
                 $state,
                 "color",
                 "clear"
-              ),
-              [sty.slotTargetEndIconcolor_link]: hasVariant(
-                $state,
-                "color",
-                "link"
               ),
               [sty.slotTargetEndIconcolor_softBlue]: hasVariant(
                 $state,
