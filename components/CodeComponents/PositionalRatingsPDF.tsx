@@ -1,13 +1,14 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 
-// Register Satoshi fonts
+// Register Satoshi variable font
 Font.register({
   family: 'Satoshi',
   fonts: [
-    { src: '/fonts/Satoshi-Regular.woff2', fontWeight: 400 },
-    { src: '/fonts/Satoshi-Medium.woff2', fontWeight: 500 },
-    { src: '/fonts/Satoshi-Bold.woff2', fontWeight: 700 },
+    { src: '/fonts/Satoshi-Variable.ttf', fontWeight: 400 },
+    { src: '/fonts/Satoshi-Variable.ttf', fontWeight: 500 },
+    { src: '/fonts/Satoshi-Variable.ttf', fontWeight: 600 },
+    { src: '/fonts/Satoshi-Variable.ttf', fontWeight: 700 },
   ]
 });
 
@@ -34,7 +35,9 @@ const colors = {
 const styles = StyleSheet.create({
   page: {
     backgroundColor: '#ffffff',
-    padding: 30,
+    paddingTop: 15, // 0.5 inch top margin
+    paddingBottom: 30,
+    paddingHorizontal: 30,
     fontFamily: 'Satoshi',
   },
   title: {
