@@ -607,6 +607,15 @@ export function PositionalRatings({
   // Handle PDF Export
   const handleExportPDF = async () => {
     try {
+      // Determine logo URL based on location
+      // Default to CFA Buda logo (default location)
+      // TODO: Fetch from Supabase locations table image_url column
+      const locationLogos: { [key: string]: string } = {
+        '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd': '/logos/CFA Buda Logo.png', // CFA Buda
+        'e437119c-27d9-4114-9273-350925016738': '/logos/CFA West Buda Logo.png', // CFA West Buda
+      };
+      const logoUrl = locationLogos[locationId] || '/logos/Circle C CFA.png'; // Default to Circle C
+      
       // Prepare filter data
       const filterData = {
         dateRange: {
@@ -678,6 +687,7 @@ export function PositionalRatings({
       const blob = await pdf(
         <PositionalRatingsPDF
           title="Positional Excellence Ratings"
+          logoUrl={logoUrl}
           filters={filterData}
           metrics={metrics}
           tableData={tableData}

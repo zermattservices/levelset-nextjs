@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 
 // Register Satoshi variable font
 Font.register({
@@ -40,11 +40,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     fontFamily: 'Satoshi',
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   title: {
     fontSize: 28,
     fontWeight: 700,
     color: colors.levelsetGreen,
-    marginBottom: 20,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    objectFit: 'contain',
   },
   filtersSection: {
     marginBottom: 20,
@@ -164,6 +174,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 4,
     minHeight: 32,
+    alignItems: 'center',
   },
   tableCell: {
     fontSize: 9,
@@ -175,6 +186,7 @@ const styles = StyleSheet.create({
   },
   tableHeaderCell: {
     fontSize: 10,
+    fontWeight: 400,
     color: colors.grey900,
     paddingHorizontal: 3,
     textAlign: 'center',
@@ -191,6 +203,7 @@ const styles = StyleSheet.create({
   ratingCell: {
     textAlign: 'center',
     paddingVertical: 4,
+    paddingHorizontal: 6,
     borderRadius: 3,
     fontWeight: 600,
     color: colors.white,
@@ -303,6 +316,7 @@ const styles = StyleSheet.create({
 
 interface PDFDocumentProps {
   title: string;
+  logoUrl?: string;
   filters: {
     dateRange: { start: string; end: string };
     fohSelected: boolean;
@@ -372,7 +386,7 @@ const formatFieldName = (field: string): string => {
 
 const formatOperator = (operator: string): string => {
   const operatorMap: { [key: string]: string } = {
-    is: '=',
+    is: ':',
     isNot: '≠',
     isAnyOf: 'in',
   };
@@ -381,6 +395,7 @@ const formatOperator = (operator: string): string => {
 
 export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({ 
   title, 
+  logoUrl,
   filters, 
   metrics,
   tableData 
@@ -388,8 +403,11 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
   return (
     <Document>
       <Page size="A4" orientation="landscape" style={styles.page}>
-        {/* Title */}
-        <Text style={styles.title}>{title}</Text>
+        {/* Header with Title and Logo */}
+        <View style={styles.header}>
+          <Text style={styles.title}>{title}</Text>
+          {logoUrl && <Image src={logoUrl} style={styles.logo} />}
+        </View>
         
         {/* Filters Section - 3 columns */}
         <View style={styles.filtersSection}>
@@ -414,13 +432,13 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
           <View style={styles.filterColumn}>
             {filters.searchText && (
               <Text style={styles.filterItem}>
-                <Text style={styles.filterLabel}>Search {formatOperator('is')} </Text>
+                <Text style={styles.filterLabel}>Search: </Text>
                 <Text style={styles.filterValue}>{filters.searchText}</Text>
               </Text>
             )}
             {filters.columnFilters.slice(0, Math.ceil(filters.columnFilters.length / 2)).map((f, idx) => (
               <Text key={idx} style={styles.filterItem}>
-                <Text style={styles.filterLabel}>{formatFieldName(f.field)} {formatOperator(f.operator)} </Text>
+                <Text style={styles.filterLabel}>{formatFieldName(f.field)}{formatOperator(f.operator)} </Text>
                 <Text style={styles.filterValue}>{f.value}</Text>
               </Text>
             ))}
@@ -430,7 +448,7 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
           <View style={styles.filterColumn}>
             {filters.columnFilters.slice(Math.ceil(filters.columnFilters.length / 2)).map((f, idx) => (
               <Text key={idx} style={styles.filterItem}>
-                <Text style={styles.filterLabel}>{formatFieldName(f.field)} {formatOperator(f.operator)} </Text>
+                <Text style={styles.filterLabel}>{formatFieldName(f.field)}{formatOperator(f.operator)} </Text>
                 <Text style={styles.filterValue}>{f.value}</Text>
               </Text>
             ))}
@@ -459,22 +477,21 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
             </View>
             <View style={styles.metricValueRow}>
               <Text style={styles.metricValue}>{metrics.ratingsCount.value.toLocaleString()}</Text>
-              <View style={{ textAlign: 'right' }}>
+              <Text style={styles.metricDelta}>
                 {metrics.ratingsCount.hasPriorData ? (
                   <>
                     <Text style={[
-                      styles.metricDelta,
                       styles.deltaBold,
                       metrics.ratingsCount.change >= 0 ? styles.deltaGreen : styles.deltaRed
                     ]}>
                       {metrics.ratingsCount.change >= 0 ? '+' : ''}{metrics.ratingsCount.change}
                     </Text>
-                    <Text style={styles.metricDelta}> over prior {metrics.ratingsCount.priorPeriod}</Text>
+                    {' over prior '}{metrics.ratingsCount.priorPeriod}
                   </>
                 ) : (
-                  <Text style={styles.metricDelta}>+0 over prior period</Text>
+                  '+0 over prior period'
                 )}
-              </View>
+              </Text>
             </View>
           </View>
           
@@ -498,22 +515,21 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
             </View>
             <View style={styles.metricValueRow}>
               <Text style={styles.metricValue}>{metrics.avgRating.value.toFixed(2)}</Text>
-              <View style={{ textAlign: 'right' }}>
+              <Text style={styles.metricDelta}>
                 {metrics.avgRating.hasPriorData ? (
                   <>
                     <Text style={[
-                      styles.metricDelta,
                       styles.deltaBold,
                       metrics.avgRating.change >= 0 ? styles.deltaGreen : styles.deltaRed
                     ]}>
                       {metrics.avgRating.change >= 0 ? '+' : ''}{metrics.avgRating.change.toFixed(2)}
                     </Text>
-                    <Text style={styles.metricDelta}> over prior {metrics.avgRating.priorPeriod}</Text>
+                    {' over prior '}{metrics.avgRating.priorPeriod}
                   </>
                 ) : (
-                  <Text style={styles.metricDelta}>+0.00 over prior period</Text>
+                  '+0.00 over prior period'
                 )}
-              </View>
+              </Text>
             </View>
           </View>
           
@@ -537,22 +553,21 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
             </View>
             <View style={styles.metricValueRow}>
               <Text style={styles.metricValue}>{metrics.ratingsPerDay.value.toFixed(1)}</Text>
-              <View style={{ textAlign: 'right' }}>
+              <Text style={styles.metricDelta}>
                 {metrics.ratingsPerDay.hasPriorData ? (
                   <>
                     <Text style={[
-                      styles.metricDelta,
                       styles.deltaBold,
                       metrics.ratingsPerDay.change >= 0 ? styles.deltaGreen : styles.deltaRed
                     ]}>
                       {metrics.ratingsPerDay.change >= 0 ? '+' : ''}{metrics.ratingsPerDay.change.toFixed(1)}
                     </Text>
-                    <Text style={styles.metricDelta}> over prior {metrics.ratingsPerDay.priorPeriod}</Text>
+                    {' over prior '}{metrics.ratingsPerDay.priorPeriod}
                   </>
                 ) : (
-                  <Text style={styles.metricDelta}>+0.0 over prior period</Text>
+                  '+0.0 over prior period'
                 )}
-              </View>
+              </Text>
             </View>
           </View>
         </View>
