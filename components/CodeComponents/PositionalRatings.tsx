@@ -700,44 +700,87 @@ export function PositionalRatings({
     }
     
     try {
-      // Get visible rows using DataGrid API
-      const sortedRowIds = apiRef.current.getSortedRowIds?.();
+      // Use getRowModels which returns a Map of all rows
+      const rowModels = apiRef.current.getRowModels();
       
-      if (!sortedRowIds) {
-        console.log('[PositionalRatings] No sortedRowIds, using all rows');
-        setFilteredRows(rows);
-        return;
-      }
+      // Get the visible (filtered) row count from pagination state
+      const paginationState = apiRef.current.state.pagination;
+      const filterState = apiRef.current.state.filter;
       
-      // Check if there are any active filters or quick filter
-      const hasFilters = (filterModel && filterModel.items && filterModel.items.length > 0) || searchText;
-      
-      console.log('[PositionalRatings] Filtering state:', {
+      console.log('[PositionalRatings] DataGrid state:', {
         totalRows: rows.length,
-        sortedRowCount: sortedRowIds.length,
-        hasFilters,
-        filterModelItems: filterModel?.items?.length || 0,
+        rowModelsSize: rowModels?.size || 0,
+        paginationRowCount: paginationState?.rowCount,
+        filterItems: filterModel?.items?.length || 0,
         searchText
       });
       
-      // If no filters, just return all rows
+      // Check if there are any active filters
+      const hasFilters = (filterModel && filterModel.items && filterModel.items.length > 0) || searchText;
+      
+      // If no filters, use all rows
       if (!hasFilters) {
         console.log('[PositionalRatings] No filters, using all rows');
         setFilteredRows(rows);
         return;
       }
       
-      // Get filtered rows by checking if each row ID is in the sorted list
-      // DataGrid's getSortedRowIds returns only the rows that pass filters
+      // Get all row IDs and check against filter state
       const visibleRows: any[] = [];
-      sortedRowIds.forEach((id: any) => {
-        const row = apiRef.current.getRow(id);
-        if (row) {
+      
+      // Iterate through all rows and check if they pass filters
+      rows.forEach((row: any) => {
+        // Use the DataGrid's internal filtering by checking if the row would be visible
+        // We need to manually apply the filter logic since getSortedRowIds doesn't respect filters
+        let isVisible = true;
+        
+        // Apply filter model filters
+        if (filterModel && filterModel.items) {
+          for (const filterItem of filterModel.items) {
+            if (!filterItem.value) continue;
+            
+            const fieldValue = row[filterItem.field];
+            const filterValue = filterItem.value;
+            
+            if (filterItem.operator === 'is') {
+              if (fieldValue !== filterValue) {
+                isVisible = false;
+                break;
+              }
+            } else if (filterItem.operator === 'isNot') {
+              if (fieldValue === filterValue) {
+                isVisible = false;
+                break;
+              }
+            } else if (filterItem.operator === 'isAnyOf') {
+              const values = typeof filterValue === 'string' ? filterValue.split(',') : [filterValue];
+              if (!values.includes(fieldValue)) {
+                isVisible = false;
+                break;
+              }
+            }
+          }
+        }
+        
+        // Apply quick filter (search text) - search across multiple fields
+        if (isVisible && searchText) {
+          const searchLower = searchText.toLowerCase();
+          const searchableText = [
+            row.employee_name,
+            row.employee_role,
+            row.rater_name,
+            row.position_cleaned
+          ].filter(Boolean).join(' ').toLowerCase();
+          
+          isVisible = searchableText.includes(searchLower);
+        }
+        
+        if (isVisible) {
           visibleRows.push(row);
         }
       });
       
-      console.log('[PositionalRatings] Filtered to', visibleRows.length, 'visible rows');
+      console.log('[PositionalRatings] Manually filtered to', visibleRows.length, 'visible rows');
       setFilteredRows(visibleRows);
     } catch (error) {
       console.error('[PositionalRatings] Error getting filtered rows:', error);
@@ -1633,36 +1676,6 @@ export function PositionalRatings({
             loading={loading}
             onFilterModelChange={(newModel) => {
               setFilterModel(newModel);
-              // Force immediate update of filtered rows after filter changes
-              setTimeout(() => {
-                if (!apiRef.current || rows.length === 0) {
-                  setFilteredRows(rows);
-                  return;
-                }
-                
-                try {
-                  const sortedRowIds = apiRef.current.getSortedRowIds?.();
-                  
-                  if (!sortedRowIds) {
-                    setFilteredRows(rows);
-                    return;
-                  }
-                  
-                  const visibleRows: any[] = [];
-                  sortedRowIds.forEach((id: any) => {
-                    const row = apiRef.current.getRow(id);
-                    if (row) {
-                      visibleRows.push(row);
-                    }
-                  });
-                  
-                  console.log('[PositionalRatings] onFilterModelChange: filtered to', visibleRows.length, 'rows');
-                  setFilteredRows(visibleRows);
-                } catch (error) {
-                  console.error('Error getting filtered rows:', error);
-                  setFilteredRows(rows);
-                }
-              }, 50);
             }}
             pagination
             pageSizeOptions={[25, 50, 100, 250]}
