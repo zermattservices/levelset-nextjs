@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font, Image, Link } from '@react-pdf/renderer';
 
 // Register Satoshi variable font
 Font.register({
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   title: {
     fontSize: 28,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     color: colors.grey600,
   },
-  deltaBold: {
+  deltaNumber: {
     fontWeight: 600,
   },
   deltaGreen: {
@@ -223,13 +223,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     fontSize: 8,
     fontWeight: 600,
-    textAlign: 'center',
-    alignSelf: 'flex-start',
   },
-  rolePillWrapper: {
+  pillWrapper: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
   },
   rolePillNewHire: {
     backgroundColor: '#E6FAE6',
@@ -302,13 +301,29 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bohColor,
     color: colors.white,
   },
-  pageNumber: {
+  footer: {
     position: 'absolute',
     fontSize: 9,
     bottom: 20,
-    left: 0,
-    right: 0,
-    textAlign: 'center',
+    left: 30,
+    right: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  footerLogo: {
+    width: 60,
+    height: 20,
+    objectFit: 'contain',
+  },
+  footerDivider: {
+    width: 1,
+    height: 12,
+    backgroundColor: colors.grey600,
+  },
+  pageNumber: {
+    fontSize: 9,
     color: colors.grey600,
   },
 });
@@ -412,19 +427,19 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
         <View style={styles.filtersSection}>
           {/* Column 1: Date Range and Areas */}
           <View style={styles.filterColumn}>
-            <View style={styles.filterRow}>
-              <Text style={styles.filterLabel}>Date Range:</Text>
+            <Text style={styles.filterItem}>
+              <Text style={styles.filterLabel}>Date Range: </Text>
               <Text style={styles.filterValue}>
                 {filters.dateRange.start} - {filters.dateRange.end}
               </Text>
-            </View>
-            <View style={styles.filterRow}>
-              <Text style={styles.filterLabel}>Areas:</Text>
+            </Text>
+            <Text style={styles.filterItem}>
+              <Text style={styles.filterLabel}>Areas: </Text>
               <Text style={styles.filterValue}>
                 {filters.fohSelected && 'FOH'} {filters.fohSelected && filters.bohSelected && '+ '}
                 {filters.bohSelected && 'BOH'}
               </Text>
-            </View>
+            </Text>
           </View>
           
           {/* Column 2: Search + First half of column filters */}
@@ -480,7 +495,7 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
                 {metrics.ratingsCount.hasPriorData ? (
                   <>
                     <Text style={[
-                      styles.deltaBold,
+                      styles.deltaNumber,
                       metrics.ratingsCount.change >= 0 ? styles.deltaGreen : styles.deltaRed
                     ]}>
                       {metrics.ratingsCount.change >= 0 ? '+' : ''}{metrics.ratingsCount.change}
@@ -518,7 +533,7 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
                 {metrics.avgRating.hasPriorData ? (
                   <>
                     <Text style={[
-                      styles.deltaBold,
+                      styles.deltaNumber,
                       metrics.avgRating.change >= 0 ? styles.deltaGreen : styles.deltaRed
                     ]}>
                       {metrics.avgRating.change >= 0 ? '+' : ''}{metrics.avgRating.change.toFixed(2)}
@@ -556,7 +571,7 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
                 {metrics.ratingsPerDay.hasPriorData ? (
                   <>
                     <Text style={[
-                      styles.deltaBold,
+                      styles.deltaNumber,
                       metrics.ratingsPerDay.change >= 0 ? styles.deltaGreen : styles.deltaRed
                     ]}>
                       {metrics.ratingsPerDay.change >= 0 ? '+' : ''}{metrics.ratingsPerDay.change.toFixed(1)}
@@ -593,13 +608,13 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
             <View key={index} style={styles.tableRow} wrap={false}>
               <Text style={[styles.tableCell, styles.colDate]}>{row.date}</Text>
               <Text style={[styles.tableCell, styles.colEmployee]}>{row.employeeName}</Text>
-              <View style={[styles.tableCell, styles.colRole, styles.rolePillWrapper]}>
+              <View style={[styles.tableCell, styles.colRole, styles.pillWrapper]}>
                 <View style={getRolePillStyle(row.employeeRole)}>
                   <Text>{row.employeeRole}</Text>
                 </View>
               </View>
               <Text style={[styles.tableCell, styles.colLeader]}>{row.leaderName}</Text>
-              <View style={[styles.tableCell, styles.colPosition, styles.rolePillWrapper]}>
+              <View style={[styles.tableCell, styles.colPosition, styles.pillWrapper]}>
                 <View style={[styles.pill, row.isFOH ? styles.fohPill : styles.bohPill]}>
                   <Text>{row.position}</Text>
                 </View>
@@ -650,10 +665,16 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
           ))}
         </View>
         
-        {/* Page Numbers */}
-        <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
-          `Page ${pageNumber} of ${totalPages}`
-        )} fixed />
+        {/* Footer with Logo and Page Numbers */}
+        <View style={styles.footer} fixed>
+          <Link src="https://app.levelset.io">
+            <Image src="/logos/Levelset no margin.png" style={styles.footerLogo} />
+          </Link>
+          <View style={styles.footerDivider} />
+          <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
+            `Page ${pageNumber} of ${totalPages}`
+          )} />
+        </View>
       </Page>
     </Document>
   );
