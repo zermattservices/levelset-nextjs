@@ -51,10 +51,16 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: colors.grey100,
     borderRadius: 4,
+    flexDirection: 'row',
+    gap: 16,
+  },
+  filterColumn: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 6,
   },
   filterRow: {
     flexDirection: 'row',
-    marginBottom: 6,
     fontSize: 11,
   },
   filterLabel: {
@@ -64,6 +70,10 @@ const styles = StyleSheet.create({
   },
   filterValue: {
     color: colors.grey600,
+  },
+  filterItem: {
+    fontSize: 11,
+    color: colors.grey900,
   },
   metricsContainer: {
     flexDirection: 'row',
@@ -114,13 +124,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   metricValue: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: 700,
     color: colors.grey900,
   },
   metricDelta: {
     fontSize: 12,
     textAlign: 'right',
+    color: colors.grey600,
   },
   deltaGreen: {
     color: colors.trendGreen,
@@ -132,7 +143,6 @@ const styles = StyleSheet.create({
   },
   deltaGrey: {
     color: colors.grey600,
-    fontWeight: 600,
   },
   periodText: {
     fontSize: 12,
@@ -170,14 +180,14 @@ const styles = StyleSheet.create({
     color: colors.grey900,
     paddingHorizontal: 3,
   },
-  // Column widths
-  colDate: { width: '12%' },
-  colEmployee: { width: '14%' },
-  colRole: { width: '11%' },
-  colLeader: { width: '13%' },
-  colPosition: { width: '10%' },
-  colRating: { width: '6%' },
-  colOverall: { width: '6%' },
+  // Column widths (no actions column, more space for criteria headers)
+  colDate: { width: '13%' },
+  colEmployee: { width: '15%' },
+  colRole: { width: '12%' },
+  colLeader: { width: '14%' },
+  colPosition: { width: '11%' },
+  colRating: { width: '7%' },
+  colOverall: { width: '7%' },
   // Rating cells
   ratingCell: {
     textAlign: 'center',
@@ -203,10 +213,21 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: 600,
     textAlign: 'center',
+    alignSelf: 'flex-start',
+  },
+  rolePillWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rolePill: {
     backgroundColor: colors.grey200,
     color: colors.grey900,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    fontSize: 8,
+    fontWeight: 500,
   },
   fohPill: {
     backgroundColor: colors.fohColor,
@@ -296,40 +317,45 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
         {/* Title */}
         <Text style={styles.title}>{title}</Text>
         
-        {/* Filters Section */}
+        {/* Filters Section - 3 columns */}
         <View style={styles.filtersSection}>
-          <View style={styles.filterRow}>
-            <Text style={styles.filterLabel}>Date Range:</Text>
-            <Text style={styles.filterValue}>
-              {filters.dateRange.start} - {filters.dateRange.end}
-            </Text>
-          </View>
-          
-          <View style={styles.filterRow}>
-            <Text style={styles.filterLabel}>Areas:</Text>
-            <Text style={styles.filterValue}>
-              {filters.fohSelected && 'FOH'} {filters.fohSelected && filters.bohSelected && '+ '}
-              {filters.bohSelected && 'BOH'}
-            </Text>
-          </View>
-          
-          {filters.searchText && (
+          {/* Column 1: Date Range and Areas */}
+          <View style={styles.filterColumn}>
             <View style={styles.filterRow}>
-              <Text style={styles.filterLabel}>Search:</Text>
-              <Text style={styles.filterValue}>{filters.searchText}</Text>
-            </View>
-          )}
-          
-          {filters.columnFilters.length > 0 && (
-            <View style={styles.filterRow}>
-              <Text style={styles.filterLabel}>Filters:</Text>
+              <Text style={styles.filterLabel}>Date Range:</Text>
               <Text style={styles.filterValue}>
-                {filters.columnFilters.map((f, idx) => 
-                  `${formatFieldName(f.field)} ${formatOperator(f.operator)} "${f.value}"${idx < filters.columnFilters.length - 1 ? ', ' : ''}`
-                ).join('')}
+                {filters.dateRange.start} - {filters.dateRange.end}
               </Text>
             </View>
-          )}
+            <View style={styles.filterRow}>
+              <Text style={styles.filterLabel}>Areas:</Text>
+              <Text style={styles.filterValue}>
+                {filters.fohSelected && 'FOH'} {filters.fohSelected && filters.bohSelected && '+ '}
+                {filters.bohSelected && 'BOH'}
+              </Text>
+            </View>
+          </View>
+          
+          {/* Column 2: Search + First half of column filters */}
+          <View style={styles.filterColumn}>
+            {filters.searchText && (
+              <Text style={styles.filterItem}>Search = "{filters.searchText}"</Text>
+            )}
+            {filters.columnFilters.slice(0, Math.ceil(filters.columnFilters.length / 2)).map((f, idx) => (
+              <Text key={idx} style={styles.filterItem}>
+                {formatFieldName(f.field)} {formatOperator(f.operator)} "{f.value}"
+              </Text>
+            ))}
+          </View>
+          
+          {/* Column 3: Second half of column filters */}
+          <View style={styles.filterColumn}>
+            {filters.columnFilters.slice(Math.ceil(filters.columnFilters.length / 2)).map((f, idx) => (
+              <Text key={idx} style={styles.filterItem}>
+                {formatFieldName(f.field)} {formatOperator(f.operator)} "{f.value}"
+              </Text>
+            ))}
+          </View>
         </View>
         
         {/* Metrics Cards */}
@@ -459,15 +485,15 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
             <View key={index} style={styles.tableRow} wrap={false}>
               <Text style={[styles.tableCell, styles.colDate]}>{row.date}</Text>
               <Text style={[styles.tableCell, styles.colEmployee]}>{row.employeeName}</Text>
-              <View style={[styles.tableCell, styles.colRole]}>
+              <View style={[styles.tableCell, styles.colRole, styles.rolePillWrapper]}>
                 <View style={styles.rolePill}>
-                  <Text>{row.employeeRole}</Text>
+                  <Text style={{ textAlign: 'center' }}>{row.employeeRole}</Text>
                 </View>
               </View>
               <Text style={[styles.tableCell, styles.colLeader]}>{row.leaderName}</Text>
-              <View style={[styles.tableCell, styles.colPosition]}>
+              <View style={[styles.tableCell, styles.colPosition, { alignItems: 'center', justifyContent: 'center' }]}>
                 <View style={[styles.pill, row.isFOH ? styles.fohPill : styles.bohPill]}>
-                  <Text>{row.position}</Text>
+                  <Text style={{ textAlign: 'center' }}>{row.position}</Text>
                 </View>
               </View>
               <View style={[styles.tableCell, styles.colRating]}>
