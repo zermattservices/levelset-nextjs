@@ -89,6 +89,11 @@ function parseTimestamp(timestamp: string): string {
   return `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00`;
 }
 
+function cleanPositionName(positionName: string): string {
+  // Remove Spanish text (e.g., "Drinks 1/3 | Bebidas 1/3" -> "Drinks 1/3")
+  return positionName.split('|')[0].trim();
+}
+
 async function main() {
   console.log('Starting ratings import...');
   
@@ -185,8 +190,11 @@ async function main() {
       normalizedTime.getMinutes()
     ).toISOString();
     
+    // Clean the position name to remove Spanish text
+    const cleanedPosition = cleanPositionName(row.position);
+    
     // Check if this rating already exists
-    const key = `${employeeId}|${raterId}|${row.position}|${normalizedKey}`;
+    const key = `${employeeId}|${raterId}|${cleanedPosition}|${normalizedKey}`;
     if (existingKeys.has(key)) {
       skipped.push(`Already exists: ${row.tmName} rated by ${row.leaderName} on ${row.timestamp}`);
       continue;
@@ -210,7 +218,7 @@ async function main() {
     newRatings.push({
       employee_id: employeeId,
       rater_user_id: raterId,
-      position: row.position,
+      position: cleanedPosition,
       rating_1: rating1,
       rating_2: rating2,
       rating_3: rating3,
