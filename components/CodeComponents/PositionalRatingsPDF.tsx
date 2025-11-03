@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 4,
   },
   title: {
     fontSize: 28,
@@ -57,10 +57,10 @@ const styles = StyleSheet.create({
     objectFit: 'contain',
   },
   filtersSection: {
-    marginBottom: 20,
+    marginBottom: 16,
     padding: 12,
     backgroundColor: colors.grey100,
-    borderRadius: 4,
+    borderRadius: 16,
     flexDirection: 'row',
     gap: 16,
   },
@@ -87,12 +87,12 @@ const styles = StyleSheet.create({
   metricsContainer: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   metricCard: {
     flex: 1,
     backgroundColor: colors.white,
-    borderRadius: 8,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.grey200,
     padding: 12,
@@ -141,6 +141,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'right',
     color: colors.grey600,
+    fontWeight: 400,
   },
   deltaNumber: {
     fontWeight: 600,
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
     color: colors.grey600,
   },
   table: {
-    marginTop: 10,
+    marginTop: 0,
   },
   tableHeader: {
     flexDirection: 'row',
@@ -313,8 +314,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   footerLogo: {
-    width: 60,
-    height: 20,
+    width: 50,
+    height: 16,
     objectFit: 'contain',
   },
   footerDivider: {
