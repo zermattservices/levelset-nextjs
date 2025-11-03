@@ -81,6 +81,15 @@ export function RatingsAnalytics({
     const avgRating = totalRating / count;
     const ratingsPerDay = count / days;
 
+    console.log('[RatingsAnalytics] Calculated metrics:', {
+      rowCount: count,
+      totalRating,
+      avgRating: avgRating.toFixed(2),
+      ratingsPerDay: ratingsPerDay.toFixed(1),
+      days,
+      sampleRatings: currentRows.slice(0, 3).map((r: any) => r.rating_avg)
+    });
+
     return { count, avgRating, ratingsPerDay, days };
   }, [currentRows, startDate, endDate]);
 
