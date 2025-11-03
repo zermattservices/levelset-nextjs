@@ -45,10 +45,13 @@ import type {
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import CancelIcon from '@mui/icons-material/Cancel';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { createSupabaseClient } from '@/util/supabase/component';
 import type { Rating, PositionBig5Labels } from '@/lib/supabase.types';
 import { cleanPositionName, FOH_POSITIONS, BOH_POSITIONS } from '@/lib/ratings-data';
 import RatingsAnalytics from './RatingsAnalytics';
+import { pdf } from '@react-pdf/renderer';
+import PositionalRatingsPDF from './PositionalRatingsPDF';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
@@ -527,6 +530,9 @@ export function PositionalRatings({
   const [searchText, setSearchText] = React.useState('');
   const [filterModel, setFilterModel] = React.useState<any>(undefined);
   
+  // Metrics data for PDF export
+  const [metricsData, setMetricsData] = React.useState<any>(null);
+  
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
   const [ratingToDelete, setRatingToDelete] = React.useState<RatingRow | null>(null);
@@ -597,6 +603,99 @@ export function PositionalRatings({
     
     return null;
   }, [orgId, locationId, big5LabelsCache]);
+
+  // Handle PDF Export
+  const handleExportPDF = async () => {
+    try {
+      // Prepare filter data
+      const filterData = {
+        dateRange: {
+          start: startDate?.toLocaleDateString() || '',
+          end: endDate?.toLocaleDateString() || ''
+        },
+        fohSelected: showFOH,
+        bohSelected: showBOH,
+        searchText: searchText || '',
+        columnFilters: filterModel?.items?.map((item: any) => ({
+          field: item.field || '',
+          operator: item.operator || '',
+          value: String(item.value || '')
+        })) || []
+      };
+
+      // Prepare metrics data
+      const metrics = metricsData ? {
+        ratingsCount: {
+          value: metricsData.current.count,
+          change: metricsData.prior ? metricsData.current.count - metricsData.prior.count : 0,
+          percentChange: metricsData.prior && metricsData.prior.count > 0 
+            ? ((metricsData.current.count - metricsData.prior.count) / metricsData.prior.count) * 100 
+            : 0,
+          priorPeriod: metricsData.periodText,
+          hasPriorData: !!metricsData.prior && metricsData.prior.count > 0,
+        },
+        avgRating: {
+          value: metricsData.current.avgRating,
+          change: metricsData.prior ? metricsData.current.avgRating - metricsData.prior.avgRating : 0,
+          percentChange: metricsData.prior && metricsData.prior.avgRating > 0
+            ? ((metricsData.current.avgRating - metricsData.prior.avgRating) / metricsData.prior.avgRating) * 100
+            : 0,
+          priorPeriod: metricsData.periodText,
+          hasPriorData: !!metricsData.prior && metricsData.prior.count > 0,
+        },
+        ratingsPerDay: {
+          value: metricsData.current.ratingsPerDay,
+          change: metricsData.prior ? metricsData.current.ratingsPerDay - metricsData.prior.ratingsPerDay : 0,
+          percentChange: metricsData.prior && metricsData.prior.ratingsPerDay > 0
+            ? ((metricsData.current.ratingsPerDay - metricsData.prior.ratingsPerDay) / metricsData.prior.ratingsPerDay) * 100
+            : 0,
+          priorPeriod: metricsData.periodText,
+          hasPriorData: !!metricsData.prior && metricsData.prior.count > 0,
+        },
+      } : {
+        ratingsCount: { value: 0, change: 0, percentChange: 0, priorPeriod: 'period', hasPriorData: false },
+        avgRating: { value: 0, change: 0, percentChange: 0, priorPeriod: 'period', hasPriorData: false },
+        ratingsPerDay: { value: 0, change: 0, percentChange: 0, priorPeriod: 'period', hasPriorData: false },
+      };
+
+      // Prepare table data from filteredRows
+      const tableData = filteredRows.map((row: any) => ({
+        date: row.formatted_date,
+        employeeName: row.employee_name,
+        employeeRole: row.employee_role,
+        leaderName: row.rater_name,
+        position: cleanPositionName(row.position_cleaned || row.position),
+        isFOH: FOH_POSITIONS.includes(row.position),
+        rating1: row.rating_1,
+        rating2: row.rating_2,
+        rating3: row.rating_3,
+        rating4: row.rating_4,
+        rating5: row.rating_5,
+        overall: row.rating_avg,
+      }));
+
+      // Generate PDF blob
+      const blob = await pdf(
+        <PositionalRatingsPDF
+          title="Positional Excellence Ratings"
+          filters={filterData}
+          metrics={metrics}
+          tableData={tableData}
+        />
+      ).toBlob();
+
+      // Trigger download
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `positional-ratings-${new Date().toISOString().split('T')[0]}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setError('Failed to generate PDF. Please try again.');
+    }
+  };
 
   // Fetch ratings data
   const fetchRatings = React.useCallback(async () => {
@@ -1221,6 +1320,22 @@ export function PositionalRatings({
           alignItems: 'center',
           marginLeft: 'auto',
         }}>
+          <IconButton
+            onClick={handleExportPDF}
+            sx={{
+              color: levelsetGreen,
+              padding: '8px',
+              borderRadius: '50%',
+              width: '36px',
+              height: '36px',
+              '&:hover': {
+                backgroundColor: 'rgba(49, 102, 74, 0.04)',
+              },
+            }}
+            aria-label="Export to PDF"
+          >
+            <FileDownloadIcon sx={{ fontSize: '20px' }} />
+          </IconButton>
           <GridToolbarFilterButton 
             slotProps={{
               button: {
@@ -1665,6 +1780,7 @@ export function PositionalRatings({
           searchText={searchText}
           filterModel={filterModel}
           loading={loading}
+          onMetricsCalculated={setMetricsData}
         />
         
         {/* Data Grid */}

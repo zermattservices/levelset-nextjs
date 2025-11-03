@@ -29,6 +29,7 @@
     "@plasmicpkgs/plasmic-rich-components": "^1.0.223",
     "@plasmicpkgs/plasmic-tabs": "^0.0.68",
     "@plasmicpkgs/react-aria": "^0.0.154",
+    "@react-pdf/renderer": "^4.3.1",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.48.0",
     "antd": "^5.27.5",

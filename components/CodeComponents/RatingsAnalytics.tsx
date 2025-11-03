@@ -15,6 +15,11 @@ interface RatingsAnalyticsProps {
   searchText: string;
   filterModel: GridFilterModel | undefined;
   loading: boolean;
+  onMetricsCalculated?: (metrics: {
+    current: { count: number; avgRating: number; ratingsPerDay: number; days: number };
+    prior: { count: number; avgRating: number; ratingsPerDay: number } | null;
+    periodText: string;
+  }) => void;
 }
 
 interface AnalyticsData {
@@ -59,6 +64,7 @@ export function RatingsAnalytics({
   searchText,
   filterModel,
   loading,
+  onMetricsCalculated,
 }: RatingsAnalyticsProps) {
   const [analyticsData, setAnalyticsData] = React.useState<AnalyticsData | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = React.useState(false);
@@ -158,6 +164,17 @@ export function RatingsAnalytics({
   const periodText = getPeriodText(currentMetrics.days || 30);
   const priorMetrics = analyticsData?.prior;
   const hasPriorData = priorMetrics && priorMetrics.count > 0;
+
+  // Call onMetricsCalculated whenever metrics are updated
+  React.useEffect(() => {
+    if (onMetricsCalculated) {
+      onMetricsCalculated({
+        current: currentMetrics,
+        prior: priorMetrics,
+        periodText,
+      });
+    }
+  }, [currentMetrics, priorMetrics, periodText, onMetricsCalculated]);
 
   // Show skeleton during analytics loading (not parent loading)
   if (analyticsLoading) {

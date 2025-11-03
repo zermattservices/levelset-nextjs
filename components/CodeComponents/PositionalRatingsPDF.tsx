@@ -1,0 +1,526 @@
+import React from 'react';
+import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+
+// Register Satoshi fonts
+Font.register({
+  family: 'Satoshi',
+  fonts: [
+    { src: '/fonts/Satoshi-Regular.woff2', fontWeight: 400 },
+    { src: '/fonts/Satoshi-Medium.woff2', fontWeight: 500 },
+    { src: '/fonts/Satoshi-Bold.woff2', fontWeight: 700 },
+  ]
+});
+
+// Colors
+const colors = {
+  levelsetGreen: '#31664a',
+  fohColor: '#006391',
+  bohColor: '#ffcc5b',
+  fohColorLight: '#eaf9ff',
+  bohColorLight: '#fffcf0',
+  ratingGreen: '#249e6b',
+  ratingOrange: '#ffb549',
+  ratingRed: '#ad2624',
+  grey100: '#f9fafb',
+  grey200: '#e5e7eb',
+  grey600: '#6b7280',
+  grey900: '#111827',
+  trendGreen: '#38A169',
+  trendRed: '#E53E3E',
+  white: '#ffffff',
+};
+
+// Styles
+const styles = StyleSheet.create({
+  page: {
+    backgroundColor: '#ffffff',
+    padding: 30,
+    fontFamily: 'Satoshi',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 700,
+    color: colors.levelsetGreen,
+    marginBottom: 20,
+  },
+  filtersSection: {
+    marginBottom: 20,
+    padding: 12,
+    backgroundColor: colors.grey100,
+    borderRadius: 4,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    marginBottom: 6,
+    fontSize: 11,
+  },
+  filterLabel: {
+    fontWeight: 600,
+    color: colors.grey900,
+    marginRight: 6,
+  },
+  filterValue: {
+    color: colors.grey600,
+  },
+  metricsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+  metricCard: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.grey200,
+    padding: 12,
+  },
+  metricHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+  },
+  metricName: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: colors.grey900,
+  },
+  trendBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: 600,
+  },
+  trendBadgeGreen: {
+    backgroundColor: '#D4EDDA',
+    color: colors.trendGreen,
+  },
+  trendBadgeRed: {
+    backgroundColor: '#F8D7DA',
+    color: colors.trendRed,
+  },
+  trendBadgeGrey: {
+    backgroundColor: colors.grey200,
+    color: colors.grey600,
+  },
+  metricValueRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  metricValue: {
+    fontSize: 28,
+    fontWeight: 700,
+    color: colors.grey900,
+  },
+  metricDelta: {
+    fontSize: 12,
+    textAlign: 'right',
+  },
+  deltaGreen: {
+    color: colors.trendGreen,
+    fontWeight: 600,
+  },
+  deltaRed: {
+    color: colors.trendRed,
+    fontWeight: 600,
+  },
+  deltaGrey: {
+    color: colors.grey600,
+    fontWeight: 600,
+  },
+  periodText: {
+    fontSize: 12,
+    color: colors.grey600,
+  },
+  table: {
+    marginTop: 10,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: colors.grey100,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.grey200,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.grey200,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    minHeight: 32,
+  },
+  tableCell: {
+    fontSize: 9,
+    color: colors.grey900,
+    paddingHorizontal: 3,
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  tableHeaderCell: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: colors.grey900,
+    paddingHorizontal: 3,
+  },
+  // Column widths
+  colDate: { width: '12%' },
+  colEmployee: { width: '14%' },
+  colRole: { width: '11%' },
+  colLeader: { width: '13%' },
+  colPosition: { width: '10%' },
+  colRating: { width: '6%' },
+  colOverall: { width: '6%' },
+  // Rating cells
+  ratingCell: {
+    textAlign: 'center',
+    paddingVertical: 4,
+    borderRadius: 3,
+    fontWeight: 600,
+    color: colors.white,
+  },
+  ratingGreen: {
+    backgroundColor: colors.ratingGreen,
+  },
+  ratingOrange: {
+    backgroundColor: colors.ratingOrange,
+  },
+  ratingRed: {
+    backgroundColor: colors.ratingRed,
+  },
+  // Role/Position pills
+  pill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    fontSize: 8,
+    fontWeight: 600,
+    textAlign: 'center',
+  },
+  rolePill: {
+    backgroundColor: colors.grey200,
+    color: colors.grey900,
+  },
+  fohPill: {
+    backgroundColor: colors.fohColor,
+    color: colors.white,
+  },
+  bohPill: {
+    backgroundColor: colors.bohColor,
+    color: colors.white,
+  },
+  pageNumber: {
+    position: 'absolute',
+    fontSize: 9,
+    bottom: 20,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    color: colors.grey600,
+  },
+});
+
+interface PDFDocumentProps {
+  title: string;
+  filters: {
+    dateRange: { start: string; end: string };
+    fohSelected: boolean;
+    bohSelected: boolean;
+    searchText: string;
+    columnFilters: Array<{ field: string; operator: string; value: string }>;
+  };
+  metrics: {
+    ratingsCount: { value: number; change: number; percentChange: number; priorPeriod: string; hasPriorData: boolean };
+    avgRating: { value: number; change: number; percentChange: number; priorPeriod: string; hasPriorData: boolean };
+    ratingsPerDay: { value: number; change: number; percentChange: number; priorPeriod: string; hasPriorData: boolean };
+  };
+  tableData: Array<{
+    date: string;
+    employeeName: string;
+    employeeRole: string;
+    leaderName: string;
+    position: string;
+    isFOH: boolean;
+    rating1: number | null;
+    rating2: number | null;
+    rating3: number | null;
+    rating4: number | null;
+    rating5: number | null;
+    overall: number | null;
+  }>;
+}
+
+const getRatingStyle = (rating: number | null) => {
+  if (rating === null || rating === undefined) return null;
+  if (rating >= 2.75) return styles.ratingGreen;
+  if (rating >= 1.75) return styles.ratingOrange;
+  return styles.ratingRed;
+};
+
+const formatFieldName = (field: string): string => {
+  const fieldMap: { [key: string]: string } = {
+    employee_name: 'Employee',
+    employee_role: 'Employee Role',
+    rater_name: 'Leader',
+    position_cleaned: 'Position',
+    rating_avg: 'Overall Rating',
+  };
+  return fieldMap[field] || field;
+};
+
+const formatOperator = (operator: string): string => {
+  const operatorMap: { [key: string]: string } = {
+    is: '=',
+    isNot: '≠',
+    isAnyOf: 'in',
+  };
+  return operatorMap[operator] || operator;
+};
+
+export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({ 
+  title, 
+  filters, 
+  metrics,
+  tableData 
+}) => {
+  return (
+    <Document>
+      <Page size="A4" orientation="landscape" style={styles.page}>
+        {/* Title */}
+        <Text style={styles.title}>{title}</Text>
+        
+        {/* Filters Section */}
+        <View style={styles.filtersSection}>
+          <View style={styles.filterRow}>
+            <Text style={styles.filterLabel}>Date Range:</Text>
+            <Text style={styles.filterValue}>
+              {filters.dateRange.start} - {filters.dateRange.end}
+            </Text>
+          </View>
+          
+          <View style={styles.filterRow}>
+            <Text style={styles.filterLabel}>Areas:</Text>
+            <Text style={styles.filterValue}>
+              {filters.fohSelected && 'FOH'} {filters.fohSelected && filters.bohSelected && '+ '}
+              {filters.bohSelected && 'BOH'}
+            </Text>
+          </View>
+          
+          {filters.searchText && (
+            <View style={styles.filterRow}>
+              <Text style={styles.filterLabel}>Search:</Text>
+              <Text style={styles.filterValue}>{filters.searchText}</Text>
+            </View>
+          )}
+          
+          {filters.columnFilters.length > 0 && (
+            <View style={styles.filterRow}>
+              <Text style={styles.filterLabel}>Filters:</Text>
+              <Text style={styles.filterValue}>
+                {filters.columnFilters.map((f, idx) => 
+                  `${formatFieldName(f.field)} ${formatOperator(f.operator)} "${f.value}"${idx < filters.columnFilters.length - 1 ? ', ' : ''}`
+                ).join('')}
+              </Text>
+            </View>
+          )}
+        </View>
+        
+        {/* Metrics Cards */}
+        <View style={styles.metricsContainer}>
+          {/* # of Ratings */}
+          <View style={styles.metricCard}>
+            <View style={styles.metricHeader}>
+              <Text style={styles.metricName}># of Ratings</Text>
+              <View style={[
+                styles.trendBadge, 
+                metrics.ratingsCount.hasPriorData
+                  ? (metrics.ratingsCount.percentChange >= 0 ? styles.trendBadgeGreen : styles.trendBadgeRed)
+                  : styles.trendBadgeGrey
+              ]}>
+                <Text>
+                  {metrics.ratingsCount.hasPriorData 
+                    ? `${metrics.ratingsCount.percentChange >= 0 ? '↑' : '↓'} ${Math.abs(metrics.ratingsCount.percentChange).toFixed(1)}%`
+                    : '% --'
+                  }
+                </Text>
+              </View>
+            </View>
+            <View style={styles.metricValueRow}>
+              <Text style={styles.metricValue}>{metrics.ratingsCount.value.toLocaleString()}</Text>
+              <Text style={[
+                styles.metricDelta,
+                metrics.ratingsCount.hasPriorData
+                  ? (metrics.ratingsCount.change >= 0 ? styles.deltaGreen : styles.deltaRed)
+                  : styles.deltaGrey
+              ]}>
+                {metrics.ratingsCount.hasPriorData
+                  ? `${metrics.ratingsCount.change >= 0 ? '+' : ''}${metrics.ratingsCount.change} over prior ${metrics.ratingsCount.priorPeriod}`
+                  : '+0 over prior period'
+                }
+              </Text>
+            </View>
+          </View>
+          
+          {/* Avg. Rating */}
+          <View style={styles.metricCard}>
+            <View style={styles.metricHeader}>
+              <Text style={styles.metricName}>Avg. Rating</Text>
+              <View style={[
+                styles.trendBadge, 
+                metrics.avgRating.hasPriorData
+                  ? (metrics.avgRating.percentChange >= 0 ? styles.trendBadgeGreen : styles.trendBadgeRed)
+                  : styles.trendBadgeGrey
+              ]}>
+                <Text>
+                  {metrics.avgRating.hasPriorData 
+                    ? `${metrics.avgRating.percentChange >= 0 ? '↑' : '↓'} ${Math.abs(metrics.avgRating.percentChange).toFixed(1)}%`
+                    : '% --'
+                  }
+                </Text>
+              </View>
+            </View>
+            <View style={styles.metricValueRow}>
+              <Text style={styles.metricValue}>{metrics.avgRating.value.toFixed(2)}</Text>
+              <Text style={[
+                styles.metricDelta,
+                metrics.avgRating.hasPriorData
+                  ? (metrics.avgRating.change >= 0 ? styles.deltaGreen : styles.deltaRed)
+                  : styles.deltaGrey
+              ]}>
+                {metrics.avgRating.hasPriorData
+                  ? `${metrics.avgRating.change >= 0 ? '+' : ''}${metrics.avgRating.change.toFixed(2)} over prior ${metrics.avgRating.priorPeriod}`
+                  : '+0.00 over prior period'
+                }
+              </Text>
+            </View>
+          </View>
+          
+          {/* Ratings per Day */}
+          <View style={styles.metricCard}>
+            <View style={styles.metricHeader}>
+              <Text style={styles.metricName}>Ratings per Day</Text>
+              <View style={[
+                styles.trendBadge, 
+                metrics.ratingsPerDay.hasPriorData
+                  ? (metrics.ratingsPerDay.percentChange >= 0 ? styles.trendBadgeGreen : styles.trendBadgeRed)
+                  : styles.trendBadgeGrey
+              ]}>
+                <Text>
+                  {metrics.ratingsPerDay.hasPriorData 
+                    ? `${metrics.ratingsPerDay.percentChange >= 0 ? '↑' : '↓'} ${Math.abs(metrics.ratingsPerDay.percentChange).toFixed(1)}%`
+                    : '% --'
+                  }
+                </Text>
+              </View>
+            </View>
+            <View style={styles.metricValueRow}>
+              <Text style={styles.metricValue}>{metrics.ratingsPerDay.value.toFixed(1)}</Text>
+              <Text style={[
+                styles.metricDelta,
+                metrics.ratingsPerDay.hasPriorData
+                  ? (metrics.ratingsPerDay.change >= 0 ? styles.deltaGreen : styles.deltaRed)
+                  : styles.deltaGrey
+              ]}>
+                {metrics.ratingsPerDay.hasPriorData
+                  ? `${metrics.ratingsPerDay.change >= 0 ? '+' : ''}${metrics.ratingsPerDay.change.toFixed(1)} over prior ${metrics.ratingsPerDay.priorPeriod}`
+                  : '+0.0 over prior period'
+                }
+              </Text>
+            </View>
+          </View>
+        </View>
+        
+        {/* Table */}
+        <View style={styles.table}>
+          {/* Table Header */}
+          <View style={styles.tableHeader}>
+            <Text style={[styles.tableHeaderCell, styles.colDate]}>Date</Text>
+            <Text style={[styles.tableHeaderCell, styles.colEmployee]}>Employee</Text>
+            <Text style={[styles.tableHeaderCell, styles.colRole]}>Employee Role</Text>
+            <Text style={[styles.tableHeaderCell, styles.colLeader]}>Leader</Text>
+            <Text style={[styles.tableHeaderCell, styles.colPosition]}>Position</Text>
+            <Text style={[styles.tableHeaderCell, styles.colRating]}>Criteria 1</Text>
+            <Text style={[styles.tableHeaderCell, styles.colRating]}>Criteria 2</Text>
+            <Text style={[styles.tableHeaderCell, styles.colRating]}>Criteria 3</Text>
+            <Text style={[styles.tableHeaderCell, styles.colRating]}>Criteria 4</Text>
+            <Text style={[styles.tableHeaderCell, styles.colRating]}>Criteria 5</Text>
+            <Text style={[styles.tableHeaderCell, styles.colOverall]}>Overall</Text>
+          </View>
+          
+          {/* Table Rows */}
+          {tableData.map((row, index) => (
+            <View key={index} style={styles.tableRow} wrap={false}>
+              <Text style={[styles.tableCell, styles.colDate]}>{row.date}</Text>
+              <Text style={[styles.tableCell, styles.colEmployee]}>{row.employeeName}</Text>
+              <View style={[styles.tableCell, styles.colRole]}>
+                <View style={styles.rolePill}>
+                  <Text>{row.employeeRole}</Text>
+                </View>
+              </View>
+              <Text style={[styles.tableCell, styles.colLeader]}>{row.leaderName}</Text>
+              <View style={[styles.tableCell, styles.colPosition]}>
+                <View style={[styles.pill, row.isFOH ? styles.fohPill : styles.bohPill]}>
+                  <Text>{row.position}</Text>
+                </View>
+              </View>
+              <View style={[styles.tableCell, styles.colRating]}>
+                {row.rating1 !== null && (
+                  <View style={[styles.ratingCell, getRatingStyle(row.rating1)]}>
+                    <Text>{row.rating1.toFixed(2)}</Text>
+                  </View>
+                )}
+              </View>
+              <View style={[styles.tableCell, styles.colRating]}>
+                {row.rating2 !== null && (
+                  <View style={[styles.ratingCell, getRatingStyle(row.rating2)]}>
+                    <Text>{row.rating2.toFixed(2)}</Text>
+                  </View>
+                )}
+              </View>
+              <View style={[styles.tableCell, styles.colRating]}>
+                {row.rating3 !== null && (
+                  <View style={[styles.ratingCell, getRatingStyle(row.rating3)]}>
+                    <Text>{row.rating3.toFixed(2)}</Text>
+                  </View>
+                )}
+              </View>
+              <View style={[styles.tableCell, styles.colRating]}>
+                {row.rating4 !== null && (
+                  <View style={[styles.ratingCell, getRatingStyle(row.rating4)]}>
+                    <Text>{row.rating4.toFixed(2)}</Text>
+                  </View>
+                )}
+              </View>
+              <View style={[styles.tableCell, styles.colRating]}>
+                {row.rating5 !== null && (
+                  <View style={[styles.ratingCell, getRatingStyle(row.rating5)]}>
+                    <Text>{row.rating5.toFixed(2)}</Text>
+                  </View>
+                )}
+              </View>
+              <View style={[styles.tableCell, styles.colOverall]}>
+                {row.overall !== null && (
+                  <View style={[styles.ratingCell, getRatingStyle(row.overall)]}>
+                    <Text>{row.overall.toFixed(2)}</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          ))}
+        </View>
+        
+        {/* Page Numbers */}
+        <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
+          `Page ${pageNumber} of ${totalPages}`
+        )} fixed />
+      </Page>
+    </Document>
+  );
+};
+
+export default PositionalRatingsPDF;
+
