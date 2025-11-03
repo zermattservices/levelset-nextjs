@@ -433,7 +433,7 @@ export function PEAClassic({
       {/* Tabs */}
       <StyledTabs value={activeTab} onChange={handleTabChange}>
         <StyledTab label="Overview" value="overview" />
-        <StyledTab label="Employee Ratings" value="employees" />
+        <StyledTab label="Position View" value="employees" />
         <StyledTab label="Leadership View" value="leadership" />
       </StyledTabs>
 
@@ -625,11 +625,11 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding }: Ove
                             <TableCell>Leader</TableCell>
                             <TableCell>Date</TableCell>
                             <TableCell>Position</TableCell>
-                            <TableCell align="center">Rating 1</TableCell>
-                            <TableCell align="center">Rating 2</TableCell>
-                            <TableCell align="center">Rating 3</TableCell>
-                            <TableCell align="center">Rating 4</TableCell>
-                            <TableCell align="center">Rating 5</TableCell>
+                            <TableCell align="center">Criteria 1</TableCell>
+                            <TableCell align="center">Criteria 2</TableCell>
+                            <TableCell align="center">Criteria 3</TableCell>
+                            <TableCell align="center">Criteria 4</TableCell>
+                            <TableCell align="center">Criteria 5</TableCell>
                             <TableCell align="center">Avg</TableCell>
                           </TableRow>
                         </TableHead>
@@ -682,11 +682,11 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
             <TableCell sx={{ width: 40 }}></TableCell>
             <TableCell sx={{ pl: 1 }}>Name</TableCell>
             <TableCell align="center">Last Rating</TableCell>
-            <TableCell align="center">{big5Labels?.label_1 || 'Rating 1'}</TableCell>
-            <TableCell align="center">{big5Labels?.label_2 || 'Rating 2'}</TableCell>
-            <TableCell align="center">{big5Labels?.label_3 || 'Rating 3'}</TableCell>
-            <TableCell align="center">{big5Labels?.label_4 || 'Rating 4'}</TableCell>
-            <TableCell align="center">{big5Labels?.label_5 || 'Rating 5'}</TableCell>
+            <TableCell align="center">{big5Labels?.label_1 || 'Criteria 1'}</TableCell>
+            <TableCell align="center">{big5Labels?.label_2 || 'Criteria 2'}</TableCell>
+            <TableCell align="center">{big5Labels?.label_3 || 'Criteria 3'}</TableCell>
+            <TableCell align="center">{big5Labels?.label_4 || 'Criteria 4'}</TableCell>
+            <TableCell align="center">{big5Labels?.label_5 || 'Criteria 5'}</TableCell>
             <TableCell align="center">Avg</TableCell>
             <TableCell align="center"># Ratings</TableCell>
           </TableRow>
@@ -873,11 +873,11 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding }: L
                             <TableCell>Employee</TableCell>
                             <TableCell>Date</TableCell>
                             <TableCell>Position</TableCell>
-                            <TableCell align="center">Rating 1</TableCell>
-                            <TableCell align="center">Rating 2</TableCell>
-                            <TableCell align="center">Rating 3</TableCell>
-                            <TableCell align="center">Rating 4</TableCell>
-                            <TableCell align="center">Rating 5</TableCell>
+                            <TableCell align="center">Criteria 1</TableCell>
+                            <TableCell align="center">Criteria 2</TableCell>
+                            <TableCell align="center">Criteria 3</TableCell>
+                            <TableCell align="center">Criteria 4</TableCell>
+                            <TableCell align="center">Criteria 5</TableCell>
                             <TableCell align="center">Avg</TableCell>
                           </TableRow>
                         </TableHead>

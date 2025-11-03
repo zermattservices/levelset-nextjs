@@ -159,11 +159,30 @@ export async function fetchOverviewData(
       }
     });
 
-    // Calculate overall average (average of position averages)
-    const posAvgs = Object.values(positionAverages).filter(v => v !== null) as number[];
-    const overall_avg = posAvgs.length > 0
-      ? posAvgs.reduce((sum, avg) => sum + avg, 0) / posAvgs.length
-      : null;
+    // Calculate overall average (average of last 4 ratings across all positions)
+    const last4Ratings = empRatings.slice(0, 4);
+    let overall_avg: number | null = null;
+    
+    if (last4Ratings.length > 0) {
+      const avgs: number[] = [];
+      last4Ratings.forEach(r => {
+        if (r.rating_avg !== null) {
+          avgs.push(r.rating_avg);
+        } else {
+          // Calculate avg from rating_1-5 if rating_avg is null
+          const individualRatings = [r.rating_1, r.rating_2, r.rating_3, r.rating_4, r.rating_5]
+            .filter(v => v !== null) as number[];
+          if (individualRatings.length > 0) {
+            const calculatedAvg = individualRatings.reduce((sum, v) => sum + v, 0) / individualRatings.length;
+            avgs.push(calculatedAvg);
+          }
+        }
+      });
+      
+      overall_avg = avgs.length > 0
+        ? avgs.reduce((sum, avg) => sum + avg, 0) / avgs.length
+        : null;
+    }
 
     // 90-day count
     const ninetyDaysAgo = new Date();
