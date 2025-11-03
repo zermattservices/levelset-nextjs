@@ -16,7 +16,11 @@ import {
   FormControl,
   InputLabel,
   IconButton,
-  Collapse
+  Collapse,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -50,7 +54,7 @@ const cleanPositionName = (positionName: string): string => {
   return positionName;
 };
 
-export interface PositionalRatingsTableProps {
+export interface PEAClassicProps {
   orgId: string;
   locationId: string;
   className?: string;
@@ -75,7 +79,7 @@ const StyledContainer = styled(TableContainer)<{ componentwidth?: string | numbe
   overflow: "auto",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
-  maxHeight: '70vh'
+  maxHeight: 650
 }));
 
 const StyledTable = styled(Table)(() => ({
@@ -223,7 +227,7 @@ const LoadingOverlay = styled(Box)(() => ({
 
 // ===== Main Component =====
 
-export function PositionalRatingsTable({
+export function PEAClassic({
   orgId,
   locationId,
   className = "",
@@ -233,7 +237,7 @@ export function PositionalRatingsTable({
   logoUrl,
   width,
   maxWidth
-}: PositionalRatingsTableProps) {
+}: PEAClassicProps) {
   const [activeTab, setActiveTab] = React.useState<"overview" | "employees" | "leadership">(defaultTab);
   const [area, setArea] = React.useState<"FOH" | "BOH">(defaultArea);
   const [selectedPosition, setSelectedPosition] = React.useState<string | null>(null);
@@ -248,6 +252,8 @@ export function PositionalRatingsTable({
   
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  
+  const [showRatingScale, setShowRatingScale] = React.useState(false);
 
   const cellPadding = density === "compact" ? 0.5 : 1;
 
@@ -411,39 +417,18 @@ export function PositionalRatingsTable({
 
   return (
     <Box 
-      className={`positional-ratings-table ${className}`}
+      className={`pea-classic ${className}`}
       sx={{
         width: width || '100%',
         maxWidth: maxWidth || '100%'
       }}
     >
-      {/* Header with Rubric and Logo */}
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr auto 1fr', 
-        alignItems: 'start', 
-        gap: 2,
-        mb: 3
-      }}>
-        <Box sx={{ gridColumn: 1 }}>
-          <PEARubric />
+      {/* Header with Logo only */}
+      {logoUrl && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <img src={logoUrl} alt="Location Logo" style={{ width: 180, height: 'auto' }} />
         </Box>
-        
-        <Box sx={{ gridColumn: 2, textAlign: 'center' }}>
-          <Typography 
-            variant="h5" 
-            sx={{ fontFamily, fontWeight: 600, mb: 2 }}
-          >
-            Positional Excellence Ratings
-          </Typography>
-        </Box>
-
-        {logoUrl && (
-          <Box sx={{ gridColumn: 3, justifySelf: 'end' }}>
-            <img src={logoUrl} alt="Location Logo" style={{ width: 180, height: 'auto' }} />
-          </Box>
-        )}
-      </Box>
+      )}
 
       {/* Tabs */}
       <StyledTabs value={activeTab} onChange={handleTabChange}>
@@ -473,6 +458,26 @@ export function PositionalRatingsTable({
             </Select>
           </FormControl>
         )}
+        
+        {/* Show Rating Scale Button */}
+        <Button
+          onClick={() => setShowRatingScale(true)}
+          sx={{
+            fontFamily,
+            fontSize: 14,
+            fontWeight: 600,
+            backgroundColor: '#31664a',
+            color: '#ffffff',
+            borderRadius: '6px',
+            textTransform: 'none',
+            padding: '8px 16px',
+            '&:hover': {
+              backgroundColor: '#27533d',
+            }
+          }}
+        >
+          Show Rating Scale
+        </Button>
       </ControlsContainer>
 
       {/* Table Content - Render based on active tab with loading overlay */}
@@ -514,6 +519,26 @@ export function PositionalRatingsTable({
           />
         )}
       </Box>
+      
+      {/* Rating Scale Modal */}
+      <Dialog
+        open={showRatingScale}
+        onClose={() => setShowRatingScale(false)}
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            fontFamily,
+          }
+        }}
+      >
+        <DialogTitle sx={{ fontFamily, fontWeight: 600, pb: 1 }}>
+          Rating Scale
+        </DialogTitle>
+        <DialogContent>
+          <PEARubric />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

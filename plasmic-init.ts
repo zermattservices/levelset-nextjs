@@ -19,7 +19,7 @@ import { LogoutButton } from "./components/CodeComponents/auth/LogoutButton";
 import { SupabaseUserLogOut } from "./components/CodeComponents/auth/SupabaseUserLogOut";
 import { SimpleLogoutButton } from "./components/CodeComponents/auth/SimpleLogoutButton";
 import { FullPEAScoreboard } from "./components/CodeComponents/FullPEAScoreboard";
-import { PositionalRatingsTable } from "./components/CodeComponents/PositionalRatingsTable";
+import { PEAClassic } from "./components/CodeComponents/PEAClassic";
 import { PositionalRatings } from "./components/CodeComponents/PositionalRatings";
 import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
 
@@ -498,10 +498,10 @@ PLASMIC.registerComponent(SimpleLogoutButton, {
       importPath: "./components/CodeComponents/FullPEAScoreboard",
     });
 
-// Register PositionalRatingsTable component - Supabase-based PEA ratings dashboard
-PLASMIC.registerComponent(PositionalRatingsTable, {
-  name: "PositionalRatingsTable",
-  displayName: "Positional Ratings Table",
+// Register PEAClassic component - Supabase-based PEA ratings dashboard (formerly PositionalRatingsTable)
+PLASMIC.registerComponent(PEAClassic, {
+  name: "PEAClassic",
+  displayName: "PEA Classic",
   props: {
     orgId: {
       type: "string",
@@ -547,7 +547,7 @@ PLASMIC.registerComponent(PositionalRatingsTable, {
       description: "URL for location logo (optional)"
     }
   },
-  importPath: "./components/CodeComponents/PositionalRatingsTable",
+  importPath: "./components/CodeComponents/PEAClassic",
 });
 
 // Register PositionalRatings component - All ratings in one table with advanced data grid features
