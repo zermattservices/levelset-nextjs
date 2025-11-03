@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   trendBadge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 6,
     fontSize: 12,
     fontWeight: 600,
   },
@@ -133,16 +133,14 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     color: colors.grey600,
   },
+  deltaBold: {
+    fontWeight: 600,
+  },
   deltaGreen: {
     color: colors.trendGreen,
-    fontWeight: 600,
   },
   deltaRed: {
     color: colors.trendRed,
-    fontWeight: 600,
-  },
-  deltaGrey: {
-    color: colors.grey600,
   },
   periodText: {
     fontSize: 12,
@@ -173,21 +171,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   tableHeaderCell: {
     fontSize: 10,
-    fontWeight: 600,
     color: colors.grey900,
     paddingHorizontal: 3,
+    textAlign: 'center',
   },
   // Column widths (no actions column, more space for criteria headers)
   colDate: { width: '13%' },
-  colEmployee: { width: '15%' },
+  colEmployee: { width: '14%' },
   colRole: { width: '12%' },
-  colLeader: { width: '14%' },
+  colLeader: { width: '13%' },
   colPosition: { width: '11%' },
-  colRating: { width: '7%' },
-  colOverall: { width: '7%' },
+  colRating: { width: '7.4%' },
+  colOverall: { width: '7.4%' },
   // Rating cells
   ratingCell: {
     textAlign: 'center',
@@ -220,9 +219,63 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rolePill: {
-    backgroundColor: colors.grey200,
-    color: colors.grey900,
+  rolePillNewHire: {
+    backgroundColor: '#E6FAE6',
+    color: '#2E8B57',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    fontSize: 8,
+    fontWeight: 500,
+  },
+  rolePillTeamMember: {
+    backgroundColor: '#E6F2FF',
+    color: '#4169E1',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    fontSize: 8,
+    fontWeight: 500,
+  },
+  rolePillTrainer: {
+    backgroundColor: '#FFF0F5',
+    color: '#C71585',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    fontSize: 8,
+    fontWeight: 500,
+  },
+  rolePillTeamLead: {
+    backgroundColor: '#FFF0E6',
+    color: '#A0522D',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    fontSize: 8,
+    fontWeight: 500,
+  },
+  rolePillDirector: {
+    backgroundColor: '#F5F0FF',
+    color: '#6A5ACD',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    fontSize: 8,
+    fontWeight: 500,
+  },
+  rolePillOperator: {
+    backgroundColor: '#F0F0FF',
+    color: '#483D8B',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    fontSize: 8,
+    fontWeight: 500,
+  },
+  rolePillExecutive: {
+    backgroundColor: '#F0F0FF',
+    color: '#483D8B',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 12,
@@ -285,6 +338,27 @@ const getRatingStyle = (rating: number | null) => {
   return styles.ratingRed;
 };
 
+const getRolePillStyle = (role: string) => {
+  switch (role) {
+    case 'New Hire':
+      return styles.rolePillNewHire;
+    case 'Team Member':
+      return styles.rolePillTeamMember;
+    case 'Trainer':
+      return styles.rolePillTrainer;
+    case 'Team Lead':
+      return styles.rolePillTeamLead;
+    case 'Director':
+      return styles.rolePillDirector;
+    case 'Operator':
+      return styles.rolePillOperator;
+    case 'Executive':
+      return styles.rolePillExecutive;
+    default:
+      return styles.rolePillTeamMember; // Default to Team Member style
+  }
+};
+
 const formatFieldName = (field: string): string => {
   const fieldMap: { [key: string]: string } = {
     employee_name: 'Employee',
@@ -339,11 +413,15 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
           {/* Column 2: Search + First half of column filters */}
           <View style={styles.filterColumn}>
             {filters.searchText && (
-              <Text style={styles.filterItem}>Search = "{filters.searchText}"</Text>
+              <Text style={styles.filterItem}>
+                <Text style={styles.filterLabel}>Search {formatOperator('is')} </Text>
+                <Text style={styles.filterValue}>{filters.searchText}</Text>
+              </Text>
             )}
             {filters.columnFilters.slice(0, Math.ceil(filters.columnFilters.length / 2)).map((f, idx) => (
               <Text key={idx} style={styles.filterItem}>
-                {formatFieldName(f.field)} {formatOperator(f.operator)} "{f.value}"
+                <Text style={styles.filterLabel}>{formatFieldName(f.field)} {formatOperator(f.operator)} </Text>
+                <Text style={styles.filterValue}>{f.value}</Text>
               </Text>
             ))}
           </View>
@@ -352,7 +430,8 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
           <View style={styles.filterColumn}>
             {filters.columnFilters.slice(Math.ceil(filters.columnFilters.length / 2)).map((f, idx) => (
               <Text key={idx} style={styles.filterItem}>
-                {formatFieldName(f.field)} {formatOperator(f.operator)} "{f.value}"
+                <Text style={styles.filterLabel}>{formatFieldName(f.field)} {formatOperator(f.operator)} </Text>
+                <Text style={styles.filterValue}>{f.value}</Text>
               </Text>
             ))}
           </View>
@@ -380,17 +459,22 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
             </View>
             <View style={styles.metricValueRow}>
               <Text style={styles.metricValue}>{metrics.ratingsCount.value.toLocaleString()}</Text>
-              <Text style={[
-                styles.metricDelta,
-                metrics.ratingsCount.hasPriorData
-                  ? (metrics.ratingsCount.change >= 0 ? styles.deltaGreen : styles.deltaRed)
-                  : styles.deltaGrey
-              ]}>
-                {metrics.ratingsCount.hasPriorData
-                  ? `${metrics.ratingsCount.change >= 0 ? '+' : ''}${metrics.ratingsCount.change} over prior ${metrics.ratingsCount.priorPeriod}`
-                  : '+0 over prior period'
-                }
-              </Text>
+              <View style={{ textAlign: 'right' }}>
+                {metrics.ratingsCount.hasPriorData ? (
+                  <>
+                    <Text style={[
+                      styles.metricDelta,
+                      styles.deltaBold,
+                      metrics.ratingsCount.change >= 0 ? styles.deltaGreen : styles.deltaRed
+                    ]}>
+                      {metrics.ratingsCount.change >= 0 ? '+' : ''}{metrics.ratingsCount.change}
+                    </Text>
+                    <Text style={styles.metricDelta}> over prior {metrics.ratingsCount.priorPeriod}</Text>
+                  </>
+                ) : (
+                  <Text style={styles.metricDelta}>+0 over prior period</Text>
+                )}
+              </View>
             </View>
           </View>
           
@@ -414,17 +498,22 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
             </View>
             <View style={styles.metricValueRow}>
               <Text style={styles.metricValue}>{metrics.avgRating.value.toFixed(2)}</Text>
-              <Text style={[
-                styles.metricDelta,
-                metrics.avgRating.hasPriorData
-                  ? (metrics.avgRating.change >= 0 ? styles.deltaGreen : styles.deltaRed)
-                  : styles.deltaGrey
-              ]}>
-                {metrics.avgRating.hasPriorData
-                  ? `${metrics.avgRating.change >= 0 ? '+' : ''}${metrics.avgRating.change.toFixed(2)} over prior ${metrics.avgRating.priorPeriod}`
-                  : '+0.00 over prior period'
-                }
-              </Text>
+              <View style={{ textAlign: 'right' }}>
+                {metrics.avgRating.hasPriorData ? (
+                  <>
+                    <Text style={[
+                      styles.metricDelta,
+                      styles.deltaBold,
+                      metrics.avgRating.change >= 0 ? styles.deltaGreen : styles.deltaRed
+                    ]}>
+                      {metrics.avgRating.change >= 0 ? '+' : ''}{metrics.avgRating.change.toFixed(2)}
+                    </Text>
+                    <Text style={styles.metricDelta}> over prior {metrics.avgRating.priorPeriod}</Text>
+                  </>
+                ) : (
+                  <Text style={styles.metricDelta}>+0.00 over prior period</Text>
+                )}
+              </View>
             </View>
           </View>
           
@@ -448,17 +537,22 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
             </View>
             <View style={styles.metricValueRow}>
               <Text style={styles.metricValue}>{metrics.ratingsPerDay.value.toFixed(1)}</Text>
-              <Text style={[
-                styles.metricDelta,
-                metrics.ratingsPerDay.hasPriorData
-                  ? (metrics.ratingsPerDay.change >= 0 ? styles.deltaGreen : styles.deltaRed)
-                  : styles.deltaGrey
-              ]}>
-                {metrics.ratingsPerDay.hasPriorData
-                  ? `${metrics.ratingsPerDay.change >= 0 ? '+' : ''}${metrics.ratingsPerDay.change.toFixed(1)} over prior ${metrics.ratingsPerDay.priorPeriod}`
-                  : '+0.0 over prior period'
-                }
-              </Text>
+              <View style={{ textAlign: 'right' }}>
+                {metrics.ratingsPerDay.hasPriorData ? (
+                  <>
+                    <Text style={[
+                      styles.metricDelta,
+                      styles.deltaBold,
+                      metrics.ratingsPerDay.change >= 0 ? styles.deltaGreen : styles.deltaRed
+                    ]}>
+                      {metrics.ratingsPerDay.change >= 0 ? '+' : ''}{metrics.ratingsPerDay.change.toFixed(1)}
+                    </Text>
+                    <Text style={styles.metricDelta}> over prior {metrics.ratingsPerDay.priorPeriod}</Text>
+                  </>
+                ) : (
+                  <Text style={styles.metricDelta}>+0.0 over prior period</Text>
+                )}
+              </View>
             </View>
           </View>
         </View>
@@ -486,14 +580,14 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
               <Text style={[styles.tableCell, styles.colDate]}>{row.date}</Text>
               <Text style={[styles.tableCell, styles.colEmployee]}>{row.employeeName}</Text>
               <View style={[styles.tableCell, styles.colRole, styles.rolePillWrapper]}>
-                <View style={styles.rolePill}>
-                  <Text style={{ textAlign: 'center' }}>{row.employeeRole}</Text>
+                <View style={getRolePillStyle(row.employeeRole)}>
+                  <Text>{row.employeeRole}</Text>
                 </View>
               </View>
               <Text style={[styles.tableCell, styles.colLeader]}>{row.leaderName}</Text>
-              <View style={[styles.tableCell, styles.colPosition, { alignItems: 'center', justifyContent: 'center' }]}>
+              <View style={[styles.tableCell, styles.colPosition, styles.rolePillWrapper]}>
                 <View style={[styles.pill, row.isFOH ? styles.fohPill : styles.bohPill]}>
-                  <Text style={{ textAlign: 'center' }}>{row.position}</Text>
+                  <Text>{row.position}</Text>
                 </View>
               </View>
               <View style={[styles.tableCell, styles.colRating]}>
