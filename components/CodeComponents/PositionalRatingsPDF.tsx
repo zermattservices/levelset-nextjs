@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontWeight: 600,
     color: colors.grey900,
-    marginRight: 6,
   },
   filterValue: {
     color: colors.grey600,
