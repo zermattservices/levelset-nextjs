@@ -1767,10 +1767,6 @@ export function PositionalRatings({
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <StyledContainer className={className} componentwidth={width} componentmaxwidth={maxWidth}>
-        <Typography variant="h5" sx={{ fontFamily, fontWeight: 600, mb: 2, color: '#111827' }}>
-          Positional Ratings
-        </Typography>
-        
         {/* Error Display */}
         {error && (
           <Typography color="error" sx={{ mb: 2, fontFamily }}>

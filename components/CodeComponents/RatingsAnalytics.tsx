@@ -179,7 +179,7 @@ export function RatingsAnalytics({
   // Show skeleton during analytics loading (not parent loading)
   if (analyticsLoading) {
     return (
-      <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap' }}>
+      <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap', borderRadius: '16px', mb: '12px' }}>
         <Skeleton 
           variant="rectangular" 
           animation="wave"
@@ -215,7 +215,7 @@ export function RatingsAnalytics({
   }
 
   return (
-    <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap' }}>
+    <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap', borderRadius: '16px', mb: '12px' }}>
       {/* Metric 1: # of Ratings */}
       <AnalyticsMetricCard
         metricName="# of Ratings"
