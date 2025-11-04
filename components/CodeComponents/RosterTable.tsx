@@ -14,7 +14,6 @@ import {
   Stack,
   Menu,
   MenuItem,
-  Button,
   Box,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -234,21 +233,6 @@ const RoleMenuItem = styled(MenuItem)(() => ({
   },
 }));
 
-const SaveButton = styled(Button)(() => ({
-  marginTop: 8,
-  backgroundColor: "#31664a",
-  color: "white",
-  fontSize: 12,
-  fontWeight: 500,
-  fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
-  padding: "6px 12px",
-  borderRadius: 6,
-  textTransform: "none",
-  "&:hover": {
-    backgroundColor: "#2d5a42",
-  },
-}));
-
 const AvailabilityChip = styled(Box)(() => ({
   display: "inline-flex",
   alignItems: "center",
@@ -309,7 +293,6 @@ export function RosterTable({
   
   // Role dropdown state
   const [roleMenuAnchor, setRoleMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
-  const [pendingRoleChanges, setPendingRoleChanges] = React.useState<{ [key: string]: Role }>({});
   
   // Availability dropdown state
   const [availabilityMenuAnchor, setAvailabilityMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
@@ -411,7 +394,15 @@ export function RosterTable({
       onCertifiedChange(id, checked);
     }
     
-    // Update via API
+    // Optimistic update - update UI immediately
+    const previousData = data.find(emp => emp.id === id);
+    setData(prev => prev.map(emp => 
+      emp.id === id 
+        ? { ...emp, certified: checked }
+        : emp
+    ));
+    
+    // Update via API in the background
     try {
       const response = await fetch('/api/employees', {
         method: 'POST',
@@ -429,14 +420,22 @@ export function RosterTable({
       
       const result = await response.json();
       
-      // Update with both certified status and calculated_pay from API response
+      // Update with calculated_pay from API response
       setData(prev => prev.map(emp => 
         emp.id === id 
-          ? { ...emp, certified: checked, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
+          ? { ...emp, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
           : emp
       ));
     } catch (err) {
       console.error('Error updating Certified status:', err);
+      // Revert on error
+      if (previousData) {
+        setData(prev => prev.map(emp => 
+          emp.id === id 
+            ? { ...emp, certified: previousData.certified }
+            : emp
+        ));
+      }
     }
   };
 
@@ -445,7 +444,15 @@ export function RosterTable({
       onFohChange(id, checked);
     }
     
-    // Update via API
+    // Optimistic update - update UI immediately
+    const previousData = data.find(emp => emp.id === id);
+    setData(prev => prev.map(emp => 
+      emp.id === id 
+        ? { ...emp, foh: checked }
+        : emp
+    ));
+    
+    // Update via API in the background
     try {
       const response = await fetch('/api/employees', {
         method: 'POST',
@@ -463,14 +470,22 @@ export function RosterTable({
       
       const result = await response.json();
       
-      // Update with both FOH status and calculated_pay from API response
+      // Update with calculated_pay from API response
       setData(prev => prev.map(emp => 
         emp.id === id 
-          ? { ...emp, foh: checked, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
+          ? { ...emp, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
           : emp
       ));
     } catch (err) {
       console.error('Error updating FOH status:', err);
+      // Revert on error
+      if (previousData) {
+        setData(prev => prev.map(emp => 
+          emp.id === id 
+            ? { ...emp, foh: previousData.foh }
+            : emp
+        ));
+      }
     }
   };
 
@@ -479,7 +494,15 @@ export function RosterTable({
       onBohChange(id, checked);
     }
     
-    // Update via API
+    // Optimistic update - update UI immediately
+    const previousData = data.find(emp => emp.id === id);
+    setData(prev => prev.map(emp => 
+      emp.id === id 
+        ? { ...emp, boh: checked }
+        : emp
+    ));
+    
+    // Update via API in the background
     try {
       const response = await fetch('/api/employees', {
         method: 'POST',
@@ -497,14 +520,22 @@ export function RosterTable({
       
       const result = await response.json();
       
-      // Update with both BOH status and calculated_pay from API response
+      // Update with calculated_pay from API response
       setData(prev => prev.map(emp => 
         emp.id === id 
-          ? { ...emp, boh: checked, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
+          ? { ...emp, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
           : emp
       ));
     } catch (err) {
       console.error('Error updating BOH status:', err);
+      // Revert on error
+      if (previousData) {
+        setData(prev => prev.map(emp => 
+          emp.id === id 
+            ? { ...emp, boh: previousData.boh }
+            : emp
+        ));
+      }
     }
   };
 
@@ -524,7 +555,15 @@ export function RosterTable({
       onAvailabilityChange(id, availability);
     }
 
-    // Update via API (which will trigger pay recalculation)
+    // Optimistic update - update UI immediately
+    const previousData = data.find(emp => emp.id === id);
+    setData(prev => prev.map(emp =>
+      emp.id === id 
+        ? { ...emp, availability }
+        : emp
+    ));
+
+    // Update via API in the background (which will trigger pay recalculation)
     try {
       const response = await fetch('/api/employees', {
         method: 'POST',
@@ -542,14 +581,22 @@ export function RosterTable({
 
       const result = await response.json();
       
-      // Update both availability and calculated_pay from API response
+      // Update calculated_pay from API response
       setData(prev => prev.map(emp =>
         emp.id === id 
-          ? { ...emp, availability, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
+          ? { ...emp, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
           : emp
       ));
     } catch (err) {
       console.error('Error updating availability:', err);
+      // Revert on error
+      if (previousData) {
+        setData(prev => prev.map(emp =>
+          emp.id === id 
+            ? { ...emp, availability: previousData.availability }
+            : emp
+        ));
+      }
     }
   };
 
@@ -566,30 +613,25 @@ export function RosterTable({
       ...prev,
       [employeeId]: null
     }));
-    // Clear pending changes when closing without saving
-    setPendingRoleChanges(prev => {
-      const newPending = { ...prev };
-      delete newPending[employeeId];
-      return newPending;
-    });
   };
 
-  const handleRoleSelect = (employeeId: string, newRole: Role) => {
-    setPendingRoleChanges(prev => ({
-      ...prev,
-      [employeeId]: newRole
-    }));
-  };
-
-  const handleSaveRoleChange = async (employeeId: string) => {
-    const newRole = pendingRoleChanges[employeeId];
-    if (!newRole) return;
-
+  const handleRoleSelect = async (employeeId: string, newRole: Role) => {
+    // Close the menu immediately
+    handleRoleMenuClose(employeeId);
+    
     if (onRoleChange) {
       onRoleChange(employeeId, newRole);
     }
 
-    // Update via API
+    // Optimistic update - update UI immediately
+    const previousData = data.find(emp => emp.id === employeeId);
+    setData(prev => prev.map(emp => 
+      emp.id === employeeId 
+        ? { ...emp, currentRole: newRole }
+        : emp
+    ));
+
+    // Update via API in the background
     try {
       const response = await fetch('/api/employees', {
         method: 'POST',
@@ -607,22 +649,22 @@ export function RosterTable({
       
       const result = await response.json();
       
-      // Update with both role and calculated_pay from API response
+      // Update with calculated_pay from API response
       setData(prev => prev.map(emp => 
         emp.id === employeeId 
-          ? { ...emp, currentRole: newRole, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
+          ? { ...emp, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
           : emp
       ));
-      
-      // Clear pending changes and close menu
-      setPendingRoleChanges(prev => {
-        const newPending = { ...prev };
-        delete newPending[employeeId];
-        return newPending;
-      });
-      handleRoleMenuClose(employeeId);
     } catch (err) {
       console.error('Error updating employee role:', err);
+      // Revert on error
+      if (previousData) {
+        setData(prev => prev.map(emp => 
+          emp.id === employeeId 
+            ? { ...emp, currentRole: previousData.currentRole }
+            : emp
+        ));
+      }
     }
   };
 
@@ -793,10 +835,10 @@ export function RosterTable({
                 ) : (
                   <>
                     <RoleChip
-                      className={`${roleChip(pendingRoleChanges[e.id] || e.currentRole)} ${roleBadgeClass || ""}`}
+                      className={`${roleChip(e.currentRole)} ${roleBadgeClass || ""}`}
                       onClick={(event) => handleRoleMenuOpen(event, e.id)}
                     >
-                      {pendingRoleChanges[e.id] || e.currentRole}
+                      {e.currentRole}
                       <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
                     </RoleChip>
                     
@@ -825,7 +867,7 @@ export function RosterTable({
                         <RoleMenuItem
                           key={role}
                           onClick={() => handleRoleSelect(e.id, role)}
-                          selected={pendingRoleChanges[e.id] === role}
+                          selected={e.currentRole === role}
                         >
                           <RoleChip
                             className={`${roleChip(role)} ${roleBadgeClass || ""}`}
@@ -841,18 +883,6 @@ export function RosterTable({
                           </RoleChip>
                         </RoleMenuItem>
                       ))}
-                      
-                      {pendingRoleChanges[e.id] && (
-                        <Box sx={{ px: 2, py: 1, borderTop: '1px solid #e5e7eb' }}>
-                          <SaveButton
-                            fullWidth
-                            onClick={() => handleSaveRoleChange(e.id)}
-                            size="small"
-                          >
-                            Save Changes
-                          </SaveButton>
-                        </Box>
-                      )}
                     </Menu>
                   </>
                 )}
