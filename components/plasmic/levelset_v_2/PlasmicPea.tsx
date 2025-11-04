@@ -66,7 +66,7 @@ import { FohBohSlider } from "../../CodeComponents/FohBohSlider"; // plasmic-imp
 import { PositionButtons } from "../../CodeComponents/PositionButtons"; // plasmic-import: tQU-ID6-K3GO/codeComponent
 import { ScoreboardTable } from "../../CodeComponents/ScoreboardTable"; // plasmic-import: EURkS6Dky8BE/codeComponent
 import { PEARubric } from "../../CodeComponents/PEARubric"; // plasmic-import: Kl-hD0pLbIQ_/codeComponent
-import { FullPEAScoreboard } from "../../CodeComponents/FullPEAScoreboard"; // plasmic-import: Y-WGXOhHxLj4/codeComponent
+import { PositionalRatings } from "../../CodeComponents/PositionalRatings"; // plasmic-import: LAVhHSecbW0h/codeComponent
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -97,7 +97,7 @@ export type PlasmicPea__OverridesType = {
   verticalStack2?: Flex__<"div">;
   peaRubric?: Flex__<typeof PEARubric>;
   verticalStack3?: Flex__<"div">;
-  fullPeaScoreboard?: Flex__<typeof FullPEAScoreboard>;
+  positionalRatings?: Flex__<typeof PositionalRatings>;
 };
 
 export interface DefaultPeaProps {}
@@ -147,20 +147,7 @@ function PlasmicPea__RenderFunc(props: {
         path: "menuNavigation.headerLocationId",
         type: "private",
         variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) =>
-          (() => {
-            try {
-              return $state.form.value.location_alt_id;
-            } catch (e) {
-              if (
-                e instanceof TypeError ||
-                e?.plasmicType === "PlasmicUndefinedDataError"
-              ) {
-                return undefined;
-              }
-              throw e;
-            }
-          })()
+        initFunc: ({ $props, $state, $queries, $ctx }) => ``
       },
       {
         path: "menuNavigation.firstName",
@@ -522,15 +509,21 @@ function PlasmicPea__RenderFunc(props: {
             className={classNames(projectcss.all, sty.verticalStack3)}
           >
             <div className={classNames(projectcss.all, sty.freeBox___9LQfr)}>
-              <FullPEAScoreboard
-                data-plasmic-name={"fullPeaScoreboard"}
-                data-plasmic-override={overrides.fullPeaScoreboard}
-                className={classNames("__wab_instance", sty.fullPeaScoreboard)}
-                dashboardWidth={"1200px"}
-                height={"800px"}
-                maxWidth={"1200px"}
-                variant={"buda"}
-              />
+              <div className={classNames(projectcss.all, sty.freeBox___7G7OF)}>
+                <PositionalRatings
+                  data-plasmic-name={"positionalRatings"}
+                  data-plasmic-override={overrides.positionalRatings}
+                  className={classNames(
+                    "__wab_instance",
+                    sty.positionalRatings
+                  )}
+                  density={"comfortable"}
+                  locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                  maxWidth={"100%"}
+                  orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                  width={"100%"}
+                />
+              </div>
             </div>
           </div>
         </RedirectIf>
@@ -551,7 +544,7 @@ const PlasmicDescendants = {
     "verticalStack2",
     "peaRubric",
     "verticalStack3",
-    "fullPeaScoreboard"
+    "positionalRatings"
   ],
   menuNavigation: ["menuNavigation"],
   redirectIf: [
@@ -563,7 +556,7 @@ const PlasmicDescendants = {
     "verticalStack2",
     "peaRubric",
     "verticalStack3",
-    "fullPeaScoreboard"
+    "positionalRatings"
   ],
   verticalStack: [
     "verticalStack",
@@ -576,8 +569,8 @@ const PlasmicDescendants = {
   peaScoreboardTable: ["peaScoreboardTable"],
   verticalStack2: ["verticalStack2", "peaRubric"],
   peaRubric: ["peaRubric"],
-  verticalStack3: ["verticalStack3", "fullPeaScoreboard"],
-  fullPeaScoreboard: ["fullPeaScoreboard"]
+  verticalStack3: ["verticalStack3", "positionalRatings"],
+  positionalRatings: ["positionalRatings"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
 type DescendantsType<T extends NodeNameType> =
@@ -593,7 +586,7 @@ type NodeDefaultElementType = {
   verticalStack2: "div";
   peaRubric: typeof PEARubric;
   verticalStack3: "div";
-  fullPeaScoreboard: typeof FullPEAScoreboard;
+  positionalRatings: typeof PositionalRatings;
 };
 
 type ReservedPropsType = "variants" | "args" | "overrides";
@@ -667,7 +660,7 @@ export const PlasmicPea = Object.assign(
     verticalStack2: makeNodeComponent("verticalStack2"),
     peaRubric: makeNodeComponent("peaRubric"),
     verticalStack3: makeNodeComponent("verticalStack3"),
-    fullPeaScoreboard: makeNodeComponent("fullPeaScoreboard"),
+    positionalRatings: makeNodeComponent("positionalRatings"),
 
     // Metadata about props expected for PlasmicPea
     internalVariantProps: PlasmicPea__VariantProps,

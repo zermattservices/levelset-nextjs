@@ -1,0 +1,21 @@
+
+> levelset-nextjs@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.33
+  - Environments: .env.local, .env.production
+
+   Linting and checking validity of types ...
+Failed to compile.
+
+./components/CodeComponents/PositionalRatings.tsx:29:3
+Type error: '"@mui/x-data-grid-pro"' has no exported member named 'GridValueGetterParams'. Did you mean 'GridValueGetter'?
+
+[0m [90m 27 |[39m   [33mGridToolbarExport[39m[33m,[39m[0m
+[0m [90m 28 |[39m   [33mGridRowParams[39m[33m,[39m[0m
+[0m[31m[1m>[22m[39m[90m 29 |[39m   [33mGridValueGetterParams[39m[0m
+[0m [90m    |[39m   [31m[1m^[22m[39m[0m
+[0m [90m 30 |[39m } [36mfrom[39m [32m'@mui/x-data-grid-pro'[39m[33m;[39m[0m
+[0m [90m 31 |[39m [36mimport[39m [33mDeleteIcon[39m [36mfrom[39m [32m'@mui/icons-material/Delete'[39m[33m;[39m[0m
+[0m [90m 32 |[39m [36mimport[39m { createSupabaseClient } [36mfrom[39m [32m'@/util/supabase/component'[39m[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null

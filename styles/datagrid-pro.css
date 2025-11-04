@@ -1,0 +1,271 @@
+/* MUI X DataGridPro global overrides for Positional Ratings component */
+/* Using actual rendered class names from DOM (MuiDataGrid-*) */
+
+/* COLUMN SEPARATORS - Hide all separators completely */
+.MuiDataGrid-columnSeparator,
+.MuiDataGrid-columnSeparator--resizable,
+.MuiDataGrid-columnSeparator--sideRight,
+.MuiDataGrid-columnSeparator--sideLeft,
+.MuiDataGrid-columnSeparator--resizing {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.MuiDataGrid-iconSeparator {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* FILTER PANEL - Force Levelset green on focus & correct border colors */
+/* Default border color - match Filter value field (darker grey) */
+.MuiDataGrid-filterFormColumnInput .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline,
+.MuiDataGrid-filterFormOperatorInput .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline,
+.MuiDataGrid-filterFormValueInput .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(0, 0, 0, 0.23) !important;
+}
+
+/* Focus state - Levelset green */
+.MuiDataGrid-filterFormColumnInput .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+.MuiDataGrid-filterFormOperatorInput .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+.MuiDataGrid-filterFormValueInput .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+.MuiDataGrid-filterFormColumnInput .MuiInputLabel-root.Mui-focused,
+.MuiDataGrid-filterFormOperatorInput .MuiInputLabel-root.Mui-focused,
+.MuiDataGrid-filterFormValueInput .MuiInputLabel-root.Mui-focused {
+  color: #31664a !important;
+}
+
+/* COLUMNS PANEL - Force Levelset green on search input */
+.MuiDataGrid-columnsManagementSearchInput .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+.MuiDataGrid-columnsManagementSearchInput .MuiInputLabel-root.Mui-focused {
+  color: #31664a !important;
+}
+
+/* GLOBAL TEXTFIELD OVERRIDES - Force Levelset green for ALL TextField focus states */
+
+/* All outlined TextField focus states */
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+/* All TextField label focus states */
+.MuiInputLabel-root.Mui-focused {
+  color: #31664a !important;
+}
+
+/* All FormControl focus states */
+.MuiFormControl-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+.MuiFormControl-root .MuiInputLabel-root.Mui-focused {
+  color: #31664a !important;
+}
+
+/* ALL InputLabels - Force Satoshi font and size */
+.MuiInputLabel-root {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 16px !important;
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ALL Select components - Force Satoshi font */
+.MuiSelect-select {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+/* ALL TextField inputs - Force Satoshi font */
+.MuiInputBase-input {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+/* DatePicker specific overrides */
+.MuiPickersPopper-root ~ div .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+div[class*="DatePicker"] .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+.MuiPickersPopper-root ~ div .MuiInputLabel-root.Mui-focused,
+div[class*="DatePicker"] .MuiInputLabel-root.Mui-focused {
+  color: #31664a !important;
+}
+
+/* Select component focus states */
+.MuiSelect-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #31664a !important;
+  border-width: 2px !important;
+}
+
+/* CONSISTENT INPUT HEIGHTS - Match pill buttons (36-38px total height) */
+.MuiInputBase-root.MuiInputBase-sizeSmall {
+  height: 36px !important;
+}
+
+.MuiInputBase-root.MuiInputBase-sizeSmall .MuiInputBase-input {
+  padding: 8.5px 14px !important;
+}
+
+.MuiInputBase-root.MuiInputBase-sizeSmall .MuiSelect-select {
+  padding: 8.5px 14px !important;
+}
+
+/* COLUMNS MENU - Force labels to be visible with MAXIMUM specificity */
+.MuiDataGrid-columnsManagement .MuiFormControlLabel-root {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+.MuiDataGrid-columnsManagement .MuiFormControlLabel-root .MuiFormControlLabel-label {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 13px !important;
+  color: #111827 !important;
+  margin-left: 8px !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  flex: 1 !important;
+  white-space: normal !important;
+}
+
+.MuiDataGrid-columnsManagement .MuiFormControlLabel-root .MuiTypography-root {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 13px !important;
+  color: #111827 !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
+.MuiDataGrid-columnsManagementRow {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 4px 16px !important;
+  width: 100% !important;
+}
+
+/* TOOLBAR BUTTONS - Hide text, keep icons only */
+/* Only target filter/columns buttons, NOT date pill buttons */
+.MuiDataGrid-toolbarContainer button[aria-label="Show columns"],
+.MuiDataGrid-toolbarContainer button[aria-label="Show filters"] {
+  min-width: auto !important;
+  padding: 8px !important;
+  font-size: 0 !important;
+  border-radius: 50% !important; /* Circular button */
+  width: 36px !important;
+  height: 36px !important;
+}
+
+.MuiDataGrid-toolbarContainer button[aria-label="Show columns"] .MuiButton-startIcon,
+.MuiDataGrid-toolbarContainer button[aria-label="Show filters"] .MuiButton-startIcon {
+  margin: 0 !important;
+  font-size: 1.5rem !important;
+}
+
+.MuiDataGrid-toolbarContainer button[aria-label="Show columns"] .MuiButton-startIcon svg,
+.MuiDataGrid-toolbarContainer button[aria-label="Show filters"] .MuiButton-startIcon svg {
+  font-size: 20px !important;
+}
+
+/* QUICK FILTER (Search Bar) - Collapse when not focused */
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter {
+  width: auto !important;
+  transition: width 0.2s ease !important;
+}
+
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root {
+  width: 0 !important;
+  transition: width 0.2s ease !important;
+  overflow: hidden !important;
+}
+
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root .MuiInputBase-root {
+  width: 0 !important;
+  padding: 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Expand search bar when focused or has value */
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root:focus-within,
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root:has(input:not(:placeholder-shown)) {
+  width: 150px !important;
+}
+
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root:focus-within .MuiInputBase-root,
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiTextField-root:has(input:not(:placeholder-shown)) .MuiInputBase-root {
+  width: 150px !important;
+  padding: 8px 10px !important;
+}
+
+/* Keep search icon visible */
+.MuiDataGrid-toolbarContainer .MuiDataGrid-toolbarQuickFilter .MuiInputAdornment-root {
+  margin: 0 !important;
+  padding: 8px !important;
+  cursor: pointer !important;
+}
+
+/* Filter indicator badge - Levelset green */
+.MuiDataGrid-toolbarContainer .MuiBadge-badge {
+  background-color: #31664a !important;
+  color: #fff !important;
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 10px !important;
+}
+
+/* DROPDOWN MENUS - Force consistent styling for ALL Select dropdowns */
+.MuiMenu-paper,
+.MuiPopover-paper {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.MuiMenu-list {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.MuiMenuItem-root {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+}
+
+/* FILTER PANEL DROPDOWN MENUS - Specific targeting */
+.MuiDataGrid-filterFormColumnInput .MuiMenu-paper,
+.MuiDataGrid-filterFormOperatorInput .MuiMenu-paper,
+.MuiDataGrid-filterFormValueInput .MuiMenu-paper {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  box-shadow: 0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12) !important;
+}
+
+.MuiDataGrid-filterFormColumnInput .MuiMenuItem-root,
+.MuiDataGrid-filterFormOperatorInput .MuiMenuItem-root,
+.MuiDataGrid-filterFormValueInput .MuiMenuItem-root {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  padding: 6px 16px !important;
+}
+

@@ -434,20 +434,6 @@
           "path": "/discipline"
         },
         {
-          "id": "BUkAZC9D-uE7",
-          "name": "Pea",
-          "type": "managed",
-          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
-          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicPea.tsx",
-          "importSpec": {
-            "modulePath": "../pages/positional-excellence.tsx"
-          },
-          "cssFilePath": "plasmic/levelset_v_2/PlasmicPea.module.css",
-          "scheme": "blackbox",
-          "componentType": "page",
-          "path": "/positional-excellence"
-        },
-        {
           "id": "aHXz3tDsrZcJ",
           "name": "LoginPage",
           "type": "managed",
@@ -538,6 +524,48 @@
           "cssFilePath": "plasmic/levelset_v_2/PlasmicDiscActionForm.module.css",
           "scheme": "blackbox",
           "componentType": "component"
+        },
+        {
+          "id": "_BgwMJSaZ9Nz",
+          "name": "Admin",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicAdmin.tsx",
+          "importSpec": {
+            "modulePath": "../pages/admin.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicAdmin.module.css",
+          "scheme": "blackbox",
+          "componentType": "page",
+          "path": "/admin"
+        },
+        {
+          "id": "BUkAZC9D-uE7",
+          "name": "PositionalExcellence",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicPositionalExcellence.tsx",
+          "importSpec": {
+            "modulePath": "../pages/positional-excellence.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicPositionalExcellence.module.css",
+          "scheme": "blackbox",
+          "componentType": "page",
+          "path": "/positional-excellence"
+        },
+        {
+          "id": "X7Sn6AWMY-7d",
+          "name": "PeaClassic",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicPeaClassic.tsx",
+          "importSpec": {
+            "modulePath": "../pages/positional-excellence-classic.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicPeaClassic.module.css",
+          "scheme": "blackbox",
+          "componentType": "page",
+          "path": "/positional-excellence-classic"
         }
       ],
       "icons": [
@@ -899,6 +927,18 @@
           "name": "FullPEAScoreboard",
           "displayName": "FullPEAScoreboard",
           "componentImportPath": "./components/CodeComponents/FullPEAScoreboard"
+        },
+        {
+          "id": "LAVhHSecbW0h",
+          "name": "PositionalRatings",
+          "displayName": "PositionalRatings",
+          "componentImportPath": "./components/CodeComponents/PositionalRatings"
+        },
+        {
+          "id": "jAb7H8eOs0Ht",
+          "name": "PEAClassic",
+          "displayName": "PEAClassic",
+          "componentImportPath": "./components/CodeComponents/PEAClassic"
         }
       ],
       "splitsProviderFilePath": "",

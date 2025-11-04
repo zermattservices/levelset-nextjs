@@ -275,20 +275,7 @@ function PlasmicDiscipline__RenderFunc(props: {
         path: "menuNavigation.headerLocationId",
         type: "private",
         variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) =>
-          (() => {
-            try {
-              return $state.form.value.location_alt_id;
-            } catch (e) {
-              if (
-                e instanceof TypeError ||
-                e?.plasmicType === "PlasmicUndefinedDataError"
-              ) {
-                return undefined;
-              }
-              throw e;
-            }
-          })()
+        initFunc: ({ $props, $state, $queries, $ctx }) => ``
       },
       {
         path: "menuNavigation.firstName",
@@ -1293,7 +1280,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                           )}
                         >
                           {
-                            "Here\u2019s your organization's current points. Click a Team Member to see their recent infractions."
+                            "Here\u2019s your organization's current discipline health. Click a Team Member to see their recent infractions."
                           }
                         </div>
                       </div>

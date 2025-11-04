@@ -27,7 +27,7 @@
   z-index: 1;
   max-width: var(--token-eC7sN0TdrMwT);
   min-width: 0;
-  padding: 0px 8px 0px 16px;
+  padding: 0px 8px;
 }
 .freeBox__a3UdP {
   display: flex;
@@ -82,13 +82,13 @@
   color: var(--token-0Rg7d9VjUj_J);
   min-width: 0;
 }
-.svg__uQFv {
+.svg__ybpsO {
   position: relative;
   object-fit: cover;
   width: auto;
   height: 1em;
 }
-.svg__ulU8K {
+.svg__qw1E {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -109,13 +109,13 @@
   color: var(--token-0Rg7d9VjUj_J);
   min-width: 0;
 }
-.svg__npaq {
+.svg__cu5Sv {
   position: relative;
   object-fit: cover;
   width: auto;
   height: 1em;
 }
-.svg__n5E9 {
+.svg__kskld {
   position: relative;
   object-fit: cover;
   width: auto;
@@ -373,13 +373,13 @@
   font-weight: 600;
   min-width: 0;
 }
-.svg__tdZlh {
+.svg__sCeSl {
   position: relative;
   object-fit: cover;
   width: auto;
   height: 1em;
 }
-.svg__iWdIe {
+.svg__zoBpc {
   position: relative;
   object-fit: cover;
   width: auto;

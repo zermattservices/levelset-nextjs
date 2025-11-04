@@ -19,6 +19,8 @@ import { LogoutButton } from "./components/CodeComponents/auth/LogoutButton";
 import { SupabaseUserLogOut } from "./components/CodeComponents/auth/SupabaseUserLogOut";
 import { SimpleLogoutButton } from "./components/CodeComponents/auth/SimpleLogoutButton";
 import { FullPEAScoreboard } from "./components/CodeComponents/FullPEAScoreboard";
+import { PEAClassic } from "./components/CodeComponents/PEAClassic";
+import { PositionalRatings } from "./components/CodeComponents/PositionalRatings";
 import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
@@ -159,9 +161,122 @@ PLASMIC.registerComponent(RosterTable, {
   name: "RosterTable",
   displayName: "Roster Table",
   props: {
-    orgId: "string",
-    locationId: "string",
+    orgId: {
+      type: "string",
+      defaultValue: "default-org",
+      description: "Organization ID for filtering employee data"
+    },
+    locationId: {
+      type: "string",
+      defaultValue: "default-location", 
+      description: "Location ID for filtering employee data"
+    },
     className: "string",
+    density: {
+      type: "choice",
+      options: ["comfortable", "compact"],
+      defaultValue: "comfortable",
+      description: "Table density/spacing"
+    },
+    showActions: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Whether to show action buttons"
+    },
+    // Style override props for Plasmic design control
+    tableClass: {
+      type: "string",
+      description: "CSS class for the table element"
+    },
+    headerRowClass: {
+      type: "string", 
+      description: "CSS class for header row"
+    },
+    headerCellClass: {
+      type: "string",
+      description: "CSS class for header cells"
+    },
+    rowClass: {
+      type: "string",
+      description: "CSS class for data rows"
+    },
+    cellClass: {
+      type: "string",
+      description: "CSS class for data cells"
+    },
+    nameCellClass: {
+      type: "string",
+      description: "CSS class for name cells"
+    },
+    roleBadgeClass: {
+      type: "string",
+      description: "CSS class for role badges"
+    },
+    checkboxOnClass: {
+      type: "string",
+      description: "CSS class for checked checkboxes"
+    },
+    checkboxOffClass: {
+      type: "string", 
+      description: "CSS class for unchecked checkboxes"
+    },
+    actionsCellClass: {
+      type: "string",
+      description: "CSS class for actions cell"
+    },
+    // Event handlers
+    onFohChange: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "checked", type: "boolean" }
+      ],
+      description: "Called when FOH checkbox changes"
+    },
+    onBohChange: {
+      type: "eventHandler", 
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "checked", type: "boolean" }
+      ],
+      description: "Called when BOH checkbox changes"
+    },
+    onRoleChange: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "newRole", type: "string" }
+      ],
+      description: "Called when employee role is changed"
+    },
+    onEdit: {
+      type: "eventHandler",
+      argTypes: [{ name: "id", type: "string" }],
+      description: "Called when edit action is clicked"
+    },
+    onDelete: {
+      type: "eventHandler",
+      argTypes: [{ name: "id", type: "string" }],
+      description: "Called when delete action is clicked"
+    },
+    onEmployeeCreate: {
+      type: "eventHandler",
+      argTypes: [{ name: "employee", type: "object" }],
+      description: "Called when creating a new employee"
+    },
+    onEmployeeUpdate: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "employee", type: "object" }
+      ],
+      description: "Called when updating an employee"
+    },
+    onEmployeeDelete: {
+      type: "eventHandler",
+      argTypes: [{ name: "id", type: "string" }],
+      description: "Called when deleting an employee"
+    }
   },
   importPath: "./components/CodeComponents/RosterTable",
 });
@@ -382,6 +497,94 @@ PLASMIC.registerComponent(SimpleLogoutButton, {
       },
       importPath: "./components/CodeComponents/FullPEAScoreboard",
     });
+
+// Register PEAClassic component - Supabase-based PEA ratings dashboard (formerly PositionalRatingsTable)
+PLASMIC.registerComponent(PEAClassic, {
+  name: "PEAClassic",
+  displayName: "PEA Classic",
+  props: {
+    orgId: {
+      type: "string",
+      defaultValue: "54b9864f-9df9-4a15-a209-7b99e1c274f4",
+      description: "Organization ID"
+    },
+    locationId: {
+      type: "string",
+      defaultValue: "67e00fb2-29f5-41ce-9c1c-93e2f7f392dd",
+      description: "Location ID (CFA Buda or West Buda)"
+    },
+    className: "string",
+    width: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Width of the component (e.g., '100%', '1200px')"
+    },
+    maxWidth: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Maximum width of the component (e.g., '100%', '1400px')"
+    },
+    density: {
+      type: "choice",
+      options: ["comfortable", "compact"],
+      defaultValue: "comfortable",
+      description: "Table density/spacing"
+    },
+    defaultTab: {
+      type: "choice",
+      options: ["overview", "employees", "leadership"],
+      defaultValue: "overview",
+      description: "Initial tab to display"
+    },
+    defaultArea: {
+      type: "choice",
+      options: ["FOH", "BOH"],
+      defaultValue: "FOH",
+      description: "Initial FOH/BOH area"
+    },
+    logoUrl: {
+      type: "string",
+      description: "URL for location logo (optional)"
+    }
+  },
+  importPath: "./components/CodeComponents/PEAClassic",
+});
+
+// Register PositionalRatings component - All ratings in one table with advanced data grid features
+PLASMIC.registerComponent(PositionalRatings, {
+  name: "PositionalRatings",
+  displayName: "Positional Ratings",
+  props: {
+    orgId: {
+      type: "string",
+      defaultValue: "54b9864f-9df9-4a15-a209-7b99e1c274f4",
+      description: "Organization ID"
+    },
+    locationId: {
+      type: "string",
+      defaultValue: "67e00fb2-29f5-41ce-9c1c-93e2f7f392dd",
+      description: "Location ID (CFA Buda or West Buda)"
+    },
+    className: "string",
+    width: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Width of the component (e.g., '100%', '1200px')"
+    },
+    maxWidth: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Maximum width of the component (e.g., '100%', '1400px')"
+    },
+    density: {
+      type: "choice",
+      options: ["comfortable", "compact", "standard"],
+      defaultValue: "comfortable",
+      description: "Data grid density/spacing"
+    }
+  },
+  importPath: "./components/CodeComponents/PositionalRatings",
+});
 
 // Register DrawerV2 component - Enhanced version of Plasmic's default Drawer with size prop
 PLASMIC.registerComponent(DrawerV2, {

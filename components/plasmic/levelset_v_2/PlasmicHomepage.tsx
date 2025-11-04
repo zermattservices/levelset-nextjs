@@ -64,6 +64,8 @@ import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08
 import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
 import MetricCard from "../../MetricCard"; // plasmic-import: 7uoOAZgc5EOu/component
 import TrendCard from "../../TrendCard"; // plasmic-import: V-0rig617-gC/component
+import { AntdModal } from "@plasmicpkgs/antd5/skinny/registerModal";
+import LevelsetButton from "../../LevelsetButton"; // plasmic-import: u704oB_4BUvT/component
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -71,6 +73,9 @@ import "@plasmicapp/react-web/lib/plasmic.css";
 
 import projectcss from "../levelset_v2/plasmic_levelset_v2.module.css"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectcss
 import sty from "./PlasmicHomepage.module.css"; // plasmic-import: DhQCv3DKjDwJ/css
+
+import CheckSvgIcon from "../levelset_tabs/icons/PlasmicIcon__CheckSvg"; // plasmic-import: dTo8s4EZdHvA/icon
+import IconIcon from "../levelset_tabs/icons/PlasmicIcon__Icon"; // plasmic-import: CEbmjO_n9jaW/icon
 
 createPlasmicElementProxy;
 
@@ -98,6 +103,8 @@ export type PlasmicHomepage__OverridesType = {
   text2?: Flex__<"div">;
   blurredStack?: Flex__<"div">;
   whedStack?: Flex__<"div">;
+  modal?: Flex__<typeof AntdModal>;
+  levelsetButton?: Flex__<typeof LevelsetButton>;
 };
 
 export interface DefaultHomepageProps {}
@@ -147,20 +154,7 @@ function PlasmicHomepage__RenderFunc(props: {
         path: "menuNavigation.headerLocationId",
         type: "private",
         variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) =>
-          (() => {
-            try {
-              return $state.form.value.location_alt_id;
-            } catch (e) {
-              if (
-                e instanceof TypeError ||
-                e?.plasmicType === "PlasmicUndefinedDataError"
-              ) {
-                return undefined;
-              }
-              throw e;
-            }
-          })()
+        initFunc: ({ $props, $state, $queries, $ctx }) => ``
       },
       {
         path: "menuNavigation.firstName",
@@ -272,6 +266,25 @@ function PlasmicHomepage__RenderFunc(props: {
         type: "private",
         variableType: "text",
         initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
+      },
+      {
+        path: "modal.open",
+        type: "private",
+        variableType: "boolean",
+        initFunc: ({ $props, $state, $queries, $ctx }) =>
+          (() => {
+            try {
+              return !$state.menuNavigation.headerLocationId;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return true;
+              }
+              throw e;
+            }
+          })()
       }
     ],
     [$props, $ctx, $refs]
@@ -889,6 +902,85 @@ function PlasmicHomepage__RenderFunc(props: {
             </div>
           </div>
         </RedirectIf>
+        {false ? (
+          <AntdModal
+            data-plasmic-name={"modal"}
+            data-plasmic-override={overrides.modal}
+            className={classNames("__wab_instance", sty.modal)}
+            defaultStylesClassName={classNames(
+              projectcss.root_reset,
+              projectcss.plasmic_default_styles,
+              projectcss.plasmic_mixins,
+              styleTokensClassNames
+            )}
+            hideFooter={true}
+            modalContentClassName={classNames({
+              [sty["pcls_fZreQ6LQZtXo"]]: true
+            })}
+            modalScopeClassName={sty["modal__modal"]}
+            onOpenChange={async (...eventArgs: any) => {
+              generateStateOnChangeProp($state, ["modal", "open"]).apply(
+                null,
+                eventArgs
+              );
+            }}
+            open={generateStateValueProp($state, ["modal", "open"])}
+            title={
+              <div
+                className={classNames(
+                  projectcss.all,
+                  projectcss.__wab_text,
+                  sty.text__oxN4C
+                )}
+              >
+                {"Select a Location"}
+              </div>
+            }
+            trigger={null}
+            wrapClassName={classNames({ [sty["pcls_aRDvD62CplaH"]]: true })}
+          >
+            <div className={classNames(projectcss.all, sty.freeBox___3Tjrd)}>
+              {(_par => (!_par ? [] : Array.isArray(_par) ? _par : [_par]))(
+                (() => {
+                  try {
+                    return [1, 2];
+                  } catch (e) {
+                    if (
+                      e instanceof TypeError ||
+                      e?.plasmicType === "PlasmicUndefinedDataError"
+                    ) {
+                      return [];
+                    }
+                    throw e;
+                  }
+                })()
+              ).map((__plasmic_item_0, __plasmic_idx_0) => {
+                const currentItem = __plasmic_item_0;
+                const currentIndex = __plasmic_idx_0;
+                return (
+                  <LevelsetButton
+                    data-plasmic-name={"levelsetButton"}
+                    data-plasmic-override={overrides.levelsetButton}
+                    className={classNames("__wab_instance", sty.levelsetButton)}
+                    color={"brand"}
+                    key={currentIndex}
+                    size={"compact"}
+                  >
+                    <div
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text__uEbfj
+                      )}
+                    >
+                      {"Button"}
+                    </div>
+                  </LevelsetButton>
+                );
+              })}
+            </div>
+          </AntdModal>
+        ) : null}
       </div>
     </React.Fragment>
   ) as React.ReactElement | null;
@@ -909,7 +1001,9 @@ const PlasmicDescendants = {
     "trendCard2",
     "text2",
     "blurredStack",
-    "whedStack"
+    "whedStack",
+    "modal",
+    "levelsetButton"
   ],
   menuNavigation: ["menuNavigation"],
   redirectIf: [
@@ -946,7 +1040,9 @@ const PlasmicDescendants = {
   trendCard2: ["trendCard2", "text2"],
   text2: ["text2"],
   blurredStack: ["blurredStack"],
-  whedStack: ["whedStack"]
+  whedStack: ["whedStack"],
+  modal: ["modal", "levelsetButton"],
+  levelsetButton: ["levelsetButton"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
 type DescendantsType<T extends NodeNameType> =
@@ -966,6 +1062,8 @@ type NodeDefaultElementType = {
   text2: "div";
   blurredStack: "div";
   whedStack: "div";
+  modal: typeof AntdModal;
+  levelsetButton: typeof LevelsetButton;
 };
 
 type ReservedPropsType = "variants" | "args" | "overrides";
@@ -1043,6 +1141,8 @@ export const PlasmicHomepage = Object.assign(
     text2: makeNodeComponent("text2"),
     blurredStack: makeNodeComponent("blurredStack"),
     whedStack: makeNodeComponent("whedStack"),
+    modal: makeNodeComponent("modal"),
+    levelsetButton: makeNodeComponent("levelsetButton"),
 
     // Metadata about props expected for PlasmicHomepage
     internalVariantProps: PlasmicHomepage__VariantProps,

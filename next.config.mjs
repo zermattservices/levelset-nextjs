@@ -36,6 +36,10 @@ const nextConfig = {
     'rc-tooltip',
     'rc-tree',
     'rc-table',
+    '@mui/x-data-grid',
+    '@mui/x-data-grid-pro',
+    '@mui/x-data-grid-premium',
+    '@mui/x-date-pickers',
   ],
 };
 
