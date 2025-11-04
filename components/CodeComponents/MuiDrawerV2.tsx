@@ -94,6 +94,7 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
     contentWrapperStyle,
     zIndex = 1000,
     afterOpenChange,
+    drawerScopeClassName,
     drawerHeaderClassName,
     drawerBodyClassName,
     drawerFooterClassName,
