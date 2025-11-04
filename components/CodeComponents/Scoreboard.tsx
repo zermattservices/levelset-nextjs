@@ -1,4 +1,5 @@
 import * as React from "react";
+import { ScoreboardSkeleton } from "./Skeletons/ScoreboardSkeleton";
 
 type Payload = { header: (string|number)[]; rows: (string|number)[][]; sheetName: string; updated: string };
 type Bundle = { tabs: Record<string, Payload> };
@@ -441,9 +442,7 @@ export function Scoreboard({ bundleUrl, logoUrl, initialTab, title }: {
   if (loading && !currentData) {
     return (
       <div className="wrap">
-        <div className="spinner-wrap" style={{ display: 'flex' }}>
-          <div className="spinner"></div>
-        </div>
+        <ScoreboardSkeleton rows={15} columns={8} />
       </div>
     );
   }

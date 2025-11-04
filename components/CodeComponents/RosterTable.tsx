@@ -19,6 +19,7 @@ import {
 import { styled } from "@mui/material/styles";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { EmployeeTableSkeleton } from "./Skeletons/EmployeeTableSkeleton";
 
 export type Role =
   | "New Hire"
@@ -302,47 +303,53 @@ export function RosterTable({
 
   const cellPadding = density === "compact" ? 1 : 1.5;
   
-  // Fetch employees from Supabase
-  React.useEffect(() => {
-    async function fetchEmployees() {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/employees?org_id=${orgId}&location_id=${locationId}`);
-        
-        if (!response.ok) throw new Error(`Failed to fetch employees: ${response.status}`);
-        
-        const data = await response.json() as { employees: Employee[] };
-        
-        // Transform Supabase employees to RosterEntry format
-        const transformedData: RosterEntry[] = data.employees.map((emp: Employee) => ({
-          id: emp.id,
-          name: emp.full_name || `${emp.first_name} ${emp.last_name || ''}`.trim(),
-          currentRole: emp.role as Role,
-          certified: emp.is_certified ?? false,
-          availability: emp.availability || 'Available',
-          calculatedPay: emp.calculated_pay ?? null,
-          foh: emp.is_foh ?? false,
-          boh: emp.is_boh ?? false
-        }));
-        
-        setData(transformedData);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching employees:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load employees');
-        setData(sampleData); // Fallback to sample data
-      } finally {
-        setLoading(false);
-      }
+  // Fetch employees from Supabase - memoized to avoid recreating on every render
+  const fetchEmployees = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/employees?org_id=${orgId}&location_id=${locationId}`, {
+        // Add cache headers for better performance
+        headers: {
+          'Cache-Control': 'max-age=60', // Cache for 60 seconds
+        }
+      });
+      
+      if (!response.ok) throw new Error(`Failed to fetch employees: ${response.status}`);
+      
+      const data = await response.json() as { employees: Employee[] };
+      
+      // Transform Supabase employees to RosterEntry format
+      const transformedData: RosterEntry[] = data.employees.map((emp: Employee) => ({
+        id: emp.id,
+        name: emp.full_name || `${emp.first_name} ${emp.last_name || ''}`.trim(),
+        currentRole: emp.role as Role,
+        certified: emp.is_certified ?? false,
+        availability: emp.availability || 'Available',
+        calculatedPay: emp.calculated_pay ?? null,
+        foh: emp.is_foh ?? false,
+        boh: emp.is_boh ?? false
+      }));
+      
+      setData(transformedData);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching employees:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load employees');
+      setData(sampleData); // Fallback to sample data
+    } finally {
+      setLoading(false);
     }
-    
+  }, [orgId, locationId]);
+
+  // Fetch employees on mount and when orgId/locationId changes
+  React.useEffect(() => {
     if (orgId && locationId) {
       fetchEmployees();
     } else {
       setData(sampleData);
       setLoading(false);
     }
-  }, [orgId, locationId]);
+  }, [orgId, locationId, fetchEmployees]);
 
   // Real-time subscription disabled - Realtime not enabled on employees table
   // If you need real-time updates, enable Realtime on the employees table in Supabase
@@ -670,26 +677,11 @@ export function RosterTable({
 
   if (loading && data.length === 0) {
     return (
-      <StyledContainer
-        className={`roster-table-container ${className}`}
-        data-plasmic-name="roster-table-container"
-      >
-        <Stack
-          direction="row"
-          spacing={1.5}
-          alignItems="center"
-          justifyContent="center"
-          sx={{ py: 6, px: 4 }}
-        >
-          <CircularProgress size={20} thickness={5} sx={{ color: "#31664a" }} />
-          <Typography
-            variant="body2"
-            sx={{ color: "#6b7280", fontFamily }}
-          >
-            Loading roster...
-          </Typography>
-        </Stack>
-      </StyledContainer>
+      <EmployeeTableSkeleton
+        className={className}
+        rows={10}
+        showActions={showActions}
+      />
     );
   }
 

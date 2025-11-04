@@ -105,8 +105,8 @@ export function SupabaseUserSession({
     return subscription.unsubscribe;
   }, [fetchAppUserData]);
 
-  // Flatten the data structure for Plasmic dynamic values
-  const userData = {
+  // Flatten the data structure for Plasmic dynamic values - memoized to prevent unnecessary re-renders
+  const userData = React.useMemo(() => ({
     // Basic auth data
     email: currentUser?.email || '',
     id: currentUser?.id || '',
@@ -127,7 +127,7 @@ export function SupabaseUserSession({
     // Full objects for components that need them
     authUser: currentUser,
     appUser: appUser,
-  };
+  }), [currentUser, appUser, isLoaded]);
 
   return (
     <DataProvider name="auth" data={userData}>

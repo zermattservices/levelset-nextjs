@@ -1,4 +1,5 @@
 import * as React from "react";
+import { ScoreboardSkeleton } from "./Skeletons/ScoreboardSkeleton";
 
 type Payload = { header: (string|number)[]; rows: (string|number)[][]; sheetName: string; updated: string };
 type Bundle = { tabs: Record<string, Payload> };
@@ -360,13 +361,7 @@ export function ScoreboardTable({
   }, [currentData]);
 
   if (loading && !currentData) {
-    return (
-      <div className={`scoreboard-table-container ${className}`} data-plasmic-name="scoreboard-table-container">
-        <div className="spinner-wrap" style={{ display: 'flex' }}>
-          <div className="spinner"></div>
-        </div>
-      </div>
-    );
+    return <ScoreboardSkeleton className={className} rows={15} columns={8} />;
   }
 
   if (error || !bundle) {

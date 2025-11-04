@@ -1,5 +1,6 @@
 import * as React from "react";
 import { createSupabaseClient } from "@/util/supabase/component";
+import { Skeleton, Box } from "@mui/material";
 
 export interface DisciplineAction {
   id: string;
@@ -159,18 +160,29 @@ export function DisciplineActionsTable({
         <table className={`roster-table ${tableClass}`} data-plasmic-name="discipline-actions-table">
           <thead data-plasmic-name="table-header">
             <tr className={headerRowClass} data-plasmic-name="header-row">
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="action-header">Action</th>
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="points-header">Points</th>
-              {showActions && <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="actions-header"></th>}
+              <th className={headerCellClass} style={{ textAlign: 'center', padding: '12px' }} data-plasmic-name="action-header">Action</th>
+              <th className={headerCellClass} style={{ textAlign: 'center', padding: '12px' }} data-plasmic-name="points-header">Points</th>
+              {showActions && <th className={headerCellClass} style={{ textAlign: 'center', padding: '12px' }} data-plasmic-name="actions-header"></th>}
             </tr>
           </thead>
           <tbody>
-            {/* Empty rows to show table structure while loading */}
             {Array.from({ length: 5 }).map((_, index) => (
-              <tr key={index} className={rowClass}>
-                <td className={`${actionCellClass || ""} ${cellClass || ""}`}></td>
-                <td className={`centered ${cellClass || ""}`}></td>
-                {showActions && <td className={`centered ${cellClass || ""} ${actionsCellClass || ""}`}></td>}
+              <tr key={`skeleton-${index}`} className={rowClass}>
+                <td className={`${actionCellClass || ""} ${cellClass || ""}`} style={{ padding: '12px' }}>
+                  <Skeleton variant="text" width="80%" height={20} />
+                </td>
+                <td className={`centered ${cellClass || ""}`} style={{ padding: '12px' }}>
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <Skeleton variant="rounded" width={50} height={28} sx={{ borderRadius: 14 }} />
+                  </Box>
+                </td>
+                {showActions && (
+                  <td className={`centered ${cellClass || ""} ${actionsCellClass || ""}`} style={{ padding: '12px' }}>
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <Skeleton variant="rounded" width={80} height={32} sx={{ borderRadius: 8 }} />
+                    </Box>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { createSupabaseClient } from "@/util/supabase/component";
+import { DisciplineTableSkeleton } from "./Skeletons/DisciplineTableSkeleton";
 
 export interface DisciplineEntry {
   id: string;
@@ -297,31 +298,13 @@ export function DisciplineTable({
 
   if (loading && data.length === 0) {
     return (
-      <div className={`roster-table-container scrollable loading ${className}`} data-plasmic-name="discipline-table-container">
-        <table className={`roster-table ${tableClass}`} data-plasmic-name="discipline-table">
-          <thead data-plasmic-name="table-header">
-            <tr className={headerRowClass} data-plasmic-name="header-row">
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="name-header">Name</th>
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="role-header">Role</th>
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="last-infraction-header">Last Infraction</th>
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="points-header">Current Points</th>
-              {showActions && <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="actions-header"></th>}
-            </tr>
-          </thead>
-          <tbody>
-            {/* Empty rows to show table structure while loading */}
-            {Array.from({ length: 10 }).map((_, index) => (
-              <tr key={index} className={rowClass}>
-                <td className={`name-cell ${nameCellClass || ""} ${cellClass || ""}`}></td>
-                <td className={`centered ${cellClass || ""}`}></td>
-                <td className={`centered ${cellClass || ""}`}></td>
-                <td className={`centered ${cellClass || ""}`}></td>
-                {showActions && <td className={`centered ${cellClass || ""} ${actionsCellClass || ""}`}></td>}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DisciplineTableSkeleton
+        className={className}
+        rows={10}
+        showActions={showActions}
+        tableClass={tableClass}
+        headerRowClass={headerRowClass}
+      />
     );
   }
 

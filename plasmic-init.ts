@@ -22,6 +22,17 @@ import { FullPEAScoreboard } from "./components/CodeComponents/FullPEAScoreboard
 import { PEAClassic } from "./components/CodeComponents/PEAClassic";
 import { PositionalRatings } from "./components/CodeComponents/PositionalRatings";
 import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
+import { MuiDrawerV2 } from "./components/CodeComponents/MuiDrawerV2";
+import { DrawerHeader } from "./components/CodeComponents/DrawerComponents/DrawerHeader";
+import { DrawerContent } from "./components/CodeComponents/DrawerComponents/DrawerContent";
+import { DrawerFooter } from "./components/CodeComponents/DrawerComponents/DrawerFooter";
+import { SlideoutListItem } from "./components/CodeComponents/DrawerComponents/SlideoutListItem";
+import { CenteredLoadingSpinner } from "./components/CodeComponents/CenteredLoadingSpinner";
+import { TableSkeleton } from "./components/CodeComponents/Skeletons/TableSkeleton";
+import { EmployeeTableSkeleton } from "./components/CodeComponents/Skeletons/EmployeeTableSkeleton";
+import { DisciplineTableSkeleton } from "./components/CodeComponents/Skeletons/DisciplineTableSkeleton";
+import { CardSkeleton } from "./components/CodeComponents/Skeletons/CardSkeleton";
+import { ScoreboardSkeleton } from "./components/CodeComponents/Skeletons/ScoreboardSkeleton";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
 const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
@@ -790,4 +801,383 @@ PLASMIC.registerComponent(DrawerV2, {
     }
   },
   importPath: "./components/CodeComponents/DrawerV2",
+});
+
+// Register CenteredLoadingSpinner component - Global loading spinner with overlay
+PLASMIC.registerComponent(CenteredLoadingSpinner, {
+  name: "CenteredLoadingSpinner",
+  displayName: "Centered Loading Spinner",
+  props: {
+    className: "string",
+    size: {
+      type: "number",
+      defaultValue: 48,
+      description: "Size of the spinner in pixels"
+    },
+    color: {
+      type: "string",
+      defaultValue: "#31664a",
+      description: "Color of the spinner"
+    },
+    backgroundColor: {
+      type: "string",
+      defaultValue: "rgba(255, 255, 255, 0.8)",
+      description: "Background overlay color"
+    },
+    opacity: {
+      type: "number",
+      defaultValue: 0.8,
+      description: "Opacity of the background overlay"
+    }
+  },
+  importPath: "./components/CodeComponents/CenteredLoadingSpinner",
+});
+
+// Register TableSkeleton component - Generic table loading skeleton
+PLASMIC.registerComponent(TableSkeleton, {
+  name: "TableSkeleton",
+  displayName: "Table Skeleton",
+  props: {
+    className: "string",
+    rows: {
+      type: "number",
+      defaultValue: 10,
+      description: "Number of skeleton rows to display"
+    },
+    columns: {
+      type: "number",
+      defaultValue: 5,
+      description: "Number of columns in the skeleton"
+    },
+    showHeader: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show skeleton header row"
+    },
+    height: {
+      type: "number",
+      defaultValue: 40,
+      description: "Height of each skeleton row"
+    }
+  },
+  importPath: "./components/CodeComponents/Skeletons/TableSkeleton",
+});
+
+// Register EmployeeTableSkeleton component - Roster/Employee table loading skeleton
+PLASMIC.registerComponent(EmployeeTableSkeleton, {
+  name: "EmployeeTableSkeleton",
+  displayName: "Employee Table Skeleton",
+  props: {
+    className: "string",
+    rows: {
+      type: "number",
+      defaultValue: 10,
+      description: "Number of skeleton rows to display"
+    },
+    showActions: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show actions column skeleton"
+    }
+  },
+  importPath: "./components/CodeComponents/Skeletons/EmployeeTableSkeleton",
+});
+
+// Register DisciplineTableSkeleton component - Discipline table loading skeleton
+PLASMIC.registerComponent(DisciplineTableSkeleton, {
+  name: "DisciplineTableSkeleton",
+  displayName: "Discipline Table Skeleton",
+  props: {
+    className: "string",
+    rows: {
+      type: "number",
+      defaultValue: 10,
+      description: "Number of skeleton rows to display"
+    },
+    showActions: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show actions column skeleton"
+    },
+    tableClass: {
+      type: "string",
+      defaultValue: "rounded-2xl overflow-hidden",
+      description: "CSS classes for table wrapper"
+    },
+    headerRowClass: {
+      type: "string",
+      defaultValue: "bg-gray-50",
+      description: "CSS classes for header row"
+    }
+  },
+  importPath: "./components/CodeComponents/Skeletons/DisciplineTableSkeleton",
+});
+
+// Register CardSkeleton component - Card/metric loading skeleton
+PLASMIC.registerComponent(CardSkeleton, {
+  name: "CardSkeleton",
+  displayName: "Card Skeleton",
+  props: {
+    className: "string",
+    count: {
+      type: "number",
+      defaultValue: 1,
+      description: "Number of card skeletons to display"
+    },
+    variant: {
+      type: "choice",
+      options: ["metric", "dashboard", "simple"],
+      defaultValue: "metric",
+      description: "Type of card skeleton"
+    },
+    width: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Width of each card skeleton"
+    },
+    height: {
+      type: "string",
+      defaultValue: "auto",
+      description: "Height of each card skeleton"
+    }
+  },
+  importPath: "./components/CodeComponents/Skeletons/CardSkeleton",
+});
+
+// Register ScoreboardSkeleton component - Scoreboard table loading skeleton
+PLASMIC.registerComponent(ScoreboardSkeleton, {
+  name: "ScoreboardSkeleton",
+  displayName: "Scoreboard Skeleton",
+  props: {
+    className: "string",
+    rows: {
+      type: "number",
+      defaultValue: 15,
+      description: "Number of skeleton rows to display"
+    },
+    columns: {
+      type: "number",
+      defaultValue: 8,
+      description: "Number of columns in the skeleton"
+    },
+    showHeader: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show skeleton header row"
+    }
+  },
+  importPath: "./components/CodeComponents/Skeletons/ScoreboardSkeleton",
+});
+
+// Register MuiDrawerV2 component - MUI-based Drawer to replace Ant Design version
+PLASMIC.registerComponent(MuiDrawerV2, {
+  name: "MuiDrawerV2",
+  displayName: "Drawer V2 (MUI)",
+  props: {
+    // Core props
+    open: {
+      type: "boolean",
+      defaultValue: false
+    },
+    placement: {
+      type: "choice",
+      options: ["top", "right", "bottom", "left"],
+      defaultValue: "right"
+    },
+    children: {
+      type: "slot",
+      defaultValue: {
+        type: "vbox",
+        children: ["Drawer content"]
+      }
+    },
+    title: {
+      type: "slot",
+      defaultValue: "Drawer title"
+    },
+    footer: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    extra: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    closeIcon: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    onOpenChange: {
+      type: "eventHandler",
+      argTypes: [{ name: "open", type: "boolean" }]
+    },
+    
+    // Layout props
+    size: {
+      type: "choice",
+      options: ["default", "large"],
+      defaultValue: "default",
+      description: "Preset size: default (378px) or large (736px)"
+    },
+    width: {
+      type: "string",
+      description: "Custom width (e.g., '500px' or '50%')"
+    },
+    height: {
+      type: "string",
+      description: "Custom height for top/bottom placement"
+    },
+    
+    // Behavior props
+    mask: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show background mask",
+      advanced: true
+    },
+    maskClosable: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Click mask to close",
+      advanced: true
+    },
+    keyboard: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Press ESC to close",
+      advanced: true
+    },
+    destroyOnClose: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Unmount children when closed",
+      advanced: true
+    },
+    autoFocus: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Auto-focus when opened",
+      advanced: true
+    },
+    closable: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show close button"
+    },
+    zIndex: {
+      type: "number",
+      defaultValue: 1000,
+      description: "Z-index of drawer",
+      advanced: true
+    },
+    
+    // Style class names
+    className: "string",
+    rootClassName: "string",
+    drawerHeaderClassName: "string",
+    drawerBodyClassName: "string",
+    drawerFooterClassName: "string",
+    drawerTitleClassName: "string",
+    drawerMaskClassName: "string",
+    drawerContentWrapperClassName: "string",
+    closeButtonClassName: "string",
+  },
+  states: {
+    open: {
+      type: "writable",
+      valueProp: "open",
+      onChangeProp: "onOpenChange",
+      variableType: "boolean"
+    }
+  },
+  importPath: "./components/CodeComponents/MuiDrawerV2",
+});
+
+// Register DrawerHeader component
+PLASMIC.registerComponent(DrawerHeader, {
+  name: "DrawerHeader",
+  displayName: "Drawer Header",
+  props: {
+    title: {
+      type: "slot",
+      defaultValue: "Header Title"
+    },
+    subtitle: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DrawerComponents/DrawerHeader",
+});
+
+// Register DrawerContent component
+PLASMIC.registerComponent(DrawerContent, {
+  name: "DrawerContent",
+  displayName: "Drawer Content",
+  props: {
+    children: {
+      type: "slot",
+      defaultValue: {
+        type: "vbox",
+        children: ["Content goes here"]
+      }
+    },
+    scrollable: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Enable scrolling for overflow content"
+    },
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DrawerComponents/DrawerContent",
+});
+
+// Register DrawerFooter component
+PLASMIC.registerComponent(DrawerFooter, {
+  name: "DrawerFooter",
+  displayName: "Drawer Footer",
+  props: {
+    children: {
+      type: "slot",
+      defaultValue: {
+        type: "hbox",
+        children: ["Footer content"]
+      }
+    },
+    align: {
+      type: "choice",
+      options: ["left", "center", "right", "space-between"],
+      defaultValue: "right",
+      description: "Alignment of footer content"
+    },
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DrawerComponents/DrawerFooter",
+});
+
+// Register SlideoutListItem component
+PLASMIC.registerComponent(SlideoutListItem, {
+  name: "SlideoutListItem",
+  displayName: "Slideout List Item",
+  props: {
+    icon: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    label: {
+      type: "slot",
+      defaultValue: "Label"
+    },
+    value: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    onClick: {
+      type: "eventHandler",
+      argTypes: []
+    },
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DrawerComponents/SlideoutListItem",
 });

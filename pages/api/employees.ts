@@ -36,6 +36,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Failed to fetch employees' });
       }
 
+      // Add cache headers for better performance (cache for 60 seconds, stale-while-revalidate for 120 seconds)
+      res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+
       return res.status(200).json({ employees: employees || [] });
     }
 
