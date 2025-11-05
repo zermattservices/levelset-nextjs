@@ -46,11 +46,17 @@ Each action displays:
 1. Add MuiDrawerV2 component to your page
 2. Set up state: $state.drawerOpen (boolean)
 3. Set up state: $state.selectedEmployee (object)
-4. Configure DrawerV2 props:
+4. Configure MuiDrawerV2 props:
    - open: $state.drawerOpen
    - onOpenChange: (open) => $state.drawerOpen = open
    - placement: "right"
    - size: "large" (or width: "620")
+   - title: Create a title slot with employee name and role:
+     • Add a vertical stack in the title slot
+     • First element: Text showing $state.selectedEmployee.full_name
+       - Font: Satoshi, 18px, weight 600, color #414651
+     • Second element: Text showing $state.selectedEmployee.role
+       - Font: Satoshi, 14px, weight 400, color #535862
 ```
 
 ### Step 2: Add DrawerTabContainer
@@ -62,6 +68,9 @@ Each action displays:
    - orgId: Your org ID (or from $ctx.auth.org_id)
    - locationId: Your location ID (or from $ctx.auth.location_id)
    - onRecordAction: Open your "Record Action" modal
+
+Note: The employee name and role are NOT in the DrawerTabContainer - 
+they go in the drawer's title slot (see Step 1)
 ```
 
 ### Step 3: Connect DisciplineTable
@@ -181,13 +190,24 @@ Page Structure:
 
 ## Styling
 
-The component uses MUI components with your brand colors:
-- Primary color: #31664a (brand green)
-- Positive points: #166534 (green)
-- Negative points: #dc2626 (red)
-- Text colors match your design system
+The component matches Plasmic design system exactly:
 
-All spacing, borders, and styling match the existing Plasmic design.
+**Fonts**:
+- Primary font: Satoshi (all text except large point numbers)
+- Point numbers: Inter, sans-serif (24px, weight 600)
+
+**Colors** (from Plasmic tokens):
+- Main text: #414651 (rgba(65, 70, 81, 1))
+- Secondary text: #535862 (rgba(83, 88, 98, 1))
+- Positive points (green): #178459 (rgba(23, 132, 89, 1))
+- Negative points (red): #d23230 (--token-kv72MHA99lrw)
+- Border: #e9eaeb (--token-bGw1ZBUIaR08)
+- Brand green (buttons, tabs): #31664a
+
+**Components Match**:
+- List items: Exact match to SlideoutListItem2 component
+- Metric cards: Exact match to Discipline page metric cards
+- All spacing, borders, shadows match Plasmic design
 
 ## Empty States
 
