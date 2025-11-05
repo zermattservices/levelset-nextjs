@@ -165,8 +165,8 @@ export function RecordActionModal({
         // Fetch acting leader - look up app_users by auth_user_id
         if (!currentUser && currentUserId) {
           setLoadingLeader(true);
+          console.log('[RecordActionModal] Fetching app_user for auth_user_id:', currentUserId);
           try {
-            console.log('Fetching app_user for auth_user_id:', currentUserId);
             
             // currentUserId is the auth user ID, look it up in app_users
             const { data: appUserData, error: appUserError } = await supabase
@@ -175,8 +175,8 @@ export function RecordActionModal({
               .eq('auth_user_id', currentUserId)
               .maybeSingle();
             
-            console.log('App user data:', appUserData);
-            console.log('App user error:', appUserError);
+            console.log('[RecordActionModal] App user data:', appUserData);
+            console.log('[RecordActionModal] App user error:', appUserError);
             
             if (!appUserError && appUserData) {
               // Convert app_user to Employee-like object for display
@@ -189,10 +189,10 @@ export function RecordActionModal({
                 location_id: appUserData.location_id || locationId,
                 active: true,
               };
-              console.log('Setting acting leader:', employeeLike);
+              console.log('[RecordActionModal] Setting acting leader:', employeeLike);
               setActingLeader(employeeLike);
             } else {
-              console.warn('No app_user found for auth_user_id:', currentUserId);
+              console.warn('[RecordActionModal] No app_user found for auth_user_id:', currentUserId);
               setActingLeader({
                 id: currentUserId,
                 full_name: 'Current User',
@@ -203,7 +203,7 @@ export function RecordActionModal({
               });
             }
           } catch (err) {
-            console.error('Error fetching app_user:', err);
+            console.error('[RecordActionModal] Error fetching app_user:', err);
             setActingLeader({
               id: currentUserId,
               full_name: 'Current User',
@@ -373,6 +373,13 @@ export function RecordActionModal({
             disabled
           />
 
+          {/* Acting Leader (disabled) */}
+          <CustomTextField
+            label="Acting Leader"
+            value={loadingLeader ? "Loading..." : (actingLeader?.full_name || "Not available")}
+            disabled
+          />
+
           {/* Action Date */}
           <DatePicker
             label="Action Date"
@@ -446,13 +453,6 @@ export function RecordActionModal({
                 },
               },
             }}
-          />
-
-          {/* Acting Leader (disabled) */}
-          <CustomTextField
-            label="Acting Leader"
-            value={loadingLeader ? "Loading..." : (actingLeader?.full_name || "Not available")}
-            disabled
           />
 
           {/* Recommended Action (disabled) */}

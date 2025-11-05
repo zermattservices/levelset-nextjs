@@ -470,6 +470,8 @@ export function DisciplineNotifications({
       {/* Infractions This Week Accordion */}
       {(
         <Accordion
+          expanded={expandedPanel === 'infractions'}
+          onChange={() => setExpandedPanel(expandedPanel === 'infractions' ? false : 'infractions')}
           disableGutters
           elevation={0}
           sx={{
@@ -482,7 +484,6 @@ export function DisciplineNotifications({
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon sx={{ color: levelsetGreen }} />}
-            onClick={() => setExpandedPanel(expandedPanel === 'infractions' ? false : 'infractions')}
             sx={{
               padding: 0,
               minHeight: 48,
@@ -509,7 +510,7 @@ export function DisciplineNotifications({
               {expandedPanel === 'infractions' ? 'Collapse' : 'Expand'}
             </Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{ padding: 0, mt: 2 }}>
+          <AccordionDetails sx={{ padding: 0 }}>
             <Box
               sx={{
                 backgroundColor: "#f9fafb",
@@ -538,6 +539,8 @@ export function DisciplineNotifications({
       {/* Required Disciplinary Actions Accordion */}
       {recommendations.length > 0 && (
         <Accordion
+          expanded={expandedPanel === 'actions'}
+          onChange={() => setExpandedPanel(expandedPanel === 'actions' ? false : 'actions')}
           disableGutters
           elevation={0}
           sx={{
@@ -551,7 +554,6 @@ export function DisciplineNotifications({
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon sx={{ color: levelsetGreen }} />}
-            onClick={() => setExpandedPanel(expandedPanel === 'actions' ? false : 'actions')}
             sx={{
               padding: 0,
               minHeight: 48,
@@ -590,7 +592,7 @@ export function DisciplineNotifications({
               {expandedPanel === 'actions' ? 'Collapse' : 'Expand'}
             </Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{ padding: 0, mt: 2 }}>
+          <AccordionDetails sx={{ padding: 0 }}>
             <Box
               sx={{
                 backgroundColor: "#f9fafb",
