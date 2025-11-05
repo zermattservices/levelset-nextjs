@@ -70,6 +70,7 @@ import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08
 import { LoadingBoundary } from "@plasmicpkgs/plasmic-basic-components";
 import { LottieWrapper } from "@plasmicpkgs/lottie-react";
 import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
+import { RecommendedActions } from "../../CodeComponents/RecommendedActions"; // plasmic-import: DCoGrXYcTP13/codeComponent
 import { DisciplineTable } from "../../CodeComponents/DisciplineTable"; // plasmic-import: Gsr7FZewgF56/codeComponent
 import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTable"; // plasmic-import: gO99exJZ_N-6/codeComponent
 import { MuiDrawerV2 } from "../../CodeComponents/MuiDrawerV2"; // plasmic-import: hoSoBbznWutx/codeComponent
@@ -100,6 +101,7 @@ export type PlasmicDiscipline__OverridesType = {
   loadingBoundary?: Flex__<typeof LoadingBoundary>;
   lottie?: Flex__<typeof LottieWrapper>;
   redirectIf?: Flex__<typeof RedirectIf>;
+  recommendedActions?: Flex__<typeof RecommendedActions>;
   verticalStack?: Flex__<"div">;
   disciplineTable?: Flex__<typeof DisciplineTable>;
   verticalStack2?: Flex__<"div">;
@@ -1082,137 +1084,99 @@ function PlasmicDiscipline__RenderFunc(props: {
                 </div>
                 <div className={classNames(projectcss.all, sty.freeBox__lKzxl)}>
                   <div
-                    className={classNames(projectcss.all, sty.freeBox__cHwGk)}
+                    className={classNames(projectcss.all, sty.freeBox__s72NY)}
                   >
+                    <RecommendedActions
+                      data-plasmic-name={"recommendedActions"}
+                      data-plasmic-override={overrides.recommendedActions}
+                      className={classNames(
+                        "__wab_instance",
+                        sty.recommendedActions
+                      )}
+                      currentUser={(() => {
+                        try {
+                          return $ctx.auth.id;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return undefined;
+                          }
+                          throw e;
+                        }
+                      })()}
+                      locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                      maxWidth={"1200px"}
+                      orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                      width={"100%"}
+                    />
+
                     <div
-                      data-plasmic-name={"verticalStack"}
-                      data-plasmic-override={overrides.verticalStack}
-                      className={classNames(projectcss.all, sty.verticalStack)}
+                      className={classNames(projectcss.all, sty.freeBox__cHwGk)}
                     >
                       <div
+                        data-plasmic-name={"verticalStack"}
+                        data-plasmic-override={overrides.verticalStack}
                         className={classNames(
                           projectcss.all,
-                          projectcss.__wab_text,
-                          sty.text__of8Zu
+                          sty.verticalStack
                         )}
                       >
-                        {"Employees"}
+                        <div
+                          className={classNames(
+                            projectcss.all,
+                            projectcss.__wab_text,
+                            sty.text__of8Zu
+                          )}
+                        >
+                          {"Employees"}
+                        </div>
+                        <DisciplineTable
+                          data-plasmic-name={"disciplineTable"}
+                          data-plasmic-override={overrides.disciplineTable}
+                          className={classNames(
+                            "__wab_instance",
+                            sty.disciplineTable
+                          )}
+                          density={"comfortable"}
+                          locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                          orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                          showActions={true}
+                        />
                       </div>
-                      <DisciplineTable
-                        data-plasmic-name={"disciplineTable"}
-                        data-plasmic-override={overrides.disciplineTable}
-                        className={classNames(
-                          "__wab_instance",
-                          sty.disciplineTable
-                        )}
-                        density={"comfortable"}
-                        locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                        onRowClick={async employee => {
-                          const $steps = {};
-
-                          $steps["updateSelectedEmployee"] = true
-                            ? (() => {
-                                const actionArgs = {
-                                  variable: {
-                                    objRoot: $state,
-                                    variablePath: ["selectedEmployee"]
-                                  },
-                                  operation: 0,
-                                  value: employee
-                                };
-                                return (({
-                                  variable,
-                                  value,
-                                  startIndex,
-                                  deleteCount
-                                }) => {
-                                  if (!variable) {
-                                    return;
-                                  }
-                                  const { objRoot, variablePath } = variable;
-
-                                  $stateSet(objRoot, variablePath, value);
-                                  return value;
-                                })?.apply(null, [actionArgs]);
-                              })()
-                            : undefined;
-                          if (
-                            $steps["updateSelectedEmployee"] != null &&
-                            typeof $steps["updateSelectedEmployee"] ===
-                              "object" &&
-                            typeof $steps["updateSelectedEmployee"].then ===
-                              "function"
-                          ) {
-                            $steps["updateSelectedEmployee"] =
-                              await $steps["updateSelectedEmployee"];
-                          }
-
-                          $steps["updateDrawerOpen"] = true
-                            ? (() => {
-                                const actionArgs = {
-                                  variable: {
-                                    objRoot: $state,
-                                    variablePath: ["drawerOpen"]
-                                  },
-                                  operation: 0,
-                                  value: true
-                                };
-                                return (({
-                                  variable,
-                                  value,
-                                  startIndex,
-                                  deleteCount
-                                }) => {
-                                  if (!variable) {
-                                    return;
-                                  }
-                                  const { objRoot, variablePath } = variable;
-
-                                  $stateSet(objRoot, variablePath, value);
-                                  return value;
-                                })?.apply(null, [actionArgs]);
-                              })()
-                            : undefined;
-                          if (
-                            $steps["updateDrawerOpen"] != null &&
-                            typeof $steps["updateDrawerOpen"] === "object" &&
-                            typeof $steps["updateDrawerOpen"].then ===
-                              "function"
-                          ) {
-                            $steps["updateDrawerOpen"] =
-                              await $steps["updateDrawerOpen"];
-                          }
-                        }}
-                        orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
-                        showActions={true}
-                      />
-                    </div>
-                    <div
-                      data-plasmic-name={"verticalStack2"}
-                      data-plasmic-override={overrides.verticalStack2}
-                      className={classNames(projectcss.all, sty.verticalStack2)}
-                    >
                       <div
+                        data-plasmic-name={"verticalStack2"}
+                        data-plasmic-override={overrides.verticalStack2}
                         className={classNames(
                           projectcss.all,
-                          projectcss.__wab_text,
-                          sty.text__oSxFd
+                          sty.verticalStack2
                         )}
                       >
-                        {"Disciplinary Actions"}
+                        <div
+                          className={classNames(
+                            projectcss.all,
+                            projectcss.__wab_text,
+                            sty.text__oSxFd
+                          )}
+                        >
+                          {"Disciplinary Actions"}
+                        </div>
+                        <DisciplineActionsTable
+                          data-plasmic-name={"disciplineActionsTable"}
+                          data-plasmic-override={
+                            overrides.disciplineActionsTable
+                          }
+                          className={classNames(
+                            "__wab_instance",
+                            sty.disciplineActionsTable
+                          )}
+                          density={"comfortable"}
+                          locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                          orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                          showActions={false}
+                        />
                       </div>
-                      <DisciplineActionsTable
-                        data-plasmic-name={"disciplineActionsTable"}
-                        data-plasmic-override={overrides.disciplineActionsTable}
-                        className={classNames(
-                          "__wab_instance",
-                          sty.disciplineActionsTable
-                        )}
-                        density={"comfortable"}
-                        locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                        orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
-                        showActions={false}
-                      />
                     </div>
                   </div>
                 </div>
@@ -1439,6 +1403,7 @@ const PlasmicDescendants = {
     "loadingBoundary",
     "lottie",
     "redirectIf",
+    "recommendedActions",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
@@ -1456,6 +1421,7 @@ const PlasmicDescendants = {
     "loadingBoundary",
     "lottie",
     "redirectIf",
+    "recommendedActions",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
@@ -1471,6 +1437,7 @@ const PlasmicDescendants = {
   lottie: ["lottie"],
   redirectIf: [
     "redirectIf",
+    "recommendedActions",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
@@ -1483,6 +1450,7 @@ const PlasmicDescendants = {
     "text3",
     "supportingText3"
   ],
+  recommendedActions: ["recommendedActions"],
   verticalStack: ["verticalStack", "disciplineTable"],
   disciplineTable: ["disciplineTable"],
   verticalStack2: ["verticalStack2", "disciplineActionsTable"],
@@ -1523,6 +1491,7 @@ type NodeDefaultElementType = {
   loadingBoundary: typeof LoadingBoundary;
   lottie: typeof LottieWrapper;
   redirectIf: typeof RedirectIf;
+  recommendedActions: typeof RecommendedActions;
   verticalStack: "div";
   disciplineTable: typeof DisciplineTable;
   verticalStack2: "div";
@@ -1602,6 +1571,7 @@ export const PlasmicDiscipline = Object.assign(
     loadingBoundary: makeNodeComponent("loadingBoundary"),
     lottie: makeNodeComponent("lottie"),
     redirectIf: makeNodeComponent("redirectIf"),
+    recommendedActions: makeNodeComponent("recommendedActions"),
     verticalStack: makeNodeComponent("verticalStack"),
     disciplineTable: makeNodeComponent("disciplineTable"),
     verticalStack2: makeNodeComponent("verticalStack2"),

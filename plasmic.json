@@ -1024,6 +1024,30 @@
           "name": "DrawerTabContainer",
           "displayName": "DrawerTabContainer",
           "componentImportPath": "./components/CodeComponents/DrawerTabContainer"
+        },
+        {
+          "id": "s8UZIokCXXk7",
+          "name": "EmployeeModal",
+          "displayName": "EmployeeModal",
+          "componentImportPath": "./components/CodeComponents/EmployeeModal"
+        },
+        {
+          "id": "Jk0Vw7pa-Bba",
+          "name": "InfractionEditModal",
+          "displayName": "InfractionEditModal",
+          "componentImportPath": "./components/CodeComponents/InfractionEditModal"
+        },
+        {
+          "id": "WFvJJA48ZqSi",
+          "name": "RecordActionModal",
+          "displayName": "RecordActionModal",
+          "componentImportPath": "./components/CodeComponents/RecordActionModal"
+        },
+        {
+          "id": "DCoGrXYcTP13",
+          "name": "RecommendedActions",
+          "displayName": "RecommendedActions",
+          "componentImportPath": "./components/CodeComponents/RecommendedActions"
         }
       ],
       "splitsProviderFilePath": "",
