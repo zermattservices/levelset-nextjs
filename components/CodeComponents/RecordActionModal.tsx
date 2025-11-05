@@ -469,8 +469,11 @@ export function RecordActionModal({
             onChange={(e) => setNotes(e.target.value)}
             multiline
             rows={3}
-            placeholder="Add any additional notes..."
+            placeholder="Please include any information relevant to this disciplinary action..."
             fullWidth
+            InputLabelProps={{
+              shrink: true,
+            }}
             sx={{
               '& .MuiInputLabel-root': {
                 fontFamily,

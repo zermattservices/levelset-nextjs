@@ -19,6 +19,7 @@ import type { Employee, Infraction } from "@/lib/supabase.types";
 import { createSupabaseClient } from "@/util/supabase/component";
 import { RecordActionModal } from "./RecordActionModal";
 import { EmployeeModal } from "./EmployeeModal";
+import { DismissConfirmationModal } from "./DismissConfirmationModal";
 
 export interface DisciplineNotificationsProps {
   orgId: string;
@@ -237,6 +238,8 @@ export function DisciplineNotifications({
   const [selectedRecommendation, setSelectedRecommendation] = React.useState<RecommendedAction | null>(null);
   const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
+  const [dismissModalOpen, setDismissModalOpen] = React.useState(false);
+  const [recommendationToDismiss, setRecommendationToDismiss] = React.useState<RecommendedAction | null>(null);
   const [appUserId, setAppUserId] = React.useState<string | null>(null);
   const supabase = createSupabaseClient();
 
@@ -353,7 +356,15 @@ export function DisciplineNotifications({
     }
   }, [orgId, locationId, fetchData]);
 
-  const handleDismiss = async (recommendation: RecommendedAction) => {
+  const handleDismissClick = (recommendation: RecommendedAction) => {
+    setRecommendationToDismiss(recommendation);
+    setDismissModalOpen(true);
+  };
+
+  const handleDismissConfirm = async () => {
+    if (!recommendationToDismiss) return;
+    
+    const recommendation = recommendationToDismiss;
     try {
       const { data: existing } = await supabase
         .from('recommended_disc_actions')
@@ -395,9 +406,13 @@ export function DisciplineNotifications({
       }
 
       setRecommendations(prev => prev.filter(r => r.employee_id !== recommendation.employee_id));
+      setDismissModalOpen(false);
+      setRecommendationToDismiss(null);
     } catch (err: any) {
       console.error('Error dismissing recommendation:', err);
       alert(`Failed to dismiss recommendation: ${err?.message || 'Please try again.'}`);
+      setDismissModalOpen(false);
+      setRecommendationToDismiss(null);
     }
   };
 
@@ -653,7 +668,7 @@ export function DisciplineNotifications({
 
                   {/* Dismiss Button */}
                   <Button
-                    onClick={() => handleDismiss(rec)}
+                    onClick={() => handleDismissClick(rec)}
                     variant="outlined"
                     sx={{
                       fontFamily,
@@ -736,6 +751,17 @@ export function DisciplineNotifications({
         orgId={orgId}
         locationId={locationId}
         initialTab="discipline"
+      />
+
+      {/* Dismiss Confirmation Modal */}
+      <DismissConfirmationModal
+        open={dismissModalOpen}
+        employeeName={recommendationToDismiss?.employee_name || "this employee"}
+        onConfirm={handleDismissConfirm}
+        onCancel={() => {
+          setDismissModalOpen(false);
+          setRecommendationToDismiss(null);
+        }}
       />
     </Box>
   );

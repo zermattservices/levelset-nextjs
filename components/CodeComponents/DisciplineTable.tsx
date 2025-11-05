@@ -502,6 +502,8 @@ export function DisciplineTable({
             backgroundColor: '#f9fafb',
             fontWeight: 600,
             fontSize: 14,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
             color: '#111827',
             fontFamily,
             '&:focus, &:focus-within': {

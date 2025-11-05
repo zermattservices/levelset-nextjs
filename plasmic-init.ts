@@ -32,6 +32,7 @@ import { EmployeeModal } from "./components/CodeComponents/EmployeeModal";
 import { InfractionEditModal } from "./components/CodeComponents/InfractionEditModal";
 import { RecordActionModal } from "./components/CodeComponents/RecordActionModal";
 import { DisciplineNotifications } from "./components/CodeComponents/RecommendedActions";
+import { DismissConfirmationModal } from "./components/CodeComponents/DismissConfirmationModal";
 import { CenteredLoadingSpinner } from "./components/CodeComponents/CenteredLoadingSpinner";
 import { TableSkeleton } from "./components/CodeComponents/Skeletons/TableSkeleton";
 import { EmployeeTableSkeleton } from "./components/CodeComponents/Skeletons/EmployeeTableSkeleton";
