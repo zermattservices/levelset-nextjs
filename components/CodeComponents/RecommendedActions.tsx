@@ -740,3 +740,6 @@ export function DisciplineNotifications({
     </Box>
   );
 }
+
+// Export alias for backwards compatibility
+export const RecommendedActions = DisciplineNotifications;
