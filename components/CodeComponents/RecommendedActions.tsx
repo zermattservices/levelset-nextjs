@@ -468,7 +468,7 @@ export function DisciplineNotifications({
   return (
     <Box className={className} sx={{ mb: 3, width, maxWidth, mx: 'auto' }}>
       {/* Infractions This Week Accordion */}
-      {weeklyInfractions.length > 0 && (
+      {(
         <Accordion
           disableGutters
           elevation={0}
@@ -521,9 +521,15 @@ export function DisciplineNotifications({
                 gap: 2,
               }}
             >
-              {weeklyInfractions.map((infraction) => (
-                <InfractionCard key={infraction.id} infraction={infraction} />
-              ))}
+              {weeklyInfractions.length > 0 ? (
+                weeklyInfractions.map((infraction) => (
+                  <InfractionCard key={infraction.id} infraction={infraction} />
+                ))
+              ) : (
+                <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', textAlign: 'center', py: 2 }}>
+                  No infractions in the last 7 days
+                </Typography>
+              )}
             </Box>
           </AccordionDetails>
         </Accordion>
