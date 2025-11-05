@@ -257,6 +257,7 @@ export function InfractionEditModal({
             value={infractionDate}
             onChange={(newValue) => setInfractionDate(newValue)}
             format="M/d/yyyy"
+            enableAccessibleFieldDOMStructure={false}
             slots={{
               textField: CustomTextField,
             }}

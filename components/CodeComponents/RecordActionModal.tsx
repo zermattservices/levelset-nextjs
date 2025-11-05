@@ -251,6 +251,7 @@ export function RecordActionModal({
             value={actionDate}
             onChange={(newValue) => setActionDate(newValue)}
             format="M/d/yyyy"
+            enableAccessibleFieldDOMStructure={false}
             slots={{
               textField: CustomTextField,
             }}

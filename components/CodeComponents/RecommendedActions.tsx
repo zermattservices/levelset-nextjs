@@ -92,14 +92,14 @@ export function RecommendedActions({
   const [recommendations, setRecommendations] = React.useState<RecommendedAction[]>([]);
   const [disciplineActions, setDisciplineActions] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [expanded, setExpanded] = React.useState(true);
+  const [expanded, setExpanded] = React.useState(false); // Start collapsed
   const [recordModalOpen, setRecordModalOpen] = React.useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = React.useState<RecommendedAction | null>(null);
   const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
   const supabase = createSupabaseClient();
 
-  // Fetch recommendations and discipline actions
+  // Fetch recommendations from database (source of truth)
   const fetchRecommendations = React.useCallback(async () => {
     try {
       setLoading(true);
@@ -116,31 +116,56 @@ export function RecommendedActions({
         setDisciplineActions(actionsData);
       }
       
-      const recs = await calculateRecommendations(orgId, locationId);
-      
-      // Filter out recommendations that have been dismissed or actioned
-      const { data: dismissedRecs, error: dismissedError } = await supabase
+      // Fetch pending recommendations from database
+      const { data: dbRecs, error: recsError } = await supabase
         .from('recommended_disc_actions')
-        .select('employee_id, recommended_action_id')
+        .select('*')
         .eq('org_id', orgId)
         .eq('location_id', locationId)
-        .not('action_taken', 'is', null);
+        .is('action_taken', null)
+        .order('points_when_recommended', { ascending: false });
 
-      if (dismissedError) {
-        console.warn('Error fetching dismissed recommendations:', dismissedError);
+      if (recsError) {
+        console.error('Error fetching recommendations:', recsError);
+        setRecommendations([]);
+        return;
       }
 
-      // Create a set of dismissed recommendation keys for quick lookup
-      const dismissedSet = new Set(
-        (dismissedRecs || []).map(r => `${r.employee_id}:${r.recommended_action_id}`)
-      );
+      // Fetch employee data to enrich recommendations
+      if (dbRecs && dbRecs.length > 0) {
+        const employeeIds = dbRecs.map(r => r.employee_id);
+        const { data: employees, error: empError } = await supabase
+          .from('employees')
+          .select('*')
+          .in('id', employeeIds);
 
-      // Filter out dismissed/actioned recommendations
-      const activeRecs = recs.filter(rec => 
-        !dismissedSet.has(`${rec.employee_id}:${rec.action_id}`)
-      );
+        if (empError) {
+          console.warn('Error fetching employee data:', empError);
+        }
 
-      setRecommendations(activeRecs);
+        // Transform database records to RecommendedAction format
+        const enrichedRecs: RecommendedAction[] = dbRecs.map(rec => {
+          const employee = employees?.find(e => e.id === rec.employee_id);
+          const threshold = actionsData?.find(a => a.id === rec.recommended_action_id);
+          
+          return {
+            employee_id: rec.employee_id,
+            employee_name: employee?.full_name || 'Unknown',
+            employee_role: employee?.role || 'Team Member',
+            current_points: rec.points_when_recommended,
+            recommended_action: rec.recommended_action,
+            action_id: rec.recommended_action_id,
+            points_threshold: threshold?.points_threshold || 0,
+            threshold_exceeded_by: rec.points_when_recommended - (threshold?.points_threshold || 0),
+            has_existing_action: false, // Already filtered out in DB
+            employee: employee as Employee,
+          };
+        });
+
+        setRecommendations(enrichedRecs);
+      } else {
+        setRecommendations([]);
+      }
     } catch (err) {
       console.error('Error fetching recommendations:', err);
       setRecommendations([]);
@@ -152,54 +177,93 @@ export function RecommendedActions({
   React.useEffect(() => {
     if (orgId && locationId) {
       fetchRecommendations();
+      setExpanded(false); // Reset to collapsed on page load
     }
   }, [orgId, locationId, fetchRecommendations]);
 
   const handleDismiss = async (recommendation: RecommendedAction) => {
     try {
-      // Create or update recommendation record as dismissed
-      const { error } = await supabase
+      // First, try to find existing recommendation
+      const { data: existing } = await supabase
         .from('recommended_disc_actions')
-        .upsert({
-          employee_id: recommendation.employee_id,
-          org_id: orgId,
-          location_id: locationId,
-          recommended_action_id: recommendation.action_id,
-          recommended_action: recommendation.recommended_action,
-          points_when_recommended: recommendation.current_points,
-          action_taken: 'dismissed',
-          action_taken_at: new Date().toISOString(),
-          action_taken_by: currentUser?.id || null,
-        }, {
-          onConflict: 'employee_id,recommended_action_id,org_id,location_id,created_at',
-        });
+        .select('id')
+        .eq('employee_id', recommendation.employee_id)
+        .eq('recommended_action_id', recommendation.action_id)
+        .eq('org_id', orgId)
+        .eq('location_id', locationId)
+        .is('action_taken', null)
+        .single();
 
-      if (error) throw error;
+      if (existing) {
+        // Update existing recommendation
+        const { error: updateError } = await supabase
+          .from('recommended_disc_actions')
+          .update({
+            action_taken: 'dismissed',
+            action_taken_at: new Date().toISOString(),
+            action_taken_by: currentUser?.id || null,
+          })
+          .eq('id', existing.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Insert new recommendation as dismissed
+        const { error: insertError } = await supabase
+          .from('recommended_disc_actions')
+          .insert({
+            employee_id: recommendation.employee_id,
+            org_id: orgId,
+            location_id: locationId,
+            recommended_action_id: recommendation.action_id,
+            recommended_action: recommendation.recommended_action,
+            points_when_recommended: recommendation.current_points,
+            action_taken: 'dismissed',
+            action_taken_at: new Date().toISOString(),
+            action_taken_by: currentUser?.id || null,
+          });
+
+        if (insertError) throw insertError;
+      }
 
       // Remove from local state
       setRecommendations(prev => prev.filter(r => r.employee_id !== recommendation.employee_id));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error dismissing recommendation:', err);
-      alert('Failed to dismiss recommendation. Please try again.');
+      alert(`Failed to dismiss recommendation: ${err?.message || 'Please try again.'}`);
     }
   };
 
   const handleRecordAction = async (recommendation: RecommendedAction) => {
     // Create recommendation record if it doesn't exist
     try {
-      await supabase
+      // Check if recommendation already exists
+      const { data: existing } = await supabase
         .from('recommended_disc_actions')
-        .upsert({
-          employee_id: recommendation.employee_id,
-          org_id: orgId,
-          location_id: locationId,
-          recommended_action_id: recommendation.action_id,
-          recommended_action: recommendation.recommended_action,
-          points_when_recommended: recommendation.current_points,
-        }, {
-          onConflict: 'employee_id,recommended_action_id,org_id,location_id,created_at',
-          ignoreDuplicates: true,
-        });
+        .select('id')
+        .eq('employee_id', recommendation.employee_id)
+        .eq('recommended_action_id', recommendation.action_id)
+        .eq('org_id', orgId)
+        .eq('location_id', locationId)
+        .is('action_taken', null)
+        .maybeSingle();
+
+      if (!existing) {
+        // Insert new recommendation
+        const { error: insertError } = await supabase
+          .from('recommended_disc_actions')
+          .insert({
+            employee_id: recommendation.employee_id,
+            org_id: orgId,
+            location_id: locationId,
+            recommended_action_id: recommendation.action_id,
+            recommended_action: recommendation.recommended_action,
+            points_when_recommended: recommendation.current_points,
+          });
+
+        if (insertError) {
+          console.warn('Error creating recommendation record:', insertError);
+        }
+      }
     } catch (err) {
       console.warn('Error creating recommendation record:', err);
     }
@@ -266,24 +330,41 @@ export function RecommendedActions({
         }}
       >
         {/* Collapsed View - Shows comma-separated names */}
-        {!expanded && (
-          <Box sx={{ padding: "16px" }}>
-            <Typography
-              sx={{
-                fontFamily,
-                fontSize: 14,
-                color: '#6b7280',
-              }}
-            >
-              {employeeNames}
-            </Typography>
-          </Box>
-        )}
+        <Box 
+          sx={{ 
+            padding: "16px",
+            maxHeight: expanded ? '1000px' : '60px',
+            opacity: expanded ? 0 : 1,
+            transition: 'max-height 0.3s ease-in-out, opacity 0.2s ease-in-out',
+            overflow: 'hidden',
+            display: expanded ? 'none' : 'block',
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: 14,
+              color: '#6b7280',
+            }}
+          >
+            {employeeNames}
+          </Typography>
+        </Box>
 
         {/* Expanded View - Shows all cards */}
-        {expanded && (
-          <Box sx={{ padding: "16px", display: "flex", flexDirection: "column", gap: 2 }}>
-            {recommendations.map((rec) => (
+        <Box 
+          sx={{ 
+            padding: expanded ? "16px" : "0",
+            maxHeight: expanded ? '2000px' : '0',
+            opacity: expanded ? 1 : 0,
+            transition: 'max-height 0.3s ease-in-out, opacity 0.2s ease-in-out, padding 0.3s ease-in-out',
+            overflow: 'hidden',
+            display: "flex", 
+            flexDirection: "column", 
+            gap: 2,
+          }}
+        >
+          {recommendations.map((rec) => (
               <Box
                 key={rec.employee_id}
                 sx={{
@@ -399,8 +480,7 @@ export function RecommendedActions({
                 </Button>
               </Box>
             ))}
-          </Box>
-        )}
+        </Box>
 
         {/* Toggle Button at Bottom */}
         <Box
