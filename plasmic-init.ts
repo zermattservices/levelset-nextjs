@@ -1399,7 +1399,11 @@ PLASMIC.registerComponent(RecommendedActions, {
     },
     currentUser: {
       type: "object",
-      description: "Current user object"
+      description: "Current user object (optional)"
+    },
+    currentUserId: {
+      type: "string",
+      description: "Auth user ID to look up in app_users table"
     },
     className: "string",
     maxWidth: {

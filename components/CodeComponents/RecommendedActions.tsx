@@ -15,6 +15,7 @@ export interface RecommendedActionsProps {
   orgId: string;
   locationId: string;
   currentUser: Employee | null;
+  currentUserId?: string; // Alternative: auth user ID to look up in app_users
   className?: string;
   maxWidth?: string | number;
   width?: string | number;
@@ -85,6 +86,7 @@ export function RecommendedActions({
   orgId,
   locationId,
   currentUser,
+  currentUserId,
   className = "",
   maxWidth = "1200px",
   width = "100%",
@@ -97,6 +99,7 @@ export function RecommendedActions({
   const [selectedRecommendation, setSelectedRecommendation] = React.useState<RecommendedAction | null>(null);
   const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
+  const [appUserId, setAppUserId] = React.useState<string | null>(null);
   const supabase = createSupabaseClient();
 
   // Fetch recommendations from database (source of truth)
@@ -174,6 +177,32 @@ export function RecommendedActions({
     }
   }, [orgId, locationId, supabase]);
 
+  // Fetch app_user ID from auth_user_id
+  React.useEffect(() => {
+    if (!currentUserId) {
+      setAppUserId(currentUser?.id || null);
+      return;
+    }
+
+    const fetchAppUserId = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('app_users')
+          .select('id')
+          .eq('auth_user_id', currentUserId)
+          .single();
+        
+        if (!error && data) {
+          setAppUserId(data.id);
+        }
+      } catch (err) {
+        console.error('Error fetching app_user ID:', err);
+      }
+    };
+
+    fetchAppUserId();
+  }, [currentUserId, currentUser, supabase]);
+
   React.useEffect(() => {
     if (orgId && locationId) {
       fetchRecommendations();
@@ -195,19 +224,19 @@ export function RecommendedActions({
         .single();
 
       if (existing) {
-        // Update existing recommendation
+        // Update existing recommendation - use app_user ID
         const { error: updateError } = await supabase
           .from('recommended_disc_actions')
           .update({
             action_taken: 'dismissed',
             action_taken_at: new Date().toISOString(),
-            action_taken_by: currentUser?.id || null,
+            action_taken_by: appUserId || currentUser?.id || null,
           })
           .eq('id', existing.id);
 
         if (updateError) throw updateError;
       } else {
-        // Insert new recommendation as dismissed
+        // Insert new recommendation as dismissed - use app_user ID
         const { error: insertError } = await supabase
           .from('recommended_disc_actions')
           .insert({
@@ -219,7 +248,7 @@ export function RecommendedActions({
             points_when_recommended: recommendation.current_points,
             action_taken: 'dismissed',
             action_taken_at: new Date().toISOString(),
-            action_taken_by: currentUser?.id || null,
+            action_taken_by: appUserId || currentUser?.id || null,
           });
 
         if (insertError) throw insertError;

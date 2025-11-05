@@ -161,16 +161,28 @@ export function RecordActionModal({
           }
         }
 
-        // Fetch acting leader if we only have user ID
+        // Fetch acting leader - look up app_users by auth_user_id
         if (!currentUser && currentUserId) {
-          const { data: userData, error: userError } = await supabase
-            .from('employees')
+          // currentUserId is the auth user ID, look it up in app_users
+          const { data: appUserData, error: appUserError } = await supabase
+            .from('app_users')
             .select('*')
-            .eq('id', currentUserId)
+            .eq('auth_user_id', currentUserId)
             .single();
           
-          if (!userError && userData) {
-            setActingLeader(userData as Employee);
+          if (!appUserError && appUserData) {
+            // Convert app_user to Employee-like object for display
+            const employeeLike: Employee = {
+              id: appUserData.id,
+              full_name: `${appUserData.first_name || ''} ${appUserData.last_name || ''}`.trim() || appUserData.email,
+              role: appUserData.role || 'User',
+              org_id: appUserData.org_id,
+              location_id: appUserData.location_id || locationId,
+              active: true,
+            };
+            setActingLeader(employeeLike);
+          } else {
+            console.warn('Error fetching app_user:', appUserError);
           }
         } else if (currentUser) {
           setActingLeader(currentUser);
