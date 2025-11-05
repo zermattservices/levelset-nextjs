@@ -216,9 +216,11 @@ export function RecordActionModal({
             setLoadingLeader(false);
           }
         } else if (currentUser) {
+          console.log('[RecordActionModal] Using currentUser:', currentUser);
           setActingLeader(currentUser);
           setLoadingLeader(false);
         } else {
+          console.log('[RecordActionModal] No currentUser or currentUserId provided');
           setActingLeader(null);
           setLoadingLeader(false);
         }
