@@ -67,14 +67,13 @@ import {
 
 import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_mCN/component
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
-import { LoadingBoundary } from "@plasmicpkgs/plasmic-basic-components";
-import { LottieWrapper } from "@plasmicpkgs/lottie-react";
+import { CenteredLoadingSpinner } from "../../CodeComponents/CenteredLoadingSpinner"; // plasmic-import: iEXTq_V60EEp/codeComponent
 import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
 import { RecommendedActions } from "../../CodeComponents/RecommendedActions"; // plasmic-import: DCoGrXYcTP13/codeComponent
 import { DisciplineTable } from "../../CodeComponents/DisciplineTable"; // plasmic-import: Gsr7FZewgF56/codeComponent
 import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTable"; // plasmic-import: gO99exJZ_N-6/codeComponent
-import { MuiDrawerV2 } from "../../CodeComponents/MuiDrawerV2"; // plasmic-import: hoSoBbznWutx/codeComponent
-import { DrawerTabContainer } from "../../CodeComponents/DrawerTabContainer"; // plasmic-import: 3_XXEMijZcI9/codeComponent
+import { LoadingBoundary } from "@plasmicpkgs/plasmic-basic-components";
+import { LottieWrapper } from "@plasmicpkgs/lottie-react";
 import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
@@ -98,21 +97,15 @@ export const PlasmicDiscipline__ArgProps = new Array<ArgPropType>();
 export type PlasmicDiscipline__OverridesType = {
   root?: Flex__<"div">;
   menuNavigation?: Flex__<typeof MenuNavigation>;
-  loadingBoundary?: Flex__<typeof LoadingBoundary>;
-  lottie?: Flex__<typeof LottieWrapper>;
+  centeredLoadingSpinner?: Flex__<typeof CenteredLoadingSpinner>;
   redirectIf?: Flex__<typeof RedirectIf>;
   recommendedActions?: Flex__<typeof RecommendedActions>;
   verticalStack?: Flex__<"div">;
   disciplineTable?: Flex__<typeof DisciplineTable>;
   verticalStack2?: Flex__<"div">;
   disciplineActionsTable?: Flex__<typeof DisciplineActionsTable>;
-  drawerV2Mui?: Flex__<typeof MuiDrawerV2>;
-  drawerTabContainer?: Flex__<typeof DrawerTabContainer>;
-  content3?: Flex__<"div">;
-  textAndSupportingText3?: Flex__<"div">;
-  textAndOnlineIndicator2?: Flex__<"div">;
-  text3?: Flex__<"div">;
-  supportingText3?: Flex__<"div">;
+  loadingBoundary?: Flex__<typeof LoadingBoundary>;
+  lottie?: Flex__<typeof LottieWrapper>;
 };
 
 export interface DefaultDisciplineProps {}
@@ -231,25 +224,6 @@ function PlasmicDiscipline__RenderFunc(props: {
                 e?.plasmicType === "PlasmicUndefinedDataError"
               ) {
                 return undefined;
-              }
-              throw e;
-            }
-          })()
-      },
-      {
-        path: "drawerV2Mui.open",
-        type: "private",
-        variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) =>
-          (() => {
-            try {
-              return $state.drawerOpen;
-            } catch (e) {
-              if (
-                e instanceof TypeError ||
-                e?.plasmicType === "PlasmicUndefinedDataError"
-              ) {
-                return true;
               }
               throw e;
             }
@@ -440,9 +414,176 @@ function PlasmicDiscipline__RenderFunc(props: {
           ])}
         />
 
+        <CenteredLoadingSpinner
+          data-plasmic-name={"centeredLoadingSpinner"}
+          data-plasmic-override={overrides.centeredLoadingSpinner}
+          backgroundColor={"rgba(255, 255, 255, 0.8)"}
+          className={classNames("__wab_instance", sty.centeredLoadingSpinner)}
+          color={"#31664a"}
+          opacity={0.8}
+          showChildren={true}
+          size={48}
+        >
+          <RedirectIf
+            data-plasmic-name={"redirectIf"}
+            data-plasmic-override={overrides.redirectIf}
+            className={classNames("__wab_instance", sty.redirectIf)}
+            condition={true}
+            onFalse={async () => {
+              const $steps = {};
+
+              $steps["goToLoginPage"] = true
+                ? (() => {
+                    const actionArgs = { destination: `/auth/login` };
+                    return (({ destination }) => {
+                      if (
+                        typeof destination === "string" &&
+                        destination.startsWith("#")
+                      ) {
+                        document
+                          .getElementById(destination.substr(1))
+                          .scrollIntoView({ behavior: "smooth" });
+                      } else {
+                        __nextRouter?.push(destination);
+                      }
+                    })?.apply(null, [actionArgs]);
+                  })()
+                : undefined;
+              if (
+                $steps["goToLoginPage"] != null &&
+                typeof $steps["goToLoginPage"] === "object" &&
+                typeof $steps["goToLoginPage"].then === "function"
+              ) {
+                $steps["goToLoginPage"] = await $steps["goToLoginPage"];
+              }
+            }}
+          >
+            <div className={classNames(projectcss.all, sty.freeBox__jtUkZ)}>
+              <div className={classNames(projectcss.all, sty.freeBox__ureDb)}>
+                <div className={classNames(projectcss.all, sty.freeBox__nlSty)}>
+                  <div
+                    className={classNames(projectcss.all, sty.freeBox__mKhGx)}
+                  >
+                    <div
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text__wQDeC
+                      )}
+                    >
+                      {"APS Dashboard"}
+                    </div>
+                  </div>
+                  <div
+                    className={classNames(projectcss.all, sty.freeBox__c457R)}
+                  >
+                    <div
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text___8HOob
+                      )}
+                    >
+                      {
+                        "Here\u2019s your organization's current discipline health. Click a Team Member to see their recent infractions."
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={classNames(projectcss.all, sty.freeBox__lKzxl)}>
+              <div className={classNames(projectcss.all, sty.freeBox__s72NY)}>
+                <RecommendedActions
+                  data-plasmic-name={"recommendedActions"}
+                  data-plasmic-override={overrides.recommendedActions}
+                  className={classNames(
+                    "__wab_instance",
+                    sty.recommendedActions
+                  )}
+                  currentUser={(() => {
+                    try {
+                      return $ctx.auth.id;
+                    } catch (e) {
+                      if (
+                        e instanceof TypeError ||
+                        e?.plasmicType === "PlasmicUndefinedDataError"
+                      ) {
+                        return undefined;
+                      }
+                      throw e;
+                    }
+                  })()}
+                  locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                  maxWidth={"1200px"}
+                  orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                  width={"100%"}
+                />
+
+                <div className={classNames(projectcss.all, sty.freeBox__cHwGk)}>
+                  <div
+                    data-plasmic-name={"verticalStack"}
+                    data-plasmic-override={overrides.verticalStack}
+                    className={classNames(projectcss.all, sty.verticalStack)}
+                  >
+                    <div
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text__of8Zu
+                      )}
+                    >
+                      {"Employees"}
+                    </div>
+                    <DisciplineTable
+                      data-plasmic-name={"disciplineTable"}
+                      data-plasmic-override={overrides.disciplineTable}
+                      className={classNames(
+                        "__wab_instance",
+                        sty.disciplineTable
+                      )}
+                      density={"comfortable"}
+                      locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                      orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                      showActions={true}
+                    />
+                  </div>
+                  <div
+                    data-plasmic-name={"verticalStack2"}
+                    data-plasmic-override={overrides.verticalStack2}
+                    className={classNames(projectcss.all, sty.verticalStack2)}
+                  >
+                    <div
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.text__oSxFd
+                      )}
+                    >
+                      {"Disciplinary Actions"}
+                    </div>
+                    <DisciplineActionsTable
+                      data-plasmic-name={"disciplineActionsTable"}
+                      data-plasmic-override={overrides.disciplineActionsTable}
+                      className={classNames(
+                        "__wab_instance",
+                        sty.disciplineActionsTable
+                      )}
+                      density={"comfortable"}
+                      locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                      orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                      showActions={false}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </RedirectIf>
+        </CenteredLoadingSpinner>
         <LoadingBoundary
           data-plasmic-name={"loadingBoundary"}
           data-plasmic-override={overrides.loadingBoundary}
+          children={null}
           loadingState={
             <DataCtxReader__>
               {$ctx => (
@@ -1001,396 +1142,7 @@ function PlasmicDiscipline__RenderFunc(props: {
               )}
             </DataCtxReader__>
           }
-        >
-          <DataCtxReader__>
-            {$ctx => (
-              <RedirectIf
-                data-plasmic-name={"redirectIf"}
-                data-plasmic-override={overrides.redirectIf}
-                className={classNames("__wab_instance", sty.redirectIf)}
-                condition={true}
-                onFalse={async () => {
-                  const $steps = {};
-
-                  $steps["goToLoginPage"] = true
-                    ? (() => {
-                        const actionArgs = { destination: `/auth/login` };
-                        return (({ destination }) => {
-                          if (
-                            typeof destination === "string" &&
-                            destination.startsWith("#")
-                          ) {
-                            document
-                              .getElementById(destination.substr(1))
-                              .scrollIntoView({ behavior: "smooth" });
-                          } else {
-                            __nextRouter?.push(destination);
-                          }
-                        })?.apply(null, [actionArgs]);
-                      })()
-                    : undefined;
-                  if (
-                    $steps["goToLoginPage"] != null &&
-                    typeof $steps["goToLoginPage"] === "object" &&
-                    typeof $steps["goToLoginPage"].then === "function"
-                  ) {
-                    $steps["goToLoginPage"] = await $steps["goToLoginPage"];
-                  }
-                }}
-              >
-                <div className={classNames(projectcss.all, sty.freeBox__jtUkZ)}>
-                  <div
-                    className={classNames(projectcss.all, sty.freeBox__ureDb)}
-                  >
-                    <div
-                      className={classNames(projectcss.all, sty.freeBox__nlSty)}
-                    >
-                      <div
-                        className={classNames(
-                          projectcss.all,
-                          sty.freeBox__mKhGx
-                        )}
-                      >
-                        <div
-                          className={classNames(
-                            projectcss.all,
-                            projectcss.__wab_text,
-                            sty.text__wQDeC
-                          )}
-                        >
-                          {"APS Dashboard"}
-                        </div>
-                      </div>
-                      <div
-                        className={classNames(
-                          projectcss.all,
-                          sty.freeBox__c457R
-                        )}
-                      >
-                        <div
-                          className={classNames(
-                            projectcss.all,
-                            projectcss.__wab_text,
-                            sty.text___8HOob
-                          )}
-                        >
-                          {
-                            "Here\u2019s your organization's current discipline health. Click a Team Member to see their recent infractions."
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className={classNames(projectcss.all, sty.freeBox__lKzxl)}>
-                  <div
-                    className={classNames(projectcss.all, sty.freeBox__s72NY)}
-                  >
-                    <RecommendedActions
-                      data-plasmic-name={"recommendedActions"}
-                      data-plasmic-override={overrides.recommendedActions}
-                      className={classNames(
-                        "__wab_instance",
-                        sty.recommendedActions
-                      )}
-                      currentUser={(() => {
-                        try {
-                          return $ctx.auth.id;
-                        } catch (e) {
-                          if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
-                          ) {
-                            return undefined;
-                          }
-                          throw e;
-                        }
-                      })()}
-                      locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                      maxWidth={"1200px"}
-                      orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
-                      width={"100%"}
-                    />
-
-                    <div
-                      className={classNames(projectcss.all, sty.freeBox__cHwGk)}
-                    >
-                      <div
-                        data-plasmic-name={"verticalStack"}
-                        data-plasmic-override={overrides.verticalStack}
-                        className={classNames(
-                          projectcss.all,
-                          sty.verticalStack
-                        )}
-                      >
-                        <div
-                          className={classNames(
-                            projectcss.all,
-                            projectcss.__wab_text,
-                            sty.text__of8Zu
-                          )}
-                        >
-                          {"Employees"}
-                        </div>
-                        <DisciplineTable
-                          data-plasmic-name={"disciplineTable"}
-                          data-plasmic-override={overrides.disciplineTable}
-                          className={classNames(
-                            "__wab_instance",
-                            sty.disciplineTable
-                          )}
-                          density={"comfortable"}
-                          locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                          orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
-                          showActions={true}
-                        />
-                      </div>
-                      <div
-                        data-plasmic-name={"verticalStack2"}
-                        data-plasmic-override={overrides.verticalStack2}
-                        className={classNames(
-                          projectcss.all,
-                          sty.verticalStack2
-                        )}
-                      >
-                        <div
-                          className={classNames(
-                            projectcss.all,
-                            projectcss.__wab_text,
-                            sty.text__oSxFd
-                          )}
-                        >
-                          {"Disciplinary Actions"}
-                        </div>
-                        <DisciplineActionsTable
-                          data-plasmic-name={"disciplineActionsTable"}
-                          data-plasmic-override={
-                            overrides.disciplineActionsTable
-                          }
-                          className={classNames(
-                            "__wab_instance",
-                            sty.disciplineActionsTable
-                          )}
-                          density={"comfortable"}
-                          locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                          orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
-                          showActions={false}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <MuiDrawerV2
-                  data-plasmic-name={"drawerV2Mui"}
-                  data-plasmic-override={overrides.drawerV2Mui}
-                  autoFocus={true}
-                  className={classNames("__wab_instance", sty.drawerV2Mui)}
-                  closable={true}
-                  destroyOnClose={false}
-                  keyboard={true}
-                  mask={true}
-                  maskClosable={true}
-                  onOpenChange={async (...eventArgs: any) => {
-                    generateStateOnChangeProp($state, [
-                      "drawerV2Mui",
-                      "open"
-                    ]).apply(null, eventArgs);
-
-                    (async open => {
-                      const $steps = {};
-
-                      $steps["updateDrawerOpen"] = true
-                        ? (() => {
-                            const actionArgs = {
-                              variable: {
-                                objRoot: $state,
-                                variablePath: ["drawerOpen"]
-                              },
-                              operation: 0,
-                              value: true
-                            };
-                            return (({
-                              variable,
-                              value,
-                              startIndex,
-                              deleteCount
-                            }) => {
-                              if (!variable) {
-                                return;
-                              }
-                              const { objRoot, variablePath } = variable;
-
-                              $stateSet(objRoot, variablePath, value);
-                              return value;
-                            })?.apply(null, [actionArgs]);
-                          })()
-                        : undefined;
-                      if (
-                        $steps["updateDrawerOpen"] != null &&
-                        typeof $steps["updateDrawerOpen"] === "object" &&
-                        typeof $steps["updateDrawerOpen"].then === "function"
-                      ) {
-                        $steps["updateDrawerOpen"] =
-                          await $steps["updateDrawerOpen"];
-                      }
-                    }).apply(null, eventArgs);
-                  }}
-                  open={generateStateValueProp($state, ["drawerV2Mui", "open"])}
-                  placement={"right"}
-                  size={"default"}
-                  title={
-                    <div
-                      data-plasmic-name={"content3"}
-                      data-plasmic-override={overrides.content3}
-                      className={classNames(projectcss.all, sty.content3)}
-                    >
-                      <div
-                        data-plasmic-name={"textAndSupportingText3"}
-                        data-plasmic-override={overrides.textAndSupportingText3}
-                        className={classNames(
-                          projectcss.all,
-                          sty.textAndSupportingText3
-                        )}
-                      >
-                        <div
-                          data-plasmic-name={"textAndOnlineIndicator2"}
-                          data-plasmic-override={
-                            overrides.textAndOnlineIndicator2
-                          }
-                          className={classNames(
-                            projectcss.all,
-                            sty.textAndOnlineIndicator2
-                          )}
-                        >
-                          <div
-                            data-plasmic-name={"text3"}
-                            data-plasmic-override={overrides.text3}
-                            className={classNames(
-                              projectcss.all,
-                              projectcss.__wab_text,
-                              sty.text3
-                            )}
-                          >
-                            <React.Fragment>
-                              {(() => {
-                                try {
-                                  return (() => {
-                                    {
-                                      {
-                                        return $state.selectedEmployee
-                                          ?.full_name;
-                                      }
-                                    }
-                                  })();
-                                } catch (e) {
-                                  if (
-                                    e instanceof TypeError ||
-                                    e?.plasmicType ===
-                                      "PlasmicUndefinedDataError"
-                                  ) {
-                                    return "Reece Howard";
-                                  }
-                                  throw e;
-                                }
-                              })()}
-                            </React.Fragment>
-                          </div>
-                        </div>
-                        <div
-                          data-plasmic-name={"supportingText3"}
-                          data-plasmic-override={overrides.supportingText3}
-                          className={classNames(
-                            projectcss.all,
-                            projectcss.__wab_text,
-                            sty.supportingText3
-                          )}
-                        >
-                          <React.Fragment>
-                            {(() => {
-                              try {
-                                return $state.selectedEmployee?.role;
-                              } catch (e) {
-                                if (
-                                  e instanceof TypeError ||
-                                  e?.plasmicType === "PlasmicUndefinedDataError"
-                                ) {
-                                  return "Owner/Operator";
-                                }
-                                throw e;
-                              }
-                            })()}
-                          </React.Fragment>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                  width={"620"}
-                  zIndex={1000}
-                >
-                  <DrawerTabContainer
-                    data-plasmic-name={"drawerTabContainer"}
-                    data-plasmic-override={overrides.drawerTabContainer}
-                    className={classNames(
-                      "__wab_instance",
-                      sty.drawerTabContainer
-                    )}
-                    employee={(() => {
-                      try {
-                        return $state.selectedEmployee;
-                      } catch (e) {
-                        if (
-                          e instanceof TypeError ||
-                          e?.plasmicType === "PlasmicUndefinedDataError"
-                        ) {
-                          return undefined;
-                        }
-                        throw e;
-                      }
-                    })()}
-                    initialTab={"discipline"}
-                    onRecordAction={async () => {
-                      const $steps = {};
-
-                      $steps["runCode"] = true
-                        ? (() => {
-                            const actionArgs = {
-                              customFunction: async () => {
-                                return () =>
-                                  ($state.recordActionModalOpen = true);
-                              }
-                            };
-                            return (({ customFunction }) => {
-                              return customFunction();
-                            })?.apply(null, [actionArgs]);
-                          })()
-                        : undefined;
-                      if (
-                        $steps["runCode"] != null &&
-                        typeof $steps["runCode"] === "object" &&
-                        typeof $steps["runCode"].then === "function"
-                      ) {
-                        $steps["runCode"] = await $steps["runCode"];
-                      }
-                    }}
-                    orgId={(() => {
-                      try {
-                        return $ctx.auth.org_id;
-                      } catch (e) {
-                        if (
-                          e instanceof TypeError ||
-                          e?.plasmicType === "PlasmicUndefinedDataError"
-                        ) {
-                          return undefined;
-                        }
-                        throw e;
-                      }
-                    })()}
-                  />
-                </MuiDrawerV2>
-              </RedirectIf>
-            )}
-          </DataCtxReader__>
-        </LoadingBoundary>
+        />
       </div>
     </React.Fragment>
   ) as React.ReactElement | null;
@@ -1400,87 +1152,41 @@ const PlasmicDescendants = {
   root: [
     "root",
     "menuNavigation",
-    "loadingBoundary",
-    "lottie",
+    "centeredLoadingSpinner",
     "redirectIf",
     "recommendedActions",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
     "disciplineActionsTable",
-    "drawerV2Mui",
-    "drawerTabContainer",
-    "content3",
-    "textAndSupportingText3",
-    "textAndOnlineIndicator2",
-    "text3",
-    "supportingText3"
+    "loadingBoundary",
+    "lottie"
   ],
   menuNavigation: ["menuNavigation"],
-  loadingBoundary: [
-    "loadingBoundary",
-    "lottie",
+  centeredLoadingSpinner: [
+    "centeredLoadingSpinner",
     "redirectIf",
     "recommendedActions",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
-    "disciplineActionsTable",
-    "drawerV2Mui",
-    "drawerTabContainer",
-    "content3",
-    "textAndSupportingText3",
-    "textAndOnlineIndicator2",
-    "text3",
-    "supportingText3"
+    "disciplineActionsTable"
   ],
-  lottie: ["lottie"],
   redirectIf: [
     "redirectIf",
     "recommendedActions",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
-    "disciplineActionsTable",
-    "drawerV2Mui",
-    "drawerTabContainer",
-    "content3",
-    "textAndSupportingText3",
-    "textAndOnlineIndicator2",
-    "text3",
-    "supportingText3"
+    "disciplineActionsTable"
   ],
   recommendedActions: ["recommendedActions"],
   verticalStack: ["verticalStack", "disciplineTable"],
   disciplineTable: ["disciplineTable"],
   verticalStack2: ["verticalStack2", "disciplineActionsTable"],
   disciplineActionsTable: ["disciplineActionsTable"],
-  drawerV2Mui: [
-    "drawerV2Mui",
-    "drawerTabContainer",
-    "content3",
-    "textAndSupportingText3",
-    "textAndOnlineIndicator2",
-    "text3",
-    "supportingText3"
-  ],
-  drawerTabContainer: ["drawerTabContainer"],
-  content3: [
-    "content3",
-    "textAndSupportingText3",
-    "textAndOnlineIndicator2",
-    "text3",
-    "supportingText3"
-  ],
-  textAndSupportingText3: [
-    "textAndSupportingText3",
-    "textAndOnlineIndicator2",
-    "text3",
-    "supportingText3"
-  ],
-  textAndOnlineIndicator2: ["textAndOnlineIndicator2", "text3"],
-  text3: ["text3"],
-  supportingText3: ["supportingText3"]
+  loadingBoundary: ["loadingBoundary", "lottie"],
+  lottie: ["lottie"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
 type DescendantsType<T extends NodeNameType> =
@@ -1488,21 +1194,15 @@ type DescendantsType<T extends NodeNameType> =
 type NodeDefaultElementType = {
   root: "div";
   menuNavigation: typeof MenuNavigation;
-  loadingBoundary: typeof LoadingBoundary;
-  lottie: typeof LottieWrapper;
+  centeredLoadingSpinner: typeof CenteredLoadingSpinner;
   redirectIf: typeof RedirectIf;
   recommendedActions: typeof RecommendedActions;
   verticalStack: "div";
   disciplineTable: typeof DisciplineTable;
   verticalStack2: "div";
   disciplineActionsTable: typeof DisciplineActionsTable;
-  drawerV2Mui: typeof MuiDrawerV2;
-  drawerTabContainer: typeof DrawerTabContainer;
-  content3: "div";
-  textAndSupportingText3: "div";
-  textAndOnlineIndicator2: "div";
-  text3: "div";
-  supportingText3: "div";
+  loadingBoundary: typeof LoadingBoundary;
+  lottie: typeof LottieWrapper;
 };
 
 type ReservedPropsType = "variants" | "args" | "overrides";
@@ -1568,21 +1268,15 @@ export const PlasmicDiscipline = Object.assign(
   {
     // Helper components rendering sub-elements
     menuNavigation: makeNodeComponent("menuNavigation"),
-    loadingBoundary: makeNodeComponent("loadingBoundary"),
-    lottie: makeNodeComponent("lottie"),
+    centeredLoadingSpinner: makeNodeComponent("centeredLoadingSpinner"),
     redirectIf: makeNodeComponent("redirectIf"),
     recommendedActions: makeNodeComponent("recommendedActions"),
     verticalStack: makeNodeComponent("verticalStack"),
     disciplineTable: makeNodeComponent("disciplineTable"),
     verticalStack2: makeNodeComponent("verticalStack2"),
     disciplineActionsTable: makeNodeComponent("disciplineActionsTable"),
-    drawerV2Mui: makeNodeComponent("drawerV2Mui"),
-    drawerTabContainer: makeNodeComponent("drawerTabContainer"),
-    content3: makeNodeComponent("content3"),
-    textAndSupportingText3: makeNodeComponent("textAndSupportingText3"),
-    textAndOnlineIndicator2: makeNodeComponent("textAndOnlineIndicator2"),
-    text3: makeNodeComponent("text3"),
-    supportingText3: makeNodeComponent("supportingText3"),
+    loadingBoundary: makeNodeComponent("loadingBoundary"),
+    lottie: makeNodeComponent("lottie"),
 
     // Metadata about props expected for PlasmicDiscipline
     internalVariantProps: PlasmicDiscipline__VariantProps,
