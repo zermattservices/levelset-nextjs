@@ -33,6 +33,23 @@ export interface Infraction {
   org_id: string;
   location_id: string;
   description?: string;
+  infraction?: string; // The type/description of infraction
+  leader_name?: string; // Name of leader who documented (from JOIN)
+  acknowledgement?: string; // Status: "Notified", "Notified not present", etc.
+  leader_id?: string; // ID of documenting leader
+}
+
+export interface DisciplinaryAction {
+  id: string;
+  employee_id: string;
+  action: string; // The action taken (e.g., "Documented Warning")
+  action_date: string;
+  action_id?: string; // Reference to disc_actions_rubric
+  leader_id?: string; // Who took the action
+  leader_name?: string; // Name of leader who took action (from JOIN)
+  org_id: string;
+  location_id: string;
+  notes?: string;
 }
 
 export interface Rating {

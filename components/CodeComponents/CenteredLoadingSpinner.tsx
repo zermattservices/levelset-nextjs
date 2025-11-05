@@ -9,6 +9,8 @@ export interface CenteredLoadingSpinnerProps {
   color?: string;
   backgroundColor?: string;
   opacity?: number;
+  children?: React.ReactNode;
+  showChildren?: boolean;
 }
 
 export function CenteredLoadingSpinner({
@@ -17,7 +19,18 @@ export function CenteredLoadingSpinner({
   color = "#31664a",
   backgroundColor = "rgba(255, 255, 255, 0.8)",
   opacity = 0.8,
+  children,
+  showChildren = false,
 }: CenteredLoadingSpinnerProps) {
+  // If children provided and showChildren is true, render them beneath/around the spinner
+  if (children && showChildren) {
+    return (
+      <Box className={className} data-plasmic-name="centered-loading-spinner">
+        {children}
+      </Box>
+    );
+  }
+
   return (
     <Box
       className={className}

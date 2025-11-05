@@ -27,6 +27,7 @@ import { DrawerHeader } from "./components/CodeComponents/DrawerComponents/Drawe
 import { DrawerContent } from "./components/CodeComponents/DrawerComponents/DrawerContent";
 import { DrawerFooter } from "./components/CodeComponents/DrawerComponents/DrawerFooter";
 import { SlideoutListItem } from "./components/CodeComponents/DrawerComponents/SlideoutListItem";
+import { DrawerTabContainer } from "./components/CodeComponents/DrawerTabContainer";
 import { CenteredLoadingSpinner } from "./components/CodeComponents/CenteredLoadingSpinner";
 import { TableSkeleton } from "./components/CodeComponents/Skeletons/TableSkeleton";
 import { EmployeeTableSkeleton } from "./components/CodeComponents/Skeletons/EmployeeTableSkeleton";
@@ -828,6 +829,15 @@ PLASMIC.registerComponent(CenteredLoadingSpinner, {
       type: "number",
       defaultValue: 0.8,
       description: "Opacity of the background overlay"
+    },
+    children: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    showChildren: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Show children instead of spinner (for LoadingBoundary compatibility)"
     }
   },
   importPath: "./components/CodeComponents/CenteredLoadingSpinner",
@@ -1180,4 +1190,37 @@ PLASMIC.registerComponent(SlideoutListItem, {
     className: "string",
   },
   importPath: "./components/CodeComponents/DrawerComponents/SlideoutListItem",
+});
+
+// Register DrawerTabContainer component - Complete drawer with tabs for employee details
+PLASMIC.registerComponent(DrawerTabContainer, {
+  name: "DrawerTabContainer",
+  displayName: "Drawer Tab Container",
+  props: {
+    employee: {
+      type: "object",
+      description: "Employee object with all details"
+    },
+    className: "string",
+    initialTab: {
+      type: "choice",
+      options: ["pathway", "pe", "evaluations", "discipline"],
+      defaultValue: "discipline",
+      description: "Initial tab to display"
+    },
+    orgId: {
+      type: "string",
+      description: "Organization ID"
+    },
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    onRecordAction: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler for Record an Action button"
+    }
+  },
+  importPath: "./components/CodeComponents/DrawerTabContainer",
 });
