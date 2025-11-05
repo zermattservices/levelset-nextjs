@@ -31,7 +31,7 @@ import { DrawerTabContainer } from "./components/CodeComponents/DrawerTabContain
 import { EmployeeModal } from "./components/CodeComponents/EmployeeModal";
 import { InfractionEditModal } from "./components/CodeComponents/InfractionEditModal";
 import { RecordActionModal } from "./components/CodeComponents/RecordActionModal";
-import { RecommendedActions } from "./components/CodeComponents/RecommendedActions";
+import { DisciplineNotifications } from "./components/CodeComponents/RecommendedActions";
 import { CenteredLoadingSpinner } from "./components/CodeComponents/CenteredLoadingSpinner";
 import { TableSkeleton } from "./components/CodeComponents/Skeletons/TableSkeleton";
 import { EmployeeTableSkeleton } from "./components/CodeComponents/Skeletons/EmployeeTableSkeleton";
@@ -1381,12 +1381,51 @@ PLASMIC.registerComponent(RecordActionModal, {
   importPath: "./components/CodeComponents/RecordActionModal",
 });
 
-// Register RecommendedActions component
+// Register DisciplineNotifications component (contains both infractions this week and required actions)
 // @ts-ignore - Complex Plasmic registration type
-PLASMIC.registerComponent(RecommendedActions, {
+PLASMIC.registerComponent(DisciplineNotifications, {
+  name: "DisciplineNotifications",
+  // @ts-ignore - Complex Plasmic registration type
+  displayName: "Discipline Notifications",
+  // @ts-ignore - Complex Plasmic registration type
+  props: {
+    orgId: {
+      type: "string",
+      description: "Organization ID"
+    },
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    currentUser: {
+      type: "object",
+      description: "Current user object (optional)"
+    },
+    currentUserId: {
+      type: "string",
+      description: "Auth user ID to look up in app_users table"
+    },
+    className: "string",
+    maxWidth: {
+      type: "string",
+      defaultValue: "1200px",
+      description: "Maximum width of the component"
+    },
+    width: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Width of the component"
+    }
+  },
+  importPath: "./components/CodeComponents/RecommendedActions",
+});
+
+// Backwards compatibility - RecommendedActions is now DisciplineNotifications
+// @ts-ignore - Complex Plasmic registration type
+PLASMIC.registerComponent(DisciplineNotifications, {
   name: "RecommendedActions",
   // @ts-ignore - Complex Plasmic registration type
-  displayName: "Recommended Actions",
+  displayName: "Recommended Actions (deprecated - use Discipline Notifications)",
   // @ts-ignore - Complex Plasmic registration type
   props: {
     orgId: {

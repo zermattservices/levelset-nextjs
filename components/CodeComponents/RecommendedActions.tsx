@@ -20,7 +20,7 @@ import { createSupabaseClient } from "@/util/supabase/component";
 import { RecordActionModal } from "./RecordActionModal";
 import { EmployeeModal } from "./EmployeeModal";
 
-export interface RecommendedActionsProps {
+export interface DisciplineNotificationsProps {
   orgId: string;
   locationId: string;
   currentUser: Employee | null;
@@ -29,6 +29,9 @@ export interface RecommendedActionsProps {
   maxWidth?: string | number;
   width?: string | number;
 }
+
+// For backwards compatibility
+export type RecommendedActionsProps = DisciplineNotificationsProps;
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
@@ -216,7 +219,7 @@ const PointsBadge = ({ points, disciplineActions }: { points: number; discipline
   );
 };
 
-export function RecommendedActions({
+export function DisciplineNotifications({
   orgId,
   locationId,
   currentUser,
@@ -224,7 +227,7 @@ export function RecommendedActions({
   className = "",
   maxWidth = "1200px",
   width = "100%",
-}: RecommendedActionsProps) {
+}: DisciplineNotificationsProps) {
   const [recommendations, setRecommendations] = React.useState<RecommendedAction[]>([]);
   const [weeklyInfractions, setWeeklyInfractions] = React.useState<Infraction[]>([]);
   const [disciplineActions, setDisciplineActions] = React.useState<any[]>([]);
@@ -463,14 +466,7 @@ export function RecommendedActions({
           }}
         >
           <AccordionSummary
-            expandIcon={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500 }}>
-                  {expandedPanel === 'infractions' ? 'Collapse' : 'Expand'}
-                </Typography>
-                <ExpandMoreIcon sx={{ color: levelsetGreen }} />
-              </Box>
-            }
+            expandIcon={<ExpandMoreIcon sx={{ color: levelsetGreen }} />}
             onClick={() => setExpandedPanel(expandedPanel === 'infractions' ? false : 'infractions')}
             sx={{
               padding: 0,
@@ -480,11 +476,22 @@ export function RecommendedActions({
               },
               '& .MuiAccordionSummary-content': {
                 margin: '12px 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+              },
+              '& .MuiAccordionSummary-expandIconWrapper': {
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
               },
             }}
           >
             <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
               Infractions This Week ({weeklyInfractions.length})
+            </Typography>
+            <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500, ml: 'auto', mr: 1 }}>
+              {expandedPanel === 'infractions' ? 'Collapse' : 'Expand'}
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0, mt: 2 }}>
@@ -522,14 +529,7 @@ export function RecommendedActions({
           }}
         >
           <AccordionSummary
-            expandIcon={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500 }}>
-                  {expandedPanel === 'actions' ? 'Collapse' : 'Expand'}
-                </Typography>
-                <ExpandMoreIcon sx={{ color: levelsetGreen }} />
-              </Box>
-            }
+            expandIcon={<ExpandMoreIcon sx={{ color: levelsetGreen }} />}
             onClick={() => setExpandedPanel(expandedPanel === 'actions' ? false : 'actions')}
             sx={{
               padding: 0,
@@ -542,6 +542,11 @@ export function RecommendedActions({
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1.5,
+              },
+              '& .MuiAccordionSummary-expandIconWrapper': {
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
               },
             }}
           >
@@ -560,6 +565,9 @@ export function RecommendedActions({
                 height: 24,
               }}
             />
+            <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500, ml: 'auto', mr: 1 }}>
+              {expandedPanel === 'actions' ? 'Collapse' : 'Expand'}
+            </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0, mt: 2 }}>
             <Box

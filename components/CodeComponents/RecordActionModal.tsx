@@ -139,6 +139,7 @@ export function RecordActionModal({
   const [notes, setNotes] = React.useState("");
   const [locationName, setLocationName] = React.useState("");
   const [actingLeader, setActingLeader] = React.useState<Employee | null>(null);
+  const [loadingLeader, setLoadingLeader] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const supabase = createSupabaseClient();
 
@@ -163,29 +164,63 @@ export function RecordActionModal({
 
         // Fetch acting leader - look up app_users by auth_user_id
         if (!currentUser && currentUserId) {
-          // currentUserId is the auth user ID, look it up in app_users
-          const { data: appUserData, error: appUserError } = await supabase
-            .from('app_users')
-            .select('*')
-            .eq('auth_user_id', currentUserId)
-            .single();
-          
-          if (!appUserError && appUserData) {
-            // Convert app_user to Employee-like object for display
-            const employeeLike: Employee = {
-              id: appUserData.id,
-              full_name: `${appUserData.first_name || ''} ${appUserData.last_name || ''}`.trim() || appUserData.email,
-              role: appUserData.role || 'User',
-              org_id: appUserData.org_id,
-              location_id: appUserData.location_id || locationId,
+          setLoadingLeader(true);
+          try {
+            console.log('Fetching app_user for auth_user_id:', currentUserId);
+            
+            // currentUserId is the auth user ID, look it up in app_users
+            const { data: appUserData, error: appUserError } = await supabase
+              .from('app_users')
+              .select('*')
+              .eq('auth_user_id', currentUserId)
+              .maybeSingle();
+            
+            console.log('App user data:', appUserData);
+            console.log('App user error:', appUserError);
+            
+            if (!appUserError && appUserData) {
+              // Convert app_user to Employee-like object for display
+              const fullName = `${appUserData.first_name || ''} ${appUserData.last_name || ''}`.trim();
+              const employeeLike: Employee = {
+                id: appUserData.id,
+                full_name: fullName || appUserData.email || 'Unknown User',
+                role: appUserData.role || 'User',
+                org_id: appUserData.org_id,
+                location_id: appUserData.location_id || locationId,
+                active: true,
+              };
+              console.log('Setting acting leader:', employeeLike);
+              setActingLeader(employeeLike);
+            } else {
+              console.warn('No app_user found for auth_user_id:', currentUserId);
+              setActingLeader({
+                id: currentUserId,
+                full_name: 'Current User',
+                role: 'User',
+                org_id: orgId,
+                location_id: locationId,
+                active: true,
+              });
+            }
+          } catch (err) {
+            console.error('Error fetching app_user:', err);
+            setActingLeader({
+              id: currentUserId,
+              full_name: 'Current User',
+              role: 'User',
+              org_id: orgId,
+              location_id: locationId,
               active: true,
-            };
-            setActingLeader(employeeLike);
-          } else {
-            console.warn('Error fetching app_user:', appUserError);
+            });
+          } finally {
+            setLoadingLeader(false);
           }
         } else if (currentUser) {
           setActingLeader(currentUser);
+          setLoadingLeader(false);
+        } else {
+          setActingLeader(null);
+          setLoadingLeader(false);
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -416,7 +451,7 @@ export function RecordActionModal({
           {/* Acting Leader (disabled) */}
           <CustomTextField
             label="Acting Leader"
-            value={actingLeader?.full_name || "Loading..."}
+            value={loadingLeader ? "Loading..." : (actingLeader?.full_name || "Not available")}
             disabled
           />
 
@@ -428,13 +463,42 @@ export function RecordActionModal({
           />
 
           {/* Notes */}
-          <CustomTextField
+          <TextField
             label="Notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             multiline
             rows={3}
             placeholder="Add any additional notes..."
+            fullWidth
+            sx={{
+              '& .MuiInputLabel-root': {
+                fontFamily,
+                fontSize: 12,
+                color: '#6b7280',
+                '&.Mui-focused': {
+                  color: levelsetGreen,
+                },
+              },
+              '& .MuiInputBase-root': {
+                fontFamily,
+                fontSize: 14,
+              },
+              '& .MuiInputBase-input': {
+                fontFamily,
+                fontSize: 14,
+              },
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#e5e7eb',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#d1d5db',
+              },
+              '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: levelsetGreen,
+                borderWidth: '2px',
+              },
+            }}
           />
 
           {/* Action Buttons */}
