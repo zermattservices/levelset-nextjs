@@ -128,12 +128,15 @@ export function InfractionEditModal({
   className = "",
 }: InfractionEditModalProps) {
   const [infractionDate, setInfractionDate] = React.useState<Date | null>(null);
+  const [employeeId, setEmployeeId] = React.useState("");
+  const [employeeName, setEmployeeName] = React.useState("");
   const [leaderId, setLeaderId] = React.useState("");
   const [notified, setNotified] = React.useState(true); // Boolean for toggle
   const [infractionType, setInfractionType] = React.useState("");
   const [points, setPoints] = React.useState(0);
   const [notes, setNotes] = React.useState("");
   const [locationName, setLocationName] = React.useState("");
+  const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [leaders, setLeaders] = React.useState<Employee[]>([]);
   const [discActionsRubricOptions, setDiscActionsRubricOptions] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
@@ -147,6 +150,8 @@ export function InfractionEditModal({
 
     // Set form values from infraction
     setInfractionDate(infraction.infraction_date ? new Date(infraction.infraction_date) : null);
+    setEmployeeId(infraction.employee_id || "");
+    setEmployeeName(infraction.employee_name || "");
     setLeaderId(infraction.leader_id || "");
     setNotified(infraction.ack_bool !== false); // Default to true if undefined
     setInfractionType(infraction.infraction || infraction.description || "");
@@ -170,7 +175,26 @@ export function InfractionEditModal({
       }
     };
 
-    // Fetch leaders (employees with is_leader = true)
+    // Fetch all employees for employee dropdown
+    const fetchEmployees = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('employees')
+          .select('id, full_name')
+          .eq('org_id', orgId)
+          .eq('location_id', locationId)
+          .eq('active', true)
+          .order('full_name');
+        
+        if (!error && data) {
+          setEmployees(data as Employee[]);
+        }
+      } catch (err) {
+        console.error('Error fetching employees:', err);
+      }
+    };
+
+    // Fetch leaders (employees with is_leader = true) + ensure the documenting leader is included
     const fetchLeaders = async () => {
       try {
         const { data, error } = await supabase
@@ -183,18 +207,35 @@ export function InfractionEditModal({
           .order('full_name');
         
         if (!error && data) {
-          setLeaders(data as Employee[]);
+          let leadersList = data as Employee[];
+          
+          // If there's a leader_id but it's not in the list, fetch and add it
+          if (infraction.leader_id && !leadersList.find(l => l.id === infraction.leader_id)) {
+            const { data: originalLeader } = await supabase
+              .from('employees')
+              .select('id, full_name')
+              .eq('id', infraction.leader_id)
+              .single();
+            
+            if (originalLeader) {
+              leadersList = [...leadersList, originalLeader as Employee].sort((a, b) => 
+                (a.full_name || '').localeCompare(b.full_name || '')
+              );
+            }
+          }
+          
+          setLeaders(leadersList);
         }
       } catch (err) {
         console.error('Error fetching leaders:', err);
       }
     };
 
-    // Fetch disc_actions_rubric options for infraction dropdown
-    const fetchDiscActionsRubric = async () => {
+    // Fetch infractions_rubric options for infraction dropdown
+    const fetchInfractionsRubric = async () => {
       try {
         const { data, error } = await supabase
-          .from('disc_actions_rubric')
+          .from('infractions_rubric')
           .select('*')
           .eq('org_id', orgId)
           .eq('location_id', locationId)
@@ -204,13 +245,14 @@ export function InfractionEditModal({
           setDiscActionsRubricOptions(data);
         }
       } catch (err) {
-        console.error('Error fetching disc_actions_rubric:', err);
+        console.error('Error fetching infractions_rubric:', err);
       }
     };
 
     fetchLocationName();
+    fetchEmployees();
     fetchLeaders();
-    fetchDiscActionsRubric();
+    fetchInfractionsRubric();
   }, [open, infraction, orgId, locationId, supabase]);
 
   // Handle infraction type change - update points automatically
@@ -218,7 +260,7 @@ export function InfractionEditModal({
     setInfractionType(value);
     const rubricItem = discActionsRubricOptions.find(item => item.action === value);
     if (rubricItem) {
-      setPoints(rubricItem.points_threshold || 0);
+      setPoints(rubricItem.points || 0);
     }
   };
 
@@ -318,6 +360,51 @@ export function InfractionEditModal({
             value={locationName}
             disabled
           />
+
+          {/* Employee (disabled dropdown) */}
+          <FormControl fullWidth size="small">
+            <InputLabel
+              shrink
+              sx={{
+                fontFamily,
+                fontSize: 12,
+                color: '#6b7280',
+              }}
+            >
+              Employee
+            </InputLabel>
+            <Select
+              value={employeeId}
+              onChange={(e) => setEmployeeId(e.target.value)}
+              label="Employee"
+              notched
+              disabled
+              sx={{
+                fontFamily,
+                fontSize: 14,
+                '& .MuiOutlinedInput-input': {
+                  padding: '10px 14px',
+                },
+                '& .MuiInputBase-input.Mui-disabled': {
+                  color: '#9ca3af',
+                  WebkitTextFillColor: '#9ca3af',
+                  backgroundColor: '#f9fafb',
+                },
+                '& .MuiOutlinedInput-root.Mui-disabled': {
+                  backgroundColor: '#f9fafb',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#e5e7eb',
+                  },
+                },
+              }}
+            >
+              {employees.map((emp) => (
+                <MenuItem key={emp.id} value={emp.id} sx={{ fontFamily, fontSize: 14 }}>
+                  {emp.full_name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           {/* Infraction Date */}
           <DatePicker

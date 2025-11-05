@@ -112,14 +112,6 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
                   {infraction.leader_name}
                 </Typography>
               </Box>
-
-              <Box
-                sx={{
-                  width: "2px",
-                  height: "14px",
-                  backgroundColor: "#e9eaeb",
-                }}
-              />
             </>
           )}
 
