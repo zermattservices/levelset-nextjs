@@ -2,15 +2,17 @@
 -- The original constraint included created_at, which allowed duplicates
 -- We need to enforce uniqueness based only on employee, action, org, and location
 
--- Drop the old constraint
+-- Drop the old constraint if it exists
 ALTER TABLE recommended_disc_actions 
 DROP CONSTRAINT IF EXISTS recommended_disc_actions_employee_id_recommended_action_id_org_;
 
--- Add new constraint without created_at
+-- Drop any existing unique index with the same name
+DROP INDEX IF EXISTS recommended_disc_actions_unique_pending;
+
+-- Create a partial unique index (PostgreSQL doesn't support WHERE in table constraints)
 -- Only allow one pending recommendation per employee/action/org/location combination
-ALTER TABLE recommended_disc_actions
-ADD CONSTRAINT recommended_disc_actions_unique_pending
-UNIQUE (employee_id, recommended_action_id, org_id, location_id)
+CREATE UNIQUE INDEX recommended_disc_actions_unique_pending
+ON recommended_disc_actions (employee_id, recommended_action_id, org_id, location_id)
 WHERE (action_taken IS NULL);
 
 -- Note: This is a partial unique index that only enforces uniqueness for pending recommendations
