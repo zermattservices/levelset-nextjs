@@ -1,0 +1,21 @@
+
+> levelset-nextjs@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.33
+  - Environments: .env.local, .env.production
+
+   Linting and checking validity of types ...
+Failed to compile.
+
+./components/CodeComponents/InfractionEditModal.tsx:198:15
+Type error: Property assignment expected.
+
+[0m [90m 196 |[39m         fullWidth[0m
+[0m [90m 197 |[39m         [33mPaperProps[39m[33m=[39m{{[0m
+[0m[31m[1m>[22m[39m[90m 198 |[39m           sx[33m=[39m{{[0m
+[0m [90m     |[39m               [31m[1m^[22m[39m[0m
+[0m [90m 199 |[39m             borderRadius[33m:[39m [32m"16px"[39m[33m,[39m[0m
+[0m [90m 200 |[39m             fontFamily[33m,[39m[0m
+[0m [90m 201 |[39m           }[33m,[39m[0m
+Next.js build worker exited with code: 1 and signal: null

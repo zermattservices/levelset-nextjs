@@ -30,6 +30,8 @@ import { SlideoutListItem } from "./components/CodeComponents/DrawerComponents/S
 import { DrawerTabContainer } from "./components/CodeComponents/DrawerTabContainer";
 import { EmployeeModal } from "./components/CodeComponents/EmployeeModal";
 import { InfractionEditModal } from "./components/CodeComponents/InfractionEditModal";
+import { RecordActionModal } from "./components/CodeComponents/RecordActionModal";
+import { RecommendedActions } from "./components/CodeComponents/RecommendedActions";
 import { CenteredLoadingSpinner } from "./components/CodeComponents/CenteredLoadingSpinner";
 import { TableSkeleton } from "./components/CodeComponents/Skeletons/TableSkeleton";
 import { EmployeeTableSkeleton } from "./components/CodeComponents/Skeletons/EmployeeTableSkeleton";
@@ -1316,4 +1318,96 @@ PLASMIC.registerComponent(InfractionEditModal, {
     className: "string"
   },
   importPath: "./components/CodeComponents/InfractionEditModal",
+});
+
+// Register RecordActionModal component
+// @ts-ignore - Complex Plasmic registration type
+PLASMIC.registerComponent(RecordActionModal, {
+  name: "RecordActionModal",
+  // @ts-ignore - Complex Plasmic registration type
+  displayName: "Record Action Modal",
+  // @ts-ignore - Complex Plasmic registration type
+  props: {
+    open: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Whether the modal is open"
+    },
+    employee: {
+      type: "object",
+      description: "Employee object for the action"
+    },
+    recommendedAction: {
+      type: "string",
+      description: "The recommended action text"
+    },
+    recommendedActionId: {
+      type: "string",
+      description: "ID of the recommended action from disc_actions_rubric"
+    },
+    currentUser: {
+      type: "object",
+      description: "Current user object (acting leader)"
+    },
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler for closing the modal"
+    },
+    onSuccess: {
+      type: "eventHandler",
+      argTypes: [
+        { 
+          name: "employeeId", 
+          type: "string"
+        }
+      ],
+      description: "Handler called after successfully recording an action"
+    },
+    orgId: {
+      type: "string",
+      description: "Organization ID"
+    },
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    className: "string"
+  },
+  importPath: "./components/CodeComponents/RecordActionModal",
+});
+
+// Register RecommendedActions component
+// @ts-ignore - Complex Plasmic registration type
+PLASMIC.registerComponent(RecommendedActions, {
+  name: "RecommendedActions",
+  // @ts-ignore - Complex Plasmic registration type
+  displayName: "Recommended Actions",
+  // @ts-ignore - Complex Plasmic registration type
+  props: {
+    orgId: {
+      type: "string",
+      description: "Organization ID"
+    },
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    currentUser: {
+      type: "object",
+      description: "Current user object"
+    },
+    onEmployeeClick: {
+      type: "eventHandler",
+      argTypes: [
+        { 
+          name: "employeeId", 
+          type: "string"
+        }
+      ],
+      description: "Handler for when employee is clicked after recording action"
+    },
+    className: "string"
+  },
+  importPath: "./components/CodeComponents/RecommendedActions",
 });

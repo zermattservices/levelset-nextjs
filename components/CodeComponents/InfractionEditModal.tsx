@@ -195,7 +195,7 @@ export function InfractionEditModal({
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx={{
+          sx: {
             borderRadius: "16px",
             fontFamily,
           },
