@@ -773,6 +773,7 @@ export function DisciplineNotifications({
         orgId={orgId}
         locationId={locationId}
         initialTab="discipline"
+        currentUserId={currentUserId}
       />
 
       {/* Dismiss Confirmation Modal */}

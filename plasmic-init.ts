@@ -30,6 +30,9 @@ import { SlideoutListItem } from "./components/CodeComponents/DrawerComponents/S
 import { DrawerTabContainer } from "./components/CodeComponents/DrawerTabContainer";
 import { EmployeeModal } from "./components/CodeComponents/EmployeeModal";
 import { InfractionEditModal } from "./components/CodeComponents/InfractionEditModal";
+import { AddInfractionModal } from "./components/CodeComponents/AddInfractionModal";
+import { AddActionModal } from "./components/CodeComponents/AddActionModal";
+import { EditActionModal } from "./components/CodeComponents/EditActionModal";
 import { RecordActionModal } from "./components/CodeComponents/RecordActionModal";
 import { DisciplineNotifications } from "./components/CodeComponents/RecommendedActions";
 import { DismissConfirmationModal } from "./components/CodeComponents/DismissConfirmationModal";
@@ -105,6 +108,10 @@ PLASMIC.registerComponent(DisciplineTable, {
       type: "string", 
       defaultValue: "default-location",
       description: "Location ID for filtering discipline data"
+    },
+    currentUserId: {
+      type: "string",
+      description: "Current auth user ID for passing to modals"
     },
     className: "string",
     density: {
@@ -1271,6 +1278,10 @@ PLASMIC.registerComponent(EmployeeModal, {
       argTypes: [],
       description: "Handler for Record an Action button"
     },
+    currentUserId: {
+      type: "string",
+      description: "Current auth user ID for prefilling acting leader"
+    },
     className: "string"
   },
   importPath: "./components/CodeComponents/EmployeeModal",
@@ -1319,6 +1330,74 @@ PLASMIC.registerComponent(InfractionEditModal, {
     className: "string"
   },
   importPath: "./components/CodeComponents/InfractionEditModal",
+});
+
+// Register Add Infraction Modal
+PLASMIC.registerComponent(AddInfractionModal, {
+  name: "AddInfractionModal",
+  displayName: "Add Infraction Modal",
+  props: {
+    open: "boolean",
+    employee: "object",
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+    },
+    onSave: {
+      type: "eventHandler",
+      argTypes: [{ name: "infraction", type: "object" }],
+    },
+    currentUserId: "string",
+    orgId: "string",
+    locationId: "string",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/AddInfractionModal",
+});
+
+// Register Add Action Modal
+PLASMIC.registerComponent(AddActionModal, {
+  name: "AddActionModal",
+  displayName: "Add Action Modal",
+  props: {
+    open: "boolean",
+    employee: "object",
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+    },
+    onSave: {
+      type: "eventHandler",
+      argTypes: [{ name: "action", type: "object" }],
+    },
+    currentUserId: "string",
+    orgId: "string",
+    locationId: "string",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/AddActionModal",
+});
+
+// Register Edit Action Modal
+PLASMIC.registerComponent(EditActionModal, {
+  name: "EditActionModal",
+  displayName: "Edit Action Modal",
+  props: {
+    open: "boolean",
+    action: "object",
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+    },
+    onSave: {
+      type: "eventHandler",
+      argTypes: [{ name: "action", type: "object" }],
+    },
+    orgId: "string",
+    locationId: "string",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/EditActionModal",
 });
 
 // Register RecordActionModal component

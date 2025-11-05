@@ -27,6 +27,7 @@ export interface DisciplineEntry {
 export interface DisciplineTableProps {
   orgId: string;
   locationId: string;
+  currentUserId?: string; // For passing to EmployeeModal
   className?: string;
 
   // style/density controls
@@ -90,7 +91,7 @@ const RoleChip = ({ role }: { role: string }) => {
 // Points Badge Component - color based on discipline actions
 const PointsBadge = ({ points, disciplineActions }: { points: number; disciplineActions: any[] }) => {
   const getBadgeColor = () => {
-    if (points === 0) {
+  if (points === 0) {
       return { bg: '#f3f4f6', color: '#111827' }; // Light grey with black text for 0 points
     }
     
@@ -167,6 +168,7 @@ export function DisciplineTable({
   onViewDetails,
   onAddInfraction,
   onRowClick,
+  currentUserId,
 }: DisciplineTableProps) {
   const [data, setData] = React.useState<DisciplineEntry[]>([]);
   const [disciplineActions, setDisciplineActions] = React.useState<any[]>([]);
@@ -178,83 +180,83 @@ export function DisciplineTable({
   
   // Fetch discipline data from Supabase
   const fetchDisciplineData = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      console.log('Fetching discipline data for org:', orgId, 'location:', locationId);
-      
-      let transformedData: DisciplineEntry[] = [];
-      
-      // Fetch discipline actions for styling
-      const { data: actionsData, error: actionsError } = await supabase
-        .from('disc_actions_rubric')
-        .select('*')
-        .eq('org_id', orgId)
-        .eq('location_id', locationId)
-        .order('points_threshold', { ascending: true });
-        
-      if (!actionsError && actionsData) {
-        setDisciplineActions(actionsData);
-      }
-      
+        try {
+          setLoading(true);
+          console.log('Fetching discipline data for org:', orgId, 'location:', locationId);
+          
+          let transformedData: DisciplineEntry[] = [];
+          
+          // Fetch discipline actions for styling
+          const { data: actionsData, error: actionsError } = await supabase
+            .from('disc_actions_rubric')
+            .select('*')
+            .eq('org_id', orgId)
+            .eq('location_id', locationId)
+            .order('points_threshold', { ascending: true });
+            
+          if (!actionsError && actionsData) {
+            setDisciplineActions(actionsData);
+          }
+          
       // Fetch employees (filter by active) and join to sum points from infractions within last 90 days
-      const { data: employees, error: empError } = await supabase
-        .from('employees')
+            const { data: employees, error: empError } = await supabase
+              .from('employees')
         .select('*')
-        .eq('org_id', orgId)
-        .eq('location_id', locationId)
-        .eq('active', true);
-        
-      if (empError) throw empError;
-      
-      if (employees && employees.length > 0) {
+              .eq('org_id', orgId)
+              .eq('location_id', locationId)
+              .eq('active', true);
+              
+            if (empError) throw empError;
+            
+            if (employees && employees.length > 0) {
         // Get infractions for all employees from last 90 days
-        const employeeIds = employees.map(emp => emp.id);
+              const employeeIds = employees.map(emp => emp.id);
         const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        
-        const { data: infractions, error: infError } = await supabase
-          .from('infractions')
-          .select('employee_id, points, infraction_date')
-          .in('employee_id', employeeIds)
-          .eq('org_id', orgId)
-          .eq('location_id', locationId)
+              
+              const { data: infractions, error: infError } = await supabase
+                .from('infractions')
+                .select('employee_id, points, infraction_date')
+                .in('employee_id', employeeIds)
+                .eq('org_id', orgId)
+                .eq('location_id', locationId)
           .gte('infraction_date', ninetyDaysAgo)
-          .order('infraction_date', { ascending: false });
-          
-        if (infError) {
-          console.warn('Error fetching infractions, continuing with empty infractions:', infError);
-        }
-        
-        // Calculate current points and last infraction for each employee
-        transformedData = employees.map(emp => {
-          const empInfractions = infractions?.filter(inf => inf.employee_id === emp.id) || [];
-          const current_points = empInfractions.reduce((sum, inf) => sum + (inf.points || 0), 0);
-          const last_infraction = empInfractions && empInfractions.length > 0 ? empInfractions[0]?.infraction_date : null;
-          
-          return {
-            id: emp.id,
-            full_name: emp.full_name || 'Unknown',
-            role: emp.role || 'Team Member',
-            last_infraction,
+                .order('infraction_date', { ascending: false });
+                
+              if (infError) {
+                console.warn('Error fetching infractions, continuing with empty infractions:', infError);
+              }
+              
+              // Calculate current points and last infraction for each employee
+              transformedData = employees.map(emp => {
+                const empInfractions = infractions?.filter(inf => inf.employee_id === emp.id) || [];
+                const current_points = empInfractions.reduce((sum, inf) => sum + (inf.points || 0), 0);
+                const last_infraction = empInfractions && empInfractions.length > 0 ? empInfractions[0]?.infraction_date : null;
+                
+                return {
+                  id: emp.id,
+                  full_name: emp.full_name || 'Unknown',
+                  role: emp.role || 'Team Member',
+                  last_infraction,
             current_points,
             employee: emp as Employee, // Store full employee object for modal
-          };
+                };
         }).sort((a, b) => b.current_points - a.current_points || a.full_name.localeCompare(b.full_name)); // Sort by points DESC, then name ASC
+              
+              console.log('Loaded discipline data from tables:', transformedData.length, 'entries');
+            } else {
+              console.log('No employees found for org:', orgId, 'location:', locationId);
+              transformedData = [];
+          }
         
-        console.log('Loaded discipline data from tables:', transformedData.length, 'entries');
-      } else {
-        console.log('No employees found for org:', orgId, 'location:', locationId);
-        transformedData = [];
+        setData(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching discipline data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load discipline data');
+        setData([]);
+      } finally {
+        setLoading(false);
       }
-    
-      setData(transformedData);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching discipline data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load discipline data');
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
   }, [orgId, locationId, supabase]);
     
   // Initial fetch
@@ -566,6 +568,7 @@ export function DisciplineTable({
         orgId={orgId}
         locationId={locationId}
         initialTab="discipline"
+        currentUserId={currentUserId}
         onRecordAction={onAddInfraction ? () => {
           onAddInfraction(selectedEmployee?.id || '');
         } : undefined}

@@ -13,11 +13,15 @@ import {
   Skeleton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { Employee, Infraction, DisciplinaryAction } from "@/lib/supabase.types";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
 import { InfractionEditModal } from "./InfractionEditModal";
+import { AddInfractionModal } from "./AddInfractionModal";
+import { AddActionModal } from "./AddActionModal";
+import { EditActionModal } from "./EditActionModal";
 
 export interface EmployeeModalProps {
   open: boolean;
@@ -27,6 +31,7 @@ export interface EmployeeModalProps {
   locationId: string;
   initialTab?: "pathway" | "pe" | "evaluations" | "discipline";
   onRecordAction?: () => void;
+  currentUserId?: string; // For prefilling acting leader
   className?: string;
 }
 
@@ -170,11 +175,13 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
 
 interface DisciplinaryActionListItemProps {
   action: DisciplinaryAction;
+  onClick?: () => void;
 }
 
-function DisciplinaryActionListItem({ action }: DisciplinaryActionListItemProps) {
+function DisciplinaryActionListItem({ action, onClick }: DisciplinaryActionListItemProps) {
   return (
     <Box
+      onClick={onClick}
       sx={{
         display: "flex",
         flexDirection: "row",
@@ -186,6 +193,10 @@ function DisciplinaryActionListItem({ action }: DisciplinaryActionListItemProps)
         border: "1px solid #e9eaeb",
         backgroundColor: "#ffffff",
         minWidth: 0,
+        cursor: onClick ? "pointer" : "default",
+        "&:hover": onClick ? {
+          backgroundColor: "#f9fafb",
+        } : undefined,
       }}
     >
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px", minWidth: 0 }}>
@@ -256,6 +267,7 @@ export function EmployeeModal({
   locationId,
   initialTab = "discipline",
   onRecordAction,
+  currentUserId,
   className = "",
 }: EmployeeModalProps) {
   const [currentTab, setCurrentTab] = React.useState(initialTab);
@@ -264,6 +276,10 @@ export function EmployeeModal({
   const [loading, setLoading] = React.useState(false);
   const [infractionModalOpen, setInfractionModalOpen] = React.useState(false);
   const [selectedInfraction, setSelectedInfraction] = React.useState<Infraction | null>(null);
+  const [addInfractionModalOpen, setAddInfractionModalOpen] = React.useState(false);
+  const [addActionModalOpen, setAddActionModalOpen] = React.useState(false);
+  const [editActionModalOpen, setEditActionModalOpen] = React.useState(false);
+  const [selectedAction, setSelectedAction] = React.useState<DisciplinaryAction | null>(null);
   const supabase = createSupabaseClient();
 
   // Reset to discipline tab when modal opens
@@ -478,17 +494,36 @@ export function EmployeeModal({
         <Box sx={{ display: "flex", gap: 2, flex: 1, minHeight: 0, width: "100%" }}>
           {/* Left Column: Infractions */}
           <Box sx={{ flex: "1 1 50%", display: "flex", flexDirection: "column", minWidth: 0, maxWidth: "50%" }}>
-            <Typography
-              sx={{
-                fontFamily: "Satoshi",
-                fontSize: "14px",
-                fontWeight: 600,
-                color: "#414651",
-                mb: 2,
-              }}
-            >
-              Infractions
-            </Typography>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+              <Typography
+                sx={{
+                  fontFamily: "Satoshi",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "#414651",
+                }}
+              >
+                Infractions
+              </Typography>
+              <Button
+                onClick={() => setAddInfractionModalOpen(true)}
+                startIcon={<AddIcon />}
+                sx={{
+                  fontFamily: "Satoshi",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  color: "#31664a",
+                  padding: "4px 12px",
+                  minWidth: "auto",
+                  "&:hover": {
+                    backgroundColor: "rgba(49, 102, 74, 0.04)",
+                  },
+                }}
+              >
+                Infraction
+              </Button>
+            </Box>
             {infractions.length === 0 ? (
               <Box
                 sx={{
@@ -543,7 +578,25 @@ export function EmployeeModal({
               >
                 Disciplinary Actions
               </Typography>
-              {onRecordAction && (
+              <Button
+                onClick={() => setAddActionModalOpen(true)}
+                startIcon={<AddIcon />}
+                sx={{
+                  fontFamily: "Satoshi",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  color: "#31664a",
+                  padding: "4px 12px",
+                  minWidth: "auto",
+                  "&:hover": {
+                    backgroundColor: "rgba(49, 102, 74, 0.04)",
+                  },
+                }}
+              >
+                Action
+              </Button>
+              {onRecordAction && false && (
                 <Button
                   variant="contained"
                   size="small"
@@ -592,7 +645,14 @@ export function EmployeeModal({
             ) : (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, overflow: "auto" }}>
                 {disciplinaryActions.map((action) => (
-                  <DisciplinaryActionListItem key={action.id} action={action} />
+                  <DisciplinaryActionListItem 
+                    key={action.id} 
+                    action={action}
+                    onClick={() => {
+                      setSelectedAction(action);
+                      setEditActionModalOpen(true);
+                    }}
+                  />
                 ))}
               </Box>
             )}
@@ -752,6 +812,58 @@ export function EmployeeModal({
             prev.map(inf => inf.id === updatedInfraction.id ? updatedInfraction : inf)
           );
           // Optionally refetch data
+          fetchEmployeeData();
+        }}
+        orgId={orgId}
+        locationId={locationId}
+      />
+
+      {/* Add Infraction Modal */}
+      <AddInfractionModal
+        open={addInfractionModalOpen}
+        employee={employee}
+        onClose={() => setAddInfractionModalOpen(false)}
+        onSave={(newInfraction) => {
+          // Add to the list
+          setInfractions(prev => [newInfraction, ...prev]);
+          // Refetch data to update counts
+          fetchEmployeeData();
+        }}
+        currentUserId={currentUserId}
+        orgId={orgId}
+        locationId={locationId}
+      />
+
+      {/* Add Action Modal */}
+      <AddActionModal
+        open={addActionModalOpen}
+        employee={employee}
+        onClose={() => setAddActionModalOpen(false)}
+        onSave={(newAction) => {
+          // Add to the list
+          setDisciplinaryActions(prev => [newAction, ...prev]);
+          // Refetch data to update counts
+          fetchEmployeeData();
+        }}
+        currentUserId={currentUserId}
+        orgId={orgId}
+        locationId={locationId}
+      />
+
+      {/* Edit Action Modal */}
+      <EditActionModal
+        open={editActionModalOpen}
+        action={selectedAction}
+        onClose={() => {
+          setEditActionModalOpen(false);
+          setSelectedAction(null);
+        }}
+        onSave={(updatedAction) => {
+          // Update the action in the list
+          setDisciplinaryActions(prev =>
+            prev.map(act => act.id === updatedAction.id ? updatedAction : act)
+          );
+          // Refetch data
           fetchEmployeeData();
         }}
         orgId={orgId}
