@@ -3,6 +3,7 @@ import { SupabaseUserSession } from "./components/CodeComponents/SupabaseUserSes
 import { RedirectIf } from "./components/CodeComponents/RedirectIf";
 import { DisciplineTable } from "./components/CodeComponents/DisciplineTable";
 import { DisciplineActionsTable } from "./components/CodeComponents/DisciplineActionsTable";
+import { RecommendedActions } from "./components/CodeComponents/RecommendedActions";
 import { RosterTable } from "./components/CodeComponents/RosterTable";
 import { FohBohSlider } from "./components/CodeComponents/FohBohSlider";
 import { Scoreboard } from "./components/CodeComponents/Scoreboard";
@@ -168,6 +169,31 @@ PLASMIC.registerComponent(DisciplineActionsTable, {
     }
   },
   importPath: "./components/CodeComponents/DisciplineActionsTable",
+});
+
+// Register RecommendedActions component
+PLASMIC.registerComponent(RecommendedActions, {
+  name: "RecommendedActions",
+  displayName: "Recommended Actions",
+  props: {
+    orgId: {
+      type: "string",
+      defaultValue: "default-org",
+      description: "Organization ID for filtering recommendations"
+    },
+    locationId: {
+      type: "string",
+      defaultValue: "default-location",
+      description: "Location ID for filtering recommendations"
+    },
+    className: "string",
+    onActionRecorded: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Callback when a disciplinary action is recorded"
+    }
+  },
+  importPath: "./components/CodeComponents/RecommendedActions",
 });
 
 // Register RosterTable component

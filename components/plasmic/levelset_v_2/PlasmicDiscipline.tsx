@@ -72,6 +72,7 @@ import { LottieWrapper } from "@plasmicpkgs/lottie-react";
 import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
 import { DisciplineTable } from "../../CodeComponents/DisciplineTable"; // plasmic-import: Gsr7FZewgF56/codeComponent
 import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTable"; // plasmic-import: gO99exJZ_N-6/codeComponent
+import { RecommendedActions } from "../../CodeComponents/RecommendedActions"; // plasmic-import: recommendedActions/codeComponent
 import { MuiDrawerV2 } from "../../CodeComponents/MuiDrawerV2"; // plasmic-import: hoSoBbznWutx/codeComponent
 import { DrawerTabContainer } from "../../CodeComponents/DrawerTabContainer"; // plasmic-import: 3_XXEMijZcI9/codeComponent
 import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
@@ -100,6 +101,7 @@ export type PlasmicDiscipline__OverridesType = {
   loadingBoundary?: Flex__<typeof LoadingBoundary>;
   lottie?: Flex__<typeof LottieWrapper>;
   redirectIf?: Flex__<typeof RedirectIf>;
+  recommendedActions?: Flex__<typeof RecommendedActions>;
   verticalStack?: Flex__<"div">;
   disciplineTable?: Flex__<typeof DisciplineTable>;
   verticalStack2?: Flex__<"div">;
@@ -1084,6 +1086,13 @@ function PlasmicDiscipline__RenderFunc(props: {
                   <div
                     className={classNames(projectcss.all, sty.freeBox__cHwGk)}
                   >
+                    <RecommendedActions
+                      data-plasmic-name={"recommendedActions"}
+                      data-plasmic-override={overrides.recommendedActions}
+                      className={classNames("__wab_instance", sty.recommendedActions)}
+                      locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                      orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                    />
                     <div
                       data-plasmic-name={"verticalStack"}
                       data-plasmic-override={overrides.verticalStack}

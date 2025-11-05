@@ -109,3 +109,23 @@ export interface LeaderRatingAggregate {
   recent_ratings: Rating[]; // last 10 for expandable rows
 }
 
+export interface RecommendedAction {
+  id: string;
+  employee_id: string;
+  employee_name?: string; // Populated from JOIN
+  org_id: string;
+  location_id: string;
+  location_name?: string; // Populated from JOIN
+  action_id: string;
+  action_name?: string; // Populated from JOIN with disc_actions_rubric
+  points_threshold: number;
+  employee_points: number;
+  created_at: string;
+  acknowledged_at?: string;
+  acknowledged_by?: string;
+  action_taken_id?: string;
+  action_taken_at?: string;
+  action_taken_by?: string;
+  created_by?: string;
+}
+
