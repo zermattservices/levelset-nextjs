@@ -29,6 +29,7 @@ import { DrawerFooter } from "./components/CodeComponents/DrawerComponents/Drawe
 import { SlideoutListItem } from "./components/CodeComponents/DrawerComponents/SlideoutListItem";
 import { DrawerTabContainer } from "./components/CodeComponents/DrawerTabContainer";
 import { EmployeeModal } from "./components/CodeComponents/EmployeeModal";
+import { InfractionEditModal } from "./components/CodeComponents/InfractionEditModal";
 import { CenteredLoadingSpinner } from "./components/CodeComponents/CenteredLoadingSpinner";
 import { TableSkeleton } from "./components/CodeComponents/Skeletons/TableSkeleton";
 import { EmployeeTableSkeleton } from "./components/CodeComponents/Skeletons/EmployeeTableSkeleton";
@@ -1270,4 +1271,49 @@ PLASMIC.registerComponent(EmployeeModal, {
     className: "string"
   },
   importPath: "./components/CodeComponents/EmployeeModal",
+});
+
+// Register InfractionEditModal component
+// @ts-ignore - Complex Plasmic registration type
+PLASMIC.registerComponent(InfractionEditModal, {
+  name: "InfractionEditModal",
+  // @ts-ignore - Complex Plasmic registration type
+  displayName: "Infraction Edit Modal",
+  // @ts-ignore - Complex Plasmic registration type
+  props: {
+    open: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Whether the modal is open"
+    },
+    infraction: {
+      type: "object",
+      description: "Infraction object to edit"
+    },
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler for closing the modal"
+    },
+    onSave: {
+      type: "eventHandler",
+      argTypes: [
+        { 
+          name: "infraction", 
+          type: "object"
+        }
+      ],
+      description: "Handler for saving the infraction"
+    },
+    orgId: {
+      type: "string",
+      description: "Organization ID"
+    },
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    className: "string"
+  },
+  importPath: "./components/CodeComponents/InfractionEditModal",
 });

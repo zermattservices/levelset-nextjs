@@ -495,8 +495,7 @@ export function DisciplineTable({
           [`& .${gridClasses.columnHeader}`]: {
             backgroundColor: '#f9fafb',
             fontWeight: 600,
-            fontSize: 12,
-            textTransform: 'uppercase',
+            fontSize: 14,
             color: '#111827',
             fontFamily,
             '&:focus, &:focus-within': {
@@ -516,6 +515,8 @@ export function DisciplineTable({
             fontSize: 13,
             color: '#111827',
             fontFamily,
+            display: 'flex',
+            alignItems: 'center',
             '&:focus, &:focus-within': {
               outline: 'none',
             },

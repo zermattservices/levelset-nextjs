@@ -17,6 +17,7 @@ import { createSupabaseClient } from "@/util/supabase/component";
 import type { Employee, Infraction, DisciplinaryAction } from "@/lib/supabase.types";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
+import { InfractionEditModal } from "./InfractionEditModal";
 
 export interface EmployeeModalProps {
   open: boolean;
@@ -31,14 +32,16 @@ export interface EmployeeModalProps {
 
 interface InfractionListItemProps {
   infraction: Infraction;
+  onClick?: () => void;
 }
 
-function InfractionListItem({ infraction }: InfractionListItemProps) {
+function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
   const isPositive = (infraction.points || 0) < 0;
   const pointColor = isPositive ? "#178459" : "#d23230";
 
   return (
     <Box
+      onClick={onClick}
       sx={{
         display: "flex",
         flexDirection: "row",
@@ -50,6 +53,10 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
         border: "1px solid #e9eaeb",
         backgroundColor: "#ffffff",
         width: "100%",
+        cursor: onClick ? "pointer" : "default",
+        "&:hover": onClick ? {
+          backgroundColor: "#f9fafb",
+        } : undefined,
       }}
     >
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -264,6 +271,8 @@ export function EmployeeModal({
   const [infractions, setInfractions] = React.useState<Infraction[]>([]);
   const [disciplinaryActions, setDisciplinaryActions] = React.useState<DisciplinaryAction[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [infractionModalOpen, setInfractionModalOpen] = React.useState(false);
+  const [selectedInfraction, setSelectedInfraction] = React.useState<Infraction | null>(null);
   const supabase = createSupabaseClient();
 
   // Reset to discipline tab when modal opens
@@ -385,7 +394,7 @@ export function EmployeeModal({
           >
             Current Period (last 90 days)
           </Typography>
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, width: "100%" }}>
             {/* Infractions Card */}
             <Box
               sx={{
@@ -394,11 +403,13 @@ export function EmployeeModal({
                 boxShadow: "inset 0px 0px 0px 1px rgba(233, 234, 235, 1)",
                 filter: "drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05))",
                 borderRadius: "12px",
-                padding: "24px 16px",
+                padding: "16px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "8px",
+                minWidth: 0,
               }}
             >
               <Typography
@@ -435,11 +446,13 @@ export function EmployeeModal({
                 boxShadow: "inset 0px 0px 0px 1px rgba(233, 234, 235, 1)",
                 filter: "drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05))",
                 borderRadius: "12px",
-                padding: "24px 16px",
+                padding: "16px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "8px",
+                minWidth: 0,
               }}
             >
               <Typography
@@ -513,7 +526,14 @@ export function EmployeeModal({
             ) : (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, overflow: "auto" }}>
                 {infractions.map((infraction) => (
-                  <InfractionListItem key={infraction.id} infraction={infraction} />
+                  <InfractionListItem
+                    key={infraction.id}
+                    infraction={infraction}
+                    onClick={() => {
+                      setSelectedInfraction(infraction);
+                      setInfractionModalOpen(true);
+                    }}
+                  />
                 ))}
               </Box>
             )}
@@ -726,6 +746,26 @@ export function EmployeeModal({
         {currentTab === "evaluations" && renderEvaluationsTab()}
         {currentTab === "discipline" && renderDisciplineTab()}
       </Box>
+      
+      {/* Infraction Edit Modal */}
+      <InfractionEditModal
+        open={infractionModalOpen}
+        infraction={selectedInfraction}
+        onClose={() => {
+          setInfractionModalOpen(false);
+          setSelectedInfraction(null);
+        }}
+        onSave={(updatedInfraction) => {
+          // Update the infraction in the list
+          setInfractions(prev =>
+            prev.map(inf => inf.id === updatedInfraction.id ? updatedInfraction : inf)
+          );
+          // Optionally refetch data
+          fetchEmployeeData();
+        }}
+        orgId={orgId}
+        locationId={locationId}
+      />
     </Dialog>
   );
 }
