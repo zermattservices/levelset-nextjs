@@ -177,7 +177,7 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
                 sty.text__i5EJo
               )}
             >
-              {"PEA"}
+              {"Positional Excellence"}
             </div>
           </LevelsetButton>
           <LevelsetButton
@@ -208,7 +208,7 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
                 sty.text__tyFVx
               )}
             >
-              {"APS"}
+              {"Discipline"}
             </div>
           </LevelsetButton>
           <LevelsetButton

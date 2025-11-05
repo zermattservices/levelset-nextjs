@@ -73,6 +73,8 @@ import { LottieWrapper } from "@plasmicpkgs/lottie-react";
 import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
 import { DisciplineTable } from "../../CodeComponents/DisciplineTable"; // plasmic-import: Gsr7FZewgF56/codeComponent
 import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTable"; // plasmic-import: gO99exJZ_N-6/codeComponent
+import { MuiDrawerV2 } from "../../CodeComponents/MuiDrawerV2"; // plasmic-import: hoSoBbznWutx/codeComponent
+import { DrawerTabContainer } from "../../CodeComponents/DrawerTabContainer"; // plasmic-import: 3_XXEMijZcI9/codeComponent
 import { DrawerV2 } from "../../CodeComponents/DrawerV2"; // plasmic-import: lBRE4GzKIedo/codeComponent
 import { TabsContainer } from "@plasmicpkgs/plasmic-tabs";
 import { TabButton } from "@plasmicpkgs/plasmic-tabs";
@@ -131,6 +133,13 @@ export type PlasmicDiscipline__OverridesType = {
   disciplineTable?: Flex__<typeof DisciplineTable>;
   verticalStack2?: Flex__<"div">;
   disciplineActionsTable?: Flex__<typeof DisciplineActionsTable>;
+  drawerV2Mui?: Flex__<typeof MuiDrawerV2>;
+  drawerTabContainer?: Flex__<typeof DrawerTabContainer>;
+  content3?: Flex__<"div">;
+  textAndSupportingText3?: Flex__<"div">;
+  textAndOnlineIndicator2?: Flex__<"div">;
+  text3?: Flex__<"div">;
+  supportingText3?: Flex__<"div">;
   drawerV2?: Flex__<typeof DrawerV2>;
   content2?: Flex__<"div">;
   textAndSupportingText2?: Flex__<"div">;
@@ -443,6 +452,31 @@ function PlasmicDiscipline__RenderFunc(props: {
         initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
 
         onMutate: generateOnMutateForSpec("value", AntdInput_Helpers)
+      },
+      {
+        path: "drawerV2Mui.open",
+        type: "private",
+        variableType: "boolean",
+        initFunc: ({ $props, $state, $queries, $ctx }) =>
+          (() => {
+            try {
+              return $state.drawerOpen;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return true;
+              }
+              throw e;
+            }
+          })()
+      },
+      {
+        path: "drawerOpen",
+        type: "private",
+        variableType: "boolean",
+        initFunc: ({ $props, $state, $queries, $ctx }) => false
       }
     ],
     [$props, $ctx, $refs]
@@ -1317,77 +1351,27 @@ function PlasmicDiscipline__RenderFunc(props: {
                         onRowClick={async employee => {
                           const $steps = {};
 
-                          $steps["updateSelectedEmployee"] = true
+                          $steps["runCode"] = true
                             ? (() => {
                                 const actionArgs = {
-                                  variable: {
-                                    objRoot: $state,
-                                    variablePath: ["selectedEmployee"]
-                                  },
-                                  operation: 0,
-                                  value: employee
-                                };
-                                return (({
-                                  variable,
-                                  value,
-                                  startIndex,
-                                  deleteCount
-                                }) => {
-                                  if (!variable) {
-                                    return;
+                                  customFunction: async () => {
+                                    return employee => {
+                                      $state.selectedEmployee = employee;
+                                      $state.drawerOpen = true;
+                                    };
                                   }
-                                  const { objRoot, variablePath } = variable;
-
-                                  $stateSet(objRoot, variablePath, value);
-                                  return value;
+                                };
+                                return (({ customFunction }) => {
+                                  return customFunction();
                                 })?.apply(null, [actionArgs]);
                               })()
                             : undefined;
                           if (
-                            $steps["updateSelectedEmployee"] != null &&
-                            typeof $steps["updateSelectedEmployee"] ===
-                              "object" &&
-                            typeof $steps["updateSelectedEmployee"].then ===
-                              "function"
+                            $steps["runCode"] != null &&
+                            typeof $steps["runCode"] === "object" &&
+                            typeof $steps["runCode"].then === "function"
                           ) {
-                            $steps["updateSelectedEmployee"] =
-                              await $steps["updateSelectedEmployee"];
-                          }
-
-                          $steps["updateDrawerV2Open"] = true
-                            ? (() => {
-                                const actionArgs = {
-                                  variable: {
-                                    objRoot: $state,
-                                    variablePath: ["drawerV2", "open"]
-                                  },
-                                  operation: 0,
-                                  value: true
-                                };
-                                return (({
-                                  variable,
-                                  value,
-                                  startIndex,
-                                  deleteCount
-                                }) => {
-                                  if (!variable) {
-                                    return;
-                                  }
-                                  const { objRoot, variablePath } = variable;
-
-                                  $stateSet(objRoot, variablePath, value);
-                                  return value;
-                                })?.apply(null, [actionArgs]);
-                              })()
-                            : undefined;
-                          if (
-                            $steps["updateDrawerV2Open"] != null &&
-                            typeof $steps["updateDrawerV2Open"] === "object" &&
-                            typeof $steps["updateDrawerV2Open"].then ===
-                              "function"
-                          ) {
-                            $steps["updateDrawerV2Open"] =
-                              await $steps["updateDrawerV2Open"];
+                            $steps["runCode"] = await $steps["runCode"];
                           }
                         }}
                         orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
@@ -1423,6 +1407,198 @@ function PlasmicDiscipline__RenderFunc(props: {
                     </div>
                   </div>
                 </div>
+                <MuiDrawerV2
+                  data-plasmic-name={"drawerV2Mui"}
+                  data-plasmic-override={overrides.drawerV2Mui}
+                  autoFocus={true}
+                  className={classNames("__wab_instance", sty.drawerV2Mui)}
+                  closable={true}
+                  destroyOnClose={false}
+                  keyboard={true}
+                  mask={true}
+                  maskClosable={true}
+                  onOpenChange={async (...eventArgs: any) => {
+                    generateStateOnChangeProp($state, [
+                      "drawerV2Mui",
+                      "open"
+                    ]).apply(null, eventArgs);
+
+                    (async open => {
+                      const $steps = {};
+
+                      $steps["runCode"] = true
+                        ? (() => {
+                            const actionArgs = {
+                              customFunction: async () => {
+                                return open => ($state.drawerOpen = open);
+                              }
+                            };
+                            return (({ customFunction }) => {
+                              return customFunction();
+                            })?.apply(null, [actionArgs]);
+                          })()
+                        : undefined;
+                      if (
+                        $steps["runCode"] != null &&
+                        typeof $steps["runCode"] === "object" &&
+                        typeof $steps["runCode"].then === "function"
+                      ) {
+                        $steps["runCode"] = await $steps["runCode"];
+                      }
+                    }).apply(null, eventArgs);
+                  }}
+                  open={generateStateValueProp($state, ["drawerV2Mui", "open"])}
+                  placement={"right"}
+                  size={"default"}
+                  title={
+                    <div
+                      data-plasmic-name={"content3"}
+                      data-plasmic-override={overrides.content3}
+                      className={classNames(projectcss.all, sty.content3)}
+                    >
+                      <div
+                        data-plasmic-name={"textAndSupportingText3"}
+                        data-plasmic-override={overrides.textAndSupportingText3}
+                        className={classNames(
+                          projectcss.all,
+                          sty.textAndSupportingText3
+                        )}
+                      >
+                        <div
+                          data-plasmic-name={"textAndOnlineIndicator2"}
+                          data-plasmic-override={
+                            overrides.textAndOnlineIndicator2
+                          }
+                          className={classNames(
+                            projectcss.all,
+                            sty.textAndOnlineIndicator2
+                          )}
+                        >
+                          <div
+                            data-plasmic-name={"text3"}
+                            data-plasmic-override={overrides.text3}
+                            className={classNames(
+                              projectcss.all,
+                              projectcss.__wab_text,
+                              sty.text3
+                            )}
+                          >
+                            <React.Fragment>
+                              {(() => {
+                                try {
+                                  return (() => {
+                                    {
+                                      {
+                                        return $state.selectedEmployee
+                                          ?.full_name;
+                                      }
+                                    }
+                                  })();
+                                } catch (e) {
+                                  if (
+                                    e instanceof TypeError ||
+                                    e?.plasmicType ===
+                                      "PlasmicUndefinedDataError"
+                                  ) {
+                                    return "Reece Howard";
+                                  }
+                                  throw e;
+                                }
+                              })()}
+                            </React.Fragment>
+                          </div>
+                        </div>
+                        <div
+                          data-plasmic-name={"supportingText3"}
+                          data-plasmic-override={overrides.supportingText3}
+                          className={classNames(
+                            projectcss.all,
+                            projectcss.__wab_text,
+                            sty.supportingText3
+                          )}
+                        >
+                          <React.Fragment>
+                            {(() => {
+                              try {
+                                return $state.selectedEmployee?.role;
+                              } catch (e) {
+                                if (
+                                  e instanceof TypeError ||
+                                  e?.plasmicType === "PlasmicUndefinedDataError"
+                                ) {
+                                  return "Owner/Operator";
+                                }
+                                throw e;
+                              }
+                            })()}
+                          </React.Fragment>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  width={"620"}
+                  zIndex={1000}
+                >
+                  <DrawerTabContainer
+                    data-plasmic-name={"drawerTabContainer"}
+                    data-plasmic-override={overrides.drawerTabContainer}
+                    className={classNames(
+                      "__wab_instance",
+                      sty.drawerTabContainer
+                    )}
+                    employee={(() => {
+                      try {
+                        return $state.selectedEmployee;
+                      } catch (e) {
+                        if (
+                          e instanceof TypeError ||
+                          e?.plasmicType === "PlasmicUndefinedDataError"
+                        ) {
+                          return undefined;
+                        }
+                        throw e;
+                      }
+                    })()}
+                    initialTab={"discipline"}
+                    onRecordAction={async () => {
+                      const $steps = {};
+
+                      $steps["runCode"] = true
+                        ? (() => {
+                            const actionArgs = {
+                              customFunction: async () => {
+                                return () =>
+                                  ($state.recordActionModalOpen = true);
+                              }
+                            };
+                            return (({ customFunction }) => {
+                              return customFunction();
+                            })?.apply(null, [actionArgs]);
+                          })()
+                        : undefined;
+                      if (
+                        $steps["runCode"] != null &&
+                        typeof $steps["runCode"] === "object" &&
+                        typeof $steps["runCode"].then === "function"
+                      ) {
+                        $steps["runCode"] = await $steps["runCode"];
+                      }
+                    }}
+                    orgId={(() => {
+                      try {
+                        return $ctx.auth.org_id;
+                      } catch (e) {
+                        if (
+                          e instanceof TypeError ||
+                          e?.plasmicType === "PlasmicUndefinedDataError"
+                        ) {
+                          return undefined;
+                        }
+                        throw e;
+                      }
+                    })()}
+                  />
+                </MuiDrawerV2>
                 <DrawerV2
                   data-plasmic-name={"drawerV2"}
                   data-plasmic-override={overrides.drawerV2}
@@ -5527,6 +5703,13 @@ const PlasmicDescendants = {
     "disciplineTable",
     "verticalStack2",
     "disciplineActionsTable",
+    "drawerV2Mui",
+    "drawerTabContainer",
+    "content3",
+    "textAndSupportingText3",
+    "textAndOnlineIndicator2",
+    "text3",
+    "supportingText3",
     "drawerV2",
     "content2",
     "textAndSupportingText2",
@@ -5607,6 +5790,13 @@ const PlasmicDescendants = {
     "disciplineTable",
     "verticalStack2",
     "disciplineActionsTable",
+    "drawerV2Mui",
+    "drawerTabContainer",
+    "content3",
+    "textAndSupportingText3",
+    "textAndOnlineIndicator2",
+    "text3",
+    "supportingText3",
     "drawerV2",
     "content2",
     "textAndSupportingText2",
@@ -5684,6 +5874,32 @@ const PlasmicDescendants = {
   disciplineTable: ["disciplineTable"],
   verticalStack2: ["verticalStack2", "disciplineActionsTable"],
   disciplineActionsTable: ["disciplineActionsTable"],
+  drawerV2Mui: [
+    "drawerV2Mui",
+    "drawerTabContainer",
+    "content3",
+    "textAndSupportingText3",
+    "textAndOnlineIndicator2",
+    "text3",
+    "supportingText3"
+  ],
+  drawerTabContainer: ["drawerTabContainer"],
+  content3: [
+    "content3",
+    "textAndSupportingText3",
+    "textAndOnlineIndicator2",
+    "text3",
+    "supportingText3"
+  ],
+  textAndSupportingText3: [
+    "textAndSupportingText3",
+    "textAndOnlineIndicator2",
+    "text3",
+    "supportingText3"
+  ],
+  textAndOnlineIndicator2: ["textAndOnlineIndicator2", "text3"],
+  text3: ["text3"],
+  supportingText3: ["supportingText3"],
   drawerV2: [
     "drawerV2",
     "content2",
@@ -6444,6 +6660,13 @@ type NodeDefaultElementType = {
   disciplineTable: typeof DisciplineTable;
   verticalStack2: "div";
   disciplineActionsTable: typeof DisciplineActionsTable;
+  drawerV2Mui: typeof MuiDrawerV2;
+  drawerTabContainer: typeof DrawerTabContainer;
+  content3: "div";
+  textAndSupportingText3: "div";
+  textAndOnlineIndicator2: "div";
+  text3: "div";
+  supportingText3: "div";
   drawerV2: typeof DrawerV2;
   content2: "div";
   textAndSupportingText2: "div";
@@ -6586,6 +6809,13 @@ export const PlasmicDiscipline = Object.assign(
     disciplineTable: makeNodeComponent("disciplineTable"),
     verticalStack2: makeNodeComponent("verticalStack2"),
     disciplineActionsTable: makeNodeComponent("disciplineActionsTable"),
+    drawerV2Mui: makeNodeComponent("drawerV2Mui"),
+    drawerTabContainer: makeNodeComponent("drawerTabContainer"),
+    content3: makeNodeComponent("content3"),
+    textAndSupportingText3: makeNodeComponent("textAndSupportingText3"),
+    textAndOnlineIndicator2: makeNodeComponent("textAndOnlineIndicator2"),
+    text3: makeNodeComponent("text3"),
+    supportingText3: makeNodeComponent("supportingText3"),
     drawerV2: makeNodeComponent("drawerV2"),
     content2: makeNodeComponent("content2"),
     textAndSupportingText2: makeNodeComponent("textAndSupportingText2"),
