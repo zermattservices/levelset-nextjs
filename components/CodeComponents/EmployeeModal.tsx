@@ -350,6 +350,28 @@ export function EmployeeModal({
         console.error('Error fetching disciplinary actions:', err);
         setDisciplinaryActions([]);
       }
+
+      // Fetch recommended actions for this employee
+      try {
+        console.log('[EmployeeModal] Fetching recommended actions for employee:', employee.id);
+        const { data: recommendedData, error: recommendedError } = await supabase
+          .from('recommended_disc_actions')
+          .select('*')
+          .eq('employee_id', employee.id)
+          .is('action_taken', null)
+          .order('created_at', { ascending: false });
+        
+        console.log('[EmployeeModal] Recommended actions result:', { recommendedData, recommendedError });
+        
+        if (!recommendedError && recommendedData) {
+          setRecommendedActions(recommendedData);
+        } else {
+          setRecommendedActions([]);
+        }
+      } catch (err) {
+        console.error('[EmployeeModal] Error fetching recommended actions:', err);
+        setRecommendedActions([]);
+      }
     } catch (err) {
       console.error('Error fetching employee discipline data:', err);
     } finally {
