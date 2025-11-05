@@ -1397,17 +1397,17 @@ PLASMIC.registerComponent(RecommendedActions, {
       type: "object",
       description: "Current user object"
     },
-    onEmployeeClick: {
-      type: "eventHandler",
-      argTypes: [
-        { 
-          name: "employeeId", 
-          type: "string"
-        }
-      ],
-      description: "Handler for when employee is clicked after recording action"
+    className: "string",
+    maxWidth: {
+      type: "string",
+      defaultValue: "1200px",
+      description: "Maximum width of the component"
     },
-    className: "string"
+    width: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Width of the component"
+    }
   },
   importPath: "./components/CodeComponents/RecommendedActions",
 });

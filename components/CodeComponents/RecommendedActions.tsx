@@ -1,42 +1,121 @@
 "use client";
 
 import * as React from "react";
-import { Box, Typography, Button, Chip, Skeleton } from "@mui/material";
-import WarningIcon from "@mui/icons-material/Warning";
+import { Box, Typography, Button, Skeleton } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { calculateRecommendations } from "@/lib/discipline-recommendations";
 import type { RecommendedAction } from "@/lib/discipline-recommendations";
 import type { Employee } from "@/lib/supabase.types";
 import { createSupabaseClient } from "@/util/supabase/component";
 import { RecordActionModal } from "./RecordActionModal";
+import { EmployeeModal } from "./EmployeeModal";
 
 export interface RecommendedActionsProps {
   orgId: string;
   locationId: string;
   currentUser: Employee | null;
-  onEmployeeClick?: (employeeId: string) => void;
   className?: string;
+  maxWidth?: string | number;
+  width?: string | number;
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
 
+// Points Badge Component - matching DisciplineTable styling
+const PointsBadge = ({ points, disciplineActions }: { points: number; disciplineActions: any[] }) => {
+  const getBadgeColor = () => {
+    if (points === 0) {
+      return { bg: '#f3f4f6', color: '#111827' };
+    }
+    
+    const applicableAction = disciplineActions
+      .filter(action => points >= action.points_threshold)
+      .sort((a, b) => b.points_threshold - a.points_threshold)[0];
+    
+    if (applicableAction) {
+      const actionName = applicableAction.action.toLowerCase();
+      if (actionName.includes('documented warning')) {
+        return { bg: '#fee2e2', color: '#991b1b' };
+      } else if (actionName.includes('write up 1')) {
+        return { bg: '#fecaca', color: '#991b1b' };
+      } else if (actionName.includes('write up 2')) {
+        return { bg: '#fca5a5', color: '#7f1d1d' };
+      } else if (actionName.includes('write up 3')) {
+        return { bg: '#f87171', color: '#7f1d1d' };
+      } else if (actionName.includes('termination')) {
+        return { bg: '#dc2626', color: '#ffffff' };
+      }
+    }
+    
+    if (points <= 10) return { bg: '#fee2e2', color: '#991b1b' };
+    else if (points <= 30) return { bg: '#fecaca', color: '#991b1b' };
+    else if (points <= 50) return { bg: '#fca5a5', color: '#7f1d1d' };
+    else if (points <= 75) return { bg: '#f87171', color: '#7f1d1d' };
+    else return { bg: '#dc2626', color: '#ffffff' };
+  };
+  
+  const colors = getBadgeColor();
+  
+  return (
+    <Box
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.bg,
+        color: colors.color,
+        fontFamily,
+        fontSize: 14,
+        fontWeight: 600,
+        height: 28,
+        minWidth: 42,
+        padding: '0 12px',
+        borderRadius: '14px',
+        flexShrink: 0,
+      }}
+    >
+      {points}
+    </Box>
+  );
+};
+
 export function RecommendedActions({
   orgId,
   locationId,
   currentUser,
-  onEmployeeClick,
   className = "",
+  maxWidth = "1200px",
+  width = "100%",
 }: RecommendedActionsProps) {
   const [recommendations, setRecommendations] = React.useState<RecommendedAction[]>([]);
+  const [disciplineActions, setDisciplineActions] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [expanded, setExpanded] = React.useState(true);
   const [recordModalOpen, setRecordModalOpen] = React.useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = React.useState<RecommendedAction | null>(null);
+  const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
+  const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
   const supabase = createSupabaseClient();
 
-  // Fetch recommendations
+  // Fetch recommendations and discipline actions
   const fetchRecommendations = React.useCallback(async () => {
     try {
       setLoading(true);
+      
+      // Fetch discipline actions rubric for points badge coloring
+      const { data: actionsData, error: actionsError } = await supabase
+        .from('disc_actions_rubric')
+        .select('*')
+        .eq('org_id', orgId)
+        .eq('location_id', locationId)
+        .order('points_threshold', { ascending: true });
+        
+      if (!actionsError && actionsData) {
+        setDisciplineActions(actionsData);
+      }
+      
       const recs = await calculateRecommendations(orgId, locationId);
       
       // Filter out recommendations that have been dismissed or actioned
@@ -129,178 +208,232 @@ export function RecommendedActions({
     setRecordModalOpen(true);
   };
 
+  // Get comma-separated names for collapsed view
+  const employeeNames = React.useMemo(() => {
+    return recommendations.map(r => r.employee_name).join(', ');
+  }, [recommendations]);
+
   if (loading) {
     return (
-      <Box className={className} sx={{ mb: 3 }}>
+      <Box 
+        className={className} 
+        sx={{ 
+          mb: 3, 
+          width,
+          maxWidth,
+          mx: 'auto',
+        }}
+      >
         <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
       </Box>
     );
   }
 
   if (recommendations.length === 0) {
-    return null; // Don't show anything if no recommendations
+    return null;
   }
 
   return (
-    <Box className={className} sx={{ mb: 3 }}>
+    <Box 
+      className={className} 
+      sx={{ 
+        mb: 3,
+        width,
+        maxWidth,
+        mx: 'auto',
+      }}
+    >
       {/* Header */}
-      <Box
+      <Typography
         sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
+          fontFamily,
+          fontSize: 18,
+          fontWeight: 600,
+          color: '#111827',
           mb: 2,
         }}
       >
-        <WarningIcon sx={{ color: '#f59e0b', fontSize: 24 }} />
-        <Typography
-          sx={{
-            fontFamily,
-            fontSize: 18,
-            fontWeight: 600,
-            color: '#111827',
-          }}
-        >
-          Recommended Disciplinary Actions ({recommendations.length})
-        </Typography>
-      </Box>
+        Recommended Disciplinary Actions ({recommendations.length})
+      </Typography>
 
-      {/* Recommendations Grid */}
+      {/* Collapsible Grey Container */}
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
-          gap: 2,
+          backgroundColor: "#f9fafb",
+          border: "1px solid #e5e7eb",
+          borderRadius: "12px",
+          overflow: "hidden",
         }}
       >
-        {recommendations.map((rec) => (
-          <Box
-            key={rec.employee_id}
-            sx={{
-              backgroundColor: "#fffbeb",
-              border: "1px solid #fbbf24",
-              borderRadius: "12px",
-              padding: "16px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 1.5,
-            }}
-          >
-            {/* Employee Name and Points */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <Box>
-                <Typography
+        {/* Collapsed View - Shows comma-separated names */}
+        {!expanded && (
+          <Box sx={{ padding: "16px" }}>
+            <Typography
+              sx={{
+                fontFamily,
+                fontSize: 14,
+                color: '#6b7280',
+              }}
+            >
+              {employeeNames}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Expanded View - Shows all cards */}
+        {expanded && (
+          <Box sx={{ padding: "16px", display: "flex", flexDirection: "column", gap: 2 }}>
+            {recommendations.map((rec) => (
+              <Box
+                key={rec.employee_id}
+                sx={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e9eaeb",
+                  borderRadius: "8px",
+                  padding: "12px 16px",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                {/* Employee Name and Role */}
+                <Box sx={{ minWidth: 180 }}>
+                  <Typography
+                    sx={{
+                      fontFamily,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: '#111827',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {rec.employee_name}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily,
+                      fontSize: 12,
+                      color: '#6b7280',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {rec.employee_role}
+                  </Typography>
+                </Box>
+
+                {/* Points Badge */}
+                <PointsBadge points={rec.current_points} disciplineActions={disciplineActions} />
+
+                {/* Recommended Action Card */}
+                <Box
                   sx={{
-                    fontFamily,
-                    fontSize: 16,
-                    fontWeight: 600,
-                    color: '#111827',
+                    flex: 1,
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #e9eaeb",
+                    borderRadius: "8px",
+                    padding: "8px 12px",
                   }}
                 >
-                  {rec.employee_name}
-                </Typography>
-                <Typography
+                  <Typography
+                    sx={{
+                      fontFamily,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: '#111827',
+                    }}
+                  >
+                    {rec.recommended_action}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily,
+                      fontSize: 11,
+                      color: '#6b7280',
+                    }}
+                  >
+                    Threshold: {rec.points_threshold} pts (exceeded by {rec.threshold_exceeded_by})
+                  </Typography>
+                </Box>
+
+                {/* Dismiss Button */}
+                <Button
+                  onClick={() => handleDismiss(rec)}
+                  variant="outlined"
                   sx={{
                     fontFamily,
                     fontSize: 13,
-                    color: '#6b7280',
+                    textTransform: "none",
+                    color: "#6b7280",
+                    borderColor: "#d1d5db",
+                    padding: "6px 16px",
+                    minWidth: 100,
+                    flexShrink: 0,
+                    "&:hover": {
+                      backgroundColor: "#f3f4f6",
+                      borderColor: "#9ca3af",
+                    },
                   }}
                 >
-                  {rec.employee_role}
-                </Typography>
+                  Dismiss
+                </Button>
+
+                {/* Record Action Button */}
+                <Button
+                  onClick={() => handleRecordAction(rec)}
+                  variant="contained"
+                  sx={{
+                    fontFamily,
+                    fontSize: 13,
+                    textTransform: "none",
+                    backgroundColor: levelsetGreen,
+                    padding: "6px 16px",
+                    minWidth: 120,
+                    flexShrink: 0,
+                    "&:hover": {
+                      backgroundColor: "#264d38",
+                    },
+                  }}
+                >
+                  Record Action
+                </Button>
               </Box>
-              <Chip
-                label={`${rec.current_points} pts`}
-                sx={{
-                  backgroundColor: '#dc2626',
-                  color: '#ffffff',
-                  fontFamily,
-                  fontSize: 12,
-                  fontWeight: 600,
-                }}
-              />
-            </Box>
-
-            {/* Recommended Action */}
-            <Box
-              sx={{
-                backgroundColor: "#ffffff",
-                border: "1px solid #e9eaeb",
-                borderRadius: "8px",
-                padding: "12px",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontFamily,
-                  fontSize: 12,
-                  color: '#6b7280',
-                  mb: 0.5,
-                }}
-              >
-                Recommended Action:
-              </Typography>
-              <Typography
-                sx={{
-                  fontFamily,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: '#111827',
-                }}
-              >
-                {rec.recommended_action}
-              </Typography>
-              <Typography
-                sx={{
-                  fontFamily,
-                  fontSize: 12,
-                  color: '#6b7280',
-                  mt: 0.5,
-                }}
-              >
-                Threshold: {rec.points_threshold} points (exceeded by {rec.threshold_exceeded_by})
-              </Typography>
-            </Box>
-
-            {/* Action Buttons */}
-            <Box sx={{ display: "flex", gap: 1, mt: 0.5 }}>
-              <Button
-                onClick={() => handleDismiss(rec)}
-                variant="outlined"
-                fullWidth
-                sx={{
-                  fontFamily,
-                  fontSize: 13,
-                  textTransform: "none",
-                  color: "#6b7280",
-                  borderColor: "#d1d5db",
-                  "&:hover": {
-                    backgroundColor: "#f3f4f6",
-                    borderColor: "#9ca3af",
-                  },
-                }}
-              >
-                Dismiss
-              </Button>
-              <Button
-                onClick={() => handleRecordAction(rec)}
-                variant="contained"
-                fullWidth
-                sx={{
-                  fontFamily,
-                  fontSize: 13,
-                  textTransform: "none",
-                  backgroundColor: levelsetGreen,
-                  "&:hover": {
-                    backgroundColor: "#264d38",
-                  },
-                }}
-              >
-                Record Action
-              </Button>
-            </Box>
+            ))}
           </Box>
-        ))}
+        )}
+
+        {/* Toggle Button at Bottom */}
+        <Box
+          onClick={() => setExpanded(!expanded)}
+          sx={{
+            borderTop: "1px solid #e5e7eb",
+            padding: "12px 16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1,
+            cursor: "pointer",
+            "&:hover": {
+              backgroundColor: "#f3f4f6",
+            },
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 500,
+              color: levelsetGreen,
+            }}
+          >
+            {expanded ? "Show Less" : "Show All"}
+          </Typography>
+          {expanded ? (
+            <ExpandLessIcon sx={{ fontSize: 18, color: levelsetGreen }} />
+          ) : (
+            <ExpandMoreIcon sx={{ fontSize: 18, color: levelsetGreen }} />
+          )}
+        </Box>
       </Box>
 
       {/* Record Action Modal */}
@@ -318,16 +451,30 @@ export function RecommendedActions({
           onSuccess={(employeeId) => {
             // Refresh recommendations
             fetchRecommendations();
-            // Open employee modal
-            if (onEmployeeClick) {
-              onEmployeeClick(employeeId);
+            // Open employee modal with the employee who had action recorded
+            const emp = recommendations.find(r => r.employee_id === employeeId)?.employee;
+            if (emp) {
+              setSelectedEmployee(emp);
+              setEmployeeModalOpen(true);
             }
           }}
           orgId={orgId}
           locationId={locationId}
         />
       )}
+
+      {/* Employee Modal */}
+      <EmployeeModal
+        open={employeeModalOpen}
+        employee={selectedEmployee}
+        onClose={() => {
+          setEmployeeModalOpen(false);
+          setSelectedEmployee(null);
+        }}
+        orgId={orgId}
+        locationId={locationId}
+        initialTab="discipline"
+      />
     </Box>
   );
 }
-
