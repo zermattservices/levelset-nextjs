@@ -1,6 +1,19 @@
 import * as React from "react";
 import { createSupabaseClient } from "@/util/supabase/component";
 import { DisciplineTableSkeleton } from "./Skeletons/DisciplineTableSkeleton";
+import {
+  Box,
+  Chip,
+  Typography,
+} from "@mui/material";
+import {
+  DataGridPro,
+  GridColDef,
+  GridRowsProp,
+  gridClasses,
+} from "@mui/x-data-grid-pro";
+import type { Employee } from "@/lib/supabase.types";
+import { EmployeeModal } from "./EmployeeModal";
 
 export interface DisciplineEntry {
   id: string;
@@ -8,6 +21,7 @@ export interface DisciplineEntry {
   role: string;
   last_infraction: string | null;
   current_points: number;
+  employee?: Employee; // Full employee object for modal
 }
 
 export interface DisciplineTableProps {
@@ -36,63 +50,99 @@ export interface DisciplineTableProps {
   onRowClick?: (employee: DisciplineEntry) => void;
 }
 
-// Role badge helper
-const roleChip = (role: string) => {
-  const base = "role-badge";
-  const normalized = role.toLowerCase();
+const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+const levelsetGreen = '#31664a';
+
+// Role Chip Component - matching PositionalRatings
+const RoleChip = ({ role }: { role: string }) => {
+  const styles: Record<string, { bg: string; color: string }> = {
+    'New Hire': { bg: '#f0fdf4', color: '#166534' },
+    'Team Member': { bg: '#eff6ff', color: '#1d4ed8' },
+    'Trainer': { bg: '#fef2f2', color: '#dc2626' },
+    'Team Lead': { bg: '#fef3c7', color: '#d97706' },
+    'Director': { bg: '#f3e8ff', color: '#7c3aed' },
+    'Executive': { bg: '#F0F0FF', color: '#483D8B' },
+    'Operator': { bg: '#F0F0FF', color: '#483D8B' },
+  };
   
-  if (normalized.includes("new hire")) return `${base} new-hire`;
-  if (normalized.includes("team lead") || normalized.includes("lead")) return `${base} team-lead`;
-  if (normalized.includes("operator") || normalized.includes("executive")) return `${base} operator`;
-  if (normalized.includes("trainer")) return `${base} trainer`;
-  if (normalized.includes("director")) return `${base} director`;
-  return `${base} team-member`;
+  const style = styles[role] || styles['Team Member'];
+  
+  return (
+    <Chip
+      label={role}
+      size="small"
+      sx={{
+        fontFamily,
+        fontSize: 12,
+        fontWeight: 500,
+        backgroundColor: style.bg,
+        color: style.color,
+        height: 24,
+        borderRadius: 12,
+        '& .MuiChip-label': {
+          padding: '0 8px',
+        },
+      }}
+    />
+  );
 };
 
-// Points badge helper - color based on discipline actions
-const pointsBadge = (points: number, disciplineActions: any[], customClass?: string) => {
-  let badgeClass = "role-badge points-badge";
-  
-  if (points === 0) {
-    badgeClass += " points-0-grey"; // Light grey with black text for 0 points
-  } else {
+// Points Badge Component - color based on discipline actions
+const PointsBadge = ({ points, disciplineActions }: { points: number; disciplineActions: any[] }) => {
+  const getBadgeColor = () => {
+    if (points === 0) {
+      return { bg: '#f3f4f6', color: '#111827' }; // Light grey with black text for 0 points
+    }
+    
     // Find the highest threshold that the points exceed
     const applicableAction = disciplineActions
       .filter(action => points >= action.points_threshold)
       .sort((a, b) => b.points_threshold - a.points_threshold)[0];
     
     if (applicableAction) {
-      // Map action names to CSS classes
+      // Map action names to colors
       const actionName = applicableAction.action.toLowerCase();
       if (actionName.includes('documented warning')) {
-        badgeClass += " points-10"; // Light red/pink
+        return { bg: '#fee2e2', color: '#991b1b' }; // Light red/pink
       } else if (actionName.includes('write up 1')) {
-        badgeClass += " points-30"; // Medium red/pink
+        return { bg: '#fecaca', color: '#991b1b' }; // Medium red/pink
       } else if (actionName.includes('write up 2')) {
-        badgeClass += " points-50"; // Medium red
+        return { bg: '#fca5a5', color: '#7f1d1d' }; // Medium red
       } else if (actionName.includes('write up 3')) {
-        badgeClass += " points-75"; // Darker red
+        return { bg: '#f87171', color: '#7f1d1d' }; // Darker red
       } else if (actionName.includes('termination')) {
-        badgeClass += " points-100"; // Darkest red
-      } else {
-        // Default fallback based on points
-        if (points <= 10) badgeClass += " points-10";
-        else if (points <= 30) badgeClass += " points-30";
-        else if (points <= 50) badgeClass += " points-50";
-        else if (points <= 75) badgeClass += " points-75";
-        else badgeClass += " points-100";
+        return { bg: '#dc2626', color: '#ffffff' }; // Darkest red
       }
-    } else {
-      // Fallback if no actions match
-      if (points <= 10) badgeClass += " points-10";
-      else if (points <= 30) badgeClass += " points-30";
-      else if (points <= 50) badgeClass += " points-50";
-      else if (points <= 75) badgeClass += " points-75";
-      else badgeClass += " points-100";
     }
-  }
+    
+    // Fallback based on points
+    if (points <= 10) return { bg: '#fee2e2', color: '#991b1b' };
+    else if (points <= 30) return { bg: '#fecaca', color: '#991b1b' };
+    else if (points <= 50) return { bg: '#fca5a5', color: '#7f1d1d' };
+    else if (points <= 75) return { bg: '#f87171', color: '#7f1d1d' };
+    else return { bg: '#dc2626', color: '#ffffff' };
+  };
   
-  return `${badgeClass} ${customClass || ""}`;
+  const colors = getBadgeColor();
+  
+  return (
+    <Chip
+      label={points}
+      size="small"
+      sx={{
+        fontFamily,
+        fontSize: 12,
+        fontWeight: 600,
+        backgroundColor: colors.bg,
+        color: colors.color,
+        height: 24,
+        borderRadius: 12,
+        '& .MuiChip-label': {
+          padding: '0 8px',
+        },
+      }}
+    />
+  );
 };
 
 export function DisciplineTable({
@@ -120,122 +170,90 @@ export function DisciplineTable({
   const [disciplineActions, setDisciplineActions] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
   const supabase = createSupabaseClient();
-
-  const padY = density === "compact" ? "py-2" : "py-3";
   
   // Fetch discipline data from Supabase
   const fetchDisciplineData = React.useCallback(async () => {
-        try {
-          setLoading(true);
-          console.log('Fetching discipline data for org:', orgId, 'location:', locationId);
-          
-          // First try the view, then fallback to manual query
-          let transformedData: DisciplineEntry[] = [];
-          
-          // Fetch discipline actions for styling
-          const { data: actionsData, error: actionsError } = await supabase
-            .from('disc_actions_rubric')
-            .select('*')
-            .eq('org_id', orgId)
-            .eq('location_id', locationId)
-            .order('points_threshold', { ascending: true });
-            
-          if (!actionsError && actionsData) {
-            setDisciplineActions(actionsData);
-          }
-          
-          try {
-            // Try the v_employee_infraction_rollup view first
-            let query = supabase
-              .from('v_employee_infraction_rollup')
-              .select('*');
-            
-            if (orgId) {
-              query = query.eq('org_id', orgId);
-            }
-            if (locationId) {
-              query = query.eq('location_id', locationId);
-            }
-            
-            const { data: viewData, error: viewError } = await query.order('current_points', { ascending: false });
-            
-            if (!viewError && viewData) {
-              console.log('Loaded discipline data from view:', viewData.length, 'entries');
-              
-              // Transform view data to DisciplineEntry format
-              transformedData = viewData.map((entry: any) => ({
-                id: entry.employee_id || entry.id,
-                full_name: entry.full_name || 'Unknown',
-                role: entry.role || 'Team Member',
-                last_infraction: entry.last_infraction || null,
-                current_points: entry.current_points || 0
-              }));
-            } else {
-              throw new Error('View not available, trying manual query');
-            }
-          } catch (viewErr) {
-            console.log('View not available, fetching from tables manually:', viewErr);
-            
-            // Fallback: fetch employees and their infractions manually
-            const { data: employees, error: empError } = await supabase
-              .from('employees')
-              .select('id, full_name, role, org_id, location_id')
-              .eq('org_id', orgId)
-              .eq('location_id', locationId)
-              .eq('active', true);
-              
-            if (empError) throw empError;
-            
-            if (employees && employees.length > 0) {
-              // Get infractions for all employees
-              const employeeIds = employees.map(emp => emp.id);
-              
-              const { data: infractions, error: infError } = await supabase
-                .from('infractions')
-                .select('employee_id, points, infraction_date')
-                .in('employee_id', employeeIds)
-                .eq('org_id', orgId)
-                .eq('location_id', locationId)
-                .order('infraction_date', { ascending: false });
-                
-              if (infError) {
-                console.warn('Error fetching infractions, continuing with empty infractions:', infError);
-                // Continue with empty infractions array instead of throwing
-              }
-              
-              // Calculate current points and last infraction for each employee
-              transformedData = employees.map(emp => {
-                const empInfractions = infractions?.filter(inf => inf.employee_id === emp.id) || [];
-                const current_points = empInfractions.reduce((sum, inf) => sum + (inf.points || 0), 0);
-                const last_infraction = empInfractions && empInfractions.length > 0 ? empInfractions[0]?.infraction_date : null;
-                
-                return {
-                  id: emp.id,
-                  full_name: emp.full_name || 'Unknown',
-                  role: emp.role || 'Team Member',
-                  last_infraction,
-                  current_points
-                };
-              }).sort((a, b) => a.full_name.localeCompare(b.full_name)); // Sort by name alphabetically
-              
-              console.log('Loaded discipline data from tables:', transformedData.length, 'entries');
-            } else {
-              console.log('No employees found for org:', orgId, 'location:', locationId);
-              transformedData = [];
-            }
-          }
+    try {
+      setLoading(true);
+      console.log('Fetching discipline data for org:', orgId, 'location:', locationId);
+      
+      let transformedData: DisciplineEntry[] = [];
+      
+      // Fetch discipline actions for styling
+      const { data: actionsData, error: actionsError } = await supabase
+        .from('disc_actions_rubric')
+        .select('*')
+        .eq('org_id', orgId)
+        .eq('location_id', locationId)
+        .order('points_threshold', { ascending: true });
         
-        setData(transformedData);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching discipline data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load discipline data');
-        setData([]);
-      } finally {
-        setLoading(false);
+      if (!actionsError && actionsData) {
+        setDisciplineActions(actionsData);
       }
-    }, [orgId, locationId]);
+      
+      // Fetch employees (filter by active) and join to sum points from infractions within last 90 days
+      const { data: employees, error: empError } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('org_id', orgId)
+        .eq('location_id', locationId)
+        .eq('active', true);
+        
+      if (empError) throw empError;
+      
+      if (employees && employees.length > 0) {
+        // Get infractions for all employees from last 90 days
+        const employeeIds = employees.map(emp => emp.id);
+        const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        
+        const { data: infractions, error: infError } = await supabase
+          .from('infractions')
+          .select('employee_id, points, infraction_date')
+          .in('employee_id', employeeIds)
+          .eq('org_id', orgId)
+          .eq('location_id', locationId)
+          .gte('infraction_date', ninetyDaysAgo)
+          .order('infraction_date', { ascending: false });
+          
+        if (infError) {
+          console.warn('Error fetching infractions, continuing with empty infractions:', infError);
+        }
+        
+        // Calculate current points and last infraction for each employee
+        transformedData = employees.map(emp => {
+          const empInfractions = infractions?.filter(inf => inf.employee_id === emp.id) || [];
+          const current_points = empInfractions.reduce((sum, inf) => sum + (inf.points || 0), 0);
+          const last_infraction = empInfractions && empInfractions.length > 0 ? empInfractions[0]?.infraction_date : null;
+          
+          return {
+            id: emp.id,
+            full_name: emp.full_name || 'Unknown',
+            role: emp.role || 'Team Member',
+            last_infraction,
+            current_points,
+            employee: emp as Employee, // Store full employee object for modal
+          };
+        }).sort((a, b) => b.current_points - a.current_points || a.full_name.localeCompare(b.full_name)); // Sort by points DESC, then name ASC
+        
+        console.log('Loaded discipline data from tables:', transformedData.length, 'entries');
+      } else {
+        console.log('No employees found for org:', orgId, 'location:', locationId);
+        transformedData = [];
+      }
+    
+      setData(transformedData);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching discipline data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load discipline data');
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [orgId, locationId, supabase]);
     
   // Initial fetch
   React.useEffect(() => {
@@ -296,6 +314,83 @@ export function DisciplineTable({
   }, [orgId, locationId, supabase, fetchDisciplineData]);
   */
 
+  // Convert data to DataGrid rows
+  const rows: GridRowsProp = React.useMemo(() => {
+    return data.map((entry) => ({
+      id: entry.id,
+      full_name: entry.full_name,
+      role: entry.role,
+      last_infraction: entry.last_infraction,
+      current_points: entry.current_points,
+      employee: entry.employee, // Store full employee object
+    }));
+  }, [data]);
+
+  // Define columns
+  const columns: GridColDef[] = React.useMemo(() => [
+    {
+      field: 'full_name',
+      headerName: 'NAME',
+      width: 200,
+      sortable: true,
+      resizable: false,
+      renderCell: (params) => (
+        <Typography
+          sx={{
+            fontFamily,
+            fontSize: 13,
+            fontWeight: 600,
+            color: '#111827',
+          }}
+        >
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: 'role',
+      headerName: 'ROLE',
+      width: 160,
+      sortable: true,
+      resizable: false,
+      headerAlign: 'center',
+      align: 'center',
+      renderCell: (params) => <RoleChip role={params.value} />,
+    },
+    {
+      field: 'last_infraction',
+      headerName: 'LAST INFRACTION',
+      width: 160,
+      sortable: true,
+      resizable: false,
+      headerAlign: 'center',
+      align: 'center',
+      renderCell: (params) => (
+        <Typography
+          sx={{
+            fontFamily,
+            fontSize: 13,
+            color: '#111827',
+          }}
+        >
+          {params.value ? new Date(params.value).toLocaleDateString() : '-'}
+        </Typography>
+      ),
+    },
+    {
+      field: 'current_points',
+      headerName: 'CURRENT POINTS',
+      width: 160,
+      sortable: true,
+      resizable: false,
+      headerAlign: 'center',
+      align: 'center',
+      renderCell: (params) => (
+        <PointsBadge points={params.value} disciplineActions={disciplineActions} />
+      ),
+    },
+  ], [disciplineActions]);
+
   if (loading && data.length === 0) {
     return (
       <DisciplineTableSkeleton
@@ -310,88 +405,165 @@ export function DisciplineTable({
 
   if (error && data.length === 0) {
     return (
-      <div className={`roster-table-container ${className}`}>
-        <div className="flex items-center justify-center p-8">
-          <div className="text-red-500">{error}</div>
-        </div>
-      </div>
+      <Box className={className} sx={{ p: 3, textAlign: 'center' }}>
+        <Typography sx={{ fontFamily, color: '#dc2626' }}>{error}</Typography>
+      </Box>
     );
   }
 
   if (data.length === 0 && !loading) {
     return (
-      <div className={`roster-table-container ${className}`}>
-        <div className="flex items-center justify-center p-8">
-          <div className="text-gray-500">No discipline data available</div>
-        </div>
-      </div>
+      <Box className={className} sx={{ p: 3, textAlign: 'center' }}>
+        <Typography sx={{ fontFamily, color: '#6b7280' }}>No discipline data available</Typography>
+      </Box>
     );
   }
 
   return (
-    <div className={`roster-table-container scrollable ${className}`} data-plasmic-name="discipline-table-container">
-      <table className={`roster-table ${tableClass}`} data-plasmic-name="discipline-table">
-          <thead data-plasmic-name="table-header">
-            <tr className={headerRowClass} data-plasmic-name="header-row">
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="name-header">Name</th>
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="role-header">Role</th>
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="last-infraction-header">Last Infraction</th>
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="points-header">Current Points</th>
-              {showActions && <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="actions-header"></th>}
-            </tr>
-          </thead>
-
-          <tbody>
-            {data.map((e) => (
-              <tr 
-                key={e.id} 
-                className={`${rowClass} ${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}`}
-                onClick={() => onRowClick?.(e)}
-              >
-                <td className={`name-cell ${nameCellClass || ""} ${cellClass || ""}`} style={{ fontWeight: '600' }}>
-                  {e.full_name}
-                </td>
-                <td className={`centered ${cellClass || ""}`}>
-                  <span className={`${roleChip(e.role)} ${roleBadgeClass || ""}`}>
-                    {e.role}
-                  </span>
-                </td>
-                <td className={`centered ${cellClass || ""}`}>
-                  {e.last_infraction 
-                    ? new Date(e.last_infraction).toLocaleDateString()
-                    : '-'
-                  }
-                </td>
-                <td className={`centered ${cellClass || ""}`}>
-                  <span className={`${pointsBadge(e.current_points, disciplineActions, pointsBadgeClass)}`}>
-                    {e.current_points}
-                  </span>
-                </td>
-                {showActions && (
-                  <td className={`centered ${cellClass || ""} ${actionsCellClass || ""}`}>
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        console.log('DisciplineTable row clicked:', e);
-                        event.stopPropagation();
-                        onRowClick?.(e);
-                        onViewDetails?.(e.id);
-                      }}
-                      className="actions-button arrow-button"
-                      aria-label="View details"
-                      title="View details"
-                    >
-                      <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                        <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-    </div>
+    <Box
+      className={className}
+      sx={{
+        height: 650,
+        width: '100%',
+        fontFamily,
+      }}
+      data-plasmic-name="discipline-table-container"
+    >
+      <DataGridPro
+        rows={rows}
+        columns={columns}
+        loading={loading}
+        pagination
+        pageSizeOptions={[25, 50, 100]}
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 50 },
+          },
+          sorting: {
+            sortModel: [{ field: 'current_points', sort: 'desc' }],
+          },
+        }}
+        disableRowSelectionOnClick
+        disableColumnResize
+        showColumnVerticalBorder={false}
+        rowHeight={48}
+        onRowClick={(params) => {
+          const rowData = params.row as DisciplineEntry & { employee?: Employee };
+          
+          // Get the full employee object from the data array
+          const entry = data.find(e => e.id === rowData.id);
+          const employeeObj = entry?.employee;
+          
+          // If we have a full employee object, use it; otherwise create a minimal one
+          if (employeeObj) {
+            setSelectedEmployee(employeeObj);
+            setModalOpen(true);
+          } else {
+            // Fallback: create minimal employee object
+            const minimalEmployee: Employee = {
+              id: rowData.id,
+              full_name: rowData.full_name,
+              role: rowData.role,
+              org_id: orgId,
+              location_id: locationId,
+              active: true,
+            };
+            setSelectedEmployee(minimalEmployee);
+            setModalOpen(true);
+          }
+          
+          // Still call the original callbacks for backwards compatibility
+          const employeeData: DisciplineEntry = {
+            id: rowData.id,
+            full_name: rowData.full_name,
+            role: rowData.role,
+            last_infraction: rowData.last_infraction,
+            current_points: rowData.current_points,
+          };
+          onRowClick?.(employeeData);
+          onViewDetails?.(employeeData.id);
+        }}
+        sx={{
+          fontFamily,
+          border: '1px solid #e5e7eb',
+          borderRadius: 2,
+          
+          // Column headers
+          [`& .${gridClasses.columnHeaders}`]: {
+            borderBottom: '1px solid #e5e7eb',
+          },
+          [`& .${gridClasses.columnHeader}`]: {
+            backgroundColor: '#f9fafb',
+            fontWeight: 600,
+            fontSize: 12,
+            textTransform: 'uppercase',
+            color: '#111827',
+            fontFamily,
+            '&:focus, &:focus-within': {
+              outline: 'none',
+            },
+          },
+          
+          // Column separators - Hide
+          [`& .${gridClasses.columnSeparator}`]: {
+            display: 'none',
+          },
+          
+          // Cells
+          [`& .${gridClasses.cell}`]: {
+            borderBottom: '1px solid #f3f4f6',
+            borderRight: 'none',
+            fontSize: 13,
+            color: '#111827',
+            fontFamily,
+            '&:focus, &:focus-within': {
+              outline: 'none',
+            },
+          },
+          
+          // Rows
+          [`& .${gridClasses.row}:hover`]: {
+            backgroundColor: '#f9fafb',
+            cursor: 'pointer',
+          },
+          
+          // Footer
+          [`& .${gridClasses.footerContainer}`]: {
+            borderTop: '1px solid #e5e7eb',
+            fontFamily,
+          },
+          '& .MuiTablePagination-root': {
+            fontFamily,
+            color: '#6b7280',
+          },
+          '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+            fontFamily,
+            fontSize: 13,
+          },
+          
+          // Loading
+          '& .MuiCircularProgress-root': {
+            color: levelsetGreen,
+          },
+        }}
+      />
+      
+      {/* Employee Modal */}
+      <EmployeeModal
+        open={modalOpen}
+        employee={selectedEmployee}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedEmployee(null);
+        }}
+        orgId={orgId}
+        locationId={locationId}
+        initialTab="discipline"
+        onRecordAction={onAddInfraction ? () => {
+          onAddInfraction(selectedEmployee?.id || '');
+        } : undefined}
+      />
+    </Box>
   );
 }
 

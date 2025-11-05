@@ -28,6 +28,7 @@ import { DrawerContent } from "./components/CodeComponents/DrawerComponents/Draw
 import { DrawerFooter } from "./components/CodeComponents/DrawerComponents/DrawerFooter";
 import { SlideoutListItem } from "./components/CodeComponents/DrawerComponents/SlideoutListItem";
 import { DrawerTabContainer } from "./components/CodeComponents/DrawerTabContainer";
+import { EmployeeModal } from "./components/CodeComponents/EmployeeModal";
 import { CenteredLoadingSpinner } from "./components/CodeComponents/CenteredLoadingSpinner";
 import { TableSkeleton } from "./components/CodeComponents/Skeletons/TableSkeleton";
 import { EmployeeTableSkeleton } from "./components/CodeComponents/Skeletons/EmployeeTableSkeleton";
@@ -1223,4 +1224,50 @@ PLASMIC.registerComponent(DrawerTabContainer, {
     }
   },
   importPath: "./components/CodeComponents/DrawerTabContainer",
+});
+
+// Register EmployeeModal component
+// @ts-ignore - Complex Plasmic registration type
+PLASMIC.registerComponent(EmployeeModal, {
+  name: "EmployeeModal",
+  // @ts-ignore - Complex Plasmic registration type
+  displayName: "Employee Modal",
+  // @ts-ignore - Complex Plasmic registration type
+  props: {
+    open: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Whether the modal is open"
+    },
+    employee: {
+      type: "object",
+      description: "Employee object to display"
+    },
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler for closing the modal"
+    },
+    orgId: {
+      type: "string",
+      description: "Organization ID"
+    },
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    initialTab: {
+      type: "choice",
+      options: ["pathway", "pe", "evaluations", "discipline"],
+      defaultValue: "discipline",
+      description: "Initial tab to display"
+    },
+    onRecordAction: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler for Record an Action button"
+    },
+    className: "string"
+  },
+  importPath: "./components/CodeComponents/EmployeeModal",
 });
