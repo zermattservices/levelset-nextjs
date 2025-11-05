@@ -566,6 +566,19 @@
           "scheme": "blackbox",
           "componentType": "page",
           "path": "/positional-excellence-classic"
+        },
+        {
+          "id": "Plh-Ei-tZDG1",
+          "name": "DrawerOldV2",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicDrawerOldV2.tsx",
+          "importSpec": {
+            "modulePath": "DrawerOldV2.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicDrawerOldV2.module.css",
+          "scheme": "blackbox",
+          "componentType": "component"
         }
       ],
       "icons": [
