@@ -484,9 +484,9 @@ export function EmployeeModal({
         </Box>
 
         {/* Side-by-Side Layout: Infractions and Disciplinary Actions */}
-        <Box sx={{ display: "flex", gap: 2, flex: 1, minHeight: 0 }}>
+        <Box sx={{ display: "flex", gap: 2, flex: 1, minHeight: 0, width: "100%" }}>
           {/* Left Column: Infractions */}
-          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <Box sx={{ flex: "1 1 50%", display: "flex", flexDirection: "column", minWidth: 0, maxWidth: "50%" }}>
             <Typography
               sx={{
                 fontFamily: "Satoshi",
@@ -540,7 +540,7 @@ export function EmployeeModal({
           </Box>
 
           {/* Right Column: Disciplinary Actions */}
-          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <Box sx={{ flex: "1 1 50%", display: "flex", flexDirection: "column", minWidth: 0, maxWidth: "50%" }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
               <Typography
                 sx={{

@@ -126,22 +126,24 @@ const PointsBadge = ({ points, disciplineActions }: { points: number; discipline
   const colors = getBadgeColor();
   
   return (
-    <Chip
-      label={points}
-      size="small"
+    <Box
       sx={{
-        fontFamily,
-        fontSize: 12,
-        fontWeight: 600,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: colors.bg,
         color: colors.color,
-        height: 24,
-        borderRadius: 12,
-        '& .MuiChip-label': {
-          padding: '0 8px',
-        },
+        fontFamily,
+        fontSize: 14,
+        fontWeight: 600,
+        height: 28,
+        minWidth: 42,
+        padding: '0 12px',
+        borderRadius: '14px',
       }}
-    />
+    >
+      {points}
+    </Box>
   );
 };
 
@@ -335,16 +337,18 @@ export function DisciplineTable({
       sortable: true,
       resizable: false,
       renderCell: (params) => (
-        <Typography
-          sx={{
-            fontFamily,
-            fontSize: 13,
-            fontWeight: 600,
-            color: '#111827',
-          }}
-        >
-          {params.value}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#111827',
+            }}
+          >
+            {params.value}
+          </Typography>
+        </Box>
       ),
     },
     {
@@ -366,15 +370,17 @@ export function DisciplineTable({
       headerAlign: 'center',
       align: 'center',
       renderCell: (params) => (
-        <Typography
-          sx={{
-            fontFamily,
-            fontSize: 13,
-            color: '#111827',
-          }}
-        >
-          {params.value ? new Date(params.value).toLocaleDateString() : '-'}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              color: '#111827',
+            }}
+          >
+            {params.value ? new Date(params.value).toLocaleDateString() : '-'}
+          </Typography>
+        </Box>
       ),
     },
     {
@@ -515,8 +521,6 @@ export function DisciplineTable({
             fontSize: 13,
             color: '#111827',
             fontFamily,
-            display: 'flex',
-            alignItems: 'center',
             '&:focus, &:focus-within': {
               outline: 'none',
             },
