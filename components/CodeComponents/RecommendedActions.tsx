@@ -1,12 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { Box, Typography, Button, Skeleton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Skeleton,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Chip,
+} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { calculateRecommendations } from "@/lib/discipline-recommendations";
+import CalendarIcon from "@mui/icons-material/CalendarToday";
+import PersonIcon from "@mui/icons-material/Person";
 import type { RecommendedAction } from "@/lib/discipline-recommendations";
-import type { Employee } from "@/lib/supabase.types";
+import type { Employee, Infraction } from "@/lib/supabase.types";
 import { createSupabaseClient } from "@/util/supabase/component";
 import { RecordActionModal } from "./RecordActionModal";
 import { EmployeeModal } from "./EmployeeModal";
@@ -23,6 +32,131 @@ export interface RecommendedActionsProps {
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
+
+// Infraction Card Component - matching EmployeeModal
+function InfractionCard({ infraction }: { infraction: Infraction }) {
+  const isPositive = (infraction.points || 0) < 0;
+  const pointColor = isPositive ? "#178459" : "#d23230";
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
+        gap: "12px",
+        padding: "12px 16px",
+        borderRadius: "12px",
+        border: "1px solid #e9eaeb",
+        backgroundColor: "#ffffff",
+        width: "100%",
+      }}
+    >
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+        <Typography
+          sx={{
+            fontFamily: "Satoshi",
+            fontSize: "14px",
+            fontWeight: 500,
+            color: "#414651",
+            lineHeight: "20px",
+          }}
+        >
+          {infraction.infraction || infraction.description || "Infraction"}
+        </Typography>
+
+        <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <CalendarIcon sx={{ fontSize: "1em", color: "#535862" }} />
+            <Typography
+              sx={{
+                fontFamily: "Satoshi",
+                fontSize: "14px",
+                fontWeight: 500,
+                color: "#535862",
+                lineHeight: "20px",
+              }}
+            >
+              {new Date(infraction.infraction_date).toLocaleDateString()}
+            </Typography>
+          </Box>
+
+          <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
+
+          {infraction.leader_name && (
+            <>
+              <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <PersonIcon sx={{ fontSize: "1em", color: "#535862" }} />
+                <Typography
+                  sx={{
+                    fontFamily: "Satoshi",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    color: "#535862",
+                    lineHeight: "20px",
+                  }}
+                >
+                  {infraction.leader_name}
+                </Typography>
+              </Box>
+              <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
+            </>
+          )}
+
+          {infraction.acknowledgement && (
+            <Typography
+              sx={{
+                fontFamily: "Satoshi",
+                fontSize: "14px",
+                fontWeight: 500,
+                color: "#535862",
+                lineHeight: "20px",
+              }}
+            >
+              {infraction.acknowledgement}
+            </Typography>
+          )}
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          alignSelf: "stretch",
+        }}
+      >
+        <Typography
+          sx={{
+            fontFamily: "Inter, sans-serif",
+            fontSize: "24px",
+            fontWeight: 600,
+            color: pointColor,
+            lineHeight: "32px",
+            textAlign: "center",
+          }}
+        >
+          {infraction.points}
+        </Typography>
+        <Typography
+          sx={{
+            fontFamily: "Satoshi",
+            fontSize: "12px",
+            fontWeight: 500,
+            color: "#414651",
+            lineHeight: "18px",
+            textAlign: "center",
+          }}
+        >
+          points
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
 
 // Points Badge Component - matching DisciplineTable styling
 const PointsBadge = ({ points, disciplineActions }: { points: number; disciplineActions: any[] }) => {
@@ -92,90 +226,16 @@ export function RecommendedActions({
   width = "100%",
 }: RecommendedActionsProps) {
   const [recommendations, setRecommendations] = React.useState<RecommendedAction[]>([]);
+  const [weeklyInfractions, setWeeklyInfractions] = React.useState<Infraction[]>([]);
   const [disciplineActions, setDisciplineActions] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [expanded, setExpanded] = React.useState(false); // Start collapsed
+  const [expandedPanel, setExpandedPanel] = React.useState<string | false>(false);
   const [recordModalOpen, setRecordModalOpen] = React.useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = React.useState<RecommendedAction | null>(null);
   const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
   const [appUserId, setAppUserId] = React.useState<string | null>(null);
   const supabase = createSupabaseClient();
-
-  // Fetch recommendations from database (source of truth)
-  const fetchRecommendations = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch discipline actions rubric for points badge coloring
-      const { data: actionsData, error: actionsError } = await supabase
-        .from('disc_actions_rubric')
-        .select('*')
-        .eq('org_id', orgId)
-        .eq('location_id', locationId)
-        .order('points_threshold', { ascending: true });
-        
-      if (!actionsError && actionsData) {
-        setDisciplineActions(actionsData);
-      }
-      
-      // Fetch pending recommendations from database
-      const { data: dbRecs, error: recsError } = await supabase
-        .from('recommended_disc_actions')
-        .select('*')
-        .eq('org_id', orgId)
-        .eq('location_id', locationId)
-        .is('action_taken', null)
-        .order('points_when_recommended', { ascending: false });
-
-      if (recsError) {
-        console.error('Error fetching recommendations:', recsError);
-        setRecommendations([]);
-        return;
-      }
-
-      // Fetch employee data to enrich recommendations
-      if (dbRecs && dbRecs.length > 0) {
-        const employeeIds = dbRecs.map(r => r.employee_id);
-        const { data: employees, error: empError } = await supabase
-          .from('employees')
-          .select('*')
-          .in('id', employeeIds);
-
-        if (empError) {
-          console.warn('Error fetching employee data:', empError);
-        }
-
-        // Transform database records to RecommendedAction format
-        const enrichedRecs: RecommendedAction[] = dbRecs.map(rec => {
-          const employee = employees?.find(e => e.id === rec.employee_id);
-          const threshold = actionsData?.find(a => a.id === rec.recommended_action_id);
-          
-          return {
-            employee_id: rec.employee_id,
-            employee_name: employee?.full_name || 'Unknown',
-            employee_role: employee?.role || 'Team Member',
-            current_points: rec.points_when_recommended,
-            recommended_action: rec.recommended_action,
-            action_id: rec.recommended_action_id,
-            points_threshold: threshold?.points_threshold || 0,
-            threshold_exceeded_by: rec.points_when_recommended - (threshold?.points_threshold || 0),
-            has_existing_action: false, // Already filtered out in DB
-            employee: employee as Employee,
-          };
-        });
-
-        setRecommendations(enrichedRecs);
-      } else {
-        setRecommendations([]);
-      }
-    } catch (err) {
-      console.error('Error fetching recommendations:', err);
-      setRecommendations([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [orgId, locationId, supabase]);
 
   // Fetch app_user ID from auth_user_id
   React.useEffect(() => {
@@ -203,16 +263,95 @@ export function RecommendedActions({
     fetchAppUserId();
   }, [currentUserId, currentUser, supabase]);
 
+  // Fetch recommendations and infractions
+  const fetchData = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch discipline actions rubric for points badge coloring
+      const { data: actionsData, error: actionsError } = await supabase
+        .from('disc_actions_rubric')
+        .select('*')
+        .eq('org_id', orgId)
+        .eq('location_id', locationId)
+        .order('points_threshold', { ascending: true });
+        
+      if (!actionsError && actionsData) {
+        setDisciplineActions(actionsData);
+      }
+      
+      // Fetch pending recommendations from database
+      const { data: dbRecs, error: recsError } = await supabase
+        .from('recommended_disc_actions')
+        .select('*')
+        .eq('org_id', orgId)
+        .eq('location_id', locationId)
+        .is('action_taken', null)
+        .order('points_when_recommended', { ascending: false });
+
+      if (!recsError && dbRecs && dbRecs.length > 0) {
+        const employeeIds = dbRecs.map(r => r.employee_id);
+        const { data: employees, error: empError } = await supabase
+          .from('employees')
+          .select('*')
+          .in('id', employeeIds);
+
+        if (!empError) {
+          const enrichedRecs: RecommendedAction[] = dbRecs.map(rec => {
+            const employee = employees?.find(e => e.id === rec.employee_id);
+            const threshold = actionsData?.find(a => a.id === rec.recommended_action_id);
+            
+            return {
+              employee_id: rec.employee_id,
+              employee_name: employee?.full_name || 'Unknown',
+              employee_role: employee?.role || 'Team Member',
+              current_points: rec.points_when_recommended,
+              recommended_action: rec.recommended_action,
+              action_id: rec.recommended_action_id,
+              points_threshold: threshold?.points_threshold || 0,
+              threshold_exceeded_by: rec.points_when_recommended - (threshold?.points_threshold || 0),
+              has_existing_action: false,
+              employee: employee as Employee,
+            };
+          });
+          setRecommendations(enrichedRecs);
+        }
+      } else {
+        setRecommendations([]);
+      }
+
+      // Fetch infractions from last 7 days
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const { data: infractionsData, error: infError } = await supabase
+        .from('infractions')
+        .select('*')
+        .eq('org_id', orgId)
+        .eq('location_id', locationId)
+        .gte('infraction_date', sevenDaysAgo)
+        .order('infraction_date', { ascending: false });
+
+      if (!infError && infractionsData) {
+        setWeeklyInfractions(infractionsData as Infraction[]);
+      } else {
+        setWeeklyInfractions([]);
+      }
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setRecommendations([]);
+      setWeeklyInfractions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [orgId, locationId, supabase]);
+
   React.useEffect(() => {
     if (orgId && locationId) {
-      fetchRecommendations();
-      setExpanded(false); // Reset to collapsed on page load
+      fetchData();
     }
-  }, [orgId, locationId, fetchRecommendations]);
+  }, [orgId, locationId, fetchData]);
 
   const handleDismiss = async (recommendation: RecommendedAction) => {
     try {
-      // First, try to find existing recommendation
       const { data: existing } = await supabase
         .from('recommended_disc_actions')
         .select('id')
@@ -224,7 +363,6 @@ export function RecommendedActions({
         .single();
 
       if (existing) {
-        // Update existing recommendation - use app_user ID
         const { error: updateError } = await supabase
           .from('recommended_disc_actions')
           .update({
@@ -236,7 +374,6 @@ export function RecommendedActions({
 
         if (updateError) throw updateError;
       } else {
-        // Insert new recommendation as dismissed - use app_user ID
         const { error: insertError } = await supabase
           .from('recommended_disc_actions')
           .insert({
@@ -254,7 +391,6 @@ export function RecommendedActions({
         if (insertError) throw insertError;
       }
 
-      // Remove from local state
       setRecommendations(prev => prev.filter(r => r.employee_id !== recommendation.employee_id));
     } catch (err: any) {
       console.error('Error dismissing recommendation:', err);
@@ -263,9 +399,7 @@ export function RecommendedActions({
   };
 
   const handleRecordAction = async (recommendation: RecommendedAction) => {
-    // Create recommendation record if it doesn't exist
     try {
-      // Check if recommendation already exists
       const { data: existing } = await supabase
         .from('recommended_disc_actions')
         .select('id')
@@ -277,7 +411,6 @@ export function RecommendedActions({
         .maybeSingle();
 
       if (!existing) {
-        // Insert new recommendation
         const { error: insertError } = await supabase
           .from('recommended_disc_actions')
           .insert({
@@ -301,249 +434,262 @@ export function RecommendedActions({
     setRecordModalOpen(true);
   };
 
-  // Get comma-separated names for collapsed view
-  const employeeNames = React.useMemo(() => {
-    return recommendations.map(r => r.employee_name).join(', ');
-  }, [recommendations]);
-
   if (loading) {
     return (
-      <Box 
-        className={className} 
-        sx={{ 
-          mb: 3, 
-          width,
-          maxWidth,
-          mx: 'auto',
-        }}
-      >
+      <Box className={className} sx={{ mb: 3, width, maxWidth, mx: 'auto' }}>
         <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
       </Box>
     );
   }
 
-  if (recommendations.length === 0) {
+  // Don't show if no infractions and no recommendations
+  if (weeklyInfractions.length === 0 && recommendations.length === 0) {
     return null;
   }
 
   return (
-    <Box 
-      className={className} 
-      sx={{ 
-        mb: 3,
-        width,
-        maxWidth,
-        mx: 'auto',
-      }}
-    >
-      {/* Header */}
-      <Typography
-        sx={{
-          fontFamily,
-          fontSize: 18,
-          fontWeight: 600,
-          color: '#111827',
-          mb: 2,
-        }}
-      >
-        Recommended Disciplinary Actions ({recommendations.length})
-      </Typography>
-
-      {/* Collapsible Grey Container */}
-      <Box
-        sx={{
-          backgroundColor: "#f9fafb",
-          border: "1px solid #e5e7eb",
-          borderRadius: "12px",
-          overflow: "hidden",
-        }}
-      >
-        {/* Collapsed View - Shows comma-separated names */}
-        <Box 
-          sx={{ 
-            padding: "16px",
-            maxHeight: expanded ? '1000px' : '60px',
-            opacity: expanded ? 0 : 1,
-            transition: 'max-height 0.3s ease-in-out, opacity 0.2s ease-in-out',
-            overflow: 'hidden',
-            display: expanded ? 'none' : 'block',
-          }}
-        >
-          <Typography
-            sx={{
-              fontFamily,
-              fontSize: 14,
-              color: '#6b7280',
-            }}
-          >
-            {employeeNames}
-          </Typography>
-        </Box>
-
-        {/* Expanded View - Shows all cards */}
-        <Box 
-          sx={{ 
-            padding: expanded ? "16px" : "0",
-            maxHeight: expanded ? '2000px' : '0',
-            opacity: expanded ? 1 : 0,
-            transition: 'max-height 0.3s ease-in-out, opacity 0.2s ease-in-out, padding 0.3s ease-in-out',
-            overflow: 'hidden',
-            display: "flex", 
-            flexDirection: "column", 
-            gap: 2,
-          }}
-        >
-          {recommendations.map((rec) => (
-              <Box
-                key={rec.employee_id}
-                sx={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e9eaeb",
-                  borderRadius: "8px",
-                  padding: "12px 16px",
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 2,
-                }}
-              >
-                {/* Employee Name and Role */}
-                <Box sx={{ minWidth: 180 }}>
-                  <Typography
-                    sx={{
-                      fontFamily,
-                      fontSize: 14,
-                      fontWeight: 600,
-                      color: '#111827',
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {rec.employee_name}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontFamily,
-                      fontSize: 12,
-                      color: '#6b7280',
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {rec.employee_role}
-                  </Typography>
-                </Box>
-
-                {/* Points Badge */}
-                <PointsBadge points={rec.current_points} disciplineActions={disciplineActions} />
-
-                {/* Recommended Action Card */}
-                <Box
-                  sx={{
-                    flex: 1,
-                    backgroundColor: "#ffffff",
-                    border: "1px solid #e9eaeb",
-                    borderRadius: "8px",
-                    padding: "8px 12px",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontFamily,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: '#111827',
-                    }}
-                  >
-                    {rec.recommended_action}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontFamily,
-                      fontSize: 11,
-                      color: '#6b7280',
-                    }}
-                  >
-                    Threshold: {rec.points_threshold} pts (exceeded by {rec.threshold_exceeded_by})
-                  </Typography>
-                </Box>
-
-                {/* Dismiss Button */}
-                <Button
-                  onClick={() => handleDismiss(rec)}
-                  variant="outlined"
-                  sx={{
-                    fontFamily,
-                    fontSize: 13,
-                    textTransform: "none",
-                    color: "#6b7280",
-                    borderColor: "#d1d5db",
-                    padding: "6px 16px",
-                    minWidth: 100,
-                    flexShrink: 0,
-                    "&:hover": {
-                      backgroundColor: "#f3f4f6",
-                      borderColor: "#9ca3af",
-                    },
-                  }}
-                >
-                  Dismiss
-                </Button>
-
-                {/* Record Action Button */}
-                <Button
-                  onClick={() => handleRecordAction(rec)}
-                  variant="contained"
-                  sx={{
-                    fontFamily,
-                    fontSize: 13,
-                    textTransform: "none",
-                    backgroundColor: levelsetGreen,
-                    padding: "6px 16px",
-                    minWidth: 120,
-                    flexShrink: 0,
-                    "&:hover": {
-                      backgroundColor: "#264d38",
-                    },
-                  }}
-                >
-                  Record Action
-                </Button>
-              </Box>
-            ))}
-        </Box>
-
-        {/* Toggle Button at Bottom */}
-        <Box
-          onClick={() => setExpanded(!expanded)}
+    <Box className={className} sx={{ mb: 3, width, maxWidth, mx: 'auto' }}>
+      {/* Infractions This Week Accordion */}
+      {weeklyInfractions.length > 0 && (
+        <Accordion
+          disableGutters
+          elevation={0}
           sx={{
-            borderTop: "1px solid #e5e7eb",
-            padding: "12px 16px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 1,
-            cursor: "pointer",
-            "&:hover": {
-              backgroundColor: "#f3f4f6",
+            '&:before': { display: 'none' },
+            '&.MuiAccordion-root': {
+              backgroundColor: 'transparent',
+              boxShadow: 'none',
             },
           }}
         >
-          <Typography
+          <AccordionSummary
+            expandIcon={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500 }}>
+                  {expandedPanel === 'infractions' ? 'Collapse' : 'Expand'}
+                </Typography>
+                <ExpandMoreIcon sx={{ color: levelsetGreen }} />
+              </Box>
+            }
+            onClick={() => setExpandedPanel(expandedPanel === 'infractions' ? false : 'infractions')}
             sx={{
-              fontFamily,
-              fontSize: 13,
-              fontWeight: 500,
-              color: levelsetGreen,
+              padding: 0,
+              minHeight: 48,
+              '&.Mui-expanded': {
+                minHeight: 48,
+              },
+              '& .MuiAccordionSummary-content': {
+                margin: '12px 0',
+              },
             }}
           >
-            {expanded ? "Show Less" : "Show All"}
-          </Typography>
-          {expanded ? (
-            <ExpandLessIcon sx={{ fontSize: 18, color: levelsetGreen }} />
-          ) : (
-            <ExpandMoreIcon sx={{ fontSize: 18, color: levelsetGreen }} />
-          )}
-        </Box>
-      </Box>
+            <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
+              Infractions This Week ({weeklyInfractions.length})
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0, mt: 2 }}>
+            <Box
+              sx={{
+                backgroundColor: "#f9fafb",
+                border: "1px solid #e5e7eb",
+                borderRadius: "12px",
+                padding: "16px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
+              {weeklyInfractions.map((infraction) => (
+                <InfractionCard key={infraction.id} infraction={infraction} />
+              ))}
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+      )}
+
+      {/* Required Disciplinary Actions Accordion */}
+      {recommendations.length > 0 && (
+        <Accordion
+          disableGutters
+          elevation={0}
+          sx={{
+            '&:before': { display: 'none' },
+            '&.MuiAccordion-root': {
+              backgroundColor: 'transparent',
+              boxShadow: 'none',
+              mt: weeklyInfractions.length > 0 ? 2 : 0,
+            },
+          }}
+        >
+          <AccordionSummary
+            expandIcon={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500 }}>
+                  {expandedPanel === 'actions' ? 'Collapse' : 'Expand'}
+                </Typography>
+                <ExpandMoreIcon sx={{ color: levelsetGreen }} />
+              </Box>
+            }
+            onClick={() => setExpandedPanel(expandedPanel === 'actions' ? false : 'actions')}
+            sx={{
+              padding: 0,
+              minHeight: 48,
+              '&.Mui-expanded': {
+                minHeight: 48,
+              },
+              '& .MuiAccordionSummary-content': {
+                margin: '12px 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+              },
+            }}
+          >
+            <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
+              Required Disciplinary Actions ({recommendations.length})
+            </Typography>
+            <Chip
+              label="Action Required"
+              size="small"
+              sx={{
+                backgroundColor: '#dc2626',
+                color: '#ffffff',
+                fontFamily,
+                fontSize: 11,
+                fontWeight: 600,
+                height: 24,
+              }}
+            />
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0, mt: 2 }}>
+            <Box
+              sx={{
+                backgroundColor: "#f9fafb",
+                border: "1px solid #e5e7eb",
+                borderRadius: "12px",
+                padding: "16px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
+              {recommendations.map((rec) => (
+                <Box
+                  key={rec.employee_id}
+                  sx={{
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #e9eaeb",
+                    borderRadius: "8px",
+                    padding: "12px 16px",
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
+                  {/* Employee Name and Role */}
+                  <Box sx={{ minWidth: 180 }}>
+                    <Typography
+                      sx={{
+                        fontFamily,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: '#111827',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {rec.employee_name}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontFamily,
+                        fontSize: 12,
+                        color: '#6b7280',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {rec.employee_role}
+                    </Typography>
+                  </Box>
+
+                  {/* Points Badge */}
+                  <PointsBadge points={rec.current_points} disciplineActions={disciplineActions} />
+
+                  {/* Recommended Action */}
+                  <Box
+                    sx={{
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #e9eaeb",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontFamily,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: '#111827',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {rec.recommended_action}
+                    </Typography>
+                  </Box>
+
+                  {/* Spacer to push buttons right */}
+                  <Box sx={{ flex: 1 }} />
+
+                  {/* Dismiss Button */}
+                  <Button
+                    onClick={() => handleDismiss(rec)}
+                    variant="outlined"
+                    sx={{
+                      fontFamily,
+                      fontSize: 13,
+                      textTransform: "none",
+                      color: "#6b7280",
+                      borderColor: "#d1d5db",
+                      padding: "6px 16px",
+                      minWidth: 100,
+                      flexShrink: 0,
+                      "&:hover": {
+                        backgroundColor: "#f3f4f6",
+                        borderColor: "#9ca3af",
+                      },
+                    }}
+                  >
+                    Dismiss
+                  </Button>
+
+                  {/* Record Action Button */}
+                  <Button
+                    onClick={() => handleRecordAction(rec)}
+                    variant="contained"
+                    sx={{
+                      fontFamily,
+                      fontSize: 13,
+                      textTransform: "none",
+                      backgroundColor: levelsetGreen,
+                      padding: "6px 16px",
+                      minWidth: 120,
+                      flexShrink: 0,
+                      "&:hover": {
+                        backgroundColor: "#264d38",
+                      },
+                    }}
+                  >
+                    Record Action
+                  </Button>
+                </Box>
+              ))}
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+      )}
 
       {/* Record Action Modal */}
       {selectedRecommendation && (
@@ -553,15 +699,13 @@ export function RecommendedActions({
           recommendedAction={selectedRecommendation.recommended_action}
           recommendedActionId={selectedRecommendation.action_id}
           currentUser={currentUser}
-          currentUserId={currentUser?.id}
+          currentUserId={currentUserId}
           onClose={() => {
             setRecordModalOpen(false);
             setSelectedRecommendation(null);
           }}
           onSuccess={(employeeId) => {
-            // Refresh recommendations
-            fetchRecommendations();
-            // Open employee modal with the employee who had action recorded
+            fetchData();
             const emp = recommendations.find(r => r.employee_id === employeeId)?.employee;
             if (emp) {
               setSelectedEmployee(emp);
