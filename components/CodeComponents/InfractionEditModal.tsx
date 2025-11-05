@@ -13,6 +13,8 @@ import {
   FormControl,
   InputLabel,
   Button,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -127,13 +129,13 @@ export function InfractionEditModal({
 }: InfractionEditModalProps) {
   const [infractionDate, setInfractionDate] = React.useState<Date | null>(null);
   const [leaderId, setLeaderId] = React.useState("");
-  const [acknowledgement, setAcknowledgement] = React.useState("");
+  const [notified, setNotified] = React.useState(true); // Boolean for toggle
   const [infractionType, setInfractionType] = React.useState("");
   const [points, setPoints] = React.useState(0);
   const [notes, setNotes] = React.useState("");
   const [locationName, setLocationName] = React.useState("");
   const [leaders, setLeaders] = React.useState<Employee[]>([]);
-  const [infractionRubricOptions, setInfractionRubricOptions] = React.useState<any[]>([]);
+  const [discActionsRubricOptions, setDiscActionsRubricOptions] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
   const supabase = createSupabaseClient();
 
@@ -146,7 +148,7 @@ export function InfractionEditModal({
     // Set form values from infraction
     setInfractionDate(infraction.infraction_date ? new Date(infraction.infraction_date) : null);
     setLeaderId(infraction.leader_id || "");
-    setAcknowledgement(infraction.acknowledgement || "");
+    setNotified(infraction.ack_bool !== false); // Default to true if undefined
     setInfractionType(infraction.infraction || infraction.description || "");
     setPoints(infraction.points || 0);
     setNotes(infraction.notes || "");
@@ -188,35 +190,35 @@ export function InfractionEditModal({
       }
     };
 
-    // Fetch infraction rubric options
-    const fetchInfractionRubric = async () => {
+    // Fetch disc_actions_rubric options for infraction dropdown
+    const fetchDiscActionsRubric = async () => {
       try {
         const { data, error } = await supabase
-          .from('infractions_rubric')
+          .from('disc_actions_rubric')
           .select('*')
           .eq('org_id', orgId)
           .eq('location_id', locationId)
-          .order('infraction');
+          .order('action');
         
         if (!error && data) {
-          setInfractionRubricOptions(data);
+          setDiscActionsRubricOptions(data);
         }
       } catch (err) {
-        console.error('Error fetching infraction rubric:', err);
+        console.error('Error fetching disc_actions_rubric:', err);
       }
     };
 
     fetchLocationName();
     fetchLeaders();
-    fetchInfractionRubric();
+    fetchDiscActionsRubric();
   }, [open, infraction, orgId, locationId, supabase]);
 
   // Handle infraction type change - update points automatically
   const handleInfractionTypeChange = (value: string) => {
     setInfractionType(value);
-    const rubricItem = infractionRubricOptions.find(item => item.infraction === value);
+    const rubricItem = discActionsRubricOptions.find(item => item.action === value);
     if (rubricItem) {
-      setPoints(rubricItem.points || 0);
+      setPoints(rubricItem.points_threshold || 0);
     }
   };
 
@@ -229,7 +231,8 @@ export function InfractionEditModal({
       const updatedInfraction: Partial<Infraction> = {
         infraction_date: infractionDate ? infractionDate.toISOString().split('T')[0] : infraction.infraction_date,
         leader_id: leaderId || infraction.leader_id,
-        acknowledgement: acknowledgement || infraction.acknowledgement,
+        acknowledgement: notified ? 'Notified' : 'Not notified',
+        ack_bool: notified,
         infraction: infractionType || infraction.infraction,
         points: points,
         notes: notes || infraction.notes,
@@ -395,51 +398,58 @@ export function InfractionEditModal({
             </Select>
           </FormControl>
 
-          {/* Acknowledgement */}
-          <FormControl fullWidth size="small">
-            <InputLabel
-              shrink
+          {/* Acknowledgement - Toggle Button */}
+          <Box>
+            <Typography
               sx={{
                 fontFamily,
                 fontSize: 12,
                 color: '#6b7280',
-                '&.Mui-focused': {
-                  color: levelsetGreen,
-                },
+                mb: 0.5,
               }}
             >
               Acknowledgement
-            </InputLabel>
-            <Select
-              value={acknowledgement}
-              onChange={(e) => setAcknowledgement(e.target.value)}
-              label="Acknowledgement"
-              notched
+            </Typography>
+            <ToggleButtonGroup
+              value={notified ? 'notified' : 'not-notified'}
+              exclusive
+              onChange={(e, newValue) => {
+                if (newValue !== null) {
+                  setNotified(newValue === 'notified');
+                }
+              }}
+              fullWidth
               sx={{
-                fontFamily,
-                fontSize: 14,
-                '& .MuiOutlinedInput-input': {
+                '& .MuiToggleButton-root': {
+                  fontFamily,
+                  fontSize: 14,
+                  textTransform: 'none',
                   padding: '10px 14px',
-                },
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#e5e7eb',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#d1d5db',
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: levelsetGreen,
-                  borderWidth: '2px',
+                  border: '1px solid #e5e7eb',
+                  color: '#6b7280',
+                  '&.Mui-selected': {
+                    backgroundColor: levelsetGreen,
+                    color: '#ffffff',
+                    fontWeight: 500,
+                    '&:hover': {
+                      backgroundColor: '#254d36',
+                    },
+                  },
+                  '&:not(.Mui-selected)': {
+                    backgroundColor: '#f3f4f6',
+                    '&:hover': {
+                      backgroundColor: '#e5e7eb',
+                    },
+                  },
                 },
               }}
             >
-              <MenuItem value="Notified" sx={{ fontFamily, fontSize: 14 }}>Notified</MenuItem>
-              <MenuItem value="Acknowledged" sx={{ fontFamily, fontSize: 14 }}>Acknowledged</MenuItem>
-              <MenuItem value="Refused" sx={{ fontFamily, fontSize: 14 }}>Refused</MenuItem>
-            </Select>
-          </FormControl>
+              <ToggleButton value="notified">Notified</ToggleButton>
+              <ToggleButton value="not-notified">Not notified</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
 
-          {/* Infraction - Dropdown from infractions_rubric */}
+          {/* Infraction - Dropdown from disc_actions_rubric */}
           <FormControl fullWidth size="small">
             <InputLabel
               shrink
@@ -477,9 +487,9 @@ export function InfractionEditModal({
                 },
               }}
             >
-              {infractionRubricOptions.map((item) => (
-                <MenuItem key={item.id} value={item.infraction} sx={{ fontFamily, fontSize: 14 }}>
-                  {item.infraction}
+              {discActionsRubricOptions.map((item) => (
+                <MenuItem key={item.id} value={item.action} sx={{ fontFamily, fontSize: 14 }}>
+                  {item.action}
                 </MenuItem>
               ))}
             </Select>
@@ -494,15 +504,44 @@ export function InfractionEditModal({
           />
 
           {/* Notes */}
-          <CustomTextField
+          <TextField
             label="Notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             multiline
             rows={3}
             placeholder="Add any additional notes..."
+            fullWidth
             InputLabelProps={{
               shrink: true,
+            }}
+            sx={{
+              '& .MuiInputLabel-root': {
+                fontFamily,
+                fontSize: 12,
+                color: '#6b7280',
+                '&.Mui-focused': {
+                  color: levelsetGreen,
+                },
+              },
+              '& .MuiInputBase-root': {
+                fontFamily,
+                fontSize: 14,
+              },
+              '& .MuiInputBase-input': {
+                fontFamily,
+                fontSize: 14,
+              },
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#e5e7eb',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#d1d5db',
+              },
+              '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: levelsetGreen,
+                borderWidth: '2px',
+              },
             }}
           />
 

@@ -38,6 +38,7 @@ export interface Infraction {
   leader_id?: string; // ID of documenting leader
   leader_name?: string; // Name of leader who documented (populated from view/JOIN)
   acknowledgement?: string; // Status: "Notified", "Notified not present", etc.
+  ack_bool?: boolean; // Boolean version: true if notified, false if not notified
   notes?: string;
   created_at?: string;
 }

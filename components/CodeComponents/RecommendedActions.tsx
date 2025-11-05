@@ -122,22 +122,18 @@ function InfractionCard({ infraction }: { infraction: Infraction }) {
             </>
           )}
 
-          {infraction.acknowledgement && (
-            <>
-              <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
-              <Typography
-                sx={{
-                  fontFamily: "Satoshi",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  color: "#535862",
-                  lineHeight: "20px",
-                }}
-              >
-                {infraction.acknowledgement}
-              </Typography>
-            </>
-          )}
+          <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
+          <Typography
+            sx={{
+              fontFamily: "Satoshi",
+              fontSize: "14px",
+              fontWeight: 500,
+              color: "#535862",
+              lineHeight: "20px",
+            }}
+          >
+            {infraction.ack_bool ? 'Notified' : 'Not notified'}
+          </Typography>
         </Box>
       </Box>
 
