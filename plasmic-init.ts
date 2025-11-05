@@ -1349,6 +1349,10 @@ PLASMIC.registerComponent(RecordActionModal, {
       type: "object",
       description: "Current user object (acting leader)"
     },
+    currentUserId: {
+      type: "string",
+      description: "Alternative: just the current user ID (will fetch employee data)"
+    },
     onClose: {
       type: "eventHandler",
       argTypes: [],

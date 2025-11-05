@@ -524,6 +524,7 @@ export function RecommendedActions({
           recommendedAction={selectedRecommendation.recommended_action}
           recommendedActionId={selectedRecommendation.action_id}
           currentUser={currentUser}
+          currentUserId={currentUser?.id}
           onClose={() => {
             setRecordModalOpen(false);
             setSelectedRecommendation(null);

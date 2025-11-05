@@ -23,6 +23,7 @@ export interface RecordActionModalProps {
   recommendedAction: string;
   recommendedActionId: string;
   currentUser: Employee | null;
+  currentUserId?: string; // Alternative: just the auth user ID
   onClose: () => void;
   onSuccess?: (employeeId: string) => void;
   orgId: string;
@@ -43,7 +44,7 @@ const CustomTextField = React.forwardRef((props: any, ref: any) => (
     sx={{
       '& .MuiInputLabel-root': {
         fontFamily,
-        fontSize: 11,
+        fontSize: 12,
         color: '#6b7280',
         '&.Mui-focused': {
           color: levelsetGreen,
@@ -51,12 +52,23 @@ const CustomTextField = React.forwardRef((props: any, ref: any) => (
       },
       '& .MuiInputBase-root': {
         fontFamily,
-        fontSize: 12,
+        fontSize: 14,
       },
       '& .MuiInputBase-input': {
         fontFamily,
-        fontSize: 12,
-        padding: '8.5px 14px',
+        fontSize: 14,
+        padding: '10px 14px',
+      },
+      '& .MuiInputBase-input.Mui-disabled': {
+        color: '#9ca3af',
+        WebkitTextFillColor: '#9ca3af',
+        backgroundColor: '#f9fafb',
+      },
+      '& .MuiOutlinedInput-root.Mui-disabled': {
+        backgroundColor: '#f9fafb',
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: '#e5e7eb',
+        },
       },
       '& .MuiOutlinedInput-notchedOutline': {
         borderColor: '#e5e7eb',
@@ -73,12 +85,50 @@ const CustomTextField = React.forwardRef((props: any, ref: any) => (
   />
 ));
 
+// Custom DatePicker TextField - with date picker styling matching PositionalRatings
+const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
+  <TextField
+    {...props}
+    ref={ref}
+    size="small"
+    sx={{
+      '& .MuiInputBase-input': {
+        fontFamily,
+        fontSize: 14,
+        padding: '10px 14px',
+      },
+      '& .MuiInputLabel-root': {
+        fontFamily,
+        fontSize: 12,
+      },
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#e5e7eb',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#d1d5db',
+      },
+      '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: levelsetGreen,
+        borderWidth: '2px',
+      },
+      '& .MuiIconButton-root': {
+        padding: '6px',
+        '& .MuiSvgIcon-root': {
+          fontSize: '1rem',
+        },
+      },
+      ...props.sx,
+    }}
+  />
+));
+
 export function RecordActionModal({
   open,
   employee,
   recommendedAction,
   recommendedActionId,
   currentUser,
+  currentUserId,
   onClose,
   onSuccess,
   orgId,
@@ -88,31 +138,50 @@ export function RecordActionModal({
   const [actionDate, setActionDate] = React.useState<Date | null>(new Date());
   const [notes, setNotes] = React.useState("");
   const [locationName, setLocationName] = React.useState("");
+  const [actingLeader, setActingLeader] = React.useState<Employee | null>(null);
   const [saving, setSaving] = React.useState(false);
   const supabase = createSupabaseClient();
 
-  // Load location name
+  // Load location name and acting leader
   React.useEffect(() => {
-    if (!open || !locationId) return;
+    if (!open) return;
 
-    const fetchLocationName = async () => {
+    const fetchData = async () => {
       try {
-        const { data, error } = await supabase
-          .from('locations')
-          .select('name')
-          .eq('id', locationId)
-          .single();
-        
-        if (!error && data) {
-          setLocationName(data.name);
+        // Fetch location name
+        if (locationId) {
+          const { data: locData, error: locError } = await supabase
+            .from('locations')
+            .select('name')
+            .eq('id', locationId)
+            .single();
+          
+          if (!locError && locData) {
+            setLocationName(locData.name);
+          }
+        }
+
+        // Fetch acting leader if we only have user ID
+        if (!currentUser && currentUserId) {
+          const { data: userData, error: userError } = await supabase
+            .from('employees')
+            .select('*')
+            .eq('id', currentUserId)
+            .single();
+          
+          if (!userError && userData) {
+            setActingLeader(userData as Employee);
+          }
+        } else if (currentUser) {
+          setActingLeader(currentUser);
         }
       } catch (err) {
-        console.error('Error fetching location:', err);
+        console.error('Error fetching data:', err);
       }
     };
 
-    fetchLocationName();
-  }, [open, locationId, supabase]);
+    fetchData();
+  }, [open, locationId, currentUser, currentUserId, supabase]);
 
   // Reset form when modal opens
   React.useEffect(() => {
@@ -123,7 +192,11 @@ export function RecordActionModal({
   }, [open]);
 
   const handleSubmit = async () => {
-    if (!employee || !currentUser || !actionDate) return;
+    const leader = actingLeader || currentUser;
+    if (!employee || !leader || !actionDate) {
+      alert('Missing required information. Please ensure you are logged in.');
+      return;
+    }
 
     try {
       setSaving(true);
@@ -138,7 +211,7 @@ export function RecordActionModal({
           action: recommendedAction,
           action_id: recommendedActionId,
           action_date: actionDate.toISOString().split('T')[0],
-          acting_leader: currentUser.id,
+          acting_leader: leader.id,
           notes: notes || null,
         })
         .select()
@@ -152,7 +225,7 @@ export function RecordActionModal({
         .update({
           action_taken: 'action_recorded',
           action_taken_at: new Date().toISOString(),
-          action_taken_by: currentUser.id,
+          action_taken_by: leader.id,
           disc_action_id: actionData?.id,
         })
         .eq('employee_id', employee.id)
@@ -186,10 +259,10 @@ export function RecordActionModal({
       <Dialog
         open={open}
         onClose={onClose}
-        maxWidth="sm"
-        fullWidth
+        maxWidth={false}
         PaperProps={{
           sx: {
+            width: "500px",
             borderRadius: "16px",
             fontFamily,
           },
@@ -207,16 +280,30 @@ export function RecordActionModal({
             backgroundColor: "#ffffff",
           }}
         >
-          <Typography
-            sx={{
-              fontFamily,
-              fontSize: "20px",
-              fontWeight: 600,
-              color: "#181d27",
-            }}
-          >
-            Record an action for {employee.full_name}
-          </Typography>
+          <Box>
+            <Typography
+              component="span"
+              sx={{
+                fontFamily,
+                fontSize: "20px",
+                fontWeight: 600,
+                color: "#181d27",
+              }}
+            >
+              Record an action for{" "}
+            </Typography>
+            <Typography
+              component="span"
+              sx={{
+                fontFamily,
+                fontSize: "20px",
+                fontWeight: 600,
+                color: levelsetGreen,
+              }}
+            >
+              {employee.full_name}
+            </Typography>
+          </Box>
           <IconButton
             onClick={onClose}
             sx={{
@@ -237,12 +324,6 @@ export function RecordActionModal({
             label="Location"
             value={locationName}
             disabled
-            sx={{
-              '& .MuiInputBase-input.Mui-disabled': {
-                color: '#6b7280',
-                WebkitTextFillColor: '#6b7280',
-              },
-            }}
           />
 
           {/* Action Date */}
@@ -253,12 +334,69 @@ export function RecordActionModal({
             format="M/d/yyyy"
             enableAccessibleFieldDOMStructure={false}
             slots={{
-              textField: CustomTextField,
+              textField: CustomDateTextField,
             }}
             slotProps={{
               textField: {
                 fullWidth: true,
-                size: "small",
+              },
+              popper: {
+                sx: {
+                  '& .MuiPaper-root': {
+                    fontFamily,
+                  },
+                  '& .MuiTypography-root': {
+                    fontFamily,
+                    fontSize: 11,
+                  },
+                  '& .MuiPickersDay-root': {
+                    fontFamily,
+                    fontSize: 11,
+                    '&.Mui-selected': {
+                      backgroundColor: `${levelsetGreen} !important`,
+                      color: '#fff !important',
+                      '&:hover': {
+                        backgroundColor: `${levelsetGreen} !important`,
+                      },
+                      '&:focus': {
+                        backgroundColor: `${levelsetGreen} !important`,
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                    },
+                    '&:focus': {
+                      backgroundColor: 'rgba(49, 102, 74, 0.12)',
+                    },
+                  },
+                  '& .MuiPickersCalendarHeader-label': {
+                    fontFamily,
+                    fontSize: 12,
+                  },
+                  '& .MuiDayCalendar-weekDayLabel': {
+                    fontFamily,
+                    fontSize: 10,
+                  },
+                  '& .MuiButtonBase-root': {
+                    fontFamily,
+                    fontSize: 11,
+                    color: levelsetGreen,
+                  },
+                  '& .MuiIconButton-root': {
+                    color: `${levelsetGreen} !important`,
+                    '&:hover': {
+                      backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                    },
+                  },
+                  '& .MuiPickersYear-yearButton': {
+                    fontFamily,
+                    fontSize: 12,
+                    '&.Mui-selected': {
+                      backgroundColor: `${levelsetGreen} !important`,
+                      color: '#fff !important',
+                    },
+                  },
+                },
               },
             }}
           />
@@ -266,14 +404,8 @@ export function RecordActionModal({
           {/* Acting Leader (disabled) */}
           <CustomTextField
             label="Acting Leader"
-            value={currentUser?.full_name || ""}
+            value={actingLeader?.full_name || "Loading..."}
             disabled
-            sx={{
-              '& .MuiInputBase-input.Mui-disabled': {
-                color: '#6b7280',
-                WebkitTextFillColor: '#6b7280',
-              },
-            }}
           />
 
           {/* Recommended Action (disabled) */}
@@ -281,12 +413,6 @@ export function RecordActionModal({
             label="Action"
             value={recommendedAction}
             disabled
-            sx={{
-              '& .MuiInputBase-input.Mui-disabled': {
-                color: '#6b7280',
-                WebkitTextFillColor: '#6b7280',
-              },
-            }}
           />
 
           {/* Notes */}
@@ -297,11 +423,6 @@ export function RecordActionModal({
             multiline
             rows={3}
             placeholder="Add any additional notes..."
-            sx={{
-              '& .MuiInputBase-input': {
-                padding: '8.5px 14px',
-              },
-            }}
           />
 
           {/* Action Buttons */}
