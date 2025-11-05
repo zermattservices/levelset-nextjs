@@ -175,7 +175,9 @@
   min-width: 0;
   padding: 8px;
 }
-.recommendedActions:global(.__wab_instance) {
+.recommendedActionsDeprecatedUseDisciplineNotifications:global(
+  .__wab_instance
+) {
   max-width: 100%;
   object-fit: cover;
 }

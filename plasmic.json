@@ -1048,6 +1048,30 @@
           "name": "RecommendedActions",
           "displayName": "RecommendedActions",
           "componentImportPath": "./components/CodeComponents/RecommendedActions"
+        },
+        {
+          "id": "p5JIJndPb_tu",
+          "name": "DisciplineNotifications",
+          "displayName": "DisciplineNotifications",
+          "componentImportPath": "./components/CodeComponents/RecommendedActions"
+        },
+        {
+          "id": "nH3wzl05daEu",
+          "name": "AddInfractionModal",
+          "displayName": "AddInfractionModal",
+          "componentImportPath": "./components/CodeComponents/AddInfractionModal"
+        },
+        {
+          "id": "OOSNuN0W_-2F",
+          "name": "AddActionModal",
+          "displayName": "AddActionModal",
+          "componentImportPath": "./components/CodeComponents/AddActionModal"
+        },
+        {
+          "id": "hGbtHsvKcvZS",
+          "name": "EditActionModal",
+          "displayName": "EditActionModal",
+          "componentImportPath": "./components/CodeComponents/EditActionModal"
         }
       ],
       "splitsProviderFilePath": "",

@@ -97,7 +97,9 @@ export type PlasmicDiscipline__OverridesType = {
   menuNavigation?: Flex__<typeof MenuNavigation>;
   centeredLoadingSpinner?: Flex__<typeof CenteredLoadingSpinner>;
   redirectIf?: Flex__<typeof RedirectIf>;
-  recommendedActions?: Flex__<typeof RecommendedActions>;
+  recommendedActionsDeprecatedUseDisciplineNotifications?: Flex__<
+    typeof RecommendedActions
+  >;
   verticalStack?: Flex__<"div">;
   disciplineTable?: Flex__<typeof DisciplineTable>;
   verticalStack2?: Flex__<"div">;
@@ -491,11 +493,15 @@ function PlasmicDiscipline__RenderFunc(props: {
             <div className={classNames(projectcss.all, sty.freeBox__lKzxl)}>
               <div className={classNames(projectcss.all, sty.freeBox__s72NY)}>
                 <RecommendedActions
-                  data-plasmic-name={"recommendedActions"}
-                  data-plasmic-override={overrides.recommendedActions}
+                  data-plasmic-name={
+                    "recommendedActionsDeprecatedUseDisciplineNotifications"
+                  }
+                  data-plasmic-override={
+                    overrides.recommendedActionsDeprecatedUseDisciplineNotifications
+                  }
                   className={classNames(
                     "__wab_instance",
-                    sty.recommendedActions
+                    sty.recommendedActionsDeprecatedUseDisciplineNotifications
                   )}
                   currentUser={(() => {
                     try {
@@ -538,6 +544,19 @@ function PlasmicDiscipline__RenderFunc(props: {
                         "__wab_instance",
                         sty.disciplineTable
                       )}
+                      currentUserId={(() => {
+                        try {
+                          return $ctx.auth.id;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return undefined;
+                          }
+                          throw e;
+                        }
+                      })()}
                       density={"comfortable"}
                       locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
                       orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
@@ -587,7 +606,7 @@ const PlasmicDescendants = {
     "menuNavigation",
     "centeredLoadingSpinner",
     "redirectIf",
-    "recommendedActions",
+    "recommendedActionsDeprecatedUseDisciplineNotifications",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
@@ -597,7 +616,7 @@ const PlasmicDescendants = {
   centeredLoadingSpinner: [
     "centeredLoadingSpinner",
     "redirectIf",
-    "recommendedActions",
+    "recommendedActionsDeprecatedUseDisciplineNotifications",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
@@ -605,13 +624,15 @@ const PlasmicDescendants = {
   ],
   redirectIf: [
     "redirectIf",
-    "recommendedActions",
+    "recommendedActionsDeprecatedUseDisciplineNotifications",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
     "disciplineActionsTable"
   ],
-  recommendedActions: ["recommendedActions"],
+  recommendedActionsDeprecatedUseDisciplineNotifications: [
+    "recommendedActionsDeprecatedUseDisciplineNotifications"
+  ],
   verticalStack: ["verticalStack", "disciplineTable"],
   disciplineTable: ["disciplineTable"],
   verticalStack2: ["verticalStack2", "disciplineActionsTable"],
@@ -625,7 +646,7 @@ type NodeDefaultElementType = {
   menuNavigation: typeof MenuNavigation;
   centeredLoadingSpinner: typeof CenteredLoadingSpinner;
   redirectIf: typeof RedirectIf;
-  recommendedActions: typeof RecommendedActions;
+  recommendedActionsDeprecatedUseDisciplineNotifications: typeof RecommendedActions;
   verticalStack: "div";
   disciplineTable: typeof DisciplineTable;
   verticalStack2: "div";
@@ -697,7 +718,9 @@ export const PlasmicDiscipline = Object.assign(
     menuNavigation: makeNodeComponent("menuNavigation"),
     centeredLoadingSpinner: makeNodeComponent("centeredLoadingSpinner"),
     redirectIf: makeNodeComponent("redirectIf"),
-    recommendedActions: makeNodeComponent("recommendedActions"),
+    recommendedActionsDeprecatedUseDisciplineNotifications: makeNodeComponent(
+      "recommendedActionsDeprecatedUseDisciplineNotifications"
+    ),
     verticalStack: makeNodeComponent("verticalStack"),
     disciplineTable: makeNodeComponent("disciplineTable"),
     verticalStack2: makeNodeComponent("verticalStack2"),
