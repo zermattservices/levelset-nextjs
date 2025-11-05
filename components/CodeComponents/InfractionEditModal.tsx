@@ -34,7 +34,7 @@ export interface InfractionEditModalProps {
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
 
-// Custom TextField matching PositionalRatings
+// Custom TextField matching RecordActionModal
 const CustomTextField = React.forwardRef((props: any, ref: any) => (
   <TextField
     {...props}
@@ -44,7 +44,7 @@ const CustomTextField = React.forwardRef((props: any, ref: any) => (
     sx={{
       '& .MuiInputLabel-root': {
         fontFamily,
-        fontSize: 11,
+        fontSize: 12,
         color: '#6b7280',
         '&.Mui-focused': {
           color: levelsetGreen,
@@ -52,12 +52,54 @@ const CustomTextField = React.forwardRef((props: any, ref: any) => (
       },
       '& .MuiInputBase-root': {
         fontFamily,
-        fontSize: 12,
+        fontSize: 14,
       },
       '& .MuiInputBase-input': {
         fontFamily,
+        fontSize: 14,
+        padding: '10px 14px',
+      },
+      '& .MuiInputBase-input.Mui-disabled': {
+        color: '#9ca3af',
+        WebkitTextFillColor: '#9ca3af',
+        backgroundColor: '#f9fafb',
+      },
+      '& .MuiOutlinedInput-root.Mui-disabled': {
+        backgroundColor: '#f9fafb',
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: '#e5e7eb',
+        },
+      },
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#e5e7eb',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#d1d5db',
+      },
+      '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: levelsetGreen,
+        borderWidth: '2px',
+      },
+      ...props.sx,
+    }}
+  />
+));
+
+// Custom DatePicker TextField
+const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
+  <TextField
+    {...props}
+    ref={ref}
+    size="small"
+    sx={{
+      '& .MuiInputBase-input': {
+        fontFamily,
+        fontSize: 14,
+        padding: '10px 14px',
+      },
+      '& .MuiInputLabel-root': {
+        fontFamily,
         fontSize: 12,
-        padding: '8.5px 14px',
       },
       '& .MuiOutlinedInput-notchedOutline': {
         borderColor: '#e5e7eb',
@@ -91,6 +133,7 @@ export function InfractionEditModal({
   const [notes, setNotes] = React.useState("");
   const [locationName, setLocationName] = React.useState("");
   const [leaders, setLeaders] = React.useState<Employee[]>([]);
+  const [infractionRubricOptions, setInfractionRubricOptions] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
   const supabase = createSupabaseClient();
 
@@ -145,9 +188,37 @@ export function InfractionEditModal({
       }
     };
 
+    // Fetch infraction rubric options
+    const fetchInfractionRubric = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('infractions_rubric')
+          .select('*')
+          .eq('org_id', orgId)
+          .eq('location_id', locationId)
+          .order('infraction');
+        
+        if (!error && data) {
+          setInfractionRubricOptions(data);
+        }
+      } catch (err) {
+        console.error('Error fetching infraction rubric:', err);
+      }
+    };
+
     fetchLocationName();
     fetchLeaders();
+    fetchInfractionRubric();
   }, [open, infraction, orgId, locationId, supabase]);
+
+  // Handle infraction type change - update points automatically
+  const handleInfractionTypeChange = (value: string) => {
+    setInfractionType(value);
+    const rubricItem = infractionRubricOptions.find(item => item.infraction === value);
+    if (rubricItem) {
+      setPoints(rubricItem.points || 0);
+    }
+  };
 
   const handleSave = async () => {
     if (!infraction) return;
@@ -243,12 +314,6 @@ export function InfractionEditModal({
             label="Location"
             value={locationName}
             disabled
-            sx={{
-              '& .MuiInputBase-input.Mui-disabled': {
-                color: '#6b7280',
-                WebkitTextFillColor: '#6b7280',
-              },
-            }}
           />
 
           {/* Infraction Date */}
@@ -259,12 +324,27 @@ export function InfractionEditModal({
             format="M/d/yyyy"
             enableAccessibleFieldDOMStructure={false}
             slots={{
-              textField: CustomTextField,
+              textField: CustomDateTextField,
             }}
             slotProps={{
               textField: {
                 fullWidth: true,
                 size: "small",
+              },
+              popper: {
+                sx: {
+                  '& .MuiPaper-root': {
+                    fontFamily,
+                  },
+                  '& .MuiPickersDay-root': {
+                    fontFamily,
+                    fontSize: 11,
+                    '&.Mui-selected': {
+                      backgroundColor: `${levelsetGreen} !important`,
+                      color: '#fff !important',
+                    },
+                  },
+                },
               },
             }}
           />
@@ -272,9 +352,10 @@ export function InfractionEditModal({
           {/* Documenting Leader */}
           <FormControl fullWidth size="small">
             <InputLabel
+              shrink
               sx={{
                 fontFamily,
-                fontSize: 11,
+                fontSize: 12,
                 color: '#6b7280',
                 '&.Mui-focused': {
                   color: levelsetGreen,
@@ -287,9 +368,13 @@ export function InfractionEditModal({
               value={leaderId}
               onChange={(e) => setLeaderId(e.target.value)}
               label="Documenting Leader"
+              notched
               sx={{
                 fontFamily,
-                fontSize: 12,
+                fontSize: 14,
+                '& .MuiOutlinedInput-input': {
+                  padding: '10px 14px',
+                },
                 '& .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#e5e7eb',
                 },
@@ -303,7 +388,7 @@ export function InfractionEditModal({
               }}
             >
               {leaders.map((leader) => (
-                <MenuItem key={leader.id} value={leader.id} sx={{ fontFamily, fontSize: 12 }}>
+                <MenuItem key={leader.id} value={leader.id} sx={{ fontFamily, fontSize: 14 }}>
                   {leader.full_name}
                 </MenuItem>
               ))}
@@ -313,9 +398,10 @@ export function InfractionEditModal({
           {/* Acknowledgement */}
           <FormControl fullWidth size="small">
             <InputLabel
+              shrink
               sx={{
                 fontFamily,
-                fontSize: 11,
+                fontSize: 12,
                 color: '#6b7280',
                 '&.Mui-focused': {
                   color: levelsetGreen,
@@ -328,9 +414,13 @@ export function InfractionEditModal({
               value={acknowledgement}
               onChange={(e) => setAcknowledgement(e.target.value)}
               label="Acknowledgement"
+              notched
               sx={{
                 fontFamily,
-                fontSize: 12,
+                fontSize: 14,
+                '& .MuiOutlinedInput-input': {
+                  padding: '10px 14px',
+                },
                 '& .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#e5e7eb',
                 },
@@ -343,18 +433,57 @@ export function InfractionEditModal({
                 },
               }}
             >
-              <MenuItem value="Notified" sx={{ fontFamily, fontSize: 12 }}>Notified</MenuItem>
-              <MenuItem value="Notified not present" sx={{ fontFamily, fontSize: 12 }}>Notified not present</MenuItem>
-              <MenuItem value="Not notified" sx={{ fontFamily, fontSize: 12 }}>Not notified</MenuItem>
+              <MenuItem value="Notified" sx={{ fontFamily, fontSize: 14 }}>Notified</MenuItem>
+              <MenuItem value="Acknowledged" sx={{ fontFamily, fontSize: 14 }}>Acknowledged</MenuItem>
+              <MenuItem value="Refused" sx={{ fontFamily, fontSize: 14 }}>Refused</MenuItem>
             </Select>
           </FormControl>
 
-          {/* Infraction Type */}
-          <CustomTextField
-            label="Infraction"
-            value={infractionType}
-            onChange={(e) => setInfractionType(e.target.value)}
-          />
+          {/* Infraction - Dropdown from infractions_rubric */}
+          <FormControl fullWidth size="small">
+            <InputLabel
+              shrink
+              sx={{
+                fontFamily,
+                fontSize: 12,
+                color: '#6b7280',
+                '&.Mui-focused': {
+                  color: levelsetGreen,
+                },
+              }}
+            >
+              Infraction
+            </InputLabel>
+            <Select
+              value={infractionType}
+              onChange={(e) => handleInfractionTypeChange(e.target.value)}
+              label="Infraction"
+              notched
+              sx={{
+                fontFamily,
+                fontSize: 14,
+                '& .MuiOutlinedInput-input': {
+                  padding: '10px 14px',
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#e5e7eb',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#d1d5db',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: levelsetGreen,
+                  borderWidth: '2px',
+                },
+              }}
+            >
+              {infractionRubricOptions.map((item) => (
+                <MenuItem key={item.id} value={item.infraction} sx={{ fontFamily, fontSize: 14 }}>
+                  {item.infraction}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           {/* Points */}
           <CustomTextField
@@ -370,11 +499,10 @@ export function InfractionEditModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             multiline
-            rows={4}
-            sx={{
-              '& .MuiInputBase-input': {
-                padding: '8.5px 14px',
-              },
+            rows={3}
+            placeholder="Add any additional notes..."
+            InputLabelProps={{
+              shrink: true,
             }}
           />
 
@@ -382,15 +510,11 @@ export function InfractionEditModal({
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 1 }}>
             <Button
               onClick={onClose}
-              disabled={saving}
               sx={{
                 fontFamily,
                 fontSize: 13,
                 textTransform: "none",
                 color: "#6b7280",
-                "&:hover": {
-                  backgroundColor: "#f3f4f6",
-                },
               }}
             >
               Cancel
@@ -405,7 +529,7 @@ export function InfractionEditModal({
                 textTransform: "none",
                 backgroundColor: levelsetGreen,
                 "&:hover": {
-                  backgroundColor: "#264d38",
+                  backgroundColor: "#254d36",
                 },
               }}
             >
@@ -417,4 +541,3 @@ export function InfractionEditModal({
     </LocalizationProvider>
   );
 }
-

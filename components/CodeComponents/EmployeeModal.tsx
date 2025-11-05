@@ -46,20 +46,20 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
         display: "flex",
         flexDirection: "row",
         alignItems: "flex-start",
-        justifyContent: "flex-start",
+        justifyContent: "space-between",
         gap: "12px",
         padding: "12px 16px",
         borderRadius: "12px",
         border: "1px solid #e9eaeb",
         backgroundColor: "#ffffff",
-        width: "100%",
+        minWidth: 0,
         cursor: onClick ? "pointer" : "default",
         "&:hover": onClick ? {
           backgroundColor: "#f9fafb",
         } : undefined,
       }}
     >
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px", minWidth: 0 }}>
         <Typography
           sx={{
             fontFamily: "Satoshi",
@@ -72,7 +72,7 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
           {infraction.infraction || infraction.description || "Infraction"}
         </Typography>
 
-        <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px" }}>
+        <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <CalendarIcon sx={{ fontSize: "1em", color: "#535862" }} />
             <Typography
@@ -145,7 +145,7 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          alignSelf: "stretch",
+          flexShrink: 0,
         }}
       >
         <Typography
@@ -188,16 +188,16 @@ function DisciplinaryActionListItem({ action }: DisciplinaryActionListItemProps)
         display: "flex",
         flexDirection: "row",
         alignItems: "flex-start",
-        justifyContent: "flex-start",
+        justifyContent: "space-between",
         gap: "12px",
         padding: "12px 16px",
         borderRadius: "12px",
         border: "1px solid #e9eaeb",
         backgroundColor: "#ffffff",
-        width: "100%",
+        minWidth: 0,
       }}
     >
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px", minWidth: 0 }}>
         <Typography
           sx={{
             fontFamily: "Satoshi",

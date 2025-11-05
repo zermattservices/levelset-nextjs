@@ -37,7 +37,7 @@ export type RecommendedActionsProps = DisciplineNotificationsProps;
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
 
-// Infraction Card Component - matching EmployeeModal
+// Infraction Card Component - for Infractions This Week section
 function InfractionCard({ infraction }: { infraction: Infraction }) {
   const isPositive = (infraction.points || 0) < 0;
   const pointColor = isPositive ? "#178459" : "#d23230";
@@ -48,16 +48,32 @@ function InfractionCard({ infraction }: { infraction: Infraction }) {
         display: "flex",
         flexDirection: "row",
         alignItems: "flex-start",
-        justifyContent: "flex-start",
+        justifyContent: "space-between",
         gap: "12px",
         padding: "12px 16px",
         borderRadius: "12px",
         border: "1px solid #e9eaeb",
         backgroundColor: "#ffffff",
-        width: "100%",
+        minWidth: 0,
       }}
     >
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px", minWidth: 0 }}>
+        {/* Employee Name - Bold on top row for Infractions This Week */}
+        {infraction.employee_name && (
+          <Typography
+            sx={{
+              fontFamily: "Satoshi",
+              fontSize: "14px",
+              fontWeight: 700,
+              color: "#111827",
+              lineHeight: "20px",
+            }}
+          >
+            {infraction.employee_name}
+          </Typography>
+        )}
+        
+        {/* Infraction Name */}
         <Typography
           sx={{
             fontFamily: "Satoshi",
@@ -70,7 +86,7 @@ function InfractionCard({ infraction }: { infraction: Infraction }) {
           {infraction.infraction || infraction.description || "Infraction"}
         </Typography>
 
-        <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px" }}>
+        <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <CalendarIcon sx={{ fontSize: "1em", color: "#535862" }} />
             <Typography
@@ -86,10 +102,9 @@ function InfractionCard({ infraction }: { infraction: Infraction }) {
             </Typography>
           </Box>
 
-          <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
-
           {infraction.leader_name && (
             <>
+              <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
               <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
                 <PersonIcon sx={{ fontSize: "1em", color: "#535862" }} />
                 <Typography
@@ -104,22 +119,24 @@ function InfractionCard({ infraction }: { infraction: Infraction }) {
                   {infraction.leader_name}
                 </Typography>
               </Box>
-              <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
             </>
           )}
 
           {infraction.acknowledgement && (
-            <Typography
-              sx={{
-                fontFamily: "Satoshi",
-                fontSize: "14px",
-                fontWeight: 500,
-                color: "#535862",
-                lineHeight: "20px",
-              }}
-            >
-              {infraction.acknowledgement}
-            </Typography>
+            <>
+              <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
+              <Typography
+                sx={{
+                  fontFamily: "Satoshi",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "#535862",
+                  lineHeight: "20px",
+                }}
+              >
+                {infraction.acknowledgement}
+              </Typography>
+            </>
           )}
         </Box>
       </Box>
@@ -130,7 +147,7 @@ function InfractionCard({ infraction }: { infraction: Infraction }) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          alignSelf: "stretch",
+          flexShrink: 0,
         }}
       >
         <Typography
@@ -233,7 +250,8 @@ export function DisciplineNotifications({
   const [weeklyInfractions, setWeeklyInfractions] = React.useState<Infraction[]>([]);
   const [disciplineActions, setDisciplineActions] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [expandedPanel, setExpandedPanel] = React.useState<string | false>(false);
+  const [infractionsExpanded, setInfractionsExpanded] = React.useState(false);
+  const [actionsExpanded, setActionsExpanded] = React.useState(false);
   const [recordModalOpen, setRecordModalOpen] = React.useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = React.useState<RecommendedAction | null>(null);
   const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
@@ -470,8 +488,8 @@ export function DisciplineNotifications({
       {/* Infractions This Week Accordion */}
       {(
         <Accordion
-          expanded={expandedPanel === 'infractions'}
-          onChange={() => setExpandedPanel(expandedPanel === 'infractions' ? false : 'infractions')}
+          expanded={infractionsExpanded}
+          onChange={() => setInfractionsExpanded(!infractionsExpanded)}
           disableGutters
           elevation={0}
           sx={{
@@ -507,7 +525,7 @@ export function DisciplineNotifications({
               Infractions This Week ({weeklyInfractions.length})
             </Typography>
             <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500, ml: 'auto', mr: 1 }}>
-              {expandedPanel === 'infractions' ? 'Collapse' : 'Expand'}
+              {infractionsExpanded ? 'Collapse' : 'Expand'}
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
@@ -539,8 +557,8 @@ export function DisciplineNotifications({
       {/* Required Disciplinary Actions Accordion */}
       {recommendations.length > 0 && (
         <Accordion
-          expanded={expandedPanel === 'actions'}
-          onChange={() => setExpandedPanel(expandedPanel === 'actions' ? false : 'actions')}
+          expanded={actionsExpanded}
+          onChange={() => setActionsExpanded(!actionsExpanded)}
           disableGutters
           elevation={0}
           sx={{
@@ -548,7 +566,7 @@ export function DisciplineNotifications({
             '&.MuiAccordion-root': {
               backgroundColor: 'transparent',
               boxShadow: 'none',
-              mt: weeklyInfractions.length > 0 ? 2 : 0,
+              mt: 2,
             },
           }}
         >
@@ -589,7 +607,7 @@ export function DisciplineNotifications({
               }}
             />
             <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500, ml: 'auto', mr: 1 }}>
-              {expandedPanel === 'actions' ? 'Collapse' : 'Expand'}
+              {actionsExpanded ? 'Collapse' : 'Expand'}
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>

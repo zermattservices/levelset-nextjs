@@ -216,9 +216,55 @@ export function RecordActionModal({
             setLoadingLeader(false);
           }
         } else if (currentUser) {
-          console.log('[RecordActionModal] Using currentUser:', currentUser);
-          setActingLeader(currentUser);
-          setLoadingLeader(false);
+          // Check if currentUser is actually an Employee object or just a string ID
+          if (typeof currentUser === 'string') {
+            // It's just an auth UUID string, treat it as currentUserId
+            console.log('[RecordActionModal] currentUser is a string (auth UUID), fetching from app_users:', currentUser);
+            setLoadingLeader(true);
+            try {
+              const { data: appUserData, error: appUserError } = await supabase
+                .from('app_users')
+                .select('*')
+                .eq('auth_user_id', currentUser)
+                .maybeSingle();
+              
+              console.log('[RecordActionModal] Fetched app_user data:', appUserData);
+              
+              if (!appUserError && appUserData) {
+                const fullName = `${appUserData.first_name || ''} ${appUserData.last_name || ''}`.trim();
+                const employeeLike: Employee = {
+                  id: appUserData.id,
+                  full_name: fullName || appUserData.email || 'Unknown User',
+                  role: appUserData.role || 'User',
+                  org_id: appUserData.org_id,
+                  location_id: appUserData.location_id || locationId,
+                  active: true,
+                };
+                setActingLeader(employeeLike);
+              } else {
+                console.warn('[RecordActionModal] No app_user found for auth UUID:', currentUser);
+                setActingLeader({
+                  id: '',
+                  full_name: 'Not available',
+                  role: '',
+                } as Employee);
+              }
+            } catch (err) {
+              console.error('[RecordActionModal] Error fetching app_user:', err);
+              setActingLeader({
+                id: '',
+                full_name: 'Not available',
+                role: '',
+              } as Employee);
+            } finally {
+              setLoadingLeader(false);
+            }
+          } else {
+            // It's an Employee object
+            console.log('[RecordActionModal] Using currentUser Employee object:', currentUser);
+            setActingLeader(currentUser);
+            setLoadingLeader(false);
+          }
         } else {
           console.log('[RecordActionModal] No currentUser or currentUserId provided');
           setActingLeader(null);
