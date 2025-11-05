@@ -28,28 +28,33 @@ export interface Employee {
 export interface Infraction {
   id: string;
   employee_id: string;
+  employee_name?: string; // Populated from view/JOIN
   points: number;
   infraction_date: string;
   org_id: string;
   location_id: string;
   description?: string;
   infraction?: string; // The type/description of infraction
-  leader_name?: string; // Name of leader who documented (from JOIN)
-  acknowledgement?: string; // Status: "Notified", "Notified not present", etc.
   leader_id?: string; // ID of documenting leader
+  leader_name?: string; // Name of leader who documented (populated from view/JOIN)
+  acknowledgement?: string; // Status: "Notified", "Notified not present", etc.
+  notes?: string;
+  created_at?: string;
 }
 
 export interface DisciplinaryAction {
   id: string;
   employee_id: string;
+  employee_name?: string; // Populated from view/JOIN
   action: string; // The action taken (e.g., "Documented Warning")
   action_date: string;
   action_id?: string; // Reference to disc_actions_rubric
-  leader_id?: string; // Who took the action
-  leader_name?: string; // Name of leader who took action (from JOIN)
+  acting_leader?: string; // ID of leader who took the action (actual field name in DB)
+  leader_name?: string; // Name of leader who took action (populated from view/JOIN)
   org_id: string;
   location_id: string;
   notes?: string;
+  created_at?: string;
 }
 
 export interface Rating {

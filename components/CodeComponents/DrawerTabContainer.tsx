@@ -119,53 +119,52 @@ export function DrawerTabContainer({
     try {
       setLoading(true);
 
-      // Fetch infractions with leader info (using JOIN)
-      const { data: infractionsData, error: infractionsError } = await supabase
-        .from('infractions')
-        .select(`
-          *,
-          leader:employees!infractions_leader_id_fkey(full_name)
-        `)
-        .eq('employee_id', employee.id)
-        .eq('org_id', orgId)
-        .eq('location_id', locationId)
-        .gte('infraction_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
-        .order('infraction_date', { ascending: false });
+      // Fetch infractions for this employee (last 90 days)
+      // The table already includes employee_name and leader_name (from view or computed columns)
+      try {
+        const { data: infractionsData, error: infractionsError } = await supabase
+          .from('infractions')
+          .select('*')
+          .eq('employee_id', employee.id)
+          .eq('org_id', orgId)
+          .eq('location_id', locationId)
+          .gte('infraction_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+          .order('infraction_date', { ascending: false });
 
-      if (!infractionsError && infractionsData) {
-        const transformedInfractions: Infraction[] = infractionsData.map((inf: any) => ({
-          ...inf,
-          leader_name: inf.leader?.full_name || 'Unknown',
-        }));
-        setInfractions(transformedInfractions);
-      } else {
-        console.error('Error fetching infractions:', infractionsError);
+        if (!infractionsError && infractionsData) {
+          setInfractions(infractionsData as Infraction[]);
+          console.log('Loaded infractions:', infractionsData.length);
+        } else {
+          console.error('Error fetching infractions:', infractionsError);
+          setInfractions([]);
+        }
+      } catch (err) {
+        console.error('Error fetching infractions:', err);
         setInfractions([]);
       }
 
-      // Fetch disciplinary actions with leader info (using JOIN)
-      const { data: actionsData, error: actionsError } = await supabase
-        .from('disc_actions')
-        .select(`
-          *,
-          leader:employees!disc_actions_leader_id_fkey(full_name),
-          action_details:disc_actions_rubric!disc_actions_action_id_fkey(action)
-        `)
-        .eq('employee_id', employee.id)
-        .eq('org_id', orgId)
-        .eq('location_id', locationId)
-        .gte('action_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
-        .order('action_date', { ascending: false });
+      // Fetch disciplinary actions for this employee (last 90 days)
+      // The table already includes employee_name and leader_name (from view or computed columns)
+      // Note: leader field is called 'acting_leader' in the database
+      try {
+        const { data: actionsData, error: actionsError } = await supabase
+          .from('disc_actions')
+          .select('*')
+          .eq('employee_id', employee.id)
+          .eq('org_id', orgId)
+          .eq('location_id', locationId)
+          .gte('action_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+          .order('action_date', { ascending: false });
 
-      if (!actionsError && actionsData) {
-        const transformedActions: DisciplinaryAction[] = actionsData.map((act: any) => ({
-          ...act,
-          leader_name: act.leader?.full_name || 'Unknown',
-          action: act.action_details?.action || act.action || 'Unknown Action',
-        }));
-        setDisciplinaryActions(transformedActions);
-      } else {
-        console.error('Error fetching disciplinary actions:', actionsError);
+        if (!actionsError && actionsData) {
+          setDisciplinaryActions(actionsData as DisciplinaryAction[]);
+          console.log('Loaded disciplinary actions:', actionsData.length);
+        } else {
+          console.error('Error fetching disciplinary actions:', actionsError);
+          setDisciplinaryActions([]);
+        }
+      } catch (err) {
+        console.error('Error fetching disciplinary actions:', err);
         setDisciplinaryActions([]);
       }
     } catch (err) {
