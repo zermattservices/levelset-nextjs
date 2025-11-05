@@ -22,6 +22,8 @@ import { InfractionEditModal } from "./InfractionEditModal";
 import { AddInfractionModal } from "./AddInfractionModal";
 import { AddActionModal } from "./AddActionModal";
 import { EditActionModal } from "./EditActionModal";
+import { RecordActionModal } from "./RecordActionModal";
+import { DismissConfirmationModal } from "./DismissConfirmationModal";
 
 export interface EmployeeModalProps {
   open: boolean;
@@ -273,6 +275,7 @@ export function EmployeeModal({
   const [currentTab, setCurrentTab] = React.useState(initialTab);
   const [infractions, setInfractions] = React.useState<Infraction[]>([]);
   const [disciplinaryActions, setDisciplinaryActions] = React.useState<DisciplinaryAction[]>([]);
+  const [recommendedActions, setRecommendedActions] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [infractionModalOpen, setInfractionModalOpen] = React.useState(false);
   const [selectedInfraction, setSelectedInfraction] = React.useState<Infraction | null>(null);
@@ -280,6 +283,10 @@ export function EmployeeModal({
   const [addActionModalOpen, setAddActionModalOpen] = React.useState(false);
   const [editActionModalOpen, setEditActionModalOpen] = React.useState(false);
   const [selectedAction, setSelectedAction] = React.useState<DisciplinaryAction | null>(null);
+  const [recordRecommendedActionOpen, setRecordRecommendedActionOpen] = React.useState(false);
+  const [selectedRecommendation, setSelectedRecommendation] = React.useState<any>(null);
+  const [dismissConfirmationOpen, setDismissConfirmationOpen] = React.useState(false);
+  const [recommendationToDismiss, setRecommendationToDismiss] = React.useState<any>(null);
   const supabase = createSupabaseClient();
 
   // Reset to discipline tab when modal opens
@@ -617,45 +624,147 @@ export function EmployeeModal({
                 </Button>
               )}
             </Box>
-            {disciplinaryActions.length === 0 ? (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  padding: "12px 16px",
-                  borderRadius: "12px",
-                  border: "1px solid #e9eaeb",
-                  backgroundColor: "#ffffff",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  minHeight: "60px",
-                }}
-              >
-                <Typography
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, overflow: "auto" }}>
+              {/* Recommended Actions - Yellow background cards at top */}
+              {recommendedActions.map((rec) => (
+                <Box
+                  key={rec.id}
                   sx={{
-                    fontFamily: "Satoshi",
-                    fontSize: "14px",
-                    color: "#535862",
-                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1.5,
+                    padding: "12px 16px",
+                    borderRadius: "12px",
+                    border: "1px solid #fbbf24",
+                    backgroundColor: "#fef3c7",
                   }}
                 >
-                  No disciplinary actions in the last 90 days
-                </Typography>
-              </Box>
-            ) : (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, overflow: "auto" }}>
-                {disciplinaryActions.map((action) => (
-                  <DisciplinaryActionListItem 
-                    key={action.id} 
-                    action={action}
-                    onClick={() => {
-                      setSelectedAction(action);
-                      setEditActionModalOpen(true);
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <CalendarIcon sx={{ fontSize: "1em", color: "#92400e" }} />
+                        <Typography
+                          sx={{
+                            fontFamily: "Satoshi",
+                            fontSize: "14px",
+                            fontWeight: 500,
+                            color: "#92400e",
+                            lineHeight: "20px",
+                          }}
+                        >
+                          {new Date(rec.created_at).toLocaleDateString()}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          backgroundColor: '#ffffff',
+                          borderRadius: '6px',
+                          padding: '4px 8px',
+                          border: '1px solid #e9eaeb',
+                          width: 'fit-content',
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontFamily: "Satoshi",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            color: "#414651",
+                          }}
+                        >
+                          {rec.recommended_action}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: "flex", gap: 1.5, justifyContent: "flex-end" }}>
+                    <Button
+                      onClick={() => {
+                        setRecommendationToDismiss(rec);
+                        setDismissConfirmationOpen(true);
+                      }}
+                      variant="outlined"
+                      sx={{
+                        fontFamily: "Satoshi",
+                        fontSize: 13,
+                        textTransform: "none",
+                        color: "#6b7280",
+                        borderColor: "#d1d5db",
+                        padding: "6px 16px",
+                        "&:hover": {
+                          backgroundColor: "#f3f4f6",
+                          borderColor: "#9ca3af",
+                        },
+                      }}
+                    >
+                      Dismiss
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setSelectedRecommendation(rec);
+                        setRecordRecommendedActionOpen(true);
+                      }}
+                      variant="contained"
+                      sx={{
+                        fontFamily: "Satoshi",
+                        fontSize: 13,
+                        textTransform: "none",
+                        backgroundColor: "#31664a",
+                        padding: "6px 16px",
+                        "&:hover": {
+                          backgroundColor: "#254d36",
+                        },
+                      }}
+                    >
+                      Record Action
+                    </Button>
+                  </Box>
+                </Box>
+              ))}
+
+              {/* Regular Disciplinary Actions */}
+              {disciplinaryActions.length === 0 && recommendedActions.length === 0 ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: "12px 16px",
+                    borderRadius: "12px",
+                    border: "1px solid #e9eaeb",
+                    backgroundColor: "#ffffff",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: "60px",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: "Satoshi",
+                      fontSize: "14px",
+                      color: "#535862",
+                      textAlign: "center",
                     }}
-                  />
-                ))}
-              </Box>
-            )}
+                  >
+                    No disciplinary actions in the last 90 days
+                  </Typography>
+                </Box>
+              ) : (
+                <>
+                  {disciplinaryActions.map((action) => (
+                    <DisciplinaryActionListItem 
+                      key={action.id} 
+                      action={action}
+                      onClick={() => {
+                        setSelectedAction(action);
+                        setEditActionModalOpen(true);
+                      }}
+                    />
+                  ))}
+                </>
+              )}
+            </Box>
           </Box>
         </Box>
       </Box>
@@ -868,6 +977,82 @@ export function EmployeeModal({
         }}
         orgId={orgId}
         locationId={locationId}
+      />
+
+      {/* Record Recommended Action Modal */}
+      {selectedRecommendation && (
+        <RecordActionModal
+          open={recordRecommendedActionOpen}
+          employee={employee}
+          recommendedAction={selectedRecommendation.recommended_action}
+          recommendedActionId={selectedRecommendation.recommended_action_id}
+          currentUser={null}
+          currentUserId={currentUserId}
+          onClose={() => {
+            setRecordRecommendedActionOpen(false);
+            setSelectedRecommendation(null);
+          }}
+          onSuccess={(employeeId) => {
+            // Mark recommendation as recorded
+            const updateRecommendation = async () => {
+              try {
+                await supabase
+                  .from('recommended_disc_actions')
+                  .update({
+                    action_taken: 'action_recorded',
+                    action_taken_at: new Date().toISOString(),
+                  })
+                  .eq('id', selectedRecommendation.id);
+                
+                // Remove from local state
+                setRecommendedActions(prev => prev.filter(r => r.id !== selectedRecommendation.id));
+                
+                // Refetch data to get the new action
+                fetchEmployeeData();
+              } catch (err) {
+                console.error('Error updating recommendation:', err);
+              }
+            };
+            updateRecommendation();
+            setRecordRecommendedActionOpen(false);
+            setSelectedRecommendation(null);
+          }}
+          orgId={orgId}
+          locationId={locationId}
+        />
+      )}
+
+      {/* Dismiss Confirmation Modal */}
+      <DismissConfirmationModal
+        open={dismissConfirmationOpen}
+        employeeName={employee?.full_name || "this employee"}
+        onConfirm={async () => {
+          if (!recommendationToDismiss) return;
+          
+          try {
+            await supabase
+              .from('recommended_disc_actions')
+              .update({
+                action_taken: 'dismissed',
+                action_taken_at: new Date().toISOString(),
+              })
+              .eq('id', recommendationToDismiss.id);
+            
+            // Remove from local state
+            setRecommendedActions(prev => prev.filter(r => r.id !== recommendationToDismiss.id));
+            setDismissConfirmationOpen(false);
+            setRecommendationToDismiss(null);
+          } catch (err) {
+            console.error('Error dismissing recommendation:', err);
+            alert('Failed to dismiss recommendation. Please try again.');
+            setDismissConfirmationOpen(false);
+            setRecommendationToDismiss(null);
+          }
+        }}
+        onCancel={() => {
+          setDismissConfirmationOpen(false);
+          setRecommendationToDismiss(null);
+        }}
       />
     </Dialog>
   );

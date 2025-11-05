@@ -239,7 +239,7 @@ export function InfractionEditModal({
           .select('*')
           .eq('org_id', orgId)
           .eq('location_id', locationId)
-          .order('action');
+          .order('points', { ascending: true }); // Order by points, lowest to highest
         
         if (!error && data) {
           setDiscActionsRubricOptions(data);
@@ -576,7 +576,7 @@ export function InfractionEditModal({
             >
               {discActionsRubricOptions.map((item) => (
                 <MenuItem key={item.id} value={item.action} sx={{ fontFamily, fontSize: 14 }}>
-                  {item.action}
+                  {item.points} - {item.action}
                 </MenuItem>
               ))}
             </Select>
