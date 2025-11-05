@@ -345,7 +345,7 @@ export function DrawerTabContainer({
   const renderDisciplineTab = () => {
     if (loading) {
       return (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: 2, backgroundColor: "#ffffff" }}>
           <Skeleton variant="text" width="60%" height={24} sx={{ mb: 2 }} />
           <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
             <Skeleton variant="rounded" width="50%" height={100} />
@@ -358,7 +358,7 @@ export function DrawerTabContainer({
     }
 
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 2, backgroundColor: "#ffffff" }}>
         {/* Current Period Summary */}
         <Box>
           <Typography
@@ -606,15 +606,25 @@ export function DrawerTabContainer({
   };
 
   return (
-    <Box className={className} sx={{ display: "flex", flexDirection: "column", height: "100%" }} data-plasmic-name="drawer-tab-container">
+    <Box 
+      className={className} 
+      sx={{ 
+        display: "flex", 
+        flexDirection: "column", 
+        height: "100%",
+        backgroundColor: "#ffffff",
+      }} 
+      data-plasmic-name="drawer-tab-container"
+    >
       {/* Tabs */}
-      <Box sx={{ borderBottom: "1px solid #e9eaeb" }}>
+      <Box sx={{ borderBottom: "1px solid #e9eaeb", backgroundColor: "#ffffff" }}>
         <Tabs
           value={currentTab}
           onChange={(_, newValue) => setCurrentTab(newValue)}
           sx={{
             px: 1,
             minHeight: 48,
+            backgroundColor: "#ffffff",
             "& .MuiTab-root": {
               textTransform: "none",
               fontSize: "14px",
@@ -640,7 +650,7 @@ export function DrawerTabContainer({
       </Box>
 
       {/* Tab Content */}
-      <Box sx={{ overflow: "auto", flex: 1 }}>
+      <Box sx={{ overflow: "auto", flex: 1, backgroundColor: "#ffffff" }}>
         {currentTab === "pathway" && renderPathwayTab()}
         {currentTab === "pe" && renderPETab()}
         {currentTab === "evaluations" && renderEvaluationsTab()}

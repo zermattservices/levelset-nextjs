@@ -136,6 +136,11 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
   // Render drawer content (only if not destroyOnClose or drawer is open)
   const shouldRenderContent = !destroyOnClose || open;
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('MuiDrawerV2 state:', { open, shouldRenderContent, hasChildren: !!children });
+  }, [open, shouldRenderContent, children]);
+
   return (
     <Drawer
       open={open}
@@ -148,6 +153,7 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
         "& .MuiDrawer-paper": {
           width: drawerWidth,
           height: drawerHeight,
+          backgroundColor: "#ffffff",
           ...contentWrapperStyle,
         },
       }}
@@ -156,7 +162,10 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
         hideBackdrop: !mask,
         slotProps: {
           backdrop: {
-            sx: maskStyle,
+            sx: {
+              backgroundColor: mask ? "rgba(0, 0, 0, 0.5)" : "transparent",
+              ...maskStyle,
+            },
             className: drawerMaskClassName,
           },
         },
@@ -169,6 +178,7 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
           display: "flex",
           flexDirection: "column",
           height: "100%",
+          backgroundColor: "#ffffff",
           ...style,
         }}
       >
@@ -181,20 +191,17 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
               alignItems: "center",
               justifyContent: "space-between",
               padding: "16px 24px",
-              borderBottom: "1px solid #f0f0f0",
+              borderBottom: "1px solid #e9eaeb",
+              backgroundColor: "#ffffff",
+              flexShrink: 0,
               ...headerStyle,
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
               {title && (
-                <Typography
-                  variant="h6"
-                  component="div"
-                  className={drawerTitleClassName}
-                  sx={{ fontSize: "16px", fontWeight: 600, lineHeight: "22px" }}
-                >
+                <Box className={drawerTitleClassName} sx={{ display: "flex", flexDirection: "column" }}>
                   {title}
-                </Typography>
+                </Box>
               )}
               {extra && <Box>{extra}</Box>}
             </Box>
@@ -216,14 +223,15 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
           </Box>
         )}
 
-        {/* Body */}
+        {/* Body - Remove default padding to let children control their own layout */}
         {shouldRenderContent && (
           <Box
             className={drawerBodyClassName}
             sx={{
               flex: 1,
-              padding: "24px",
               overflow: "auto",
+              backgroundColor: "#ffffff",
+              // Remove default padding - let children control their own padding
               ...bodyStyle,
             }}
           >
@@ -237,7 +245,9 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
             className={drawerFooterClassName}
             sx={{
               padding: "10px 16px",
-              borderTop: "1px solid #f0f0f0",
+              borderTop: "1px solid #e9eaeb",
+              backgroundColor: "#ffffff",
+              flexShrink: 0,
               ...footerStyle,
             }}
           >

@@ -371,7 +371,9 @@ export function DisciplineTable({
                   <td className={`centered ${cellClass || ""} ${actionsCellClass || ""}`}>
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={(event) => {
+                        console.log('DisciplineTable row clicked:', e);
+                        event.stopPropagation();
                         onRowClick?.(e);
                         onViewDetails?.(e.id);
                       }}
