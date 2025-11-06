@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { Employee, AvailabilityType } from "@/lib/supabase.types";
+import type { Employee, AvailabilityType, CertificationStatus } from "@/lib/supabase.types";
 import {
   Table,
   TableBody,
@@ -34,7 +34,7 @@ export interface RosterEntry {
   id: string;
   name: string;
   currentRole: Role;
-  certified: boolean;
+  certifiedStatus: CertificationStatus;
   availability: AvailabilityType;
   calculatedPay: number | null;
   foh: boolean;
@@ -63,7 +63,7 @@ export interface RosterTableProps {
   actionsCellClass?: string;
 
   // handlers
-  onCertifiedChange?: (id: string, checked: boolean) => void;
+  onCertifiedStatusChange?: (id: string, status: CertificationStatus) => void;
   onAvailabilityChange?: (id: string, availability: AvailabilityType) => void;
   onFohChange?: (id: string, checked: boolean) => void;
   onBohChange?: (id: string, checked: boolean) => void;
@@ -77,17 +77,17 @@ export interface RosterTableProps {
 
 // sample data (design preview)
 const sampleData: RosterEntry[] = [
-  { id: "1", name: "Alexandra Nolasco", currentRole: "New Hire", certified: false, availability: "Available", calculatedPay: 15, foh: true,  boh: false },
-  { id: "2", name: "Amanda Luna",       currentRole: "Team Lead", certified: true, availability: "Available", calculatedPay: 25, foh: true,  boh: false },
-  { id: "3", name: "Angeles Carbajal",  currentRole: "Team Lead", certified: true, availability: "Available", calculatedPay: 25, foh: false, boh: true  },
-  { id: "4", name: "Ashley Ramirez",    currentRole: "Team Lead", certified: true, availability: "Available", calculatedPay: 25, foh: true,  boh: false },
-  { id: "5", name: "Caidyn Spann",      currentRole: "Team Member", certified: false, availability: "Limited", calculatedPay: 14, foh: true, boh: false },
-  { id: "6", name: "Casey Howard",      currentRole: "Director",  certified: true, availability: "Available", calculatedPay: 30, foh: true,  boh: true  },
-  { id: "7", name: "Celia Barrera",     currentRole: "New Hire",  certified: false, availability: "Available", calculatedPay: 15, foh: true,  boh: false },
-  { id: "8", name: "Daniel Millan",     currentRole: "Team Member", certified: true, availability: "Available", calculatedPay: 18, foh: true, boh: false },
-  { id: "9", name: "Sarah Johnson",     currentRole: "Trainer",   certified: true, availability: "Available", calculatedPay: 20, foh: true,  boh: true  },
-  { id: "10", name: "Michael Chen",     currentRole: "Executive", certified: true, availability: "Available", calculatedPay: 36, foh: true,  boh: true  },
-  { id: "11", name: "Lisa Rodriguez",   currentRole: "Operator",  certified: true, availability: "Available", calculatedPay: null, foh: true,  boh: true  },
+  { id: "1", name: "Alexandra Nolasco", currentRole: "New Hire", certifiedStatus: "Not Certified", availability: "Available", calculatedPay: 15, foh: true,  boh: false },
+  { id: "2", name: "Amanda Luna",       currentRole: "Team Lead", certifiedStatus: "Certified", availability: "Available", calculatedPay: 25, foh: true,  boh: false },
+  { id: "3", name: "Angeles Carbajal",  currentRole: "Team Lead", certifiedStatus: "Certified", availability: "Available", calculatedPay: 25, foh: false, boh: true  },
+  { id: "4", name: "Ashley Ramirez",    currentRole: "Team Lead", certifiedStatus: "Certified", availability: "Available", calculatedPay: 25, foh: true,  boh: false },
+  { id: "5", name: "Caidyn Spann",      currentRole: "Team Member", certifiedStatus: "Pending", availability: "Limited", calculatedPay: 14, foh: true, boh: false },
+  { id: "6", name: "Casey Howard",      currentRole: "Director",  certifiedStatus: "PIP", availability: "Available", calculatedPay: 30, foh: true,  boh: true  },
+  { id: "7", name: "Celia Barrera",     currentRole: "New Hire",  certifiedStatus: "Not Certified", availability: "Available", calculatedPay: 15, foh: true,  boh: false },
+  { id: "8", name: "Daniel Millan",     currentRole: "Team Member", certifiedStatus: "Certified", availability: "Available", calculatedPay: 18, foh: true, boh: false },
+  { id: "9", name: "Sarah Johnson",     currentRole: "Trainer",   certifiedStatus: "Certified", availability: "Available", calculatedPay: 20, foh: true,  boh: true  },
+  { id: "10", name: "Michael Chen",     currentRole: "Executive", certifiedStatus: "Certified", availability: "Available", calculatedPay: 36, foh: true,  boh: true  },
+  { id: "11", name: "Lisa Rodriguez",   currentRole: "Operator",  certifiedStatus: "Certified", availability: "Available", calculatedPay: null, foh: true,  boh: true  },
 ];
 
 // role → chip colors (can still be overridden via roleBadgeClass)
@@ -259,6 +259,40 @@ const AvailabilityChip = styled(Box)(() => ({
   },
 }));
 
+const CertificationChip = styled(Box)(() => ({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 4,
+  padding: "4px 12px",
+  borderRadius: 12,
+  fontSize: 12,
+  fontWeight: 500,
+  fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+  cursor: "pointer",
+  transition: "all 0.15s ease-in-out",
+  "&:hover": {
+    opacity: 0.8,
+    transform: "translateY(-1px)",
+  },
+  "&.not-certified": {
+    backgroundColor: "transparent",
+    color: "#31664a",
+    border: "1px solid #31664a",
+  },
+  "&.pending": {
+    backgroundColor: "#fef3c7",
+    color: "#d97706",
+  },
+  "&.certified": {
+    backgroundColor: "#31664a",
+    color: "#ffffff",
+  },
+  "&.pip": {
+    backgroundColor: "#dc2626",
+    color: "#ffffff",
+  },
+}));
+
 export function RosterTable({
   orgId,
   locationId,
@@ -277,7 +311,7 @@ export function RosterTable({
   checkboxOffClass,
   actionsCellClass,
 
-  onCertifiedChange,
+  onCertifiedStatusChange,
   onAvailabilityChange,
   onFohChange,
   onBohChange,
@@ -297,6 +331,9 @@ export function RosterTable({
   
   // Availability dropdown state
   const [availabilityMenuAnchor, setAvailabilityMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
+  
+  // Certification status dropdown state
+  const [certificationMenuAnchor, setCertificationMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
 
   // Unchangeable roles
   const unchangeableRoles: Role[] = ["Operator", "Executive"];
@@ -323,7 +360,7 @@ export function RosterTable({
         id: emp.id,
         name: emp.full_name || `${emp.first_name} ${emp.last_name || ''}`.trim(),
         currentRole: emp.role as Role,
-        certified: emp.is_certified ?? false,
+        certifiedStatus: emp.certified_status || 'Not Certified',
         availability: emp.availability || 'Available',
         calculatedPay: emp.calculated_pay ?? null,
         foh: emp.is_foh ?? false,
@@ -395,55 +432,44 @@ export function RosterTable({
   }, [orgId, locationId]);
   */
 
-  // Handle Certified/FOH/BOH changes with API calls
-  const handleCertifiedChange = async (id: string, checked: boolean) => {
-    if (onCertifiedChange) {
-      onCertifiedChange(id, checked);
-    }
+  // Handle Certification status changes with API calls
+  const handleCertificationStatusChange = async (id: string, newStatus: CertificationStatus) => {
+    // Close menu
+    setCertificationMenuAnchor(prev => ({ ...prev, [id]: null }));
     
-    // Optimistic update - update UI immediately
-    const previousData = data.find(emp => emp.id === id);
+    // Optimistically update UI
     setData(prev => prev.map(emp => 
-      emp.id === id 
-        ? { ...emp, certified: checked }
-        : emp
+      emp.id === id ? { ...emp, certifiedStatus: newStatus } : emp
     ));
     
-    // Update via API in the background
+    // Call Supabase
     try {
-      const response = await fetch('/api/employees', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          intent: 'update',
-          id: id,
-          is_certified: checked
-        })
-      });
+      const { createSupabaseClient } = await import("@/util/supabase/component");
+      const supabase = createSupabaseClient();
+      const { error } = await supabase
+        .from('employees')
+        .update({ certified_status: newStatus })
+        .eq('id', id);
       
-      if (!response.ok) throw new Error('Failed to update employee');
-      
-      const result = await response.json();
-      
-      // Update with calculated_pay from API response
-      setData(prev => prev.map(emp => 
-        emp.id === id 
-          ? { ...emp, calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay }
-          : emp
-      ));
-    } catch (err) {
-      console.error('Error updating Certified status:', err);
-      // Revert on error
-      if (previousData) {
-        setData(prev => prev.map(emp => 
-          emp.id === id 
-            ? { ...emp, certified: previousData.certified }
-            : emp
-        ));
+      if (error) {
+        console.error('Failed to update certification status:', error);
+        // Revert on error
+        fetchEmployees();
+      } else if (onCertifiedStatusChange) {
+        onCertifiedStatusChange(id, newStatus);
       }
+    } catch (err) {
+      console.error('Failed to update certification status:', err);
+      fetchEmployees(); // Revert on error
     }
+  };
+
+  // Legacy handler for backwards compatibility (deprecated)
+  // Converts boolean to certification status
+  const handleCertifiedChange = async (id: string, checked: boolean) => {
+    // Convert boolean to certification status
+    const newStatus: CertificationStatus = checked ? 'Certified' : 'Not Certified';
+    await handleCertificationStatusChange(id, newStatus);
   };
 
   const handleFohChange = async (id: string, checked: boolean) => {
@@ -976,18 +1002,37 @@ export function RosterTable({
                 align="center"
                 sx={{ py: cellPadding }}
               >
-                <BrandCheckbox
-                  checked={e.certified}
-                  onChange={(_, checked) => handleCertifiedChange(e.id, checked)}
-                  className={
-                    checkboxOnClass || checkboxOffClass
-                      ? e.certified
-                        ? checkboxOnClass
-                        : checkboxOffClass
-                      : undefined
-                  }
-                  inputProps={{ "aria-label": `Certified status for ${e.name}` }}
-                />
+                <CertificationChip
+                  className={e.certifiedStatus.toLowerCase().replace(' ', '-')}
+                  onClick={(event) => {
+                    setCertificationMenuAnchor(prev => ({ ...prev, [e.id]: event.currentTarget }));
+                  }}
+                >
+                  {e.certifiedStatus}
+                  <ExpandMoreIcon sx={{ fontSize: 16, ml: 0.5 }} />
+                </CertificationChip>
+                <Menu
+                  anchorEl={certificationMenuAnchor[e.id]}
+                  open={Boolean(certificationMenuAnchor[e.id])}
+                  onClose={() => setCertificationMenuAnchor(prev => ({ ...prev, [e.id]: null }))}
+                  PaperProps={{
+                    sx: {
+                      mt: 0.5,
+                      boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                      borderRadius: 2,
+                    },
+                  }}
+                >
+                  {(['Not Certified', 'Pending', 'Certified', 'PIP'] as CertificationStatus[]).map((status) => (
+                    <RoleMenuItem
+                      key={status}
+                      selected={e.certifiedStatus === status}
+                      onClick={() => handleCertificationStatusChange(e.id, status)}
+                    >
+                      {status}
+                    </RoleMenuItem>
+                  ))}
+                </Menu>
               </TableCell>
               <TableCell
                 className={cellClass}

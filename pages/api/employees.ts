@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'POST') {
       // Update employee
-      const { intent, id, role, is_certified, is_foh, is_boh, availability } = req.body;
+      const { intent, id, role, is_certified, certified_status, is_foh, is_boh, availability } = req.body;
 
       if (intent !== 'update' || !id) {
         return res.status(400).json({ error: 'Invalid request parameters' });
@@ -71,8 +71,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         updateData.role = role;
         payFieldsChanged = true;
       }
-      if (is_certified !== undefined) {
-        updateData.is_certified = is_certified === 'true' || is_certified === true;
+      // Handle both old is_certified (boolean) and new certified_status (enum) for backwards compatibility
+      if (certified_status !== undefined) {
+        updateData.certified_status = certified_status;
+        payFieldsChanged = true;
+      } else if (is_certified !== undefined) {
+        // Legacy: convert boolean to certification status
+        updateData.certified_status = (is_certified === 'true' || is_certified === true) ? 'Certified' : 'Not Certified';
         payFieldsChanged = true;
       }
       if (is_foh !== undefined) {

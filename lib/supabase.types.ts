@@ -1,5 +1,6 @@
 // Supabase type definitions
 export type AvailabilityType = 'Limited' | 'Available';
+export type CertificationStatus = 'Not Certified' | 'Pending' | 'Certified' | 'PIP';
 
 export interface Employee {
   id: string;
@@ -15,7 +16,7 @@ export interface Employee {
   is_boh?: boolean;
   is_leader?: boolean;
   is_trainer?: boolean;
-  is_certified?: boolean;
+  certified_status?: CertificationStatus;
   availability?: AvailabilityType;
   calculated_pay?: number;
   position?: string;
@@ -108,5 +109,19 @@ export interface LeaderRatingAggregate {
   overall_avg: number | null;
   total_count_90d: number; // 90-day rolling count
   recent_ratings: Rating[]; // last 10 for expandable rows
+}
+
+export interface CertificationAudit {
+  id: string;
+  employee_id: string;
+  org_id: string;
+  location_id: string;
+  audit_date: string; // ISO date string
+  status_before: CertificationStatus | null;
+  status_after: CertificationStatus;
+  all_positions_qualified: boolean;
+  position_averages: Record<string, number>; // e.g., {"iPOS": 2.9, "Host": 2.85}
+  created_at: string;
+  notes?: string;
 }
 

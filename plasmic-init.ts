@@ -273,6 +273,22 @@ PLASMIC.registerComponent(RosterTable, {
       ],
       description: "Called when employee role is changed"
     },
+    onCertifiedStatusChange: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "status", type: "string" }
+      ],
+      description: "Called when certification status is changed"
+    },
+    onAvailabilityChange: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "availability", type: "string" }
+      ],
+      description: "Called when availability is changed"
+    },
     onEdit: {
       type: "eventHandler",
       argTypes: [{ name: "id", type: "string" }],
