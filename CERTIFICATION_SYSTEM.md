@@ -5,6 +5,7 @@
 The Certification Status System is an automated employee certification tracking system that evaluates employees based on their rolling-4 positional rating averages. The system automatically transitions employees through certification states based on monthly PEA Audit Day assessments.
 
 **Locations:** Only applies to Buda and West Buda locations.
+**Roles:** Only applies to employees with the "Team Member" role. Trainers and Leadership are excluded from certification tracking.
 
 ## Certification States
 
@@ -20,7 +21,7 @@ The Certification Status System is an automated employee certification tracking 
 - **Badge:** Yellow background (#fef3c7) with amber text (#d97706)
 - **Description:** Employee has met qualification requirements and is awaiting formal evaluation
 - **Criteria:**
-  - All position averages ≥ 2.85 for two consecutive PEA Audit Days (approximately 30 days)
+  - All position averages ≥ 2.75 for two consecutive PEA Audit Days (approximately 30 days)
   - Awaiting formal evaluation to move to Certified status
 - **Transition:** Manually changed to "Certified" after evaluation is completed
 
@@ -29,7 +30,7 @@ The Certification Status System is an automated employee certification tracking 
 - **Description:** Employee has passed evaluation and meets all certification requirements
 - **Criteria:**
   - Successfully completed evaluation while in Pending status
-  - Must maintain all position averages ≥ 2.85 to stay certified
+  - Must maintain all position averages ≥ 2.75 to stay certified
 - **Warning System:**
   - First month below threshold: Warning issued, stays Certified
   - Second consecutive month below threshold: Moved to PIP
@@ -38,20 +39,22 @@ The Certification Status System is an automated employee certification tracking 
 - **Badge:** Red background (#dc2626) with white text
 - **Description:** Employee has fallen below certification standards and is on a performance improvement plan
 - **Criteria:**
-  - Was Certified but had position averages below 2.85 for two consecutive months
+  - Was Certified but had position averages below 2.75 for two consecutive months
 - **Exit Conditions:**
-  - Improves all positions to ≥ 2.85 by next PEA Audit Day → Returns to Certified
+  - Improves all positions to ≥ 2.75 by next PEA Audit Day → Returns to Certified
   - Doesn't improve by next PEA Audit Day → Moves to Not Certified
 
 ## State Transition Flow
 
 ```
-Not Certified → (2 months at ≥2.85) → Pending → (manual evaluation) → Certified
+Not Certified → (2 months at ≥2.75) → Pending → (manual evaluation) → Certified
                                                                           ↓
-                                                                    (2 months < 2.85)
+                                                                    (2 months < 2.75)
                                                                           ↓
-Not Certified ← (1 month < 2.85) ← PIP ← (improve to ≥2.85) ← Certified
+Not Certified ← (1 month < 2.75) ← PIP ← (improve to ≥2.75) ← Certified
 ```
+
+**Note:** Only Team Members with the "Team Member" role are evaluated. Trainers and Leadership positions are excluded from the certification system.
 
 ## PEA Audit Day
 
@@ -149,10 +152,12 @@ npx tsx scripts/initial-certification-setup.ts
 ```
 
 This will:
-- Fetch all active employees in Buda/West Buda
-- Get their current position averages
-- Set `certified_status` to 'Certified' if all positions ≥ 2.85, otherwise 'Not Certified'
+- Fetch all active Team Member employees in Buda/West Buda
+- Calculate their rolling-4 position averages from the ratings table
+- Set `certified_status` to 'Certified' if all positions ≥ 2.75, otherwise 'Not Certified'
 - Create initial audit records
+
+**Important:** The rating_avg calculation was fixed in migration `20251106_fix_rating_avg_decimal.sql` to use decimal precision instead of rounding down. Make sure this migration is run before the initial setup.
 
 ### 4. Configure Vercel Cron Job
 
