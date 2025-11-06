@@ -114,6 +114,7 @@ export interface LeaderRatingAggregate {
 export interface CertificationAudit {
   id: string;
   employee_id: string;
+  employee_name?: string; // For easier audit review
   org_id: string;
   location_id: string;
   audit_date: string; // ISO date string

@@ -53,12 +53,14 @@ export async function evaluateCertifications(
     },
   });
   
-  // Fetch active employees for this location
+  // Fetch active Team Member employees for this location
+  // Certification only applies to Team Members, not Trainers or Leadership
   const { data: employees, error: employeesError } = await supabase
     .from('employees')
     .select('*')
     .eq('location_id', locationId)
-    .eq('active', true);
+    .eq('active', true)
+    .eq('role', 'Team Member');
   
   if (employeesError || !employees) {
     console.error('Error fetching employees:', employeesError);
@@ -255,6 +257,7 @@ async function saveEvaluationResult(
       .from('certification_audit')
       .insert({
         employee_id: result.employeeId,
+        employee_name: result.employeeName,
         org_id: employee.org_id,
         location_id: employee.location_id,
         audit_date: auditDate.toISOString().split('T')[0],

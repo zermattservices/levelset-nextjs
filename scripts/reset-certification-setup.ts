@@ -1,13 +1,10 @@
 /**
- * Initial setup script for certification status
+ * Reset certification setup
+ * - Clear all certification_audit records
+ * - Reset all Team Member employees to 'Not Certified'
+ * - Then re-run initial setup
  * 
- * This script:
- * 1. Fetches all active employees in Buda and West Buda locations
- * 2. Gets their current position averages from Google Sheets
- * 3. Sets certified_status to 'Certified' if all positions >= 2.85, otherwise 'Not Certified'
- * 4. Creates initial audit records
- * 
- * Run with: npx tsx scripts/initial-certification-setup.ts
+ * Run with: npx tsx scripts/reset-certification-setup.ts
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -15,6 +12,7 @@ import type { Employee } from '../lib/supabase.types';
 import { 
   allPositionsQualified,
   BUDA_LOCATION_IDS,
+  CERTIFICATION_THRESHOLD,
 } from '../lib/certification-utils';
 import { 
   fetchEmployeePositionAverages,
@@ -22,32 +20,56 @@ import {
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
-// Load environment variables from .env.local
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-async function runInitialSetup() {
+async function resetAndSetup() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   
   if (!supabaseUrl || !supabaseKey) {
-    console.error('❌ Missing Supabase credentials in environment variables');
-    console.error('   Make sure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set in .env.local');
+    console.error('❌ Missing Supabase credentials');
     process.exit(1);
   }
   
   const supabase = createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+    auth: { autoRefreshToken: false, persistSession: false }
   });
   
-  console.log('🚀 Starting initial certification setup...\n');
+  console.log('🔄 Resetting certification setup...\n');
+  
+  // Step 1: Delete all certification audit records
+  console.log('1️⃣  Deleting all certification_audit records...');
+  const { error: deleteAuditError } = await supabase
+    .from('certification_audit')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+  
+  if (deleteAuditError) {
+    console.error('   ❌ Error deleting audits:', deleteAuditError);
+  } else {
+    console.log('   ✅ All audit records deleted');
+  }
+  
+  // Step 2: Reset all Team Member employees to 'Not Certified'
+  console.log('\n2️⃣  Resetting all Team Member employees to Not Certified...');
+  const { error: resetError } = await supabase
+    .from('employees')
+    .update({ certified_status: 'Not Certified' })
+    .eq('role', 'Team Member')
+    .in('location_id', Object.values(BUDA_LOCATION_IDS));
+  
+  if (resetError) {
+    console.error('   ❌ Error resetting employees:', resetError);
+  } else {
+    console.log('   ✅ All Team Member employees reset');
+  }
+  
+  // Step 3: Run initial setup
+  console.log('\n3️⃣  Running initial certification setup...\n');
   
   const today = new Date();
   const auditDate = today.toISOString().split('T')[0];
   
-  // Process both Buda and West Buda locations
   const locationIds = Object.values(BUDA_LOCATION_IDS);
   let totalProcessed = 0;
   let totalCertified = 0;
@@ -56,7 +78,7 @@ async function runInitialSetup() {
   for (const locationId of locationIds) {
     console.log(`\n📍 Processing location: ${locationId}`);
     
-    // Fetch active Team Member employees (certification only applies to Team Members)
+    // Fetch active Team Member employees
     const { data: employees, error: employeesError } = await supabase
       .from('employees')
       .select('*')
@@ -69,13 +91,12 @@ async function runInitialSetup() {
       continue;
     }
     
-    console.log(`   Found ${employees.length} active employees`);
+    console.log(`   Found ${employees.length} active Team Member employees`);
     
     // Calculate position averages from ratings table
-    console.log(`   📊 Calculating position averages from ratings...`);
+    console.log(`   📊 Calculating position averages from ratings (threshold: ${CERTIFICATION_THRESHOLD})...`);
     const positionAveragesData = await fetchEmployeePositionAverages(employees as Employee[], supabase);
     
-    // Create a map for quick lookup
     const averagesMap = new Map();
     positionAveragesData.forEach(avg => {
       averagesMap.set(avg.employeeId, avg);
@@ -100,23 +121,20 @@ async function runInitialSetup() {
         continue;
       }
       
-      // Get org_id and location_id for audit record
-      const orgId = employee.org_id;
-      
       // Create initial audit record
       const { error: auditError } = await supabase
         .from('certification_audit')
         .insert({
           employee_id: employee.id,
           employee_name: employee.full_name,
-          org_id: orgId,
+          org_id: employee.org_id,
           location_id: locationId,
           audit_date: auditDate,
-          status_before: 'Not Certified', // Initial setup, so "before" is assumed Not Certified
+          status_before: 'Not Certified',
           status_after: newStatus,
           all_positions_qualified: allQualified,
           position_averages: positions,
-          notes: 'Initial certification setup',
+          notes: `Initial certification setup (threshold: ${CERTIFICATION_THRESHOLD})`,
         });
       
       if (auditError) {
@@ -130,29 +148,32 @@ async function runInitialSetup() {
         totalNotCertified++;
       }
       
-      // Show progress for each employee
       const statusEmoji = newStatus === 'Certified' ? '✅' : '⚪';
       const positionCount = Object.keys(positions).length;
-      console.log(`   ${statusEmoji} ${employee.full_name}: ${newStatus} (${positionCount} positions)`);
+      const avgDisplay = Object.entries(positions)
+        .map(([pos, avg]) => `${pos}: ${(avg as number).toFixed(2)}`)
+        .join(', ');
+      console.log(`   ${statusEmoji} ${employee.full_name}: ${newStatus} (${positionCount} positions: ${avgDisplay || 'none'})`);
     }
   }
   
   console.log('\n' + '='.repeat(60));
-  console.log('📊 Initial Setup Complete!');
+  console.log('📊 Reset & Setup Complete!');
   console.log('='.repeat(60));
   console.log(`   Total Processed: ${totalProcessed}`);
   console.log(`   ✅ Certified: ${totalCertified}`);
   console.log(`   ⚪ Not Certified: ${totalNotCertified}`);
+  console.log(`   🎯 Threshold: ${CERTIFICATION_THRESHOLD}`);
   console.log('');
 }
 
-// Run the script
-runInitialSetup()
+resetAndSetup()
   .then(() => {
-    console.log('✨ Script completed successfully');
+    console.log('✨ Reset complete!');
     process.exit(0);
   })
   .catch((error) => {
     console.error('💥 Script failed:', error);
     process.exit(1);
   });
+

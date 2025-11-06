@@ -129,14 +129,19 @@ export function getPreviousPEAAuditDay(fromDate: Date = new Date()): Date {
 }
 
 /**
+ * Certification threshold for position averages
+ */
+export const CERTIFICATION_THRESHOLD = 2.75;
+
+/**
  * Check if all position averages meet or exceed the certification threshold
  * @param positionAverages - Map of position names to their averages
- * @param threshold - Minimum average required (default 2.85)
+ * @param threshold - Minimum average required (default 2.75)
  * @returns boolean
  */
 export function allPositionsQualified(
   positionAverages: Record<string, number>,
-  threshold: number = 2.85
+  threshold: number = CERTIFICATION_THRESHOLD
 ): boolean {
   const positions = Object.keys(positionAverages);
   
