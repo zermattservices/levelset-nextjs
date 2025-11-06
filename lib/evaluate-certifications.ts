@@ -12,7 +12,6 @@ import {
 } from './certification-utils';
 import { 
   fetchEmployeePositionAverages,
-  getBundleUrlForLocation,
   type PositionAverages,
 } from './fetch-position-averages';
 
@@ -66,15 +65,8 @@ export async function evaluateCertifications(
     return [];
   }
   
-  // Get bundle URL for this location
-  const bundleUrl = getBundleUrlForLocation(locationId);
-  if (!bundleUrl) {
-    console.error(`No bundle URL found for location ${locationId}`);
-    return [];
-  }
-  
-  // Fetch position averages from Google Sheets
-  const positionAveragesData = await fetchEmployeePositionAverages(bundleUrl, employees as Employee[]);
+  // Calculate position averages from ratings table
+  const positionAveragesData = await fetchEmployeePositionAverages(employees as Employee[], supabase);
   
   // Create a map for quick lookup
   const averagesMap = new Map<string, PositionAverages>();

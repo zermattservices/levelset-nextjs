@@ -18,7 +18,6 @@ import {
 } from '../lib/certification-utils';
 import { 
   fetchEmployeePositionAverages,
-  getBundleUrlForLocation,
 } from '../lib/fetch-position-averages';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
@@ -71,16 +70,9 @@ async function runInitialSetup() {
     
     console.log(`   Found ${employees.length} active employees`);
     
-    // Get bundle URL for this location
-    const bundleUrl = getBundleUrlForLocation(locationId);
-    if (!bundleUrl) {
-      console.error(`   ❌ No bundle URL found for location ${locationId}`);
-      continue;
-    }
-    
-    // Fetch position averages from Google Sheets
-    console.log(`   📊 Fetching position averages from Google Sheets...`);
-    const positionAveragesData = await fetchEmployeePositionAverages(bundleUrl, employees as Employee[]);
+    // Calculate position averages from ratings table
+    console.log(`   📊 Calculating position averages from ratings...`);
+    const positionAveragesData = await fetchEmployeePositionAverages(employees as Employee[], supabase);
     
     // Create a map for quick lookup
     const averagesMap = new Map();

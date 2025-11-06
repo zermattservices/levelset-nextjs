@@ -150,11 +150,11 @@ export function allPositionsQualified(
 }
 
 /**
- * Location IDs for Buda and West Buda (these will need to be updated with actual IDs)
+ * Location IDs for Buda and West Buda
  */
 export const BUDA_LOCATION_IDS = {
-  BUDA: process.env.NEXT_PUBLIC_BUDA_LOCATION_ID || 'buda-location-id',
-  WEST_BUDA: process.env.NEXT_PUBLIC_WEST_BUDA_LOCATION_ID || 'west-buda-location-id',
+  BUDA: process.env.NEXT_PUBLIC_BUDA_LOCATION_ID || '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd',
+  WEST_BUDA: process.env.NEXT_PUBLIC_WEST_BUDA_LOCATION_ID || 'e437119c-27d9-4114-9273-350925016738',
 };
 
 /**
