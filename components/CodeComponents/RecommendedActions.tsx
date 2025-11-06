@@ -590,18 +590,20 @@ export function DisciplineNotifications({
             <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
               Required Disciplinary Actions ({recommendations.length})
             </Typography>
-            <Chip
-              label="Action Required"
-              size="small"
-              sx={{
-                backgroundColor: '#dc2626',
-                color: '#ffffff',
-                fontFamily,
-                fontSize: 11,
-                fontWeight: 600,
-                height: 24,
-              }}
-            />
+            {recommendations.length > 0 && (
+              <Chip
+                label="Action Required"
+                size="small"
+                sx={{
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
+                  fontFamily,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  height: 24,
+                }}
+              />
+            )}
             <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500, ml: 'auto', mr: 1 }}>
               {actionsExpanded ? 'Collapse' : 'Expand'}
             </Typography>

@@ -653,55 +653,50 @@ export function EmployeeModal({
                   key={rec.id}
                   sx={{
                     display: "flex",
-                    flexDirection: "column",
-                    gap: 1.5,
+                    flexDirection: "row",
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
+                    gap: "12px",
                     padding: "12px 16px",
                     borderRadius: "12px",
                     border: "1px solid #fbbf24",
                     backgroundColor: "#fef3c7",
+                    minWidth: 0,
                   }}
                 >
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <CalendarIcon sx={{ fontSize: "1em", color: "#92400e" }} />
-                        <Typography
-                          sx={{
-                            fontFamily: "Satoshi",
-                            fontSize: "14px",
-                            fontWeight: 500,
-                            color: "#92400e",
-                            lineHeight: "20px",
-                          }}
-                        >
-                          {new Date(rec.created_at).toLocaleDateString()}
-                        </Typography>
-                      </Box>
-                      <Box
+                  <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px", minWidth: 0 }}>
+                    {/* Action name on top row */}
+                    <Typography
+                      sx={{
+                        fontFamily: "Satoshi",
+                        fontSize: "14px",
+                        fontWeight: 500,
+                        color: "#414651",
+                        lineHeight: "20px",
+                      }}
+                    >
+                      {rec.recommended_action}
+                    </Typography>
+
+                    {/* Date on bottom row */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <CalendarIcon sx={{ fontSize: "1em", color: "#92400e" }} />
+                      <Typography
                         sx={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          backgroundColor: '#ffffff',
-                          borderRadius: '6px',
-                          padding: '4px 8px',
-                          border: '1px solid #e9eaeb',
-                          width: 'fit-content',
+                          fontFamily: "Satoshi",
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          color: "#92400e",
+                          lineHeight: "20px",
                         }}
                       >
-                        <Typography
-                          sx={{
-                            fontFamily: "Satoshi",
-                            fontSize: "12px",
-                            fontWeight: 600,
-                            color: "#414651",
-                          }}
-                        >
-                          {rec.recommended_action}
-                        </Typography>
-                      </Box>
+                        {new Date(rec.created_at).toLocaleDateString()}
+                      </Typography>
                     </Box>
                   </Box>
-                  <Box sx={{ display: "flex", gap: 1.5, justifyContent: "flex-end" }}>
+
+                  {/* Buttons on same row as content */}
+                  <Box sx={{ display: "flex", gap: 1.5, flexShrink: 0 }}>
                     <Button
                       onClick={() => {
                         setRecommendationToDismiss(rec);
