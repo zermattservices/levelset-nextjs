@@ -1282,6 +1282,11 @@ PLASMIC.registerComponent(EmployeeModal, {
       type: "string",
       description: "Current auth user ID for prefilling acting leader"
     },
+    onRecommendationUpdate: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler called when a recommendation is recorded or dismissed"
+    },
     className: "string"
   },
   importPath: "./components/CodeComponents/EmployeeModal",

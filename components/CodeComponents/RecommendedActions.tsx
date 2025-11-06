@@ -776,6 +776,10 @@ export function DisciplineNotifications({
         locationId={locationId}
         initialTab="discipline"
         currentUserId={currentUserId}
+        onRecommendationUpdate={() => {
+          // Refresh recommendations when an action is recorded or dismissed in the modal
+          fetchData();
+        }}
       />
 
       {/* Dismiss Confirmation Modal */}

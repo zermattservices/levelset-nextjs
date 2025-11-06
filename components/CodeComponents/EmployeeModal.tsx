@@ -34,6 +34,7 @@ export interface EmployeeModalProps {
   initialTab?: "pathway" | "pe" | "evaluations" | "discipline";
   onRecordAction?: () => void;
   currentUserId?: string; // For prefilling acting leader
+  onRecommendationUpdate?: () => void; // Called when a recommendation is recorded or dismissed
   className?: string;
 }
 
@@ -267,6 +268,7 @@ export function EmployeeModal({
   onClose,
   orgId,
   locationId,
+  onRecommendationUpdate,
   initialTab = "discipline",
   onRecordAction,
   currentUserId,
@@ -654,7 +656,7 @@ export function EmployeeModal({
                   sx={{
                     display: "flex",
                     flexDirection: "row",
-                    alignItems: "flex-start",
+                    alignItems: "center",
                     justifyContent: "space-between",
                     gap: "12px",
                     padding: "12px 16px",
@@ -1026,6 +1028,9 @@ export function EmployeeModal({
                 
                 // Refetch data to get the new action
                 fetchEmployeeData();
+                
+                // Notify parent to refresh recommendations
+                onRecommendationUpdate?.();
               } catch (err) {
                 console.error('Error updating recommendation:', err);
               }
@@ -1057,6 +1062,10 @@ export function EmployeeModal({
             
             // Remove from local state
             setRecommendedActions(prev => prev.filter(r => r.id !== recommendationToDismiss.id));
+            
+            // Notify parent to refresh recommendations
+            onRecommendationUpdate?.();
+            
             setDismissConfirmationOpen(false);
             setRecommendationToDismiss(null);
           } catch (err) {
