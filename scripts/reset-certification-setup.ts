@@ -50,12 +50,11 @@ async function resetAndSetup() {
     console.log('   ✅ All audit records deleted');
   }
   
-  // Step 2: Reset all Team Member employees to 'Not Certified'
-  console.log('\n2️⃣  Resetting all Team Member employees to Not Certified...');
+  // Step 2: Reset ALL employees to 'Not Certified' in Buda/West Buda locations
+  console.log('\n2️⃣  Resetting all employees to Not Certified...');
   const { error: resetError } = await supabase
     .from('employees')
     .update({ certified_status: 'Not Certified' })
-    .eq('role', 'Team Member')
     .in('location_id', Object.values(BUDA_LOCATION_IDS));
   
   if (resetError) {
