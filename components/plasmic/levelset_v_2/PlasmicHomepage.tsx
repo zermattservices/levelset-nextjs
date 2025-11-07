@@ -62,6 +62,7 @@ import {
 import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_mCN/component
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
 import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
+import { DashboardMetricCard } from "../../CodeComponents/DashboardMetricCard"; // plasmic-import: VbQnBNLaJ-GU/codeComponent
 import MetricCard from "../../MetricCard"; // plasmic-import: 7uoOAZgc5EOu/component
 import TrendCard from "../../TrendCard"; // plasmic-import: V-0rig617-gC/component
 import { AntdModal } from "@plasmicpkgs/antd5/skinny/registerModal";
@@ -94,13 +95,6 @@ export type PlasmicHomepage__OverridesType = {
   redirectIf?: Flex__<typeof RedirectIf>;
   img?: Flex__<typeof PlasmicImg__>;
   _360Stack?: Flex__<"div">;
-  heading3?: Flex__<"div">;
-  heading7?: Flex__<"div">;
-  trendCard?: Flex__<typeof TrendCard>;
-  text?: Flex__<"div">;
-  heading9?: Flex__<"div">;
-  trendCard2?: Flex__<typeof TrendCard>;
-  text2?: Flex__<"div">;
   blurredStack?: Flex__<"div">;
   whedStack?: Flex__<"div">;
   modal?: Flex__<typeof AntdModal>;
@@ -212,18 +206,6 @@ function PlasmicHomepage__RenderFunc(props: {
               throw e;
             }
           })()
-      },
-      {
-        path: "trendCard.value",
-        type: "private",
-        variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
-      },
-      {
-        path: "trendCard2.value",
-        type: "private",
-        variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => "5.8"
       },
       {
         path: "trendCard3.value",
@@ -547,212 +529,22 @@ function PlasmicHomepage__RenderFunc(props: {
                   <div
                     className={classNames(projectcss.all, sty.freeBox__thp47)}
                   >
-                    <div
-                      className={classNames(projectcss.all, sty.freeBox__fqNlw)}
-                      onClick={async event => {
-                        const $steps = {};
+                    <DashboardMetricCard
+                      className={classNames(
+                        "__wab_instance",
+                        sty.dashboardMetricCard__fWith
+                      )}
+                      variant={"positional-excellence"}
+                    />
 
-                        $steps["goToPea"] = true
-                          ? (() => {
-                              const actionArgs = {
-                                destination: `/positional-excellence`
-                              };
-                              return (({ destination }) => {
-                                if (
-                                  typeof destination === "string" &&
-                                  destination.startsWith("#")
-                                ) {
-                                  document
-                                    .getElementById(destination.substr(1))
-                                    .scrollIntoView({ behavior: "smooth" });
-                                } else {
-                                  __nextRouter?.push(destination);
-                                }
-                              })?.apply(null, [actionArgs]);
-                            })()
-                          : undefined;
-                        if (
-                          $steps["goToPea"] != null &&
-                          typeof $steps["goToPea"] === "object" &&
-                          typeof $steps["goToPea"].then === "function"
-                        ) {
-                          $steps["goToPea"] = await $steps["goToPea"];
-                        }
-                      }}
-                    >
-                      <MetricCard
-                        className={classNames(
-                          "__wab_instance",
-                          sty.metricCard__x6EnB
-                        )}
-                        delta={
-                          <div
-                            data-plasmic-name={"heading3"}
-                            data-plasmic-override={overrides.heading3}
-                            className={classNames(
-                              projectcss.all,
-                              projectcss.__wab_text,
-                              sty.heading3
-                            )}
-                          >
-                            {"+27"}
-                          </div>
-                        }
-                        heading5={
-                          <div
-                            data-plasmic-name={"heading7"}
-                            data-plasmic-override={overrides.heading7}
-                            className={classNames(
-                              projectcss.all,
-                              projectcss.__wab_text,
-                              sty.heading7
-                            )}
-                          >
-                            {"October"}
-                          </div>
-                        }
-                        metricName={"PEA Ratings"}
-                        metricTotal2={"863"}
-                        trendCard2={
-                          <TrendCard
-                            data-plasmic-name={"trendCard"}
-                            data-plasmic-override={overrides.trendCard}
-                            className={classNames(
-                              "__wab_instance",
-                              sty.trendCard
-                            )}
-                            onValueChange={async (...eventArgs: any) => {
-                              generateStateOnChangeProp($state, [
-                                "trendCard",
-                                "value"
-                              ]).apply(null, eventArgs);
+                    <DashboardMetricCard
+                      className={classNames(
+                        "__wab_instance",
+                        sty.dashboardMetricCard__e62Fz
+                      )}
+                      variant={"discipline-points"}
+                    />
 
-                              if (
-                                eventArgs.length > 1 &&
-                                eventArgs[1] &&
-                                eventArgs[1]._plasmic_state_init_
-                              ) {
-                                return;
-                              }
-                            }}
-                            text3={
-                              <div
-                                data-plasmic-name={"text"}
-                                data-plasmic-override={overrides.text}
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text
-                                )}
-                              >
-                                {"11.1"}
-                              </div>
-                            }
-                            value={generateStateValueProp($state, [
-                              "trendCard",
-                              "value"
-                            ])}
-                          />
-                        }
-                      />
-                    </div>
-                    <div
-                      className={classNames(projectcss.all, sty.freeBox__zfJd9)}
-                      onClick={async event => {
-                        const $steps = {};
-
-                        $steps["goToDiscipline"] = true
-                          ? (() => {
-                              const actionArgs = { destination: `/discipline` };
-                              return (({ destination }) => {
-                                if (
-                                  typeof destination === "string" &&
-                                  destination.startsWith("#")
-                                ) {
-                                  document
-                                    .getElementById(destination.substr(1))
-                                    .scrollIntoView({ behavior: "smooth" });
-                                } else {
-                                  __nextRouter?.push(destination);
-                                }
-                              })?.apply(null, [actionArgs]);
-                            })()
-                          : undefined;
-                        if (
-                          $steps["goToDiscipline"] != null &&
-                          typeof $steps["goToDiscipline"] === "object" &&
-                          typeof $steps["goToDiscipline"].then === "function"
-                        ) {
-                          $steps["goToDiscipline"] =
-                            await $steps["goToDiscipline"];
-                        }
-                      }}
-                    >
-                      <MetricCard
-                        className={classNames(
-                          "__wab_instance",
-                          sty.metricCard__zxCMh
-                        )}
-                        heading5={
-                          <div
-                            data-plasmic-name={"heading9"}
-                            data-plasmic-override={overrides.heading9}
-                            className={classNames(
-                              projectcss.all,
-                              projectcss.__wab_text,
-                              sty.heading9
-                            )}
-                          >
-                            {"October"}
-                          </div>
-                        }
-                        metricName={"Accountability Points"}
-                        metricTotal2={"55"}
-                        trendCard2={
-                          <TrendCard
-                            data-plasmic-name={"trendCard2"}
-                            data-plasmic-override={overrides.trendCard2}
-                            className={classNames(
-                              "__wab_instance",
-                              sty.trendCard2
-                            )}
-                            onValueChange={async (...eventArgs: any) => {
-                              generateStateOnChangeProp($state, [
-                                "trendCard2",
-                                "value"
-                              ]).apply(null, eventArgs);
-
-                              if (
-                                eventArgs.length > 1 &&
-                                eventArgs[1] &&
-                                eventArgs[1]._plasmic_state_init_
-                              ) {
-                                return;
-                              }
-                            }}
-                            text3={
-                              <div
-                                data-plasmic-name={"text2"}
-                                data-plasmic-override={overrides.text2}
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text2
-                                )}
-                              >
-                                {"5.8"}
-                              </div>
-                            }
-                            value={generateStateValueProp($state, [
-                              "trendCard2",
-                              "value"
-                            ])}
-                          />
-                        }
-                      >
-                        {"Average:"}
-                      </MetricCard>
-                    </div>
                     <div
                       data-plasmic-name={"blurredStack"}
                       data-plasmic-override={overrides.blurredStack}
@@ -993,52 +785,15 @@ const PlasmicDescendants = {
     "redirectIf",
     "img",
     "_360Stack",
-    "heading3",
-    "heading7",
-    "trendCard",
-    "text",
-    "heading9",
-    "trendCard2",
-    "text2",
     "blurredStack",
     "whedStack",
     "modal",
     "levelsetButton"
   ],
   menuNavigation: ["menuNavigation"],
-  redirectIf: [
-    "redirectIf",
-    "img",
-    "_360Stack",
-    "heading3",
-    "heading7",
-    "trendCard",
-    "text",
-    "heading9",
-    "trendCard2",
-    "text2",
-    "blurredStack",
-    "whedStack"
-  ],
+  redirectIf: ["redirectIf", "img", "_360Stack", "blurredStack", "whedStack"],
   img: ["img"],
-  _360Stack: [
-    "_360Stack",
-    "heading3",
-    "heading7",
-    "trendCard",
-    "text",
-    "heading9",
-    "trendCard2",
-    "text2",
-    "blurredStack"
-  ],
-  heading3: ["heading3"],
-  heading7: ["heading7"],
-  trendCard: ["trendCard", "text"],
-  text: ["text"],
-  heading9: ["heading9"],
-  trendCard2: ["trendCard2", "text2"],
-  text2: ["text2"],
+  _360Stack: ["_360Stack", "blurredStack"],
   blurredStack: ["blurredStack"],
   whedStack: ["whedStack"],
   modal: ["modal", "levelsetButton"],
@@ -1053,13 +808,6 @@ type NodeDefaultElementType = {
   redirectIf: typeof RedirectIf;
   img: typeof PlasmicImg__;
   _360Stack: "div";
-  heading3: "div";
-  heading7: "div";
-  trendCard: typeof TrendCard;
-  text: "div";
-  heading9: "div";
-  trendCard2: typeof TrendCard;
-  text2: "div";
   blurredStack: "div";
   whedStack: "div";
   modal: typeof AntdModal;
@@ -1132,13 +880,6 @@ export const PlasmicHomepage = Object.assign(
     redirectIf: makeNodeComponent("redirectIf"),
     img: makeNodeComponent("img"),
     _360Stack: makeNodeComponent("_360Stack"),
-    heading3: makeNodeComponent("heading3"),
-    heading7: makeNodeComponent("heading7"),
-    trendCard: makeNodeComponent("trendCard"),
-    text: makeNodeComponent("text"),
-    heading9: makeNodeComponent("heading9"),
-    trendCard2: makeNodeComponent("trendCard2"),
-    text2: makeNodeComponent("text2"),
     blurredStack: makeNodeComponent("blurredStack"),
     whedStack: makeNodeComponent("whedStack"),
     modal: makeNodeComponent("modal"),

@@ -1072,6 +1072,12 @@
           "name": "EditActionModal",
           "displayName": "EditActionModal",
           "componentImportPath": "./components/CodeComponents/EditActionModal"
+        },
+        {
+          "id": "VbQnBNLaJ-GU",
+          "name": "DashboardMetricCard",
+          "displayName": "DashboardMetricCard",
+          "componentImportPath": "./components/CodeComponents/DashboardMetricCard"
         }
       ],
       "splitsProviderFilePath": "",
