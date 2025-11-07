@@ -43,6 +43,9 @@ import { DisciplineTableSkeleton } from "./components/CodeComponents/Skeletons/D
 import { CardSkeleton } from "./components/CodeComponents/Skeletons/CardSkeleton";
 import { ScoreboardSkeleton } from "./components/CodeComponents/Skeletons/ScoreboardSkeleton";
 import { DashboardMetricCard } from "./components/CodeComponents/DashboardMetricCard";
+import { LocationProvider } from "./components/CodeComponents/LocationContext";
+import { LocationSelectDropdown } from "./components/CodeComponents/LocationSelectDropdown";
+import { LocationSelectModal } from "./components/CodeComponents/LocationSelectModal";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
 const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
@@ -70,6 +73,14 @@ PLASMIC.registerGlobalContext(SupabaseUserSession, {
     }
   },
   importPath: "./components/CodeComponents/SupabaseUserSession",
+});
+
+// Register LocationProvider global context
+PLASMIC.registerGlobalContext(LocationProvider, {
+  name: "LocationProvider",
+  providesData: true,
+  props: {},
+  importPath: "./components/CodeComponents/LocationContext",
 });
 
 // Register RedirectIf component
@@ -362,6 +373,43 @@ PLASMIC.registerComponent(DashboardMetricCard, {
     className: "string",
   },
   importPath: "./components/CodeComponents/DashboardMetricCard",
+});
+
+// Register LocationSelectDropdown component
+PLASMIC.registerComponent(LocationSelectDropdown, {
+  name: "LocationSelectDropdown",
+  displayName: "Location Select Dropdown",
+  props: {
+    label: {
+      type: "string",
+      defaultValue: "Location",
+    },
+    placeholder: {
+      type: "string",
+      defaultValue: "Select a location",
+    },
+    fullWidth: {
+      type: "boolean",
+      defaultValue: false,
+    },
+    showLabel: {
+      type: "boolean",
+      defaultValue: true,
+    },
+    disabled: "boolean",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/LocationSelectDropdown",
+});
+
+// Register LocationSelectModal component
+PLASMIC.registerComponent(LocationSelectModal, {
+  name: "LocationSelectModal",
+  displayName: "Location Select Modal",
+  props: {
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/LocationSelectModal",
 });
 
 // Register ScoreboardTable component
