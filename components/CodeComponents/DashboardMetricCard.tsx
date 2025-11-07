@@ -246,8 +246,7 @@ export function DashboardMetricCard({
   const arrowClasses = [styles.trendIcon, change < 0 ? styles.down : '']
     .filter(Boolean)
     .join(' ');
-
-  const secondaryLabel = formatMonthLabel(timestamp);
+  const secondaryLabel = 'Past 90 days';
 
   return (
     <div className={containerClasses}>
@@ -271,8 +270,10 @@ export function DashboardMetricCard({
           <div className={styles.primaryRow}>
             <span className={styles.primaryLabel}>{config.totalLabel}</span>
             <span className={styles.primaryValue}>{formatNumber(total)}</span>
-            <span className={deltaClasses}>{deltaText}</span>
-            <span className={styles.periodLabel}>{config.deltaLabel}</span>
+            <span className={styles.primaryMeta}>
+              <span className={deltaClasses}>{deltaText}</span>
+              <span className={styles.periodLabel}>{config.deltaLabel}</span>
+            </span>
           </div>
           <div className={styles.secondaryRow}>
             <span className={styles.secondaryLabel}>{secondaryLabel}</span>
