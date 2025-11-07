@@ -42,6 +42,7 @@ import { EmployeeTableSkeleton } from "./components/CodeComponents/Skeletons/Emp
 import { DisciplineTableSkeleton } from "./components/CodeComponents/Skeletons/DisciplineTableSkeleton";
 import { CardSkeleton } from "./components/CodeComponents/Skeletons/CardSkeleton";
 import { ScoreboardSkeleton } from "./components/CodeComponents/Skeletons/ScoreboardSkeleton";
+import { DashboardMetricCard } from "./components/CodeComponents/DashboardMetricCard";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
 const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
@@ -330,6 +331,37 @@ PLASMIC.registerComponent(Scoreboard, {
     bundleUrl: "string",
   },
   importPath: "./components/CodeComponents/Scoreboard",
+});
+
+// Register DashboardMetricCard component
+PLASMIC.registerComponent(DashboardMetricCard, {
+  name: "DashboardMetricCard",
+  displayName: "Dashboard Metric Card",
+  props: {
+    variant: {
+      type: "choice",
+      options: [
+        { label: "Positional Excellence", value: "positional-excellence" },
+        { label: "Discipline Points", value: "discipline-points" },
+      ],
+      defaultValue: "positional-excellence",
+      description: "Select which metric data to display",
+    },
+    orgId: {
+      type: "string",
+      description: "Override the organization ID (defaults to the signed-in user's org)",
+    },
+    locationId: {
+      type: "string",
+      description: "Override the location ID (defaults to the signed-in user's location)",
+    },
+    linkHref: {
+      type: "string",
+      description: "Optional Next.js route to navigate to when the card is clicked",
+    },
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DashboardMetricCard",
 });
 
 // Register ScoreboardTable component
