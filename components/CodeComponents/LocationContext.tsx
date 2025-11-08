@@ -135,8 +135,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     try {
       if (inEditor) {
         const sampleLocations: LocationRecord[] = [
-          { id: 'sample-1', location_number: '1001', name: 'Sample Location 1' },
-          { id: 'sample-2', location_number: '1002', name: 'Sample Location 2' },
+          { id: '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', location_number: '01656', name: 'Buda' },
         ];
         if (!isMountedRef.current) {
           return;

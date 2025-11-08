@@ -11,6 +11,13 @@ import { useLocationContext } from './LocationContext';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
+const DropdownIcon = React.forwardRef<SVGSVGElement, React.ComponentProps<typeof ExpandMoreIcon>>(
+  function DropdownIcon(props, ref) {
+    const { style, ...rest } = props as any;
+    return <ExpandMoreIcon ref={ref} {...rest} style={{ ...(style || {}), pointerEvents: 'none' }} />;
+  }
+);
+
 export interface LocationSelectDropdownProps {
   placeholder?: string;
   className?: string;
@@ -89,7 +96,7 @@ export function LocationSelectDropdown({
       <Select
         value={selectedLocationId ?? ''}
         displayEmpty
-        IconComponent={ExpandMoreIcon}
+        IconComponent={DropdownIcon}
         renderValue={(value) => {
           if (!value) {
             return <span style={{ color: '#9ca3af' }}>{placeholder}</span>;

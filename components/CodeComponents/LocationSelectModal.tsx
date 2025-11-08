@@ -90,6 +90,7 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
                     borderRadius: 999,
                     textTransform: 'none',
                     paddingY: 1.5,
+                    paddingX: 6,
                     backgroundColor: '#31664a',
                     color: '#ffffff',
                     boxShadow: '0px 10px 18px rgba(49, 102, 74, 0.25)',

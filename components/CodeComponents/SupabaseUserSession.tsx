@@ -117,8 +117,8 @@ export function SupabaseUserSession({
     last_name: appUser?.last_name || '',
     full_name: appUser?.full_name || '',
     role: appUser?.role || '',
-    org_id: appUser?.org_id || '',
-    location_id: appUser?.location_id || '',
+    org_id: appUser?.org_id || (inEditor ? '54b9864f-9df9-4a15-a209-7b99e1c274f4' : ''),
+    location_id: appUser?.location_id || (inEditor ? '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd' : ''),
     employee_id: appUser?.employee_id || '',
     phone: appUser?.phone || '',
     hire_date: appUser?.hire_date || '',
@@ -127,7 +127,7 @@ export function SupabaseUserSession({
     // Full objects for components that need them
     authUser: currentUser,
     appUser: appUser,
-  }), [currentUser, appUser, isLoaded]);
+  }), [currentUser, appUser, isLoaded, inEditor]);
 
   return (
     <DataProvider name="auth" data={userData}>
