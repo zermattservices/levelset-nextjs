@@ -240,6 +240,10 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     error,
   }), [error, loading, locations, selectedLocationId, selectedLocationNumber]);
 
+  if (typeof globalThis !== 'undefined') {
+    (globalThis as any).locationContext = plasmicData;
+  }
+
   return (
     <LocationContext.Provider value={value}>
       <DataProvider name="locationContext" data={plasmicData}>
