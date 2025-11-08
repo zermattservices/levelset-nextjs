@@ -135,13 +135,15 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     try {
       if (inEditor) {
         const sampleLocations: LocationRecord[] = [
-          { id: '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', location_number: '01656', name: 'Buda' },
+          { id: '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', location_number: '04056', name: 'Buda' },
+          { id: 'c0d86fa1-0000-0000-0000-000000000000', location_number: '05508', name: 'Preview Location' },
         ];
         if (!isMountedRef.current) {
           return;
         }
         setLocations(sampleLocations);
         setUserId('plasmic-editor');
+        userIdRef.current = 'plasmic-editor';
         setSelectedLocationId(sampleLocations[0].id);
         setSelectedLocationNumber(sampleLocations[0].location_number ?? null);
         setLoading(false);
