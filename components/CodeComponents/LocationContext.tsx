@@ -1,5 +1,5 @@
 import React from 'react';
-import { DataProvider } from '@plasmicapp/loader-nextjs';
+import { DataProvider } from '@plasmicapp/react-web/lib/host';
 import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import { createSupabaseClient } from '@/util/supabase/component';
 
