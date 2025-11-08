@@ -73,7 +73,7 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
           )}
 
           {!loading && !error && shouldUseDropdown && (
-            <LocationSelectDropdown fullWidth showLabel={false} placeholder="Choose a location" />
+            <LocationSelectDropdown className="location-select-modal-dropdown" placeholder="Choose a location" />
           )}
 
           {!loading && !error && shouldShowButtons && (
