@@ -62,6 +62,7 @@ import {
 import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_mCN/component
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
 import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
+import { LocationSelectModal } from "../../CodeComponents/LocationSelectModal"; // plasmic-import: r7jw9gr3SmiF/codeComponent
 import { DashboardMetricCard } from "../../CodeComponents/DashboardMetricCard"; // plasmic-import: VbQnBNLaJ-GU/codeComponent
 import MetricCard from "../../MetricCard"; // plasmic-import: 7uoOAZgc5EOu/component
 import TrendCard from "../../TrendCard"; // plasmic-import: V-0rig617-gC/component
@@ -93,6 +94,7 @@ export type PlasmicHomepage__OverridesType = {
   root?: Flex__<"div">;
   menuNavigation?: Flex__<typeof MenuNavigation>;
   redirectIf?: Flex__<typeof RedirectIf>;
+  locationSelectModal?: Flex__<typeof LocationSelectModal>;
   img?: Flex__<typeof PlasmicImg__>;
   _360Stack?: Flex__<"div">;
   blurredStack?: Flex__<"div">;
@@ -429,6 +431,12 @@ function PlasmicHomepage__RenderFunc(props: {
             }
           }}
         >
+          <LocationSelectModal
+            data-plasmic-name={"locationSelectModal"}
+            data-plasmic-override={overrides.locationSelectModal}
+            className={classNames("__wab_instance", sty.locationSelectModal)}
+          />
+
           <div className={classNames(projectcss.all, sty.freeBox__dtJkS)}>
             <div className={classNames(projectcss.all, sty.freeBox__sheik)}>
               <div className={classNames(projectcss.all, sty.freeBox__bUa1M)}>
@@ -783,6 +791,7 @@ const PlasmicDescendants = {
     "root",
     "menuNavigation",
     "redirectIf",
+    "locationSelectModal",
     "img",
     "_360Stack",
     "blurredStack",
@@ -791,7 +800,15 @@ const PlasmicDescendants = {
     "levelsetButton"
   ],
   menuNavigation: ["menuNavigation"],
-  redirectIf: ["redirectIf", "img", "_360Stack", "blurredStack", "whedStack"],
+  redirectIf: [
+    "redirectIf",
+    "locationSelectModal",
+    "img",
+    "_360Stack",
+    "blurredStack",
+    "whedStack"
+  ],
+  locationSelectModal: ["locationSelectModal"],
   img: ["img"],
   _360Stack: ["_360Stack", "blurredStack"],
   blurredStack: ["blurredStack"],
@@ -806,6 +823,7 @@ type NodeDefaultElementType = {
   root: "div";
   menuNavigation: typeof MenuNavigation;
   redirectIf: typeof RedirectIf;
+  locationSelectModal: typeof LocationSelectModal;
   img: typeof PlasmicImg__;
   _360Stack: "div";
   blurredStack: "div";
@@ -878,6 +896,7 @@ export const PlasmicHomepage = Object.assign(
     // Helper components rendering sub-elements
     menuNavigation: makeNodeComponent("menuNavigation"),
     redirectIf: makeNodeComponent("redirectIf"),
+    locationSelectModal: makeNodeComponent("locationSelectModal"),
     img: makeNodeComponent("img"),
     _360Stack: makeNodeComponent("_360Stack"),
     blurredStack: makeNodeComponent("blurredStack"),

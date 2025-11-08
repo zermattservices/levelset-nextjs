@@ -10,19 +10,21 @@ import { _useGlobalVariants } from "../levelset_v_2/plasmic"; // plasmic-import:
 import { AntdConfigProvider } from "@plasmicpkgs/antd5/skinny/registerConfigProvider";
 import { EmbedCss } from "@plasmicpkgs/plasmic-embed-css";
 import { SupabaseUserSession } from "../../CodeComponents/SupabaseUserSession"; // plasmic-import: 5ULMmrCLhQRS/codeComponent
+import { LocationProvider } from "../../CodeComponents/LocationContext"; // plasmic-import: TyW2jq7R_8jA/codeComponent
 
 export interface GlobalContextsProviderProps {
   children?: React.ReactElement;
   antdConfigProviderProps?: Partial<
     Omit<React.ComponentProps<typeof AntdConfigProvider>, "children">
   >;
-
   embedCssProps?: Partial<
     Omit<React.ComponentProps<typeof EmbedCss>, "children">
   >;
-
   supabaseUserSessionProps?: Partial<
     Omit<React.ComponentProps<typeof SupabaseUserSession>, "children">
+  >;
+  locationProviderProps?: Partial<
+    Omit<React.ComponentProps<typeof LocationProvider>, "children">
   >;
 }
 
@@ -33,7 +35,8 @@ export default function GlobalContextsProvider(
     children,
     antdConfigProviderProps,
     embedCssProps,
-    supabaseUserSessionProps
+    supabaseUserSessionProps,
+    locationProviderProps
   } = props;
 
   return (
@@ -146,7 +149,9 @@ export default function GlobalContextsProvider(
               : undefined
           }
         >
-          {children}
+          <LocationProvider {...locationProviderProps}>
+            {children}
+          </LocationProvider>
         </SupabaseUserSession>
       </EmbedCss>
     </AntdConfigProvider>

@@ -67,11 +67,7 @@ import {
 } from "@plasmicapp/react-web/lib/data-sources";
 
 import LevelsetButton from "../../LevelsetButton"; // plasmic-import: u704oB_4BUvT/component
-import { FormWrapper } from "@plasmicpkgs/antd5/skinny/Form";
-import { formHelpers as FormWrapper_Helpers } from "@plasmicpkgs/antd5/skinny/Form";
-import { FormItemWrapper } from "@plasmicpkgs/antd5/skinny/FormItem";
-import { AntdSelect } from "@plasmicpkgs/antd5/skinny/registerSelect";
-import { AntdButton } from "@plasmicpkgs/antd5/skinny/registerButton";
+import { LocationSelectDropdown } from "../../CodeComponents/LocationSelectDropdown"; // plasmic-import: xGtCjBxqS8e8/codeComponent
 import LogoutButton from "../../LogoutButton"; // plasmic-import: UwKJxxQFYiGw/component
 import { SupabaseUserLogOut } from "../../CodeComponents/auth/SupabaseUserLogOut"; // plasmic-import: l-xO2VjafQ7l/codeComponent
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
@@ -135,10 +131,7 @@ export const PlasmicMenuNavigation__ArgProps = new Array<ArgPropType>(
 export type PlasmicMenuNavigation__OverridesType = {
   root?: Flex__<"div">;
   logo?: Flex__<typeof PlasmicImg__>;
-  form?: Flex__<typeof FormWrapper>;
-  formField?: Flex__<typeof FormItemWrapper>;
-  select?: Flex__<typeof AntdSelect>;
-  button?: Flex__<typeof AntdButton>;
+  locationSelectDropdown?: Flex__<typeof LocationSelectDropdown>;
   logoutButton?: Flex__<typeof LogoutButton>;
   account?: Flex__<typeof PlasmicImg__>;
   supabaseUserLogOut?: Flex__<typeof SupabaseUserLogOut>;
@@ -250,30 +243,6 @@ function PlasmicMenuNavigation__RenderFunc(props: {
 
         valueProp: "lastName",
         onChangeProp: "onLastNameChange"
-      },
-      {
-        path: "form.value",
-        type: "private",
-        variableType: "object",
-        initFunc: ({ $props, $state, $queries, $ctx }) => undefined,
-
-        refName: "form",
-        onMutate: generateOnMutateForSpec("value", FormWrapper_Helpers)
-      },
-      {
-        path: "form.isSubmitting",
-        type: "private",
-        variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $ctx }) => false,
-
-        refName: "form",
-        onMutate: generateOnMutateForSpec("isSubmitting", FormWrapper_Helpers)
-      },
-      {
-        path: "select.value",
-        type: "private",
-        variableType: "text",
-        initFunc: ({ $props, $state, $queries, $ctx }) => undefined
       }
     ],
     [$props, $ctx, $refs]
@@ -508,167 +477,18 @@ function PlasmicMenuNavigation__RenderFunc(props: {
         <div className={classNames(projectcss.all, sty.freeBox__rkbjc)}>
           <div className={classNames(projectcss.all, sty.freeBox___1LyUp)}>
             <div className={classNames(projectcss.all, sty.freeBox__agUzE)}>
-              {(() => {
-                const child$Props = {
-                  className: classNames("__wab_instance", sty.form),
-                  extendedOnValuesChange: async (...eventArgs: any) => {
-                    generateStateOnChangePropForCodeComponents(
-                      $state,
-                      "value",
-                      ["form", "value"],
-                      FormWrapper_Helpers
-                    ).apply(null, eventArgs);
-
-                    (async (changedValues, allValues) => {
-                      const $steps = {};
-                    }).apply(null, eventArgs);
-                  },
-                  formItems: [
-                    { label: "Name", name: "name", inputType: "Text" },
-                    {
-                      label: "Message",
-                      name: "message",
-                      inputType: "Text Area"
-                    }
-                  ],
-                  initialValues: (() => {
-                    try {
-                      return $queries.locationsQuery.data[0].id;
-                    } catch (e) {
-                      if (
-                        e instanceof TypeError ||
-                        e?.plasmicType === "PlasmicUndefinedDataError"
-                      ) {
-                        return "67e00fb2-29f5-41ce-9c1c-93e2f7f392dd";
-                      }
-                      throw e;
-                    }
-                  })(),
-                  labelCol: { span: 8, horizontalOnly: true },
-                  layout: "vertical",
-                  mode: "advanced",
-                  onIsSubmittingChange: async (...eventArgs: any) => {
-                    generateStateOnChangePropForCodeComponents(
-                      $state,
-                      "isSubmitting",
-                      ["form", "isSubmitting"],
-                      FormWrapper_Helpers
-                    ).apply(null, eventArgs);
-                  },
-                  ref: ref => {
-                    $refs["form"] = ref;
-                  },
-                  submitSlot: null,
-                  wrapperCol: { span: 16, horizontalOnly: true }
-                };
-                initializeCodeComponentStates(
-                  $state,
-                  [
-                    {
-                      name: "value",
-                      plasmicStateName: "form.value"
-                    },
-                    {
-                      name: "isSubmitting",
-                      plasmicStateName: "form.isSubmitting"
-                    }
-                  ],
-                  [],
-                  FormWrapper_Helpers ?? {},
-                  child$Props
-                );
-
-                return (
-                  <FormWrapper
-                    data-plasmic-name={"form"}
-                    data-plasmic-override={overrides.form}
-                    {...child$Props}
-                  >
-                    <FormItemWrapper
-                      data-plasmic-name={"formField"}
-                      data-plasmic-override={overrides.formField}
-                      className={classNames("__wab_instance", sty.formField)}
-                      initialValue={(() => {
-                        try {
-                          return $queries.locationsQuery.data[0].id;
-                        } catch (e) {
-                          if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
-                          ) {
-                            return undefined;
-                          }
-                          throw e;
-                        }
-                      })()}
-                      label={"Label"}
-                      name={"header_location_id"}
-                      noLabel={true}
-                      noStyle={false}
-                      rules={[{ ruleType: "required" }]}
-                      valuePropName={"selectedLocation"}
-                    >
-                      <AntdSelect
-                        data-plasmic-name={"select"}
-                        data-plasmic-override={overrides.select}
-                        className={classNames("__wab_instance", sty.select)}
-                        defaultOpen={false}
-                        defaultStylesClassName={classNames(
-                          projectcss.root_reset,
-                          projectcss.plasmic_default_styles,
-                          projectcss.plasmic_mixins,
-                          styleTokensClassNames
-                        )}
-                        onChange={async (...eventArgs: any) => {
-                          generateStateOnChangeProp($state, [
-                            "select",
-                            "value"
-                          ]).apply(null, eventArgs);
-                        }}
-                        options={(() => {
-                          const __composite = [
-                            { value: null, label: null, type: "option" },
-                            { value: null, label: null, type: "option" }
-                          ];
-                          __composite["0"]["value"] =
-                            $queries.locationsQuery.data[0].id;
-                          __composite["0"]["label"] =
-                            $queries.locationsQuery.data[0].name;
-                          __composite["1"]["value"] =
-                            $queries.locationsQuery.data[1].id;
-                          __composite["1"]["label"] =
-                            $queries.locationsQuery.data[1].name;
-                          return __composite;
-                        })()}
-                        placeholder={"Select..."}
-                        popupScopeClassName={sty["select__popup"]}
-                        value={generateStateValueProp($state, [
-                          "select",
-                          "value"
-                        ])}
-                      />
-                    </FormItemWrapper>
-                    <AntdButton
-                      data-plasmic-name={"button"}
-                      data-plasmic-override={overrides.button}
-                      className={classNames("__wab_instance", sty.button)}
-                      disabled={false}
-                      submitsForm={false}
-                      type={"primary"}
-                    >
-                      <div
-                        className={classNames(
-                          projectcss.all,
-                          projectcss.__wab_text,
-                          sty.text__sVc4F
-                        )}
-                      >
-                        {"Submit"}
-                      </div>
-                    </AntdButton>
-                  </FormWrapper>
-                );
-              })()}
+              <LocationSelectDropdown
+                data-plasmic-name={"locationSelectDropdown"}
+                data-plasmic-override={overrides.locationSelectDropdown}
+                className={classNames(
+                  "__wab_instance",
+                  sty.locationSelectDropdown
+                )}
+                fullWidth={false}
+                label={"Location"}
+                placeholder={"Select a location"}
+                showLabel={false}
+              />
             </div>
             <div className={classNames(projectcss.all, sty.freeBox__pKjWu)}>
               <div className={classNames(projectcss.all, sty.freeBox__cVk2)}>
@@ -888,19 +708,13 @@ const PlasmicDescendants = {
   root: [
     "root",
     "logo",
-    "form",
-    "formField",
-    "select",
-    "button",
+    "locationSelectDropdown",
     "logoutButton",
     "account",
     "supabaseUserLogOut"
   ],
   logo: ["logo"],
-  form: ["form", "formField", "select", "button"],
-  formField: ["formField", "select"],
-  select: ["select"],
-  button: ["button"],
+  locationSelectDropdown: ["locationSelectDropdown"],
   logoutButton: ["logoutButton"],
   account: ["account"],
   supabaseUserLogOut: ["supabaseUserLogOut"]
@@ -911,10 +725,7 @@ type DescendantsType<T extends NodeNameType> =
 type NodeDefaultElementType = {
   root: "div";
   logo: typeof PlasmicImg__;
-  form: typeof FormWrapper;
-  formField: typeof FormItemWrapper;
-  select: typeof AntdSelect;
-  button: typeof AntdButton;
+  locationSelectDropdown: typeof LocationSelectDropdown;
   logoutButton: typeof LogoutButton;
   account: typeof PlasmicImg__;
   supabaseUserLogOut: typeof SupabaseUserLogOut;
@@ -983,10 +794,7 @@ export const PlasmicMenuNavigation = Object.assign(
   {
     // Helper components rendering sub-elements
     logo: makeNodeComponent("logo"),
-    form: makeNodeComponent("form"),
-    formField: makeNodeComponent("formField"),
-    select: makeNodeComponent("select"),
-    button: makeNodeComponent("button"),
+    locationSelectDropdown: makeNodeComponent("locationSelectDropdown"),
     logoutButton: makeNodeComponent("logoutButton"),
     account: makeNodeComponent("account"),
     supabaseUserLogOut: makeNodeComponent("supabaseUserLogOut"),

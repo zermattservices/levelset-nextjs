@@ -1078,6 +1078,24 @@
           "name": "DashboardMetricCard",
           "displayName": "DashboardMetricCard",
           "componentImportPath": "./components/CodeComponents/DashboardMetricCard"
+        },
+        {
+          "id": "xGtCjBxqS8e8",
+          "name": "LocationSelectDropdown",
+          "displayName": "LocationSelectDropdown",
+          "componentImportPath": "./components/CodeComponents/LocationSelectDropdown"
+        },
+        {
+          "id": "r7jw9gr3SmiF",
+          "name": "LocationSelectModal",
+          "displayName": "LocationSelectModal",
+          "componentImportPath": "./components/CodeComponents/LocationSelectModal"
+        },
+        {
+          "id": "TyW2jq7R_8jA",
+          "name": "LocationProvider",
+          "displayName": "LocationProvider",
+          "componentImportPath": "./components/CodeComponents/LocationContext"
         }
       ],
       "splitsProviderFilePath": "",
