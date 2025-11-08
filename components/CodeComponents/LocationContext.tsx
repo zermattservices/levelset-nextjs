@@ -89,6 +89,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
   const [selectedLocationId, setSelectedLocationId] = React.useState<string | null>(null);
   const [selectedLocationNumber, setSelectedLocationNumber] = React.useState<string | null>(null);
   const [userId, setUserId] = React.useState<string | null>(null);
+  const userIdRef = React.useRef<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -155,6 +156,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       }
 
       setUserId(fetchedUserId);
+      userIdRef.current = fetchedUserId;
       setLocations(fetchedLocations);
 
       const storageKey = buildStorageKey(fetchedUserId);
@@ -180,7 +182,15 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
   }, [loadLocations]);
 
   React.useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        const key = buildStorageKey(userIdRef.current);
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem(key);
+        }
+        setSelectedLocationId(null);
+        setSelectedLocationNumber(null);
+      }
       loadLocations();
     });
 
