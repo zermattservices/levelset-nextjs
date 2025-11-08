@@ -2,6 +2,7 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import { useDataEnv } from '@plasmicapp/react-web/lib/host';
+import { Skeleton } from '@mui/material';
 
 import { createSupabaseClient } from '@/util/supabase/component';
 
@@ -97,7 +98,7 @@ export function DashboardMetricCard({
 
     if (!effectiveOrgId || !effectiveLocationId) {
       setMetricState(null);
-      setError('Location or organization missing.');
+      setError(null);
       setLoading(false);
       return;
     }
@@ -210,27 +211,22 @@ export function DashboardMetricCard({
     .filter(Boolean)
     .join(' ');
 
-  if (loading) {
+  const missingContext = !effectiveOrgId || !effectiveLocationId;
+  const shouldShowSkeleton = loading || missingContext || (!metricState && !error);
+
+  if (error && !shouldShowSkeleton) {
     return (
       <div className={containerClasses}>
         <div className={styles.metricItem}>
-          <div className={styles.loadingState}>Loading metrics…</div>
+          <div className={styles.errorState}>{error}</div>
         </div>
       </div>
     );
   }
 
-  if (error || !metricState) {
-    return (
-      <div className={containerClasses}>
-        <div className={styles.metricItem}>
-          <div className={styles.errorState}>{error || 'Metrics unavailable.'}</div>
-        </div>
-      </div>
-    );
-  }
-
-  const { total, change, percent, timestamp } = metricState;
+  const total = metricState?.total ?? 0;
+  const change = metricState?.change ?? 0;
+  const percent = metricState?.percent ?? 0;
 
   const percentRounded = Number.isFinite(percent) ? Number(percent.toFixed(1)) : 0;
   const percentText = `${percentRounded > 0 ? '+' : percentRounded < 0 ? '' : ''}${percentRounded.toFixed(1)}%`;
@@ -260,18 +256,36 @@ export function DashboardMetricCard({
       >
         <div className={styles.titleAndTrend}>
           <div className={styles.title}>{config.title}</div>
-          <div className={percentTrendClasses} aria-live="polite">
-            <ArrowUpIcon className={arrowClasses} />
-            <span>{percentText}</span>
-          </div>
+          {shouldShowSkeleton ? (
+            <Skeleton
+              variant="rounded"
+              animation="wave"
+              sx={{ width: 110, height: 36, borderRadius: 18 }}
+            />
+          ) : (
+            <div className={percentTrendClasses} aria-live="polite">
+              <ArrowUpIcon className={arrowClasses} />
+              <span>{percentText}</span>
+            </div>
+          )}
         </div>
 
         <div className={styles.supportingMetrics}>
           <div className={styles.primaryRow}>
             <span className={styles.primaryLabel}>{config.totalLabel}</span>
-            <span className={styles.primaryValue}>{formatNumber(total)}</span>
+            <span className={styles.primaryValue}>
+              {shouldShowSkeleton ? (
+                <Skeleton variant="text" animation="wave" sx={{ width: 64, height: 28 }} />
+              ) : (
+                formatNumber(total)
+              )}
+            </span>
             <span className={styles.primaryMeta}>
-              <span className={deltaClasses}>{deltaText}</span>
+              {shouldShowSkeleton ? (
+                <Skeleton variant="text" animation="wave" sx={{ width: 56, height: 20 }} />
+              ) : (
+                <span className={deltaClasses}>{deltaText}</span>
+              )}
               <span className={styles.periodLabel}>{config.deltaLabel}</span>
             </span>
           </div>

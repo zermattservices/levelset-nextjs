@@ -709,6 +709,13 @@ export function PositionalRatings({
 
   // Fetch ratings data
   const fetchRatings = React.useCallback(async () => {
+    if (!orgId || !locationId) {
+      setError(null);
+      setRows([]);
+      setFilteredRows([]);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     

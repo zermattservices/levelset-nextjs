@@ -20,6 +20,7 @@ import { styled } from "@mui/material/styles";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { EmployeeTableSkeleton } from "./Skeletons/EmployeeTableSkeleton";
+import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 
 export type Role =
   | "New Hire"
@@ -325,6 +326,7 @@ export function RosterTable({
   const [data, setData] = React.useState<RosterEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const inEditor = usePlasmicCanvasContext();
   
   // Role dropdown state
   const [roleMenuAnchor, setRoleMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
@@ -372,7 +374,6 @@ export function RosterTable({
     } catch (err) {
       console.error('Error fetching employees:', err);
       setError(err instanceof Error ? err.message : 'Failed to load employees');
-      setData(sampleData); // Fallback to sample data
     } finally {
       setLoading(false);
     }
@@ -380,13 +381,20 @@ export function RosterTable({
 
   // Fetch employees on mount and when orgId/locationId changes
   React.useEffect(() => {
-    if (orgId && locationId) {
-      fetchEmployees();
-    } else {
-      setData(sampleData);
+    if (!orgId || !locationId) {
+      if (inEditor) {
+        setData(sampleData);
+        setError(null);
+      } else {
+        setData([]);
+        setError('Select a location to view the roster.');
+      }
       setLoading(false);
+      return;
     }
-  }, [orgId, locationId, fetchEmployees]);
+
+    fetchEmployees();
+  }, [orgId, locationId, fetchEmployees, inEditor]);
 
   // Real-time subscription disabled - Realtime not enabled on employees table
   // If you need real-time updates, enable Realtime on the employees table in Supabase

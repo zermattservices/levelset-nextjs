@@ -49,7 +49,7 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
       }}
     >
       <DialogContent sx={{ padding: 0 }}>
-        <Stack spacing={3} alignItems="center">
+        <Stack spacing={3} alignItems="center" sx={{ width: "100%", maxWidth: 320, marginX: "auto" }}>
           <Typography
             variant="h5"
             sx={{
@@ -77,11 +77,10 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
           )}
 
           {!loading && !error && shouldShowButtons && (
-            <Stack spacing={2} width="100%">
+            <Stack spacing={2} alignItems="center" sx={{ width: "100%", maxWidth: 320 }}>
               {locations.map((location) => (
                 <Button
                   key={location.id}
-                  fullWidth
                   onClick={() => selectLocation(location.id)}
                   sx={{
                     fontFamily,
@@ -91,9 +90,12 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
                     textTransform: 'none',
                     paddingY: 1.5,
                     paddingX: 6,
+                    width: "auto",
+                    minWidth: 0,
                     backgroundColor: '#31664a',
+                    whiteSpace: 'nowrap',
                     color: '#ffffff',
-                    boxShadow: '0px 10px 18px rgba(49, 102, 74, 0.25)',
+                    boxShadow: '0px 6px 16px rgba(49, 102, 74, 0.12)',
                     '&:hover': {
                       backgroundColor: '#28523a',
                     },

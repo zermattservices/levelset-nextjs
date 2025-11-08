@@ -103,6 +103,11 @@ export function RatingsAnalytics({
   React.useEffect(() => {
     async function fetchPriorPeriod() {
       if (!startDate || !endDate) return;
+      if (!orgId || !locationId) {
+        setAnalyticsData(null);
+        setAnalyticsLoading(false);
+        return;
+      }
 
       setAnalyticsLoading(true);
 
