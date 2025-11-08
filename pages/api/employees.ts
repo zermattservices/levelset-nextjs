@@ -2,6 +2,8 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { Employee } from '@/lib/supabase.types';
 import { calculatePay, shouldCalculatePay } from '@/lib/pay-calculator';
+import { allPositionsQualified } from '@/lib/certification-utils';
+import { fetchEmployeePositionAverages } from '@/lib/fetch-position-averages';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Handle CORS preflight
@@ -63,6 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const updateData: Partial<Employee> = {};
+      const previousStatus = currentEmployee.certified_status || 'Not Certified';
       
       // Track if any pay-affecting fields changed
       let payFieldsChanged = false;
@@ -120,6 +123,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Failed to update employee' });
       }
 
+      if (
+        previousStatus === 'Not Certified' &&
+        data?.certified_status === 'Pending'
+      ) {
+        await ensureEvaluationForPending(supabase, data as Employee);
+      }
+
       return res.status(200).json({ employee: data });
     }
 
@@ -127,5 +137,68 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error('API error:', error);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+function addMonths(date: Date, months: number): Date {
+  const clone = new Date(date);
+  clone.setMonth(clone.getMonth() + months);
+  return clone;
+}
+
+function formatMonthLabel(date: Date): string {
+  return date.toLocaleString('en-US', { month: 'long' });
+}
+
+async function ensureEvaluationForPending(supabase: ReturnType<typeof createServerSupabaseClient>, employee: Employee) {
+  try {
+    const { data: existing } = await supabase
+      .from('evaluations')
+      .select('id')
+      .eq('employee_id', employee.id)
+      .in('status', ['Planned', 'Scheduled'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const averages = await fetchEmployeePositionAverages([employee], supabase);
+    const positions = averages[0]?.positions || {};
+    const ratingStatus = Object.keys(positions).length > 0 && allPositionsQualified(positions);
+
+    if (existing) {
+      await supabase
+        .from('evaluations')
+        .update({
+          rating_status: ratingStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existing.id);
+      return;
+    }
+
+    const evaluationMonth = formatMonthLabel(addMonths(new Date(), 1));
+
+    const { error: insertError } = await supabase.from('evaluations').insert({
+      employee_id: employee.id,
+      employee_name: employee.full_name,
+      location_id: employee.location_id,
+      org_id: employee.org_id,
+      leader_id: null,
+      leader_name: null,
+      evaluation_date: null,
+      month: evaluationMonth,
+      role: employee.role,
+      status: 'Planned',
+      rating_status: ratingStatus,
+      state_before: 'Pending',
+      state_after: null,
+      notes: null,
+    });
+
+    if (insertError) {
+      console.error('[Employees API] Failed to create evaluation record:', insertError);
+    }
+  } catch (error) {
+    console.error('[Employees API] Unexpected error while creating evaluation:', error);
   }
 }

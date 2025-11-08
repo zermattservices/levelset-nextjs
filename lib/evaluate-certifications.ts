@@ -4,16 +4,22 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import type { Employee, CertificationStatus, CertificationAudit } from './supabase.types';
-import { 
-  allPositionsQualified, 
+import type { Employee, CertificationStatus } from './supabase.types';
+import {
+  allPositionsQualified,
   isEligibleLocation,
-  getPEAAuditDay,
+  getFourthFullWeekThursday,
+  getThirdFullWeekFriday,
+  getNextPEAAuditDay,
+  getNextThirdFullWeekFriday,
+  sameDay,
 } from './certification-utils';
-import { 
+import {
   fetchEmployeePositionAverages,
   type PositionAverages,
 } from './fetch-position-averages';
+
+type AuditRunType = 'FOURTH_THURSDAY' | 'THIRD_FRIDAY';
 
 interface EvaluationResult {
   employeeId: string;
@@ -25,210 +31,36 @@ interface EvaluationResult {
   notes?: string;
 }
 
+const ACTIVE_EVALUATION_STATUSES = ['Planned', 'Scheduled'];
+
 /**
- * Evaluate certifications for all employees in a location
- * @param locationId - The location to evaluate
- * @param auditDate - The audit date (PEA Audit Day)
- * @param supabaseUrl - Supabase project URL
- * @param supabaseKey - Supabase service role key
- * @returns Array of evaluation results
+ * Evaluate certifications for all employees in a location.
+ * The behaviour changes depending on the audit run type (4th Thursday vs 3rd Friday).
  */
 export async function evaluateCertifications(
   locationId: string,
-  auditDate: Date,
+  referenceDate: Date,
   supabaseUrl: string,
-  supabaseKey: string
+  supabaseKey: string,
+  runType: AuditRunType = 'FOURTH_THURSDAY'
 ): Promise<EvaluationResult[]> {
-  // Check if this location is eligible for certification tracking
   if (!isEligibleLocation(locationId)) {
     console.log(`Location ${locationId} is not eligible for certification tracking`);
     return [];
   }
-  
-  // Create Supabase client with service role
+
   const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
   });
-  
-  // Fetch active Team Member employees for this location
-  // Certification only applies to Team Members, not Trainers or Leadership
-  const { data: employees, error: employeesError } = await supabase
-    .from('employees')
-    .select('*')
-    .eq('location_id', locationId)
-    .eq('active', true)
-    .eq('role', 'Team Member');
-  
-  if (employeesError || !employees) {
-    console.error('Error fetching employees:', employeesError);
-    return [];
-  }
-  
-  // Calculate position averages from ratings table
-  const positionAveragesData = await fetchEmployeePositionAverages(employees as Employee[], supabase);
-  
-  // Create a map for quick lookup
-  const averagesMap = new Map<string, PositionAverages>();
-  positionAveragesData.forEach(avg => {
-    averagesMap.set(avg.employeeId, avg);
-  });
-  
-  // Process each employee
-  const results: EvaluationResult[] = [];
-  
-  for (const employee of employees as Employee[]) {
-    const result = await evaluateEmployee(
-      employee,
-      averagesMap.get(employee.id),
-      auditDate,
-      supabase
-    );
-    
-    if (result) {
-      results.push(result);
-      
-      // Save audit record and update employee status
-      await saveEvaluationResult(result, auditDate, supabase);
-    }
-  }
-  
-  return results;
-}
 
-/**
- * Evaluate a single employee's certification status
- */
-async function evaluateEmployee(
-  employee: Employee,
-  positionAverages: PositionAverages | undefined,
-  auditDate: Date,
-  supabase: any
-): Promise<EvaluationResult | null> {
-  const currentStatus = employee.certified_status || 'Not Certified';
-  let newStatus: CertificationStatus = currentStatus;
-  let notes: string | undefined;
-  
-  const positions = positionAverages?.positions || {};
-  const allQualified = Object.keys(positions).length > 0 && allPositionsQualified(positions);
-  
-  // Fetch last 2 audit records for this employee
-  const { data: previousAudits } = await supabase
-    .from('certification_audit')
-    .select('*')
-    .eq('employee_id', employee.id)
-    .order('audit_date', { ascending: false })
-    .limit(2);
-  
-  const lastAudit = previousAudits?.[0] as CertificationAudit | undefined;
-  const secondLastAudit = previousAudits?.[1] as CertificationAudit | undefined;
-  
-  // Apply state machine logic
-  switch (currentStatus) {
-    case 'Not Certified':
-      newStatus = evaluateNotCertified(allQualified, lastAudit);
-      if (newStatus === 'Pending') {
-        notes = 'Employee qualified with all positions >= 2.85 for two consecutive months. Evaluation pending.';
-      }
-      break;
-      
-    case 'Pending':
-      // Pending status is manually changed to Certified after evaluation
-      // But if they drop below threshold, return to Not Certified
-      if (!allQualified) {
-        newStatus = 'Not Certified';
-        notes = 'Position averages dropped below 2.85 while in Pending status.';
-      }
-      break;
-      
-    case 'Certified':
-      newStatus = evaluateCertified(allQualified, lastAudit, currentStatus);
-      if (newStatus === 'PIP') {
-        notes = 'Employee below 2.85 threshold for two consecutive months. Placed on PIP.';
-      } else if (newStatus === 'Certified' && !allQualified) {
-        notes = 'WARNING: At least one position below 2.85. Will be placed on PIP next month if not improved.';
-      }
-      break;
-      
-    case 'PIP':
-      newStatus = evaluatePIP(allQualified);
-      if (newStatus === 'Certified') {
-        notes = 'Employee improved all positions to >= 2.85. Returned to Certified status.';
-      } else if (newStatus === 'Not Certified') {
-        notes = 'Employee did not improve within PIP period. Status changed to Not Certified.';
-      }
-      break;
+  if (runType === 'THIRD_FRIDAY') {
+    return evaluateThirdFridayPendingCheck(locationId, referenceDate, supabase);
   }
-  
-  return {
-    employeeId: employee.id,
-    employeeName: employee.full_name || `${employee.first_name} ${employee.last_name || ''}`.trim(),
-    statusBefore: currentStatus,
-    statusAfter: newStatus,
-    positionAverages: positions,
-    allQualified,
-    notes,
-  };
-}
 
-/**
- * Evaluate transition from Not Certified
- */
-function evaluateNotCertified(
-  allQualified: boolean,
-  lastAudit: CertificationAudit | undefined
-): CertificationStatus {
-  // If not qualified this month, stay Not Certified
-  if (!allQualified) {
-    return 'Not Certified';
-  }
-  
-  // If qualified this month AND qualified last month, move to Pending
-  if (lastAudit && lastAudit.all_positions_qualified) {
-    return 'Pending';
-  }
-  
-  // Qualified this month but no history or wasn't qualified last month
-  return 'Not Certified';
-}
-
-/**
- * Evaluate transition from Certified
- */
-function evaluateCertified(
-  allQualified: boolean,
-  lastAudit: CertificationAudit | undefined,
-  currentStatus: CertificationStatus
-): CertificationStatus {
-  // If still qualified, stay Certified
-  if (allQualified) {
-    return 'Certified';
-  }
-  
-  // Not qualified this month - check if there was a warning last month
-  if (lastAudit && lastAudit.status_after === 'Certified' && !lastAudit.all_positions_qualified) {
-    // Had warning last month and still below threshold -> PIP
-    return 'PIP';
-  }
-  
-  // First month below threshold - issue warning but stay Certified
-  return 'Certified';
-}
-
-/**
- * Evaluate transition from PIP
- */
-function evaluatePIP(allQualified: boolean): CertificationStatus {
-  // If improved to all qualified, return to Certified
-  if (allQualified) {
-    return 'Certified';
-  }
-  
-  // PIP period ends after one audit cycle
-  // If still not qualified, move to Not Certified
-  return 'Not Certified';
+  return evaluateFourthThursdayAudit(locationId, referenceDate, supabase);
 }
 
 /**
@@ -299,53 +131,338 @@ export async function runMonthlyEvaluation(
   supabaseKey: string
 ): Promise<{ success: boolean; message: string; results?: EvaluationResult[] }> {
   const today = new Date();
-  const auditDay = getPEAAuditDay(today.getFullYear(), today.getMonth() + 1);
-  
-  // Check if today is the audit day
-  const isAuditDay = (
-    today.getFullYear() === auditDay.getFullYear() &&
-    today.getMonth() === auditDay.getMonth() &&
-    today.getDate() === auditDay.getDate()
-  );
-  
-  if (!isAuditDay) {
+  const fourthThursday = getFourthFullWeekThursday(today.getFullYear(), today.getMonth() + 1);
+  const thirdFriday = getThirdFullWeekFriday(today.getFullYear(), today.getMonth() + 1);
+
+  let runType: AuditRunType | null = null;
+  let referenceDate: Date | null = null;
+
+  if (sameDay(today, thirdFriday)) {
+    runType = 'THIRD_FRIDAY';
+    referenceDate = thirdFriday;
+  } else if (sameDay(today, fourthThursday)) {
+    runType = 'FOURTH_THURSDAY';
+    referenceDate = fourthThursday;
+  }
+
+  if (!runType || !referenceDate) {
+    const nextAudit = getNextPEAAuditDay(today);
+    const nextPendingCheck = getNextThirdFullWeekFriday(today);
     return {
       success: false,
-      message: `Today is not PEA Audit Day. Next audit day is ${auditDay.toLocaleDateString()}`,
+      message: `Today is not a certification evaluation day. Next 3rd-Friday check: ${nextPendingCheck.toLocaleDateString()}, next 4th-Thursday audit: ${nextAudit.toLocaleDateString()}`,
     };
   }
-  
-  // Run evaluations for both Buda and West Buda
+
+  const supabaseCredentialsMissing = !supabaseUrl || !supabaseKey;
+  if (supabaseCredentialsMissing) {
+    console.error('[Cron] Missing Supabase credentials');
+    return {
+      success: false,
+      message: 'Server configuration error: Missing Supabase credentials',
+    };
+  }
+
   const budaLocationId = process.env.NEXT_PUBLIC_BUDA_LOCATION_ID;
   const westBudaLocationId = process.env.NEXT_PUBLIC_WEST_BUDA_LOCATION_ID;
-  
   const allResults: EvaluationResult[] = [];
-  
+
   if (budaLocationId) {
     const budaResults = await evaluateCertifications(
       budaLocationId,
-      auditDay,
+      referenceDate,
       supabaseUrl,
-      supabaseKey
+      supabaseKey,
+      runType
     );
     allResults.push(...budaResults);
   }
-  
+
   if (westBudaLocationId) {
     const westBudaResults = await evaluateCertifications(
       westBudaLocationId,
-      auditDay,
+      referenceDate,
       supabaseUrl,
-      supabaseKey
+      supabaseKey,
+      runType
     );
     allResults.push(...westBudaResults);
   }
-  
-  const statusChanges = allResults.filter(r => r.statusBefore !== r.statusAfter);
-  
+
+  const statusChanges = allResults.filter((r) => r.statusBefore !== r.statusAfter);
+  const descriptor =
+    runType === 'THIRD_FRIDAY' ? '3rd-Friday pending check' : '4th-Thursday audit';
+
   return {
     success: true,
-    message: `Evaluated ${allResults.length} employees. ${statusChanges.length} status changes.`,
+    message: `${descriptor} evaluated ${allResults.length} employees. ${statusChanges.length} status changes.`,
     results: allResults,
   };
+}
+
+// ===== Helper Logic =====
+
+async function evaluateFourthThursdayAudit(
+  locationId: string,
+  auditDate: Date,
+  supabase: any
+): Promise<EvaluationResult[]> {
+  const employees = await fetchTeamMembers(supabase, locationId);
+  if (employees.length === 0) {
+    return [];
+  }
+
+  const averagesMap = await buildPositionAverageMap(supabase, employees);
+  const results: EvaluationResult[] = [];
+
+  for (const employee of employees) {
+    const currentStatus: CertificationStatus = employee.certified_status || 'Not Certified';
+    const positions = averagesMap.get(employee.id)?.positions || {};
+    const hasPositions = Object.keys(positions).length > 0;
+    const allQualified = hasPositions && allPositionsQualified(positions);
+
+    let newStatus: CertificationStatus = currentStatus;
+    let notes: string | undefined;
+
+    if (currentStatus === 'Not Certified') {
+      if (allQualified) {
+        newStatus = 'Pending';
+        notes = 'Qualified for evaluation; moved to Pending.';
+        await createPendingEvaluationRecord(supabase, employee, auditDate, true);
+      }
+    } else if (currentStatus === 'Pending') {
+      if (!allQualified) {
+        newStatus = 'Not Certified';
+        notes = 'Lost qualification during evaluation week; evaluation cancelled.';
+        await cancelActiveEvaluationRecord(supabase, employee.id, 'Not Certified');
+      } else {
+        await updatePendingEvaluationRatingStatus(supabase, employee.id, true);
+      }
+    } else if (currentStatus === 'Certified') {
+      if (!allQualified) {
+        newStatus = 'PIP';
+        notes = 'Ratings below 2.75; moved to PIP.';
+      }
+    } else if (currentStatus === 'PIP') {
+      if (allQualified) {
+        newStatus = 'Certified';
+        notes = 'Improved while on PIP; returned to Certified.';
+      } else {
+        newStatus = 'Not Certified';
+        notes = 'Did not improve while on PIP; moved to Not Certified.';
+      }
+    }
+
+    if (newStatus !== currentStatus) {
+      const result: EvaluationResult = {
+        employeeId: employee.id,
+        employeeName: employee.full_name || `${employee.first_name} ${employee.last_name || ''}`.trim(),
+        statusBefore: currentStatus,
+        statusAfter: newStatus,
+        positionAverages: positions,
+        allQualified,
+        notes,
+      };
+
+      results.push(result);
+      await saveEvaluationResult(result, auditDate, supabase);
+    }
+  }
+
+  return results;
+}
+
+async function evaluateThirdFridayPendingCheck(
+  locationId: string,
+  checkDate: Date,
+  supabase: any
+): Promise<EvaluationResult[]> {
+  const employees = await fetchTeamMembers(supabase, locationId, ['Pending']);
+  if (employees.length === 0) {
+    return [];
+  }
+
+  const averagesMap = await buildPositionAverageMap(supabase, employees);
+  const results: EvaluationResult[] = [];
+
+  for (const employee of employees) {
+    const positions = averagesMap.get(employee.id)?.positions || {};
+    const hasPositions = Object.keys(positions).length > 0;
+    const allQualified = hasPositions && allPositionsQualified(positions);
+
+    if (allQualified) {
+      await updatePendingEvaluationRatingStatus(supabase, employee.id, true);
+      continue;
+    }
+
+    await cancelActiveEvaluationRecord(supabase, employee.id, 'Not Certified');
+
+    const result: EvaluationResult = {
+      employeeId: employee.id,
+      employeeName: employee.full_name || `${employee.first_name} ${employee.last_name || ''}`.trim(),
+      statusBefore: 'Pending',
+      statusAfter: 'Not Certified',
+      positionAverages: positions,
+      allQualified,
+      notes: 'Failed pre-evaluation rating check; evaluation cancelled.',
+    };
+
+    results.push(result);
+    await saveEvaluationResult(result, checkDate, supabase);
+  }
+
+  return results;
+}
+
+async function fetchTeamMembers(
+  supabase: any,
+  locationId: string,
+  statuses?: CertificationStatus[]
+): Promise<Employee[]> {
+  let query = supabase
+    .from('employees')
+    .select('*')
+    .eq('location_id', locationId)
+    .eq('active', true)
+    .eq('role', 'Team Member');
+
+  if (statuses && statuses.length > 0) {
+    query = query.in('certified_status', statuses);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) {
+    console.error('Error fetching employees:', error);
+    return [];
+  }
+
+  return data as Employee[];
+}
+
+async function buildPositionAverageMap(
+  supabase: any,
+  employees: Employee[]
+): Promise<Map<string, PositionAverages>> {
+  const map = new Map<string, PositionAverages>();
+  if (employees.length === 0) {
+    return map;
+  }
+
+  const averages = await fetchEmployeePositionAverages(employees, supabase);
+  averages.forEach((avg) => {
+    map.set(avg.employeeId, avg);
+  });
+
+  return map;
+}
+
+function addMonths(date: Date, months: number): Date {
+  const clone = new Date(date);
+  clone.setMonth(clone.getMonth() + months);
+  return clone;
+}
+
+function formatMonthLabel(date: Date): string {
+  return date.toLocaleString('en-US', { month: 'long' });
+}
+
+async function createPendingEvaluationRecord(
+  supabase: any,
+  employee: Employee,
+  auditDate: Date,
+  ratingStatus: boolean
+): Promise<void> {
+  try {
+    const evaluationMonthDate = addMonths(auditDate, 1);
+    const monthLabel = formatMonthLabel(evaluationMonthDate);
+
+    const { error } = await supabase.from('evaluations').insert({
+      employee_id: employee.id,
+      employee_name: employee.full_name,
+      location_id: employee.location_id,
+      org_id: employee.org_id,
+      leader_id: null,
+      leader_name: null,
+      evaluation_date: null,
+      month: monthLabel,
+      role: employee.role,
+      status: 'Planned',
+      rating_status: ratingStatus,
+      state_before: 'Pending',
+      state_after: null,
+      notes: null,
+    });
+
+    if (error) {
+      console.error(`Error creating evaluation for ${employee.full_name}:`, error);
+    }
+  } catch (error) {
+    console.error('Unexpected error creating evaluation record:', error);
+  }
+}
+
+async function updatePendingEvaluationRatingStatus(
+  supabase: any,
+  employeeId: string,
+  ratingStatus: boolean
+): Promise<void> {
+  const evaluation = await findActiveEvaluationRecord(supabase, employeeId);
+  if (!evaluation) {
+    return;
+  }
+
+  await updateEvaluationRecord(supabase, evaluation.id, { rating_status: ratingStatus });
+}
+
+async function cancelActiveEvaluationRecord(
+  supabase: any,
+  employeeId: string,
+  stateAfter: CertificationStatus
+): Promise<void> {
+  const evaluation = await findActiveEvaluationRecord(supabase, employeeId);
+  if (!evaluation) {
+    return;
+  }
+
+  await updateEvaluationRecord(supabase, evaluation.id, {
+    status: 'Cancelled',
+    rating_status: false,
+    state_after: stateAfter,
+  });
+}
+
+async function findActiveEvaluationRecord(
+  supabase: any,
+  employeeId: string
+): Promise<{ id: string } | null> {
+  const { data, error } = await supabase
+    .from('evaluations')
+    .select('id')
+    .eq('employee_id', employeeId)
+    .in('status', ACTIVE_EVALUATION_STATUSES)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching active evaluation:', error);
+    return null;
+  }
+
+  return data ?? null;
+}
+
+async function updateEvaluationRecord(
+  supabase: any,
+  evaluationId: string,
+  updates: Record<string, any>
+): Promise<void> {
+  const { error } = await supabase
+    .from('evaluations')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', evaluationId);
+
+  if (error) {
+    console.error('Error updating evaluation record:', error);
+  }
 }

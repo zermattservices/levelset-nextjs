@@ -15,11 +15,14 @@ import {
   Menu,
   MenuItem,
   Box,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { EmployeeTableSkeleton } from "./Skeletons/EmployeeTableSkeleton";
+import { EvaluationsTable } from "./EvaluationsTable";
 import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 
 export type Role =
@@ -40,6 +43,32 @@ export interface RosterEntry {
   calculatedPay: number | null;
   foh: boolean;
   boh: boolean;
+}
+
+export function RosterTable(props: RosterTableProps) {
+  const { orgId, locationId } = props;
+  const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations'>('employees');
+
+  const handleTabChange = (_event: React.SyntheticEvent, value: string) => {
+    setActiveTab((value as 'employees' | 'evaluations') ?? 'employees');
+  };
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <StyledTabs value={activeTab} onChange={handleTabChange}>
+        <StyledTab label="Employees" value="employees" />
+        <StyledTab label="Evaluations" value="evaluations" />
+      </StyledTabs>
+
+      <Box sx={{ mt: 2 }}>
+        {activeTab === 'employees' ? (
+          <EmployeesTableView {...props} />
+        ) : (
+          <EvaluationsTable orgId={orgId} locationId={locationId} className={props.className} />
+        )}
+      </Box>
+    </Box>
+  );
 }
 
 export interface RosterTableProps {
@@ -123,6 +152,27 @@ const StyledContainer = styled(TableContainer)(() => ({
   overflow: "hidden",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
+}));
+
+const StyledTabs = styled(Tabs)(() => ({
+  borderBottom: '1px solid #e5e7eb',
+  marginBottom: 16,
+  '& .MuiTabs-indicator': {
+    backgroundColor: '#31664a',
+    height: 3,
+  },
+}));
+
+const StyledTab = styled(Tab)(() => ({
+  fontFamily,
+  fontSize: 14,
+  fontWeight: 500,
+  textTransform: 'none',
+  color: '#6b7280',
+  '&.Mui-selected': {
+    color: '#31664a',
+    fontWeight: 600,
+  },
 }));
 
 const StyledTable = styled(Table)(() => ({
@@ -294,7 +344,7 @@ const CertificationChip = styled(Box)(() => ({
   },
 }));
 
-export function RosterTable({
+function EmployeesTableView({
   orgId,
   locationId,
   className = "",

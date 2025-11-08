@@ -14,15 +14,16 @@ The Certification Status System is an automated employee certification tracking 
 - **Description:** Default state for all new employees or those who don't meet certification requirements
 - **Criteria:**
   - Employee is new or hasn't achieved qualification requirements
-  - Has one or more position averages below 2.85 (yellow or red in Positional Ratings)
-  - Was Certified → PIP → didn't improve (moved to Not Certified)
+  - One or more position averages below **2.75**
+  - Failed the 3rd-Friday pre-check while Pending (evaluation cancelled)
+  - Completed PIP without meeting the threshold (PIP → Not Certified)
 
 ### 2. Pending
 - **Badge:** Yellow background (#fef3c7) with amber text (#d97706)
 - **Description:** Employee has met qualification requirements and is awaiting formal evaluation
 - **Criteria:**
-  - All position averages ≥ 2.75 for two consecutive PEA Audit Days (approximately 30 days)
-  - Awaiting formal evaluation to move to Certified status
+  - All position averages ≥ **2.75** on the **4th-Thursday** audit
+  - Awaiting formal evaluation during the following month
 - **Transition:** Manually changed to "Certified" after evaluation is completed
 
 ### 3. Certified
@@ -31,9 +32,9 @@ The Certification Status System is an automated employee certification tracking 
 - **Criteria:**
   - Successfully completed evaluation while in Pending status
   - Must maintain all position averages ≥ 2.75 to stay certified
-- **Warning System:**
-  - First month below threshold: Warning issued, stays Certified
-  - Second consecutive month below threshold: Moved to PIP
+- **Monitoring:**
+  - 4th-Thursday audit immediately moves a sub-2.75 Certified team member to **PIP**
+  - PIP outcome is determined on the next month's 4th-Thursday audit
 
 ### 4. PIP (Performance Improvement Plan)
 - **Badge:** Red background (#dc2626) with white text
@@ -47,22 +48,27 @@ The Certification Status System is an automated employee certification tracking 
 ## State Transition Flow
 
 ```
-Not Certified → (2 months at ≥2.75) → Pending → (manual evaluation) → Certified
-                                                                          ↓
-                                                                    (2 months < 2.75)
-                                                                          ↓
-Not Certified ← (1 month < 2.75) ← PIP ← (improve to ≥2.75) ← Certified
+Not Certified --(4th Thursday ≥ 2.75)--> Pending --(manual evaluation)--> Certified
+       ^                                   |
+       |                                   | (3rd Friday < 2.75)
+       +-----------<-----------------------+
+
+Certified --(4th Thursday < 2.75)--> PIP --(next 4th Thursday < 2.75)--> Not Certified
+                                \--(next 4th Thursday ≥ 2.75)--> Certified
 ```
 
 **Note:** Only Team Members with the "Team Member" role are evaluated. Trainers and Leadership positions are excluded from the certification system.
 
-## PEA Audit Day
+## Evaluation Cadence
 
-**Definition:** The Monday of the 4th full week of each month
-- A "full week" is Sunday-Saturday where all 7 days fall within that month
-- Example: November 2025 → November 24, 2025 (Monday)
+- **Full Week Definition:** Weeks run **Monday → Saturday** (Sundays are ignored).
+- **3rd-Friday Pending Check:** On the **Friday of the 3rd full week**, only Pending team members are checked. If any position average falls below **2.75**, they immediately return to **Not Certified** and their evaluation is cancelled.
+- **4th-Thursday Audit:** On the **Thursday of the 4th full week**, all Team Members are evaluated:
+  - Not Certified team members at ≥2.75 move to **Pending** (next month's evaluation is planned).
+  - Certified team members <2.75 move straight to **PIP**.
+  - PIP outcomes are determined (≥2.75 → Certified, otherwise Not Certified).
 
-**Automated Evaluation:** Runs every PEA Audit Day via cron job
+These automated checks are triggered by the cron endpoint on their respective days.
 
 ## Pay Calculation
 
@@ -87,6 +93,10 @@ Users can manually change any employee's certification status via the dropdown i
   - Creates `certification_audit` table for history tracking
   - Indexes for performance
   - RLS policies for security
+- **Migration:** `supabase/migrations/20251108_create_evaluations_table.sql`
+  - Creates `evaluations` table for planned evaluations
+  - Tracks assigned leader, month, status, rating status, notes
+  - Foreign keys to `employees`, `locations`, and `orgs`
 
 ### Backend Logic
 - **Utilities:** `lib/certification-utils.ts`
@@ -98,24 +108,28 @@ Users can manually change any employee's certification status via the dropdown i
   - Parses FOH and BOH position averages
   
 - **Evaluation Logic:** `lib/evaluate-certifications.ts`
-  - Core state machine implementation
-  - Handles all state transitions
-  - Creates audit records
+  - Core state machine implementation for 3rd-Friday and 4th-Thursday runs
+  - Creates audit records and evaluation entries
   
 - **Pay Calculator:** `lib/pay-calculator.ts`
   - Updated to use `certified_status` instead of `is_certified`
   - `isCertifiedForPay()` function determines pay qualification
 
 ### Frontend
-- **RosterTable:** `components/CodeComponents/RosterTable.tsx`
-  - Certification status dropdown with styled pills
-  - Manual status change handling
-  - Updated to use `certified_status` field
+- **RosterTable Tabs:** `components/CodeComponents/RosterTable.tsx`
+  - Tabbed layout for Employees and Evaluations views
+  - Employees tab retains roster management
+  - Evaluations tab renders `EvaluationsTable`
+- **EvaluationsTable:** `components/CodeComponents/EvaluationsTable.tsx`
+  - MUI DataGridPro table for scheduling and tracking evaluations
 
 ### API Endpoints
 - **Employees API:** `pages/api/employees.ts`
   - Handles certification status updates
   - Backward compatible with legacy `is_certified` field
+- **Evaluations API:** `pages/api/evaluations.ts`
+  - Lists evaluations for a location/org
+  - Supports inline updates (leader assignment, date, status, notes)
   
 - **Cron Job:** `pages/api/cron/evaluate-certifications.ts`
   - Automated evaluation on PEA Audit Days
@@ -126,6 +140,13 @@ Users can manually change any employee's certification status via the dropdown i
 - **Initial Setup:** `scripts/initial-certification-setup.ts`
   - One-time script to set initial certification statuses
   - Run with: `npx tsx scripts/initial-certification-setup.ts`
+
+## Evaluations Workflow
+
+1. **Planning:** When a Team Member moves from Not Certified → Pending on the 4th-Thursday audit, an evaluation row is created for the following month (`status = Planned`, `rating_status = true`).
+2. **Pre-Check:** The 3rd-Friday job validates Pending team members. Anyone dropping below 2.75 is returned to Not Certified and their evaluation is marked `Cancelled`.
+3. **Scheduling:** Setting an `evaluation_date` (via UI) automatically moves the row to `Scheduled`. Leaders can be assigned directly in the table.
+4. **Completion:** Status can be updated to `Completed` (after evaluation) or `Cancelled` (manual override). `rating_status` can be toggled to reflect current averages.
 
 ## Setup Instructions
 
@@ -196,11 +217,12 @@ git push origin main
    - [ ] Status changes trigger pay recalculation
 
 2. **State Transitions**
-   - [ ] Not Certified → Pending (after 2 months at ≥2.85)
+   - [ ] Not Certified → Pending (4th-Thursday audit ≥2.75)
    - [ ] Pending → Certified (manual change)
-   - [ ] Certified → PIP (after 2 months below 2.85)
-   - [ ] PIP → Certified (improved ratings)
-   - [ ] PIP → Not Certified (didn't improve)
+   - [ ] Pending → Not Certified (3rd-Friday check <2.75)
+   - [ ] Certified → PIP (4th-Thursday audit <2.75)
+   - [ ] PIP → Certified (next 4th-Thursday ≥2.75)
+   - [ ] PIP → Not Certified (next 4th-Thursday <2.75)
 
 3. **PEA Audit Day Calculation**
    - [ ] Verify `getPEAAuditDay()` returns correct Monday for various months
