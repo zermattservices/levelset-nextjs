@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   FormControl,
-  InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -13,21 +12,15 @@ import { useLocationContext } from './LocationContext';
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 export interface LocationSelectDropdownProps {
-  label?: string;
   placeholder?: string;
-  fullWidth?: boolean;
   className?: string;
   disabled?: boolean;
-  showLabel?: boolean;
 }
 
 export function LocationSelectDropdown({
-  label = 'Location',
   placeholder = 'Select a location',
-  fullWidth = false,
   className,
   disabled = false,
-  showLabel = true,
 }: LocationSelectDropdownProps) {
   const { locations, selectedLocationId, loading, selectLocation } = useLocationContext();
 
@@ -44,26 +37,28 @@ export function LocationSelectDropdown({
   return (
     <FormControl
       className={className}
-      fullWidth={fullWidth}
       disabled={disabled || loading || locations.length === 0}
       variant="outlined"
       size="small"
       sx={{
-        minWidth: fullWidth ? undefined : 180,
-        '& .MuiInputBase-root': {
-          borderRadius: 12,
+        width: 120,
+        minWidth: 120,
+        '& .MuiOutlinedInput-root': {
+          borderRadius: '12px',
           backgroundColor: '#ffffff',
           fontFamily,
           fontSize: 14,
           fontWeight: 500,
           color: '#111827',
-          paddingRight: '32px !important',
+          paddingRight: '40px !important',
+          transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
         },
         '& .MuiOutlinedInput-notchedOutline': {
           borderColor: '#e5e7eb',
+          borderWidth: '1px',
         },
         '&:hover .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#cbd5f5',
+          borderColor: '#31664a',
         },
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
           borderColor: '#31664a',
@@ -72,29 +67,22 @@ export function LocationSelectDropdown({
         '& .MuiSelect-icon': {
           color: '#31664a',
           marginRight: 4,
+          right: 10,
         },
-        '& .MuiInputBase-input': {
-          padding: '10px 14px',
+        '& .MuiSelect-select': {
+          display: 'flex',
+          alignItems: 'center',
+          padding: '11px 12px !important',
+          fontFamily,
+          fontSize: 14,
+          fontWeight: 500,
         },
-        '& .Mui-disabled .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#e5e7eb',
+        '& .MuiSelect-select.Mui-disabled': {
+          color: '#9ca3af',
         },
       }}
     >
-      {showLabel && (
-        <InputLabel
-          sx={{
-            fontFamily,
-            fontSize: 12,
-            color: '#6b7280',
-          }}
-        >
-          {label}
-        </InputLabel>
-      )}
-
       <Select
-        label={showLabel ? label : undefined}
         value={selectedLocationId ?? ''}
         displayEmpty
         IconComponent={ExpandMoreIcon}
@@ -113,6 +101,32 @@ export function LocationSelectDropdown({
         onChange={handleChange}
         sx={{
           fontFamily,
+          height: 'auto',
+        }}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              borderRadius: '12px',
+              boxShadow: '0px 20px 40px rgba(15, 23, 42, 0.12)',
+              overflow: 'hidden',
+              minWidth: 160,
+              '& .MuiMenuItem-root': {
+                fontFamily,
+                fontSize: 14,
+                fontWeight: 500,
+                color: '#111827',
+                paddingY: 1,
+                paddingX: 2,
+                '&.Mui-selected': {
+                  backgroundColor: '#eef5f0',
+                  color: '#31664a',
+                },
+                '&.Mui-selected:hover': {
+                  backgroundColor: '#e3efe6',
+                },
+              },
+            },
+          },
         }}
       >
         {loading && (
