@@ -542,6 +542,32 @@ function PlasmicHomepage__RenderFunc(props: {
                         "__wab_instance",
                         sty.dashboardMetricCard__fWith
                       )}
+                      locationId={(() => {
+                        try {
+                          return locationContext.selectedLocationId;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return undefined;
+                          }
+                          throw e;
+                        }
+                      })()}
+                      orgId={(() => {
+                        try {
+                          return $ctx.auth.org_id;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return undefined;
+                          }
+                          throw e;
+                        }
+                      })()}
                       variant={"positional-excellence"}
                     />
 
@@ -550,6 +576,19 @@ function PlasmicHomepage__RenderFunc(props: {
                         "__wab_instance",
                         sty.dashboardMetricCard__e62Fz
                       )}
+                      locationId={(() => {
+                        try {
+                          return locationContext.selectedLocationId;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return undefined;
+                          }
+                          throw e;
+                        }
+                      })()}
                       variant={"discipline-points"}
                     />
 
