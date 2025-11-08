@@ -72,6 +72,7 @@ export function LocationSelectDropdown({
           color: '#31664a',
           marginRight: 0,
           right: 12,
+          pointerEvents: 'none',
         },
         '& .MuiSelect-select': {
           display: 'flex',
