@@ -713,6 +713,7 @@ export function PositionalRatings({
       setError(null);
       setRows([]);
       setFilteredRows([]);
+      setLoading(false);
       return;
     }
 
@@ -805,7 +806,7 @@ export function PositionalRatings({
     if (startDate && endDate) {
       fetchRatings();
     }
-  }, [startDate, endDate, showFOH, showBOH]);
+  }, [startDate, endDate, showFOH, showBOH, fetchRatings]);
 
   // Update filtered rows from DataGrid API whenever filters or data changes
   React.useEffect(() => {
