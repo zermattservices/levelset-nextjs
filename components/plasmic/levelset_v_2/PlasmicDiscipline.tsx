@@ -69,7 +69,7 @@ import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_m
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
 import { CenteredLoadingSpinner } from "../../CodeComponents/CenteredLoadingSpinner"; // plasmic-import: iEXTq_V60EEp/codeComponent
 import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import: gEWHFHS2fu7I/codeComponent
-import { RecommendedActions } from "../../CodeComponents/RecommendedActions"; // plasmic-import: DCoGrXYcTP13/codeComponent
+import { DisciplineNotifications } from "../../CodeComponents/RecommendedActions"; // plasmic-import: p5JIJndPb_tu/codeComponent
 import { DisciplineTable } from "../../CodeComponents/DisciplineTable"; // plasmic-import: Gsr7FZewgF56/codeComponent
 import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTable"; // plasmic-import: gO99exJZ_N-6/codeComponent
 import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
@@ -97,9 +97,7 @@ export type PlasmicDiscipline__OverridesType = {
   menuNavigation?: Flex__<typeof MenuNavigation>;
   centeredLoadingSpinner?: Flex__<typeof CenteredLoadingSpinner>;
   redirectIf?: Flex__<typeof RedirectIf>;
-  recommendedActionsDeprecatedUseDisciplineNotifications?: Flex__<
-    typeof RecommendedActions
-  >;
+  disciplineNotifications?: Flex__<typeof DisciplineNotifications>;
   verticalStack?: Flex__<"div">;
   disciplineTable?: Flex__<typeof DisciplineTable>;
   verticalStack2?: Flex__<"div">;
@@ -492,18 +490,14 @@ function PlasmicDiscipline__RenderFunc(props: {
             </div>
             <div className={classNames(projectcss.all, sty.freeBox__lKzxl)}>
               <div className={classNames(projectcss.all, sty.freeBox__s72NY)}>
-                <RecommendedActions
-                  data-plasmic-name={
-                    "recommendedActionsDeprecatedUseDisciplineNotifications"
-                  }
-                  data-plasmic-override={
-                    overrides.recommendedActionsDeprecatedUseDisciplineNotifications
-                  }
+                <DisciplineNotifications
+                  data-plasmic-name={"disciplineNotifications"}
+                  data-plasmic-override={overrides.disciplineNotifications}
                   className={classNames(
                     "__wab_instance",
-                    sty.recommendedActionsDeprecatedUseDisciplineNotifications
+                    sty.disciplineNotifications
                   )}
-                  currentUser={(() => {
+                  currentUserId={(() => {
                     try {
                       return $ctx.auth.id;
                     } catch (e) {
@@ -516,9 +510,33 @@ function PlasmicDiscipline__RenderFunc(props: {
                       throw e;
                     }
                   })()}
-                  locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                  locationId={(() => {
+                    try {
+                      return $ctx.locationContext.selectedLocationId;
+                    } catch (e) {
+                      if (
+                        e instanceof TypeError ||
+                        e?.plasmicType === "PlasmicUndefinedDataError"
+                      ) {
+                        return undefined;
+                      }
+                      throw e;
+                    }
+                  })()}
                   maxWidth={"1200px"}
-                  orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                  orgId={(() => {
+                    try {
+                      return $ctx.auth.org_id;
+                    } catch (e) {
+                      if (
+                        e instanceof TypeError ||
+                        e?.plasmicType === "PlasmicUndefinedDataError"
+                      ) {
+                        return undefined;
+                      }
+                      throw e;
+                    }
+                  })()}
                   width={"100%"}
                 />
 
@@ -558,8 +576,32 @@ function PlasmicDiscipline__RenderFunc(props: {
                         }
                       })()}
                       density={"comfortable"}
-                      locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                      orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                      locationId={(() => {
+                        try {
+                          return $ctx.locationContext.selectedLocationId;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return undefined;
+                          }
+                          throw e;
+                        }
+                      })()}
+                      orgId={(() => {
+                        try {
+                          return $ctx.auth.org_id;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return undefined;
+                          }
+                          throw e;
+                        }
+                      })()}
                       showActions={true}
                     />
                   </div>
@@ -585,8 +627,32 @@ function PlasmicDiscipline__RenderFunc(props: {
                         sty.disciplineActionsTable
                       )}
                       density={"comfortable"}
-                      locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
-                      orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                      locationId={(() => {
+                        try {
+                          return $ctx.locationContext.selectedLocationId;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return undefined;
+                          }
+                          throw e;
+                        }
+                      })()}
+                      orgId={(() => {
+                        try {
+                          return $ctx.auth.org_id;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return undefined;
+                          }
+                          throw e;
+                        }
+                      })()}
                       showActions={false}
                     />
                   </div>
@@ -606,7 +672,7 @@ const PlasmicDescendants = {
     "menuNavigation",
     "centeredLoadingSpinner",
     "redirectIf",
-    "recommendedActionsDeprecatedUseDisciplineNotifications",
+    "disciplineNotifications",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
@@ -616,7 +682,7 @@ const PlasmicDescendants = {
   centeredLoadingSpinner: [
     "centeredLoadingSpinner",
     "redirectIf",
-    "recommendedActionsDeprecatedUseDisciplineNotifications",
+    "disciplineNotifications",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
@@ -624,15 +690,13 @@ const PlasmicDescendants = {
   ],
   redirectIf: [
     "redirectIf",
-    "recommendedActionsDeprecatedUseDisciplineNotifications",
+    "disciplineNotifications",
     "verticalStack",
     "disciplineTable",
     "verticalStack2",
     "disciplineActionsTable"
   ],
-  recommendedActionsDeprecatedUseDisciplineNotifications: [
-    "recommendedActionsDeprecatedUseDisciplineNotifications"
-  ],
+  disciplineNotifications: ["disciplineNotifications"],
   verticalStack: ["verticalStack", "disciplineTable"],
   disciplineTable: ["disciplineTable"],
   verticalStack2: ["verticalStack2", "disciplineActionsTable"],
@@ -646,7 +710,7 @@ type NodeDefaultElementType = {
   menuNavigation: typeof MenuNavigation;
   centeredLoadingSpinner: typeof CenteredLoadingSpinner;
   redirectIf: typeof RedirectIf;
-  recommendedActionsDeprecatedUseDisciplineNotifications: typeof RecommendedActions;
+  disciplineNotifications: typeof DisciplineNotifications;
   verticalStack: "div";
   disciplineTable: typeof DisciplineTable;
   verticalStack2: "div";
@@ -718,9 +782,7 @@ export const PlasmicDiscipline = Object.assign(
     menuNavigation: makeNodeComponent("menuNavigation"),
     centeredLoadingSpinner: makeNodeComponent("centeredLoadingSpinner"),
     redirectIf: makeNodeComponent("redirectIf"),
-    recommendedActionsDeprecatedUseDisciplineNotifications: makeNodeComponent(
-      "recommendedActionsDeprecatedUseDisciplineNotifications"
-    ),
+    disciplineNotifications: makeNodeComponent("disciplineNotifications"),
     verticalStack: makeNodeComponent("verticalStack"),
     disciplineTable: makeNodeComponent("disciplineTable"),
     verticalStack2: makeNodeComponent("verticalStack2"),

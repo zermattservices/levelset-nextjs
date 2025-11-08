@@ -594,10 +594,34 @@ function PlasmicPeaClassic__RenderFunc(props: {
                   className={classNames("__wab_instance", sty.peaClassic)}
                   defaultArea={"FOH"}
                   defaultTab={"overview"}
-                  density={"comfortable"}
-                  locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
+                  density={"compact"}
+                  locationId={(() => {
+                    try {
+                      return $ctx.locationContext.selectedLocationId;
+                    } catch (e) {
+                      if (
+                        e instanceof TypeError ||
+                        e?.plasmicType === "PlasmicUndefinedDataError"
+                      ) {
+                        return undefined;
+                      }
+                      throw e;
+                    }
+                  })()}
                   maxWidth={"100%"}
-                  orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
+                  orgId={(() => {
+                    try {
+                      return $ctx.auth.org_id;
+                    } catch (e) {
+                      if (
+                        e instanceof TypeError ||
+                        e?.plasmicType === "PlasmicUndefinedDataError"
+                      ) {
+                        return undefined;
+                      }
+                      throw e;
+                    }
+                  })()}
                   width={"100%"}
                 />
               </div>

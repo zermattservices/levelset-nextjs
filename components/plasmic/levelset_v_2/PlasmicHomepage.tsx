@@ -544,7 +544,7 @@ function PlasmicHomepage__RenderFunc(props: {
                       )}
                       locationId={(() => {
                         try {
-                          return locationContext.selectedLocationId;
+                          return $ctx.locationContext.selectedLocationId;
                         } catch (e) {
                           if (
                             e instanceof TypeError ||
@@ -578,7 +578,7 @@ function PlasmicHomepage__RenderFunc(props: {
                       )}
                       locationId={(() => {
                         try {
-                          return locationContext.selectedLocationId;
+                          return $ctx.locationContext.selectedLocationId;
                         } catch (e) {
                           if (
                             e instanceof TypeError ||
