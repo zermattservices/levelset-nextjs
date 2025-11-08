@@ -586,6 +586,10 @@ export function PositionalRatings({
     if (big5LabelsCache.has(position)) {
       return big5LabelsCache.get(position);
     }
+
+    if (!orgId || !locationId) {
+      return null;
+    }
     
     try {
       const response = await fetch(
