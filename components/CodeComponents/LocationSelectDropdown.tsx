@@ -50,7 +50,7 @@ export function LocationSelectDropdown({
           fontSize: 14,
           fontWeight: 500,
           color: '#111827',
-          paddingRight: '40px !important',
+          paddingRight: '38px !important',
           transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
         },
         '& .MuiOutlinedInput-notchedOutline': {
@@ -66,8 +66,8 @@ export function LocationSelectDropdown({
         },
         '& .MuiSelect-icon': {
           color: '#31664a',
-          marginRight: 4,
-          right: 10,
+          marginRight: 0,
+          right: 12,
         },
         '& .MuiSelect-select': {
           display: 'flex',
