@@ -1,4 +1,5 @@
 import React from 'react';
+import { DataProvider } from '@plasmicapp/loader-nextjs';
 import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import { createSupabaseClient } from '@/util/supabase/component';
 
@@ -232,7 +233,21 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber]
   );
 
-  return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;
+  const plasmicData = React.useMemo(() => ({
+    locations,
+    selectedLocationId,
+    selectedLocationNumber,
+    loading,
+    error,
+  }), [error, loading, locations, selectedLocationId, selectedLocationNumber]);
+
+  return (
+    <LocationContext.Provider value={value}>
+      <DataProvider name="locationContext" data={plasmicData}>
+        {children}
+      </DataProvider>
+    </LocationContext.Provider>
+  );
 }
 
 export function useLocationContext() {
