@@ -186,6 +186,7 @@ const StyledTable = styled(Table)(() => ({
     color: "#111827",
     lineHeight: 1.2,
     fontFamily,
+    padding: "14px 24px",
   },
   "& td": {
     borderBottom: "1px solid #e5e7eb",
@@ -193,6 +194,7 @@ const StyledTable = styled(Table)(() => ({
     fontSize: 14,
     lineHeight: 1.2,
     fontFamily,
+    padding: "14px 24px",
   },
   "& tbody tr:hover": {
     backgroundColor: "#f9fafb",

@@ -281,7 +281,13 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                 height: '100%',
               }}
             >
-              <FormControl size="small" sx={{ minWidth: 180 }}>
+              <FormControl
+                size="small"
+                sx={{
+                  minWidth: 180,
+                  height: 28,
+                }}
+              >
                 <Select
                   value={row.leader_id ?? ''}
                   onChange={handleLeaderChange(row)}
@@ -289,18 +295,17 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                   displayEmpty
                   sx={{
                     fontFamily,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    borderRadius: 999,
+                    fontSize: 12,
+                    fontWeight: 500,
+                    borderRadius: 14,
                     backgroundColor: '#f3f4f6',
                     color: '#374151',
-                    minHeight: 36,
+                    height: 28,
                     '& .MuiSelect-select': {
                       display: 'flex',
                       alignItems: 'center',
-                      py: 0.5,
-                      pl: 2,
-                      pr: 3,
+                      padding: '0 12px',
+                      minHeight: 0,
                     },
                     '& fieldset': {
                       border: 'none',
@@ -411,11 +416,11 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                         fontFamily,
                         width: 148,
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: 999,
+                          borderRadius: 14,
                           backgroundColor: '#f3f4f6',
                           fontFamily,
-                          fontSize: 13,
-                          minHeight: 36,
+                          fontSize: 12,
+                          height: 28,
                           paddingRight: 0,
                           '& fieldset': {
                             border: 'none',
@@ -429,8 +434,8 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                         },
                         '& .MuiInputBase-input': {
                           fontFamily,
-                          fontSize: 13,
-                          padding: '8px 16px',
+                          fontSize: 12,
+                          padding: '0 12px',
                           textAlign: 'center',
                         },
                       },
@@ -472,25 +477,30 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                 width: '100%',
               }}
             >
-              <FormControl size="small" sx={{ minWidth: 150 }}>
+              <FormControl
+                size="small"
+                sx={{
+                  minWidth: 150,
+                  height: 28,
+                }}
+              >
                 <Select
                   value={row.status}
                   onChange={handleStatusChange(row)}
                   disabled={disabled}
                   sx={{
                     fontFamily,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    borderRadius: 999,
+                    fontSize: 12,
+                    fontWeight: 500,
+                    borderRadius: 14,
                     backgroundColor: style.bg,
                     color: style.color,
-                    minHeight: 36,
+                    height: 28,
                     '& .MuiSelect-select': {
                       display: 'flex',
                       alignItems: 'center',
-                      py: 0.5,
-                      pl: 2,
-                      pr: 3,
+                      padding: '0 12px',
+                      minHeight: 0,
                     },
                     '& fieldset': {
                       border: 'none',
@@ -553,6 +563,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
   return (
     <StyledContainer className={className}>
       <DataGridPro
+        style={{ flex: 1, width: '100%' }}
         rows={rows}
         columns={columns}
         getRowId={(row) => row.id}
@@ -560,6 +571,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
         disableColumnResize
         showColumnVerticalBorder={false}
         rowHeight={48}
+        columnHeaderHeight={56}
         sortingOrder={['desc', 'asc']}
         initialState={{
           sorting: {
@@ -587,6 +599,9 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
               outline: 'none',
             },
           },
+          '& .MuiDataGrid-columnHeaderTitleContainer': {
+            padding: '0 16px',
+          },
           [`& .${gridClasses.columnSeparator}`]: {
             display: 'none',
           },
@@ -599,6 +614,9 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
             '&:focus, &:focus-within': {
               outline: 'none',
             },
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 16px',
           },
           [`& .${gridClasses.row}:hover`]: {
             backgroundColor: '#f9fafb',

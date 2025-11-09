@@ -405,6 +405,7 @@ export function DisciplineTable({
       data-plasmic-name="discipline-table-container"
     >
       <DataGridPro
+        style={{ flex: 1, width: '100%' }}
         rows={rows}
         columns={columns}
         loading={loading}
@@ -422,6 +423,7 @@ export function DisciplineTable({
         disableColumnResize
         showColumnVerticalBorder={false}
         rowHeight={48}
+        columnHeaderHeight={56}
         onRowClick={(params) => {
           const rowData = params.row as DisciplineEntry & { employee?: Employee };
           
@@ -477,6 +479,9 @@ export function DisciplineTable({
               outline: 'none',
             },
           },
+          '& .MuiDataGrid-columnHeaderTitleContainer': {
+            padding: '0 16px',
+          },
           
           // Column separators - Hide
           [`& .${gridClasses.columnSeparator}`]: {
@@ -493,6 +498,9 @@ export function DisciplineTable({
             '&:focus, &:focus-within': {
               outline: 'none',
             },
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 16px',
           },
           
           // Rows
