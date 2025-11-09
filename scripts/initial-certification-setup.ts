@@ -12,11 +12,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { Employee } from '../lib/supabase.types';
-import { 
+import {
   allPositionsQualified,
   BUDA_LOCATION_IDS,
 } from '../lib/certification-utils';
-import { 
+import {
   fetchEmployeePositionAverages,
 } from '../lib/fetch-position-averages';
 import * as dotenv from 'dotenv';
@@ -24,6 +24,100 @@ import * as path from 'path';
 
 // Load environment variables from .env.local
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
+type QualifiedStatus = 'Certified' | 'Pending';
+
+const QUALIFIED_STATUS_OPTIONS: Record<string, QualifiedStatus> = {
+  certified: 'Certified',
+  pending: 'Pending',
+};
+
+const qualifiedStatusArg = process.argv.find((arg) =>
+  arg.toLowerCase().startsWith('--qualified-status=')
+);
+
+let targetQualifiedStatus: QualifiedStatus = 'Certified';
+if (qualifiedStatusArg) {
+  const rawValue = qualifiedStatusArg.split('=')[1]?.trim().toLowerCase();
+  if (rawValue && QUALIFIED_STATUS_OPTIONS[rawValue]) {
+    targetQualifiedStatus = QUALIFIED_STATUS_OPTIONS[rawValue];
+  } else {
+    console.warn(
+      `⚠️  Unknown --qualified-status value "${rawValue}". Falling back to '${targetQualifiedStatus}'.`
+    );
+    console.warn('   Valid options: certified, pending');
+  }
+}
+
+console.log(
+  `⚙️  Qualified employees will be set to '${targetQualifiedStatus}'. (Override with --qualified-status=pending)`
+);
+
+const ACTIVE_EVALUATION_STATUSES = ['Planned', 'Scheduled'];
+
+function addMonths(date: Date, months: number): Date {
+  const clone = new Date(date);
+  clone.setMonth(clone.getMonth() + months);
+  return clone;
+}
+
+function formatMonthLabel(date: Date): string {
+  return date.toLocaleString('en-US', { month: 'long' });
+}
+
+async function ensurePendingEvaluation(
+  supabase: any,
+  employee: Employee,
+  auditDate: Date
+) {
+  try {
+    const { data: existing, error: existingError } = await supabase
+      .from('evaluations')
+      .select('id')
+      .eq('employee_id', employee.id)
+      .in('status', ACTIVE_EVALUATION_STATUSES)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingError) {
+      console.error(`   ❌ Error checking existing evaluation for ${employee.full_name}:`, existingError);
+      return;
+    }
+
+    if (existing) {
+      return;
+    }
+
+    const evaluationMonthDate = addMonths(auditDate, 1);
+    const monthLabel = formatMonthLabel(evaluationMonthDate);
+
+    const { error: insertError } = await supabase.from('evaluations').insert({
+      employee_id: employee.id,
+      employee_name: employee.full_name,
+      location_id: employee.location_id,
+      org_id: employee.org_id,
+      leader_id: null,
+      leader_name: null,
+      evaluation_date: null,
+      month: monthLabel,
+      role: employee.role,
+      status: 'Planned',
+      rating_status: true,
+      state_before: 'Pending',
+      state_after: null,
+      notes: null,
+    });
+
+    if (insertError) {
+      console.error(`   ❌ Error creating evaluation for ${employee.full_name}:`, insertError);
+    } else {
+      console.log(`   🗓️  Created evaluation (month: ${monthLabel}) for ${employee.full_name}`);
+    }
+  } catch (error) {
+    console.error(`   ❌ Unexpected error creating evaluation for ${employee.full_name}:`, error);
+  }
+}
 
 async function runInitialSetup() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -50,7 +144,7 @@ async function runInitialSetup() {
   // Process both Buda and West Buda locations
   const locationIds = Object.values(BUDA_LOCATION_IDS);
   let totalProcessed = 0;
-  let totalCertified = 0;
+  let totalQualified = 0;
   let totalNotCertified = 0;
   
   for (const locationId of locationIds) {
@@ -87,7 +181,7 @@ async function runInitialSetup() {
       const hasPositions = Object.keys(positions).length > 0;
       const allQualified = hasPositions && allPositionsQualified(positions);
       
-      const newStatus = allQualified ? 'Certified' : 'Not Certified';
+      const newStatus = allQualified ? targetQualifiedStatus : 'Not Certified';
       
       // Update employee status
       const { error: updateError } = await supabase
@@ -124,14 +218,18 @@ async function runInitialSetup() {
       }
       
       totalProcessed++;
-      if (newStatus === 'Certified') {
-        totalCertified++;
+      if (newStatus === targetQualifiedStatus) {
+        totalQualified++;
       } else {
         totalNotCertified++;
       }
+
+      if (newStatus === 'Pending') {
+        await ensurePendingEvaluation(supabase, employee, today);
+      }
       
       // Show progress for each employee
-      const statusEmoji = newStatus === 'Certified' ? '✅' : '⚪';
+      const statusEmoji = newStatus === targetQualifiedStatus ? '✅' : '⚪';
       const positionCount = Object.keys(positions).length;
       console.log(`   ${statusEmoji} ${employee.full_name}: ${newStatus} (${positionCount} positions)`);
     }
@@ -141,7 +239,7 @@ async function runInitialSetup() {
   console.log('📊 Initial Setup Complete!');
   console.log('='.repeat(60));
   console.log(`   Total Processed: ${totalProcessed}`);
-  console.log(`   ✅ Certified: ${totalCertified}`);
+  console.log(`   ✅ ${targetQualifiedStatus}: ${totalQualified}`);
   console.log(`   ⚪ Not Certified: ${totalNotCertified}`);
   console.log('');
 }

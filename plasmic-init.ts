@@ -40,6 +40,7 @@ import { CenteredLoadingSpinner } from "./components/CodeComponents/CenteredLoad
 import { TableSkeleton } from "./components/CodeComponents/Skeletons/TableSkeleton";
 import { EmployeeTableSkeleton } from "./components/CodeComponents/Skeletons/EmployeeTableSkeleton";
 import { DisciplineTableSkeleton } from "./components/CodeComponents/Skeletons/DisciplineTableSkeleton";
+import { EvaluationsTableSkeleton } from "./components/CodeComponents/Skeletons/EvaluationsTableSkeleton";
 import { CardSkeleton } from "./components/CodeComponents/Skeletons/CardSkeleton";
 import { ScoreboardSkeleton } from "./components/CodeComponents/Skeletons/ScoreboardSkeleton";
 import { DashboardMetricCard } from "./components/CodeComponents/DashboardMetricCard";
@@ -1029,6 +1030,21 @@ PLASMIC.registerComponent(DisciplineTableSkeleton, {
     }
   },
   importPath: "./components/CodeComponents/Skeletons/DisciplineTableSkeleton",
+});
+
+// Register EvaluationsTableSkeleton component - Evaluations table loading skeleton
+PLASMIC.registerComponent(EvaluationsTableSkeleton, {
+  name: "EvaluationsTableSkeleton",
+  displayName: "Evaluations Table Skeleton",
+  props: {
+    className: "string",
+    rows: {
+      type: "number",
+      defaultValue: 8,
+      description: "Number of skeleton rows to display",
+    },
+  },
+  importPath: "./components/CodeComponents/Skeletons/EvaluationsTableSkeleton",
 });
 
 // Register CardSkeleton component - Card/metric loading skeleton

@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { DataGridPro, GridColDef } from '@mui/x-data-grid-pro';
-import { Box, Chip, CircularProgress, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
+import { Box, Chip, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { format } from 'date-fns';
+import { EvaluationsTableSkeleton } from './Skeletons/EvaluationsTableSkeleton';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -40,6 +41,8 @@ const StyledContainer = styled('div')({
   boxShadow: '0px 2px 6px rgba(15, 23, 42, 0.04)',
   fontFamily,
   overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
 });
 
 export interface EvaluationsTableProps {
@@ -295,8 +298,17 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
             </LocalizationProvider>
           );
         },
-        valueFormatter: ({ value }) =>
-          value ? format(new Date(value as string), 'MM/dd/yyyy') : '—',
+        valueFormatter: (params: any) => {
+          const value = params?.value;
+          if (!value) {
+            return '—';
+          }
+          try {
+            return format(new Date(value as string), 'MM/dd/yyyy');
+          } catch {
+            return '—';
+          }
+        },
       },
       {
         field: 'status',
@@ -332,25 +344,30 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
   );
 
   if (loading) {
-    return (
-      <Box display="flex" alignItems="center" justifyContent="center" height={320} className={className}>
-        <CircularProgress />
-      </Box>
-    );
+    return <EvaluationsTableSkeleton className={className} rows={8} />;
   }
 
   if (error) {
     return (
-      <Box display="flex" alignItems="center" justifyContent="center" flexDirection="column" gap={2} height={320} className={className}>
-        <Typography sx={{ fontFamily, color: '#b91c1c' }}>{error}</Typography>
-        <Typography
-          component="button"
-          onClick={fetchData}
-          sx={{ fontFamily, color: '#31664a', cursor: 'pointer', background: 'none', border: 'none' }}
+      <StyledContainer className={className}>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          flexDirection="column"
+          gap={2}
+          height="100%"
         >
-          Retry
-        </Typography>
-      </Box>
+          <Typography sx={{ fontFamily, color: '#b91c1c' }}>{error}</Typography>
+          <Typography
+            component="button"
+            onClick={fetchData}
+            sx={{ fontFamily, color: '#31664a', cursor: 'pointer', background: 'none', border: 'none' }}
+          >
+            Retry
+          </Typography>
+        </Box>
+      </StyledContainer>
     );
   }
 
@@ -372,6 +389,7 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
           },
         }}
         sx={{
+          width: '100%',
           fontFamily,
           border: 'none',
           '& .MuiDataGrid-columnHeaders': {
@@ -393,7 +411,10 @@ interface EmployeeRow {
   last_name?: string | null;
 }
 
-function monthIndex(month: string): number {
+function monthIndex(month?: string | null): number {
+  if (!month) {
+    return -1;
+  }
   const index = MONTH_ORDER.indexOf(month);
   return index === -1 ? -1 : index;
 }
