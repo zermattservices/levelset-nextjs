@@ -24,6 +24,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { EmployeeTableSkeleton } from "./Skeletons/EmployeeTableSkeleton";
 import { EvaluationsTable } from "./EvaluationsTable";
 import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
+import { RolePill } from "./shared/RolePill";
 
 export type Role =
   | "New Hire"
@@ -48,6 +49,7 @@ export interface RosterEntry {
 export function RosterTable(props: RosterTableProps) {
   const { orgId, locationId } = props;
   const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations'>('employees');
+  const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
 
   const handleTabChange = (_event: React.SyntheticEvent, value: string) => {
     setActiveTab((value as 'employees' | 'evaluations') ?? 'employees');
@@ -57,14 +59,37 @@ export function RosterTable(props: RosterTableProps) {
     <Box sx={{ width: '100%' }}>
       <StyledTabs value={activeTab} onChange={handleTabChange}>
         <StyledTab label="Employees" value="employees" />
-        <StyledTab label="Evaluations" value="evaluations" />
+        <StyledTab
+          value="evaluations"
+          label={
+            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+              <span>Pending Evaluations</span>
+              {hasPlannedEvaluations && (
+                <Box
+                  component="span"
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    backgroundColor: '#facc15',
+                  }}
+                />
+              )}
+            </Box>
+          }
+        />
       </StyledTabs>
 
       <Box sx={{ mt: 2 }}>
         {activeTab === 'employees' ? (
           <EmployeesTableView {...props} />
         ) : (
-          <EvaluationsTable orgId={orgId} locationId={locationId} className={props.className} />
+          <EvaluationsTable
+            orgId={orgId}
+            locationId={locationId}
+            className={props.className}
+            onPlannedStatusChange={setHasPlannedEvaluations}
+          />
         )}
       </Box>
     </Box>
@@ -120,29 +145,6 @@ const sampleData: RosterEntry[] = [
   { id: "11", name: "Lisa Rodriguez",   currentRole: "Operator",  certifiedStatus: "Certified", availability: "Available", calculatedPay: null, foh: true,  boh: true  },
 ];
 
-// role → chip colors (can still be overridden via roleBadgeClass)
-const roleChip = (role: Role) => {
-  const base = "role-badge";
-  switch (role) {
-    case "New Hire":
-      return `${base} new-hire`;
-    case "Team Member":
-      return `${base} team-member`;
-    case "Trainer":
-      return `${base} trainer`;
-    case "Team Lead":
-      return `${base} team-lead`;
-    case "Director":
-      return `${base} director`;
-    case "Executive":
-      return `${base} executive`;
-    case "Operator":
-      return `${base} operator`;
-    default:
-      return `${base} new-hire`;
-  }
-};
-
 const fontFamily = `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
 
 const StyledContainer = styled(TableContainer)(() => ({
@@ -180,9 +182,7 @@ const StyledTable = styled(Table)(() => ({
     borderBottom: "1px solid #e5e7eb",
     backgroundColor: "#f9fafb",
     fontWeight: 600,
-    fontSize: 12,
-    letterSpacing: "0.05em",
-    textTransform: "uppercase",
+    fontSize: 14,
     color: "#111827",
     lineHeight: 1.2,
     fontFamily,
@@ -219,51 +219,6 @@ const ActionsButton = styled(IconButton)(() => ({
   "&:hover": {
     backgroundColor: "#f3f4f6",
     color: "#4b5563",
-  },
-}));
-
-const RoleChip = styled(Box)(() => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 4,
-  padding: "4px 8px",
-  borderRadius: 12,
-  fontSize: 12,
-  fontWeight: 500,
-  fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
-  cursor: "pointer",
-  transition: "all 0.15s ease-in-out",
-  "&:hover": {
-    opacity: 0.8,
-    transform: "translateY(-1px)",
-  },
-  "&.new-hire": {
-    backgroundColor: "#f0fdf4",
-    color: "#166534",
-  },
-  "&.team-member": {
-    backgroundColor: "#eff6ff",
-    color: "#1d4ed8",
-  },
-  "&.trainer": {
-    backgroundColor: "#fef2f2",
-    color: "#dc2626",
-  },
-  "&.team-lead": {
-    backgroundColor: "#fef3c7",
-    color: "#d97706",
-  },
-  "&.director": {
-    backgroundColor: "#f3e8ff",
-    color: "#7c3aed",
-  },
-  "&.executive": {
-    backgroundColor: "#F0F0FF",
-    color: "#483D8B",
-  },
-  "&.operator": {
-    backgroundColor: "#F0F0FF",
-    color: "#483D8B",
   },
 }));
 
@@ -878,7 +833,7 @@ function EmployeesTableView({
                 <Typography
                   component="span"
                   variant="body2"
-                  sx={{ fontFamily, fontWeight: 500, color: "#111827" }}
+                  sx={{ fontFamily, fontWeight: 600, color: "#111827" }}
                 >
                   {e.name}
                 </Typography>
@@ -888,35 +843,27 @@ function EmployeesTableView({
                 sx={{ py: cellPadding }}
               >
                 {unchangeableRoles.includes(e.currentRole) ? (
-                  <RoleChip
-                    className={`${roleChip(e.currentRole)} ${roleBadgeClass || ""}`}
-                    sx={{ 
-                      cursor: "default",
-                      outline: "none",
-                      border: "none",
-                      "&:hover": { 
-                        opacity: 1, 
-                        transform: "none",
-                        outline: "none",
-                        border: "none"
-                      },
-                      "&:focus": {
-                        outline: "none",
-                        border: "none"
-                      }
-                    }}
-                  >
-                    {e.currentRole}
-                  </RoleChip>
+                  <RolePill
+                    role={e.currentRole}
+                    className={roleBadgeClass}
+                  />
                 ) : (
                   <>
-                    <RoleChip
-                      className={`${roleChip(e.currentRole)} ${roleBadgeClass || ""}`}
+                    <Box
                       onClick={(event) => handleRoleMenuOpen(event, e.id)}
+                      sx={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        cursor: 'pointer',
+                      }}
                     >
-                      {e.currentRole}
-                      <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
-                    </RoleChip>
+                      <RolePill
+                        role={e.currentRole}
+                        className={roleBadgeClass}
+                      />
+                      <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+                    </Box>
                     
                     <Menu
                       anchorEl={roleMenuAnchor[e.id]}
@@ -945,18 +892,7 @@ function EmployeesTableView({
                           onClick={() => handleRoleSelect(e.id, role)}
                           selected={e.currentRole === role}
                         >
-                          <RoleChip
-                            className={`${roleChip(role)} ${roleBadgeClass || ""}`}
-                            sx={{ 
-                              cursor: "default",
-                              "&:hover": { 
-                                opacity: 1, 
-                                transform: "none" 
-                              }
-                            }}
-                          >
-                            {role}
-                          </RoleChip>
+                          <RolePill role={role} className={roleBadgeClass} />
                         </RoleMenuItem>
                       ))}
                     </Menu>

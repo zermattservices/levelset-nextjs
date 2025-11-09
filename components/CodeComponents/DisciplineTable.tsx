@@ -1,11 +1,7 @@
 import * as React from "react";
 import { createSupabaseClient } from "@/util/supabase/component";
 import { DisciplineTableSkeleton } from "./Skeletons/DisciplineTableSkeleton";
-import {
-  Box,
-  Chip,
-  Typography,
-} from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import {
   DataGridPro,
   GridColDef,
@@ -14,6 +10,7 @@ import {
 } from "@mui/x-data-grid-pro";
 import type { Employee } from "@/lib/supabase.types";
 import { EmployeeModal } from "./EmployeeModal";
+import { RolePill } from "./shared/RolePill";
 
 export interface DisciplineEntry {
   id: string;
@@ -53,40 +50,6 @@ export interface DisciplineTableProps {
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
-
-// Role Chip Component - matching PositionalRatings
-const RoleChip = ({ role }: { role: string }) => {
-  const styles: Record<string, { bg: string; color: string }> = {
-    'New Hire': { bg: '#f0fdf4', color: '#166534' },
-    'Team Member': { bg: '#eff6ff', color: '#1d4ed8' },
-    'Trainer': { bg: '#fef2f2', color: '#dc2626' },
-    'Team Lead': { bg: '#fef3c7', color: '#d97706' },
-    'Director': { bg: '#f3e8ff', color: '#7c3aed' },
-    'Executive': { bg: '#F0F0FF', color: '#483D8B' },
-    'Operator': { bg: '#F0F0FF', color: '#483D8B' },
-  };
-  
-  const style = styles[role] || styles['Team Member'];
-  
-  return (
-    <Chip
-      label={role}
-      size="small"
-      sx={{
-        fontFamily,
-        fontSize: 12,
-        fontWeight: 500,
-        backgroundColor: style.bg,
-        color: style.color,
-        height: 24,
-        borderRadius: 12,
-        '& .MuiChip-label': {
-          padding: '0 8px',
-        },
-      }}
-    />
-  );
-};
 
 // Points Badge Component - color based on discipline actions
 const PointsBadge = ({ points, disciplineActions }: { points: number; disciplineActions: any[] }) => {
@@ -334,7 +297,7 @@ export function DisciplineTable({
   const columns: GridColDef[] = React.useMemo(() => [
     {
       field: 'full_name',
-      headerName: 'NAME',
+      headerName: 'Employee',
       width: 200,
       sortable: true,
       resizable: false,
@@ -355,17 +318,21 @@ export function DisciplineTable({
     },
     {
       field: 'role',
-      headerName: 'ROLE',
+      headerName: 'Role',
       width: 160,
       sortable: true,
       resizable: false,
       headerAlign: 'center',
       align: 'center',
-      renderCell: (params) => <RoleChip role={params.value} />,
+      renderCell: (params) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+          <RolePill role={params.value} />
+        </Box>
+      ),
     },
     {
       field: 'last_infraction',
-      headerName: 'LAST INFRACTION',
+      headerName: 'Last Infraction',
       width: 160,
       sortable: true,
       resizable: false,
@@ -387,7 +354,7 @@ export function DisciplineTable({
     },
     {
       field: 'current_points',
-      headerName: 'CURRENT POINTS',
+      headerName: 'Current Points',
       width: 160,
       sortable: true,
       resizable: false,
@@ -504,8 +471,6 @@ export function DisciplineTable({
             backgroundColor: '#f9fafb',
             fontWeight: 600,
             fontSize: 14,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
             color: '#111827',
             fontFamily,
             '&:focus, &:focus-within': {

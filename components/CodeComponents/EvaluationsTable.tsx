@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { DataGridPro, GridColDef } from '@mui/x-data-grid-pro';
+import { DataGridPro, GridColDef, gridClasses } from '@mui/x-data-grid-pro';
 import { Box, Chip, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { format } from 'date-fns';
+import { addMonths, format } from 'date-fns';
 import { EvaluationsTableSkeleton } from './Skeletons/EvaluationsTableSkeleton';
+import { RolePill } from './shared/RolePill';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -15,6 +16,15 @@ const STATUS_ORDER: Record<string, number> = {
   Scheduled: 1,
   Completed: 2,
   Cancelled: 3,
+};
+
+const ALLOWED_STATUSES = ['Planned', 'Scheduled', 'Completed'];
+
+const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
+  Planned: { bg: '#fef3c7', color: '#92400e' },
+  Scheduled: { bg: '#e0f2fe', color: '#0369a1' },
+  Completed: { bg: '#dcfce7', color: '#166534' },
+  Cancelled: { bg: '#fee2e2', color: '#b91c1c' },
 };
 
 const MONTH_ORDER = [
@@ -49,6 +59,7 @@ export interface EvaluationsTableProps {
   orgId: string;
   locationId: string;
   className?: string;
+  onPlannedStatusChange?: (hasPlanned: boolean) => void;
 }
 
 interface EvaluationRow {
@@ -75,12 +86,41 @@ interface LeaderOption {
 
 const LEADER_ROLES = ['Team Lead', 'Director', 'Executive', 'Operator'];
 
-export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTableProps) {
+export function EvaluationsTable({ orgId, locationId, className, onPlannedStatusChange }: EvaluationsTableProps) {
   const [rows, setRows] = React.useState<EvaluationRow[]>([]);
   const [leaders, setLeaders] = React.useState<LeaderOption[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [updatingIds, setUpdatingIds] = React.useState<Set<string>>(new Set());
+
+  const applyFilters = React.useCallback(
+    (evaluations: EvaluationRow[]) => {
+      const now = new Date();
+      const allowedMonths = new Set([
+        format(now, 'MMMM'),
+        format(addMonths(now, 1), 'MMMM'),
+      ]);
+
+      const filtered = evaluations
+        .filter(
+          (row) =>
+            ALLOWED_STATUSES.includes(row.status) &&
+            allowedMonths.has(row.month)
+        )
+        .sort((a, b) => {
+          const monthDiff = monthIndex(b.month) - monthIndex(a.month);
+          if (monthDiff !== 0) return monthDiff;
+          const statusDiff =
+            (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99);
+          if (statusDiff !== 0) return statusDiff;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+
+      onPlannedStatusChange?.(filtered.some((row) => row.status === 'Planned'));
+      return filtered;
+    },
+    [onPlannedStatusChange]
+  );
 
   const fetchData = React.useCallback(async () => {
     try {
@@ -112,22 +152,15 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
       leaderOptions.sort((a, b) => a.name.localeCompare(b.name));
 
       setLeaders(leaderOptions);
-      setRows(
-        (evaluations as EvaluationRow[]).sort((a, b) => {
-          const monthDiff = monthIndex(b.month) - monthIndex(a.month);
-          if (monthDiff !== 0) return monthDiff;
-          const statusDiff = (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99);
-          if (statusDiff !== 0) return statusDiff;
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        })
-      );
+      setRows(applyFilters(evaluations as EvaluationRow[]));
     } catch (err) {
       console.error('[EvaluationsTable] fetch error', err);
       setError(err instanceof Error ? err.message : 'Failed to load evaluations');
+      onPlannedStatusChange?.(false);
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId]);
+  }, [orgId, locationId, applyFilters, onPlannedStatusChange]);
 
   React.useEffect(() => {
     if (orgId && locationId) {
@@ -151,17 +184,14 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
         }
 
         const { evaluation } = await response.json();
-        setRows((prev) =>
-          prev
-            .map((row) => (row.id === id ? { ...row, ...evaluation } : row))
-            .sort((a, b) => {
-              const monthDiff = monthIndex(b.month) - monthIndex(a.month);
-              if (monthDiff !== 0) return monthDiff;
-              const statusDiff = (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99);
-              if (statusDiff !== 0) return statusDiff;
-              return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-            })
-        );
+        const updatedEvaluation = evaluation as EvaluationRow;
+        setRows((prev) => {
+          const exists = prev.some((row) => row.id === id);
+          const base = exists
+            ? prev.map((row) => (row.id === id ? { ...row, ...updatedEvaluation } : row))
+            : [...prev, updatedEvaluation];
+          return applyFilters(base);
+        });
       } catch (err) {
         console.error('[EvaluationsTable] update error', err);
         setError(err instanceof Error ? err.message : 'Failed to update evaluation');
@@ -173,7 +203,7 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
         });
       }
     },
-    []
+    [applyFilters]
   );
 
   const handleLeaderChange = React.useCallback(
@@ -205,11 +235,33 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
         headerName: 'Employee',
         flex: 1.2,
         minWidth: 200,
+        renderCell: (params) => (
+          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <Typography
+              sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827' }}
+            >
+              {params.value ?? 'Unknown'}
+            </Typography>
+          </Box>
+        ),
       },
       {
         field: 'role',
         headerName: 'Role',
         width: 150,
+        renderCell: (params) => (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              width: '100%',
+            }}
+          >
+            <RolePill role={params.value} />
+          </Box>
+        ),
       },
       {
         field: 'leader_id',
@@ -221,28 +273,61 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
           const row = params.row;
           const disabled = updatingIds.has(row.id);
           return (
-            <FormControl size="small" fullWidth>
-              <Select
-                value={row.leader_id ?? ''}
-                onChange={handleLeaderChange(row)}
-                disabled={disabled}
-                displayEmpty
-                sx={{
-                  fontFamily,
-                  fontSize: 14,
-                  backgroundColor: '#ffffff',
-                }}
-              >
-                <MenuItem value="">
-                  <em>Unassigned</em>
-                </MenuItem>
-                {leaders.map((leader) => (
-                  <MenuItem key={leader.id} value={leader.id}>
-                    {leader.name}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+              }}
+            >
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <Select
+                  value={row.leader_id ?? ''}
+                  onChange={handleLeaderChange(row)}
+                  disabled={disabled}
+                  displayEmpty
+                  sx={{
+                    fontFamily,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    borderRadius: 999,
+                    backgroundColor: '#f3f4f6',
+                    color: '#374151',
+                    minHeight: 36,
+                    '& .MuiSelect-select': {
+                      display: 'flex',
+                      alignItems: 'center',
+                      py: 0.5,
+                      pl: 2,
+                      pr: 3,
+                    },
+                    '& fieldset': {
+                      border: 'none',
+                    },
+                    opacity: disabled ? 0.6 : 1,
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        fontFamily,
+                        borderRadius: 2,
+                        mt: 1,
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Unassigned</em>
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                  {leaders.map((leader) => (
+                    <MenuItem key={leader.id} value={leader.id}>
+                      {leader.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
           );
         },
       },
@@ -251,17 +336,27 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
         headerName: 'Rating Status',
         width: 160,
         renderCell: (params) => (
-          <Chip
-            label={params.value ? 'Meets Threshold' : 'Needs Review'}
-            color={params.value ? 'success' : 'warning'}
-            size="small"
+          <Box
             sx={{
-              fontFamily,
-              fontWeight: 600,
-              backgroundColor: params.value ? '#e3fcef' : '#fff7ed',
-              color: params.value ? '#166534' : '#b45309',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              width: '100%',
             }}
-          />
+          >
+            <Chip
+              label={params.value ? 'Meets Threshold' : 'Needs Review'}
+              size="small"
+              sx={{
+                fontFamily,
+                fontWeight: 600,
+                backgroundColor: params.value ? '#dcfce7' : '#fff7ed',
+                color: params.value ? '#166534' : '#b45309',
+                height: 28,
+              }}
+            />
+          </Box>
         ),
       },
       {
@@ -269,6 +364,21 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
         headerName: 'Month',
         width: 130,
         sortComparator: (v1, v2) => monthIndex(v1 as string) - monthIndex(v2 as string),
+        renderCell: (params) => (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              width: '100%',
+            }}
+          >
+            <Typography sx={{ fontFamily, fontSize: 13, color: '#111827' }}>
+              {params.value}
+            </Typography>
+          </Box>
+        ),
       },
       {
         field: 'evaluation_date',
@@ -279,23 +389,56 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
           const disabled = updatingIds.has(row.id);
           const dateValue = row.evaluation_date ? new Date(row.evaluation_date) : null;
           return (
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                value={dateValue}
-                onChange={handleDateChange(row)}
-                disabled={disabled}
-                format="MM/dd/yyyy"
-                slotProps={{
-                  textField: {
-                    size: 'small',
-                    sx: {
-                      fontFamily,
-                      width: '100%',
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                width: '100%',
+              }}
+            >
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  value={dateValue}
+                  onChange={handleDateChange(row)}
+                  disabled={disabled}
+                  format="MM/dd/yyyy"
+                  slotProps={{
+                    textField: {
+                      size: 'small',
+                      sx: {
+                        fontFamily,
+                        width: 148,
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 999,
+                          backgroundColor: '#f3f4f6',
+                          fontFamily,
+                          fontSize: 13,
+                          minHeight: 36,
+                          paddingRight: 0,
+                          '& fieldset': {
+                            border: 'none',
+                          },
+                          '&:hover fieldset': {
+                            border: 'none',
+                          },
+                          '&.Mui-focused fieldset': {
+                            border: 'none',
+                          },
+                        },
+                        '& .MuiInputBase-input': {
+                          fontFamily,
+                          fontSize: 13,
+                          padding: '8px 16px',
+                          textAlign: 'center',
+                        },
+                      },
                     },
-                  },
-                }}
-              />
-            </LocalizationProvider>
+                  }}
+                />
+              </LocalizationProvider>
+            </Box>
           );
         },
         valueFormatter: (params: any) => {
@@ -318,24 +461,60 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
         renderCell: (params) => {
           const row = params.row;
           const disabled = updatingIds.has(row.id);
+          const style = STATUS_STYLES[row.status] || STATUS_STYLES.Planned;
           return (
-            <FormControl size="small" fullWidth>
-              <Select
-                value={row.status}
-                onChange={handleStatusChange(row)}
-                disabled={disabled}
-                sx={{
-                  fontFamily,
-                  fontSize: 14,
-                }}
-              >
-                {Object.keys(STATUS_ORDER).map((statusKey) => (
-                  <MenuItem key={statusKey} value={statusKey}>
-                    {statusKey}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                width: '100%',
+              }}
+            >
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <Select
+                  value={row.status}
+                  onChange={handleStatusChange(row)}
+                  disabled={disabled}
+                  sx={{
+                    fontFamily,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    borderRadius: 999,
+                    backgroundColor: style.bg,
+                    color: style.color,
+                    minHeight: 36,
+                    '& .MuiSelect-select': {
+                      display: 'flex',
+                      alignItems: 'center',
+                      py: 0.5,
+                      pl: 2,
+                      pr: 3,
+                    },
+                    '& fieldset': {
+                      border: 'none',
+                    },
+                    opacity: disabled ? 0.6 : 1,
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        fontFamily,
+                        borderRadius: 2,
+                        mt: 1,
+                      },
+                    },
+                  }}
+                >
+                  {Object.keys(STATUS_ORDER).map((statusKey) => (
+                    <MenuItem key={statusKey} value={statusKey}>
+                      {statusKey}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
           );
         },
       },
@@ -378,6 +557,9 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
         columns={columns}
         getRowId={(row) => row.id}
         disableRowSelectionOnClick
+        disableColumnResize
+        showColumnVerticalBorder={false}
+        rowHeight={48}
         sortingOrder={['desc', 'asc']}
         initialState={{
           sorting: {
@@ -389,13 +571,41 @@ export function EvaluationsTable({ orgId, locationId, className }: EvaluationsTa
           },
         }}
         sx={{
-          width: '100%',
           fontFamily,
-          border: 'none',
-          '& .MuiDataGrid-columnHeaders': {
+          border: '1px solid #e5e7eb',
+          borderRadius: 2,
+          [`& .${gridClasses.columnHeaders}`]: {
+            borderBottom: '1px solid #e5e7eb',
+          },
+          [`& .${gridClasses.columnHeader}`]: {
             backgroundColor: '#f9fafb',
             fontWeight: 600,
-            fontSize: 12,
+            fontSize: 14,
+            color: '#111827',
+            fontFamily,
+            '&:focus, &:focus-within': {
+              outline: 'none',
+            },
+          },
+          [`& .${gridClasses.columnSeparator}`]: {
+            display: 'none',
+          },
+          [`& .${gridClasses.cell}`]: {
+            borderBottom: '1px solid #f3f4f6',
+            borderRight: 'none',
+            fontSize: 13,
+            color: '#111827',
+            fontFamily,
+            '&:focus, &:focus-within': {
+              outline: 'none',
+            },
+          },
+          [`& .${gridClasses.row}:hover`]: {
+            backgroundColor: '#f9fafb',
+          },
+          [`& .${gridClasses.footerContainer}`]: {
+            borderTop: '1px solid #e5e7eb',
+            fontFamily,
           },
         }}
       />
