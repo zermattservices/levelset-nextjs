@@ -594,7 +594,7 @@ function PlasmicPeaClassic__RenderFunc(props: {
                   className={classNames("__wab_instance", sty.peaClassic)}
                   defaultArea={"FOH"}
                   defaultTab={"overview"}
-                  density={"compact"}
+                  density={"comfortable"}
                   locationId={(() => {
                     try {
                       return $ctx.locationContext.selectedLocationId;
