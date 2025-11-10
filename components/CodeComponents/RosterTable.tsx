@@ -220,17 +220,25 @@ const RoleMenuItem = styled(MenuItem)(() => ({
 const AvailabilityChip = styled(Box)(() => ({
   display: "inline-flex",
   alignItems: "center",
-  gap: 4,
-  padding: "4px 12px",
-  borderRadius: 12,
-  fontSize: 12,
-  fontWeight: 500,
+  justifyContent: "center",
+  gap: 6,
+  padding: "0 16px",
+  minHeight: 28,
+  height: 28,
+  borderRadius: 14,
+  fontSize: 13,
+  fontWeight: 600,
   fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
   cursor: "pointer",
   transition: "all 0.15s ease-in-out",
+  backgroundColor: "#f3f4f6",
+  color: "#111827",
   "&:hover": {
-    opacity: 0.8,
+    opacity: 0.9,
     transform: "translateY(-1px)",
+  },
+  "& svg": {
+    fontSize: 16,
   },
   "&.available": {
     backgroundColor: "#dcfce7",
@@ -245,17 +253,26 @@ const AvailabilityChip = styled(Box)(() => ({
 const CertificationChip = styled(Box)(() => ({
   display: "inline-flex",
   alignItems: "center",
-  gap: 4,
-  padding: "4px 12px",
-  borderRadius: 12,
-  fontSize: 12,
-  fontWeight: 500,
+  justifyContent: "center",
+  gap: 6,
+  padding: "0 16px",
+  minHeight: 28,
+  height: 28,
+  borderRadius: 14,
+  fontSize: 13,
+  fontWeight: 600,
   fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
   cursor: "pointer",
   transition: "all 0.15s ease-in-out",
+  backgroundColor: "#f3f4f6",
+  color: "#374151",
+  border: "1px solid transparent",
   "&:hover": {
-    opacity: 0.8,
+    opacity: 0.9,
     transform: "translateY(-1px)",
+  },
+  "& svg": {
+    fontSize: 16,
   },
   "&.not-certified": {
     backgroundColor: "transparent",
@@ -850,7 +867,12 @@ function EmployeesTableView({
                     selected={availability === option}
                     onClick={() => handleAvailabilitySelect(employeeId, option)}
                   >
-                    <AvailabilityChip className={option.toLowerCase()}>{option}</AvailabilityChip>
+                    <AvailabilityChip
+                      className={option.toLowerCase()}
+                      sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
+                    >
+                      {option}
+                    </AvailabilityChip>
                   </RoleMenuItem>
                 ))}
               </Menu>
@@ -898,7 +920,11 @@ function EmployeesTableView({
                     selected={status === option}
                     onClick={() => handleCertificationStatusChange(employeeId, option)}
                   >
-                    {option}
+                    <CertificationChip className={option.toLowerCase().replace(" ", "-")}
+                      sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
+                    >
+                      {option}
+                    </CertificationChip>
                   </RoleMenuItem>
                 ))}
               </Menu>

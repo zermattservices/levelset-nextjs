@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DataGridPro, GridColDef, gridClasses } from '@mui/x-data-grid-pro';
-import { Box, Chip, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
+import { Box, Chip, FormControl, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -8,6 +8,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { addMonths, format } from 'date-fns';
 import { EvaluationsTableSkeleton } from './Skeletons/EvaluationsTableSkeleton';
 import { RolePill } from './shared/RolePill';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
@@ -273,6 +274,25 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
         renderCell: (params) => {
           const row = params.row;
           const disabled = updatingIds.has(row.id);
+          const leaderId = row.leader_id ?? '';
+          const leaderName = leaderId
+            ? leaders.find((leader) => leader.id === leaderId)?.name ?? 'Unassigned'
+            : 'Unassigned';
+          const pillSx = {
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '0 16px',
+            minHeight: 28,
+            height: 28,
+            borderRadius: 14,
+            backgroundColor: '#f3f4f6',
+            fontFamily,
+            fontSize: 13,
+            fontWeight: 600,
+            color: leaderId ? '#374151' : '#6b7280',
+          } as const;
+
           return (
             <Box
               sx={{
@@ -280,46 +300,37 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                 alignItems: 'center',
                 justifyContent: 'center',
                 height: '100%',
+                width: '100%',
               }}
             >
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: 0,
-                  width: 'auto',
-                  height: 28,
-                }}
-              >
+              <FormControl size="small" sx={{ minWidth: 0, width: 'auto' }}>
                 <Select
-                  value={row.leader_id ?? ''}
+                  value={leaderId}
                   onChange={handleLeaderChange(row)}
                   disabled={disabled}
                   displayEmpty
+                  IconComponent={ExpandMoreIcon}
+                  renderValue={() => (
+                    <Box sx={pillSx}>
+                      <span>{leaderName}</span>
+                    </Box>
+                  )}
                   sx={{
-                    fontFamily,
-                    fontSize: 13,
-                    fontWeight: 500,
-                    borderRadius: 14,
-                    backgroundColor: '#f3f4f6',
-                    color: '#374151',
-                    height: 28,
-                    lineHeight: '28px',
                     '& .MuiSelect-select': {
-                      display: 'inline-flex',
+                      display: 'flex',
                       alignItems: 'center',
-                      padding: '0 28px 0 14px',
-                      minHeight: 0,
+                      padding: 0,
                     },
                     '& fieldset': {
                       border: 'none',
                     },
-                    opacity: disabled ? 0.6 : 1,
                     '& .MuiSelect-icon': {
                       top: '50%',
                       transform: 'translateY(-50%)',
                       color: '#6b7280',
-                      right: 10,
+                      right: 4,
                     },
+                    opacity: disabled ? 0.6 : 1,
                   }}
                   MenuProps={{
                     PaperProps: {
@@ -332,11 +343,15 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                   }}
                 >
                   <MenuItem value="">
-                    <em>Unassigned</em>
+                    <Box sx={pillSx}>
+                      <span>Unassigned</span>
+                    </Box>
                   </MenuItem>
                   {leaders.map((leader) => (
                     <MenuItem key={leader.id} value={leader.id}>
-                      {leader.name}
+                      <Box sx={pillSx}>
+                        <span>{leader.name}</span>
+                      </Box>
                     </MenuItem>
                   ))}
                 </Select>
@@ -418,44 +433,53 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                   onChange={handleDateChange(row)}
                   disabled={disabled}
                   format="MM/dd/yyyy"
+                  slots={{
+                    textField: (props) => (
+                      <TextField
+                        {...props}
+                        placeholder="MM/DD/YY"
+                        size="small"
+                        InputLabelProps={{ shrink: false }}
+                        sx={{
+                          width: 128,
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 14,
+                            backgroundColor: '#f3f4f6',
+                            fontFamily,
+                            fontSize: 14,
+                            paddingRight: 8,
+                            height: 36,
+                            '& fieldset': {
+                              border: 'none',
+                            },
+                            '&:hover fieldset': {
+                              border: 'none',
+                            },
+                            '&.Mui-focused fieldset': {
+                              border: 'none',
+                            },
+                          },
+                          '& .MuiInputBase-input': {
+                            fontFamily,
+                            fontSize: 14,
+                            padding: '10px 14px',
+                            textAlign: 'center',
+                          },
+                          '& .MuiInputBase-input::placeholder': {
+                            color: '#9ca3af',
+                          },
+                        }}
+                      />
+                    ),
+                  }}
                   slotProps={{
-                    textField: {
-                      size: 'small',
-                      sx: {
-                        fontFamily,
-                        width: 128,
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 14,
-                          backgroundColor: '#f3f4f6',
-                          fontFamily,
-                          fontSize: 13,
-                          height: 28,
-                          paddingRight: 30,
-                          '& fieldset': {
-                            border: 'none',
-                          },
-                          '&:hover fieldset': {
-                            border: 'none',
-                          },
-                          '&.Mui-focused fieldset': {
-                            border: 'none',
-                          },
-                        },
-                        '& .MuiInputBase-input': {
-                          fontFamily,
-                          fontSize: 13,
-                          padding: '0 14px',
-                          textAlign: 'center',
-                        },
-                      },
-                    },
                     openPickerButton: {
                       sx: {
                         color: '#6b7280',
                         padding: 0,
-                        right: 6,
+                        mr: 1,
                         '& .MuiSvgIcon-root': {
-                          fontSize: 16,
+                          fontSize: 18,
                         },
                       },
                     },
@@ -466,6 +490,10 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                           borderRadius: 12,
                           boxShadow: '0px 10px 25px rgba(15, 23, 42, 0.12)',
                           padding: '4px 8px',
+                        },
+                        '& .MuiTypography-root': {
+                          fontFamily,
+                          fontSize: 12,
                         },
                         '& .MuiPickersDay-root': {
                           fontFamily,
@@ -503,7 +531,23 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
         renderCell: (params) => {
           const row = params.row;
           const disabled = updatingIds.has(row.id);
-          const style = STATUS_STYLES[row.status] || STATUS_STYLES.Planned;
+          const status = row.status;
+          const colors = STATUS_STYLES[status] ?? STATUS_STYLES.Planned;
+          const pillSx = {
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '0 16px',
+            minHeight: 28,
+            height: 28,
+            borderRadius: 14,
+            fontFamily,
+            fontSize: 13,
+            fontWeight: 600,
+            backgroundColor: colors.bg,
+            color: colors.color,
+          } as const;
+
           return (
             <Box
               sx={{
@@ -514,43 +558,33 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                 width: '100%',
               }}
             >
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: 0,
-                  width: 'auto',
-                  height: 28,
-                }}
-              >
+              <FormControl size="small" sx={{ minWidth: 0, width: 'auto' }}>
                 <Select
-                  value={row.status}
+                  value={status}
                   onChange={handleStatusChange(row)}
                   disabled={disabled}
+                  IconComponent={ExpandMoreIcon}
+                  renderValue={() => (
+                    <Box sx={pillSx}>
+                      <span>{status}</span>
+                    </Box>
+                  )}
                   sx={{
-                    fontFamily,
-                    fontSize: 13,
-                    fontWeight: 500,
-                    borderRadius: 14,
-                    backgroundColor: style.bg,
-                    color: style.color,
-                    height: 28,
-                    lineHeight: '28px',
                     '& .MuiSelect-select': {
-                      display: 'inline-flex',
+                      display: 'flex',
                       alignItems: 'center',
-                      padding: '0 28px 0 14px',
-                      minHeight: 0,
+                      padding: 0,
                     },
                     '& fieldset': {
                       border: 'none',
                     },
-                    opacity: disabled ? 0.6 : 1,
                     '& .MuiSelect-icon': {
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      color: style.color,
-                      right: 10,
+                      color: colors.color,
+                      right: 4,
                     },
+                    opacity: disabled ? 0.6 : 1,
                   }}
                   MenuProps={{
                     PaperProps: {
@@ -562,11 +596,16 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                     },
                   }}
                 >
-                  {Object.keys(STATUS_ORDER).map((statusKey) => (
-                    <MenuItem key={statusKey} value={statusKey}>
-                      {statusKey}
-                    </MenuItem>
-                  ))}
+                  {Object.keys(STATUS_ORDER).map((statusKey) => {
+                    const menuColors = STATUS_STYLES[statusKey] ?? STATUS_STYLES.Planned;
+                    return (
+                      <MenuItem key={statusKey} value={statusKey}>
+                        <Box sx={{ ...pillSx, backgroundColor: menuColors.bg, color: menuColors.color }}>
+                          <span>{statusKey}</span>
+                        </Box>
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </FormControl>
             </Box>
