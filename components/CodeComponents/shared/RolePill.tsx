@@ -21,6 +21,7 @@ export interface RolePillProps {
   className?: string;
   tabIndex?: number;
   "data-testid"?: string;
+  endIcon?: React.ReactNode;
 }
 
 export function RolePill({
@@ -29,6 +30,7 @@ export function RolePill({
   className,
   tabIndex,
   "data-testid": dataTestId,
+  endIcon,
 }: RolePillProps) {
   const style = ROLE_STYLES[role] || ROLE_STYLES["Team Member"];
 
@@ -68,7 +70,19 @@ export function RolePill({
           : undefined,
       }}
     >
-      {role}
+      <span>{role}</span>
+      {endIcon ? (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            marginLeft: 6,
+            lineHeight: 0,
+          }}
+        >
+          {endIcon}
+        </span>
+      ) : null}
     </Box>
   );
 }

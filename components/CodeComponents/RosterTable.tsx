@@ -186,7 +186,7 @@ const StyledTable = styled(Table)(() => ({
     color: "#111827",
     lineHeight: 1.2,
     fontFamily,
-    padding: "14px 24px",
+    padding: "18px 24px 14px",
   },
   "& td": {
     borderBottom: "1px solid #e5e7eb",
@@ -195,6 +195,9 @@ const StyledTable = styled(Table)(() => ({
     lineHeight: 1.2,
     fontFamily,
     padding: "14px 24px",
+  },
+  "& thead tr": {
+    height: 56,
   },
   "& tbody tr:hover": {
     backgroundColor: "#f9fafb",
@@ -845,27 +848,15 @@ function EmployeesTableView({
                 sx={{ py: cellPadding }}
               >
                 {unchangeableRoles.includes(e.currentRole) ? (
-                  <RolePill
-                    role={e.currentRole}
-                    className={roleBadgeClass}
-                  />
+                  <RolePill role={e.currentRole} className={roleBadgeClass} />
                 ) : (
                   <>
-                    <Box
+                    <RolePill
+                      role={e.currentRole}
+                      className={roleBadgeClass}
                       onClick={(event) => handleRoleMenuOpen(event, e.id)}
-                      sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <RolePill
-                        role={e.currentRole}
-                        className={roleBadgeClass}
-                      />
-                      <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
-                    </Box>
+                      endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />}
+                    />
                     
                     <Menu
                       anchorEl={roleMenuAnchor[e.id]}

@@ -10,6 +10,7 @@ import { EvaluationsTableSkeleton } from './Skeletons/EvaluationsTableSkeleton';
 import { RolePill } from './shared/RolePill';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+const levelsetGreen = '#31664a';
 
 const STATUS_ORDER: Record<string, number> = {
   Planned: 0,
@@ -284,7 +285,8 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
               <FormControl
                 size="small"
                 sx={{
-                  minWidth: 180,
+                  minWidth: 0,
+                  width: 'auto',
                   height: 28,
                 }}
               >
@@ -295,7 +297,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                   displayEmpty
                   sx={{
                     fontFamily,
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: 500,
                     borderRadius: 14,
                     backgroundColor: '#f3f4f6',
@@ -304,13 +306,18 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                     '& .MuiSelect-select': {
                       display: 'flex',
                       alignItems: 'center',
-                      padding: '0 12px',
+                      padding: '0 12px 0 14px',
                       minHeight: 0,
                     },
                     '& fieldset': {
                       border: 'none',
                     },
                     opacity: disabled ? 0.6 : 1,
+                    '& .MuiSelect-icon': {
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: '#6b7280',
+                    },
                   }}
                   MenuProps={{
                     PaperProps: {
@@ -379,7 +386,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
               width: '100%',
             }}
           >
-            <Typography sx={{ fontFamily, fontSize: 13, color: '#111827' }}>
+            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: '#111827' }}>
               {params.value}
             </Typography>
           </Box>
@@ -414,12 +421,12 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                       size: 'small',
                       sx: {
                         fontFamily,
-                        width: 148,
+                        width: 128,
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 14,
                           backgroundColor: '#f3f4f6',
                           fontFamily,
-                          fontSize: 12,
+                          fontSize: 13,
                           height: 28,
                           paddingRight: 0,
                           '& fieldset': {
@@ -434,9 +441,37 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                         },
                         '& .MuiInputBase-input': {
                           fontFamily,
-                          fontSize: 12,
+                          fontSize: 13,
                           padding: '0 12px',
                           textAlign: 'center',
+                        },
+                      },
+                    },
+                    openPickerButton: {
+                      sx: {
+                        color: '#6b7280',
+                        padding: 0,
+                        marginRight: 0.5,
+                        '& .MuiSvgIcon-root': {
+                          fontSize: 16,
+                        },
+                      },
+                    },
+                    popper: {
+                      sx: {
+                        '& .MuiPaper-root': {
+                          fontFamily,
+                          borderRadius: 12,
+                          boxShadow: '0px 10px 25px rgba(15, 23, 42, 0.12)',
+                          padding: '4px 8px',
+                        },
+                        '& .MuiPickersDay-root': {
+                          fontFamily,
+                          fontSize: 12,
+                          '&.Mui-selected': {
+                            backgroundColor: `${levelsetGreen} !important`,
+                            color: '#ffffff !important',
+                          },
                         },
                       },
                     },
@@ -480,7 +515,8 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
               <FormControl
                 size="small"
                 sx={{
-                  minWidth: 150,
+                  minWidth: 0,
+                  width: 'auto',
                   height: 28,
                 }}
               >
@@ -490,7 +526,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                   disabled={disabled}
                   sx={{
                     fontFamily,
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: 500,
                     borderRadius: 14,
                     backgroundColor: style.bg,
@@ -499,13 +535,18 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                     '& .MuiSelect-select': {
                       display: 'flex',
                       alignItems: 'center',
-                      padding: '0 12px',
+                      padding: '0 12px 0 14px',
                       minHeight: 0,
                     },
                     '& fieldset': {
                       border: 'none',
                     },
                     opacity: disabled ? 0.6 : 1,
+                    '& .MuiSelect-icon': {
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: style.color,
+                    },
                   }}
                   MenuProps={{
                     PaperProps: {
@@ -609,6 +650,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
             borderBottom: '1px solid #f3f4f6',
             borderRight: 'none',
             fontSize: 13,
+            fontWeight: 500,
             color: '#111827',
             fontFamily,
             '&:focus, &:focus-within': {

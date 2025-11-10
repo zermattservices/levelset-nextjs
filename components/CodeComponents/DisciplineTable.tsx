@@ -344,6 +344,7 @@ export function DisciplineTable({
             sx={{
               fontFamily,
               fontSize: 13,
+              fontWeight: 500,
               color: '#111827',
             }}
           >
@@ -493,6 +494,7 @@ export function DisciplineTable({
             borderBottom: '1px solid #f3f4f6',
             borderRight: 'none',
             fontSize: 13,
+            fontWeight: 500,
             color: '#111827',
             fontFamily,
             '&:focus, &:focus-within': {
