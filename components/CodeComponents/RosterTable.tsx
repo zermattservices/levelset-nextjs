@@ -1,12 +1,6 @@
 import * as React from "react";
 import type { Employee, AvailabilityType, CertificationStatus } from "@/lib/supabase.types";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Checkbox,
   CircularProgress,
   Typography,
@@ -25,6 +19,7 @@ import { EmployeeTableSkeleton } from "./Skeletons/EmployeeTableSkeleton";
 import { EvaluationsTable } from "./EvaluationsTable";
 import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import { RolePill } from "./shared/RolePill";
+import { DataGridPro, GridColDef, gridClasses } from "@mui/x-data-grid-pro";
 
 export type Role =
   | "New Hire"
@@ -147,13 +142,17 @@ const sampleData: RosterEntry[] = [
 
 const fontFamily = `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
 
-const StyledContainer = styled(TableContainer)(() => ({
+const StyledContainer = styled(Box)(() => ({
   borderRadius: 16,
   border: "1px solid #e5e7eb",
   backgroundColor: "#ffffff",
   overflow: "hidden",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
 }));
 
 const StyledTabs = styled(Tabs)(() => ({
@@ -174,33 +173,6 @@ const StyledTab = styled(Tab)(() => ({
   '&.Mui-selected': {
     color: '#31664a',
     fontWeight: 600,
-  },
-}));
-
-const StyledTable = styled(Table)(() => ({
-  "& th": {
-    borderBottom: "1px solid #e5e7eb",
-    backgroundColor: "#f9fafb",
-    fontWeight: 600,
-    fontSize: 14,
-    color: "#111827",
-    lineHeight: 1.2,
-    fontFamily,
-    padding: "18px 24px 14px",
-  },
-  "& td": {
-    borderBottom: "1px solid #e5e7eb",
-    color: "#111827",
-    fontSize: 14,
-    lineHeight: 1.2,
-    fontFamily,
-    padding: "14px 24px",
-  },
-  "& thead tr": {
-    height: 56,
-  },
-  "& tbody tr:hover": {
-    backgroundColor: "#f9fafb",
   },
 }));
 
@@ -350,8 +322,6 @@ function EmployeesTableView({
   // Unchangeable roles
   const unchangeableRoles: Role[] = ["Operator", "Executive"];
 
-  const cellPadding = density === "compact" ? 1 : 1.5;
-  
   // Fetch employees from Supabase - memoized to avoid recreating on every render
   const fetchEmployees = React.useCallback(async () => {
     try {
@@ -753,311 +723,363 @@ function EmployeesTableView({
     );
   }
 
+  const rows = React.useMemo(
+    () =>
+      data.map((e) => ({
+        id: e.id,
+        name: e.name,
+        currentRole: e.currentRole,
+        foh: e.foh,
+        boh: e.boh,
+        availability: e.availability,
+        certifiedStatus: e.certifiedStatus,
+        calculatedPay: e.calculatedPay,
+      })),
+    [data]
+  );
+
+  const columns = React.useMemo<GridColDef[]>(() => {
+    const baseColumns: GridColDef[] = [
+      {
+        field: "name",
+        headerName: "Employee",
+        flex: 1.4,
+        minWidth: 220,
+        renderCell: (params) => (
+          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: "#111827" }}>
+            {params.value}
+          </Typography>
+        ),
+      },
+      {
+        field: "currentRole",
+        headerName: "Current Role",
+        width: 180,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderCell: (params) => {
+          const employeeId = params.row.id as string;
+          const role = params.value as Role;
+          const immutable = unchangeableRoles.includes(role);
+          const anchor = roleMenuAnchor[employeeId] ?? null;
+          return (
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+              {immutable ? (
+                <RolePill role={role} />
+              ) : (
+                <>
+                  <RolePill
+                    role={role}
+                    endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
+                    onClick={(event) => handleRoleMenuOpen(event, employeeId)}
+                  />
+                  <Menu
+                    anchorEl={anchor}
+                    open={Boolean(anchor)}
+                    onClose={() => handleRoleMenuClose(employeeId)}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                    transformOrigin={{ vertical: "top", horizontal: "left" }}
+                    PaperProps={{
+                      sx: {
+                        fontFamily,
+                        borderRadius: 2,
+                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                        border: "1px solid #e5e7eb",
+                      },
+                    }}
+                  >
+                    {(["New Hire", "Team Member", "Trainer", "Team Lead", "Director"] as Role[]).map((roleOption) => (
+                      <RoleMenuItem
+                        key={roleOption}
+                        selected={role === roleOption}
+                        onClick={() => handleRoleSelect(employeeId, roleOption)}
+                      >
+                        <RolePill role={roleOption} />
+                      </RoleMenuItem>
+                    ))}
+                  </Menu>
+                </>
+              )}
+            </Box>
+          );
+        },
+      },
+      {
+        field: "foh",
+        headerName: "FOH",
+        width: 100,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderCell: (params) => {
+          const employeeId = params.row.id as string;
+          const checked = Boolean(params.value);
+          return (
+            <BrandCheckbox
+              checked={checked}
+              onChange={(_, state) => handleFohChange(employeeId, state)}
+              inputProps={{ "aria-label": `FOH access for ${params.row.name}` }}
+            />
+          );
+        },
+      },
+      {
+        field: "boh",
+        headerName: "BOH",
+        width: 100,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderCell: (params) => {
+          const employeeId = params.row.id as string;
+          const checked = Boolean(params.value);
+          return (
+            <BrandCheckbox
+              checked={checked}
+              onChange={(_, state) => handleBohChange(employeeId, state)}
+              inputProps={{ "aria-label": `BOH access for ${params.row.name}` }}
+            />
+          );
+        },
+      },
+      {
+        field: "availability",
+        headerName: "Availability",
+        width: 160,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderCell: (params) => {
+          const employeeId = params.row.id as string;
+          const availability = params.value as AvailabilityType;
+          const anchor = availabilityMenuAnchor[employeeId] ?? null;
+          return (
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+              <AvailabilityChip
+                className={availability.toLowerCase()}
+                onClick={(event) => handleAvailabilityMenuOpen(event, employeeId)}
+              >
+                {availability}
+                <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
+              </AvailabilityChip>
+              <Menu
+                anchorEl={anchor}
+                open={Boolean(anchor)}
+                onClose={() => handleAvailabilityMenuClose(employeeId)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                PaperProps={{
+                  sx: {
+                    fontFamily,
+                    borderRadius: 2,
+                    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                    border: "1px solid #e5e7eb",
+                  },
+                }}
+              >
+                {(["Available", "Limited"] as AvailabilityType[]).map((option) => (
+                  <RoleMenuItem
+                    key={option}
+                    selected={availability === option}
+                    onClick={() => handleAvailabilitySelect(employeeId, option)}
+                  >
+                    <AvailabilityChip className={option.toLowerCase()}>{option}</AvailabilityChip>
+                  </RoleMenuItem>
+                ))}
+              </Menu>
+            </Box>
+          );
+        },
+      },
+      {
+        field: "certifiedStatus",
+        headerName: "Certified",
+        width: 170,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderCell: (params) => {
+          const employeeId = params.row.id as string;
+          const status = params.value as CertificationStatus;
+          const anchor = certificationMenuAnchor[employeeId] ?? null;
+          return (
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+              <CertificationChip
+                className={status.toLowerCase().replace(" ", "-")}
+                onClick={(event) =>
+                  setCertificationMenuAnchor((prev) => ({ ...prev, [employeeId]: event.currentTarget }))
+                }
+              >
+                {status}
+                <ExpandMoreIcon sx={{ fontSize: 16, ml: 0.5 }} />
+              </CertificationChip>
+              <Menu
+                anchorEl={anchor}
+                open={Boolean(anchor)}
+                onClose={() => setCertificationMenuAnchor((prev) => ({ ...prev, [employeeId]: null }))}
+                PaperProps={{
+                  sx: {
+                    mt: 0.5,
+                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    borderRadius: 2,
+                  },
+                }}
+              >
+                {(["Not Certified", "Pending", "Certified", "PIP"] as CertificationStatus[]).map((option) => (
+                  <RoleMenuItem
+                    key={option}
+                    selected={status === option}
+                    onClick={() => handleCertificationStatusChange(employeeId, option)}
+                  >
+                    {option}
+                  </RoleMenuItem>
+                ))}
+              </Menu>
+            </Box>
+          );
+        },
+      },
+      {
+        field: "calculatedPay",
+        headerName: "Suggested Pay",
+        width: 170,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderCell: (params) => {
+          const pay = params.value as number | null;
+          return (
+            <Typography
+              sx={{
+                fontFamily,
+                fontWeight: 600,
+                color: pay ? "#166534" : "#9ca3af",
+                fontSize: 14,
+              }}
+            >
+              {pay ? `$${pay.toFixed(2)}/hr` : "—"}
+            </Typography>
+          );
+        },
+      },
+    ];
+
+    if (showActions) {
+      baseColumns.push({
+        field: "actions",
+        headerName: "",
+        width: 72,
+        align: "right",
+        headerAlign: "right",
+        sortable: false,
+        renderCell: (params) => (
+          <ActionsButton
+            onClick={() => onEdit?.(params.row.id as string)}
+            className="actions-button"
+            aria-label={`Actions for ${params.row.name}`}
+          >
+            <MoreVertIcon fontSize="small" />
+          </ActionsButton>
+        ),
+      });
+    }
+
+    return baseColumns;
+  }, [
+    availabilityMenuAnchor,
+    certificationMenuAnchor,
+    handleAvailabilityMenuClose,
+    handleAvailabilityMenuOpen,
+    handleAvailabilitySelect,
+    handleBohChange,
+    handleFohChange,
+    handleRoleMenuClose,
+    handleRoleMenuOpen,
+    handleRoleSelect,
+    handleCertificationStatusChange,
+    roleMenuAnchor,
+    showActions,
+    onEdit,
+  ]);
+
+  if (data.length === 0 && !loading) {
+    return (
+      <StyledContainer
+        className={`roster-table-container ${className}`}
+        data-plasmic-name="roster-table-container"
+      >
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          justifyContent="center"
+          sx={{ py: 6, px: 4 }}
+        >
+          <Typography variant="body2" sx={{ color: "#6b7280", fontFamily }}>
+            No employees found.
+          </Typography>
+        </Stack>
+      </StyledContainer>
+    );
+  }
+
   return (
     <StyledContainer
       className={`roster-table-container ${className}`}
       data-plasmic-name="roster-table-container"
     >
-      <StyledTable
-        className={`roster-table ${tableClass}`}
-        data-plasmic-name="roster-table"
-      >
-        <TableHead data-plasmic-name="table-header">
-          <TableRow
-            data-plasmic-name="header-row"
-            className={headerRowClass}
-          >
-            <TableCell
-              data-plasmic-name="name-header"
-              className={headerCellClass}
-            >
-              Name
-            </TableCell>
-            <TableCell
-              data-plasmic-name="role-header"
-              className={headerCellClass}
-            >
-              Current Role
-            </TableCell>
-            <TableCell
-              data-plasmic-name="foh-header"
-              className={headerCellClass}
-              align="center"
-            >
-              FOH
-            </TableCell>
-            <TableCell
-              data-plasmic-name="boh-header"
-              className={headerCellClass}
-              align="center"
-            >
-              BOH
-            </TableCell>
-            <TableCell
-              data-plasmic-name="availability-header"
-              className={headerCellClass}
-              align="center"
-            >
-              Availability
-            </TableCell>
-            <TableCell
-              data-plasmic-name="certified-header"
-              className={headerCellClass}
-              align="center"
-            >
-              Certified
-            </TableCell>
-            <TableCell
-              data-plasmic-name="pay-header"
-              className={headerCellClass}
-              align="center"
-            >
-              Suggested Pay
-            </TableCell>
-            {showActions && (
-              <TableCell
-                data-plasmic-name="actions-header"
-                className={headerCellClass}
-                align="right"
-              ></TableCell>
-            )}
-          </TableRow>
-        </TableHead>
-
-        <TableBody>
-          {data.map((e) => (
-            <TableRow
-              key={e.id}
-              hover
-              className={rowClass}
-            >
-              <TableCell
-                className={`name-cell ${nameCellClass || ""}`}
-                sx={{ py: cellPadding }}
-              >
-                <Typography
-                  component="span"
-                  variant="body2"
-                  sx={{ fontFamily, fontWeight: 600, color: "#111827" }}
-                >
-                  {e.name}
-                </Typography>
-              </TableCell>
-              <TableCell
-                className={cellClass}
-                sx={{ py: cellPadding }}
-              >
-                {unchangeableRoles.includes(e.currentRole) ? (
-                  <RolePill role={e.currentRole} className={roleBadgeClass} />
-                ) : (
-                  <>
-                    <RolePill
-                      role={e.currentRole}
-                      className={roleBadgeClass}
-                      onClick={(event) => handleRoleMenuOpen(event, e.id)}
-                      endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />}
-                    />
-                    
-                    <Menu
-                      anchorEl={roleMenuAnchor[e.id]}
-                      open={Boolean(roleMenuAnchor[e.id])}
-                      onClose={() => handleRoleMenuClose(e.id)}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                      }}
-                      transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'left',
-                      }}
-                      PaperProps={{
-                        sx: {
-                          fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
-                          borderRadius: 2,
-                          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                          border: "1px solid #e5e7eb",
-                        }
-                      }}
-                    >
-                      {(["New Hire", "Team Member", "Trainer", "Team Lead", "Director"] as Role[]).map((role) => (
-                        <RoleMenuItem
-                          key={role}
-                          onClick={() => handleRoleSelect(e.id, role)}
-                          selected={e.currentRole === role}
-                        >
-                          <RolePill role={role} className={roleBadgeClass} />
-                        </RoleMenuItem>
-                      ))}
-                    </Menu>
-                  </>
-                )}
-              </TableCell>
-              <TableCell
-                className={cellClass}
-                align="center"
-                sx={{ py: cellPadding }}
-              >
-                <BrandCheckbox
-                  checked={e.foh}
-                  onChange={(_, checked) => handleFohChange(e.id, checked)}
-                  className={
-                    checkboxOnClass || checkboxOffClass
-                      ? e.foh
-                        ? checkboxOnClass
-                        : checkboxOffClass
-                      : undefined
-                  }
-                  inputProps={{ "aria-label": `FOH access for ${e.name}` }}
-                />
-              </TableCell>
-              <TableCell
-                className={cellClass}
-                align="center"
-                sx={{ py: cellPadding }}
-              >
-                <BrandCheckbox
-                  checked={e.boh}
-                  onChange={(_, checked) => handleBohChange(e.id, checked)}
-                  className={
-                    checkboxOnClass || checkboxOffClass
-                      ? e.boh
-                        ? checkboxOnClass
-                        : checkboxOffClass
-                      : undefined
-                  }
-                  inputProps={{ "aria-label": `BOH access for ${e.name}` }}
-                />
-              </TableCell>
-              <TableCell
-                className={cellClass}
-                align="center"
-                sx={{ py: cellPadding }}
-              >
-                <AvailabilityChip
-                  className={e.availability.toLowerCase()}
-                  onClick={(event) => handleAvailabilityMenuOpen(event, e.id)}
-                >
-                  {e.availability}
-                  <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
-                </AvailabilityChip>
-                
-                <Menu
-                  anchorEl={availabilityMenuAnchor[e.id]}
-                  open={Boolean(availabilityMenuAnchor[e.id])}
-                  onClose={() => handleAvailabilityMenuClose(e.id)}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                  }}
-                  PaperProps={{
-                    sx: {
-                      fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
-                      borderRadius: 2,
-                      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                      border: "1px solid #e5e7eb",
-                    }
-                  }}
-                >
-                  {(['Available', 'Limited'] as AvailabilityType[]).map((avail) => (
-                    <RoleMenuItem
-                      key={avail}
-                      onClick={() => handleAvailabilitySelect(e.id, avail)}
-                      selected={e.availability === avail}
-                    >
-                      <AvailabilityChip
-                        className={avail.toLowerCase()}
-                        sx={{ 
-                          cursor: "default",
-                          "&:hover": { 
-                            opacity: 1, 
-                            transform: "none" 
-                          }
-                        }}
-                      >
-                        {avail}
-                      </AvailabilityChip>
-                    </RoleMenuItem>
-                  ))}
-                </Menu>
-              </TableCell>
-              <TableCell
-                className={cellClass}
-                align="center"
-                sx={{ py: cellPadding }}
-              >
-                <CertificationChip
-                  className={e.certifiedStatus.toLowerCase().replace(' ', '-')}
-                  onClick={(event) => {
-                    setCertificationMenuAnchor(prev => ({ ...prev, [e.id]: event.currentTarget }));
-                  }}
-                >
-                  {e.certifiedStatus}
-                  <ExpandMoreIcon sx={{ fontSize: 16, ml: 0.5 }} />
-                </CertificationChip>
-                <Menu
-                  anchorEl={certificationMenuAnchor[e.id]}
-                  open={Boolean(certificationMenuAnchor[e.id])}
-                  onClose={() => setCertificationMenuAnchor(prev => ({ ...prev, [e.id]: null }))}
-                  PaperProps={{
-                    sx: {
-                      mt: 0.5,
-                      boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                      borderRadius: 2,
-                    },
-                  }}
-                >
-                  {(['Not Certified', 'Pending', 'Certified', 'PIP'] as CertificationStatus[]).map((status) => (
-                    <RoleMenuItem
-                      key={status}
-                      selected={e.certifiedStatus === status}
-                      onClick={() => handleCertificationStatusChange(e.id, status)}
-                    >
-                      {status}
-                    </RoleMenuItem>
-                  ))}
-                </Menu>
-              </TableCell>
-              <TableCell
-                className={cellClass}
-                align="center"
-                sx={{ py: cellPadding }}
-              >
-                <Typography
-                  component="span"
-                  variant="body2"
-                  sx={{ 
-                    fontFamily, 
-                    fontWeight: 600, 
-                    color: e.calculatedPay ? "#166534" : "#9ca3af",
-                    fontSize: 14
-                  }}
-                >
-                  {e.calculatedPay ? `$${e.calculatedPay.toFixed(2)}/hr` : '—'}
-                </Typography>
-              </TableCell>
-              {showActions && (
-                <TableCell
-                  className={actionsCellClass || cellClass}
-                  align="right"
-                  sx={{ py: cellPadding }}
-                >
-                  <ActionsButton
-                    onClick={() => onEdit?.(e.id)}
-                    className="actions-button"
-                    aria-label={`Actions for ${e.name}`}
-                  >
-                    <MoreVertIcon fontSize="small" />
-                  </ActionsButton>
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </StyledTable>
+      <DataGridPro
+        rows={rows}
+        columns={columns}
+        disableRowSelectionOnClick
+        loading={loading}
+        hideFooter
+        autoHeight
+        rowHeight={48}
+        columnHeaderHeight={56}
+        sx={{
+          border: "none",
+          fontFamily,
+          [`& .${gridClasses.columnHeaders}`]: {
+            borderBottom: "1px solid #e5e7eb",
+          },
+          [`& .${gridClasses.columnHeader}`]: {
+            backgroundColor: "#f9fafb",
+            fontWeight: 600,
+            fontSize: 14,
+            color: "#111827",
+            '&:focus, &:focus-within': {
+              outline: 'none',
+            },
+          },
+          '& .MuiDataGrid-columnHeaderTitleContainer': {
+            padding: '0 16px',
+          },
+          [`& .${gridClasses.columnSeparator}`]: {
+            display: 'none',
+          },
+          [`& .${gridClasses.cell}`]: {
+            borderBottom: '1px solid #f3f4f6',
+            fontSize: 13,
+            fontWeight: 500,
+            color: '#111827',
+            '&:focus, &:focus-within': {
+              outline: 'none',
+            },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 16px',
+          },
+          [`& .${gridClasses.row}:hover`]: {
+            backgroundColor: '#f9fafb',
+          },
+          '& .MuiDataGrid-overlay': {
+            fontFamily,
+          },
+        }}
+      />
     </StyledContainer>
   );
 }

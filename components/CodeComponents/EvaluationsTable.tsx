@@ -303,10 +303,11 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                     backgroundColor: '#f3f4f6',
                     color: '#374151',
                     height: 28,
+                    lineHeight: '28px',
                     '& .MuiSelect-select': {
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
-                      padding: '0 12px 0 14px',
+                      padding: '0 28px 0 14px',
                       minHeight: 0,
                     },
                     '& fieldset': {
@@ -317,6 +318,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                       top: '50%',
                       transform: 'translateY(-50%)',
                       color: '#6b7280',
+                      right: 10,
                     },
                   }}
                   MenuProps={{
@@ -428,7 +430,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                           fontFamily,
                           fontSize: 13,
                           height: 28,
-                          paddingRight: 0,
+                          paddingRight: 30,
                           '& fieldset': {
                             border: 'none',
                           },
@@ -442,7 +444,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                         '& .MuiInputBase-input': {
                           fontFamily,
                           fontSize: 13,
-                          padding: '0 12px',
+                          padding: '0 14px',
                           textAlign: 'center',
                         },
                       },
@@ -451,7 +453,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                       sx: {
                         color: '#6b7280',
                         padding: 0,
-                        marginRight: 0.5,
+                        right: 6,
                         '& .MuiSvgIcon-root': {
                           fontSize: 16,
                         },
@@ -532,10 +534,11 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                     backgroundColor: style.bg,
                     color: style.color,
                     height: 28,
+                    lineHeight: '28px',
                     '& .MuiSelect-select': {
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
-                      padding: '0 12px 0 14px',
+                      padding: '0 28px 0 14px',
                       minHeight: 0,
                     },
                     '& fieldset': {
@@ -546,6 +549,7 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                       top: '50%',
                       transform: 'translateY(-50%)',
                       color: style.color,
+                      right: 10,
                     },
                   }}
                   MenuProps={{
