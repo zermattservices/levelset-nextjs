@@ -689,40 +689,6 @@ function EmployeesTableView({
     }
   };
 
-  if (loading && data.length === 0) {
-    return (
-      <EmployeeTableSkeleton
-        className={className}
-        rows={10}
-        showActions={showActions}
-      />
-    );
-  }
-
-  if (error && data.length === 0) {
-    return (
-      <StyledContainer
-        className={`roster-table-container ${className}`}
-        data-plasmic-name="roster-table-container"
-      >
-        <Stack
-          direction="row"
-          spacing={1.5}
-          alignItems="center"
-          justifyContent="center"
-          sx={{ py: 6, px: 4 }}
-        >
-          <Typography
-            variant="body2"
-            sx={{ color: "#b91c1c", fontFamily }}
-          >
-            {error}
-          </Typography>
-        </Stack>
-      </StyledContainer>
-    );
-  }
-
   const rows = React.useMemo(
     () =>
       data.map((e) => ({
@@ -1002,6 +968,40 @@ function EmployeesTableView({
     showActions,
     onEdit,
   ]);
+
+  if (loading && data.length === 0) {
+    return (
+      <EmployeeTableSkeleton
+        className={className}
+        rows={10}
+        showActions={showActions}
+      />
+    );
+  }
+
+  if (error && data.length === 0) {
+    return (
+      <StyledContainer
+        className={`roster-table-container ${className}`}
+        data-plasmic-name="roster-table-container"
+      >
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          justifyContent="center"
+          sx={{ py: 6, px: 4 }}
+        >
+          <Typography
+            variant="body2"
+            sx={{ color: "#b91c1c", fontFamily }}
+          >
+            {error}
+          </Typography>
+        </Stack>
+      </StyledContainer>
+    );
+  }
 
   if (data.length === 0 && !loading) {
     return (
