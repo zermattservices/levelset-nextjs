@@ -1,0 +1,480 @@
+/**
+ * Seed a mock org/location with employees, Big 5 labels, and ratings copied from Buda.
+ *
+ * Usage:
+ *   npx tsx scripts/seed-mock-location.ts
+ *
+ * Environment variables required:
+ *   NEXT_PUBLIC_SUPABASE_URL
+ *   SUPABASE_SERVICE_ROLE_KEY
+ *
+ * Optional overrides:
+ *   --ratings-limit=<number>  (defaults to 900)
+ */
+
+import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Missing Supabase credentials. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
+const BUDA_ORG_ID = process.env.NEXT_PUBLIC_BUDA_ORG_ID ?? '54b9864f-9df9-4a15-a209-7b99e1c274f4';
+const BUDA_LOCATION_ID = process.env.NEXT_PUBLIC_BUDA_LOCATION_ID ?? '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd';
+
+const MOCK_ORG_NAME = 'John Smith';
+const MOCK_LOCATION_NAME = 'John Smith Mock Location';
+const MOCK_LOCATION_NUMBER = '99999';
+const MOCK_AUTH_USER_ID = 'mock-auth-john-smith';
+const MOCK_OWNER_EMAIL = 'john.smith@mocksmithco.test';
+
+const ratingsLimitArg = process.argv.find((arg) => arg.startsWith('--ratings-limit='));
+const RATINGS_LIMIT = ratingsLimitArg ? parseInt(ratingsLimitArg.split('=')[1] || '900', 10) : 900;
+
+const ROLE_COUNTS: Record<string, number> = {
+  Operator: 1,
+  Executive: 2,
+  Director: 3,
+  'Team Lead': 10,
+  Trainer: 5,
+  'Team Member': 29,
+};
+
+const LEADER_ROLES = new Set(['Operator', 'Executive', 'Director', 'Team Lead']);
+
+const FIRST_NAMES = [
+  'Alex', 'Jamie', 'Taylor', 'Chris', 'Morgan', 'Jordan', 'Casey', 'Riley', 'Avery', 'Dakota',
+  'Skyler', 'Cameron', 'Rowan', 'Emerson', 'Quinn', 'Reese', 'Elliot', 'Harper', 'Finley', 'Logan',
+  'Reagan', 'Sage', 'Peyton', 'Drew', 'Lane', 'Shawn', 'Kai', 'Blake', 'Hayden', 'Jules',
+  'Kendall', 'Parker', 'Sawyer', 'Spencer', 'Tatum', 'Tyler', 'Winter', 'London', 'Micah', 'Nico',
+  'Phoenix', 'River', 'Shiloh', 'Wren', 'Arden', 'Blaire', 'Callen', 'Devon', 'Easton', 'Fallon',
+  'Grey', 'Harlow', 'Indie', 'Jensen', 'Kiernan', 'Lennon', 'Marley', 'Nova', 'Oakley', 'Presley',
+];
+
+const LAST_NAMES = [
+  'Adams', 'Baker', 'Carter', 'Dalton', 'Ellis', 'Fletcher', 'Grayson', 'Hughes', 'Irwin', 'Jensen',
+  'Kennedy', 'Lancaster', 'Monroe', 'Nolan', 'Oakley', 'Prescott', 'Ramsey', 'Shepard', 'Thatcher', 'Underwood',
+  'Vaughn', 'Whitaker', 'York', 'Zimmerman', 'Barron', 'Carlisle', 'Decker', 'Eastman', 'Foster', 'Gentry',
+  'Hartley', 'Iverson', 'Jamison', 'Kingsley', 'Langley', 'Maddox', 'Neilsen', 'Ortega', 'Perrin', 'Quimby',
+  'Ridley', 'Sterling', 'Thayer', 'Upton', 'Vander', 'Winslow', 'Yardley', 'Zimmer',
+];
+
+interface EmployeeRecord {
+  id: string;
+  role: string;
+  full_name: string;
+}
+
+function uniqueSlug(base: string) {
+  return `${base}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function sampleName(index: number) {
+  const first = FIRST_NAMES[index % FIRST_NAMES.length];
+  const last = LAST_NAMES[Math.floor(index / FIRST_NAMES.length) % LAST_NAMES.length];
+  return { first, last, full: `${first} ${last}` };
+}
+
+function randomHireDate(): string {
+  const now = new Date();
+  const pastDays = Math.floor(Math.random() * 540) + 30; // between ~1 month and ~18 months
+  const hire = new Date(now.getTime() - pastDays * 24 * 60 * 60 * 1000);
+  return hire.toISOString().split('T')[0];
+}
+
+async function ensureOrg(): Promise<string> {
+  const { data: existing, error: existingError } = await supabase
+    .from('orgs')
+    .select('id, slug, name')
+    .eq('name', MOCK_ORG_NAME)
+    .maybeSingle();
+
+  if (existingError) {
+    throw existingError;
+  }
+
+  if (existing?.id) {
+    console.log(`ℹ️  Reusing existing org "${MOCK_ORG_NAME}" (${existing.id})`);
+    return existing.id;
+  }
+
+  const { data: referenceOrg, error: referenceError } = await supabase
+    .from('orgs')
+    .select('*')
+    .eq('id', BUDA_ORG_ID)
+    .maybeSingle();
+
+  if (referenceError) {
+    throw referenceError;
+  }
+
+  const orgId = randomUUID();
+  const payload: Record<string, any> = { id: orgId, name: MOCK_ORG_NAME };
+
+  if (referenceOrg) {
+    for (const [key, value] of Object.entries(referenceOrg)) {
+      if (['id', 'created_at', 'updated_at', 'name'].includes(key)) continue;
+      payload[key] = value;
+    }
+  }
+
+  if ('slug' in payload) {
+    payload.slug = uniqueSlug('john-smith');
+  }
+  if ('store_number' in payload) {
+    payload.store_number = MOCK_LOCATION_NUMBER;
+  }
+  if ('owner_name' in payload) {
+    payload.owner_name = MOCK_ORG_NAME;
+  }
+
+  const { error: insertError } = await supabase.from('orgs').insert(payload);
+
+  if (insertError) {
+    console.error('❌ Failed to create org payload:', payload);
+    throw insertError;
+  }
+
+  console.log(`✅ Created org "${MOCK_ORG_NAME}" (${orgId})`);
+  return orgId;
+}
+
+async function ensureLocation(orgId: string): Promise<string> {
+  const { data: existing, error: existingError } = await supabase
+    .from('locations')
+    .select('id, name, location_number')
+    .eq('org_id', orgId)
+    .eq('location_number', MOCK_LOCATION_NUMBER)
+    .maybeSingle();
+
+  if (existingError) {
+    throw existingError;
+  }
+
+  if (existing?.id) {
+    console.log(`ℹ️  Reusing existing location "${existing.name}" (${existing.id})`);
+    return existing.id;
+  }
+
+  const { data: referenceLocation, error: referenceError } = await supabase
+    .from('locations')
+    .select('*')
+    .eq('id', BUDA_LOCATION_ID)
+    .maybeSingle();
+
+  if (referenceError) {
+    throw referenceError;
+  }
+
+  const locationId = randomUUID();
+  const payload: Record<string, any> = {
+    id: locationId,
+    org_id: orgId,
+    name: MOCK_LOCATION_NAME,
+    location_number: MOCK_LOCATION_NUMBER,
+  };
+
+  if (referenceLocation) {
+    for (const [key, value] of Object.entries(referenceLocation)) {
+      if (['id', 'created_at', 'updated_at', 'org_id', 'name', 'location_number'].includes(key)) continue;
+      payload[key] = value;
+    }
+  }
+
+  if ('slug' in payload) {
+    payload.slug = uniqueSlug('smith-99999');
+  }
+  if ('store_number' in payload) {
+    payload.store_number = MOCK_LOCATION_NUMBER;
+  }
+
+  const { error: insertError } = await supabase.from('locations').insert(payload);
+
+  if (insertError) {
+    console.error('❌ Failed to create location payload:', payload);
+    throw insertError;
+  }
+
+  console.log(`✅ Created location "${MOCK_LOCATION_NAME}" (${locationId})`);
+  return locationId;
+}
+
+async function ensureOwnerAppUser(orgId: string, locationId: string, operatorEmployeeId: string) {
+  const { data: existing, error: existingError } = await supabase
+    .from('app_users')
+    .select('id')
+    .eq('auth_user_id', MOCK_AUTH_USER_ID)
+    .maybeSingle();
+
+  if (existingError) {
+    throw existingError;
+  }
+
+  if (existing?.id) {
+    console.log(`ℹ️  Reusing existing app_user for ${MOCK_AUTH_USER_ID}`);
+    return;
+  }
+
+  const payload = {
+    id: randomUUID(),
+    auth_user_id: MOCK_AUTH_USER_ID,
+    email: MOCK_OWNER_EMAIL,
+    first_name: 'John',
+    last_name: 'Smith',
+    full_name: 'John Smith',
+    role: 'Operator',
+    org_id: orgId,
+    location_id: locationId,
+    employee_id: operatorEmployeeId,
+    active: true,
+  };
+
+  const { error: insertError } = await supabase.from('app_users').insert(payload);
+
+  if (insertError) {
+    console.error('❌ Failed to create app_user payload:', payload);
+    throw insertError;
+  }
+
+  console.log('✅ Created owner app_user linked to operator employee');
+}
+
+function buildEmployees(orgId: string, locationId: string) {
+  const employees: any[] = [];
+  let counter = 0;
+
+  for (const [role, count] of Object.entries(ROLE_COUNTS)) {
+    for (let i = 0; i < count; i++) {
+      const name = sampleName(counter);
+      counter += 1;
+      const id = randomUUID();
+
+      const emailLocal = `${name.first}.${name.last}`.toLowerCase();
+
+      employees.push({
+        id,
+        org_id: orgId,
+        location_id: locationId,
+        role,
+        full_name: name.full,
+        first_name: name.first,
+        last_name: name.last,
+        email: `${emailLocal}@mocksmithco.test`,
+        payroll_name: `${name.last}, ${name.first}`,
+        hire_date: randomHireDate(),
+        active: true,
+        is_leader: LEADER_ROLES.has(role),
+        is_trainer: role === 'Trainer',
+        is_foh: true,
+        is_boh: false,
+        availability: 'Available',
+        certified_status: 'Not Certified',
+      });
+    }
+  }
+
+  return employees;
+}
+
+function chunkArray<T>(items: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += chunkSize) {
+    chunks.push(items.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+function normalizeRole(role?: string | null): string {
+  if (!role) return 'Team Member';
+  if (ROLE_COUNTS[role]) return role;
+  if (role.toLowerCase().includes('lead')) return 'Team Lead';
+  if (role.toLowerCase().includes('trainer')) return 'Trainer';
+  if (role.toLowerCase().includes('director')) return 'Director';
+  if (role.toLowerCase().includes('exec')) return 'Executive';
+  if (role.toLowerCase().includes('operator')) return 'Operator';
+  return 'Team Member';
+}
+
+async function seed() {
+  console.log('🚀 Seeding mock location data...\n');
+
+  const orgId = await ensureOrg();
+  const locationId = await ensureLocation(orgId);
+
+  console.log('\n📄 Fetching reference data from Buda...');
+
+  const [{ data: budaEmployees, error: budaEmployeesError }, { data: budaRatingsRaw, error: budaRatingsError }, { data: big5Labels, error: big5Error }] =
+    await Promise.all([
+      supabase
+        .from('employees')
+        .select('id, full_name, role')
+        .eq('location_id', BUDA_LOCATION_ID),
+      supabase
+        .from('ratings')
+        .select('*')
+        .eq('location_id', BUDA_LOCATION_ID)
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('position_big5_labels')
+        .select('*')
+        .eq('location_id', BUDA_LOCATION_ID),
+    ]);
+
+  if (budaEmployeesError) throw budaEmployeesError;
+  if (budaRatingsError) throw budaRatingsError;
+  if (big5Error) throw big5Error;
+
+  if (!budaEmployees || budaEmployees.length === 0) {
+    throw new Error('No employees found for Buda reference location');
+  }
+
+  console.log(`   • Reference employees: ${budaEmployees.length}`);
+  console.log(`   • Reference ratings: ${budaRatingsRaw?.length ?? 0}`);
+  console.log(`   • Reference Big 5 labels: ${big5Labels?.length ?? 0}\n`);
+
+  console.log('👥 Generating mock employees...');
+  const employeePayloads = buildEmployees(orgId, locationId);
+
+  const { data: insertedEmployees, error: insertEmployeesError } = await supabase
+    .from('employees')
+    .insert(employeePayloads)
+    .select('id, role, full_name');
+
+  if (insertEmployeesError) {
+    console.error('❌ Failed to insert employees. Payload preview:', employeePayloads.slice(0, 3));
+    throw insertEmployeesError;
+  }
+
+  console.log(`✅ Inserted ${insertedEmployees?.length ?? 0} employees`);
+
+  const operatorEmployee = insertedEmployees?.find((emp) => emp.role === 'Operator');
+  if (!operatorEmployee) {
+    throw new Error('Operator employee not found after insertion');
+  }
+
+  await ensureOwnerAppUser(orgId, locationId, operatorEmployee.id);
+
+  console.log('\n🧭 Mirroring Big 5 labels...');
+
+  await supabase
+    .from('position_big5_labels')
+    .delete()
+    .eq('location_id', locationId);
+
+  if (big5Labels && big5Labels.length > 0) {
+    const big5Payloads = big5Labels.map((label) => ({
+      id: randomUUID(),
+      org_id: orgId,
+      location_id: locationId,
+      position: label.position,
+      label_1: label.label_1,
+      label_2: label.label_2,
+      label_3: label.label_3,
+      label_4: label.label_4,
+      label_5: label.label_5,
+    }));
+
+    const big5Chunks = chunkArray(big5Payloads, 100);
+    for (const chunk of big5Chunks) {
+      const { error } = await supabase.from('position_big5_labels').insert(chunk);
+      if (error) throw error;
+    }
+  }
+
+  console.log(`✅ Mirrored ${big5Labels?.length ?? 0} Big 5 label rows`);
+
+  console.log('\n📊 Cloning ratings with role-based remapping...');
+
+  const employeeByRole = new Map<string, EmployeeRecord[]>();
+  const roleCounters = new Map<string, number>();
+  insertedEmployees?.forEach((emp) => {
+    const normalized = normalizeRole(emp.role);
+    if (!employeeByRole.has(normalized)) {
+      employeeByRole.set(normalized, []);
+      roleCounters.set(normalized, 0);
+    }
+    employeeByRole.get(normalized)!.push(emp);
+  });
+
+  const defaultTeamMembers = employeeByRole.get('Team Member');
+  if (!defaultTeamMembers || defaultTeamMembers.length === 0) {
+    throw new Error('Team Member pool is empty; cannot map ratings');
+  }
+
+  const budaEmployeeMap = new Map<string, string>();
+
+  function pickNewEmployee(role: string): EmployeeRecord {
+    const normalized = normalizeRole(role);
+    const pool = employeeByRole.get(normalized) ?? defaultTeamMembers;
+    const counter = roleCounters.get(normalized) ?? 0;
+    const employee = pool[counter % pool.length];
+    roleCounters.set(normalized, counter + 1);
+    return employee;
+  }
+
+  for (const budaEmployee of budaEmployees) {
+    const mapped = pickNewEmployee(budaEmployee.role);
+    budaEmployeeMap.set(budaEmployee.id, mapped.id);
+  }
+
+  const ratingsToUse = (budaRatingsRaw ?? []).slice(-RATINGS_LIMIT);
+  const ratingPayloads = [];
+
+  for (const rating of ratingsToUse) {
+    const targetEmployeeId = budaEmployeeMap.get(rating.employee_id) ?? defaultTeamMembers[0].id;
+    const raterEmployeeId = budaEmployeeMap.get(rating.rater_user_id) ?? operatorEmployee.id;
+
+    ratingPayloads.push({
+      employee_id: targetEmployeeId,
+      rater_user_id: raterEmployeeId,
+      position: rating.position,
+      rating_1: rating.rating_1,
+      rating_2: rating.rating_2,
+      rating_3: rating.rating_3,
+      rating_4: rating.rating_4,
+      rating_5: rating.rating_5,
+      rating_avg: rating.rating_avg,
+      created_at: rating.created_at,
+      location_id: locationId,
+      org_id: orgId,
+    });
+  }
+
+  const ratingChunks = chunkArray(ratingPayloads, 200);
+  for (const chunk of ratingChunks) {
+    const { error } = await supabase.from('ratings').insert(chunk);
+    if (error) throw error;
+  }
+
+  console.log(`✅ Inserted ${ratingPayloads.length} ratings (limit ${RATINGS_LIMIT})`);
+
+  console.log('\n✨ Mock location seeding complete!');
+  console.log(`   Org ID: ${orgId}`);
+  console.log(`   Location ID: ${locationId}`);
+  console.log(`   Owner auth_user_id: ${MOCK_AUTH_USER_ID}`);
+}
+
+seed()
+  .catch((err) => {
+    console.error('❌ Seeding failed:', err);
+    process.exit(1);
+  })
+  .then(() => {
+    process.exit(0);
+  });
+
