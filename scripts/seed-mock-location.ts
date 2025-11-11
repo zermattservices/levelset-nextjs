@@ -45,31 +45,68 @@ const MOCK_OWNER_EMAIL = 'john.smith@mocksmithco.test';
 const ratingsLimitArg = process.argv.find((arg) => arg.startsWith('--ratings-limit='));
 const RATINGS_LIMIT = ratingsLimitArg ? parseInt(ratingsLimitArg.split('=')[1] || '900', 10) : 900;
 
-const ROLE_COUNTS: Record<string, number> = {
-  Operator: 1,
-  Executive: 2,
-  Director: 3,
-  'Team Lead': 10,
-  Trainer: 5,
-  'Team Member': 29,
+const ROLE_TEMPLATES: Record<string, Array<{ first: string; last: string }>> = {
+  Operator: [{ first: 'John', last: 'Smith' }],
+  Executive: [
+    { first: 'Ava', last: 'Reed' },
+    { first: 'Liam', last: 'Hayes' },
+  ],
+  Director: [
+    { first: 'Sophia', last: 'Reyes' },
+    { first: 'Noah', last: 'Bennett' },
+    { first: 'Amelia', last: 'Morales' },
+  ],
+  'Team Lead': [
+    { first: 'Mason', last: 'Clark' },
+    { first: 'Olivia', last: 'Perry' },
+    { first: 'Ethan', last: 'Brooks' },
+    { first: 'Isabella', last: 'Nguyen' },
+    { first: 'Lucas', last: 'Chavez' },
+    { first: 'Mia', last: 'Foster' },
+    { first: 'Harper', last: 'Ellis' },
+    { first: 'Jack', last: 'Kim' },
+    { first: 'Chloe', last: 'Adams' },
+    { first: 'Henry', last: 'Walsh' },
+  ],
+  Trainer: [
+    { first: 'Elijah', last: 'Price' },
+    { first: 'Lily', last: 'Cooper' },
+    { first: 'Owen', last: 'Blake' },
+    { first: 'Zoe', last: 'Turner' },
+    { first: 'Nora', last: 'Summers' },
+  ],
+  'Team Member': [
+    { first: 'Benjamin', last: 'Hall' },
+    { first: 'Charlotte', last: 'Rogers' },
+    { first: 'Daniel', last: 'Ortiz' },
+    { first: 'Grace', last: 'Sullivan' },
+    { first: 'Isaac', last: 'Powell' },
+    { first: 'Natalie', last: 'Hopkins' },
+    { first: 'Samuel', last: 'Gibbs' },
+    { first: 'Victoria', last: 'Lane' },
+    { first: 'Wyatt', last: 'Harrington' },
+    { first: 'Aubrey', last: 'Shields' },
+    { first: 'Carter', last: 'Bowman' },
+    { first: 'Delilah', last: 'Hart' },
+    { first: 'Easton', last: 'Barber' },
+    { first: 'Faith', last: 'Winters' },
+    { first: 'Gianna', last: 'Cross' },
+    { first: 'Hayden', last: 'McCoy' },
+    { first: 'Ivy', last: 'Thornton' },
+    { first: 'Julian', last: 'Baxter' },
+    { first: 'Kennedy', last: 'Lowell' },
+    { first: 'Logan', last: 'Tate' },
+    { first: 'Madison', last: 'Pierce' },
+    { first: 'Nolan', last: 'Shepard' },
+    { first: 'Paisley', last: 'Vaughn' },
+    { first: 'Quinn', last: 'Barrett' },
+    { first: 'Ryder', last: 'Mason' },
+    { first: 'Stella', last: 'Briggs' },
+    { first: 'Tristan', last: 'Keller' },
+    { first: 'Violet', last: 'Chambers' },
+    { first: 'Weston', last: 'Drake' },
+  ],
 };
-
-const FIRST_NAMES = [
-  'Alex', 'Jamie', 'Taylor', 'Chris', 'Morgan', 'Jordan', 'Casey', 'Riley', 'Avery', 'Dakota',
-  'Skyler', 'Cameron', 'Rowan', 'Emerson', 'Quinn', 'Reese', 'Elliot', 'Harper', 'Finley', 'Logan',
-  'Reagan', 'Sage', 'Peyton', 'Drew', 'Lane', 'Shawn', 'Kai', 'Blake', 'Hayden', 'Jules',
-  'Kendall', 'Parker', 'Sawyer', 'Spencer', 'Tatum', 'Tyler', 'Winter', 'London', 'Micah', 'Nico',
-  'Phoenix', 'River', 'Shiloh', 'Wren', 'Arden', 'Blaire', 'Callen', 'Devon', 'Easton', 'Fallon',
-  'Grey', 'Harlow', 'Indie', 'Jensen', 'Kiernan', 'Lennon', 'Marley', 'Nova', 'Oakley', 'Presley',
-];
-
-const LAST_NAMES = [
-  'Adams', 'Baker', 'Carter', 'Dalton', 'Ellis', 'Fletcher', 'Grayson', 'Hughes', 'Irwin', 'Jensen',
-  'Kennedy', 'Lancaster', 'Monroe', 'Nolan', 'Oakley', 'Prescott', 'Ramsey', 'Shepard', 'Thatcher', 'Underwood',
-  'Vaughn', 'Whitaker', 'York', 'Zimmerman', 'Barron', 'Carlisle', 'Decker', 'Eastman', 'Foster', 'Gentry',
-  'Hartley', 'Iverson', 'Jamison', 'Kingsley', 'Langley', 'Maddox', 'Neilsen', 'Ortega', 'Perrin', 'Quimby',
-  'Ridley', 'Sterling', 'Thayer', 'Upton', 'Vander', 'Winslow', 'Yardley', 'Zimmer',
-];
 
 async function ensureOwnerAuthUser(): Promise<string> {
   const existing = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
@@ -104,12 +141,6 @@ interface EmployeeRecord {
   id: string;
   role: string;
   full_name: string;
-}
-
-function sampleName(index: number) {
-  const first = FIRST_NAMES[index % FIRST_NAMES.length];
-  const last = LAST_NAMES[Math.floor(index / FIRST_NAMES.length) % LAST_NAMES.length];
-  return { first, last, full: `${first} ${last}` };
 }
 
 function randomHireDate(): string {
@@ -246,6 +277,24 @@ async function ensureOwnerAppUser(orgId: string, locationId: string, operatorEmp
   }
 
   if (existing?.id) {
+    const { error: updateError } = await supabase
+      .from('app_users')
+      .update({
+        email: MOCK_OWNER_EMAIL,
+        first_name: 'John',
+        last_name: 'Smith',
+        role: 'Owner/Operator',
+        org_id: orgId,
+        location_id: locationId,
+        employee_id: operatorEmployeeId,
+        permissions: 'operator',
+      })
+      .eq('id', existing.id);
+
+    if (updateError) {
+      throw updateError;
+    }
+
     console.log(`ℹ️  Reusing existing app_user for ${authUserId}`);
     return authUserId;
   }
@@ -276,27 +325,20 @@ async function ensureOwnerAppUser(orgId: string, locationId: string, operatorEmp
 
 function buildEmployees(orgId: string, locationId: string) {
   const employees: any[] = [];
-  let counter = 0;
-
-  for (const [role, count] of Object.entries(ROLE_COUNTS)) {
-    for (let i = 0; i < count; i++) {
-      const name = sampleName(counter);
-      counter += 1;
-      const id = randomUUID();
-
+  for (const [role, names] of Object.entries(ROLE_TEMPLATES)) {
+    names.forEach((name) => {
       employees.push({
-        id,
+        id: randomUUID(),
         org_id: orgId,
         location_id: locationId,
         role,
         first_name: name.first,
         last_name: name.last,
         hire_date: randomHireDate(),
-      active: true,
+        active: true,
       });
-    }
+    });
   }
-
   return employees;
 }
 
@@ -310,7 +352,7 @@ function chunkArray<T>(items: T[], chunkSize: number): T[][] {
 
 function normalizeRole(role?: string | null): string {
   if (!role) return 'Team Member';
-  if (ROLE_COUNTS[role]) return role;
+  if (ROLE_TEMPLATES[role]) return role;
   if (role.toLowerCase().includes('lead')) return 'Team Lead';
   if (role.toLowerCase().includes('trainer')) return 'Trainer';
   if (role.toLowerCase().includes('director')) return 'Director';
@@ -324,6 +366,46 @@ async function seed() {
 
   const orgId = await ensureOrg();
   const locationId = await ensureLocation(orgId);
+
+  // Ensure location metadata matches expectations
+  await supabase
+    .from('locations')
+    .update({ name: MOCK_LOCATION_NAME, location_number: MOCK_LOCATION_NUMBER })
+    .eq('id', locationId);
+
+  console.log('\n🧹 Clearing existing mock data for location...');
+  const { error: deleteRatingsError } = await supabase
+    .from('ratings')
+    .delete()
+    .eq('location_id', locationId);
+  if (deleteRatingsError) {
+    throw deleteRatingsError;
+  }
+
+  const { error: clearAppUsersError } = await supabase
+    .from('app_users')
+    .update({ employee_id: null })
+    .eq('org_id', orgId)
+    .eq('location_id', locationId);
+  if (clearAppUsersError) {
+    throw clearAppUsersError;
+  }
+
+  const { error: deleteEmployeesError } = await supabase
+    .from('employees')
+    .delete()
+    .eq('location_id', locationId);
+  if (deleteEmployeesError) {
+    throw deleteEmployeesError;
+  }
+
+  const { error: deleteLabelsError } = await supabase
+    .from('position_big5_labels')
+    .delete()
+    .eq('location_id', locationId);
+  if (deleteLabelsError) {
+    throw deleteLabelsError;
+  }
 
   console.log('\n📄 Fetching reference data from Buda...');
 
@@ -357,7 +439,6 @@ async function seed() {
   console.log(`   • Reference Big 5 labels: ${big5Labels?.length ?? 0}\n`);
 
   console.log('👥 Generating mock employees...');
-  await supabase.from('employees').delete().eq('location_id', locationId);
   const employeePayloads = buildEmployees(orgId, locationId);
 
   const { data: insertedEmployees, error: insertEmployeesError } = await supabase
@@ -380,16 +461,6 @@ async function seed() {
   const ownerAuthId = await ensureOwnerAppUser(orgId, locationId, operatorEmployee.id);
 
   console.log('\n🧭 Mirroring Big 5 labels...');
-
-  await supabase
-    .from('position_big5_labels')
-    .delete()
-    .eq('location_id', locationId);
-
-  await supabase
-    .from('ratings')
-    .delete()
-    .eq('location_id', locationId);
 
   if (big5Labels && big5Labels.length > 0) {
     const big5Payloads = big5Labels.map((label) => ({
