@@ -61,7 +61,6 @@ const fohColorLight = '#eaf9ff';
 const bohColorLight = '#fffcf0';
 
 export interface PositionalRatingsProps {
-  orgId: string;
   locationId: string;
   className?: string;
   width?: string | number;
@@ -507,7 +506,6 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
 ));
 
 export function PositionalRatings({
-  orgId,
   locationId,
   className = '',
   width,
@@ -587,13 +585,13 @@ export function PositionalRatings({
       return big5LabelsCache.get(position);
     }
 
-    if (!orgId || !locationId) {
+    if (!locationId) {
       return null;
     }
     
     try {
       const response = await fetch(
-        `/api/position-labels?org_id=${orgId}&location_id=${locationId}&position=${encodeURIComponent(position)}`
+        `/api/position-labels?location_id=${locationId}&position=${encodeURIComponent(position)}`
       );
       const result = await response.json();
       
@@ -606,7 +604,7 @@ export function PositionalRatings({
     }
     
     return null;
-  }, [orgId, locationId, big5LabelsCache]);
+  }, [locationId, big5LabelsCache]);
 
   // Handle PDF Export
   const handleExportPDF = async () => {
@@ -715,7 +713,7 @@ export function PositionalRatings({
   React.useEffect(() => {
     let isActive = true;
 
-    if (!orgId || !locationId) {
+    if (!locationId) {
       setError(null);
       setRows([]);
       setFilteredRows([]);
@@ -741,7 +739,6 @@ export function PositionalRatings({
           employee:employees!ratings_employee_id_fkey(full_name, first_name, last_name, role, is_foh, is_boh),
           rater:employees!ratings_rater_user_id_fkey(full_name)
         `)
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .gte('created_at', startDate.toISOString())
           .lte('created_at', endDate.toISOString())
@@ -819,7 +816,7 @@ export function PositionalRatings({
     return () => {
       isActive = false;
     };
-  }, [orgId, locationId, startDate, endDate, showFOH, showBOH, fetchBig5Labels]);
+  }, [locationId, startDate, endDate, showFOH, showBOH, fetchBig5Labels]);
 
   // Update filtered rows from DataGrid API whenever filters or data changes
   React.useEffect(() => {
@@ -1774,7 +1771,6 @@ export function PositionalRatings({
         
         {/* Analytics Metrics */}
         <RatingsAnalytics
-          orgId={orgId}
           locationId={locationId}
           currentRows={filteredRows}
           startDate={startDate}

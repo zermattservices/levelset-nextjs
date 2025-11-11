@@ -26,7 +26,6 @@ export interface EditActionModalProps {
   action: DisciplinaryAction | null;
   onClose: () => void;
   onSave?: (action: DisciplinaryAction) => void;
-  orgId: string;
   locationId: string;
   className?: string;
 }
@@ -121,7 +120,6 @@ export function EditActionModal({
   action,
   onClose,
   onSave,
-  orgId,
   locationId,
   className = "",
 }: EditActionModalProps) {
@@ -133,6 +131,7 @@ export function EditActionModal({
   const [notes, setNotes] = React.useState("");
   const [locationName, setLocationName] = React.useState("");
   const [employeeName, setEmployeeName] = React.useState("");
+  const [locationOrgId, setLocationOrgId] = React.useState<string | null>(null);
   const [discActionsRubricOptions, setDiscActionsRubricOptions] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
   const supabase = createSupabaseClient();
@@ -157,19 +156,19 @@ export function EditActionModal({
         // Fetch location name
         const { data: locData, error: locError } = await supabase
           .from('locations')
-          .select('name')
+          .select('name, org_id')
           .eq('id', locationId)
           .single();
         
         if (!locError && locData) {
           setLocationName(locData.name);
+          setLocationOrgId(locData.org_id ?? null);
         }
 
         // Fetch disc_actions_rubric options
         const { data: rubricData, error: rubricError } = await supabase
           .from('disc_actions_rubric')
           .select('*')
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .order('points_threshold', { ascending: true }); // Order by points, lowest to highest
         
@@ -182,7 +181,7 @@ export function EditActionModal({
     };
 
     fetchData();
-  }, [open, action, orgId, locationId, supabase]);
+  }, [open, action, locationId, supabase]);
 
   // Handle action type change
   const handleActionTypeChange = (value: string) => {

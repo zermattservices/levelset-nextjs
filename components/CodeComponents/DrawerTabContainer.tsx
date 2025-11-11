@@ -7,12 +7,12 @@ import type { Employee, Infraction, DisciplinaryAction } from "@/lib/supabase.ty
 import { Skeleton } from "@mui/material";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
+import { useLocationContext } from "./LocationContext";
 
 export interface DrawerTabContainerProps {
   employee?: Employee | null;
   className?: string;
   initialTab?: "pathway" | "pe" | "evaluations" | "discipline";
-  orgId?: string;
   locationId?: string;
   onRecordAction?: () => void;
 }
@@ -257,7 +257,6 @@ export function DrawerTabContainer({
   employee,
   className = "",
   initialTab = "discipline",
-  orgId,
   locationId,
   onRecordAction,
 }: DrawerTabContainerProps) {
@@ -266,10 +265,11 @@ export function DrawerTabContainer({
   const [disciplinaryActions, setDisciplinaryActions] = React.useState<DisciplinaryAction[]>([]);
   const [loading, setLoading] = React.useState(false);
   const supabase = createSupabaseClient();
+  const { selectedLocationOrgId } = useLocationContext();
 
   // Fetch infractions and disciplinary actions for the selected employee
   const fetchEmployeeData = React.useCallback(async () => {
-    if (!employee?.id || !orgId || !locationId) return;
+    if (!employee?.id || !locationId) return;
 
     try {
       setLoading(true);
@@ -281,7 +281,6 @@ export function DrawerTabContainer({
           .from('infractions')
           .select('*')
           .eq('employee_id', employee.id)
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .gte('infraction_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
           .order('infraction_date', { ascending: false });
@@ -306,7 +305,6 @@ export function DrawerTabContainer({
           .from('disc_actions')
           .select('*')
           .eq('employee_id', employee.id)
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .gte('action_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
           .order('action_date', { ascending: false });
@@ -327,7 +325,7 @@ export function DrawerTabContainer({
     } finally {
       setLoading(false);
     }
-  }, [employee?.id, orgId, locationId, supabase]);
+  }, [employee?.id, locationId, supabase]);
 
   // Fetch data when employee changes
   React.useEffect(() => {

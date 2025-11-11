@@ -29,7 +29,6 @@ export interface EmployeeModalProps {
   open: boolean;
   employee: Employee | null;
   onClose: () => void;
-  orgId: string;
   locationId: string;
   initialTab?: "pathway" | "pe" | "evaluations" | "discipline";
   onRecordAction?: () => void;
@@ -266,7 +265,6 @@ export function EmployeeModal({
   open,
   employee,
   onClose,
-  orgId,
   locationId,
   onRecommendationUpdate,
   initialTab = "discipline",
@@ -300,7 +298,7 @@ export function EmployeeModal({
 
   // Fetch infractions and disciplinary actions for the selected employee
   const fetchEmployeeData = React.useCallback(async () => {
-    if (!open || !employee?.id || !orgId || !locationId) {
+    if (!open || !employee?.id || !locationId) {
       setInfractions([]);
       setDisciplinaryActions([]);
       return;
@@ -315,7 +313,6 @@ export function EmployeeModal({
           .from('infractions')
           .select('*')
           .eq('employee_id', employee.id)
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .gte('infraction_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
           .order('infraction_date', { ascending: false });
@@ -337,7 +334,6 @@ export function EmployeeModal({
           .from('disc_actions')
           .select('*')
           .eq('employee_id', employee.id)
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .gte('action_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
           .order('action_date', { ascending: false });
@@ -379,7 +375,7 @@ export function EmployeeModal({
     } finally {
       setLoading(false);
     }
-  }, [open, employee?.id, orgId, locationId, supabase]);
+  }, [open, employee?.id, locationId, supabase]);
 
   // Fetch data when modal opens or employee changes
   React.useEffect(() => {
@@ -942,7 +938,6 @@ export function EmployeeModal({
           // Optionally refetch data
           fetchEmployeeData();
         }}
-        orgId={orgId}
         locationId={locationId}
       />
 
@@ -958,7 +953,6 @@ export function EmployeeModal({
           fetchEmployeeData();
         }}
         currentUserId={currentUserId}
-        orgId={orgId}
         locationId={locationId}
       />
 
@@ -974,7 +968,6 @@ export function EmployeeModal({
           fetchEmployeeData();
         }}
         currentUserId={currentUserId}
-        orgId={orgId}
         locationId={locationId}
       />
 
@@ -994,7 +987,6 @@ export function EmployeeModal({
           // Refetch data
           fetchEmployeeData();
         }}
-        orgId={orgId}
         locationId={locationId}
       />
 
@@ -1039,7 +1031,6 @@ export function EmployeeModal({
             setRecordRecommendedActionOpen(false);
             setSelectedRecommendation(null);
           }}
-          orgId={orgId}
           locationId={locationId}
         />
       )}

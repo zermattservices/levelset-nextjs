@@ -13,6 +13,7 @@ interface LocationContextValue {
   locations: LocationRecord[];
   selectedLocationId: string | null;
   selectedLocationNumber: string | null;
+  selectedLocationOrgId: string | null;
   loading: boolean;
   error: string | null;
   selectLocation: (locationId: string) => void;
@@ -88,6 +89,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
   const [locations, setLocations] = React.useState<LocationRecord[]>([]);
   const [selectedLocationId, setSelectedLocationId] = React.useState<string | null>(null);
   const [selectedLocationNumber, setSelectedLocationNumber] = React.useState<string | null>(null);
+  const [selectedLocationOrgId, setSelectedLocationOrgId] = React.useState<string | null>(null);
   const [userId, setUserId] = React.useState<string | null>(null);
   const userIdRef = React.useRef<string | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -109,6 +111,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       if (!available.length) {
         setSelectedLocationId(null);
         setSelectedLocationNumber(null);
+        setSelectedLocationOrgId(null);
         return;
       }
 
@@ -117,6 +120,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
         if (match) {
           setSelectedLocationId(match.id);
           setSelectedLocationNumber(match.location_number ?? null);
+          setSelectedLocationOrgId(match.org_id ?? null);
           return;
         }
       }
@@ -124,6 +128,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       // If no stored selection or stored selection is invalid, leave null so modal can prompt
       setSelectedLocationId(null);
       setSelectedLocationNumber(null);
+      setSelectedLocationOrgId(null);
     },
     []
   );
@@ -211,6 +216,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
 
       setSelectedLocationId(match.id);
       setSelectedLocationNumber(match.location_number ?? null);
+      setSelectedLocationOrgId(match.org_id ?? null);
 
       if (typeof window !== 'undefined') {
         const key = buildStorageKey(userId);
@@ -223,6 +229,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
   const clearSelection = React.useCallback(() => {
     setSelectedLocationId(null);
     setSelectedLocationNumber(null);
+    setSelectedLocationOrgId(null);
 
     if (typeof window !== 'undefined') {
       const key = buildStorageKey(userId);
@@ -235,21 +242,23 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       locations,
       selectedLocationId,
       selectedLocationNumber,
+      selectedLocationOrgId,
       loading,
       error,
       selectLocation,
       clearSelection,
     }),
-    [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber]
+    [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber, selectedLocationOrgId]
   );
 
   const plasmicData = React.useMemo(() => ({
     locations,
     selectedLocationId,
     selectedLocationNumber,
+    selectedLocationOrgId,
     loading,
     error,
-  }), [error, loading, locations, selectedLocationId, selectedLocationNumber]);
+  }), [error, loading, locations, selectedLocationId, selectedLocationNumber, selectedLocationOrgId]);
 
   if (typeof globalThis !== 'undefined') {
     (globalThis as any).locationContext = plasmicData;

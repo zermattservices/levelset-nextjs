@@ -42,7 +42,7 @@ export interface RosterEntry {
 }
 
 export function RosterTable(props: RosterTableProps) {
-  const { orgId, locationId } = props;
+  const { locationId } = props;
   const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations'>('employees');
   const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
 
@@ -79,12 +79,11 @@ export function RosterTable(props: RosterTableProps) {
         {activeTab === 'employees' ? (
           <EmployeesTableView {...props} />
         ) : (
-          <EvaluationsTable
-            orgId={orgId}
-            locationId={locationId}
-            className={props.className}
-            onPlannedStatusChange={setHasPlannedEvaluations}
-          />
+        <EvaluationsTable
+          locationId={locationId}
+          className={props.className}
+          onPlannedStatusChange={setHasPlannedEvaluations}
+        />
         )}
       </Box>
     </Box>
@@ -92,7 +91,6 @@ export function RosterTable(props: RosterTableProps) {
 }
 
 export interface RosterTableProps {
-  orgId: string;
   locationId: string;
   className?: string;
 
@@ -294,7 +292,6 @@ const CertificationChip = styled(Box)(() => ({
 }));
 
 function EmployeesTableView({
-  orgId,
   locationId,
   className = "",
   density = "comfortable",
@@ -341,9 +338,15 @@ function EmployeesTableView({
 
   // Fetch employees from Supabase - memoized to avoid recreating on every render
   const fetchEmployees = React.useCallback(async () => {
+    if (!locationId) {
+      setData([]);
+      setError('Select a location to view the roster.');
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
-      const response = await fetch(`/api/employees?org_id=${orgId}&location_id=${locationId}`, {
+      const response = await fetch(`/api/employees?location_id=${locationId}`, {
         // Add cache headers for better performance
         headers: {
           'Cache-Control': 'max-age=60', // Cache for 60 seconds
@@ -374,11 +377,11 @@ function EmployeesTableView({
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId]);
+  }, [locationId]);
 
-  // Fetch employees on mount and when orgId/locationId changes
+  // Fetch employees on mount and when location changes
   React.useEffect(() => {
-    if (!orgId || !locationId) {
+    if (!locationId) {
       if (inEditor) {
         setData(sampleData);
         setError(null);
@@ -391,14 +394,14 @@ function EmployeesTableView({
     }
 
     fetchEmployees();
-  }, [orgId, locationId, fetchEmployees, inEditor]);
+  }, [locationId, fetchEmployees, inEditor]);
 
   // Real-time subscription disabled - Realtime not enabled on employees table
   // If you need real-time updates, enable Realtime on the employees table in Supabase
   // Then uncomment the code below
   /*
   React.useEffect(() => {
-    if (!orgId || !locationId) return;
+    if (!locationId) return;
     
     const supabase = createSupabaseClient();
     const channel = supabase
@@ -408,12 +411,12 @@ function EmployeesTableView({
           event: '*', 
           schema: 'public', 
           table: 'employees',
-          filter: `org_id=eq.${orgId}`
+          filter: `location_id=eq.${locationId}`
         }, 
         (payload) => {
           console.log('Employee data changed:', payload);
           // Refetch data when employees change
-          fetch(`/api/employees?org_id=${orgId}&location_id=${locationId}`)
+          fetch(`/api/employees?location_id=${locationId}`)
             .then(res => res.json() as Promise<{ employees: Employee[] }>)
             .then((data) => {
               const transformedData: RosterEntry[] = data.employees.map((emp: Employee) => ({
@@ -434,7 +437,7 @@ function EmployeesTableView({
       const supabase = createSupabaseClient();
       supabase.removeChannel(channel);
     };
-  }, [orgId, locationId]);
+  }, [locationId]);
   */
 
   // Handle Certification status changes with API calls

@@ -58,7 +58,6 @@ const StyledContainer = styled('div')({
 });
 
 export interface EvaluationsTableProps {
-  orgId: string;
   locationId: string;
   className?: string;
   onPlannedStatusChange?: (hasPlanned: boolean) => void;
@@ -145,7 +144,7 @@ const DatePillTextField = React.forwardRef(function DatePillTextField(
   );
 });
 
-export function EvaluationsTable({ orgId, locationId, className, onPlannedStatusChange }: EvaluationsTableProps) {
+export function EvaluationsTable({ locationId, className, onPlannedStatusChange }: EvaluationsTableProps) {
   const [rows, setRows] = React.useState<EvaluationRow[]>([]);
   const [leaders, setLeaders] = React.useState<LeaderOption[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -186,9 +185,13 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
       setLoading(true);
       setError(null);
 
+      if (!locationId) {
+        throw new Error('Location is required');
+      }
+
       const [evaluationsRes, employeesRes] = await Promise.all([
-        fetch(`/api/evaluations?org_id=${orgId}&location_id=${locationId}`),
-        fetch(`/api/employees?org_id=${orgId}&location_id=${locationId}`),
+        fetch(`/api/evaluations?location_id=${locationId}`),
+        fetch(`/api/employees?location_id=${locationId}`),
       ]);
 
       if (!evaluationsRes.ok) {
@@ -219,13 +222,13 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId, applyFilters, onPlannedStatusChange]);
+  }, [locationId, applyFilters, onPlannedStatusChange]);
 
   React.useEffect(() => {
-    if (orgId && locationId) {
+    if (locationId) {
       fetchData();
     }
-  }, [orgId, locationId, fetchData]);
+  }, [locationId, fetchData]);
 
   const handleUpdate = React.useCallback(
     async (id: string, payload: Record<string, unknown>) => {

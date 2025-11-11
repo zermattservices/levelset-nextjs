@@ -55,7 +55,6 @@ const cleanPositionName = (positionName: string): string => {
 };
 
 export interface PEAClassicProps {
-  orgId: string;
   locationId: string;
   className?: string;
   density?: "comfortable" | "compact";
@@ -228,7 +227,6 @@ const LoadingOverlay = styled(Box)(() => ({
 // ===== Main Component =====
 
 export function PEAClassic({
-  orgId,
   locationId,
   className = "",
   density = "comfortable",
@@ -262,7 +260,7 @@ export function PEAClassic({
     async function loadPositions() {
       try {
         const response = await fetch(
-          `/api/position-labels?org_id=${orgId}&location_id=${locationId}&area=${area}`
+          `/api/position-labels?location_id=${locationId}&area=${area}`
         );
         const result = await response.json();
         
@@ -281,7 +279,7 @@ export function PEAClassic({
     }
 
     loadPositions();
-  }, [area, orgId, locationId]);
+  }, [area, locationId]);
 
   // Fetch Big 5 labels when position changes
   React.useEffect(() => {
@@ -290,7 +288,7 @@ export function PEAClassic({
     async function loadLabels() {
       try {
         const response = await fetch(
-          `/api/position-labels?org_id=${orgId}&location_id=${locationId}&position=${encodeURIComponent(selectedPosition)}`
+          `/api/position-labels?location_id=${locationId}&position=${encodeURIComponent(selectedPosition)}`
         );
         const result = await response.json();
         
@@ -306,7 +304,7 @@ export function PEAClassic({
     }
 
     loadLabels();
-  }, [selectedPosition, orgId, locationId]);
+  }, [selectedPosition, locationId]);
 
   // Fetch data when tab, area, or position changes
   React.useEffect(() => {
@@ -318,7 +316,7 @@ export function PEAClassic({
       setExpandedRows(new Set());
 
       try {
-        let endpoint = `/api/ratings?org_id=${orgId}&location_id=${locationId}&area=${area}`;
+        let endpoint = `/api/ratings?location_id=${locationId}&area=${area}`;
 
         switch (activeTab) {
           case 'overview':
@@ -357,10 +355,10 @@ export function PEAClassic({
       }
     }
 
-    if (orgId && locationId) {
+    if (locationId) {
       loadData();
     }
-  }, [activeTab, area, selectedPosition, orgId, locationId]);
+  }, [activeTab, area, selectedPosition, locationId]);
 
   // Handle row expansion
   const toggleRow = (id: string) => {

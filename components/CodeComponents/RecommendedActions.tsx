@@ -20,9 +20,9 @@ import { createSupabaseClient } from "@/util/supabase/component";
 import { RecordActionModal } from "./RecordActionModal";
 import { EmployeeModal } from "./EmployeeModal";
 import { DismissConfirmationModal } from "./DismissConfirmationModal";
+import { useLocationContext } from "./LocationContext";
 
 export interface DisciplineNotificationsProps {
-  orgId: string;
   locationId: string;
   currentUser: Employee | null;
   currentUserId?: string; // Alternative: auth user ID to look up in app_users
@@ -234,7 +234,6 @@ const PointsBadge = ({ points, disciplineActions }: { points: number; discipline
 };
 
 export function DisciplineNotifications({
-  orgId,
   locationId,
   currentUser,
   currentUserId,
@@ -256,6 +255,7 @@ export function DisciplineNotifications({
   const [recommendationToDismiss, setRecommendationToDismiss] = React.useState<RecommendedAction | null>(null);
   const [appUserId, setAppUserId] = React.useState<string | null>(null);
   const supabase = createSupabaseClient();
+  const { selectedLocationOrgId } = useLocationContext();
 
   // Fetch app_user ID from auth_user_id
   React.useEffect(() => {
@@ -292,7 +292,6 @@ export function DisciplineNotifications({
       const { data: actionsData, error: actionsError } = await supabase
         .from('disc_actions_rubric')
         .select('*')
-        .eq('org_id', orgId)
         .eq('location_id', locationId)
         .order('points_threshold', { ascending: true });
         
@@ -304,7 +303,6 @@ export function DisciplineNotifications({
       const { data: dbRecs, error: recsError } = await supabase
         .from('recommended_disc_actions')
         .select('*')
-        .eq('org_id', orgId)
         .eq('location_id', locationId)
         .is('action_taken', null)
         .order('points_when_recommended', { ascending: false });
@@ -345,7 +343,6 @@ export function DisciplineNotifications({
       const { data: infractionsData, error: infError } = await supabase
         .from('infractions')
         .select('*')
-        .eq('org_id', orgId)
         .eq('location_id', locationId)
         .gte('infraction_date', sevenDaysAgo)
         .order('infraction_date', { ascending: false });
@@ -362,13 +359,13 @@ export function DisciplineNotifications({
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId, supabase]);
+  }, [locationId, supabase]);
 
   React.useEffect(() => {
-    if (orgId && locationId) {
+    if (locationId) {
       fetchData();
     }
-  }, [orgId, locationId, fetchData]);
+  }, [locationId, fetchData]);
 
   const handleDismissClick = (recommendation: RecommendedAction) => {
     setRecommendationToDismiss(recommendation);
@@ -385,7 +382,6 @@ export function DisciplineNotifications({
         .select('id')
         .eq('employee_id', recommendation.employee_id)
         .eq('recommended_action_id', recommendation.action_id)
-        .eq('org_id', orgId)
         .eq('location_id', locationId)
         .is('action_taken', null)
         .single();
@@ -406,7 +402,7 @@ export function DisciplineNotifications({
           .from('recommended_disc_actions')
           .insert({
             employee_id: recommendation.employee_id,
-            org_id: orgId,
+            org_id: selectedLocationOrgId ?? currentUser?.org_id ?? null,
             location_id: locationId,
             recommended_action_id: recommendation.action_id,
             recommended_action: recommendation.recommended_action,
@@ -437,7 +433,6 @@ export function DisciplineNotifications({
         .select('id')
         .eq('employee_id', recommendation.employee_id)
         .eq('recommended_action_id', recommendation.action_id)
-        .eq('org_id', orgId)
         .eq('location_id', locationId)
         .is('action_taken', null)
         .maybeSingle();
@@ -447,7 +442,7 @@ export function DisciplineNotifications({
           .from('recommended_disc_actions')
           .insert({
             employee_id: recommendation.employee_id,
-            org_id: orgId,
+            org_id: selectedLocationOrgId ?? currentUser?.org_id ?? null,
             location_id: locationId,
             recommended_action_id: recommendation.action_id,
             recommended_action: recommendation.recommended_action,
@@ -759,7 +754,6 @@ export function DisciplineNotifications({
               setEmployeeModalOpen(true);
             }
           }}
-          orgId={orgId}
           locationId={locationId}
         />
       )}
@@ -772,7 +766,6 @@ export function DisciplineNotifications({
           setEmployeeModalOpen(false);
           setSelectedEmployee(null);
         }}
-        orgId={orgId}
         locationId={locationId}
         initialTab="discipline"
         currentUserId={currentUserId}

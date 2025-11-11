@@ -26,16 +26,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 async function handleGet(req: NextApiRequest, res: NextApiResponse, supabase: ReturnType<typeof createServerSupabaseClient>) {
-  const { org_id, location_id } = req.query;
+  const { location_id } = req.query;
 
-  if (!org_id || !location_id) {
-    return res.status(400).json({ error: 'org_id and location_id are required' });
+  if (!location_id) {
+    return res.status(400).json({ error: 'location_id is required' });
   }
 
   const { data, error } = await supabase
     .from('evaluations')
     .select('*')
-    .eq('org_id', org_id)
     .eq('location_id', location_id)
     .order('evaluation_date', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false });

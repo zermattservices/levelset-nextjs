@@ -555,19 +555,6 @@ function PlasmicHomepage__RenderFunc(props: {
                           throw e;
                         }
                       })()}
-                      orgId={(() => {
-                        try {
-                          return $ctx.auth.org_id;
-                        } catch (e) {
-                          if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
-                          ) {
-                            return undefined;
-                          }
-                          throw e;
-                        }
-                      })()}
                       variant={"positional-excellence"}
                     />
 

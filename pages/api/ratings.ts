@@ -12,7 +12,6 @@ import {
  * 
  * Query params:
  * - tab: 'overview' | 'position' | 'leadership' (required)
- * - org_id: string (required)
  * - location_id: string (required)
  * - area: 'FOH' | 'BOH' (required)
  * - position: string (required if tab='position')
@@ -25,13 +24,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { tab, org_id, location_id, area, position } = req.query;
+    const { tab, location_id, area, position } = req.query;
 
     // Validate required params
-    if (!tab || !org_id || !location_id || !area) {
+    if (!tab || !location_id || !area) {
       return res.status(400).json({ 
         error: 'Missing required parameters',
-        required: 'tab, org_id, location_id, area'
+        required: 'tab, location_id, area'
       });
     }
 
@@ -63,7 +62,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'overview':
         data = await fetchOverviewData(
           supabase,
-          org_id as string,
           location_id as string,
           area as 'FOH' | 'BOH'
         );
@@ -72,7 +70,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'position':
         data = await fetchPositionData(
           supabase,
-          org_id as string,
           location_id as string,
           position as string
         );
@@ -81,7 +78,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'leadership':
         data = await fetchLeadershipData(
           supabase,
-          org_id as string,
           location_id as string,
           area as 'FOH' | 'BOH'
         );

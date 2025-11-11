@@ -13,7 +13,6 @@ type MetricVariant = 'positional-excellence' | 'discipline-points';
 
 interface DashboardMetricCardProps {
   variant: MetricVariant;
-  orgId?: string;
   locationId?: string;
   linkHref?: string;
   className?: string;
@@ -64,7 +63,6 @@ function formatMonthLabel(date: Date): string {
 
 export function DashboardMetricCard({
   variant,
-  orgId,
   locationId,
   linkHref,
   className,
@@ -74,7 +72,6 @@ export function DashboardMetricCard({
   const dataEnv = useDataEnv?.();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
-  const effectiveOrgId = orgId || dataEnv?.auth?.org_id || undefined;
   const effectiveLocationId = locationId || dataEnv?.auth?.location_id || undefined;
 
   const [metricState, setMetricState] = React.useState<MetricState | null>(null);
@@ -85,7 +82,7 @@ export function DashboardMetricCard({
 
   const fetchMetrics = React.useCallback(async () => {
     // Provide representative sample data in Plasmic Studio when IDs are absent
-    if (inEditor && (!effectiveOrgId || !effectiveLocationId)) {
+    if (inEditor && !effectiveLocationId) {
       const sample: MetricState =
         variant === 'positional-excellence'
           ? { total: 863, change: 27, percent: 11.1, timestamp: new Date() }
@@ -96,7 +93,7 @@ export function DashboardMetricCard({
       return;
     }
 
-    if (!effectiveOrgId || !effectiveLocationId) {
+    if (!effectiveLocationId) {
       setMetricState(null);
       setError(null);
       setLoading(false);
@@ -114,13 +111,8 @@ export function DashboardMetricCard({
     const previousStartIso = previousPeriodStart.toISOString();
     const nowIso = now.toISOString();
 
-    const applyBaseFilters = (query: any) => {
-      let filtered = query.eq('org_id', effectiveOrgId as string);
-      if (effectiveLocationId) {
-        filtered = filtered.eq('location_id', effectiveLocationId);
-      }
-      return filtered;
-    };
+    const applyBaseFilters = (query: any) =>
+      effectiveLocationId ? query.eq('location_id', effectiveLocationId) : query;
 
     try {
       const currentQuery = applyBaseFilters(
@@ -173,7 +165,6 @@ export function DashboardMetricCard({
     config.dateColumn,
     config.table,
     effectiveLocationId,
-    effectiveOrgId,
     inEditor,
     supabase,
     variant,
@@ -211,7 +202,7 @@ export function DashboardMetricCard({
     .filter(Boolean)
     .join(' ');
 
-  const missingContext = !effectiveOrgId || !effectiveLocationId;
+  const missingContext = !effectiveLocationId;
   const shouldShowSkeleton = loading || missingContext || (!metricState && !error);
 
   if (error && !shouldShowSkeleton) {

@@ -112,11 +112,6 @@ PLASMIC.registerComponent(DisciplineTable, {
   displayName: "Discipline Table",
   // @ts-ignore - Complex Plasmic registration type
   props: {
-    orgId: {
-      type: "string",
-      defaultValue: "default-org",
-      description: "Organization ID for filtering discipline data"
-    },
     locationId: {
       type: "string", 
       defaultValue: "default-location",
@@ -167,11 +162,6 @@ PLASMIC.registerComponent(DisciplineActionsTable, {
   name: "DisciplineActionsTable",
   displayName: "Discipline Actions Table",
   props: {
-    orgId: {
-      type: "string",
-      defaultValue: "default-org",
-      description: "Organization ID for filtering discipline actions"
-    },
     locationId: {
       type: "string", 
       defaultValue: "default-location",
@@ -198,11 +188,6 @@ PLASMIC.registerComponent(RosterTable, {
   name: "RosterTable",
   displayName: "Roster Table",
   props: {
-    orgId: {
-      type: "string",
-      defaultValue: "default-org",
-      description: "Organization ID for filtering employee data"
-    },
     locationId: {
       type: "string",
       defaultValue: "default-location", 
@@ -358,10 +343,6 @@ PLASMIC.registerComponent(DashboardMetricCard, {
       ],
       defaultValue: "positional-excellence",
       description: "Select which metric data to display",
-    },
-    orgId: {
-      type: "string",
-      description: "Override the organization ID (defaults to the signed-in user's org)",
     },
     locationId: {
       type: "string",
@@ -624,11 +605,6 @@ PLASMIC.registerComponent(PEAClassic, {
   name: "PEAClassic",
   displayName: "PEA Classic",
   props: {
-    orgId: {
-      type: "string",
-      defaultValue: "54b9864f-9df9-4a15-a209-7b99e1c274f4",
-      description: "Organization ID"
-    },
     locationId: {
       type: "string",
       defaultValue: "67e00fb2-29f5-41ce-9c1c-93e2f7f392dd",
@@ -676,11 +652,6 @@ PLASMIC.registerComponent(PositionalRatings, {
   name: "PositionalRatings",
   displayName: "Positional Ratings",
   props: {
-    orgId: {
-      type: "string",
-      defaultValue: "54b9864f-9df9-4a15-a209-7b99e1c274f4",
-      description: "Organization ID"
-    },
     locationId: {
       type: "string",
       defaultValue: "67e00fb2-29f5-41ce-9c1c-93e2f7f392dd",
@@ -1332,10 +1303,6 @@ PLASMIC.registerComponent(DrawerTabContainer, {
       defaultValue: "discipline",
       description: "Initial tab to display"
     },
-    orgId: {
-      type: "string",
-      description: "Organization ID"
-    },
     locationId: {
       type: "string",
       description: "Location ID"
@@ -1370,10 +1337,6 @@ PLASMIC.registerComponent(EmployeeModal, {
       type: "eventHandler",
       argTypes: [],
       description: "Handler for closing the modal"
-    },
-    orgId: {
-      type: "string",
-      description: "Organization ID"
     },
     locationId: {
       type: "string",
@@ -1436,10 +1399,6 @@ PLASMIC.registerComponent(InfractionEditModal, {
       ],
       description: "Handler for saving the infraction"
     },
-    orgId: {
-      type: "string",
-      description: "Organization ID"
-    },
     locationId: {
       type: "string",
       description: "Location ID"
@@ -1465,7 +1424,6 @@ PLASMIC.registerComponent(AddInfractionModal, {
       argTypes: [{ name: "infraction", type: "object" }],
     },
     currentUserId: "string",
-    orgId: "string",
     locationId: "string",
     className: "string",
   },
@@ -1488,7 +1446,6 @@ PLASMIC.registerComponent(AddActionModal, {
       argTypes: [{ name: "action", type: "object" }],
     },
     currentUserId: "string",
-    orgId: "string",
     locationId: "string",
     className: "string",
   },
@@ -1510,7 +1467,6 @@ PLASMIC.registerComponent(EditActionModal, {
       type: "eventHandler",
       argTypes: [{ name: "action", type: "object" }],
     },
-    orgId: "string",
     locationId: "string",
     className: "string",
   },
@@ -1565,10 +1521,6 @@ PLASMIC.registerComponent(RecordActionModal, {
       ],
       description: "Handler called after successfully recording an action"
     },
-    orgId: {
-      type: "string",
-      description: "Organization ID"
-    },
     locationId: {
       type: "string",
       description: "Location ID"
@@ -1586,10 +1538,6 @@ PLASMIC.registerComponent(DisciplineNotifications, {
   displayName: "Discipline Notifications",
   // @ts-ignore - Complex Plasmic registration type
   props: {
-    orgId: {
-      type: "string",
-      description: "Organization ID"
-    },
     locationId: {
       type: "string",
       description: "Location ID"
@@ -1625,10 +1573,6 @@ PLASMIC.registerComponent(DisciplineNotifications, {
   displayName: "Recommended Actions (deprecated - use Discipline Notifications)",
   // @ts-ignore - Complex Plasmic registration type
   props: {
-    orgId: {
-      type: "string",
-      description: "Organization ID"
-    },
     locationId: {
       type: "string",
       description: "Location ID"

@@ -524,19 +524,6 @@ function PlasmicDiscipline__RenderFunc(props: {
                     }
                   })()}
                   maxWidth={"1200px"}
-                  orgId={(() => {
-                    try {
-                      return $ctx.auth.org_id;
-                    } catch (e) {
-                      if (
-                        e instanceof TypeError ||
-                        e?.plasmicType === "PlasmicUndefinedDataError"
-                      ) {
-                        return undefined;
-                      }
-                      throw e;
-                    }
-                  })()}
                   width={"100%"}
                 />
 
@@ -589,19 +576,6 @@ function PlasmicDiscipline__RenderFunc(props: {
                           throw e;
                         }
                       })()}
-                      orgId={(() => {
-                        try {
-                          return $ctx.auth.org_id;
-                        } catch (e) {
-                          if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
-                          ) {
-                            return undefined;
-                          }
-                          throw e;
-                        }
-                      })()}
                       showActions={true}
                     />
                   </div>
@@ -630,19 +604,6 @@ function PlasmicDiscipline__RenderFunc(props: {
                       locationId={(() => {
                         try {
                           return $ctx.locationContext.selectedLocationId;
-                        } catch (e) {
-                          if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
-                          ) {
-                            return undefined;
-                          }
-                          throw e;
-                        }
-                      })()}
-                      orgId={(() => {
-                        try {
-                          return $ctx.auth.org_id;
                         } catch (e) {
                           if (
                             e instanceof TypeError ||

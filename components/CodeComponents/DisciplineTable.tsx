@@ -22,7 +22,6 @@ export interface DisciplineEntry {
 }
 
 export interface DisciplineTableProps {
-  orgId: string;
   locationId: string;
   currentUserId?: string; // For passing to EmployeeModal
   className?: string;
@@ -112,7 +111,6 @@ const PointsBadge = ({ points, disciplineActions }: { points: number; discipline
 };
 
 export function DisciplineTable({
-  orgId = "default-org",
   locationId = "default-location",
   className = "",
   density = "comfortable",
@@ -143,9 +141,14 @@ export function DisciplineTable({
   
   // Fetch discipline data from Supabase
   const fetchDisciplineData = React.useCallback(async () => {
+        if (!locationId) {
+          setData([]);
+          setDisciplineActions([]);
+          setLoading(false);
+          return;
+        }
         try {
           setLoading(true);
-          console.log('Fetching discipline data for org:', orgId, 'location:', locationId);
           
           let transformedData: DisciplineEntry[] = [];
           
@@ -153,7 +156,6 @@ export function DisciplineTable({
           const { data: actionsData, error: actionsError } = await supabase
             .from('disc_actions_rubric')
             .select('*')
-            .eq('org_id', orgId)
             .eq('location_id', locationId)
             .order('points_threshold', { ascending: true });
             
@@ -165,7 +167,6 @@ export function DisciplineTable({
             const { data: employees, error: empError } = await supabase
               .from('employees')
         .select('*')
-              .eq('org_id', orgId)
               .eq('location_id', locationId)
               .eq('active', true);
               
@@ -180,7 +181,6 @@ export function DisciplineTable({
                 .from('infractions')
                 .select('employee_id, points, infraction_date')
                 .in('employee_id', employeeIds)
-                .eq('org_id', orgId)
                 .eq('location_id', locationId)
           .gte('infraction_date', ninetyDaysAgo)
                 .order('infraction_date', { ascending: false });
@@ -207,7 +207,7 @@ export function DisciplineTable({
               
               console.log('Loaded discipline data from tables:', transformedData.length, 'entries');
             } else {
-              console.log('No employees found for org:', orgId, 'location:', locationId);
+              console.log('No employees found for location:', locationId);
               transformedData = [];
           }
         
@@ -220,17 +220,17 @@ export function DisciplineTable({
       } finally {
         setLoading(false);
       }
-  }, [orgId, locationId, supabase]);
+  }, [locationId, supabase]);
     
   // Initial fetch
   React.useEffect(() => {
-    if (orgId && locationId) {
+    if (locationId) {
       fetchDisciplineData();
     } else {
       setData([]);
       setLoading(false);
     }
-  }, [orgId, locationId, fetchDisciplineData]);
+  }, [locationId, fetchDisciplineData]);
 
   // Real-time subscription disabled - views cannot be added to publications
   // If you need real-time updates, enable Realtime on the underlying tables:
@@ -239,19 +239,19 @@ export function DisciplineTable({
   // Then uncomment the code below
   /*
   React.useEffect(() => {
-    if (!orgId || !locationId) return;
+    if (!locationId) return;
     
     let channel: any = null;
     
     try {
       channel = supabase
-        .channel(`infractions-changes-${orgId}-${locationId}`)
+        .channel(`infractions-changes-${locationId}`)
         .on('postgres_changes', 
           { 
             event: '*', 
             schema: 'public', 
             table: 'infractions',
-            filter: `org_id=eq.${orgId}`
+            filter: `location_id=eq.${locationId}`
           }, 
           (payload) => {
             console.log('Infraction data changed:', payload);
@@ -278,7 +278,7 @@ export function DisciplineTable({
         }
       }
     };
-  }, [orgId, locationId, supabase, fetchDisciplineData]);
+  }, [locationId, supabase, fetchDisciplineData]);
   */
 
   // Convert data to DataGrid rows
@@ -438,11 +438,12 @@ export function DisciplineTable({
             setModalOpen(true);
           } else {
             // Fallback: create minimal employee object
+            const fallbackOrgId = entry?.employee?.org_id ?? '';
             const minimalEmployee: Employee = {
               id: rowData.id,
               full_name: rowData.full_name,
               role: rowData.role,
-              org_id: orgId,
+              org_id: fallbackOrgId,
               location_id: locationId,
               active: true,
             };
@@ -540,7 +541,6 @@ export function DisciplineTable({
           setModalOpen(false);
           setSelectedEmployee(null);
         }}
-        orgId={orgId}
         locationId={locationId}
         initialTab="discipline"
         currentUserId={currentUserId}

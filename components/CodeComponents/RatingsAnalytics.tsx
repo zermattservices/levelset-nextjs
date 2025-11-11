@@ -5,7 +5,6 @@ import TrendCard from '../TrendCard';
 import type { GridRowsProp, GridFilterModel } from '@mui/x-data-grid-pro';
 
 interface RatingsAnalyticsProps {
-  orgId: string;
   locationId: string;
   currentRows: GridRowsProp;
   startDate: Date | null;
@@ -54,7 +53,6 @@ function formatChange(current: number, prior: number): string {
 }
 
 export function RatingsAnalytics({
-  orgId,
   locationId,
   currentRows,
   startDate,
@@ -94,7 +92,7 @@ export function RatingsAnalytics({
   React.useEffect(() => {
     async function fetchPriorPeriod() {
       if (!startDate || !endDate) return;
-      if (!orgId || !locationId) {
+      if (!locationId) {
         setAnalyticsData(null);
         setAnalyticsLoading(false);
         return;
@@ -111,7 +109,6 @@ export function RatingsAnalytics({
 
         // Build query params
         const params = new URLSearchParams({
-          orgId,
           locationId,
           startDate: priorStartDate.toISOString(),
           endDate: priorEndDate.toISOString(),
@@ -155,7 +152,7 @@ export function RatingsAnalytics({
     }
 
     fetchPriorPeriod();
-  }, [orgId, locationId, startDate, endDate, showFOH, showBOH, searchText, filterModel]);
+  }, [locationId, startDate, endDate, showFOH, showBOH, searchText, filterModel]);
 
   const periodText = getPeriodText(currentMetrics.days || 30);
   const priorMetrics = analyticsData?.prior;

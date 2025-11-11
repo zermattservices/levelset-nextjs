@@ -11,7 +11,6 @@ export interface DisciplineAction {
 }
 
 export interface DisciplineActionsTableProps {
-  orgId: string;
   locationId: string;
   className?: string;
 
@@ -53,7 +52,6 @@ const pointsBadge = (points: number, customClass?: string) => {
 };
 
 export function DisciplineActionsTable({
-  orgId,
   locationId,
   className = "",
   density = "comfortable",
@@ -81,12 +79,11 @@ export function DisciplineActionsTable({
   const fetchDisciplineActions = React.useCallback(async () => {
     try {
       setLoading(true);
-      console.log('Fetching discipline actions for org:', orgId, 'location:', locationId);
+      console.log('Fetching discipline actions for location:', locationId);
       
       const { data: actionsData, error: actionsError } = await supabase
         .from('disc_actions_rubric')
         .select('*')
-        .eq('org_id', orgId)
         .eq('location_id', locationId)
         .order('points_threshold', { ascending: true });
         
@@ -111,24 +108,24 @@ export function DisciplineActionsTable({
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId]);
+  }, [locationId]);
   
   // Initial fetch
   React.useEffect(() => {
-    if (orgId && locationId) {
+    if (locationId) {
       fetchDisciplineActions();
     } else {
       setData([]);
       setLoading(false);
     }
-  }, [orgId, locationId, fetchDisciplineActions]);
+  }, [locationId, fetchDisciplineActions]);
 
   // Real-time subscription disabled - Realtime not enabled on disc_actions_rubric table
   // If you need real-time updates, enable Realtime on the disc_actions_rubric table in Supabase
   // Then uncomment the code below
   /*
   React.useEffect(() => {
-    if (!orgId || !locationId) return;
+    if (!locationId) return;
     
     const supabase = createSupabaseClient();
     const channel = supabase
@@ -138,7 +135,7 @@ export function DisciplineActionsTable({
           event: '*', 
           schema: 'public', 
           table: 'disc_actions_rubric',
-          filter: `org_id=eq.${orgId}`
+          filter: `location_id=eq.${locationId}`
         }, 
         (payload) => {
           console.log('Discipline actions data changed:', payload);
@@ -151,7 +148,7 @@ export function DisciplineActionsTable({
       const supabase = createSupabaseClient();
       supabase.removeChannel(channel);
     };
-  }, [orgId, locationId, fetchDisciplineActions]);
+  }, [locationId, fetchDisciplineActions]);
   */
 
   if (loading && data.length === 0) {

@@ -26,7 +26,6 @@ export interface RecordActionModalProps {
   currentUserId?: string; // Alternative: just the auth user ID
   onClose: () => void;
   onSuccess?: (employeeId: string) => void;
-  orgId: string;
   locationId: string;
   className?: string;
 }
@@ -131,13 +130,13 @@ export function RecordActionModal({
   currentUserId,
   onClose,
   onSuccess,
-  orgId,
   locationId,
   className = "",
 }: RecordActionModalProps) {
   const [actionDate, setActionDate] = React.useState<Date | null>(new Date());
   const [notes, setNotes] = React.useState("");
   const [locationName, setLocationName] = React.useState("");
+  const [locationOrgId, setLocationOrgId] = React.useState<string | null>(null);
   const [actingLeader, setActingLeader] = React.useState<Employee | null>(null);
   const [loadingLeader, setLoadingLeader] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
@@ -150,17 +149,23 @@ export function RecordActionModal({
     const fetchData = async () => {
       try {
         // Fetch location name
+        let resolvedOrgId: string | null = locationOrgId;
+
         if (locationId) {
           const { data: locData, error: locError } = await supabase
             .from('locations')
-            .select('name')
+            .select('name, org_id')
             .eq('id', locationId)
             .single();
           
           if (!locError && locData) {
             setLocationName(locData.name);
+            setLocationOrgId(locData.org_id ?? null);
+            resolvedOrgId = locData.org_id ?? null;
           }
         }
+
+        resolvedOrgId = resolvedOrgId ?? employee?.org_id ?? null;
 
         // Fetch acting leader - look up app_users by auth_user_id
         if (!currentUser && currentUserId) {
@@ -197,7 +202,7 @@ export function RecordActionModal({
                 id: currentUserId,
                 full_name: 'Current User',
                 role: 'User',
-                org_id: orgId,
+                org_id: resolvedOrgId,
                 location_id: locationId,
                 active: true,
               });
@@ -208,7 +213,7 @@ export function RecordActionModal({
               id: currentUserId,
               full_name: 'Current User',
               role: 'User',
-              org_id: orgId,
+              org_id: resolvedOrgId,
               location_id: locationId,
               active: true,
             });
@@ -301,7 +306,7 @@ export function RecordActionModal({
         .from('disc_actions')
         .insert({
           employee_id: employee.id,
-          org_id: orgId,
+          org_id: locationOrgId ?? actingLeader?.org_id ?? employee.org_id ?? null,
           location_id: locationId,
           action: recommendedAction,
           action_id: recommendedActionId,
@@ -325,7 +330,7 @@ export function RecordActionModal({
         })
         .eq('employee_id', employee.id)
         .eq('recommended_action_id', recommendedActionId)
-        .eq('org_id', orgId)
+        .eq('org_id', locationOrgId ?? employee.org_id ?? null)
         .eq('location_id', locationId)
         .is('action_taken', null);
 

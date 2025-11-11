@@ -27,7 +27,6 @@ export interface AddActionModalProps {
   onClose: () => void;
   onSave?: (action: DisciplinaryAction) => void;
   currentUserId?: string;
-  orgId: string;
   locationId: string;
   className?: string;
 }
@@ -123,7 +122,6 @@ export function AddActionModal({
   onClose,
   onSave,
   currentUserId,
-  orgId,
   locationId,
   className = "",
 }: AddActionModalProps) {
@@ -135,6 +133,7 @@ export function AddActionModal({
   const [actionId, setActionId] = React.useState("");
   const [notes, setNotes] = React.useState("");
   const [locationName, setLocationName] = React.useState("");
+  const [locationOrgId, setLocationOrgId] = React.useState<string | null>(null);
   const [discActionsRubricOptions, setDiscActionsRubricOptions] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
   const supabase = createSupabaseClient();
@@ -157,19 +156,19 @@ export function AddActionModal({
         // Fetch location name
         const { data: locData, error: locError } = await supabase
           .from('locations')
-          .select('name')
+          .select('name, org_id')
           .eq('id', locationId)
           .single();
         
         if (!locError && locData) {
           setLocationName(locData.name);
+          setLocationOrgId(locData.org_id ?? null);
         }
 
         // Fetch disc_actions_rubric options
         const { data: rubricData, error: rubricError } = await supabase
           .from('disc_actions_rubric')
           .select('*')
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .order('points_threshold', { ascending: true }); // Order by points, lowest to highest
         
@@ -214,7 +213,7 @@ export function AddActionModal({
     };
 
     fetchData();
-  }, [open, orgId, locationId, currentUserId, supabase]);
+  }, [open, locationId, currentUserId, supabase]);
 
   // Handle action type change
   const handleActionTypeChange = (value: string) => {
@@ -238,7 +237,7 @@ export function AddActionModal({
         action: actionType,
         action_id: actionId,
         notes: notes,
-        org_id: orgId,
+        org_id: locationOrgId ?? actingLeader?.org_id ?? employee?.org_id ?? null,
         location_id: locationId,
       };
 

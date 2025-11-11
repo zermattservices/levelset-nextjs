@@ -19,16 +19,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'GET') {
       // Fetch employees
-      const { org_id, location_id } = req.query;
+      const { location_id } = req.query;
       
-      if (!org_id || !location_id) {
-        return res.status(400).json({ error: 'org_id and location_id are required' });
+      if (!location_id) {
+        return res.status(400).json({ error: 'location_id is required' });
       }
 
       const { data: employees, error } = await supabase
         .from('employees')
         .select('*')
-        .eq('org_id', org_id)
         .eq('location_id', location_id)
         .eq('active', true)
         .order('full_name');

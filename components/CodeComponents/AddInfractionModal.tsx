@@ -29,7 +29,6 @@ export interface AddInfractionModalProps {
   onClose: () => void;
   onSave?: (infraction: Infraction) => void;
   currentUserId?: string;
-  orgId: string;
   locationId: string;
   className?: string;
 }
@@ -125,7 +124,6 @@ export function AddInfractionModal({
   onClose,
   onSave,
   currentUserId,
-  orgId,
   locationId,
   className = "",
 }: AddInfractionModalProps) {
@@ -138,6 +136,7 @@ export function AddInfractionModal({
   const [points, setPoints] = React.useState(0);
   const [notes, setNotes] = React.useState("");
   const [locationName, setLocationName] = React.useState("");
+  const [locationOrgId, setLocationOrgId] = React.useState<string | null>(null);
   const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [leaders, setLeaders] = React.useState<Employee[]>([]);
   const [infractionsRubricOptions, setInfractionsRubricOptions] = React.useState<any[]>([]);
@@ -163,19 +162,19 @@ export function AddInfractionModal({
         // Fetch location name
         const { data: locData, error: locError } = await supabase
           .from('locations')
-          .select('name')
+          .select('name, org_id')
           .eq('id', locationId)
           .single();
         
         if (!locError && locData) {
           setLocationName(locData.name);
+          setLocationOrgId(locData.org_id ?? null);
         }
 
         // Fetch all employees for employee dropdown
         const { data: empData, error: empError } = await supabase
           .from('employees')
           .select('id, full_name')
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .eq('active', true)
           .order('full_name');
@@ -188,7 +187,6 @@ export function AddInfractionModal({
         const { data: leadersData, error: leadersError } = await supabase
           .from('employees')
           .select('id, full_name')
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .eq('is_leader', true)
           .eq('active', true)
@@ -202,7 +200,6 @@ export function AddInfractionModal({
         const { data: rubricData, error: rubricError } = await supabase
           .from('infractions_rubric')
           .select('*')
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .order('points', { ascending: true }); // Order by points, lowest to highest
         
@@ -247,7 +244,7 @@ export function AddInfractionModal({
     };
 
     fetchData();
-  }, [open, orgId, locationId, currentUserId, supabase]);
+  }, [open, locationId, currentUserId, supabase]);
 
   // Handle infraction type change - update points automatically
   const handleInfractionTypeChange = (value: string) => {
@@ -273,7 +270,7 @@ export function AddInfractionModal({
         infraction: infractionType,
         points: points,
         notes: notes,
-        org_id: orgId,
+        org_id: locationOrgId ?? employee?.org_id ?? null,
         location_id: locationId,
       };
 

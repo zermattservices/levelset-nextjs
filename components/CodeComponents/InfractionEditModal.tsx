@@ -28,7 +28,6 @@ export interface InfractionEditModalProps {
   infraction: Infraction | null;
   onClose: () => void;
   onSave?: (infraction: Infraction) => void;
-  orgId: string;
   locationId: string;
   className?: string;
 }
@@ -123,7 +122,6 @@ export function InfractionEditModal({
   infraction,
   onClose,
   onSave,
-  orgId,
   locationId,
   className = "",
 }: InfractionEditModalProps) {
@@ -181,7 +179,6 @@ export function InfractionEditModal({
         const { data, error } = await supabase
           .from('employees')
           .select('id, full_name')
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .eq('active', true)
           .order('full_name');
@@ -200,7 +197,6 @@ export function InfractionEditModal({
         const { data, error } = await supabase
           .from('employees')
           .select('id, full_name')
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .eq('is_leader', true)
           .eq('active', true)
@@ -237,7 +233,6 @@ export function InfractionEditModal({
         const { data, error } = await supabase
           .from('infractions_rubric')
           .select('*')
-          .eq('org_id', orgId)
           .eq('location_id', locationId)
           .order('points', { ascending: true }); // Order by points, lowest to highest
         
@@ -253,7 +248,7 @@ export function InfractionEditModal({
     fetchEmployees();
     fetchLeaders();
     fetchInfractionsRubric();
-  }, [open, infraction, orgId, locationId, supabase]);
+  }, [open, infraction, locationId, supabase]);
 
   // Handle infraction type change - update points automatically
   const handleInfractionTypeChange = (value: string) => {

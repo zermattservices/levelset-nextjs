@@ -114,7 +114,7 @@ async function ensureOwnerAuthUser(): Promise<string> {
     throw existing.error;
   }
 
-  const found = existing.data.users?.find((user) => user.email?.toLowerCase() === MOCK_OWNER_EMAIL.toLowerCase());
+  const found = existing.data.users?.find((user: any) => user.email?.toLowerCase() === MOCK_OWNER_EMAIL.toLowerCase());
   if (found?.id) {
     return found.id;
   }

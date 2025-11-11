@@ -609,19 +609,6 @@ function PlasmicPeaClassic__RenderFunc(props: {
                     }
                   })()}
                   maxWidth={"100%"}
-                  orgId={(() => {
-                    try {
-                      return $ctx.auth.org_id;
-                    } catch (e) {
-                      if (
-                        e instanceof TypeError ||
-                        e?.plasmicType === "PlasmicUndefinedDataError"
-                      ) {
-                        return undefined;
-                      }
-                      throw e;
-                    }
-                  })()}
                   width={"100%"}
                 />
               </div>
