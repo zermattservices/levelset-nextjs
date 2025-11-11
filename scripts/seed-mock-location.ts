@@ -40,7 +40,6 @@ const BUDA_LOCATION_ID = process.env.NEXT_PUBLIC_BUDA_LOCATION_ID ?? '67e00fb2-2
 const MOCK_ORG_NAME = 'John Smith';
 const MOCK_LOCATION_NAME = 'John Smith Mock Location';
 const MOCK_LOCATION_NUMBER = '99999';
-const MOCK_AUTH_USER_ID = 'mock-auth-john-smith';
 const MOCK_OWNER_EMAIL = 'john.smith@mocksmithco.test';
 
 const ratingsLimitArg = process.argv.find((arg) => arg.startsWith('--ratings-limit='));
@@ -54,8 +53,6 @@ const ROLE_COUNTS: Record<string, number> = {
   Trainer: 5,
   'Team Member': 29,
 };
-
-const LEADER_ROLES = new Set(['Operator', 'Executive', 'Director', 'Team Lead']);
 
 const FIRST_NAMES = [
   'Alex', 'Jamie', 'Taylor', 'Chris', 'Morgan', 'Jordan', 'Casey', 'Riley', 'Avery', 'Dakota',
@@ -74,14 +71,39 @@ const LAST_NAMES = [
   'Ridley', 'Sterling', 'Thayer', 'Upton', 'Vander', 'Winslow', 'Yardley', 'Zimmer',
 ];
 
+async function ensureOwnerAuthUser(): Promise<string> {
+  const existing = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  if (existing.error) {
+    throw existing.error;
+  }
+
+  const found = existing.data.users?.find((user) => user.email?.toLowerCase() === MOCK_OWNER_EMAIL.toLowerCase());
+  if (found?.id) {
+    return found.id;
+  }
+
+  const password = `${randomUUID()}Aa1!`;
+  const created = await supabase.auth.admin.createUser({
+    email: MOCK_OWNER_EMAIL,
+    email_confirm: true,
+    password,
+    user_metadata: {
+      first_name: 'John',
+      last_name: 'Smith',
+    },
+  });
+
+  if (created.error || !created.data?.user?.id) {
+    throw created.error ?? new Error('Failed to create auth user for mock owner');
+  }
+
+  return created.data.user.id;
+}
+
 interface EmployeeRecord {
   id: string;
   role: string;
   full_name: string;
-}
-
-function uniqueSlug(base: string) {
-  return `${base}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function sampleName(index: number) {
@@ -100,7 +122,7 @@ function randomHireDate(): string {
 async function ensureOrg(): Promise<string> {
   const { data: existing, error: existingError } = await supabase
     .from('orgs')
-    .select('id, slug, name')
+    .select('id, name')
     .eq('name', MOCK_ORG_NAME)
     .maybeSingle();
 
@@ -133,9 +155,7 @@ async function ensureOrg(): Promise<string> {
     }
   }
 
-  if ('slug' in payload) {
-    payload.slug = uniqueSlug('john-smith');
-  }
+  delete (payload as any).slug;
   if ('store_number' in payload) {
     payload.store_number = MOCK_LOCATION_NUMBER;
   }
@@ -196,9 +216,7 @@ async function ensureLocation(orgId: string): Promise<string> {
     }
   }
 
-  if ('slug' in payload) {
-    payload.slug = uniqueSlug('smith-99999');
-  }
+  delete (payload as any).slug;
   if ('store_number' in payload) {
     payload.store_number = MOCK_LOCATION_NUMBER;
   }
@@ -214,11 +232,13 @@ async function ensureLocation(orgId: string): Promise<string> {
   return locationId;
 }
 
-async function ensureOwnerAppUser(orgId: string, locationId: string, operatorEmployeeId: string) {
+async function ensureOwnerAppUser(orgId: string, locationId: string, operatorEmployeeId: string): Promise<string> {
+  const authUserId = await ensureOwnerAuthUser();
+
   const { data: existing, error: existingError } = await supabase
     .from('app_users')
     .select('id')
-    .eq('auth_user_id', MOCK_AUTH_USER_ID)
+    .eq('auth_user_id', authUserId)
     .maybeSingle();
 
   if (existingError) {
@@ -226,22 +246,21 @@ async function ensureOwnerAppUser(orgId: string, locationId: string, operatorEmp
   }
 
   if (existing?.id) {
-    console.log(`ℹ️  Reusing existing app_user for ${MOCK_AUTH_USER_ID}`);
-    return;
+    console.log(`ℹ️  Reusing existing app_user for ${authUserId}`);
+    return authUserId;
   }
 
   const payload = {
     id: randomUUID(),
-    auth_user_id: MOCK_AUTH_USER_ID,
+    auth_user_id: authUserId,
     email: MOCK_OWNER_EMAIL,
     first_name: 'John',
     last_name: 'Smith',
-    full_name: 'John Smith',
-    role: 'Operator',
+    role: 'Owner/Operator',
     org_id: orgId,
     location_id: locationId,
     employee_id: operatorEmployeeId,
-    active: true,
+    permissions: 'operator',
   };
 
   const { error: insertError } = await supabase.from('app_users').insert(payload);
@@ -252,6 +271,7 @@ async function ensureOwnerAppUser(orgId: string, locationId: string, operatorEmp
   }
 
   console.log('✅ Created owner app_user linked to operator employee');
+  return authUserId;
 }
 
 function buildEmployees(orgId: string, locationId: string) {
@@ -264,26 +284,15 @@ function buildEmployees(orgId: string, locationId: string) {
       counter += 1;
       const id = randomUUID();
 
-      const emailLocal = `${name.first}.${name.last}`.toLowerCase();
-
       employees.push({
         id,
         org_id: orgId,
         location_id: locationId,
         role,
-        full_name: name.full,
         first_name: name.first,
         last_name: name.last,
-        email: `${emailLocal}@mocksmithco.test`,
-        payroll_name: `${name.last}, ${name.first}`,
         hire_date: randomHireDate(),
-        active: true,
-        is_leader: LEADER_ROLES.has(role),
-        is_trainer: role === 'Trainer',
-        is_foh: true,
-        is_boh: false,
-        availability: 'Available',
-        certified_status: 'Not Certified',
+      active: true,
       });
     }
   }
@@ -348,6 +357,7 @@ async function seed() {
   console.log(`   • Reference Big 5 labels: ${big5Labels?.length ?? 0}\n`);
 
   console.log('👥 Generating mock employees...');
+  await supabase.from('employees').delete().eq('location_id', locationId);
   const employeePayloads = buildEmployees(orgId, locationId);
 
   const { data: insertedEmployees, error: insertEmployeesError } = await supabase
@@ -367,12 +377,17 @@ async function seed() {
     throw new Error('Operator employee not found after insertion');
   }
 
-  await ensureOwnerAppUser(orgId, locationId, operatorEmployee.id);
+  const ownerAuthId = await ensureOwnerAppUser(orgId, locationId, operatorEmployee.id);
 
   console.log('\n🧭 Mirroring Big 5 labels...');
 
   await supabase
     .from('position_big5_labels')
+    .delete()
+    .eq('location_id', locationId);
+
+  await supabase
+    .from('ratings')
     .delete()
     .eq('location_id', locationId);
 
@@ -448,7 +463,6 @@ async function seed() {
       rating_3: rating.rating_3,
       rating_4: rating.rating_4,
       rating_5: rating.rating_5,
-      rating_avg: rating.rating_avg,
       created_at: rating.created_at,
       location_id: locationId,
       org_id: orgId,
@@ -466,7 +480,7 @@ async function seed() {
   console.log('\n✨ Mock location seeding complete!');
   console.log(`   Org ID: ${orgId}`);
   console.log(`   Location ID: ${locationId}`);
-  console.log(`   Owner auth_user_id: ${MOCK_AUTH_USER_ID}`);
+  console.log(`   Owner auth_user_id: ${ownerAuthId}`);
 }
 
 seed()
