@@ -150,7 +150,7 @@ const StyledContainer = styled(Box)(() => ({
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
   width: "100%",
-  height: "100%",
+  height: 650,
   display: "flex",
   flexDirection: "column",
 }));
@@ -1061,9 +1061,9 @@ function EmployeesTableView({
         disableRowSelectionOnClick
         loading={loading}
         hideFooter
-        autoHeight
         rowHeight={48}
         columnHeaderHeight={56}
+        style={{ flex: 1, width: '100%' }}
         sx={{
           border: "none",
           fontFamily,

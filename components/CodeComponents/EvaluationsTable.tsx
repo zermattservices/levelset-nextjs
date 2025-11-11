@@ -88,6 +88,50 @@ interface LeaderOption {
 
 const LEADER_ROLES = ['Team Lead', 'Director', 'Executive', 'Operator'];
 
+const DatePillTextField = React.forwardRef(function DatePillTextField(
+  props: React.ComponentProps<typeof TextField>,
+  ref: React.Ref<HTMLInputElement>
+) {
+  return (
+    <TextField
+      {...props}
+      inputRef={ref}
+      placeholder="MM/DD/YY"
+      size="small"
+      InputLabelProps={{ shrink: false }}
+      sx={{
+        width: 128,
+        '& .MuiOutlinedInput-root': {
+          borderRadius: 14,
+          backgroundColor: '#f3f4f6',
+          fontFamily,
+          fontSize: 14,
+          paddingRight: 8,
+          height: 36,
+          '& fieldset': {
+            border: 'none',
+          },
+          '&:hover fieldset': {
+            border: 'none',
+          },
+          '&.Mui-focused fieldset': {
+            border: 'none',
+          },
+        },
+        '& .MuiInputBase-input': {
+          fontFamily,
+          fontSize: 14,
+          padding: '10px 14px',
+          textAlign: 'center',
+        },
+        '& .MuiInputBase-input::placeholder': {
+          color: '#9ca3af',
+        },
+      }}
+    />
+  );
+});
+
 export function EvaluationsTable({ orgId, locationId, className, onPlannedStatusChange }: EvaluationsTableProps) {
   const [rows, setRows] = React.useState<EvaluationRow[]>([]);
   const [leaders, setLeaders] = React.useState<LeaderOption[]>([]);
@@ -433,44 +477,9 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                   onChange={handleDateChange(row)}
                   disabled={disabled}
                   format="MM/dd/yyyy"
+                  enableAccessibleFieldDOMStructure={false}
                   slots={{
-                    textField: (props) => (
-                      <TextField
-                        {...props}
-                        placeholder="MM/DD/YY"
-                        size="small"
-                        InputLabelProps={{ shrink: false }}
-                        sx={{
-                          width: 128,
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 14,
-                            backgroundColor: '#f3f4f6',
-                            fontFamily,
-                            fontSize: 14,
-                            paddingRight: 8,
-                            height: 36,
-                            '& fieldset': {
-                              border: 'none',
-                            },
-                            '&:hover fieldset': {
-                              border: 'none',
-                            },
-                            '&.Mui-focused fieldset': {
-                              border: 'none',
-                            },
-                          },
-                          '& .MuiInputBase-input': {
-                            fontFamily,
-                            fontSize: 14,
-                            padding: '10px 14px',
-                            textAlign: 'center',
-                          },
-                          '& .MuiInputBase-input::placeholder': {
-                            color: '#9ca3af',
-                          },
-                        }}
-                      />
-                    ),
+                    textField: DatePillTextField,
                   }}
                   slotProps={{
                     openPickerButton: {
