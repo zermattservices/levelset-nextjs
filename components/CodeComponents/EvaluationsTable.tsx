@@ -100,14 +100,14 @@ const DatePillTextField = React.forwardRef(function DatePillTextField(
       size="small"
       InputLabelProps={{ shrink: false }}
       sx={{
-        width: 128,
+        width: 132,
         '& .MuiOutlinedInput-root': {
           borderRadius: 14,
           backgroundColor: '#f3f4f6',
           fontFamily,
           fontSize: 14,
-          paddingRight: 8,
-          height: 36,
+          height: 28,
+          paddingRight: '36px',
           '& fieldset': {
             border: 'none',
           },
@@ -120,12 +120,25 @@ const DatePillTextField = React.forwardRef(function DatePillTextField(
         },
         '& .MuiInputBase-input': {
           fontFamily,
-          fontSize: 14,
-          padding: '10px 14px',
+          fontSize: 13,
+          fontWeight: 600,
+          color: '#111827',
+          padding: '0 12px',
           textAlign: 'center',
+          height: 28,
+          lineHeight: '28px',
         },
         '& .MuiInputBase-input::placeholder': {
           color: '#9ca3af',
+          opacity: 1,
+        },
+        '& .MuiIconButton-root': {
+          padding: 0,
+          marginRight: 6,
+          color: '#6b7280',
+          '& .MuiSvgIcon-root': {
+            fontSize: 18,
+          },
         },
       }}
     />
@@ -325,8 +338,8 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
           const pillSx = {
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 6,
-            padding: '0 16px',
+            gap: 8,
+            padding: '0 12px',
             minHeight: 28,
             height: 28,
             borderRadius: 14,
@@ -353,10 +366,11 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                   onChange={handleLeaderChange(row)}
                   disabled={disabled}
                   displayEmpty
-                  IconComponent={ExpandMoreIcon}
+                  IconComponent={() => null}
                   renderValue={() => (
                     <Box sx={pillSx}>
                       <span>{leaderName}</span>
+                      <ExpandMoreIcon sx={{ fontSize: 18, color: '#6b7280' }} />
                     </Box>
                   )}
                   sx={{
@@ -367,12 +381,6 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                     },
                     '& fieldset': {
                       border: 'none',
-                    },
-                    '& .MuiSelect-icon': {
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      color: '#6b7280',
-                      right: 4,
                     },
                     opacity: disabled ? 0.6 : 1,
                   }}
@@ -486,9 +494,12 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                       sx: {
                         color: '#6b7280',
                         padding: 0,
-                        mr: 1,
+                        mr: 0,
                         '& .MuiSvgIcon-root': {
                           fontSize: 18,
+                        },
+                        '&:hover': {
+                          backgroundColor: 'transparent',
                         },
                       },
                     },
@@ -496,20 +507,56 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                       sx: {
                         '& .MuiPaper-root': {
                           fontFamily,
-                          borderRadius: 12,
-                          boxShadow: '0px 10px 25px rgba(15, 23, 42, 0.12)',
-                          padding: '4px 8px',
+                          borderRadius: 16,
+                          boxShadow: '0px 12px 32px rgba(17, 24, 39, 0.15)',
+                          padding: 1,
                         },
                         '& .MuiTypography-root': {
                           fontFamily,
                           fontSize: 12,
                         },
+                        '& .MuiPickersCalendarHeader-label': {
+                          fontFamily,
+                          fontSize: 12,
+                        },
+                        '& .MuiPickersCalendarHeader-switchViewIcon': {
+                          color: levelsetGreen,
+                        },
+                        '& .MuiDayCalendar-weekDayLabel': {
+                          fontFamily,
+                          fontSize: 10,
+                          color: '#6b7280',
+                        },
                         '& .MuiPickersDay-root': {
+                          fontFamily,
+                          fontSize: 12,
+                          borderRadius: 999,
+                          '&.Mui-selected': {
+                            backgroundColor: `${levelsetGreen} !important`,
+                            color: '#ffffff !important',
+                            '&:hover': {
+                              backgroundColor: `${levelsetGreen} !important`,
+                            },
+                            '&:focus': {
+                              backgroundColor: `${levelsetGreen} !important`,
+                            },
+                          },
+                          '&:hover': {
+                            backgroundColor: 'rgba(49, 102, 74, 0.08)',
+                          },
+                        },
+                        '& .MuiYearCalendar-root .MuiPickersYear-yearButton': {
                           fontFamily,
                           fontSize: 12,
                           '&.Mui-selected': {
                             backgroundColor: `${levelsetGreen} !important`,
                             color: '#ffffff !important',
+                          },
+                        },
+                        '& .MuiIconButton-root': {
+                          color: `${levelsetGreen} !important`,
+                          '&:hover': {
+                            backgroundColor: 'rgba(49, 102, 74, 0.08)',
                           },
                         },
                       },
@@ -545,8 +592,8 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
           const pillSx = {
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 6,
-            padding: '0 16px',
+            gap: 8,
+            padding: '0 12px',
             minHeight: 28,
             height: 28,
             borderRadius: 14,
@@ -572,10 +619,11 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                   value={status}
                   onChange={handleStatusChange(row)}
                   disabled={disabled}
-                  IconComponent={ExpandMoreIcon}
+                  IconComponent={() => null}
                   renderValue={() => (
                     <Box sx={pillSx}>
                       <span>{status}</span>
+                      <ExpandMoreIcon sx={{ fontSize: 18, color: colors.color }} />
                     </Box>
                   )}
                   sx={{
@@ -586,12 +634,6 @@ export function EvaluationsTable({ orgId, locationId, className, onPlannedStatus
                     },
                     '& fieldset': {
                       border: 'none',
-                    },
-                    '& .MuiSelect-icon': {
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      color: colors.color,
-                      right: 4,
                     },
                     opacity: disabled ? 0.6 : 1,
                   }}
