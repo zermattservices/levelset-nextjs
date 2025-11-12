@@ -541,76 +541,88 @@ export function DisciplineNotifications({
       )}
 
       {/* Required Disciplinary Actions Accordion */}
-      {recommendations.length > 0 && (
-        <Accordion
-          expanded={actionsExpanded}
-          onChange={() => setActionsExpanded(!actionsExpanded)}
-          disableGutters
-          elevation={0}
+      <Accordion
+        expanded={actionsExpanded}
+        onChange={() => setActionsExpanded(!actionsExpanded)}
+        disableGutters
+        elevation={0}
+        sx={{
+          '&:before': { display: 'none' },
+          '&.MuiAccordion-root': {
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            mt: 2,
+          },
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon sx={{ color: levelsetGreen }} />}
           sx={{
-            '&:before': { display: 'none' },
-            '&.MuiAccordion-root': {
-              backgroundColor: 'transparent',
-              boxShadow: 'none',
-              mt: 2,
+            padding: 0,
+            minHeight: 48,
+            '&.Mui-expanded': {
+              minHeight: 48,
+            },
+            '& .MuiAccordionSummary-content': {
+              margin: '12px 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+            },
+            '& .MuiAccordionSummary-expandIconWrapper': {
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
             },
           }}
         >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon sx={{ color: levelsetGreen }} />}
+          <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
+            Required Disciplinary Actions ({recommendations.length})
+          </Typography>
+          {recommendations.length > 0 && (
+            <Chip
+              label="Action Required"
+              size="small"
+              sx={{
+                backgroundColor: '#dc2626',
+                color: '#ffffff',
+                fontFamily,
+                fontSize: 11,
+                fontWeight: 600,
+                height: 24,
+              }}
+            />
+          )}
+          <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500, ml: 'auto', mr: 1 }}>
+            {actionsExpanded ? 'Collapse' : 'Expand'}
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ padding: 0 }}>
+          <Box
             sx={{
-              padding: 0,
-              minHeight: 48,
-              '&.Mui-expanded': {
-                minHeight: 48,
-              },
-              '& .MuiAccordionSummary-content': {
-                margin: '12px 0',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-              },
-              '& .MuiAccordionSummary-expandIconWrapper': {
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-              },
+              backgroundColor: "#f9fafb",
+              border: "1px solid #e5e7eb",
+              borderRadius: "12px",
+              padding: "16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
             }}
           >
-            <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
-              Required Disciplinary Actions ({recommendations.length})
-            </Typography>
-            {recommendations.length > 0 && (
-              <Chip
-                label="Action Required"
-                size="small"
+            {recommendations.length === 0 ? (
+              <Typography
                 sx={{
-                  backgroundColor: '#dc2626',
-                  color: '#ffffff',
                   fontFamily,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  height: 24,
+                  fontSize: 14,
+                  color: '#6b7280',
+                  textAlign: 'center',
+                  py: 2,
                 }}
-              />
-            )}
-            <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500, ml: 'auto', mr: 1 }}>
-              {actionsExpanded ? 'Collapse' : 'Expand'}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ padding: 0 }}>
-            <Box
-              sx={{
-                backgroundColor: "#f9fafb",
-                border: "1px solid #e5e7eb",
-                borderRadius: "12px",
-                padding: "16px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 2,
-              }}
-            >
-              {recommendations.map((rec) => (
+              >
+                No disciplinary actions required.
+              </Typography>
+            ) : (
+              recommendations.map((rec) => (
                 <Box
                   key={rec.employee_id}
                   sx={{
@@ -722,11 +734,11 @@ export function DisciplineNotifications({
                     Record Action
                   </Button>
                 </Box>
-              ))}
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      )}
+              ))
+            )}
+          </Box>
+        </AccordionDetails>
+      </Accordion>
 
       {/* Record Action Modal */}
       {selectedRecommendation && (
