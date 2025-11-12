@@ -469,11 +469,6 @@ export function DisciplineNotifications({
     );
   }
 
-  // Don't show if no infractions and no recommendations
-  if (weeklyInfractions.length === 0 && recommendations.length === 0) {
-    return null;
-  }
-
   return (
     <Box className={className} sx={{ mb: 3, width, maxWidth, mx: 'auto' }}>
       {/* Infractions This Week Accordion */}

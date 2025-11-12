@@ -352,6 +352,11 @@ PLASMIC.registerComponent(DashboardMetricCard, {
       type: "string",
       description: "Optional Next.js route to navigate to when the card is clicked",
     },
+    onClick: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Triggered when the metric card is clicked (overrides link behavior when provided)",
+    },
     className: "string",
   },
   importPath: "./components/CodeComponents/DashboardMetricCard",

@@ -15,6 +15,7 @@ interface DashboardMetricCardProps {
   variant: MetricVariant;
   locationId?: string;
   linkHref?: string;
+  onClick?: () => void;
   className?: string;
 }
 
@@ -65,6 +66,7 @@ export function DashboardMetricCard({
   variant,
   locationId,
   linkHref,
+  onClick,
   className,
 }: DashboardMetricCardProps) {
   const router = useRouter();
@@ -175,17 +177,25 @@ export function DashboardMetricCard({
   }, [fetchMetrics]);
 
   const handleNavigate = React.useCallback(() => {
+    if (onClick) {
+      try {
+        onClick();
+      } catch (err) {
+        console.error('[DashboardMetricCard] onClick handler threw an error:', err);
+      }
+      return;
+    }
     if (!linkHref) {
       return;
     }
     router.push(linkHref).catch((err) => {
       console.error('[DashboardMetricCard] Navigation error:', err);
     });
-  }, [linkHref, router]);
+  }, [linkHref, onClick, router]);
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (!linkHref) {
+      if (!onClick && !linkHref) {
         return;
       }
       if (event.key === 'Enter' || event.key === ' ') {
@@ -193,10 +203,10 @@ export function DashboardMetricCard({
         handleNavigate();
       }
     },
-    [handleNavigate, linkHref]
+    [handleNavigate, linkHref, onClick]
   );
 
-  const isClickable = Boolean(linkHref);
+  const isClickable = Boolean(onClick || linkHref);
   const containerClasses = [styles.root, className].filter(Boolean).join(' ');
   const cardClasses = [styles.metricItem, isClickable ? styles.clickable : '']
     .filter(Boolean)
