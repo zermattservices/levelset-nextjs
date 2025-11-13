@@ -121,7 +121,7 @@ const DatePillTextField = React.forwardRef(function DatePillTextField(
           fontFamily,
           fontSize: 13,
           fontWeight: 600,
-          color: '#111827',
+          color: '#111827 !important',
           WebkitTextFillColor: '#111827',
           padding: '0 12px',
           textAlign: 'center',
@@ -340,7 +340,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             ? leaders.find((leader) => leader.id === leaderId)?.name ?? 'Unassigned'
             : 'Unassigned';
           const pillSx = {
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 6,
@@ -353,11 +353,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             fontSize: 13,
             fontWeight: 600,
             color: leaderId ? '#374151' : '#6b7280',
-            minWidth: 160,
-            maxWidth: 220,
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
+            width: '100%',
+            boxSizing: 'border-box',
           } as const;
 
           return (
@@ -370,7 +367,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 width: '100%',
               }}
             >
-              <FormControl size="small" sx={{ minWidth: 0 }}>
+              <FormControl size="small" sx={{ width: '100%' }}>
                 <Select
                   value={leaderId}
                   onChange={handleLeaderChange(row)}
@@ -382,23 +379,25 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                       <Box
                         component="span"
                         sx={{
+                          flexGrow: 1,
+                          minWidth: 0,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
-                          display: 'inline-block',
-                          maxWidth: 160,
                         }}
                       >
                         {leaderName}
                       </Box>
-                      <ExpandMoreIcon sx={{ fontSize: 18, color: '#6b7280' }} />
+                      <ExpandMoreIcon sx={{ fontSize: 18, color: '#6b7280', ml: 1 }} />
                     </Box>
                   )}
                   sx={{
+                    width: '100%',
                     '& .MuiSelect-select': {
                       display: 'flex',
                       alignItems: 'center',
                       padding: 0,
+                      width: '100%',
                     },
                     '& fieldset': {
                       border: 'none',
@@ -411,6 +410,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                         fontFamily,
                         borderRadius: 2,
                         mt: 1,
+                        minWidth: 220,
                       },
                     },
                   }}
@@ -619,7 +619,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           const status = row.status;
           const colors = STATUS_STYLES[status] ?? STATUS_STYLES.Planned;
           const pillSx = {
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
@@ -632,11 +632,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             fontFamily,
             fontSize: 13,
             fontWeight: 700,
-            minWidth: 120,
-            maxWidth: 160,
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
+            width: '100%',
+            boxSizing: 'border-box',
           } as const;
 
           return (
@@ -649,7 +646,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 width: '100%',
               }}
             >
-              <FormControl size="small" sx={{ minWidth: 0, width: 'auto' }}>
+              <FormControl size="small" sx={{ width: '100%' }}>
                 <Select
                   value={status}
                   onChange={handleStatusChange(row)}
@@ -660,11 +657,11 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                       <Box
                         component="span"
                         sx={{
+                          flexGrow: 1,
+                          minWidth: 0,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
-                          display: 'inline-block',
-                          maxWidth: 120,
                         }}
                       >
                         {status}
@@ -673,10 +670,12 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                     </Box>
                   )}
                   sx={{
+                    width: '100%',
                     '& .MuiSelect-select': {
                       display: 'flex',
                       alignItems: 'center',
                       padding: 0,
+                      width: '100%',
                     },
                     '& fieldset': {
                       border: 'none',
