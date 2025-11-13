@@ -4,12 +4,21 @@ import {
   Box,
   CircularProgress,
   MenuItem,
-  Rating,
+  Radio,
+  RadioGroup,
   TextField,
   Typography,
 } from '@mui/material';
 import { useMobilePortal } from '../MobilePortalContext';
 import type { FormControlCallbacks } from '../types';
+
+const RATING_OPTIONS: Array<{ label: string; value: RatingValue; color: string }> = [
+  { label: 'Not Yet', value: 1, color: '#b91c1c' },
+  { label: 'On the Rise', value: 2, color: '#f59e0b' },
+  { label: 'Crushing It', value: 3, color: '#31664a' },
+];
+
+type RatingValue = 1 | 2 | 3;
 
 interface EmployeeOption {
   id: string;
@@ -47,7 +56,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
   const [selectedEmployee, setSelectedEmployee] = React.useState('');
   const [selectedPosition, setSelectedPosition] = React.useState('');
   const [labels, setLabels] = React.useState<string[]>([]);
-  const [ratings, setRatings] = React.useState<number[]>([]);
+  const [ratings, setRatings] = React.useState<Array<RatingValue | null>>([]);
 
   const [dirty, setDirty] = React.useState(false);
 
@@ -131,7 +140,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
         if (!cancelled) {
           const fetchedLabels = payload.labels ?? [];
           setLabels(fetchedLabels);
-          setRatings(Array.from({ length: fetchedLabels.length }, () => 0));
+          setRatings(Array.from({ length: fetchedLabels.length }, () => null));
         }
       } catch (err: any) {
         if (!cancelled) {
@@ -168,7 +177,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
     if (labels.length === 0 || ratings.length !== labels.length) {
       return false;
     }
-    return ratings.every((value) => value >= 1);
+    return ratings.every((value): value is RatingValue => value === 1 || value === 2 || value === 3);
   }, [labels.length, ratings, selectedEmployee, selectedLeader, selectedPosition]);
 
   React.useEffect(() => {
@@ -181,7 +190,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
       leaderId: selectedLeader,
       employeeId: selectedEmployee,
       position: selectedPosition,
-      ratings,
+      ratings: ratings.map((value) => value ?? 0),
     };
 
     const response = await fetch(`/api/mobile/${encodeURIComponent(token)}/ratings`, {
@@ -239,6 +248,15 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Typography
+        sx={{
+          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontSize: 15,
+          color: '#4b5563',
+        }}
+      >
+        Evaluate Team Members across the Big 5 competencies for the selected position.
+      </Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField
           select
@@ -316,7 +334,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                 padding: '16px 20px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 1,
+                gap: 2,
               }}
             >
               <Typography
@@ -327,30 +345,58 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                   color: '#111827',
                 }}
               >
-                Big 5 #{index + 1}
-              </Typography>
-              <Typography
-                sx={{
-                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  fontSize: 14,
-                  color: '#4b5563',
-                }}
-              >
                 {label}
               </Typography>
-              <Rating
-                value={ratings[index] || null}
-                onChange={(_event, value) => {
+              <RadioGroup
+                row
+                value={ratings[index] ?? ''}
+                onChange={(event) => {
                   markDirty();
                   setRatings((prev) => {
-                    const next = [...prev];
-                    next[index] = value ?? 0;
+                    const next = [...prev] as Array<RatingValue | null>;
+                    next[index] = Number(event.target.value) as RatingValue;
                     return next;
                   });
                 }}
-                max={5}
-                size="large"
-              />
+                sx={{ justifyContent: 'space-between', columnGap: 1 }}
+              >
+                {RATING_OPTIONS.map((option) => (
+                  <Box
+                    key={option.value}
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      flex: 1,
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: option.color,
+                        textAlign: 'center',
+                      }}
+                    >
+                      {option.label}
+                    </Typography>
+                    <Radio
+                      value={option.value}
+                      sx={{
+                        color: option.color,
+                        '&.Mui-checked': {
+                          color: option.color,
+                        },
+                        '& .MuiSvgIcon-root': {
+                          fontSize: 26,
+                        },
+                      }}
+                    />
+                  </Box>
+                ))}
+              </RadioGroup>
             </Box>
           ))}
         </Box>

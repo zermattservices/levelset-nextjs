@@ -4,6 +4,8 @@ export interface SubmissionSummary {
   form: MobileFormKey;
   employeeName: string;
   detail: string;
+  action?: string;
+  points?: number | null;
 }
 
 export interface FormControlCallbacks {

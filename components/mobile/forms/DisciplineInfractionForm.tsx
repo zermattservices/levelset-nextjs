@@ -117,41 +117,45 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     };
   }, [controls, resetDirty, token]);
 
+  const leaderOptions = React.useMemo(() => (leaders.length ? leaders : employees), [leaders, employees]);
+
   const selectedEmployeeOption = React.useMemo(
     () => employees.find((item) => item.id === selectedEmployee),
     [employees, selectedEmployee]
   );
 
   const selectedLeaderOption = React.useMemo(
-    () => leaders.find((item) => item.id === selectedLeader) ?? employees.find((item) => item.id === selectedLeader),
-    [employees, leaders, selectedLeader]
+    () => leaderOptions.find((item) => item.id === selectedLeader),
+    [leaderOptions, selectedLeader]
+  );
+
+  const selectedInfractionOption = React.useMemo(
+    () => infractionOptions.find((item) => item.id === selectedInfraction),
+    [infractionOptions, selectedInfraction]
   );
 
   React.useEffect(() => {
-    if (selectedInfraction) {
-      const option = infractionOptions.find((item) => item.id === selectedInfraction);
-      setPoints(option?.points ?? null);
+    if (selectedInfractionOption) {
+      setPoints(selectedInfractionOption.points ?? null);
     } else {
       setPoints(null);
     }
-  }, [infractionOptions, selectedInfraction]);
+  }, [selectedInfractionOption]);
 
   React.useEffect(() => {
-    if (selectedLeaderOption) {
-      setLeaderSignature(selectedLeaderOption.name);
-    } else {
+    if (!selectedLeader) {
       setLeaderSignature('');
     }
-  }, [selectedLeaderOption]);
+  }, [selectedLeader]);
 
   const isComplete = React.useMemo(() => {
     if (!selectedLeader || !selectedEmployee || !selectedInfraction) {
       return false;
     }
-    if (!leaderSignature || leaderSignature.trim().length === 0) {
+    if (!leaderSignature.trim()) {
       return false;
     }
-    if (acknowledged && (!teamSignature || teamSignature.trim().length === 0)) {
+    if (acknowledged && !teamSignature.trim()) {
       return false;
     }
     return true;
@@ -198,16 +202,15 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     resetDirty();
     controls.completeSubmission({
       form: 'infractions',
-      employeeName: result.employeeName ?? selectedEmployeeOption?.name ?? 'Team member',
-      detail: result.action ?? 'Discipline infraction recorded',
+      employeeName: `Employee: ${selectedEmployeeOption?.name ?? 'Team member'}`,
+      detail: selectedInfractionOption?.action ?? 'Discipline infraction recorded',
+      points: selectedInfractionOption?.points ?? 0,
     });
-  }, [acknowledged, controls, leaderSignature, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedInfraction, selectedLeader, teamSignature, token]);
+  }, [acknowledged, controls, leaderSignature, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedInfraction, selectedInfractionOption?.action, selectedInfractionOption?.points, selectedLeader, teamSignature, token]);
 
   React.useEffect(() => {
     controls.setSubmitHandler(() => submit());
   }, [controls, submit]);
-
-  const leaderOptions = leaders.length ? leaders : employees;
 
   if (loading) {
     return (
@@ -227,6 +230,15 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Typography
+        sx={{
+          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontSize: 15,
+          color: '#4b5563',
+        }}
+      >
+        Document a discipline incident based on the Accountability Points System.
+      </Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField
           select
@@ -256,7 +268,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             setSelectedEmployee(event.target.value);
             markDirty();
           }}
-          helperText="Who is involved?"
+          helperText="Who are you issuing an infraction for?"
         >
           <MenuItem value="">Select team member</MenuItem>
           {employees.map((employee) => (
@@ -290,7 +302,11 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           value={points ?? 0}
           fullWidth
           InputProps={{ readOnly: true }}
-          helperText="Automatically populated from the infraction rubric"
+          sx={{
+            '& .MuiInputBase-root': {
+              backgroundColor: '#f3f4f6',
+            },
+          }}
         />
 
         <FormControlLabel
@@ -301,9 +317,20 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                 setAcknowledged(event.target.checked);
                 markDirty();
               }}
+              sx={{
+                color: '#31664a',
+                '&.Mui-checked': {
+                  color: '#31664a',
+                },
+              }}
             />
           }
-          label="Team member was present and acknowledged the infraction"
+          label="Team Member has been made aware of this infraction"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            },
+          }}
         />
 
         <TextField
@@ -325,7 +352,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             setLeaderSignature(event.target.value);
             markDirty();
           }}
-          placeholder="Full name"
+          placeholder={selectedLeaderOption?.name ?? 'Full name'}
           fullWidth
           helperText="Required to confirm this record."
         />

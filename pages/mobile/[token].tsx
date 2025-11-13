@@ -27,12 +27,12 @@ const FORM_CONFIG: Record<
 > = {
   ratings: {
     title: 'Positional Ratings',
-    description: 'Evaluate teammates across the Big 5 competencies for the selected position.',
-    submitLabel: 'Submit Ratings',
+    description: 'Evaluate Team Members across the Big 5 competencies for the selected position.',
+    submitLabel: 'Submit Rating',
   },
   infractions: {
     title: 'Discipline Infraction',
-    description: 'Document a discipline incident and capture acknowledgements in one place.',
+    description: 'Document a discipline incident based on the Accountability Points System.',
     submitLabel: 'Record Infraction',
   },
 };
@@ -46,9 +46,54 @@ const cards: Array<{ key: MobileFormKey; title: string; description: string }> =
   {
     key: 'infractions',
     title: 'Log a Discipline Infraction',
-    description: 'Document incidents, acknowledgement status, and signatures on the spot.',
+    description: 'Document infractions for Team Members according to the Accountability Points System.',
   },
 ];
+
+function RatingScaleHint() {
+  return (
+    <Box
+      sx={{
+        marginTop: 2,
+        padding: '12px 16px',
+        borderRadius: '14px',
+        border: '1px solid #e5e7eb',
+        backgroundColor: '#ffffff',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1,
+      }}
+    >
+      <Typography
+        sx={{
+          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontSize: 14,
+          fontWeight: 600,
+          color: '#111827',
+        }}
+      >
+        Rating Scale
+      </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box sx={{ backgroundColor: '#b91c1c', borderRadius: '8px', padding: '8px 12px' }}>
+          <Typography sx={{ fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', fontSize: 12, fontWeight: 600, color: '#ffffff' }}>
+            Not Yet = 1.0 — 1.49
+          </Typography>
+        </Box>
+        <Box sx={{ backgroundColor: '#f59e0b', borderRadius: '8px', padding: '8px 12px' }}>
+          <Typography sx={{ fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', fontSize: 12, fontWeight: 600, color: '#111827' }}>
+            On the Rise = 1.50 — 2.74
+          </Typography>
+        </Box>
+        <Box sx={{ backgroundColor: '#31664a', borderRadius: '8px', padding: '8px 12px' }}>
+          <Typography sx={{ fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', fontSize: 12, fontWeight: 600, color: '#ffffff' }}>
+            Crushing It = 2.75 — 3.0
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
 
 function MobilePortalPage({ location, token }: MobilePortalPageProps) {
   const [activeForm, setActiveForm] = React.useState<MobileFormKey | null>(null);
@@ -93,7 +138,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
       setSubmitting(true);
       (maybePromise as Promise<unknown>)
         .catch(() => {
-          /* errors handled within the form */
+          /* handled in form */
         })
         .finally(() => setSubmitting(false));
     }
@@ -123,6 +168,93 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
 
   const activeConfig = activeForm ? FORM_CONFIG[activeForm] : null;
 
+  const summaryCard = summary ? (
+    <Box
+      sx={{
+        backgroundColor: '#ffffff',
+        borderRadius: '16px',
+        border: '1px solid #d1fae5',
+        padding: '24px 28px',
+        textAlign: 'center',
+        boxShadow: '0 16px 32px rgba(49, 102, 74, 0.12)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+      }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Image
+          src="/logos/Levelset no margin.png"
+          alt="Levelset"
+          width={140}
+          height={48}
+          priority
+          style={{ width: 'min(140px, 50vw)', height: 'auto' }}
+        />
+      </Box>
+      <Typography
+        sx={{
+          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontSize: 22,
+          fontWeight: 700,
+          color: '#111827',
+        }}
+      >
+        Submission recorded
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontSize: 16,
+          color: '#1f2937',
+        }}
+      >
+        {summary.employeeName}
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontSize: 15,
+          color: '#4b5563',
+        }}
+      >
+        {summary.detail}
+      </Typography>
+      {summary.form === 'infractions' && typeof summary.points === 'number' && (
+        <Box
+          sx={{
+            marginTop: 2,
+            alignSelf: 'center',
+            borderRadius: '16px',
+            padding: '16px 28px',
+            backgroundColor:
+              summary.points < 0 ? '#d1fae5' : summary.points > 0 ? '#fee2e2' : '#f3f4f6',
+            color: summary.points < 0 ? '#065f46' : summary.points > 0 ? '#991b1b' : '#374151',
+            fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontWeight: 700,
+            fontSize: 20,
+          }}
+        >
+          {summary.points > 0 ? `+${summary.points}` : summary.points} pts
+        </Box>
+      )}
+      <Button
+        variant="contained"
+        onClick={() => setSummary(null)}
+        sx={{
+          marginTop: '12px',
+          backgroundColor: '#31664a',
+          textTransform: 'none',
+          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontWeight: 600,
+          '&:hover': { backgroundColor: '#264d38' },
+        }}
+      >
+        Back to home
+      </Button>
+    </Box>
+  ) : null;
+
   return (
     <MobilePortalProvider
       value={{
@@ -138,6 +270,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           name="description"
           content="Capture positional ratings and discipline infractions quickly from any device."
         />
+        <link rel="icon" href="/Levelset Icon Non Trans.png" />
       </Head>
       <Box
         sx={{
@@ -149,100 +282,56 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           alignItems: 'center',
         }}
       >
-        <Box sx={{ width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: 480,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 3,
+            px: 2,
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: 1 }}>
             <Image
-              src="/Levelset Horizontal Lockup.png"
+              src="/logos/Levelset no margin.png"
               alt="Levelset"
-              width={200}
-              height={60}
+              width={220}
+              height={72}
               priority
-              style={{ height: 'auto', width: 'auto' }}
+              style={{ width: 'min(220px, 65vw)', height: 'auto' }}
             />
           </Box>
 
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography
-              sx={{
-                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                fontSize: 24,
-                fontWeight: 700,
-                color: '#111827',
-              }}
-            >
-              {location.name ?? 'Levelset Mobile'}
-            </Typography>
-            {location.location_number && (
+          {!summary && (
+            <Box sx={{ textAlign: 'center' }}>
               <Typography
                 sx={{
                   fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  fontSize: 14,
-                  color: '#6b7280',
-                  marginTop: '4px',
-                }}
-              >
-                Store #{location.location_number}
-              </Typography>
-            )}
-          </Box>
-
-          {summary ? (
-            <Box
-              sx={{
-                backgroundColor: '#ffffff',
-                borderRadius: '16px',
-                border: '1px solid #d1fae5',
-                padding: '24px 28px',
-                textAlign: 'center',
-                boxShadow: '0 16px 32px rgba(49, 102, 74, 0.12)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-              }}
-            >
-              <Typography
-                sx={{
-                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: 700,
                   color: '#111827',
                 }}
               >
-                Submission recorded
+                {location.name ?? 'Levelset Mobile'}
               </Typography>
-              <Typography
-                sx={{
-                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  fontSize: 16,
-                  color: '#1f2937',
-                }}
-              >
-                {summary.employeeName}
-              </Typography>
-              <Typography
-                sx={{
-                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  fontSize: 15,
-                  color: '#4b5563',
-                }}
-              >
-                {summary.detail}
-              </Typography>
-              <Button
-                variant="contained"
-                onClick={() => setSummary(null)}
-                sx={{
-                  marginTop: '12px',
-                  backgroundColor: '#31664a',
-                  textTransform: 'none',
-                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  fontWeight: 600,
-                  '&:hover': { backgroundColor: '#264d38' },
-                }}
-              >
-                Back to home
-              </Button>
+              {location.location_number && (
+                <Typography
+                  sx={{
+                    fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                    fontSize: 14,
+                    color: '#6b7280',
+                    marginTop: '4px',
+                  }}
+                >
+                  Store #{location.location_number}
+                </Typography>
+              )}
             </Box>
+          )}
+
+          {summary ? (
+            summaryCard
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {cards.map((card) => (
@@ -251,7 +340,9 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                   title={card.title}
                   description={card.description}
                   onClick={() => handleOpenForm(card.key)}
-                />
+                >
+                  {card.key === 'ratings' && <RatingScaleHint />}
+                </HomeCard>
               ))}
             </Box>
           )}

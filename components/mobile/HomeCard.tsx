@@ -5,9 +5,10 @@ interface HomeCardProps {
   title: string;
   description: string;
   onClick?: () => void;
+  children?: React.ReactNode;
 }
 
-export function HomeCard({ title, description, onClick }: HomeCardProps) {
+export function HomeCard({ title, description, onClick, children }: HomeCardProps) {
   return (
     <Box
       role="button"
@@ -57,6 +58,7 @@ export function HomeCard({ title, description, onClick }: HomeCardProps) {
       >
         {description}
       </Typography>
+      {children}
     </Box>
   );
 }

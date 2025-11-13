@@ -1,0 +1,16 @@
+{
+  "name": "Levelset Mobile Portal",
+  "short_name": "Levelset",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#31664a",
+  "icons": [
+    {
+      "src": "/Levelset Icon Non Trans.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

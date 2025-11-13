@@ -114,6 +114,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     infractionId: inserted?.id ?? null,
     employeeName: employeeRecord?.full_name ?? null,
     action: rubric.action,
+    points: rubric.points ?? 0,
   });
 }
 
