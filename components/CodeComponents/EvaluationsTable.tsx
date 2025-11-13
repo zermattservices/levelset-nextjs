@@ -87,59 +87,39 @@ interface LeaderOption {
 
 const LEADER_ROLES = ['Team Lead', 'Director', 'Executive', 'Operator'];
 
-const DatePillTextField = React.forwardRef(function DatePillTextField(
+const CustomDateTextField = React.forwardRef(function CustomDateTextField(
   props: React.ComponentProps<typeof TextField>,
   ref: React.Ref<HTMLInputElement>
 ) {
   return (
     <TextField
       {...props}
-      inputRef={ref}
-      placeholder="MM/DD/YY"
+      ref={ref}
       size="small"
-      InputLabelProps={{ shrink: false }}
+      fullWidth
       sx={{
-        width: 132,
-        '& .MuiOutlinedInput-root': {
-          borderRadius: 14,
-          backgroundColor: '#f3f4f6',
-          fontFamily,
-          fontSize: 14,
-          height: 28,
-          paddingRight: '36px',
-          '& fieldset': {
-            border: 'none',
-          },
-          '&:hover fieldset': {
-            border: 'none',
-          },
-          '&.Mui-focused fieldset': {
-            border: 'none',
-          },
-        },
         '& .MuiInputBase-input': {
           fontFamily,
-          fontSize: 13,
-          fontWeight: 600,
-          color: '#111827 !important',
-          WebkitTextFillColor: '#111827',
-          padding: '0 12px',
-          textAlign: 'center',
-          height: 28,
-          lineHeight: '28px',
+          fontSize: 14,
+          padding: '10px 14px',
         },
-        '& .MuiInputBase-input::placeholder': {
-          color: '#9ca3af',
-          opacity: 1,
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: '#e5e7eb',
+        },
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+          borderColor: '#d1d5db',
+        },
+        '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderColor: levelsetGreen,
+          borderWidth: '2px',
         },
         '& .MuiIconButton-root': {
-          padding: 0,
-          marginRight: 6,
-          color: '#6b7280',
+          padding: '6px',
           '& .MuiSvgIcon-root': {
-            fontSize: 18,
+            fontSize: '1rem',
           },
         },
+        ...props.sx,
       }}
     />
   );
@@ -339,24 +319,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           const leaderName = leaderId
             ? leaders.find((leader) => leader.id === leaderId)?.name ?? 'Unassigned'
             : 'Unassigned';
-          const pillSx = {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 6,
-            padding: '0 12px',
-            minHeight: 28,
-            height: 28,
-            borderRadius: 14,
-            backgroundColor: '#f3f4f6',
-            fontFamily,
-            fontSize: 13,
-            fontWeight: 600,
-            color: leaderId ? '#374151' : '#6b7280',
-            width: '100%',
-            boxSizing: 'border-box',
-          } as const;
-
           return (
             <Box
               sx={{
@@ -365,6 +327,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 justifyContent: 'center',
                 height: '100%',
                 width: '100%',
+                paddingX: 1,
               }}
             >
               <FormControl size="small" sx={{ width: '100%' }}>
@@ -375,8 +338,27 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   displayEmpty
                   IconComponent={() => null}
                   renderValue={() => (
-                    <Box sx={pillSx}>
-                      <Box
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: '#f3f4f6',
+                        color: leaderId ? '#374151' : '#6b7280',
+                        borderRadius: 14,
+                        minHeight: 28,
+                        height: 28,
+                        padding: '0 12px',
+                        boxSizing: 'border-box',
+                        width: '100%',
+                        maxWidth: '100%',
+                        fontFamily,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        gap: 6,
+                      }}
+                    >
+                      <Typography
                         component="span"
                         sx={{
                           flexGrow: 1,
@@ -387,8 +369,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                         }}
                       >
                         {leaderName}
-                      </Box>
-                      <ExpandMoreIcon sx={{ fontSize: 18, color: '#6b7280', ml: 1 }} />
+                      </Typography>
+                      <ExpandMoreIcon sx={{ fontSize: 18, color: '#6b7280' }} />
                     </Box>
                   )}
                   sx={{
@@ -416,13 +398,51 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   }}
                 >
                   <MenuItem value="">
-                    <Box sx={pillSx}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: '#f3f4f6',
+                        color: '#6b7280',
+                        borderRadius: 14,
+                        minHeight: 28,
+                        height: 28,
+                        padding: '0 12px',
+                        boxSizing: 'border-box',
+                        width: '100%',
+                        maxWidth: '100%',
+                        fontFamily,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        gap: 6,
+                      }}
+                    >
                       <span>Unassigned</span>
                     </Box>
                   </MenuItem>
                   {leaders.map((leader) => (
                     <MenuItem key={leader.id} value={leader.id}>
-                      <Box sx={pillSx}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          backgroundColor: '#f3f4f6',
+                          color: '#374151',
+                          borderRadius: 14,
+                          minHeight: 28,
+                          height: 28,
+                          padding: '0 12px',
+                          boxSizing: 'border-box',
+                          width: '100%',
+                          maxWidth: '100%',
+                          fontFamily,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          gap: 6,
+                        }}
+                      >
                         <span>{leader.name}</span>
                       </Box>
                     </MenuItem>
@@ -498,6 +518,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 justifyContent: 'center',
                 height: '100%',
                 width: '100%',
+                paddingX: 1,
               }}
             >
               <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -508,19 +529,14 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   format="MM/dd/yyyy"
                   enableAccessibleFieldDOMStructure={false}
                   slots={{
-                    textField: DatePillTextField,
+                    textField: CustomDateTextField,
                   }}
                   slotProps={{
                     openPickerButton: {
                       sx: {
-                        color: '#6b7280',
-                        padding: 0,
-                        mr: 0,
-                        '& .MuiSvgIcon-root': {
-                          fontSize: 18,
-                        },
+                        color: levelsetGreen,
                         '&:hover': {
-                          backgroundColor: 'transparent',
+                          backgroundColor: 'rgba(49, 102, 74, 0.08)',
                         },
                       },
                     },
@@ -618,24 +634,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           const disabled = updatingIds.has(row.id);
           const status = row.status;
           const colors = STATUS_STYLES[status] ?? STATUS_STYLES.Planned;
-          const pillSx = {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-            padding: '0 12px',
-            minHeight: 28,
-            height: 28,
-            borderRadius: 14,
-            backgroundColor: colors.bg,
-            color: colors.color,
-            fontFamily,
-            fontSize: 13,
-            fontWeight: 700,
-            width: '100%',
-            boxSizing: 'border-box',
-          } as const;
-
           return (
             <Box
               sx={{
@@ -644,6 +642,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 justifyContent: 'center',
                 height: '100%',
                 width: '100%',
+                paddingX: 1,
               }}
             >
               <FormControl size="small" sx={{ width: '100%' }}>
@@ -653,8 +652,28 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   disabled={disabled}
                   IconComponent={() => null}
                   renderValue={() => (
-                    <Box component="span" sx={pillSx}>
-                      <Box
+                    <Box
+                      component="span"
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: colors.bg,
+                        color: colors.color,
+                        borderRadius: 14,
+                        minHeight: 28,
+                        height: 28,
+                        padding: '0 12px',
+                        boxSizing: 'border-box',
+                        width: '100%',
+                        maxWidth: '100%',
+                        fontFamily,
+                        fontSize: 13,
+                        fontWeight: 700,
+                        gap: 6,
+                      }}
+                    >
+                      <Typography
                         component="span"
                         sx={{
                           flexGrow: 1,
@@ -665,7 +684,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                         }}
                       >
                         {status}
-                      </Box>
+                      </Typography>
                       <ExpandMoreIcon sx={{ fontSize: 18 }} />
                     </Box>
                   )}
@@ -696,7 +715,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                     const menuColors = STATUS_STYLES[statusKey] ?? STATUS_STYLES.Planned;
                     return (
                       <MenuItem key={statusKey} value={statusKey}>
-                        <Box sx={{ ...pillSx, backgroundColor: menuColors.bg, color: menuColors.color }}>
+                        <Box sx={{ ...colors, backgroundColor: menuColors.bg, color: menuColors.color }}>
                           <span>{statusKey}</span>
                         </Box>
                       </MenuItem>

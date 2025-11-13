@@ -731,8 +731,19 @@ function EmployeesTableView({
         headerName: "Employee",
         flex: 1.4,
         minWidth: 220,
+        headerAlign: "left",
+        align: "left",
         renderCell: (params) => (
-          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: "#111827" }}>
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 600,
+              color: "#111827",
+              width: "100%",
+              textAlign: "left",
+            }}
+          >
             {params.value}
           </Typography>
         ),

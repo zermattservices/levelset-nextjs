@@ -73,6 +73,17 @@ async function populateRecommendations(orgId?: string, locationId?: string) {
     const { data: existingActions, error: actionsError } = await actionsQuery;
     if (actionsError) throw actionsError;
 
+    const rubricById = new Map<string, any>();
+    const rubricByAction = new Map<string, any>();
+    for (const rubric of rubrics ?? []) {
+      if (rubric.id) {
+        rubricById.set(rubric.id, rubric);
+      }
+      if (rubric.action) {
+        rubricByAction.set(rubric.action.toLowerCase(), rubric);
+      }
+    }
+
     // Clear pending recommendations
     let deleteQuery = supabase
       .from('recommended_disc_actions')
@@ -111,13 +122,17 @@ async function populateRecommendations(orgId?: string, locationId?: string) {
 
       const highestThreshold = crossedThresholds[0];
 
-      // Check if action already recorded
-      const hasAction = existingActions?.some(action =>
-        action.employee_id === employee.id &&
-        (action.action_id === highestThreshold.id || action.action === highestThreshold.action)
-      );
+      const employeeActions = existingActions?.filter(action => action.employee_id === employee.id) || [];
+      const highestRecordedThreshold = employeeActions.reduce((max, action) => {
+        const rubric = (action.action_id && rubricById.get(action.action_id))
+          || (action.action ? rubricByAction.get(String(action.action).toLowerCase()) : undefined);
+        if (!rubric) return max;
+        return Math.max(max, rubric.points_threshold ?? 0);
+      }, 0);
 
-      if (hasAction) continue;
+      if ((highestRecordedThreshold || 0) >= (highestThreshold.points_threshold ?? 0)) {
+        continue;
+      }
 
       // Add to recommendations
       recommendationsToInsert.push({
