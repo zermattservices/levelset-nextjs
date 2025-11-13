@@ -41,6 +41,8 @@ export interface Infraction {
   acknowledgement?: string; // Status: "Notified", "Notified not present", etc.
   ack_bool?: boolean; // Boolean version: true if notified, false if not notified
   notes?: string;
+  leader_signature?: string | null;
+  team_member_signature?: string | null;
   created_at?: string;
 }
 
