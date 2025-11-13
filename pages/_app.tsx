@@ -23,9 +23,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     <PlasmicRootProvider Head={Head}>
       <LocationProvider>
         <Head>
-          <link rel="icon" href="/Levelset Icon Non Trans.png" />
-          <link rel="shortcut icon" href="/Levelset Icon Non Trans.png" />
-          <link rel="apple-touch-icon" href="/Levelset Icon Non Trans.png" />
+          <link rel="icon" href="/favicon.ico" />
+          <link rel="shortcut icon" href="/favicon.ico" />
+          <link rel="apple-touch-icon" href="/favicon.ico" />
 
           {/* Social Sharing Meta Tags */}
           <meta property="og:title" content="Levelset App" />

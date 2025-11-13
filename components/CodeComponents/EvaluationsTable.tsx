@@ -122,6 +122,7 @@ const DatePillTextField = React.forwardRef(function DatePillTextField(
           fontSize: 13,
           fontWeight: 600,
           color: '#111827',
+          WebkitTextFillColor: '#111827',
           padding: '0 12px',
           textAlign: 'center',
           height: 28,
@@ -341,8 +342,9 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           const pillSx = {
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '0 12px',
+            justifyContent: 'space-between',
+            gap: 6,
+            padding: '0 10px',
             minHeight: 28,
             height: 28,
             borderRadius: 14,
@@ -351,6 +353,10 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             fontSize: 13,
             fontWeight: 600,
             color: leaderId ? '#374151' : '#6b7280',
+            maxWidth: 180,
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
           } as const;
 
           return (
@@ -363,7 +369,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 width: '100%',
               }}
             >
-              <FormControl size="small" sx={{ minWidth: 0, width: 'auto' }}>
+              <FormControl size="small" sx={{ minWidth: 0 }}>
                 <Select
                   value={leaderId}
                   onChange={handleLeaderChange(row)}
@@ -372,7 +378,16 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   IconComponent={() => null}
                   renderValue={() => (
                     <Box sx={pillSx}>
-                      <span>{leaderName}</span>
+                      <Box
+                        component="span"
+                        sx={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {leaderName}
+                      </Box>
                       <ExpandMoreIcon sx={{ fontSize: 18, color: '#6b7280' }} />
                     </Box>
                   )}
@@ -595,16 +610,21 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           const pillSx = {
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '0 12px',
+            justifyContent: 'center',
+            gap: 6,
+            padding: '0 10px',
             minHeight: 28,
             height: 28,
             borderRadius: 14,
-            fontFamily,
-            fontSize: 13,
-            fontWeight: 600,
             backgroundColor: colors.bg,
             color: colors.color,
+            fontFamily,
+            fontSize: 13,
+            fontWeight: 700,
+            maxWidth: 150,
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
           } as const;
 
           return (
@@ -624,9 +644,18 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   disabled={disabled}
                   IconComponent={() => null}
                   renderValue={() => (
-                    <Box sx={pillSx}>
-                      <span>{status}</span>
-                      <ExpandMoreIcon sx={{ fontSize: 18, color: colors.color }} />
+                    <Box component="span" sx={pillSx}>
+                      <Box
+                        component="span"
+                        sx={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {status}
+                      </Box>
+                      <ExpandMoreIcon sx={{ fontSize: 18 }} />
                     </Box>
                   )}
                   sx={{
