@@ -344,7 +344,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 6,
-            padding: '0 10px',
+            padding: '0 12px',
             minHeight: 28,
             height: 28,
             borderRadius: 14,
@@ -353,7 +353,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             fontSize: 13,
             fontWeight: 600,
             color: leaderId ? '#374151' : '#6b7280',
-            maxWidth: 180,
+            minWidth: 160,
+            maxWidth: 220,
             overflow: 'hidden',
             whiteSpace: 'nowrap',
             textOverflow: 'ellipsis',
@@ -384,6 +385,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
+                          display: 'inline-block',
+                          maxWidth: 160,
                         }}
                       >
                         {leaderName}
@@ -528,6 +531,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                           borderRadius: 16,
                           boxShadow: '0px 12px 32px rgba(17, 24, 39, 0.15)',
                           padding: 1,
+                          border: '1px solid #e5e7eb',
                         },
                         '& .MuiTypography-root': {
                           fontFamily,
@@ -573,9 +577,16 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                         },
                         '& .MuiIconButton-root': {
                           color: `${levelsetGreen} !important`,
+                          borderRadius: 10,
                           '&:hover': {
                             backgroundColor: 'rgba(49, 102, 74, 0.08)',
                           },
+                        },
+                        '& .MuiPickersCalendarHeader-root': {
+                          marginBottom: 0,
+                        },
+                        '& .MuiPickersArrowSwitcher-root': {
+                          gap: 0,
                         },
                       },
                     },
@@ -612,7 +623,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
-            padding: '0 10px',
+            padding: '0 12px',
             minHeight: 28,
             height: 28,
             borderRadius: 14,
@@ -621,7 +632,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             fontFamily,
             fontSize: 13,
             fontWeight: 700,
-            maxWidth: 150,
+            minWidth: 120,
+            maxWidth: 160,
             overflow: 'hidden',
             whiteSpace: 'nowrap',
             textOverflow: 'ellipsis',
@@ -651,6 +663,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
+                          display: 'inline-block',
+                          maxWidth: 120,
                         }}
                       >
                         {status}
