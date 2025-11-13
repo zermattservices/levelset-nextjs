@@ -45,6 +45,16 @@ const MOCK_OWNER_EMAIL = 'john.smith@mocksmithco.test';
 const ratingsLimitArg = process.argv.find((arg) => arg.startsWith('--ratings-limit='));
 const RATINGS_LIMIT = ratingsLimitArg ? parseInt(ratingsLimitArg.split('=')[1] || '900', 10) : 900;
 
+function generateMobileToken(): string {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let token = '';
+  for (let i = 0; i < 12; i += 1) {
+    const index = Math.floor(Math.random() * alphabet.length);
+    token += alphabet[index];
+  }
+  return token;
+}
+
 const ROLE_TEMPLATES: Record<string, Array<{ first: string; last: string }>> = {
   Operator: [{ first: 'John', last: 'Smith' }],
   Executive: [
@@ -208,7 +218,7 @@ async function ensureOrg(): Promise<string> {
 async function ensureLocation(orgId: string): Promise<string> {
   const { data: existing, error: existingError } = await supabase
     .from('locations')
-    .select('id, name, location_number')
+    .select('id, name, location_number, location_mobile_token')
     .eq('org_id', orgId)
     .eq('location_number', MOCK_LOCATION_NUMBER)
     .maybeSingle();
@@ -219,6 +229,15 @@ async function ensureLocation(orgId: string): Promise<string> {
 
   if (existing?.id) {
     console.log(`ℹ️  Reusing existing location "${existing.name}" (${existing.id})`);
+    if (!existing.location_mobile_token) {
+      const { error: updateTokenError } = await supabase
+        .from('locations')
+        .update({ location_mobile_token: generateMobileToken() })
+        .eq('id', existing.id);
+      if (updateTokenError) {
+        throw updateTokenError;
+      }
+    }
     return existing.id;
   }
 
@@ -238,6 +257,7 @@ async function ensureLocation(orgId: string): Promise<string> {
     org_id: orgId,
     name: MOCK_LOCATION_NAME,
     location_number: MOCK_LOCATION_NUMBER,
+    location_mobile_token: generateMobileToken(),
   };
 
   if (referenceLocation) {

@@ -7,6 +7,7 @@ interface LocationRecord {
   location_number: string | null;
   name?: string | null;
   org_id?: string | null;
+  location_mobile_token?: string | null;
 }
 
 interface LocationContextValue {
@@ -14,6 +15,7 @@ interface LocationContextValue {
   selectedLocationId: string | null;
   selectedLocationNumber: string | null;
   selectedLocationOrgId: string | null;
+  selectedLocationMobileToken: string | null;
   loading: boolean;
   error: string | null;
   selectLocation: (locationId: string) => void;
@@ -50,7 +52,7 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
   if (appUser?.location_id) {
     const { data: location, error: locationError } = await supabase
       .from('locations')
-      .select('id, location_number, name, org_id')
+      .select('id, location_number, name, org_id, location_mobile_token')
       .eq('id', appUser.location_id)
       .maybeSingle();
 
@@ -66,7 +68,7 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
 
   const query = supabase
     .from('locations')
-    .select('id, location_number, name, org_id')
+    .select('id, location_number, name, org_id, location_mobile_token')
     .order('location_number', { ascending: true });
 
   if (appUser?.org_id) {
@@ -90,6 +92,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
   const [selectedLocationId, setSelectedLocationId] = React.useState<string | null>(null);
   const [selectedLocationNumber, setSelectedLocationNumber] = React.useState<string | null>(null);
   const [selectedLocationOrgId, setSelectedLocationOrgId] = React.useState<string | null>(null);
+  const [selectedLocationMobileToken, setSelectedLocationMobileToken] = React.useState<string | null>(null);
   const [userId, setUserId] = React.useState<string | null>(null);
   const userIdRef = React.useRef<string | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -112,6 +115,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
         setSelectedLocationId(null);
         setSelectedLocationNumber(null);
         setSelectedLocationOrgId(null);
+        setSelectedLocationMobileToken(null);
         return;
       }
 
@@ -121,6 +125,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
           setSelectedLocationId(match.id);
           setSelectedLocationNumber(match.location_number ?? null);
           setSelectedLocationOrgId(match.org_id ?? null);
+          setSelectedLocationMobileToken(match.location_mobile_token ?? null);
           return;
         }
       }
@@ -129,6 +134,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       setSelectedLocationId(null);
       setSelectedLocationNumber(null);
       setSelectedLocationOrgId(null);
+      setSelectedLocationMobileToken(null);
     },
     []
   );
@@ -140,8 +146,8 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     try {
       if (inEditor) {
         const sampleLocations: LocationRecord[] = [
-          { id: '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', location_number: '04056', name: 'Buda' },
-          { id: 'c0d86fa1-0000-0000-0000-000000000000', location_number: '05508', name: 'Preview Location' },
+          { id: '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', location_number: '04056', name: 'Buda', location_mobile_token: 'SAMPLETOKEN01' },
+          { id: 'c0d86fa1-0000-0000-0000-000000000000', location_number: '05508', name: 'Preview Location', location_mobile_token: 'SAMPLETOKEN02' },
         ];
         if (!isMountedRef.current) {
           return;
@@ -151,6 +157,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
         userIdRef.current = 'plasmic-editor';
         setSelectedLocationId(sampleLocations[0].id);
         setSelectedLocationNumber(sampleLocations[0].location_number ?? null);
+        setSelectedLocationMobileToken(sampleLocations[0].location_mobile_token ?? null);
         setLoading(false);
         return;
       }
@@ -196,6 +203,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
         }
         setSelectedLocationId(null);
         setSelectedLocationNumber(null);
+        setSelectedLocationMobileToken(null);
       }
       loadLocations();
     });
@@ -217,6 +225,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       setSelectedLocationId(match.id);
       setSelectedLocationNumber(match.location_number ?? null);
       setSelectedLocationOrgId(match.org_id ?? null);
+      setSelectedLocationMobileToken(match.location_mobile_token ?? null);
 
       if (typeof window !== 'undefined') {
         const key = buildStorageKey(userId);
@@ -230,6 +239,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     setSelectedLocationId(null);
     setSelectedLocationNumber(null);
     setSelectedLocationOrgId(null);
+    setSelectedLocationMobileToken(null);
 
     if (typeof window !== 'undefined') {
       const key = buildStorageKey(userId);
@@ -243,12 +253,13 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       selectedLocationId,
       selectedLocationNumber,
       selectedLocationOrgId,
+      selectedLocationMobileToken,
       loading,
       error,
       selectLocation,
       clearSelection,
     }),
-    [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber, selectedLocationOrgId]
+    [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken]
   );
 
   const plasmicData = React.useMemo(() => ({
@@ -256,9 +267,10 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     selectedLocationId,
     selectedLocationNumber,
     selectedLocationOrgId,
+    selectedLocationMobileToken,
     loading,
     error,
-  }), [error, loading, locations, selectedLocationId, selectedLocationNumber, selectedLocationOrgId]);
+  }), [error, loading, locations, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken]);
 
   if (typeof globalThis !== 'undefined') {
     (globalThis as any).locationContext = plasmicData;
