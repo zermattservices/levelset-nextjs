@@ -203,8 +203,11 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     controls.completeSubmission({
       form: 'infractions',
       employeeName: `Employee: ${selectedEmployeeOption?.name ?? 'Team member'}`,
-      detail: selectedInfractionOption?.action ?? 'Discipline infraction recorded',
-      points: selectedInfractionOption?.points ?? 0,
+      detail: result?.action ?? selectedInfractionOption?.action ?? 'Discipline infraction recorded',
+      points:
+        typeof result?.points === 'number'
+          ? result.points
+          : selectedInfractionOption?.points ?? 0,
     });
   }, [acknowledged, controls, leaderSignature, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedInfraction, selectedInfractionOption?.action, selectedInfractionOption?.points, selectedLeader, teamSignature, token]);
 
@@ -230,15 +233,6 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Typography
-        sx={{
-          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-          fontSize: 15,
-          color: '#4b5563',
-        }}
-      >
-        Document a discipline incident based on the Accountability Points System.
-      </Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField
           select

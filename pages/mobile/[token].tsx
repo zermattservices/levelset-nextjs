@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 
 import { fetchLocationByToken, type MobileLocation } from '@/lib/mobile-location';
 import { MobilePortalProvider } from '@/components/mobile/MobilePortalContext';
@@ -50,57 +50,63 @@ const cards: Array<{ key: MobileFormKey; title: string; description: string }> =
   },
 ];
 
-function RatingScaleHint() {
-  return (
-    <Box
-      sx={{
-        marginTop: 2,
-        padding: '12px 16px',
-        borderRadius: '14px',
-        border: '1px solid #e5e7eb',
-        backgroundColor: '#ffffff',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1,
-      }}
-    >
-      <Typography
-        sx={{
-          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-          fontSize: 14,
-          fontWeight: 600,
-          color: '#111827',
-        }}
-      >
-        Rating Scale
-      </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Box sx={{ backgroundColor: '#b91c1c', borderRadius: '8px', padding: '8px 12px' }}>
-          <Typography sx={{ fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', fontSize: 12, fontWeight: 600, color: '#ffffff' }}>
-            Not Yet = 1.0 — 1.49
-          </Typography>
-        </Box>
-        <Box sx={{ backgroundColor: '#f59e0b', borderRadius: '8px', padding: '8px 12px' }}>
-          <Typography sx={{ fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', fontSize: 12, fontWeight: 600, color: '#111827' }}>
-            On the Rise = 1.50 — 2.74
-          </Typography>
-        </Box>
-        <Box sx={{ backgroundColor: '#31664a', borderRadius: '8px', padding: '8px 12px' }}>
-          <Typography sx={{ fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', fontSize: 12, fontWeight: 600, color: '#ffffff' }}>
-            Crushing It = 2.75 — 3.0
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
-  );
-}
-
 function MobilePortalPage({ location, token }: MobilePortalPageProps) {
   const [activeForm, setActiveForm] = React.useState<MobileFormKey | null>(null);
   const [dirty, setDirty] = React.useState(false);
   const [submitDisabled, setSubmitDisabled] = React.useState(true);
   const [submitting, setSubmitting] = React.useState(false);
   const [summary, setSummary] = React.useState<SubmissionSummary | null>(null);
+  const [installPromptEvent, setInstallPromptEvent] = React.useState<any>(null);
+  const [platform, setPlatform] = React.useState<'ios' | 'android' | null>(null);
+  const [showInstallHint, setShowInstallHint] = React.useState(false);
+  const [showIosGuide, setShowIosGuide] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const handleBeforeInstallPrompt = (event: any) => {
+      event.preventDefault();
+      setInstallPromptEvent(event);
+      setPlatform('android');
+      setShowInstallHint(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    const ua = window.navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+    const isStandalone =
+      (window.navigator as any).standalone === true ||
+      window.matchMedia('(display-mode: standalone)').matches;
+
+    if (isIOS && !isStandalone) {
+      setPlatform('ios');
+      setShowInstallHint(true);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = React.useCallback(async () => {
+    if (platform === 'android' && installPromptEvent) {
+      installPromptEvent.prompt();
+      const choice = await installPromptEvent.userChoice.catch(() => null);
+      if (choice && choice.outcome !== 'dismissed') {
+        setShowInstallHint(false);
+        setInstallPromptEvent(null);
+      }
+    } else if (platform === 'ios') {
+      setShowIosGuide(true);
+    }
+  }, [installPromptEvent, platform]);
+
+  const dismissInstallHint = React.useCallback(() => {
+    setShowInstallHint(false);
+  }, []);
 
   const submitHandlerRef = React.useRef<(() => Promise<void> | void) | null>(null);
 
@@ -340,9 +346,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                   title={card.title}
                   description={card.description}
                   onClick={() => handleOpenForm(card.key)}
-                >
-                  {card.key === 'ratings' && <RatingScaleHint />}
-                </HomeCard>
+                />
               ))}
             </Box>
           )}
@@ -372,6 +376,96 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           {renderActiveForm()}
         </FormDrawer>
       )}
+
+      {showInstallHint && !activeForm && !summary && (
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            left: 0,
+            right: 0,
+            display: 'flex',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+            zIndex: 1300,
+          }}
+        >
+          <Box
+            sx={{
+              pointerEvents: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              borderRadius: '999px',
+              border: '1px solid #e5e7eb',
+              backgroundColor: '#ffffff',
+              boxShadow: '0 18px 30px rgba(17, 24, 39, 0.15)',
+              padding: '8px 12px',
+            }}
+          >
+            <Button
+              variant="contained"
+              onClick={handleInstallClick}
+              sx={{
+                textTransform: 'none',
+                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontWeight: 600,
+                backgroundColor: '#31664a',
+                '&:hover': { backgroundColor: '#264d38' },
+              }}
+            >
+              Add to Home Screen
+            </Button>
+            <Button
+              onClick={dismissInstallHint}
+              sx={{
+                textTransform: 'none',
+                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                color: '#31664a',
+              }}
+            >
+              Not now
+            </Button>
+          </Box>
+        </Box>
+      )}
+
+      <Dialog open={showIosGuide} onClose={() => setShowIosGuide(false)}>
+        <DialogTitle
+          sx={{
+            fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontWeight: 700,
+            fontSize: 18,
+          }}
+        >
+          Add to Home Screen
+        </DialogTitle>
+        <DialogContent>
+          <Typography
+            sx={{
+              fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: 14,
+              color: '#4b5563',
+            }}
+          >
+            In Safari, tap the share icon, then choose "Add to Home Screen." This installs the Levelset portal on your
+            device for quick access.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ padding: '0 20px 16px' }}>
+          <Button
+            onClick={() => setShowIosGuide(false)}
+            sx={{
+              textTransform: 'none',
+              fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              color: '#31664a',
+              fontWeight: 600,
+            }}
+          >
+            Got it
+          </Button>
+        </DialogActions>
+      </Dialog>
     </MobilePortalProvider>
   );
 }

@@ -156,19 +156,48 @@ export function FormDrawer({
       </Drawer>
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Discard this form?</DialogTitle>
+        <DialogTitle
+          sx={{
+            fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontWeight: 700,
+            fontSize: 18,
+          }}
+        >
+          Discard this form?
+        </DialogTitle>
         <DialogContent>
-          <Typography>
+          <Typography
+            sx={{
+              fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: 14,
+              color: '#4b5563',
+            }}
+          >
             You have unsaved changes. Are you sure you want to leave this form and discard your work?
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ padding: '0 20px 16px' }}>
-          <Button onClick={() => setConfirmOpen(false)} sx={{ textTransform: 'none' }}>
+        <DialogActions sx={{ padding: '0 20px 16px', gap: 1.5 }}>
+          <Button
+            onClick={() => setConfirmOpen(false)}
+            sx={{
+              textTransform: 'none',
+              fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              color: '#31664a',
+              fontWeight: 600,
+            }}
+          >
             Keep Editing
           </Button>
           <Button
-            color="error"
-            sx={{ textTransform: 'none' }}
+            variant="contained"
+            sx={{
+              textTransform: 'none',
+              fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontWeight: 600,
+              backgroundColor: '#b91c1c',
+              color: '#ffffff',
+              '&:hover': { backgroundColor: '#991b1b' },
+            }}
             onClick={() => {
               setConfirmOpen(false);
               onClose();

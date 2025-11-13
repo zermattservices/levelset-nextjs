@@ -219,7 +219,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
     resetDirty();
     controls.completeSubmission({
       form: 'ratings',
-      employeeName: result.employeeName ?? selectedEmployeeOption?.name ?? 'Team member',
+      employeeName: `Employee: ${result.employeeName ?? selectedEmployeeOption?.name ?? 'Team member'}`,
       detail: `${selectedPosition} • Positional ratings`,
     });
   }, [controls, ratings, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedLeader, selectedPosition, token]);
@@ -248,15 +248,6 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Typography
-        sx={{
-          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-          fontSize: 15,
-          color: '#4b5563',
-        }}
-      >
-        Evaluate Team Members across the Big 5 competencies for the selected position.
-      </Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField
           select
