@@ -282,6 +282,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           name="description"
           content="Capture positional ratings and discipline infractions quickly from any device."
         />
+        <link rel="manifest" href={`/api/mobile/manifest/${token}`} />
         <link rel="icon" href="/Levelset Icon Non Trans.png" />
       </Head>
       <Box

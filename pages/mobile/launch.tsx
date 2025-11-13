@@ -14,18 +14,25 @@ export default function MobileLaunchPage() {
       return;
     }
 
+    const queryToken = typeof router.query.token === 'string' ? router.query.token : null;
+    if (queryToken) {
+      window.localStorage.setItem(STORAGE_KEY, queryToken);
+    }
+
     const token = window.localStorage.getItem(STORAGE_KEY);
     if (token) {
       router.replace(`/mobile/${token}`).catch(() => setState('missing'));
     } else {
       setState('missing');
     }
-  }, [router]);
+  }, [router, router.query.token]);
 
   return (
     <>
       <Head>
         <title>Levelset Mobile Portal</title>
+        <link rel="manifest" href={`/api/mobile/manifest/${router.query.token ?? ''}`} />
+        <link rel="icon" href="/Levelset Icon Non Trans.png" />
       </Head>
       <Box
         sx={{
