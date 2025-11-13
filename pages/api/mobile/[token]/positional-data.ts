@@ -55,9 +55,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .order('full_name'),
       supabase
         .from('position_big5_labels')
-        .select('position')
+        .select('position, zone')
         .eq('location_id', location.id)
-        .order('position'),
+        .order('zone', { ascending: true })
+        .order('position', { ascending: true }),
     ]);
 
   if (employeesError) {
@@ -78,9 +79,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const leaders = employees.filter((emp) => isLeaderRole(emp.role));
 
-  const positions = Array.from(
-    new Set((positionsData ?? []).map((item) => item.position).filter((position): position is string => Boolean(position)))
-  ).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  const zoneOrder: Array<'FOH' | 'BOH'> = ['FOH', 'BOH'];
+  const positionsMap = new Map<string, { name: string; zone: 'FOH' | 'BOH' }>();
+
+  (positionsData ?? []).forEach((item) => {
+    const name = item.position?.trim();
+    if (!name) return;
+    const zone = (item.zone === 'BOH' ? 'BOH' : 'FOH') as 'FOH' | 'BOH';
+    if (!positionsMap.has(name)) {
+      positionsMap.set(name, { name, zone });
+    }
+  });
+
+  const positions = Array.from(positionsMap.values()).sort((a, b) => {
+    const zoneDiff = zoneOrder.indexOf(a.zone) - zoneOrder.indexOf(b.zone);
+    if (zoneDiff !== 0) return zoneDiff;
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+  });
 
   res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json({

@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { fetchBig5Labels, fetchPositionsList } from '@/lib/ratings-data';
+import { fetchBig5Labels, fetchPositionsList, FOH_POSITIONS, BOH_POSITIONS } from '@/lib/ratings-data';
 
 async function getOrgIdForLocation(supabase: ReturnType<typeof createServerSupabaseClient>, locationId: string) {
   const { data, error } = await supabase
@@ -82,7 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'POST') {
-    const { org_id, location_id, position, label_1, label_2, label_3, label_4, label_5 } = req.body;
+    const { org_id, location_id, position, label_1, label_2, label_3, label_4, label_5, zone } = req.body;
 
     if (!location_id || !position || !label_1 || !label_2 || !label_3 || !label_4 || !label_5) {
       return res.status(400).json({ 
@@ -101,12 +101,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: error?.message || 'Failed to resolve org_id for location' });
     }
 
+    const normalizedPosition = String(position).trim();
+    const normalizedZone = typeof zone === 'string' ? zone.toUpperCase() : undefined;
+    const resolvedZone: 'FOH' | 'BOH' = (() => {
+      if (normalizedZone === 'FOH' || normalizedZone === 'BOH') {
+        return normalizedZone;
+      }
+      if (normalizedPosition.toLowerCase().includes('boh')) return 'BOH';
+      if (normalizedPosition.toLowerCase().includes('foh')) return 'FOH';
+      if (BOH_POSITIONS.includes(normalizedPosition)) return 'BOH';
+      if (FOH_POSITIONS.includes(normalizedPosition)) return 'FOH';
+      return 'FOH';
+    })();
+
     const { data, error } = await supabase
       .from('position_big5_labels')
       .upsert({
         org_id: resolvedOrgId,
         location_id,
-        position,
+        position: normalizedPosition,
+        zone: resolvedZone,
         label_1,
         label_2,
         label_3,

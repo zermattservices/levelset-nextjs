@@ -5,6 +5,7 @@ import {
   Checkbox,
   CircularProgress,
   FormControlLabel,
+  ListSubheader,
   MenuItem,
   TextField,
   Typography,
@@ -133,6 +134,30 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     () => infractionOptions.find((item) => item.id === selectedInfraction),
     [infractionOptions, selectedInfraction]
   );
+
+  const infractionGroups = React.useMemo(() => {
+    const byPoints = new Map<number, InfractionOption[]>();
+    infractionOptions.forEach((option) => {
+      const key = option.points ?? 0;
+      if (!byPoints.has(key)) {
+        byPoints.set(key, []);
+      }
+      byPoints.get(key)!.push(option);
+    });
+    const sortedPoints = Array.from(byPoints.keys()).sort((a, b) => a - b);
+    return sortedPoints.map((points) => ({
+      points,
+      options: byPoints
+        .get(points)!
+        .slice()
+        .sort((a, b) => a.action.localeCompare(b.action, undefined, { sensitivity: 'base' })),
+    }));
+  }, [infractionOptions]);
+
+  const formatPointsLabel = React.useCallback((value: number) => {
+    const suffix = Math.abs(value) === 1 ? 'Point' : 'Points';
+    return `${value} ${suffix}`;
+  }, []);
 
   React.useEffect(() => {
     if (selectedInfractionOption) {
@@ -284,10 +309,17 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           helperText="What happened?"
         >
           <MenuItem value="">Select infraction</MenuItem>
-          {infractionOptions.map((option) => (
-            <MenuItem key={option.id} value={option.id}>
-              {option.action}
-            </MenuItem>
+          {infractionGroups.map((group) => (
+            <React.Fragment key={group.points}>
+              <ListSubheader disableSticky sx={{ fontSize: 12, fontWeight: 700 }}>
+                {formatPointsLabel(group.points)}
+              </ListSubheader>
+              {group.options.map((option) => (
+                <MenuItem key={option.id} value={option.id}>
+                  {option.action}
+                </MenuItem>
+              ))}
+            </React.Fragment>
           ))}
         </TextField>
 

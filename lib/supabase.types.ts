@@ -84,6 +84,7 @@ export interface PositionBig5Labels {
   org_id: string;
   location_id: string;
   position: string;
+  zone: 'FOH' | 'BOH';
   label_1: string;
   label_2: string;
   label_3: string;

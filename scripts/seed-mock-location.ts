@@ -488,6 +488,7 @@ async function seed() {
       org_id: orgId,
       location_id: locationId,
       position: label.position,
+      zone: (label as any).zone ?? (label.position?.toLowerCase().includes('boh') ? 'BOH' : 'FOH'),
       label_1: label.label_1,
       label_2: label.label_2,
       label_3: label.label_3,

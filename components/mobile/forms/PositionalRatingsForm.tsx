@@ -3,6 +3,7 @@ import {
   Alert,
   Box,
   CircularProgress,
+  ListSubheader,
   MenuItem,
   Radio,
   RadioGroup,
@@ -26,10 +27,15 @@ interface EmployeeOption {
   role: string | null;
 }
 
+interface PositionOption {
+  name: string;
+  zone: 'FOH' | 'BOH';
+}
+
 interface PositionalDataResponse {
   employees: EmployeeOption[];
   leaders: EmployeeOption[];
-  positions: string[];
+  positions: PositionOption[];
 }
 
 interface LabelsResponse {
@@ -50,7 +56,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
 
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [leaders, setLeaders] = React.useState<EmployeeOption[]>([]);
-  const [positions, setPositions] = React.useState<string[]>([]);
+  const [positions, setPositions] = React.useState<PositionOption[]>([]);
 
   const [selectedLeader, setSelectedLeader] = React.useState('');
   const [selectedEmployee, setSelectedEmployee] = React.useState('');
@@ -94,7 +100,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             ? payload.leaders
             : payload.employees ?? [];
           setLeaders(leaderOptions);
-          setPositions(payload.positions ?? []);
+          setPositions((payload.positions ?? []).map((item) => ({ ...item })));
           setSelectedLeader('');
           setSelectedEmployee('');
           setSelectedPosition('');
@@ -230,6 +236,24 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
 
   const leaderOptions = leaders.length ? leaders : employees;
 
+  const positionsByZone = React.useMemo(() => {
+    const grouped = new Map<'FOH' | 'BOH', PositionOption[]>();
+    positions.forEach((option) => {
+      const zone = option.zone ?? 'FOH';
+      if (!grouped.has(zone)) {
+        grouped.set(zone, []);
+      }
+      grouped.get(zone)!.push(option);
+    });
+    const zoneOrder: Array<'FOH' | 'BOH'> = ['FOH', 'BOH'];
+    return zoneOrder
+      .map((zone) => ({
+        zone,
+        options: (grouped.get(zone) ?? []).slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })),
+      }))
+      .filter((group) => group.options.length > 0);
+  }, [positions]);
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: 4 }}>
@@ -299,10 +323,17 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           helperText="Which role are you rating them for?"
         >
           <MenuItem value="">Select position</MenuItem>
-          {positions.map((position) => (
-            <MenuItem key={position} value={position}>
-              {position}
-            </MenuItem>
+          {positionsByZone.map((group) => (
+            <React.Fragment key={group.zone}>
+              <ListSubheader disableSticky sx={{ fontSize: 12, fontWeight: 700 }}>
+                {group.zone === 'FOH' ? 'Front of House (FOH)' : 'Back of House (BOH)'}
+              </ListSubheader>
+              {group.options.map((option) => (
+                <MenuItem key={option.name} value={option.name}>
+                  {option.name}
+                </MenuItem>
+              ))}
+            </React.Fragment>
           ))}
         </TextField>
       </Box>
