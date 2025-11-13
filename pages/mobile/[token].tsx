@@ -91,6 +91,12 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
     };
   }, []);
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('levelset.mobile.lastToken', token);
+    }
+  }, [token]);
+
   const handleInstallClick = React.useCallback(async () => {
     if (platform === 'android' && installPromptEvent) {
       installPromptEvent.prompt();
@@ -411,6 +417,8 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 fontWeight: 600,
                 backgroundColor: '#31664a',
+                borderRadius: '999px',
+                padding: '10px 18px',
                 '&:hover': { backgroundColor: '#264d38' },
               }}
             >

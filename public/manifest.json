@@ -1,7 +1,8 @@
 {
   "name": "Levelset Mobile Portal",
   "short_name": "Levelset",
-  "start_url": ".",
+  "start_url": "/mobile/launch",
+  "scope": "/mobile/",
   "display": "standalone",
   "background_color": "#FFFFFF",
   "theme_color": "#31664a",
