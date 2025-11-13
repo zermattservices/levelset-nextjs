@@ -2,9 +2,9 @@
 ALTER TABLE position_big5_labels
   ADD COLUMN zone TEXT;
 
--- Remove Spanish translations or trailing descriptors after a slash and trim whitespace
+-- Remove Spanish translations or trailing descriptors after a pipe and trim whitespace
 UPDATE position_big5_labels
-SET position = trim(both ' ' FROM regexp_replace(position, '\s*/.*$', '', 'gi'));
+SET position = trim(both ' ' FROM regexp_replace(position, '\s*\|.*$', '', 'gi'));
 
 -- Ensure positions with identical names remain unique by remerging duplicates if any
 WITH ranked AS (
