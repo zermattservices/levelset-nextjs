@@ -527,6 +527,34 @@ function PlasmicHomepage__RenderFunc(props: {
                       projectcss.__wab_text,
                       sty.text__rksQk
                     )}
+                    onClick={async event => {
+                      const $steps = {};
+
+                      $steps["goToPage"] = true
+                        ? (() => {
+                            const actionArgs = {};
+                            return (({ destination }) => {
+                              if (
+                                typeof destination === "string" &&
+                                destination.startsWith("#")
+                              ) {
+                                document
+                                  .getElementById(destination.substr(1))
+                                  .scrollIntoView({ behavior: "smooth" });
+                              } else {
+                                __nextRouter?.push(destination);
+                              }
+                            })?.apply(null, [actionArgs]);
+                          })()
+                        : undefined;
+                      if (
+                        $steps["goToPage"] != null &&
+                        typeof $steps["goToPage"] === "object" &&
+                        typeof $steps["goToPage"].then === "function"
+                      ) {
+                        $steps["goToPage"] = await $steps["goToPage"];
+                      }
+                    }}
                   >
                     {"360\u00b0 Overview"}
                   </div>
@@ -555,6 +583,39 @@ function PlasmicHomepage__RenderFunc(props: {
                           throw e;
                         }
                       })()}
+                      onClick={async () => {
+                        const $steps = {};
+
+                        $steps["goToPositionalExcellence"] = true
+                          ? (() => {
+                              const actionArgs = {
+                                destination: `/positional-excellence`
+                              };
+                              return (({ destination }) => {
+                                if (
+                                  typeof destination === "string" &&
+                                  destination.startsWith("#")
+                                ) {
+                                  document
+                                    .getElementById(destination.substr(1))
+                                    .scrollIntoView({ behavior: "smooth" });
+                                } else {
+                                  __nextRouter?.push(destination);
+                                }
+                              })?.apply(null, [actionArgs]);
+                            })()
+                          : undefined;
+                        if (
+                          $steps["goToPositionalExcellence"] != null &&
+                          typeof $steps["goToPositionalExcellence"] ===
+                            "object" &&
+                          typeof $steps["goToPositionalExcellence"].then ===
+                            "function"
+                        ) {
+                          $steps["goToPositionalExcellence"] =
+                            await $steps["goToPositionalExcellence"];
+                        }
+                      }}
                       variant={"positional-excellence"}
                     />
 
@@ -576,6 +637,35 @@ function PlasmicHomepage__RenderFunc(props: {
                           throw e;
                         }
                       })()}
+                      onClick={async () => {
+                        const $steps = {};
+
+                        $steps["goToDiscipline"] = true
+                          ? (() => {
+                              const actionArgs = { destination: `/discipline` };
+                              return (({ destination }) => {
+                                if (
+                                  typeof destination === "string" &&
+                                  destination.startsWith("#")
+                                ) {
+                                  document
+                                    .getElementById(destination.substr(1))
+                                    .scrollIntoView({ behavior: "smooth" });
+                                } else {
+                                  __nextRouter?.push(destination);
+                                }
+                              })?.apply(null, [actionArgs]);
+                            })()
+                          : undefined;
+                        if (
+                          $steps["goToDiscipline"] != null &&
+                          typeof $steps["goToDiscipline"] === "object" &&
+                          typeof $steps["goToDiscipline"].then === "function"
+                        ) {
+                          $steps["goToDiscipline"] =
+                            await $steps["goToDiscipline"];
+                        }
+                      }}
                       variant={"discipline-points"}
                     />
 

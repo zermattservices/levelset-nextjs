@@ -1096,6 +1096,12 @@
           "name": "LocationProvider",
           "displayName": "LocationProvider",
           "componentImportPath": "./components/CodeComponents/LocationContext"
+        },
+        {
+          "id": "IAbCzhbQ8CvC",
+          "name": "EvaluationsTableSkeleton",
+          "displayName": "EvaluationsTableSkeleton",
+          "componentImportPath": "./components/CodeComponents/Skeletons/EvaluationsTableSkeleton"
         }
       ],
       "splitsProviderFilePath": "",
