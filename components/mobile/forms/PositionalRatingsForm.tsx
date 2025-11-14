@@ -3,18 +3,12 @@ import {
   Alert,
   Box,
   CircularProgress,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  ListSubheader,
   MenuItem,
   Radio,
   RadioGroup,
-  Select,
   TextField,
   Typography,
 } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material/Select';
 import { useMobilePortal } from '../MobilePortalContext';
 import type { FormControlCallbacks } from '../types';
 
@@ -259,28 +253,6 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
       .filter((group) => group.options.length > 0);
   }, [positions]);
 
-  const handlePositionSelect = React.useCallback(
-    (event: SelectChangeEvent<string>) => {
-      setSelectedPosition(event.target.value);
-      markDirty();
-    },
-    [markDirty]
-  );
-
-  const renderSelectedPosition = React.useCallback(
-    (value: string) => {
-      if (!value) {
-        return (
-          <Typography component="span" sx={{ color: '#9ca3af' }}>
-            Select position
-          </Typography>
-        );
-      }
-      return value;
-    },
-    []
-  );
-
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: 4 }}>
@@ -338,49 +310,31 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           ))}
         </TextField>
 
-        <FormControl fullWidth>
-          <InputLabel id="mobile-position-select-label">Position</InputLabel>
-          <Select
-            labelId="mobile-position-select-label"
-            id="mobile-position-select"
-            value={selectedPosition}
-            label="Position"
-            displayEmpty
-            renderValue={renderSelectedPosition}
-            onChange={handlePositionSelect}
-            MenuProps={{
-              MenuListProps: {
-                sx: { maxHeight: 320 },
-              },
-            }}
-          >
-            <MenuItem value="">
-              <em>Select position</em>
-            </MenuItem>
-            {positionsByZone.map((group) => (
-              <React.Fragment key={group.zone}>
-                <ListSubheader
-                  disableSticky
-                  sx={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: '#1f2937',
-                    backgroundColor: '#f3f4f6',
-                    lineHeight: '32px',
-                  }}
-                >
-                  {group.zone === 'FOH' ? 'Front of House (FOH)' : 'Back of House (BOH)'}
-                </ListSubheader>
-                {group.options.map((option) => (
-                  <MenuItem key={option.name} value={option.name}>
-                    {option.name}
-                  </MenuItem>
-                ))}
-              </React.Fragment>
-            ))}
-          </Select>
-          <FormHelperText>Which role are you rating them for?</FormHelperText>
-        </FormControl>
+        <TextField
+          select
+          label="Position"
+          value={selectedPosition}
+          fullWidth
+          onChange={(event) => {
+            setSelectedPosition(event.target.value);
+            markDirty();
+          }}
+          helperText="Which role are you rating them for?"
+          SelectProps={{
+            native: true,
+          }}
+        >
+          <option value="">Select position</option>
+          {positionsByZone.map((group) => (
+            <optgroup key={group.zone} label={group.zone === 'FOH' ? 'Front of House (FOH)' : 'Back of House (BOH)'}>
+              {group.options.map((option) => (
+                <option key={option.name} value={option.name}>
+                  {option.name}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </TextField>
       </Box>
 
       {labelsError && (
