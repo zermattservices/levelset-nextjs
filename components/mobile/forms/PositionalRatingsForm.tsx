@@ -310,6 +310,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             setSelectedPosition(event.target.value as string);
             markDirty();
           }}
+          InputLabelProps={{ shrink: true }}
           helperText="Which role are you rating them for?"
         >
           <option value="">Select position</option>

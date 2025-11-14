@@ -315,6 +315,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             setSelectedInfraction(event.target.value as string);
             markDirty();
           }}
+          InputLabelProps={{ shrink: true }}
           helperText="What happened?"
         >
           <option value="">Select infraction</option>
