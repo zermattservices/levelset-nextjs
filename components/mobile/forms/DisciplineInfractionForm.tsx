@@ -5,7 +5,6 @@ import {
   Checkbox,
   CircularProgress,
   FormControlLabel,
-  ListSubheader,
   MenuItem,
   TextField,
   Typography,
@@ -157,6 +156,25 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
   const formatPointsLabel = React.useCallback((value: number) => {
     const suffix = Math.abs(value) === 1 ? 'Point' : 'Points';
     return `${value} ${suffix}`;
+  }, []);
+
+  const getGroupStyles = React.useCallback((points: number) => {
+    if (points < 0) {
+      return {
+        backgroundColor: '#e6f4ea',
+        color: '#1f5132',
+      };
+    }
+    if (points > 0) {
+      return {
+        backgroundColor: '#fee2e2',
+        color: '#7f1d1d',
+      };
+    }
+    return {
+      backgroundColor: '#e5e7eb',
+      color: '#374151',
+    };
   }, []);
 
   React.useEffect(() => {
@@ -311,9 +329,22 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           <MenuItem value="">Select infraction</MenuItem>
           {infractionGroups.map((group) => (
             <React.Fragment key={group.points}>
-              <ListSubheader disableSticky sx={{ fontSize: 12, fontWeight: 700 }}>
+              <MenuItem
+                disabled
+                value={`group-${group.points}`}
+                sx={{
+                  ...getGroupStyles(group.points),
+                  fontSize: 12,
+                  fontWeight: 700,
+                  opacity: 1,
+                  cursor: 'default',
+                  '&.Mui-disabled': {
+                    opacity: 1,
+                  },
+                }}
+              >
                 {formatPointsLabel(group.points)}
-              </ListSubheader>
+              </MenuItem>
               {group.options.map((option) => (
                 <MenuItem key={option.id} value={option.id}>
                   {option.action}

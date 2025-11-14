@@ -3,7 +3,6 @@ import {
   Alert,
   Box,
   CircularProgress,
-  ListSubheader,
   MenuItem,
   Radio,
   RadioGroup,
@@ -325,9 +324,22 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           <MenuItem value="">Select position</MenuItem>
           {positionsByZone.map((group) => (
             <React.Fragment key={group.zone}>
-              <ListSubheader disableSticky sx={{ fontSize: 12, fontWeight: 700 }}>
+              <MenuItem
+                disabled
+                value={`header-${group.zone}`}
+                sx={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: '#1f2937',
+                  opacity: 1,
+                  cursor: 'default',
+                  '&.Mui-disabled': {
+                    opacity: 1,
+                  },
+                }}
+              >
                 {group.zone === 'FOH' ? 'Front of House (FOH)' : 'Back of House (BOH)'}
-              </ListSubheader>
+              </MenuItem>
               {group.options.map((option) => (
                 <MenuItem key={option.name} value={option.name}>
                   {option.name}
