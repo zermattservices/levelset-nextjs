@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DataGridPro, GridColDef, gridClasses } from '@mui/x-data-grid-pro';
-import { Box, Chip, FormControl, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
+import { Box, Chip, FormControl, Menu, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -87,7 +87,7 @@ interface LeaderOption {
 
 const LEADER_ROLES = ['Team Lead', 'Director', 'Executive', 'Operator'];
 
-const CustomDateTextField = React.forwardRef(function CustomDateTextField(
+const EvaluationDateTextField = React.forwardRef(function EvaluationDateTextField(
   props: React.ComponentProps<typeof TextField>,
   ref: React.Ref<HTMLInputElement>
 ) {
@@ -98,10 +98,18 @@ const CustomDateTextField = React.forwardRef(function CustomDateTextField(
       size="small"
       fullWidth
       sx={{
+        '& .MuiInputBase-root': {
+          fontFamily,
+          fontSize: 14,
+        },
         '& .MuiInputBase-input': {
           fontFamily,
           fontSize: 14,
           padding: '10px 14px',
+        },
+        '& .MuiInputLabel-root': {
+          fontFamily,
+          fontSize: 12,
         },
         '& .MuiOutlinedInput-notchedOutline': {
           borderColor: '#e5e7eb',
@@ -113,10 +121,15 @@ const CustomDateTextField = React.forwardRef(function CustomDateTextField(
           borderColor: levelsetGreen,
           borderWidth: '2px',
         },
-        '& .MuiIconButton-root': {
-          padding: '6px',
-          '& .MuiSvgIcon-root': {
-            fontSize: '1rem',
+        '& .MuiInputBase-input.Mui-disabled': {
+          color: '#9ca3af',
+          WebkitTextFillColor: '#9ca3af',
+          backgroundColor: '#f9fafb',
+        },
+        '& .MuiOutlinedInput-root.Mui-disabled': {
+          backgroundColor: '#f9fafb',
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#e5e7eb',
           },
         },
         ...props.sx,
@@ -125,12 +138,36 @@ const CustomDateTextField = React.forwardRef(function CustomDateTextField(
   );
 });
 
+const statusChipBaseStyles = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 6,
+  padding: '0 16px',
+  minHeight: 28,
+  height: 28,
+  borderRadius: 14,
+  fontSize: 13,
+  fontWeight: 600,
+  fontFamily,
+  cursor: 'pointer' as const,
+  transition: 'all 0.15s ease-in-out',
+  '&:hover': {
+    opacity: 0.9,
+    transform: 'translateY(-1px)',
+  },
+  '& svg': {
+    fontSize: 16,
+  },
+};
+
 export function EvaluationsTable({ locationId, className, onPlannedStatusChange }: EvaluationsTableProps) {
   const [rows, setRows] = React.useState<EvaluationRow[]>([]);
   const [leaders, setLeaders] = React.useState<LeaderOption[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [updatingIds, setUpdatingIds] = React.useState<Set<string>>(new Set());
+  const [statusMenuAnchor, setStatusMenuAnchor] = React.useState<Record<string, HTMLElement | null>>({});
 
   const applyFilters = React.useCallback(
     (evaluations: EvaluationRow[]) => {
@@ -257,12 +294,21 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
     [handleUpdate]
   );
 
-  const handleStatusChange = React.useCallback(
-    (row: EvaluationRow) => (event: SelectChangeEvent<string>) => {
-      handleUpdate(row.id, { status: event.target.value });
+  const handleStatusSelect = React.useCallback(
+    (row: EvaluationRow, nextStatus: string) => {
+      handleUpdate(row.id, { status: nextStatus });
+      setStatusMenuAnchor((prev) => ({ ...prev, [row.id]: null }));
     },
     [handleUpdate]
   );
+
+  const handleStatusMenuOpen = React.useCallback((rowId: string, event: React.MouseEvent<HTMLElement>) => {
+    setStatusMenuAnchor((prev) => ({ ...prev, [rowId]: event.currentTarget }));
+  }, []);
+
+  const handleStatusMenuClose = React.useCallback((rowId: string) => {
+    setStatusMenuAnchor((prev) => ({ ...prev, [rowId]: null }));
+  }, []);
 
   const handleDateChange = React.useCallback(
     (row: EvaluationRow) => async (value: Date | null) => {
@@ -320,16 +366,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             ? leaders.find((leader) => leader.id === leaderId)?.name ?? 'Unassigned'
             : 'Unassigned';
           return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                width: '100%',
-                paddingX: 1,
-              }}
-            >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', px: 0 }}>
               <FormControl size="small" sx={{ width: '100%' }}>
                 <Select
                   value={leaderId}
@@ -366,11 +403,12 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
+                          fontSize: 13,
                         }}
                       >
                         {leaderName}
                       </Typography>
-                      <ExpandMoreIcon sx={{ fontSize: 18, color: '#6b7280' }} />
+                      <ExpandMoreIcon sx={{ fontSize: 18, color: '#6b7280', flexShrink: 0 }} />
                     </Box>
                   )}
                   sx={{
@@ -387,12 +425,17 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                     opacity: disabled ? 0.6 : 1,
                   }}
                   MenuProps={{
+                    disablePortal: true,
+                    anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                    transformOrigin: { vertical: 'top', horizontal: 'left' },
+                    marginThreshold: 0,
                     PaperProps: {
                       sx: {
                         fontFamily,
                         borderRadius: 2,
-                        mt: 1,
+                        mt: 0.5,
                         minWidth: 220,
+                        maxHeight: 320,
                       },
                     },
                   }}
@@ -505,7 +548,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
       {
         field: 'evaluation_date',
         headerName: 'Date',
-        width: 160,
+        width: 200,
         renderCell: (params) => {
           const row = params.row;
           const disabled = updatingIds.has(row.id);
@@ -526,12 +569,16 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   value={dateValue}
                   onChange={handleDateChange(row)}
                   disabled={disabled}
-                  format="MM/dd/yyyy"
+                  format="M/d/yyyy"
                   enableAccessibleFieldDOMStructure={false}
                   slots={{
-                    textField: CustomDateTextField,
+                    textField: EvaluationDateTextField,
                   }}
                   slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      size: 'small',
+                    },
                     openPickerButton: {
                       sx: {
                         color: levelsetGreen,
@@ -544,65 +591,14 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                       sx: {
                         '& .MuiPaper-root': {
                           fontFamily,
-                          borderRadius: 16,
-                          boxShadow: '0px 12px 32px rgba(17, 24, 39, 0.15)',
-                          padding: 1,
-                          border: '1px solid #e5e7eb',
-                        },
-                        '& .MuiTypography-root': {
-                          fontFamily,
-                          fontSize: 12,
-                        },
-                        '& .MuiPickersCalendarHeader-label': {
-                          fontFamily,
-                          fontSize: 12,
-                        },
-                        '& .MuiPickersCalendarHeader-switchViewIcon': {
-                          color: levelsetGreen,
-                        },
-                        '& .MuiDayCalendar-weekDayLabel': {
-                          fontFamily,
-                          fontSize: 10,
-                          color: '#6b7280',
                         },
                         '& .MuiPickersDay-root': {
                           fontFamily,
-                          fontSize: 12,
-                          borderRadius: 999,
+                          fontSize: 11,
                           '&.Mui-selected': {
                             backgroundColor: `${levelsetGreen} !important`,
-                            color: '#ffffff !important',
-                            '&:hover': {
-                              backgroundColor: `${levelsetGreen} !important`,
-                            },
-                            '&:focus': {
-                              backgroundColor: `${levelsetGreen} !important`,
-                            },
+                            color: '#fff !important',
                           },
-                          '&:hover': {
-                            backgroundColor: 'rgba(49, 102, 74, 0.08)',
-                          },
-                        },
-                        '& .MuiYearCalendar-root .MuiPickersYear-yearButton': {
-                          fontFamily,
-                          fontSize: 12,
-                          '&.Mui-selected': {
-                            backgroundColor: `${levelsetGreen} !important`,
-                            color: '#ffffff !important',
-                          },
-                        },
-                        '& .MuiIconButton-root': {
-                          color: `${levelsetGreen} !important`,
-                          borderRadius: 10,
-                          '&:hover': {
-                            backgroundColor: 'rgba(49, 102, 74, 0.08)',
-                          },
-                        },
-                        '& .MuiPickersCalendarHeader-root': {
-                          marginBottom: 0,
-                        },
-                        '& .MuiPickersArrowSwitcher-root': {
-                          gap: 0,
                         },
                       },
                     },
@@ -618,7 +614,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             return '—';
           }
           try {
-            return format(new Date(value as string), 'MM/dd/yyyy');
+            return format(new Date(value as string), 'M/d/yyyy');
           } catch {
             return '—';
           }
@@ -627,108 +623,92 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
       {
         field: 'status',
         headerName: 'Status',
-        width: 150,
+        width: 160,
         sortComparator: (v1, v2) => (STATUS_ORDER[v1 as string] ?? 99) - (STATUS_ORDER[v2 as string] ?? 99),
         renderCell: (params) => {
           const row = params.row;
-          const disabled = updatingIds.has(row.id);
           const status = row.status;
           const colors = STATUS_STYLES[status] ?? STATUS_STYLES.Planned;
+          const anchor = statusMenuAnchor[row.id] ?? null;
+          const disabled = updatingIds.has(row.id);
           return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                width: '100%',
-                paddingX: 1,
-              }}
-            >
-              <FormControl size="small" sx={{ width: '100%' }}>
-                <Select
-                  value={status}
-                  onChange={handleStatusChange(row)}
-                  disabled={disabled}
-                  IconComponent={() => null}
-                  renderValue={() => (
-                    <Box
-                      component="span"
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        backgroundColor: colors.bg,
-                        color: colors.color,
-                        borderRadius: 14,
-                        minHeight: 28,
-                        height: 28,
-                        padding: '0 12px',
-                        boxSizing: 'border-box',
-                        width: '100%',
-                        maxWidth: '100%',
-                        fontFamily,
-                        fontSize: 13,
-                        fontWeight: 700,
-                        gap: 6,
-                      }}
-                    >
-                      <Typography
-                        component="span"
-                        sx={{
-                          flexGrow: 1,
-                          minWidth: 0,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {status}
-                      </Typography>
-                      <ExpandMoreIcon sx={{ fontSize: 18 }} />
-                    </Box>
-                  )}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+              <Box
+                component="button"
+                type="button"
+                disabled={disabled}
+                onClick={(event) => handleStatusMenuOpen(row.id, event)}
+                style={{ border: 'none', background: 'transparent', padding: 0, width: '100%' }}
+              >
+                <Box
                   sx={{
+                    ...statusChipBaseStyles,
                     width: '100%',
-                    '& .MuiSelect-select': {
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: 0,
-                      width: '100%',
-                    },
-                    '& fieldset': {
-                      border: 'none',
-                    },
+                    backgroundColor: colors.bg,
+                    color: colors.color,
                     opacity: disabled ? 0.6 : 1,
                   }}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        fontFamily,
-                        borderRadius: 2,
-                        mt: 1,
-                      },
-                    },
-                  }}
                 >
-                  {Object.keys(STATUS_ORDER).map((statusKey) => {
-                    const menuColors = STATUS_STYLES[statusKey] ?? STATUS_STYLES.Planned;
-                    return (
-                      <MenuItem key={statusKey} value={statusKey}>
-                        <Box sx={{ ...colors, backgroundColor: menuColors.bg, color: menuColors.color }}>
-                          <span>{statusKey}</span>
-                        </Box>
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
+                  {status}
+                  <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
+                </Box>
+              </Box>
+              <Menu
+                anchorEl={anchor}
+                open={Boolean(anchor)}
+                onClose={() => handleStatusMenuClose(row.id)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                disablePortal
+                PaperProps={{
+                  sx: {
+                    fontFamily,
+                    borderRadius: 2,
+                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid #e5e7eb',
+                    minWidth: 180,
+                  },
+                }}
+              >
+                {Object.keys(STATUS_ORDER).map((statusKey) => {
+                  const menuColors = STATUS_STYLES[statusKey] ?? STATUS_STYLES.Planned;
+                  const selected = status === statusKey;
+                  return (
+                    <MenuItem
+                      key={statusKey}
+                      selected={selected}
+                      onClick={() => handleStatusSelect(row, statusKey)}
+                      sx={{
+                        fontFamily,
+                        fontSize: 12,
+                        fontWeight: 500,
+                        padding: '6px 12px',
+                        borderRadius: 1,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          ...statusChipBaseStyles,
+                          backgroundColor: menuColors.bg,
+                          color: menuColors.color,
+                          cursor: 'default',
+                          width: '100%',
+                          transform: 'none',
+                          '&:hover': { opacity: 1, transform: 'none' },
+                        }}
+                      >
+                        {statusKey}
+                      </Box>
+                    </MenuItem>
+                  );
+                })}
+              </Menu>
             </Box>
           );
         },
       },
     ],
-    [handleLeaderChange, handleStatusChange, handleDateChange, leaders, updatingIds]
+    [handleLeaderChange, handleDateChange, leaders, statusMenuAnchor, updatingIds, handleStatusMenuOpen, handleStatusMenuClose, handleStatusSelect]
   );
 
   if (loading) {
