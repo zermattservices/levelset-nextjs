@@ -1,9 +1,14 @@
 import * as React from 'react';
+import Autocomplete from '@mui/material/Autocomplete';
 import {
   Alert,
   Box,
   CircularProgress,
-  MenuItem,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  NativeSelect,
+  OutlinedInput,
   Radio,
   RadioGroup,
   TextField,
@@ -272,69 +277,61 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <TextField
-          select
-          label="Leader name"
-          value={selectedLeader}
-          fullWidth
-          onChange={(event) => {
-            setSelectedLeader(event.target.value);
+        <Autocomplete
+          options={leaderOptions}
+          disablePortal
+          value={leaderOptions.find((option) => option.id === selectedLeader) ?? null}
+          onChange={(_, option) => {
+            setSelectedLeader(option?.id ?? '');
             markDirty();
           }}
-          helperText="Who is submitting this rating?"
-        >
-          <MenuItem value="">Select leader</MenuItem>
-          {leaderOptions.map((leader) => (
-            <MenuItem key={leader.id} value={leader.id}>
-              {leader.name}
-            </MenuItem>
-          ))}
-        </TextField>
+          getOptionLabel={(option) => option.name}
+          renderInput={(params) => (
+            <TextField {...params} label="Leader name" helperText="Who is submitting this rating?" />
+          )}
+        />
 
-        <TextField
-          select
-          label="Team member"
-          value={selectedEmployee}
-          fullWidth
-          onChange={(event) => {
-            setSelectedEmployee(event.target.value);
+        <Autocomplete
+          options={employees}
+          disablePortal
+          value={employees.find((option) => option.id === selectedEmployee) ?? null}
+          onChange={(_, option) => {
+            setSelectedEmployee(option?.id ?? '');
             markDirty();
           }}
-          helperText="Who is being evaluated?"
-        >
-          <MenuItem value="">Select team member</MenuItem>
-          {employees.map((employee) => (
-            <MenuItem key={employee.id} value={employee.id}>
-              {employee.name}
-            </MenuItem>
-          ))}
-        </TextField>
+          getOptionLabel={(option) => option.name}
+          renderInput={(params) => (
+            <TextField {...params} label="Team member" helperText="Who is being evaluated?" />
+          )}
+        />
 
-        <TextField
-          select
-          label="Position"
-          value={selectedPosition}
-          fullWidth
-          onChange={(event) => {
-            setSelectedPosition(event.target.value);
-            markDirty();
-          }}
-          helperText="Which role are you rating them for?"
-          SelectProps={{
-            native: true,
-          }}
-        >
-          <option value="">Select position</option>
-          {positionsByZone.map((group) => (
-            <optgroup key={group.zone} label={group.zone === 'FOH' ? 'Front of House (FOH)' : 'Back of House (BOH)'}>
-              {group.options.map((option) => (
-                <option key={option.name} value={option.name}>
-                  {option.name}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </TextField>
+        <FormControl fullWidth variant="outlined">
+          <InputLabel htmlFor="mobile-position-native">Position</InputLabel>
+          <NativeSelect
+            value={selectedPosition}
+            onChange={(event) => {
+              setSelectedPosition(event.target.value as string);
+              markDirty();
+            }}
+            input={<OutlinedInput label="Position" id="mobile-position-native" />}
+          >
+            <option value="">Select position</option>
+            {positionsByZone.map((group) => (
+              <optgroup
+                key={group.zone}
+                label={group.zone === 'FOH' ? 'Front of House (FOH)' : 'Back of House (BOH)'}
+                style={{ fontWeight: 700 }}
+              >
+                {group.options.map((option) => (
+                  <option key={option.name} value={option.name}>
+                    {option.name}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </NativeSelect>
+          <FormHelperText>Which role are you rating them for?</FormHelperText>
+        </FormControl>
       </Box>
 
       {labelsError && (

@@ -1,11 +1,16 @@
 import * as React from 'react';
+import Autocomplete from '@mui/material/Autocomplete';
 import {
   Alert,
   Box,
   Checkbox,
   CircularProgress,
+  FormControl,
   FormControlLabel,
-  MenuItem,
+  FormHelperText,
+  InputLabel,
+  NativeSelect,
+  OutlinedInput,
   TextField,
   Typography,
 } from '@mui/material';
@@ -277,77 +282,67 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <TextField
-          select
-          label="Leader name"
-          value={selectedLeader}
-          fullWidth
-          onChange={(event) => {
-            setSelectedLeader(event.target.value);
+        <Autocomplete
+          options={leaderOptions}
+          disablePortal
+          value={leaderOptions.find((option) => option.id === selectedLeader) ?? null}
+          onChange={(_, option) => {
+            setSelectedLeader(option?.id ?? '');
             markDirty();
           }}
-          helperText="Who is filing this infraction?"
-        >
-          <MenuItem value="">Select leader</MenuItem>
-          {leaderOptions.map((leader) => (
-            <MenuItem key={leader.id} value={leader.id}>
-              {leader.name}
-            </MenuItem>
-          ))}
-        </TextField>
+          getOptionLabel={(option) => option.name}
+          renderInput={(params) => (
+            <TextField {...params} label="Leader name" helperText="Who is filing this infraction?" />
+          )}
+        />
 
-        <TextField
-          select
-          label="Team member"
-          value={selectedEmployee}
-          fullWidth
-          onChange={(event) => {
-            setSelectedEmployee(event.target.value);
+        <Autocomplete
+          options={employees}
+          disablePortal
+          value={employees.find((option) => option.id === selectedEmployee) ?? null}
+          onChange={(_, option) => {
+            setSelectedEmployee(option?.id ?? '');
             markDirty();
           }}
-          helperText="Who are you issuing an infraction for?"
-        >
-          <MenuItem value="">Select team member</MenuItem>
-          {employees.map((employee) => (
-            <MenuItem key={employee.id} value={employee.id}>
-              {employee.name}
-            </MenuItem>
-          ))}
-        </TextField>
+          getOptionLabel={(option) => option.name}
+          renderInput={(params) => (
+            <TextField {...params} label="Team member" helperText="Who are you issuing an infraction for?" />
+          )}
+        />
 
-        <TextField
-          select
-          label="Infraction"
-          value={selectedInfraction}
-          fullWidth
-          onChange={(event) => {
-            setSelectedInfraction(event.target.value);
-            markDirty();
-          }}
-          helperText="What happened?"
-          SelectProps={{ native: true }}
-        >
-          <option value="">Select infraction</option>
-          {infractionGroups.map((group) => {
-            const styles = getGroupStyles(group.points);
-            return (
-              <optgroup
-                key={group.points}
-                label={formatPointsLabel(group.points)}
-                style={{
-                  backgroundColor: styles.backgroundColor,
-                  color: styles.color,
-                }}
-              >
-                {group.options.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.action}
-                  </option>
-                ))}
-              </optgroup>
-            );
-          })}
-        </TextField>
+        <FormControl fullWidth variant="outlined">
+          <InputLabel htmlFor="mobile-infraction-native">Infraction</InputLabel>
+          <NativeSelect
+            value={selectedInfraction}
+            onChange={(event) => {
+              setSelectedInfraction(event.target.value as string);
+              markDirty();
+            }}
+            input={<OutlinedInput label="Infraction" id="mobile-infraction-native" />}
+          >
+            <option value="">Select infraction</option>
+            {infractionGroups.map((group) => {
+              const styles = getGroupStyles(group.points);
+              return (
+                <optgroup
+                  key={group.points}
+                  label={formatPointsLabel(group.points)}
+                  style={{
+                    backgroundColor: styles.backgroundColor,
+                    color: styles.color,
+                  }}
+                >
+                  {group.options.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.action}
+                    </option>
+                  ))}
+                </optgroup>
+              );
+            })}
+          </NativeSelect>
+          <FormHelperText>What happened?</FormHelperText>
+        </FormControl>
 
         <TextField
           label="Points"
