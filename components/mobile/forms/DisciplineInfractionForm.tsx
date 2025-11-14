@@ -4,11 +4,17 @@ import {
   Box,
   Checkbox,
   CircularProgress,
+  FormControl,
   FormControlLabel,
+  FormHelperText,
+  InputLabel,
+  ListSubheader,
   MenuItem,
+  Select,
   TextField,
   Typography,
 } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import { useMobilePortal } from '../MobilePortalContext';
 import type { FormControlCallbacks } from '../types';
 
@@ -177,6 +183,29 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     };
   }, []);
 
+  const handleInfractionChange = React.useCallback(
+    (event: SelectChangeEvent<string>) => {
+      setSelectedInfraction(event.target.value);
+      markDirty();
+    },
+    [markDirty]
+  );
+
+  const renderInfractionValue = React.useCallback(
+    (value: string) => {
+      if (!value) {
+        return (
+          <Typography component="span" sx={{ color: '#9ca3af' }}>
+            Select infraction
+          </Typography>
+        );
+      }
+      const selected = infractionOptions.find((option) => option.id === value);
+      return selected?.action ?? value;
+    },
+    [infractionOptions]
+  );
+
   React.useEffect(() => {
     if (selectedInfractionOption) {
       setPoints(selectedInfractionOption.points ?? null);
@@ -315,44 +344,52 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           ))}
         </TextField>
 
-        <TextField
-          select
-          label="Infraction"
-          value={selectedInfraction}
-          fullWidth
-          onChange={(event) => {
-            setSelectedInfraction(event.target.value);
-            markDirty();
-          }}
-          helperText="What happened?"
-        >
-          <MenuItem value="">Select infraction</MenuItem>
-          {infractionGroups.map((group) => (
-            <React.Fragment key={group.points}>
-              <MenuItem
-                disabled
-                value={`group-${group.points}`}
-                sx={{
-                  ...getGroupStyles(group.points),
-                  fontSize: 12,
-                  fontWeight: 700,
-                  opacity: 1,
-                  cursor: 'default',
-                  '&.Mui-disabled': {
-                    opacity: 1,
-                  },
-                }}
-              >
-                {formatPointsLabel(group.points)}
-              </MenuItem>
-              {group.options.map((option) => (
-                <MenuItem key={option.id} value={option.id}>
-                  {option.action}
-                </MenuItem>
-              ))}
-            </React.Fragment>
-          ))}
-        </TextField>
+        <FormControl fullWidth>
+          <InputLabel id="mobile-infraction-select-label">Infraction</InputLabel>
+          <Select
+            labelId="mobile-infraction-select-label"
+            id="mobile-infraction-select"
+            value={selectedInfraction}
+            label="Infraction"
+            displayEmpty
+            renderValue={renderInfractionValue}
+            onChange={handleInfractionChange}
+            MenuProps={{
+              MenuListProps: {
+                sx: { maxHeight: 320 },
+              },
+            }}
+          >
+            <MenuItem value="">
+              <em>Select infraction</em>
+            </MenuItem>
+            {infractionGroups.map((group) => {
+              const headerStyles = getGroupStyles(group.points);
+              return (
+                <React.Fragment key={group.points}>
+                  <ListSubheader
+                    disableSticky
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      lineHeight: '32px',
+                      backgroundColor: headerStyles.backgroundColor,
+                      color: headerStyles.color,
+                    }}
+                  >
+                    {formatPointsLabel(group.points)}
+                  </ListSubheader>
+                  {group.options.map((option) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.action}
+                    </MenuItem>
+                  ))}
+                </React.Fragment>
+              );
+            })}
+          </Select>
+          <FormHelperText>What happened?</FormHelperText>
+        </FormControl>
 
         <TextField
           label="Points"
