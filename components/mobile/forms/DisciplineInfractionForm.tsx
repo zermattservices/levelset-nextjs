@@ -5,12 +5,7 @@ import {
   Box,
   Checkbox,
   CircularProgress,
-  FormControl,
   FormControlLabel,
-  FormHelperText,
-  InputLabel,
-  NativeSelect,
-  OutlinedInput,
   TextField,
   Typography,
 } from '@mui/material';
@@ -310,39 +305,39 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           )}
         />
 
-        <FormControl fullWidth variant="outlined">
-          <InputLabel htmlFor="mobile-infraction-native">Infraction</InputLabel>
-          <NativeSelect
-            value={selectedInfraction}
-            onChange={(event) => {
-              setSelectedInfraction(event.target.value as string);
-              markDirty();
-            }}
-            input={<OutlinedInput label="Infraction" id="mobile-infraction-native" />}
-          >
-            <option value="">Select infraction</option>
-            {infractionGroups.map((group) => {
-              const styles = getGroupStyles(group.points);
-              return (
-                <optgroup
-                  key={group.points}
-                  label={formatPointsLabel(group.points)}
-                  style={{
-                    backgroundColor: styles.backgroundColor,
-                    color: styles.color,
-                  }}
-                >
-                  {group.options.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.action}
-                    </option>
-                  ))}
-                </optgroup>
-              );
-            })}
-          </NativeSelect>
-          <FormHelperText>What happened?</FormHelperText>
-        </FormControl>
+        <TextField
+          select
+          SelectProps={{ native: true }}
+          label="Infraction"
+          value={selectedInfraction}
+          fullWidth
+          onChange={(event) => {
+            setSelectedInfraction(event.target.value as string);
+            markDirty();
+          }}
+          helperText="What happened?"
+        >
+          <option value="">Select infraction</option>
+          {infractionGroups.map((group) => {
+            const styles = getGroupStyles(group.points);
+            return (
+              <optgroup
+                key={group.points}
+                label={formatPointsLabel(group.points)}
+                style={{
+                  backgroundColor: styles.backgroundColor,
+                  color: styles.color,
+                }}
+              >
+                {group.options.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.action}
+                  </option>
+                ))}
+              </optgroup>
+            );
+          })}
+        </TextField>
 
         <TextField
           label="Points"

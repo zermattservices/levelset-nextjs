@@ -4,11 +4,6 @@ import {
   Alert,
   Box,
   CircularProgress,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  NativeSelect,
-  OutlinedInput,
   Radio,
   RadioGroup,
   TextField,
@@ -305,33 +300,33 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           )}
         />
 
-        <FormControl fullWidth variant="outlined">
-          <InputLabel htmlFor="mobile-position-native">Position</InputLabel>
-          <NativeSelect
-            value={selectedPosition}
-            onChange={(event) => {
-              setSelectedPosition(event.target.value as string);
-              markDirty();
-            }}
-            input={<OutlinedInput label="Position" id="mobile-position-native" />}
-          >
-            <option value="">Select position</option>
-            {positionsByZone.map((group) => (
-              <optgroup
-                key={group.zone}
-                label={group.zone === 'FOH' ? 'Front of House (FOH)' : 'Back of House (BOH)'}
-                style={{ fontWeight: 700 }}
-              >
-                {group.options.map((option) => (
-                  <option key={option.name} value={option.name}>
-                    {option.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </NativeSelect>
-          <FormHelperText>Which role are you rating them for?</FormHelperText>
-        </FormControl>
+        <TextField
+          select
+          SelectProps={{ native: true }}
+          label="Position"
+          value={selectedPosition}
+          fullWidth
+          onChange={(event) => {
+            setSelectedPosition(event.target.value as string);
+            markDirty();
+          }}
+          helperText="Which role are you rating them for?"
+        >
+          <option value="">Select position</option>
+          {positionsByZone.map((group) => (
+            <optgroup
+              key={group.zone}
+              label={group.zone === 'FOH' ? 'Front of House (FOH)' : 'Back of House (BOH)'}
+              style={{ fontWeight: 700 }}
+            >
+              {group.options.map((option) => (
+                <option key={option.name} value={option.name}>
+                  {option.name}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </TextField>
       </Box>
 
       {labelsError && (
