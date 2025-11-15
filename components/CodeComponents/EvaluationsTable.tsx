@@ -155,6 +155,7 @@ const InlineSelectChip = styled(Box)(() => ({
   backgroundColor: '#f3f4f6',
   color: '#111827',
   width: '100%',
+  boxSizing: 'border-box',
   '&:hover': {
     opacity: 0.9,
     transform: 'translateY(-1px)',
@@ -435,8 +436,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 onClose={() => handleLeaderMenuClose(row.id)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                disablePortal
-                marginThreshold={0}
                 PaperProps={{
                   sx: {
                     fontFamily,
@@ -651,8 +650,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 onClose={() => handleStatusMenuClose(row.id)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                disablePortal
-                marginThreshold={0}
                 PaperProps={{
                   sx: {
                     fontFamily,
