@@ -450,7 +450,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
               >
                 <DropdownMenuItem selected={!leaderId} onClick={() => handleLeaderSelect(row, null)}>
                   <InlineSelectChip
-                    component="div"
                     sx={{ backgroundColor: '#f3f4f6', color: '#6b7280', cursor: 'default', justifyContent: 'center', '&:hover': { opacity: 1, transform: 'none' } }}
                   >
                     <Typography component="span" sx={{ fontSize: 13 }}>
@@ -465,7 +464,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                     onClick={() => handleLeaderSelect(row, leader.id)}
                   >
                     <InlineSelectChip
-                      component="div"
                       sx={{ backgroundColor: '#f3f4f6', color: '#374151', cursor: 'default', justifyContent: 'center', '&:hover': { opacity: 1, transform: 'none' } }}
                     >
                       <Typography component="span" sx={{ fontSize: 13 }}>
@@ -671,7 +669,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   return (
                     <DropdownMenuItem key={statusKey} selected={selected} onClick={() => handleStatusSelect(row, statusKey)}>
                       <InlineSelectChip
-                        component="div"
                         sx={{
                           backgroundColor: menuColors.bg,
                           color: menuColors.color,
@@ -781,7 +778,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           [`& .${gridClasses.columnSeparator}`]: {
             display: 'none',
           },
-          [`& .${gridClasses.cellContent}`]: {
+          '& .MuiDataGrid-cellContent': {
             width: '100%',
             overflow: 'visible',
           },
