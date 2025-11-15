@@ -265,7 +265,7 @@ export function DrawerTabContainer({
   const [disciplinaryActions, setDisciplinaryActions] = React.useState<DisciplinaryAction[]>([]);
   const [loading, setLoading] = React.useState(false);
   const supabase = createSupabaseClient();
-  const { selectedLocationOrgId } = useLocationContext();
+  const { selectedLocationOrgId: _selectedLocationOrgId } = useLocationContext();
 
   // Fetch infractions and disciplinary actions for the selected employee
   const fetchEmployeeData = React.useCallback(async () => {

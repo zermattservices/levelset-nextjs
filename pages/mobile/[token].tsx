@@ -457,8 +457,8 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
               color: '#4b5563',
             }}
           >
-            In Safari, tap the share icon, then choose "Add to Home Screen." This installs the Levelset portal on your
-            device for quick access.
+            In Safari, tap the share icon, then choose &ldquo;Add to Home Screen.&rdquo; This installs the Levelset portal on
+            your device for quick access.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ padding: '0 20px 16px' }}>

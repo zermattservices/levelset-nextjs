@@ -141,17 +141,19 @@ const EvaluationDateTextField = React.forwardRef(function EvaluationDateTextFiel
 const selectChipStyles = {
   display: 'inline-flex',
   alignItems: 'center',
-  justifyContent: 'center',
-  gap: 6,
+  justifyContent: 'space-between',
+  gap: 8,
   padding: '0 16px',
-  minHeight: 28,
-  height: 28,
-  borderRadius: 14,
+  minHeight: 32,
+  height: 32,
+  borderRadius: 999,
   fontSize: 13,
   fontWeight: 600,
   fontFamily,
   cursor: 'pointer' as const,
   transition: 'all 0.15s ease-in-out',
+  border: 'none',
+  width: '100%',
   '&:hover': {
     opacity: 0.9,
     transform: 'translateY(-1px)',
@@ -395,40 +397,43 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           const anchor = leaderMenuAnchor[row.id] ?? null;
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-              <Box
-                component="button"
-                type="button"
-                onClick={(event) => {
-                  if (!disabled) {
-                    handleLeaderMenuOpen(row.id, event);
-                  }
-                }}
-                sx={{
-                  ...selectChipStyles,
-                  width: '100%',
-                  border: 'none',
-                  background: 'none',
-                  justifyContent: 'space-between',
-                  backgroundColor: '#f3f4f6',
-                  color: leaderId ? '#374151' : '#6b7280',
-                  opacity: disabled ? 0.6 : 1,
-                }}
-              >
-                <Typography
-                  component="span"
-                  sx={{
-                    flexGrow: 1,
-                    minWidth: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    fontSize: 13,
-                    textAlign: 'left',
+              <Box sx={{ width: '100%', px: 1 }}>
+                <Box
+                  component="button"
+                  type="button"
+                  onClick={(event) => {
+                    if (!disabled) {
+                      handleLeaderMenuOpen(row.id, event);
+                    }
                   }}
+                  style={{ width: '100%' }}
                 >
-                  {leaderName}
-                </Typography>
-                <ExpandMoreIcon sx={{ fontSize: 18, color: '#6b7280', flexShrink: 0 }} />
+                  <Box
+                    sx={{
+                      ...selectChipStyles,
+                      backgroundColor: '#f3f4f6',
+                      color: leaderId ? '#374151' : '#6b7280',
+                      opacity: disabled ? 0.6 : 1,
+                      borderRadius: 14,
+                      border: '1px solid #e5e7eb',
+                    }}
+                  >
+                    <Typography
+                      component="span"
+                      sx={{
+                        flexGrow: 1,
+                        minWidth: 0,
+                        fontSize: 13,
+                        textAlign: 'left',
+                        overflow: 'visible',
+                        whiteSpace: 'normal',
+                      }}
+                    >
+                      {leaderName}
+                    </Typography>
+                    <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+                  </Box>
+                </Box>
               </Box>
               <Menu
                 anchorEl={anchor}
@@ -437,6 +442,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                 disablePortal
+                marginThreshold={0}
                 PaperProps={{
                   sx: {
                     fontFamily,
@@ -452,19 +458,18 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   selected={!leaderId}
                   onClick={() => handleLeaderSelect(row, null)}
                 >
-                  <Box
-                    sx={{
-                      ...selectChipStyles,
-                      width: '100%',
-                      backgroundColor: '#f3f4f6',
-                      color: '#6b7280',
-                      cursor: 'default',
-                      transform: 'none',
-                      '&:hover': { opacity: 1, transform: 'none' },
-                    }}
-                  >
-                    Unassigned
-                  </Box>
+                    <Box
+                      sx={{
+                        ...selectChipStyles,
+                        backgroundColor: '#f3f4f6',
+                        color: '#6b7280',
+                        cursor: 'default',
+                        transform: 'none',
+                        '&:hover': { opacity: 1, transform: 'none' },
+                      }}
+                    >
+                      Unassigned
+                    </Box>
                 </DropdownMenuItem>
                 {leaders.map((leader) => (
                   <DropdownMenuItem
@@ -475,7 +480,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                     <Box
                       sx={{
                         ...selectChipStyles,
-                        width: '100%',
                         backgroundColor: '#f3f4f6',
                         color: '#374151',
                         cursor: 'default',
@@ -629,40 +633,43 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           const disabled = updatingIds.has(row.id);
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-              <Box
-                component="button"
-                type="button"
-                onClick={(event) => {
-                  if (!disabled) {
-                    handleStatusMenuOpen(row.id, event);
-                  }
-                }}
-                sx={{
-                  ...selectChipStyles,
-                  width: '100%',
-                  border: 'none',
-                  background: 'none',
-                  justifyContent: 'space-between',
-                  backgroundColor: colors.bg,
-                  color: colors.color,
-                  opacity: disabled ? 0.6 : 1,
-                }}
-              >
-                <Typography
-                  component="span"
-                  sx={{
-                    flexGrow: 1,
-                    minWidth: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    fontSize: 13,
-                    textAlign: 'left',
+              <Box sx={{ width: '100%', px: 1 }}>
+                <Box
+                  component="button"
+                  type="button"
+                  onClick={(event) => {
+                    if (!disabled) {
+                      handleStatusMenuOpen(row.id, event);
+                    }
                   }}
+                  style={{ width: '100%' }}
                 >
-                  {status}
-                </Typography>
-                <ExpandMoreIcon sx={{ fontSize: 16, ml: 0.5 }} />
+                  <Box
+                    sx={{
+                      ...selectChipStyles,
+                      backgroundColor: colors.bg,
+                      color: colors.color,
+                      opacity: disabled ? 0.6 : 1,
+                      borderRadius: 14,
+                      border: '1px solid transparent',
+                    }}
+                  >
+                    <Typography
+                      component="span"
+                      sx={{
+                        flexGrow: 1,
+                        minWidth: 0,
+                        fontSize: 13,
+                        textAlign: 'left',
+                        overflow: 'visible',
+                        whiteSpace: 'normal',
+                      }}
+                    >
+                      {status}
+                    </Typography>
+                    <ExpandMoreIcon sx={{ fontSize: 16 }} />
+                  </Box>
+                </Box>
               </Box>
               <Menu
                 anchorEl={anchor}
@@ -671,6 +678,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                 disablePortal
+                marginThreshold={0}
                 PaperProps={{
                   sx: {
                     fontFamily,

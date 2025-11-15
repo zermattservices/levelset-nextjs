@@ -58,10 +58,6 @@ function formatNumber(value: number): string {
   return new Intl.NumberFormat('en-US').format(value);
 }
 
-function formatMonthLabel(date: Date): string {
-  return date.toLocaleString('en-US', { month: 'long' });
-}
-
 export function DashboardMetricCard({
   variant,
   locationId,

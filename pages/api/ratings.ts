@@ -1,10 +1,9 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { 
-  fetchOverviewData, 
-  fetchPositionData, 
+import {
+  fetchOverviewData,
+  fetchPositionData,
   fetchLeadershipData,
-  fetchPositionsList
 } from '@/lib/ratings-data';
 
 /**

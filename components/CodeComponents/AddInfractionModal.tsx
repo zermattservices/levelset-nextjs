@@ -129,15 +129,15 @@ export function AddInfractionModal({
 }: AddInfractionModalProps) {
   const [infractionDate, setInfractionDate] = React.useState<Date | null>(new Date());
   const [leaderId, setLeaderId] = React.useState("");
-  const [actingLeader, setActingLeader] = React.useState<Employee | null>(null);
-  const [loadingLeader, setLoadingLeader] = React.useState(false);
+  const [, setActingLeader] = React.useState<Employee | null>(null);
+  const [, setLoadingLeader] = React.useState(false);
   const [notified, setNotified] = React.useState(false); // Default to Not notified
   const [infractionType, setInfractionType] = React.useState("");
   const [points, setPoints] = React.useState(0);
   const [notes, setNotes] = React.useState("");
   const [locationName, setLocationName] = React.useState("");
   const [locationOrgId, setLocationOrgId] = React.useState<string | null>(null);
-  const [employees, setEmployees] = React.useState<Employee[]>([]);
+  const [, setEmployees] = React.useState<Employee[]>([]);
   const [leaders, setLeaders] = React.useState<Employee[]>([]);
   const [infractionsRubricOptions, setInfractionsRubricOptions] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);

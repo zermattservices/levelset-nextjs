@@ -73,8 +73,6 @@ export function DisciplineActionsTable({
   const [error, setError] = React.useState<string | null>(null);
   const supabase = createSupabaseClient();
 
-  const padY = density === "compact" ? "py-2" : "py-3";
-  
   // Fetch discipline actions from Supabase
   const fetchDisciplineActions = React.useCallback(async () => {
     try {
@@ -108,7 +106,7 @@ export function DisciplineActionsTable({
     } finally {
       setLoading(false);
     }
-  }, [locationId]);
+  }, [locationId, supabase]);
   
   // Initial fetch
   React.useEffect(() => {
