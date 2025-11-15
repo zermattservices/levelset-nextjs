@@ -1,5 +1,6 @@
 import * as React from "react";
 import { createSupabaseClient } from "@/util/supabase/component";
+import { Skeleton, Box } from "@mui/material";
 
 export interface DisciplineAction {
   id: string;
@@ -10,7 +11,6 @@ export interface DisciplineAction {
 }
 
 export interface DisciplineActionsTableProps {
-  orgId: string;
   locationId: string;
   className?: string;
 
@@ -52,7 +52,6 @@ const pointsBadge = (points: number, customClass?: string) => {
 };
 
 export function DisciplineActionsTable({
-  orgId,
   locationId,
   className = "",
   density = "comfortable",
@@ -74,18 +73,15 @@ export function DisciplineActionsTable({
   const [error, setError] = React.useState<string | null>(null);
   const supabase = createSupabaseClient();
 
-  const padY = density === "compact" ? "py-2" : "py-3";
-  
   // Fetch discipline actions from Supabase
   const fetchDisciplineActions = React.useCallback(async () => {
     try {
       setLoading(true);
-      console.log('Fetching discipline actions for org:', orgId, 'location:', locationId);
+      console.log('Fetching discipline actions for location:', locationId);
       
       const { data: actionsData, error: actionsError } = await supabase
         .from('disc_actions_rubric')
         .select('*')
-        .eq('org_id', orgId)
         .eq('location_id', locationId)
         .order('points_threshold', { ascending: true });
         
@@ -110,24 +106,24 @@ export function DisciplineActionsTable({
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId]);
+  }, [locationId, supabase]);
   
   // Initial fetch
   React.useEffect(() => {
-    if (orgId && locationId) {
+    if (locationId) {
       fetchDisciplineActions();
     } else {
       setData([]);
       setLoading(false);
     }
-  }, [orgId, locationId, fetchDisciplineActions]);
+  }, [locationId, fetchDisciplineActions]);
 
   // Real-time subscription disabled - Realtime not enabled on disc_actions_rubric table
   // If you need real-time updates, enable Realtime on the disc_actions_rubric table in Supabase
   // Then uncomment the code below
   /*
   React.useEffect(() => {
-    if (!orgId || !locationId) return;
+    if (!locationId) return;
     
     const supabase = createSupabaseClient();
     const channel = supabase
@@ -137,7 +133,7 @@ export function DisciplineActionsTable({
           event: '*', 
           schema: 'public', 
           table: 'disc_actions_rubric',
-          filter: `org_id=eq.${orgId}`
+          filter: `location_id=eq.${locationId}`
         }, 
         (payload) => {
           console.log('Discipline actions data changed:', payload);
@@ -150,7 +146,7 @@ export function DisciplineActionsTable({
       const supabase = createSupabaseClient();
       supabase.removeChannel(channel);
     };
-  }, [orgId, locationId, fetchDisciplineActions]);
+  }, [locationId, fetchDisciplineActions]);
   */
 
   if (loading && data.length === 0) {
@@ -159,18 +155,29 @@ export function DisciplineActionsTable({
         <table className={`roster-table ${tableClass}`} data-plasmic-name="discipline-actions-table">
           <thead data-plasmic-name="table-header">
             <tr className={headerRowClass} data-plasmic-name="header-row">
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="action-header">Action</th>
-              <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="points-header">Points</th>
-              {showActions && <th className={headerCellClass} style={{ textAlign: 'center' }} data-plasmic-name="actions-header"></th>}
+              <th className={headerCellClass} style={{ textAlign: 'center', padding: '12px' }} data-plasmic-name="action-header">Action</th>
+              <th className={headerCellClass} style={{ textAlign: 'center', padding: '12px' }} data-plasmic-name="points-header">Points</th>
+              {showActions && <th className={headerCellClass} style={{ textAlign: 'center', padding: '12px' }} data-plasmic-name="actions-header"></th>}
             </tr>
           </thead>
           <tbody>
-            {/* Empty rows to show table structure while loading */}
             {Array.from({ length: 5 }).map((_, index) => (
-              <tr key={index} className={rowClass}>
-                <td className={`${actionCellClass || ""} ${cellClass || ""}`}></td>
-                <td className={`centered ${cellClass || ""}`}></td>
-                {showActions && <td className={`centered ${cellClass || ""} ${actionsCellClass || ""}`}></td>}
+              <tr key={`skeleton-${index}`} className={rowClass}>
+                <td className={`${actionCellClass || ""} ${cellClass || ""}`} style={{ padding: '12px' }}>
+                  <Skeleton variant="text" width="80%" height={20} />
+                </td>
+                <td className={`centered ${cellClass || ""}`} style={{ padding: '12px' }}>
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <Skeleton variant="rounded" width={50} height={28} sx={{ borderRadius: 14 }} />
+                  </Box>
+                </td>
+                {showActions && (
+                  <td className={`centered ${cellClass || ""} ${actionsCellClass || ""}`} style={{ padding: '12px' }}>
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <Skeleton variant="rounded" width={80} height={32} sx={{ borderRadius: 8 }} />
+                    </Box>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

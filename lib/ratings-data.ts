@@ -57,7 +57,6 @@ export function getPositionsByArea(area: 'FOH' | 'BOH'): string[] {
  */
 export async function fetchOverviewData(
   supabase: SupabaseClient,
-  orgId: string,
   locationId: string,
   area: 'FOH' | 'BOH'
 ): Promise<EmployeeRatingAggregate[]> {
@@ -68,7 +67,6 @@ export async function fetchOverviewData(
   const { data: allEmployees, error: empError } = await supabase
     .from('employees')
     .select('id, full_name, first_name, last_name')
-    .eq('org_id', orgId)
     .eq('location_id', locationId)
     .eq('active', true)
     .eq(fohBohField, true)
@@ -87,7 +85,6 @@ export async function fetchOverviewData(
       employee:employees!ratings_employee_id_fkey(full_name, first_name, last_name),
       rater:employees!ratings_rater_user_id_fkey(full_name)
     `)
-    .eq('org_id', orgId)
     .eq('location_id', locationId)
     .in('position', positions)
     .order('created_at', { ascending: false });
@@ -223,7 +220,6 @@ export async function fetchOverviewData(
  */
 export async function fetchPositionData(
   supabase: SupabaseClient,
-  orgId: string,
   locationId: string,
   position: string
 ): Promise<EmployeeRatingAggregate[]> {
@@ -238,7 +234,6 @@ export async function fetchPositionData(
   let employeeQuery = supabase
     .from('employees')
     .select('id, full_name, first_name, last_name')
-    .eq('org_id', orgId)
     .eq('location_id', locationId)
     .eq('active', true)
     .eq(fohBohField, true);
@@ -265,7 +260,6 @@ export async function fetchPositionData(
       employee:employees!ratings_employee_id_fkey(full_name, first_name, last_name),
       rater:employees!ratings_rater_user_id_fkey(full_name)
     `)
-    .eq('org_id', orgId)
     .eq('location_id', locationId)
     .eq('position', position)
     .order('created_at', { ascending: false });
@@ -362,7 +356,6 @@ export async function fetchPositionData(
  */
 export async function fetchLeadershipData(
   supabase: SupabaseClient,
-  orgId: string,
   locationId: string,
   area: 'FOH' | 'BOH'
 ): Promise<LeaderRatingAggregate[]> {
@@ -376,7 +369,6 @@ export async function fetchLeadershipData(
       employee:employees!ratings_employee_id_fkey(full_name, first_name, last_name),
       rater:employees!ratings_rater_user_id_fkey(full_name, first_name, last_name)
     `)
-    .eq('org_id', orgId)
     .eq('location_id', locationId)
     .in('position', positions)
     .order('created_at', { ascending: false });
@@ -502,7 +494,6 @@ export async function fetchLeadershipData(
  */
 export async function fetchPositionsList(
   supabase: SupabaseClient,
-  orgId: string,
   locationId: string,
   area: 'FOH' | 'BOH'
 ): Promise<string[]> {
@@ -511,7 +502,6 @@ export async function fetchPositionsList(
   const { data, error } = await supabase
     .from('ratings')
     .select('position')
-    .eq('org_id', orgId)
     .eq('location_id', locationId)
     .in('position', expectedPositions);
 
@@ -533,14 +523,12 @@ export async function fetchPositionsList(
  */
 export async function fetchBig5Labels(
   supabase: SupabaseClient,
-  orgId: string,
   locationId: string,
   position: string
 ): Promise<PositionBig5Labels | null> {
   const { data, error } = await supabase
     .from('position_big5_labels')
     .select('*')
-    .eq('org_id', orgId)
     .eq('location_id', locationId)
     .eq('position', position)
     .single();

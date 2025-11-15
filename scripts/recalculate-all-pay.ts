@@ -1,6 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { calculatePay, shouldCalculatePay, CFA_BUDA_LOCATION_IDS } from '../lib/pay-calculator';
 import type { Employee } from '../lib/supabase.types';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -10,7 +15,12 @@ if (!supabaseUrl || !supabaseKey) {
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
 
 async function recalculateAllPay() {
   console.log('🚀 Starting pay recalculation for CFA Buda locations...\n');
@@ -64,7 +74,7 @@ async function recalculateAllPay() {
     } else {
       const details = [
         employee.role,
-        employee.is_certified ? 'Certified' : 'Not Certified',
+        employee.certified_status || 'Not Certified',
         employee.availability || 'Available',
       ];
       

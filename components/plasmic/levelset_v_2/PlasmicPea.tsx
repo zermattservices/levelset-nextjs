@@ -520,7 +520,6 @@ function PlasmicPea__RenderFunc(props: {
                   density={"comfortable"}
                   locationId={"67e00fb2-29f5-41ce-9c1c-93e2f7f392dd"}
                   maxWidth={"100%"}
-                  orgId={"54b9864f-9df9-4a15-a209-7b99e1c274f4"}
                   width={"100%"}
                 />
               </div>

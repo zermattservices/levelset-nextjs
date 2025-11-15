@@ -27,28 +27,26 @@ const ORG_ID = '54b9864f-9df9-4a15-a209-7b99e1c274f4';
 
 // All positions that need Big 5 labels
 const ALL_POSITIONS = [
-  // FOH
-  'iPOS',
-  'Host | Anfitrión',
-  'OMD',
-  'Runner',
-  'Bagging | Embolsado',
-  'Drinks 1/3 | Bebidas 1/3',
-  'Drinks 2 | Bebidas 2',
-  '3H Week FOH',
-  'Trainer FOH',
-  'FOH Team Lead',
-  // BOH
-  'Breader | Empanizar',
-  'Secondary | Secundario',
-  'Fries | Papas',
-  'Primary | Primario',
-  'Machines | Maquinas',
-  'Prep',
-  '3H Week BOH',
-  'Trainer BOH',
-  'BOH Team Lead'
-];
+  { name: 'iPOS', zone: 'FOH' },
+  { name: 'Host', zone: 'FOH' },
+  { name: 'OMD', zone: 'FOH' },
+  { name: 'Runner', zone: 'FOH' },
+  { name: 'Bagging', zone: 'FOH' },
+  { name: 'Drinks 1/3', zone: 'FOH' },
+  { name: 'Drinks 2', zone: 'FOH' },
+  { name: '3H Week FOH', zone: 'FOH' },
+  { name: 'Trainer FOH', zone: 'FOH' },
+  { name: 'FOH Team Lead', zone: 'FOH' },
+  { name: 'Breader', zone: 'BOH' },
+  { name: 'Secondary', zone: 'BOH' },
+  { name: 'Fries', zone: 'BOH' },
+  { name: 'Primary', zone: 'BOH' },
+  { name: 'Machines', zone: 'BOH' },
+  { name: 'Prep', zone: 'BOH' },
+  { name: '3H Week BOH', zone: 'BOH' },
+  { name: 'Trainer BOH', zone: 'BOH' },
+  { name: 'BOH Team Lead', zone: 'BOH' }
+] as const;
 
 async function generateSQL() {
   console.log('\n📋 Big 5 Labels SQL Generator\n');
@@ -59,7 +57,7 @@ async function generateSQL() {
   const inserts: string[] = [];
 
   for (const position of ALL_POSITIONS) {
-    console.log(`\n📍 Position: ${position}`);
+    console.log(`\n📍 Position: ${position.name} (${position.zone})`);
     console.log('   (Press Enter to skip if this position doesn\'t exist in your sheet)\n');
     
     const labelsInput = await question(`   Enter 5 labels separated by commas: `);
@@ -79,12 +77,13 @@ async function generateSQL() {
     // Generate INSERT for both locations (Buda and West Buda have same positions/labels)
     Object.entries(LOCATIONS).forEach(([locationName, locationId]) => {
       inserts.push(`
--- ${position} @ ${locationName}
-INSERT INTO position_big5_labels (org_id, location_id, position, label_1, label_2, label_3, label_4, label_5)
+-- ${position.name} @ ${locationName}
+INSERT INTO position_big5_labels (org_id, location_id, position, zone, label_1, label_2, label_3, label_4, label_5)
 VALUES (
   '${ORG_ID}',
   '${locationId}',
-  '${position}',
+  '${position.name}',
+  '${position.zone}',
   '${labels[0]}',
   '${labels[1]}',
   '${labels[2]}',
@@ -93,6 +92,7 @@ VALUES (
 )
 ON CONFLICT (org_id, location_id, position) 
 DO UPDATE SET
+  zone = EXCLUDED.zone,
   label_1 = EXCLUDED.label_1,
   label_2 = EXCLUDED.label_2,
   label_3 = EXCLUDED.label_3,

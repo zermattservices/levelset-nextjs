@@ -151,7 +151,8 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
         <div className={classNames(projectcss.all, sty.freeBox___5Vowa)}>
           <LevelsetButton
             className={classNames("__wab_instance", sty.levelsetButton__ouwyl)}
-            color={"clear"}
+            color={"softSand"}
+            isDisabled={true}
             size={"compact"}
           >
             <div
@@ -177,12 +178,13 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
                 sty.text__i5EJo
               )}
             >
-              {"PEA"}
+              {"Positional Excellence"}
             </div>
           </LevelsetButton>
           <LevelsetButton
             className={classNames("__wab_instance", sty.levelsetButton__elre)}
-            color={"clear"}
+            color={"softSand"}
+            isDisabled={true}
             size={"compact"}
           >
             <div
@@ -208,12 +210,13 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
                 sty.text__tyFVx
               )}
             >
-              {"APS"}
+              {"Discipline"}
             </div>
           </LevelsetButton>
           <LevelsetButton
             className={classNames("__wab_instance", sty.levelsetButton___3Cma9)}
-            color={"clear"}
+            color={"softSand"}
+            isDisabled={true}
             size={"compact"}
           >
             <div
@@ -228,7 +231,8 @@ function PlasmicDashboardSubmenu__RenderFunc(props: {
           </LevelsetButton>
           <LevelsetButton
             className={classNames("__wab_instance", sty.levelsetButton__flfMl)}
-            color={"clear"}
+            color={"softSand"}
+            isDisabled={true}
             size={"compact"}
           >
             <div

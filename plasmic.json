@@ -566,6 +566,19 @@
           "scheme": "blackbox",
           "componentType": "page",
           "path": "/positional-excellence-classic"
+        },
+        {
+          "id": "Plh-Ei-tZDG1",
+          "name": "DrawerOldV2",
+          "type": "managed",
+          "projectId": "eNCsaJXBZ9ykYnmvxCb8Zx",
+          "renderModuleFilePath": "plasmic/levelset_v_2/PlasmicDrawerOldV2.tsx",
+          "importSpec": {
+            "modulePath": "DrawerOldV2.tsx"
+          },
+          "cssFilePath": "plasmic/levelset_v_2/PlasmicDrawerOldV2.module.css",
+          "scheme": "blackbox",
+          "componentType": "component"
         }
       ],
       "icons": [
@@ -939,6 +952,156 @@
           "name": "PEAClassic",
           "displayName": "PEAClassic",
           "componentImportPath": "./components/CodeComponents/PEAClassic"
+        },
+        {
+          "id": "iEXTq_V60EEp",
+          "name": "CenteredLoadingSpinner",
+          "displayName": "CenteredLoadingSpinner",
+          "componentImportPath": "./components/CodeComponents/CenteredLoadingSpinner"
+        },
+        {
+          "id": "7g6L6QLk5rg1",
+          "name": "TableSkeleton",
+          "displayName": "TableSkeleton",
+          "componentImportPath": "./components/CodeComponents/Skeletons/TableSkeleton"
+        },
+        {
+          "id": "gBPiNEHktKLm",
+          "name": "EmployeeTableSkeleton",
+          "displayName": "EmployeeTableSkeleton",
+          "componentImportPath": "./components/CodeComponents/Skeletons/EmployeeTableSkeleton"
+        },
+        {
+          "id": "qtfJvIuCgLYP",
+          "name": "DisciplineTableSkeleton",
+          "displayName": "DisciplineTableSkeleton",
+          "componentImportPath": "./components/CodeComponents/Skeletons/DisciplineTableSkeleton"
+        },
+        {
+          "id": "O15TBjl__bQv",
+          "name": "CardSkeleton",
+          "displayName": "CardSkeleton",
+          "componentImportPath": "./components/CodeComponents/Skeletons/CardSkeleton"
+        },
+        {
+          "id": "-RvWf8LWsy52",
+          "name": "ScoreboardSkeleton",
+          "displayName": "ScoreboardSkeleton",
+          "componentImportPath": "./components/CodeComponents/Skeletons/ScoreboardSkeleton"
+        },
+        {
+          "id": "hoSoBbznWutx",
+          "name": "MuiDrawerV2",
+          "displayName": "MuiDrawerV2",
+          "componentImportPath": "./components/CodeComponents/MuiDrawerV2"
+        },
+        {
+          "id": "7IXR_cgrI9Br",
+          "name": "DrawerHeader",
+          "displayName": "DrawerHeader",
+          "componentImportPath": "./components/CodeComponents/DrawerComponents/DrawerHeader"
+        },
+        {
+          "id": "w01kmtXn8hJ8",
+          "name": "DrawerContent",
+          "displayName": "DrawerContent",
+          "componentImportPath": "./components/CodeComponents/DrawerComponents/DrawerContent"
+        },
+        {
+          "id": "rJl_U9tlY2dJ",
+          "name": "DrawerFooter",
+          "displayName": "DrawerFooter",
+          "componentImportPath": "./components/CodeComponents/DrawerComponents/DrawerFooter"
+        },
+        {
+          "id": "FgVX7wKq3AJr",
+          "name": "SlideoutListItem",
+          "displayName": "SlideoutListItem",
+          "componentImportPath": "./components/CodeComponents/DrawerComponents/SlideoutListItem"
+        },
+        {
+          "id": "3_XXEMijZcI9",
+          "name": "DrawerTabContainer",
+          "displayName": "DrawerTabContainer",
+          "componentImportPath": "./components/CodeComponents/DrawerTabContainer"
+        },
+        {
+          "id": "s8UZIokCXXk7",
+          "name": "EmployeeModal",
+          "displayName": "EmployeeModal",
+          "componentImportPath": "./components/CodeComponents/EmployeeModal"
+        },
+        {
+          "id": "Jk0Vw7pa-Bba",
+          "name": "InfractionEditModal",
+          "displayName": "InfractionEditModal",
+          "componentImportPath": "./components/CodeComponents/InfractionEditModal"
+        },
+        {
+          "id": "WFvJJA48ZqSi",
+          "name": "RecordActionModal",
+          "displayName": "RecordActionModal",
+          "componentImportPath": "./components/CodeComponents/RecordActionModal"
+        },
+        {
+          "id": "DCoGrXYcTP13",
+          "name": "RecommendedActions",
+          "displayName": "RecommendedActions",
+          "componentImportPath": "./components/CodeComponents/RecommendedActions"
+        },
+        {
+          "id": "p5JIJndPb_tu",
+          "name": "DisciplineNotifications",
+          "displayName": "DisciplineNotifications",
+          "componentImportPath": "./components/CodeComponents/RecommendedActions"
+        },
+        {
+          "id": "nH3wzl05daEu",
+          "name": "AddInfractionModal",
+          "displayName": "AddInfractionModal",
+          "componentImportPath": "./components/CodeComponents/AddInfractionModal"
+        },
+        {
+          "id": "OOSNuN0W_-2F",
+          "name": "AddActionModal",
+          "displayName": "AddActionModal",
+          "componentImportPath": "./components/CodeComponents/AddActionModal"
+        },
+        {
+          "id": "hGbtHsvKcvZS",
+          "name": "EditActionModal",
+          "displayName": "EditActionModal",
+          "componentImportPath": "./components/CodeComponents/EditActionModal"
+        },
+        {
+          "id": "VbQnBNLaJ-GU",
+          "name": "DashboardMetricCard",
+          "displayName": "DashboardMetricCard",
+          "componentImportPath": "./components/CodeComponents/DashboardMetricCard"
+        },
+        {
+          "id": "xGtCjBxqS8e8",
+          "name": "LocationSelectDropdown",
+          "displayName": "LocationSelectDropdown",
+          "componentImportPath": "./components/CodeComponents/LocationSelectDropdown"
+        },
+        {
+          "id": "r7jw9gr3SmiF",
+          "name": "LocationSelectModal",
+          "displayName": "LocationSelectModal",
+          "componentImportPath": "./components/CodeComponents/LocationSelectModal"
+        },
+        {
+          "id": "TyW2jq7R_8jA",
+          "name": "LocationProvider",
+          "displayName": "LocationProvider",
+          "componentImportPath": "./components/CodeComponents/LocationContext"
+        },
+        {
+          "id": "IAbCzhbQ8CvC",
+          "name": "EvaluationsTableSkeleton",
+          "displayName": "EvaluationsTableSkeleton",
+          "componentImportPath": "./components/CodeComponents/Skeletons/EvaluationsTableSkeleton"
         }
       ],
       "splitsProviderFilePath": "",

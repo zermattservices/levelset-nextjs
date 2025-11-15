@@ -18,6 +18,7 @@ export function LoginPageForm({
   const [password, setPassword] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [googleLoading, setGoogleLoading] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   const supabase = createSupabaseClient();
 
@@ -25,28 +26,36 @@ export function LoginPageForm({
     e.preventDefault();
     
     if (!email || !password) {
-      onError?.("Please enter both email and password");
+      const message = "Please enter both email and password";
+      setErrorMessage(message);
+      onError?.(message);
       return;
     }
 
+    setErrorMessage(null);
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
-        onError?.(error.message);
+        const message = error.message || "Incorrect email or password";
+        setErrorMessage(message);
+        onError?.(message);
       } else {
+        setErrorMessage(null);
         onSuccess?.();
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Sign in failed";
-      onError?.(errorMessage);
+      const message = error instanceof Error ? error.message : "Sign in failed";
+      setErrorMessage(message);
+      onError?.(message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setErrorMessage(null);
     setGoogleLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({ 
@@ -57,13 +66,17 @@ export function LoginPageForm({
       });
       
       if (error) {
-        onError?.(error.message);
+        const message = error.message || "Google sign-in failed";
+        setErrorMessage(message);
+        onError?.(message);
       } else {
+        setErrorMessage(null);
         onSuccess?.();
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Google sign in failed";
-      onError?.(errorMessage);
+      const message = error instanceof Error ? error.message : "Google sign-in failed";
+      setErrorMessage(message);
+      onError?.(message);
     } finally {
       setGoogleLoading(false);
     }
@@ -157,6 +170,26 @@ export function LoginPageForm({
           Welcome back! Please enter your details.
         </p>
 
+        {errorMessage && (
+          <div
+            data-plasmic-name="error-banner"
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              marginBottom: '16px',
+              padding: '12px 16px',
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fca5a5',
+              borderRadius: '8px',
+              color: '#b91c1c',
+              fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
+              fontSize: '14px',
+            }}
+          >
+            {errorMessage}
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleEmailSignIn} style={{ width: '100%', maxWidth: '400px' }}>
           {/* Email Input */}
@@ -171,7 +204,7 @@ export function LoginPageForm({
                 width: '100%',
                 padding: '12px 16px',
                 fontSize: '16px',
-                border: '1px solid #e5e7eb',
+                border: '1px solid ' + (errorMessage ? '#fca5a5' : '#e5e7eb'),
                 borderRadius: '8px',
                 backgroundColor: '#ffffff',
                 color: '#111827',
@@ -189,7 +222,7 @@ export function LoginPageForm({
                 e.target.style.boxShadow = '0 0 0 3px rgba(49, 102, 74, 0.1)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = '#e5e7eb';
+                e.target.style.borderColor = errorMessage ? '#fca5a5' : '#e5e7eb';
                 e.target.style.boxShadow = 'none';
               }}
               data-plasmic-name="email-input"
@@ -208,7 +241,7 @@ export function LoginPageForm({
                 width: '100%',
                 padding: '12px 16px',
                 fontSize: '16px',
-                border: '1px solid #e5e7eb',
+                border: '1px solid ' + (errorMessage ? '#fca5a5' : '#e5e7eb'),
                 borderRadius: '8px',
                 backgroundColor: '#ffffff',
                 color: '#111827',
@@ -226,7 +259,7 @@ export function LoginPageForm({
                 e.target.style.boxShadow = '0 0 0 3px rgba(49, 102, 74, 0.1)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = '#e5e7eb';
+                e.target.style.borderColor = errorMessage ? '#fca5a5' : '#e5e7eb';
                 e.target.style.boxShadow = 'none';
               }}
               data-plasmic-name="password-input"

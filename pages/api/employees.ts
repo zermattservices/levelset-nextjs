@@ -2,6 +2,8 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { Employee } from '@/lib/supabase.types';
 import { calculatePay, shouldCalculatePay } from '@/lib/pay-calculator';
+import { allPositionsQualified } from '@/lib/certification-utils';
+import { fetchEmployeePositionAverages } from '@/lib/fetch-position-averages';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Handle CORS preflight
@@ -17,16 +19,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'GET') {
       // Fetch employees
-      const { org_id, location_id } = req.query;
+      const { location_id } = req.query;
       
-      if (!org_id || !location_id) {
-        return res.status(400).json({ error: 'org_id and location_id are required' });
+      if (!location_id) {
+        return res.status(400).json({ error: 'location_id is required' });
       }
 
       const { data: employees, error } = await supabase
         .from('employees')
         .select('*')
-        .eq('org_id', org_id)
         .eq('location_id', location_id)
         .eq('active', true)
         .order('full_name');
@@ -36,12 +37,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Failed to fetch employees' });
       }
 
+      // Add cache headers for better performance (cache for 60 seconds, stale-while-revalidate for 120 seconds)
+      res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+
       return res.status(200).json({ employees: employees || [] });
     }
 
     if (req.method === 'POST') {
       // Update employee
-      const { intent, id, role, is_certified, is_foh, is_boh, availability } = req.body;
+      const { intent, id, role, is_certified, certified_status, is_foh, is_boh, availability } = req.body;
 
       if (intent !== 'update' || !id) {
         return res.status(400).json({ error: 'Invalid request parameters' });
@@ -60,6 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const updateData: Partial<Employee> = {};
+      const previousStatus = currentEmployee.certified_status || 'Not Certified';
       
       // Track if any pay-affecting fields changed
       let payFieldsChanged = false;
@@ -68,8 +73,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         updateData.role = role;
         payFieldsChanged = true;
       }
-      if (is_certified !== undefined) {
-        updateData.is_certified = is_certified === 'true' || is_certified === true;
+      // Handle both old is_certified (boolean) and new certified_status (enum) for backwards compatibility
+      if (certified_status !== undefined) {
+        updateData.certified_status = certified_status;
+        payFieldsChanged = true;
+      } else if (is_certified !== undefined) {
+        // Legacy: convert boolean to certification status
+        updateData.certified_status = (is_certified === 'true' || is_certified === true) ? 'Certified' : 'Not Certified';
         payFieldsChanged = true;
       }
       if (is_foh !== undefined) {
@@ -112,6 +122,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Failed to update employee' });
       }
 
+      if (
+        previousStatus === 'Not Certified' &&
+        data?.certified_status === 'Pending'
+      ) {
+        await ensureEvaluationForPending(supabase, data as Employee);
+      }
+
       return res.status(200).json({ employee: data });
     }
 
@@ -119,5 +136,68 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error('API error:', error);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+function addMonths(date: Date, months: number): Date {
+  const clone = new Date(date);
+  clone.setMonth(clone.getMonth() + months);
+  return clone;
+}
+
+function formatMonthLabel(date: Date): string {
+  return date.toLocaleString('en-US', { month: 'long' });
+}
+
+async function ensureEvaluationForPending(supabase: ReturnType<typeof createServerSupabaseClient>, employee: Employee) {
+  try {
+    const { data: existing } = await supabase
+      .from('evaluations')
+      .select('id')
+      .eq('employee_id', employee.id)
+      .in('status', ['Planned', 'Scheduled'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const averages = await fetchEmployeePositionAverages([employee], supabase);
+    const positions = averages[0]?.positions || {};
+    const ratingStatus = Object.keys(positions).length > 0 && allPositionsQualified(positions);
+
+    if (existing) {
+      await supabase
+        .from('evaluations')
+        .update({
+          rating_status: ratingStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existing.id);
+      return;
+    }
+
+    const evaluationMonth = formatMonthLabel(addMonths(new Date(), 1));
+
+    const { error: insertError } = await supabase.from('evaluations').insert({
+      employee_id: employee.id,
+      employee_name: employee.full_name,
+      location_id: employee.location_id,
+      org_id: employee.org_id,
+      leader_id: null,
+      leader_name: null,
+      evaluation_date: null,
+      month: evaluationMonth,
+      role: employee.role,
+      status: 'Planned',
+      rating_status: ratingStatus,
+      state_before: 'Pending',
+      state_after: null,
+      notes: null,
+    });
+
+    if (insertError) {
+      console.error('[Employees API] Failed to create evaluation record:', insertError);
+    }
+  } catch (error) {
+    console.error('[Employees API] Unexpected error while creating evaluation:', error);
   }
 }

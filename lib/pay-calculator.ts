@@ -3,7 +3,7 @@
  * Based on 2025 Pay Ranges chart
  */
 
-import type { Employee, AvailabilityType } from './supabase.types';
+import type { Employee, AvailabilityType, CertificationStatus } from './supabase.types';
 
 // CFA Buda and CFA West Buda location IDs
 // These locations use the special pay calculation logic
@@ -54,6 +54,14 @@ const CFA_BUDA_PAY_STRUCTURE: PayStructure = {
 };
 
 /**
+ * Helper function to determine if an employee counts as "certified" for pay purposes
+ * Certified and PIP statuses count as certified, Not Certified and Pending do not
+ */
+function isCertifiedForPay(certifiedStatus?: CertificationStatus): boolean {
+  return certifiedStatus === 'Certified' || certifiedStatus === 'PIP';
+}
+
+/**
  * Calculate pay for an employee based on CFA Buda pay structure
  * 
  * Rules:
@@ -62,11 +70,11 @@ const CFA_BUDA_PAY_STRUCTURE: PayStructure = {
  * - If both FOH and BOH, use BOH (higher pay)
  * - Trainer pay varies by availability only (ignore FOH/BOH)
  * - Leadership (Team Leader, Director, Executive) ignore both availability and FOH/BOH
- * - Certified employees get higher pay across all roles
+ * - Certified/PIP employees get higher pay across all roles
  */
 export function calculatePay(employee: Employee): number | null {
   const role = employee.role?.trim();
-  const isCertified = employee.is_certified === true;
+  const isCertified = isCertifiedForPay(employee.certified_status);
   const availability = employee.availability || 'Available';
   const isFoh = employee.is_foh === true;
   const isBoh = employee.is_boh === true;
@@ -162,7 +170,7 @@ export function shouldCalculatePay(locationId: string): boolean {
  */
 export function getPayCalculationSummary(employee: Employee): string {
   const role = employee.role?.trim().toLowerCase();
-  const isCertified = employee.is_certified === true;
+  const isCertified = isCertifiedForPay(employee.certified_status);
   const availability = employee.availability || 'Available';
   const isFoh = employee.is_foh === true;
   const isBoh = employee.is_boh === true;
@@ -178,7 +186,8 @@ export function getPayCalculationSummary(employee: Employee): string {
     parts.push(`Availability: ${availability}`);
   }
 
-  parts.push(isCertified ? 'Certified' : 'Not Certified');
+  parts.push(`Status: ${employee.certified_status || 'Not Certified'}`);
+  parts.push(`Pay Level: ${isCertified ? 'Certified' : 'Starting'}`);
   parts.push(`Pay: $${calculatePay(employee)?.toFixed(2) || 'N/A'}`);
 
   return parts.join(' | ');

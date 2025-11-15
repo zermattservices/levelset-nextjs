@@ -42,7 +42,6 @@ export default async function handler(
 
   try {
     const {
-      orgId,
       locationId,
       startDate,
       endDate,
@@ -51,9 +50,9 @@ export default async function handler(
       searchText,
     } = req.query;
 
-    console.log('[Analytics API] Request params:', { orgId, locationId, startDate, endDate, showFOH, showBOH, searchText });
+    console.log('[Analytics API] Request params:', { locationId, startDate, endDate, showFOH, showBOH, searchText });
 
-    if (!orgId || !locationId || !startDate || !endDate) {
+    if (!locationId || !startDate || !endDate) {
       console.error('[Analytics API] Missing required parameters');
       return res.status(400).json({ error: 'Missing required parameters' });
     }
@@ -101,7 +100,6 @@ export default async function handler(
         employees:employees!ratings_employee_id_fkey(id, full_name, first_name, last_name, role),
         rater:employees!ratings_rater_user_id_fkey(id, full_name, first_name, last_name)
       `)
-      .eq('org_id', orgId as string)
       .eq('location_id', locationId as string)
       .gte('created_at', startDateObj.toISOString())
       .lte('created_at', endDateObj.toISOString());
@@ -247,7 +245,6 @@ export default async function handler(
           employees:employees!ratings_employee_id_fkey(id, full_name, first_name, last_name, role),
           rater:employees!ratings_rater_user_id_fkey(id, full_name, first_name, last_name)
         `)
-        .eq('org_id', orgId as string)
         .eq('location_id', locationId as string)
         .gte('created_at', priorStart.toISOString())
         .lt('created_at', priorEnd.toISOString());

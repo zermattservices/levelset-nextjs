@@ -22,6 +22,31 @@ import { FullPEAScoreboard } from "./components/CodeComponents/FullPEAScoreboard
 import { PEAClassic } from "./components/CodeComponents/PEAClassic";
 import { PositionalRatings } from "./components/CodeComponents/PositionalRatings";
 import { DrawerV2 } from "./components/CodeComponents/DrawerV2";
+import { MuiDrawerV2 } from "./components/CodeComponents/MuiDrawerV2";
+import { DrawerHeader } from "./components/CodeComponents/DrawerComponents/DrawerHeader";
+import { DrawerContent } from "./components/CodeComponents/DrawerComponents/DrawerContent";
+import { DrawerFooter } from "./components/CodeComponents/DrawerComponents/DrawerFooter";
+import { SlideoutListItem } from "./components/CodeComponents/DrawerComponents/SlideoutListItem";
+import { DrawerTabContainer } from "./components/CodeComponents/DrawerTabContainer";
+import { EmployeeModal } from "./components/CodeComponents/EmployeeModal";
+import { InfractionEditModal } from "./components/CodeComponents/InfractionEditModal";
+import { AddInfractionModal } from "./components/CodeComponents/AddInfractionModal";
+import { AddActionModal } from "./components/CodeComponents/AddActionModal";
+import { EditActionModal } from "./components/CodeComponents/EditActionModal";
+import { RecordActionModal } from "./components/CodeComponents/RecordActionModal";
+import { DisciplineNotifications } from "./components/CodeComponents/RecommendedActions";
+import { DismissConfirmationModal } from "./components/CodeComponents/DismissConfirmationModal";
+import { CenteredLoadingSpinner } from "./components/CodeComponents/CenteredLoadingSpinner";
+import { TableSkeleton } from "./components/CodeComponents/Skeletons/TableSkeleton";
+import { EmployeeTableSkeleton } from "./components/CodeComponents/Skeletons/EmployeeTableSkeleton";
+import { DisciplineTableSkeleton } from "./components/CodeComponents/Skeletons/DisciplineTableSkeleton";
+import { EvaluationsTableSkeleton } from "./components/CodeComponents/Skeletons/EvaluationsTableSkeleton";
+import { CardSkeleton } from "./components/CodeComponents/Skeletons/CardSkeleton";
+import { ScoreboardSkeleton } from "./components/CodeComponents/Skeletons/ScoreboardSkeleton";
+import { DashboardMetricCard } from "./components/CodeComponents/DashboardMetricCard";
+import { LocationProvider } from "./components/CodeComponents/LocationContext";
+import { LocationSelectDropdown } from "./components/CodeComponents/LocationSelectDropdown";
+import { LocationSelectModal } from "./components/CodeComponents/LocationSelectModal";
 
 const plasmicProjectId = process.env.PLASMIC_PROJECT_ID ?? "eNCsaJXBZ9ykYnmvxCb8Zx";
 const plasmicApiToken = process.env.PLASMIC_API_TOKEN ?? "530xINgmwEfDE5DLWFsVEhxzQTgaIBlZBKghKbN99LDMGiAGgqP4WMkLadhDhIRqCVPLbJjWCVIh4tGDJg";
@@ -49,6 +74,14 @@ PLASMIC.registerGlobalContext(SupabaseUserSession, {
     }
   },
   importPath: "./components/CodeComponents/SupabaseUserSession",
+});
+
+// Register LocationProvider global context
+PLASMIC.registerGlobalContext(LocationProvider, {
+  name: "LocationProvider",
+  providesData: true,
+  props: {},
+  importPath: "./components/CodeComponents/LocationContext",
 });
 
 // Register RedirectIf component
@@ -79,15 +112,14 @@ PLASMIC.registerComponent(DisciplineTable, {
   displayName: "Discipline Table",
   // @ts-ignore - Complex Plasmic registration type
   props: {
-    orgId: {
-      type: "string",
-      defaultValue: "default-org",
-      description: "Organization ID for filtering discipline data"
-    },
     locationId: {
       type: "string", 
       defaultValue: "default-location",
       description: "Location ID for filtering discipline data"
+    },
+    currentUserId: {
+      type: "string",
+      description: "Current auth user ID for passing to modals"
     },
     className: "string",
     density: {
@@ -130,11 +162,6 @@ PLASMIC.registerComponent(DisciplineActionsTable, {
   name: "DisciplineActionsTable",
   displayName: "Discipline Actions Table",
   props: {
-    orgId: {
-      type: "string",
-      defaultValue: "default-org",
-      description: "Organization ID for filtering discipline actions"
-    },
     locationId: {
       type: "string", 
       defaultValue: "default-location",
@@ -161,11 +188,6 @@ PLASMIC.registerComponent(RosterTable, {
   name: "RosterTable",
   displayName: "Roster Table",
   props: {
-    orgId: {
-      type: "string",
-      defaultValue: "default-org",
-      description: "Organization ID for filtering employee data"
-    },
     locationId: {
       type: "string",
       defaultValue: "default-location", 
@@ -249,6 +271,22 @@ PLASMIC.registerComponent(RosterTable, {
       ],
       description: "Called when employee role is changed"
     },
+    onCertifiedStatusChange: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "status", type: "string" }
+      ],
+      description: "Called when certification status is changed"
+    },
+    onAvailabilityChange: {
+      type: "eventHandler",
+      argTypes: [
+        { name: "id", type: "string" },
+        { name: "availability", type: "string" }
+      ],
+      description: "Called when availability is changed"
+    },
     onEdit: {
       type: "eventHandler",
       argTypes: [{ name: "id", type: "string" }],
@@ -290,6 +328,75 @@ PLASMIC.registerComponent(Scoreboard, {
     bundleUrl: "string",
   },
   importPath: "./components/CodeComponents/Scoreboard",
+});
+
+// Register DashboardMetricCard component
+PLASMIC.registerComponent(DashboardMetricCard, {
+  name: "DashboardMetricCard",
+  displayName: "Dashboard Metric Card",
+  props: {
+    variant: {
+      type: "choice",
+      options: [
+        { label: "Positional Excellence", value: "positional-excellence" },
+        { label: "Discipline Points", value: "discipline-points" },
+      ],
+      defaultValue: "positional-excellence",
+      description: "Select which metric data to display",
+    },
+    locationId: {
+      type: "string",
+      description: "Override the location ID (defaults to the signed-in user's location)",
+    },
+    linkHref: {
+      type: "string",
+      description: "Optional Next.js route to navigate to when the card is clicked",
+    },
+    onClick: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Triggered when the metric card is clicked (overrides link behavior when provided)",
+    },
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DashboardMetricCard",
+});
+
+// Register LocationSelectDropdown component
+PLASMIC.registerComponent(LocationSelectDropdown, {
+  name: "LocationSelectDropdown",
+  displayName: "Location Select Dropdown",
+  props: {
+    label: {
+      type: "string",
+      defaultValue: "Location",
+    },
+    placeholder: {
+      type: "string",
+      defaultValue: "Select a location",
+    },
+    fullWidth: {
+      type: "boolean",
+      defaultValue: false,
+    },
+    showLabel: {
+      type: "boolean",
+      defaultValue: true,
+    },
+    disabled: "boolean",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/LocationSelectDropdown",
+});
+
+// Register LocationSelectModal component
+PLASMIC.registerComponent(LocationSelectModal, {
+  name: "LocationSelectModal",
+  displayName: "Location Select Modal",
+  props: {
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/LocationSelectModal",
 });
 
 // Register ScoreboardTable component
@@ -503,11 +610,6 @@ PLASMIC.registerComponent(PEAClassic, {
   name: "PEAClassic",
   displayName: "PEA Classic",
   props: {
-    orgId: {
-      type: "string",
-      defaultValue: "54b9864f-9df9-4a15-a209-7b99e1c274f4",
-      description: "Organization ID"
-    },
     locationId: {
       type: "string",
       defaultValue: "67e00fb2-29f5-41ce-9c1c-93e2f7f392dd",
@@ -555,11 +657,6 @@ PLASMIC.registerComponent(PositionalRatings, {
   name: "PositionalRatings",
   displayName: "Positional Ratings",
   props: {
-    orgId: {
-      type: "string",
-      defaultValue: "54b9864f-9df9-4a15-a209-7b99e1c274f4",
-      description: "Organization ID"
-    },
     locationId: {
       type: "string",
       defaultValue: "67e00fb2-29f5-41ce-9c1c-93e2f7f392dd",
@@ -790,4 +887,720 @@ PLASMIC.registerComponent(DrawerV2, {
     }
   },
   importPath: "./components/CodeComponents/DrawerV2",
+});
+
+// Register CenteredLoadingSpinner component - Global loading spinner with overlay
+PLASMIC.registerComponent(CenteredLoadingSpinner, {
+  name: "CenteredLoadingSpinner",
+  displayName: "Centered Loading Spinner",
+  props: {
+    className: "string",
+    size: {
+      type: "number",
+      defaultValue: 48,
+      description: "Size of the spinner in pixels"
+    },
+    color: {
+      type: "string",
+      defaultValue: "#31664a",
+      description: "Color of the spinner"
+    },
+    backgroundColor: {
+      type: "string",
+      defaultValue: "rgba(255, 255, 255, 0.8)",
+      description: "Background overlay color"
+    },
+    opacity: {
+      type: "number",
+      defaultValue: 0.8,
+      description: "Opacity of the background overlay"
+    },
+    children: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    showChildren: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Show children instead of spinner (for LoadingBoundary compatibility)"
+    }
+  },
+  importPath: "./components/CodeComponents/CenteredLoadingSpinner",
+});
+
+// Register TableSkeleton component - Generic table loading skeleton
+PLASMIC.registerComponent(TableSkeleton, {
+  name: "TableSkeleton",
+  displayName: "Table Skeleton",
+  props: {
+    className: "string",
+    rows: {
+      type: "number",
+      defaultValue: 10,
+      description: "Number of skeleton rows to display"
+    },
+    columns: {
+      type: "number",
+      defaultValue: 5,
+      description: "Number of columns in the skeleton"
+    },
+    showHeader: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show skeleton header row"
+    },
+    height: {
+      type: "number",
+      defaultValue: 40,
+      description: "Height of each skeleton row"
+    }
+  },
+  importPath: "./components/CodeComponents/Skeletons/TableSkeleton",
+});
+
+// Register EmployeeTableSkeleton component - Roster/Employee table loading skeleton
+PLASMIC.registerComponent(EmployeeTableSkeleton, {
+  name: "EmployeeTableSkeleton",
+  displayName: "Employee Table Skeleton",
+  props: {
+    className: "string",
+    rows: {
+      type: "number",
+      defaultValue: 10,
+      description: "Number of skeleton rows to display"
+    },
+    showActions: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show actions column skeleton"
+    }
+  },
+  importPath: "./components/CodeComponents/Skeletons/EmployeeTableSkeleton",
+});
+
+// Register DisciplineTableSkeleton component - Discipline table loading skeleton
+PLASMIC.registerComponent(DisciplineTableSkeleton, {
+  name: "DisciplineTableSkeleton",
+  displayName: "Discipline Table Skeleton",
+  props: {
+    className: "string",
+    rows: {
+      type: "number",
+      defaultValue: 10,
+      description: "Number of skeleton rows to display"
+    },
+    showActions: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show actions column skeleton"
+    },
+    tableClass: {
+      type: "string",
+      defaultValue: "rounded-2xl overflow-hidden",
+      description: "CSS classes for table wrapper"
+    },
+    headerRowClass: {
+      type: "string",
+      defaultValue: "bg-gray-50",
+      description: "CSS classes for header row"
+    }
+  },
+  importPath: "./components/CodeComponents/Skeletons/DisciplineTableSkeleton",
+});
+
+// Register EvaluationsTableSkeleton component - Evaluations table loading skeleton
+PLASMIC.registerComponent(EvaluationsTableSkeleton, {
+  name: "EvaluationsTableSkeleton",
+  displayName: "Evaluations Table Skeleton",
+  props: {
+    className: "string",
+    rows: {
+      type: "number",
+      defaultValue: 8,
+      description: "Number of skeleton rows to display",
+    },
+  },
+  importPath: "./components/CodeComponents/Skeletons/EvaluationsTableSkeleton",
+});
+
+// Register CardSkeleton component - Card/metric loading skeleton
+PLASMIC.registerComponent(CardSkeleton, {
+  name: "CardSkeleton",
+  displayName: "Card Skeleton",
+  props: {
+    className: "string",
+    count: {
+      type: "number",
+      defaultValue: 1,
+      description: "Number of card skeletons to display"
+    },
+    variant: {
+      type: "choice",
+      options: ["metric", "dashboard", "simple"],
+      defaultValue: "metric",
+      description: "Type of card skeleton"
+    },
+    width: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Width of each card skeleton"
+    },
+    height: {
+      type: "string",
+      defaultValue: "auto",
+      description: "Height of each card skeleton"
+    }
+  },
+  importPath: "./components/CodeComponents/Skeletons/CardSkeleton",
+});
+
+// Register ScoreboardSkeleton component - Scoreboard table loading skeleton
+PLASMIC.registerComponent(ScoreboardSkeleton, {
+  name: "ScoreboardSkeleton",
+  displayName: "Scoreboard Skeleton",
+  props: {
+    className: "string",
+    rows: {
+      type: "number",
+      defaultValue: 15,
+      description: "Number of skeleton rows to display"
+    },
+    columns: {
+      type: "number",
+      defaultValue: 8,
+      description: "Number of columns in the skeleton"
+    },
+    showHeader: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show skeleton header row"
+    }
+  },
+  importPath: "./components/CodeComponents/Skeletons/ScoreboardSkeleton",
+});
+
+// Register MuiDrawerV2 component - MUI-based Drawer to replace Ant Design version
+PLASMIC.registerComponent(MuiDrawerV2, {
+  name: "MuiDrawerV2",
+  displayName: "Drawer V2 (MUI)",
+  props: {
+    // Core props
+    open: {
+      type: "boolean",
+      defaultValue: false
+    },
+    placement: {
+      type: "choice",
+      options: ["top", "right", "bottom", "left"],
+      defaultValue: "right"
+    },
+    children: {
+      type: "slot",
+      defaultValue: {
+        type: "vbox",
+        children: ["Drawer content"]
+      }
+    },
+    title: {
+      type: "slot",
+      defaultValue: "Drawer title"
+    },
+    footer: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    extra: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    closeIcon: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    onOpenChange: {
+      type: "eventHandler",
+      argTypes: [{ name: "open", type: "boolean" }]
+    },
+    
+    // Layout props
+    size: {
+      type: "choice",
+      options: ["default", "large"],
+      defaultValue: "default",
+      description: "Preset size: default (378px) or large (736px)"
+    },
+    width: {
+      type: "string",
+      description: "Custom width (e.g., '500px' or '50%')"
+    },
+    height: {
+      type: "string",
+      description: "Custom height for top/bottom placement"
+    },
+    
+    // Behavior props
+    mask: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show background mask",
+      advanced: true
+    },
+    maskClosable: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Click mask to close",
+      advanced: true
+    },
+    keyboard: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Press ESC to close",
+      advanced: true
+    },
+    destroyOnClose: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Unmount children when closed",
+      advanced: true
+    },
+    autoFocus: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Auto-focus when opened",
+      advanced: true
+    },
+    closable: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Show close button"
+    },
+    zIndex: {
+      type: "number",
+      defaultValue: 1000,
+      description: "Z-index of drawer",
+      advanced: true
+    },
+    
+    // Style class names
+    className: "string",
+    rootClassName: "string",
+    drawerHeaderClassName: "string",
+    drawerBodyClassName: "string",
+    drawerFooterClassName: "string",
+    drawerTitleClassName: "string",
+    drawerMaskClassName: "string",
+    drawerContentWrapperClassName: "string",
+    closeButtonClassName: "string",
+  },
+  states: {
+    open: {
+      type: "writable",
+      valueProp: "open",
+      onChangeProp: "onOpenChange",
+      variableType: "boolean"
+    }
+  },
+  importPath: "./components/CodeComponents/MuiDrawerV2",
+});
+
+// Register DrawerHeader component
+PLASMIC.registerComponent(DrawerHeader, {
+  name: "DrawerHeader",
+  displayName: "Drawer Header",
+  props: {
+    title: {
+      type: "slot",
+      defaultValue: "Header Title"
+    },
+    subtitle: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DrawerComponents/DrawerHeader",
+});
+
+// Register DrawerContent component
+PLASMIC.registerComponent(DrawerContent, {
+  name: "DrawerContent",
+  displayName: "Drawer Content",
+  props: {
+    children: {
+      type: "slot",
+      defaultValue: {
+        type: "vbox",
+        children: ["Content goes here"]
+      }
+    },
+    scrollable: {
+      type: "boolean",
+      defaultValue: true,
+      description: "Enable scrolling for overflow content"
+    },
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DrawerComponents/DrawerContent",
+});
+
+// Register DrawerFooter component
+PLASMIC.registerComponent(DrawerFooter, {
+  name: "DrawerFooter",
+  displayName: "Drawer Footer",
+  props: {
+    children: {
+      type: "slot",
+      defaultValue: {
+        type: "hbox",
+        children: ["Footer content"]
+      }
+    },
+    align: {
+      type: "choice",
+      options: ["left", "center", "right", "space-between"],
+      defaultValue: "right",
+      description: "Alignment of footer content"
+    },
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DrawerComponents/DrawerFooter",
+});
+
+// Register SlideoutListItem component
+PLASMIC.registerComponent(SlideoutListItem, {
+  name: "SlideoutListItem",
+  displayName: "Slideout List Item",
+  props: {
+    icon: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    label: {
+      type: "slot",
+      defaultValue: "Label"
+    },
+    value: {
+      type: "slot",
+      hidePlaceholder: true
+    },
+    onClick: {
+      type: "eventHandler",
+      argTypes: []
+    },
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/DrawerComponents/SlideoutListItem",
+});
+
+// Register DrawerTabContainer component - Complete drawer with tabs for employee details
+PLASMIC.registerComponent(DrawerTabContainer, {
+  name: "DrawerTabContainer",
+  displayName: "Drawer Tab Container",
+  props: {
+    employee: {
+      type: "object",
+      description: "Employee object with all details"
+    },
+    className: "string",
+    initialTab: {
+      type: "choice",
+      options: ["pathway", "pe", "evaluations", "discipline"],
+      defaultValue: "discipline",
+      description: "Initial tab to display"
+    },
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    onRecordAction: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler for Record an Action button"
+    }
+  },
+  importPath: "./components/CodeComponents/DrawerTabContainer",
+});
+
+// Register EmployeeModal component
+// @ts-ignore - Complex Plasmic registration type
+PLASMIC.registerComponent(EmployeeModal, {
+  name: "EmployeeModal",
+  // @ts-ignore - Complex Plasmic registration type
+  displayName: "Employee Modal",
+  // @ts-ignore - Complex Plasmic registration type
+  props: {
+    open: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Whether the modal is open"
+    },
+    employee: {
+      type: "object",
+      description: "Employee object to display"
+    },
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler for closing the modal"
+    },
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    initialTab: {
+      type: "choice",
+      options: ["pathway", "pe", "evaluations", "discipline"],
+      defaultValue: "discipline",
+      description: "Initial tab to display"
+    },
+    onRecordAction: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler for Record an Action button"
+    },
+    currentUserId: {
+      type: "string",
+      description: "Current auth user ID for prefilling acting leader"
+    },
+    onRecommendationUpdate: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler called when a recommendation is recorded or dismissed"
+    },
+    className: "string"
+  },
+  importPath: "./components/CodeComponents/EmployeeModal",
+});
+
+// Register InfractionEditModal component
+// @ts-ignore - Complex Plasmic registration type
+PLASMIC.registerComponent(InfractionEditModal, {
+  name: "InfractionEditModal",
+  // @ts-ignore - Complex Plasmic registration type
+  displayName: "Infraction Edit Modal",
+  // @ts-ignore - Complex Plasmic registration type
+  props: {
+    open: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Whether the modal is open"
+    },
+    infraction: {
+      type: "object",
+      description: "Infraction object to edit"
+    },
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler for closing the modal"
+    },
+    onSave: {
+      type: "eventHandler",
+      argTypes: [
+        { 
+          name: "infraction", 
+          type: "object"
+        }
+      ],
+      description: "Handler for saving the infraction"
+    },
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    className: "string"
+  },
+  importPath: "./components/CodeComponents/InfractionEditModal",
+});
+
+// Register Add Infraction Modal
+PLASMIC.registerComponent(AddInfractionModal, {
+  name: "AddInfractionModal",
+  displayName: "Add Infraction Modal",
+  props: {
+    open: "boolean",
+    employee: "object",
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+    },
+    onSave: {
+      type: "eventHandler",
+      argTypes: [{ name: "infraction", type: "object" }],
+    },
+    currentUserId: "string",
+    locationId: "string",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/AddInfractionModal",
+});
+
+// Register Add Action Modal
+PLASMIC.registerComponent(AddActionModal, {
+  name: "AddActionModal",
+  displayName: "Add Action Modal",
+  props: {
+    open: "boolean",
+    employee: "object",
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+    },
+    onSave: {
+      type: "eventHandler",
+      argTypes: [{ name: "action", type: "object" }],
+    },
+    currentUserId: "string",
+    locationId: "string",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/AddActionModal",
+});
+
+// Register Edit Action Modal
+PLASMIC.registerComponent(EditActionModal, {
+  name: "EditActionModal",
+  displayName: "Edit Action Modal",
+  props: {
+    open: "boolean",
+    action: "object",
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+    },
+    onSave: {
+      type: "eventHandler",
+      argTypes: [{ name: "action", type: "object" }],
+    },
+    locationId: "string",
+    className: "string",
+  },
+  importPath: "./components/CodeComponents/EditActionModal",
+});
+
+// Register RecordActionModal component
+// @ts-ignore - Complex Plasmic registration type
+PLASMIC.registerComponent(RecordActionModal, {
+  name: "RecordActionModal",
+  // @ts-ignore - Complex Plasmic registration type
+  displayName: "Record Action Modal",
+  // @ts-ignore - Complex Plasmic registration type
+  props: {
+    open: {
+      type: "boolean",
+      defaultValue: false,
+      description: "Whether the modal is open"
+    },
+    employee: {
+      type: "object",
+      description: "Employee object for the action"
+    },
+    recommendedAction: {
+      type: "string",
+      description: "The recommended action text"
+    },
+    recommendedActionId: {
+      type: "string",
+      description: "ID of the recommended action from disc_actions_rubric"
+    },
+    currentUser: {
+      type: "object",
+      description: "Current user object (acting leader)"
+    },
+    currentUserId: {
+      type: "string",
+      description: "Alternative: just the current user ID (will fetch employee data)"
+    },
+    onClose: {
+      type: "eventHandler",
+      argTypes: [],
+      description: "Handler for closing the modal"
+    },
+    onSuccess: {
+      type: "eventHandler",
+      argTypes: [
+        { 
+          name: "employeeId", 
+          type: "string"
+        }
+      ],
+      description: "Handler called after successfully recording an action"
+    },
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    className: "string"
+  },
+  importPath: "./components/CodeComponents/RecordActionModal",
+});
+
+// Register DisciplineNotifications component (contains both infractions this week and required actions)
+// @ts-ignore - Complex Plasmic registration type
+PLASMIC.registerComponent(DisciplineNotifications, {
+  name: "DisciplineNotifications",
+  // @ts-ignore - Complex Plasmic registration type
+  displayName: "Discipline Notifications",
+  // @ts-ignore - Complex Plasmic registration type
+  props: {
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    currentUser: {
+      type: "object",
+      description: "Current user object (optional)"
+    },
+    currentUserId: {
+      type: "string",
+      description: "Auth user ID to look up in app_users table"
+    },
+    className: "string",
+    maxWidth: {
+      type: "string",
+      defaultValue: "1200px",
+      description: "Maximum width of the component"
+    },
+    width: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Width of the component"
+    }
+  },
+  importPath: "./components/CodeComponents/RecommendedActions",
+});
+
+// Backwards compatibility - RecommendedActions is now DisciplineNotifications
+// @ts-ignore - Complex Plasmic registration type
+PLASMIC.registerComponent(DisciplineNotifications, {
+  name: "RecommendedActions",
+  // @ts-ignore - Complex Plasmic registration type
+  displayName: "Recommended Actions (deprecated - use Discipline Notifications)",
+  // @ts-ignore - Complex Plasmic registration type
+  props: {
+    locationId: {
+      type: "string",
+      description: "Location ID"
+    },
+    currentUser: {
+      type: "object",
+      description: "Current user object (optional)"
+    },
+    currentUserId: {
+      type: "string",
+      description: "Auth user ID to look up in app_users table"
+    },
+    className: "string",
+    maxWidth: {
+      type: "string",
+      defaultValue: "1200px",
+      description: "Maximum width of the component"
+    },
+    width: {
+      type: "string",
+      defaultValue: "100%",
+      description: "Width of the component"
+    }
+  },
+  importPath: "./components/CodeComponents/RecommendedActions",
 });

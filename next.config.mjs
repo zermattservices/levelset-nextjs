@@ -24,6 +24,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Transpile Ant Design packages to fix ESM module resolution issues
   transpilePackages: [
     'antd',

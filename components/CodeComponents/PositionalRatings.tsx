@@ -61,7 +61,6 @@ const fohColorLight = '#eaf9ff';
 const bohColorLight = '#fffcf0';
 
 export interface PositionalRatingsProps {
-  orgId: string;
   locationId: string;
   className?: string;
   width?: string | number;
@@ -507,7 +506,6 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
 ));
 
 export function PositionalRatings({
-  orgId,
   locationId,
   className = '',
   width,
@@ -586,10 +584,14 @@ export function PositionalRatings({
     if (big5LabelsCache.has(position)) {
       return big5LabelsCache.get(position);
     }
+
+    if (!locationId) {
+      return null;
+    }
     
     try {
       const response = await fetch(
-        `/api/position-labels?org_id=${orgId}&location_id=${locationId}&position=${encodeURIComponent(position)}`
+        `/api/position-labels?location_id=${locationId}&position=${encodeURIComponent(position)}`
       );
       const result = await response.json();
       
@@ -602,7 +604,7 @@ export function PositionalRatings({
     }
     
     return null;
-  }, [orgId, locationId, big5LabelsCache]);
+  }, [locationId, big5LabelsCache]);
 
   // Handle PDF Export
   const handleExportPDF = async () => {
@@ -707,150 +709,143 @@ export function PositionalRatings({
     }
   };
 
-  // Fetch ratings data
-  const fetchRatings = React.useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const supabase = createSupabaseClient();
-      const startDateFilter = startDate || getDateRange(dateRange)[0];
-      const endDateFilter = endDate || getDateRange(dateRange)[1];
-      
-      // Build query
-      let query = supabase
-        .from('ratings')
-        .select(`
+  // Fetch ratings data whenever core filters change
+  React.useEffect(() => {
+    let isActive = true;
+
+    if (!locationId) {
+      setError(null);
+      setRows([]);
+      setFilteredRows([]);
+      setLoading(false);
+      return;
+    }
+
+    if (!startDate || !endDate) {
+      return;
+    }
+
+    const loadRatings = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const supabase = createSupabaseClient();
+
+        let query = supabase
+          .from('ratings')
+          .select(`
           *,
           employee:employees!ratings_employee_id_fkey(full_name, first_name, last_name, role, is_foh, is_boh),
           rater:employees!ratings_rater_user_id_fkey(full_name)
         `)
-        .eq('org_id', orgId)
-        .eq('location_id', locationId)
-        .gte('created_at', startDateFilter.toISOString())
-        .lte('created_at', endDateFilter.toISOString())
-        .order('created_at', { ascending: false });
-      
-      const { data: ratings, error: fetchError } = await query;
-      
-      if (fetchError) throw fetchError;
-      
-      // Transform data
-      const transformedRows: RatingRow[] = (ratings || [])
-        .filter((rating: any) => {
-          // Filter by FOH/BOH based on position
-          const isFOHPosition = FOH_POSITIONS.includes(rating.position);
-          const isBOHPosition = BOH_POSITIONS.includes(rating.position);
-          
-          if (!showFOH && !showBOH) return false;
-          if (showFOH && !showBOH) return isFOHPosition;
-          if (!showFOH && showBOH) return isBOHPosition;
-          
-          return true;
-        })
-        .map((rating: any) => {
-          const employeeName = rating.employee?.full_name || 
-            `${rating.employee?.first_name || ''} ${rating.employee?.last_name || ''}`.trim() || 
-            'Unknown';
-          const raterName = rating.rater?.full_name || 'Unknown';
-          const employeeRole = rating.employee?.role || 'Team Member';
-          
-          return {
-            ...rating,
-            id: rating.id,
-            employee_name: employeeName,
-            employee_role: employeeRole,
-            rater_name: raterName,
-            position_cleaned: cleanPositionName(rating.position),
-            formatted_date: formatDate(rating.created_at), // Keep for display
-            created_at: rating.created_at // Keep raw date for sorting
-          };
-        });
-      
-      setRows(transformedRows);
-      
-      // Extract unique values for filters
-      const employees = Array.from(new Set(transformedRows.map(r => r.employee_name))).sort();
-      const leaders = Array.from(new Set(transformedRows.map(r => r.rater_name))).sort();
-      const roles = Array.from(new Set(transformedRows.map(r => r.employee_role))).sort();
-      const positions = Array.from(new Set(transformedRows.map(r => r.position_cleaned))).sort();
-      
-      setUniqueEmployees(employees);
-      setUniqueLeaders(leaders);
-      setUniqueRoles(roles);
-      setUniquePositions(positions);
-      
-      // Prefetch Big 5 labels for all positions
-      const positionsSet = new Set(transformedRows.map(r => r.position));
-      const uniquePos = Array.from(positionsSet);
-      uniquePos.forEach(pos => fetchBig5Labels(pos));
-      
-    } catch (err) {
-      console.error('Error fetching ratings:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load ratings');
-    } finally {
-      setLoading(false);
-    }
-  }, [orgId, locationId, showFOH, showBOH, dateRange, startDate, endDate, getDateRange, fetchBig5Labels]);
+          .eq('location_id', locationId)
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString())
+          .order('created_at', { ascending: false });
 
-  // Initial load and refetch when filters change
-  React.useEffect(() => {
-    if (startDate && endDate) {
-      fetchRatings();
-    }
-  }, [startDate, endDate, showFOH, showBOH]);
+        const { data: ratings, error: fetchError } = await query;
+
+        if (fetchError) throw fetchError;
+
+        const transformedRows: RatingRow[] = (ratings || [])
+          .filter((rating: any) => {
+            const isFOHPosition = FOH_POSITIONS.includes(rating.position);
+            const isBOHPosition = BOH_POSITIONS.includes(rating.position);
+
+            if (!showFOH && !showBOH) return false;
+            if (showFOH && !showBOH) return isFOHPosition;
+            if (!showFOH && showBOH) return isBOHPosition;
+
+            return true;
+          })
+          .map((rating: any) => {
+            const employeeName =
+              rating.employee?.full_name ||
+              `${rating.employee?.first_name || ''} ${rating.employee?.last_name || ''}`.trim() ||
+              'Unknown';
+            const raterName = rating.rater?.full_name || 'Unknown';
+            const employeeRole = rating.employee?.role || 'Team Member';
+
+            return {
+              ...rating,
+              id: rating.id,
+              employee_name: employeeName,
+              employee_role: employeeRole,
+              rater_name: raterName,
+              position_cleaned: cleanPositionName(rating.position),
+              formatted_date: formatDate(rating.created_at),
+              created_at: rating.created_at,
+            };
+          });
+
+        if (!isActive) {
+          return;
+        }
+
+        setRows(transformedRows);
+
+        const employees = Array.from(new Set(transformedRows.map((r) => r.employee_name))).sort();
+        const leaders = Array.from(new Set(transformedRows.map((r) => r.rater_name))).sort();
+        const roles = Array.from(new Set(transformedRows.map((r) => r.employee_role))).sort();
+        const positions = Array.from(new Set(transformedRows.map((r) => r.position_cleaned))).sort();
+
+        setUniqueEmployees(employees);
+        setUniqueLeaders(leaders);
+        setUniqueRoles(roles);
+        setUniquePositions(positions);
+
+        const positionsSet = new Set(transformedRows.map((r) => r.position));
+        const uniquePos = Array.from(positionsSet);
+        uniquePos.forEach((pos) => fetchBig5Labels(pos));
+      } catch (err) {
+        if (!isActive) {
+          return;
+        }
+        console.error('Error fetching ratings:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load ratings');
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadRatings();
+
+    return () => {
+      isActive = false;
+    };
+  }, [locationId, startDate, endDate, showFOH, showBOH, fetchBig5Labels]);
 
   // Update filtered rows from DataGrid API whenever filters or data changes
   React.useEffect(() => {
     if (!apiRef.current || rows.length === 0) {
-      console.log('[PositionalRatings] No apiRef or empty rows, using all rows');
       setFilteredRows(rows);
       return;
     }
-    
+
     try {
-      // Use getRowModels which returns a Map of all rows
-      const rowModels = apiRef.current.getRowModels();
-      
-      // Get the visible (filtered) row count from pagination state
-      const paginationState = apiRef.current.state.pagination;
-      const filterState = apiRef.current.state.filter;
-      
-      console.log('[PositionalRatings] DataGrid state:', {
-        totalRows: rows.length,
-        rowModelsSize: rowModels?.size || 0,
-        paginationRowCount: paginationState?.rowCount,
-        filterItems: filterModel?.items?.length || 0,
-        searchText
-      });
-      
-      // Check if there are any active filters
-      const hasFilters = (filterModel && filterModel.items && filterModel.items.length > 0) || searchText;
-      
-      // If no filters, use all rows
+      const hasFilters =
+        (filterModel && filterModel.items && filterModel.items.length > 0) || Boolean(searchText);
+
       if (!hasFilters) {
-        console.log('[PositionalRatings] No filters, using all rows');
         setFilteredRows(rows);
         return;
       }
-      
-      // Get all row IDs and check against filter state
+
       const visibleRows: any[] = [];
-      
-      // Iterate through all rows and check if they pass filters
+
       rows.forEach((row: any) => {
-        // Use the DataGrid's internal filtering by checking if the row would be visible
-        // We need to manually apply the filter logic since getSortedRowIds doesn't respect filters
         let isVisible = true;
-        
-        // Apply filter model filters
+
         if (filterModel && filterModel.items) {
           for (const filterItem of filterModel.items) {
             if (!filterItem.value) continue;
-            
+
             const fieldValue = row[filterItem.field];
             const filterValue = filterItem.value;
-            
+
             if (filterItem.operator === 'is') {
               if (fieldValue !== filterValue) {
                 isVisible = false;
@@ -870,30 +865,30 @@ export function PositionalRatings({
             }
           }
         }
-        
-        // Apply quick filter (search text) - search across multiple fields
+
         if (isVisible && searchText) {
           const searchLower = searchText.toLowerCase();
           const searchableText = [
             row.employee_name,
             row.employee_role,
             row.rater_name,
-            row.position_cleaned
-          ].filter(Boolean).join(' ').toLowerCase();
-          
+            row.position_cleaned,
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+
           isVisible = searchableText.includes(searchLower);
         }
-        
+
         if (isVisible) {
           visibleRows.push(row);
         }
       });
-      
-      console.log('[PositionalRatings] Manually filtered to', visibleRows.length, 'visible rows');
+
       setFilteredRows(visibleRows);
     } catch (error) {
       console.error('[PositionalRatings] Error getting filtered rows:', error);
-      // Fallback to all rows if there's an error
       setFilteredRows(rows);
     }
   }, [rows, filterModel, searchText]);
@@ -1776,7 +1771,6 @@ export function PositionalRatings({
         
         {/* Analytics Metrics */}
         <RatingsAnalytics
-          orgId={orgId}
           locationId={locationId}
           currentRows={filteredRows}
           startDate={startDate}
