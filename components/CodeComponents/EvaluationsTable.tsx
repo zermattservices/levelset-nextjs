@@ -138,33 +138,26 @@ const EvaluationDateTextField = React.forwardRef(function EvaluationDateTextFiel
   );
 });
 
-const PillButton = styled(Box)<{ bg?: string; color?: string; border?: string }>(({ bg, color, border }) => ({
+const InlineSelectChip = styled(Box)(() => ({
   display: 'inline-flex',
   alignItems: 'center',
-  justifyContent: 'space-between',
+  justifyContent: 'center',
   gap: 6,
   padding: '0 16px',
-  minHeight: 32,
-  height: 32,
-  borderRadius: 16,
+  minHeight: 28,
+  height: 28,
+  borderRadius: 14,
   fontSize: 13,
   fontWeight: 600,
   fontFamily,
   cursor: 'pointer',
   transition: 'all 0.15s ease-in-out',
-  backgroundColor: bg ?? '#f3f4f6',
-  color: color ?? '#111827',
-  border: `1px solid ${border ?? 'transparent'}`,
+  backgroundColor: '#f3f4f6',
+  color: '#111827',
   width: '100%',
-  textAlign: 'left',
   '&:hover': {
     opacity: 0.9,
     transform: 'translateY(-1px)',
-  },
-  '&:disabled': {
-    opacity: 0.5,
-    cursor: 'default',
-    transform: 'none',
   },
   '& svg': {
     fontSize: 16,
@@ -406,18 +399,18 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
               <Box sx={{ width: '100%', px: 0.5 }}>
-                <PillButton
-                  component="button"
-                  type="button"
+                <InlineSelectChip
                   onClick={(event) => {
                     if (!disabled) {
                       handleLeaderMenuOpen(row.id, event);
                     }
                   }}
-                  bg="#f3f4f6"
-                  color={leaderId ? '#374151' : '#6b7280'}
-                  border="#e5e7eb"
-                  sx={{ opacity: disabled ? 0.6 : 1 }}
+                  sx={{
+                    backgroundColor: '#f3f4f6',
+                    color: leaderId ? '#374151' : '#6b7280',
+                    opacity: disabled ? 0.6 : 1,
+                    justifyContent: 'space-between',
+                  }}
                 >
                   <Typography
                     component="span"
@@ -434,7 +427,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                     {leaderName || 'Unassigned'}
                   </Typography>
                   <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
-                </PillButton>
+                </InlineSelectChip>
               </Box>
               <Menu
                 anchorEl={anchor}
@@ -442,6 +435,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 onClose={() => handleLeaderMenuClose(row.id)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                disablePortal
+                marginThreshold={0}
                 PaperProps={{
                   sx: {
                     fontFamily,
@@ -452,20 +447,16 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                     maxHeight: 320,
                   },
                 }}
-                disablePortal
-                marginThreshold={0}
               >
                 <DropdownMenuItem selected={!leaderId} onClick={() => handleLeaderSelect(row, null)}>
-                  <PillButton
+                  <InlineSelectChip
                     component="div"
-                    bg="#f3f4f6"
-                    color="#6b7280"
-                    sx={{ cursor: 'default', '&:hover': { opacity: 1, transform: 'none' } }}
+                    sx={{ backgroundColor: '#f3f4f6', color: '#6b7280', cursor: 'default', justifyContent: 'center', '&:hover': { opacity: 1, transform: 'none' } }}
                   >
                     <Typography component="span" sx={{ fontSize: 13 }}>
                       Unassigned
                     </Typography>
-                  </PillButton>
+                  </InlineSelectChip>
                 </DropdownMenuItem>
                 {leaders.map((leader) => (
                   <DropdownMenuItem
@@ -473,16 +464,14 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                     selected={leaderId === leader.id}
                     onClick={() => handleLeaderSelect(row, leader.id)}
                   >
-                    <PillButton
+                    <InlineSelectChip
                       component="div"
-                      bg="#f3f4f6"
-                      color="#374151"
-                      sx={{ cursor: 'default', '&:hover': { opacity: 1, transform: 'none' } }}
+                      sx={{ backgroundColor: '#f3f4f6', color: '#374151', cursor: 'default', justifyContent: 'center', '&:hover': { opacity: 1, transform: 'none' } }}
                     >
                       <Typography component="span" sx={{ fontSize: 13 }}>
                         {leader.name}
                       </Typography>
-                    </PillButton>
+                    </InlineSelectChip>
                   </DropdownMenuItem>
                 ))}
               </Menu>
@@ -628,17 +617,18 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
               <Box sx={{ width: '100%', px: 0.5 }}>
-                <PillButton
-                  component="button"
-                  type="button"
+                <InlineSelectChip
                   onClick={(event) => {
                     if (!disabled) {
                       handleStatusMenuOpen(row.id, event);
                     }
                   }}
-                  bg={colors.bg}
-                  color={colors.color}
-                  sx={{ opacity: disabled ? 0.6 : 1 }}
+                  sx={{
+                    backgroundColor: colors.bg,
+                    color: colors.color,
+                    opacity: disabled ? 0.6 : 1,
+                    justifyContent: 'space-between',
+                  }}
                 >
                   <Typography
                     component="span"
@@ -655,7 +645,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                     {status}
                   </Typography>
                   <ExpandMoreIcon sx={{ fontSize: 16 }} />
-                </PillButton>
+                </InlineSelectChip>
               </Box>
               <Menu
                 anchorEl={anchor}
@@ -680,16 +670,20 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   const selected = status === statusKey;
                   return (
                     <DropdownMenuItem key={statusKey} selected={selected} onClick={() => handleStatusSelect(row, statusKey)}>
-                      <PillButton
+                      <InlineSelectChip
                         component="div"
-                        bg={menuColors.bg}
-                        color={menuColors.color}
-                        sx={{ cursor: 'default', '&:hover': { opacity: 1, transform: 'none' } }}
+                        sx={{
+                          backgroundColor: menuColors.bg,
+                          color: menuColors.color,
+                          cursor: 'default',
+                          justifyContent: 'center',
+                          '&:hover': { opacity: 1, transform: 'none' },
+                        }}
                       >
                         <Typography component="span" sx={{ fontSize: 13 }}>
                           {statusKey}
                         </Typography>
-                      </PillButton>
+                      </InlineSelectChip>
                     </DropdownMenuItem>
                   );
                 })}
