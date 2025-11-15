@@ -138,21 +138,23 @@ const EvaluationDateTextField = React.forwardRef(function EvaluationDateTextFiel
   );
 });
 
-const selectChipStyles = {
+const ChipButton = styled(Box)(() => ({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: 8,
+  gap: 6,
   padding: '0 16px',
-  minHeight: 32,
+  minHeight: 28,
   height: 32,
-  borderRadius: 999,
+  borderRadius: 14,
   fontSize: 13,
   fontWeight: 600,
   fontFamily,
-  cursor: 'pointer' as const,
+  cursor: 'pointer',
   transition: 'all 0.15s ease-in-out',
-  border: 'none',
+  backgroundColor: '#f3f4f6',
+  color: '#111827',
+  border: '1px solid transparent',
   width: '100%',
   '&:hover': {
     opacity: 0.9,
@@ -161,7 +163,7 @@ const selectChipStyles = {
   '& svg': {
     fontSize: 16,
   },
-};
+}));
 
 const DropdownMenuItem = styled(MenuItem)(() => ({
   fontFamily,
@@ -397,8 +399,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           const anchor = leaderMenuAnchor[row.id] ?? null;
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-              <Box sx={{ width: '100%', px: 1 }}>
-                <Box
+              <Box sx={{ width: '100%', px: 0 }}>
+                <ChipButton
                   component="button"
                   type="button"
                   onClick={(event) => {
@@ -406,34 +408,29 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                       handleLeaderMenuOpen(row.id, event);
                     }
                   }}
-                  style={{ width: '100%' }}
+                  sx={{
+                    backgroundColor: '#f3f4f6',
+                    color: leaderId ? '#374151' : '#6b7280',
+                    opacity: disabled ? 0.6 : 1,
+                    borderColor: '#e5e7eb',
+                  }}
                 >
-                  <Box
+                  <Typography
+                    component="span"
                     sx={{
-                      ...selectChipStyles,
-                      backgroundColor: '#f3f4f6',
-                      color: leaderId ? '#374151' : '#6b7280',
-                      opacity: disabled ? 0.6 : 1,
-                      borderRadius: 14,
-                      border: '1px solid #e5e7eb',
+                      flexGrow: 1,
+                      minWidth: 0,
+                      fontSize: 13,
+                      textAlign: 'left',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
                   >
-                    <Typography
-                      component="span"
-                      sx={{
-                        flexGrow: 1,
-                        minWidth: 0,
-                        fontSize: 13,
-                        textAlign: 'left',
-                        overflow: 'visible',
-                        whiteSpace: 'normal',
-                      }}
-                    >
-                      {leaderName}
-                    </Typography>
-                    <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
-                  </Box>
-                </Box>
+                    {leaderName || 'Unassigned'}
+                  </Typography>
+                  <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+                </ChipButton>
               </Box>
               <Menu
                 anchorEl={anchor}
@@ -441,8 +438,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 onClose={() => handleLeaderMenuClose(row.id)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                disablePortal
-                marginThreshold={0}
                 PaperProps={{
                   sx: {
                     fontFamily,
@@ -458,18 +453,18 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                   selected={!leaderId}
                   onClick={() => handleLeaderSelect(row, null)}
                 >
-                    <Box
-                      sx={{
-                        ...selectChipStyles,
-                        backgroundColor: '#f3f4f6',
-                        color: '#6b7280',
-                        cursor: 'default',
-                        transform: 'none',
-                        '&:hover': { opacity: 1, transform: 'none' },
-                      }}
-                    >
+                  <ChipButton
+                    component="span"
+                    sx={{
+                      backgroundColor: '#f3f4f6',
+                      color: '#6b7280',
+                      cursor: 'default',
+                      width: '100%',
+                      '&:hover': { opacity: 1, transform: 'none' },
+                    }}
+                  >
                       Unassigned
-                    </Box>
+                  </ChipButton>
                 </DropdownMenuItem>
                 {leaders.map((leader) => (
                   <DropdownMenuItem
@@ -477,18 +472,18 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                     selected={leaderId === leader.id}
                     onClick={() => handleLeaderSelect(row, leader.id)}
                   >
-                    <Box
+                    <ChipButton
+                      component="span"
                       sx={{
-                        ...selectChipStyles,
                         backgroundColor: '#f3f4f6',
                         color: '#374151',
                         cursor: 'default',
-                        transform: 'none',
+                        width: '100%',
                         '&:hover': { opacity: 1, transform: 'none' },
                       }}
                     >
                       {leader.name}
-                    </Box>
+                    </ChipButton>
                   </DropdownMenuItem>
                 ))}
               </Menu>
@@ -633,8 +628,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           const disabled = updatingIds.has(row.id);
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-              <Box sx={{ width: '100%', px: 1 }}>
-                <Box
+              <Box sx={{ width: '100%', px: 0 }}>
+                <ChipButton
                   component="button"
                   type="button"
                   onClick={(event) => {
@@ -642,34 +637,28 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                       handleStatusMenuOpen(row.id, event);
                     }
                   }}
-                  style={{ width: '100%' }}
+                  sx={{
+                    backgroundColor: colors.bg,
+                    color: colors.color,
+                    opacity: disabled ? 0.6 : 1,
+                  }}
                 >
-                  <Box
+                  <Typography
+                    component="span"
                     sx={{
-                      ...selectChipStyles,
-                      backgroundColor: colors.bg,
-                      color: colors.color,
-                      opacity: disabled ? 0.6 : 1,
-                      borderRadius: 14,
-                      border: '1px solid transparent',
+                      flexGrow: 1,
+                      minWidth: 0,
+                      fontSize: 13,
+                      textAlign: 'left',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
                   >
-                    <Typography
-                      component="span"
-                      sx={{
-                        flexGrow: 1,
-                        minWidth: 0,
-                        fontSize: 13,
-                        textAlign: 'left',
-                        overflow: 'visible',
-                        whiteSpace: 'normal',
-                      }}
-                    >
-                      {status}
-                    </Typography>
-                    <ExpandMoreIcon sx={{ fontSize: 16 }} />
-                  </Box>
-                </Box>
+                    {status}
+                  </Typography>
+                  <ExpandMoreIcon sx={{ fontSize: 16 }} />
+                </ChipButton>
               </Box>
               <Menu
                 anchorEl={anchor}
@@ -677,8 +666,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                 onClose={() => handleStatusMenuClose(row.id)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                disablePortal
-                marginThreshold={0}
                 PaperProps={{
                   sx: {
                     fontFamily,
@@ -698,19 +685,18 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
                       selected={selected}
                       onClick={() => handleStatusSelect(row, statusKey)}
                     >
-                      <Box
+                      <ChipButton
+                        component="span"
                         sx={{
-                          ...selectChipStyles,
                           backgroundColor: menuColors.bg,
                           color: menuColors.color,
-                          cursor: 'default',
                           width: '100%',
-                          transform: 'none',
+                          cursor: 'default',
                           '&:hover': { opacity: 1, transform: 'none' },
                         }}
                       >
                         {statusKey}
-                      </Box>
+                      </ChipButton>
                     </DropdownMenuItem>
                   );
                 })}
