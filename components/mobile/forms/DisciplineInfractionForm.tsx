@@ -53,15 +53,26 @@ const InfractionDateTextField = React.forwardRef(function InfractionDateTextFiel
     <TextField
       {...props}
       ref={ref}
-      fullWidth
+      size="small"
       sx={{
-        '& .MuiInputBase-root': {
+        '& .MuiInputBase-input': {
           fontFamily,
-          fontSize: 16,
+          fontSize: 14,
+          padding: '10px 14px',
         },
         '& .MuiInputLabel-root': {
           fontFamily,
-          fontSize: 16,
+          fontSize: 12,
+        },
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: '#e5e7eb',
+        },
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+          borderColor: '#d1d5db',
+        },
+        '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderColor: levelsetGreen,
+          borderWidth: '2px',
         },
         ...props.sx,
       }}
@@ -395,6 +406,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             slotProps={{
               textField: {
                 fullWidth: true,
+                size: 'small',
                 helperText: t('infraction.dateHelper'),
               },
               popper: {
