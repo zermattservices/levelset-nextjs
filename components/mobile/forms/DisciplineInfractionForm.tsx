@@ -53,26 +53,15 @@ const InfractionDateTextField = React.forwardRef(function InfractionDateTextFiel
     <TextField
       {...props}
       ref={ref}
-      size="small"
+      fullWidth
       sx={{
-        '& .MuiInputBase-input': {
+        '& .MuiInputBase-root': {
           fontFamily,
-          fontSize: 14,
-          padding: '10px 14px',
+          fontSize: 16,
         },
         '& .MuiInputLabel-root': {
           fontFamily,
-          fontSize: 12,
-        },
-        '& .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#e5e7eb',
-        },
-        '&:hover .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#d1d5db',
-        },
-        '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-          borderColor: levelsetGreen,
-          borderWidth: '2px',
+          fontSize: 16,
         },
         ...props.sx,
       }}
@@ -406,12 +395,35 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             slotProps={{
               textField: {
                 fullWidth: true,
-                size: 'small',
                 helperText: t('infraction.dateHelper'),
               },
               popper: {
                 sx: {
                   '& .MuiPaper-root': {
+                    fontFamily,
+                    '& *': {
+                      fontFamily: 'inherit',
+                    },
+                  },
+                  '& .MuiPickersCalendarHeader-root': {
+                    fontFamily,
+                  },
+                  '& .MuiPickersCalendarHeader-labelContainer': {
+                    fontFamily,
+                  },
+                  '& .MuiPickersCalendarHeader-label': {
+                    fontFamily,
+                  },
+                  '& .MuiPickersArrowSwitcher-root': {
+                    fontFamily,
+                  },
+                  '& .MuiIconButton-root': {
+                    fontFamily,
+                  },
+                  '& .MuiDayCalendar-weekContainer': {
+                    fontFamily,
+                  },
+                  '& .MuiDayCalendar-weekDayLabel': {
                     fontFamily,
                   },
                   '& .MuiPickersDay-root': {
