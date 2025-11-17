@@ -14,6 +14,7 @@ import {
   getNextThirdFullWeekFriday,
   sameDay,
 } from './certification-utils';
+import { getRatingThresholds } from './rating-thresholds';
 import {
   fetchEmployeePositionAverages,
   type PositionAverages,
@@ -212,6 +213,10 @@ async function evaluateFourthThursdayAudit(
     return [];
   }
 
+  // Fetch location-specific thresholds
+  const thresholds = await getRatingThresholds(locationId);
+  const certificationThreshold = thresholds.green_threshold;
+
   const averagesMap = await buildPositionAverageMap(supabase, employees);
   const results: EvaluationResult[] = [];
 
@@ -219,7 +224,7 @@ async function evaluateFourthThursdayAudit(
     const currentStatus: CertificationStatus = employee.certified_status || 'Not Certified';
     const positions = averagesMap.get(employee.id)?.positions || {};
     const hasPositions = Object.keys(positions).length > 0;
-    const allQualified = hasPositions && allPositionsQualified(positions);
+    const allQualified = hasPositions && allPositionsQualified(positions, certificationThreshold);
 
     let newStatus: CertificationStatus = currentStatus;
     let notes: string | undefined;
@@ -282,13 +287,17 @@ async function evaluateThirdFridayPendingCheck(
     return [];
   }
 
+  // Fetch location-specific thresholds
+  const thresholds = await getRatingThresholds(locationId);
+  const certificationThreshold = thresholds.green_threshold;
+
   const averagesMap = await buildPositionAverageMap(supabase, employees);
   const results: EvaluationResult[] = [];
 
   for (const employee of employees) {
     const positions = averagesMap.get(employee.id)?.positions || {};
     const hasPositions = Object.keys(positions).length > 0;
-    const allQualified = hasPositions && allPositionsQualified(positions);
+    const allQualified = hasPositions && allPositionsQualified(positions, certificationThreshold);
 
     if (allQualified) {
       await updatePendingEvaluationRatingStatus(supabase, employee.id, true);

@@ -544,11 +544,26 @@ export async function fetchBig5Labels(
 /**
  * Calculate color class based on rating value
  * Matches current Google Sheets color scheme
+ * @deprecated Use getRatingColor from lib/rating-thresholds with location-specific thresholds
  */
 export function getRatingColor(rating: number | null | undefined): 'green' | 'yellow' | 'red' | 'none' {
   if (rating === null || rating === undefined) return 'none';
   if (rating >= 2.75) return 'green';
   if (rating >= 1.75) return 'yellow';
+  if (rating >= 1.0) return 'red';
+  return 'none';
+}
+
+/**
+ * Calculate color class based on rating value with custom thresholds
+ */
+export function getRatingColorWithThresholds(
+  rating: number | null | undefined,
+  thresholds: { yellow_threshold: number; green_threshold: number }
+): 'green' | 'yellow' | 'red' | 'none' {
+  if (rating === null || rating === undefined) return 'none';
+  if (rating >= thresholds.green_threshold) return 'green';
+  if (rating >= thresholds.yellow_threshold) return 'yellow';
   if (rating >= 1.0) return 'red';
   return 'none';
 }

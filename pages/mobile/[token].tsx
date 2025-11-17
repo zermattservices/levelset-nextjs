@@ -54,7 +54,7 @@ const LANGUAGES: Array<{ code: Language; label: string; nativeLabel: string }> =
 ];
 
 function MobilePortalPage({ location, token }: MobilePortalPageProps) {
-  const { t } = useTranslation(['forms', 'common']);
+  const { t } = useTranslation(['forms', 'common'], { nsMode: 'fallback' });
   const [activeForm, setActiveForm] = React.useState<MobileFormKey | null>(null);
   const [dirty, setDirty] = React.useState(false);
   const [submitDisabled, setSubmitDisabled] = React.useState(true);
@@ -72,6 +72,30 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
     return 'en';
   });
   const [languageMenuAnchor, setLanguageMenuAnchor] = React.useState<HTMLElement | null>(null);
+  const [thresholds, setThresholds] = React.useState<{ yellow_threshold: number; green_threshold: number } | null>(null);
+
+  // Fetch rating thresholds
+  React.useEffect(() => {
+    if (!location?.id) return;
+    
+    fetch(`/api/mobile/${encodeURIComponent(token)}/rating-thresholds`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.yellow_threshold && data.green_threshold) {
+          setThresholds({
+            yellow_threshold: Number(data.yellow_threshold),
+            green_threshold: Number(data.green_threshold),
+          });
+        } else {
+          // Fallback to defaults
+          setThresholds({ yellow_threshold: 1.75, green_threshold: 2.75 });
+        }
+      })
+      .catch(() => {
+        // Fallback to defaults on error
+        setThresholds({ yellow_threshold: 1.75, green_threshold: 2.75 });
+      });
+  }, [location?.id, token]);
 
   // Initialize i18n with saved language
   React.useEffect(() => {
@@ -245,7 +269,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           color: '#111827',
         }}
       >
-        {t('success.title')}
+        {t('common:success.title')}
       </Typography>
       <Typography
         sx={{
@@ -264,15 +288,15 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
             borderRadius: '12px',
             padding: '20px 32px',
             backgroundColor:
-              summary.overallRating >= 2.75
+              thresholds && summary.overallRating >= thresholds.green_threshold
                 ? '#d1fae5'
-                : summary.overallRating >= 1.75
+                : thresholds && summary.overallRating >= thresholds.yellow_threshold
                 ? '#fef3c7'
                 : '#fee2e2',
             color:
-              summary.overallRating >= 2.75
+              thresholds && summary.overallRating >= thresholds.green_threshold
                 ? '#065f46'
-                : summary.overallRating >= 1.75
+                : thresholds && summary.overallRating >= thresholds.yellow_threshold
                 ? '#92400e'
                 : '#991b1b',
             fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -288,7 +312,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
               opacity: 0.9,
             }}
           >
-            {t('success.overallRating')}
+            {t('common:success.overallRating')}
           </Typography>
           <Typography
             sx={{
@@ -340,7 +364,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           '&:hover': { backgroundColor: '#264d38' },
         }}
       >
-        {t('success.backToHome')}
+        {t('common:success.backToHome')}
       </Button>
     </Box>
   ) : null;

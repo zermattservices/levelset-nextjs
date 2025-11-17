@@ -258,11 +258,13 @@ const formatDate = (dateString: string): string => {
   return `${month}/${day}/${year} ${displayHours}:${displayMinutes} ${ampm}`;
 };
 
-// Helper to get rating color
-const getRatingColor = (rating: number | null): string => {
+// Helper to get rating color with thresholds
+const getRatingColor = (rating: number | null, thresholds?: { yellow_threshold: number; green_threshold: number }): string => {
   if (rating === null || rating === undefined) return 'transparent';
-  if (rating >= 2.75) return '#249e6b';
-  if (rating >= 1.75) return '#ffb549';
+  const yellowThreshold = thresholds?.yellow_threshold ?? 1.75;
+  const greenThreshold = thresholds?.green_threshold ?? 2.75;
+  if (rating >= greenThreshold) return '#249e6b';
+  if (rating >= yellowThreshold) return '#ffb549';
   if (rating >= 1.0) return '#ad2624';
   return 'transparent';
 };
@@ -544,6 +546,32 @@ export function PositionalRatings({
   const [uniqueLeaders, setUniqueLeaders] = React.useState<string[]>([]);
   const [uniqueRoles, setUniqueRoles] = React.useState<string[]>([]);
   const [uniquePositions, setUniquePositions] = React.useState<string[]>([]);
+  
+  // Rating thresholds
+  const [thresholds, setThresholds] = React.useState<{ yellow_threshold: number; green_threshold: number } | null>(null);
+  
+  // Fetch rating thresholds
+  React.useEffect(() => {
+    if (!locationId) return;
+    
+    fetch(`/api/rating-thresholds?location_id=${encodeURIComponent(locationId)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.yellow_threshold && data.green_threshold) {
+          setThresholds({
+            yellow_threshold: Number(data.yellow_threshold),
+            green_threshold: Number(data.green_threshold),
+          });
+        } else {
+          // Fallback to defaults
+          setThresholds({ yellow_threshold: 1.75, green_threshold: 2.75 });
+        }
+      })
+      .catch(() => {
+        // Fallback to defaults on error
+        setThresholds({ yellow_threshold: 1.75, green_threshold: 2.75 });
+      });
+  }, [locationId]);
 
   // Calculate date range based on preset
   const getDateRange = React.useCallback((preset: string): [Date, Date] => {
@@ -1478,7 +1506,7 @@ export function PositionalRatings({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: getRatingColor(rating),
+                backgroundColor: getRatingColor(rating, thresholds || undefined),
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
@@ -1530,7 +1558,7 @@ export function PositionalRatings({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: getRatingColor(rating),
+                backgroundColor: getRatingColor(rating, thresholds || undefined),
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
@@ -1582,7 +1610,7 @@ export function PositionalRatings({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: getRatingColor(rating),
+                backgroundColor: getRatingColor(rating, thresholds || undefined),
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
@@ -1634,7 +1662,7 @@ export function PositionalRatings({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: getRatingColor(rating),
+                backgroundColor: getRatingColor(rating, thresholds || undefined),
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
@@ -1686,7 +1714,7 @@ export function PositionalRatings({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: getRatingColor(rating),
+                backgroundColor: getRatingColor(rating, thresholds || undefined),
                 color: rating ? '#fff !important' : '#111827',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
@@ -2265,7 +2293,7 @@ export function PositionalRatings({
                     label={ratingToDelete.rating_avg?.toFixed(2) || '—'}
                     size="small"
                     sx={{
-                      backgroundColor: getRatingColor(ratingToDelete.rating_avg),
+                      backgroundColor: getRatingColor(ratingToDelete.rating_avg, thresholds || undefined),
                       color: '#fff',
                       fontWeight: 600,
                       fontFamily,
