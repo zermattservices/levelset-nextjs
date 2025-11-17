@@ -316,6 +316,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
         />
 
         <TextField
+          key={`position-select-${language}`}
           select
           SelectProps={{ native: true }}
           label={t('ratings.position')}

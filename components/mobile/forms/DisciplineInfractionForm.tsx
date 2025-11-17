@@ -401,6 +401,21 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                 sx: {
                   '& .MuiPaper-root': {
                     fontFamily,
+                    '& *': {
+                      fontFamily: 'inherit',
+                    },
+                  },
+                  '& .MuiPickersCalendarHeader-root': {
+                    fontFamily,
+                    '& *': {
+                      fontFamily: 'inherit',
+                    },
+                  },
+                  '& .MuiPickersToolbar-root': {
+                    fontFamily,
+                    '& *': {
+                      fontFamily: 'inherit',
+                    },
                   },
                   '& .MuiPickersDay-root': {
                     fontFamily,
@@ -415,6 +430,21 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
               desktopPaper: {
                 sx: {
                   fontFamily,
+                  '& *': {
+                    fontFamily: 'inherit',
+                  },
+                  '& .MuiPickersCalendarHeader-root': {
+                    fontFamily,
+                    '& *': {
+                      fontFamily: 'inherit',
+                    },
+                  },
+                  '& .MuiPickersToolbar-root': {
+                    fontFamily,
+                    '& *': {
+                      fontFamily: 'inherit',
+                    },
+                  },
                   '& .MuiPickersDay-root': {
                     fontFamily,
                     fontSize: 11,
@@ -428,6 +458,21 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
               mobilePaper: {
                 sx: {
                   fontFamily,
+                  '& *': {
+                    fontFamily: 'inherit',
+                  },
+                  '& .MuiPickersCalendarHeader-root': {
+                    fontFamily,
+                    '& *': {
+                      fontFamily: 'inherit',
+                    },
+                  },
+                  '& .MuiPickersToolbar-root': {
+                    fontFamily,
+                    '& *': {
+                      fontFamily: 'inherit',
+                    },
+                  },
                   '& .MuiPickersDay-root': {
                     fontFamily,
                     fontSize: 11,
@@ -443,6 +488,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
         </LocalizationProvider>
 
         <TextField
+          key={`infraction-select-${language}`}
           select
           SelectProps={{ native: true }}
           label={t('infraction.infraction')}
