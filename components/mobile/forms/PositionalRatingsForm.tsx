@@ -51,7 +51,7 @@ interface PositionalRatingsFormProps {
 }
 
 export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) {
-  const { token, locationId } = useMobilePortal();
+  const { token } = useMobilePortal();
   const { t } = useTranslation('forms');
   const { translate, language } = useTranslatedContent();
 
@@ -59,7 +59,6 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
   const [loadError, setLoadError] = React.useState<string | null>(null);
   const [labelsError, setLabelsError] = React.useState<string | null>(null);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
-  const [thresholds, setThresholds] = React.useState<{ yellow_threshold: number; green_threshold: number } | null>(null);
 
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [leaders, setLeaders] = React.useState<EmployeeOption[]>([]);
@@ -84,29 +83,6 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
     setDirty(false);
     controls.setDirty(false);
   }, [controls]);
-
-  // Fetch rating thresholds
-  React.useEffect(() => {
-    if (!locationId) return;
-    
-    fetch(`/api/mobile/${encodeURIComponent(token)}/rating-thresholds`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.yellow_threshold && data.green_threshold) {
-          setThresholds({
-            yellow_threshold: Number(data.yellow_threshold),
-            green_threshold: Number(data.green_threshold),
-          });
-        } else {
-          // Fallback to defaults
-          setThresholds({ yellow_threshold: 1.75, green_threshold: 2.75 });
-        }
-      })
-      .catch(() => {
-        // Fallback to defaults on error
-        setThresholds({ yellow_threshold: 1.75, green_threshold: 2.75 });
-      });
-  }, [locationId, token]);
 
   React.useEffect(() => {
     let cancelled = false;
