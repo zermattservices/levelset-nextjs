@@ -401,31 +401,33 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                 sx: {
                   '& .MuiPaper-root': {
                     fontFamily,
-                    '& *': {
-                      fontFamily: 'inherit',
+                  },
+                  '& .MuiPickersDay-root': {
+                    fontFamily,
+                    fontSize: 11,
+                    '&.Mui-selected': {
+                      backgroundColor: `${levelsetGreen} !important`,
+                      color: '#fff !important',
                     },
                   },
-                  '& .MuiPickersCalendarHeader-root': {
+                },
+              },
+              desktopPaper: {
+                sx: {
+                  fontFamily,
+                  '& .MuiPickersDay-root': {
                     fontFamily,
+                    fontSize: 11,
+                    '&.Mui-selected': {
+                      backgroundColor: `${levelsetGreen} !important`,
+                      color: '#fff !important',
+                    },
                   },
-                  '& .MuiPickersCalendarHeader-labelContainer': {
-                    fontFamily,
-                  },
-                  '& .MuiPickersCalendarHeader-label': {
-                    fontFamily,
-                  },
-                  '& .MuiPickersArrowSwitcher-root': {
-                    fontFamily,
-                  },
-                  '& .MuiIconButton-root': {
-                    fontFamily,
-                  },
-                  '& .MuiDayCalendar-weekContainer': {
-                    fontFamily,
-                  },
-                  '& .MuiDayCalendar-weekDayLabel': {
-                    fontFamily,
-                  },
+                },
+              },
+              mobilePaper: {
+                sx: {
+                  fontFamily,
                   '& .MuiPickersDay-root': {
                     fontFamily,
                     fontSize: 11,
