@@ -53,20 +53,17 @@ const InfractionDateTextField = React.forwardRef(function InfractionDateTextFiel
     <TextField
       {...props}
       ref={ref}
+      size="small"
       fullWidth
       sx={{
-        '& .MuiInputBase-root': {
-          fontFamily,
-          fontSize: 14,
-        },
         '& .MuiInputBase-input': {
           fontFamily,
           fontSize: 14,
-          padding: '14px',
+          padding: '10px 14px',
         },
         '& .MuiInputLabel-root': {
           fontFamily,
-          fontSize: 14,
+          fontSize: 12,
         },
         '& .MuiOutlinedInput-notchedOutline': {
           borderColor: '#e5e7eb',
@@ -366,50 +363,6 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <DatePicker
-            label={t('infraction.date')}
-            value={infractionDate}
-            onChange={(newValue) => {
-              setInfractionDate(newValue);
-              markDirty();
-            }}
-            format="M/d/yyyy"
-            enableAccessibleFieldDOMStructure={false}
-            slots={{
-              textField: InfractionDateTextField,
-            }}
-          slotProps={{
-            textField: {
-              helperText: t('infraction.dateHelper'),
-            },
-              openPickerButton: {
-                sx: {
-                  color: levelsetGreen,
-                  '&:hover': {
-                    backgroundColor: 'rgba(49, 102, 74, 0.08)',
-                  },
-                },
-              },
-              popper: {
-                sx: {
-                  '& .MuiPaper-root': {
-                    fontFamily,
-                  },
-                  '& .MuiPickersDay-root': {
-                    fontFamily,
-                    fontSize: 12,
-                    '&.Mui-selected': {
-                      backgroundColor: `${levelsetGreen} !important`,
-                      color: '#fff !important',
-                    },
-                  },
-                },
-              },
-            }}
-          />
-        </LocalizationProvider>
-
         <Autocomplete
           options={leaderOptions}
           disablePortal
@@ -437,6 +390,69 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             <TextField {...params} label={t('infraction.employee')} helperText={t('infraction.employeeHelper')} />
           )}
         />
+
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            label={t('infraction.date')}
+            value={infractionDate}
+            onChange={(newValue) => {
+              setInfractionDate(newValue);
+              markDirty();
+            }}
+            format="M/d/yyyy"
+            enableAccessibleFieldDOMStructure={false}
+            slots={{
+              textField: InfractionDateTextField,
+            }}
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                size: 'small',
+                helperText: t('infraction.dateHelper'),
+              },
+              popper: {
+                sx: {
+                  '& .MuiPaper-root': {
+                    fontFamily,
+                    borderRadius: '12px',
+                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+                  },
+                  '& .MuiPickersCalendarHeader-root': {
+                    fontFamily,
+                  },
+                  '& .MuiPickersCalendarHeader-label': {
+                    fontFamily,
+                    fontSize: 14,
+                    fontWeight: 600,
+                  },
+                  '& .MuiPickersArrowSwitcher-root': {
+                    fontFamily,
+                  },
+                  '& .MuiIconButton-root': {
+                    fontFamily,
+                  },
+                  '& .MuiDayCalendar-weekContainer': {
+                    fontFamily,
+                  },
+                  '& .MuiPickersDay-root': {
+                    fontFamily,
+                    fontSize: 11,
+                    '&.Mui-selected': {
+                      backgroundColor: `${levelsetGreen} !important`,
+                      color: '#fff !important',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(49, 102, 74, 0.08)',
+                    },
+                  },
+                  '& .MuiPickersDay-today': {
+                    border: `1px solid ${levelsetGreen}`,
+                  },
+                },
+              },
+            }}
+          />
+        </LocalizationProvider>
 
         <TextField
           select
