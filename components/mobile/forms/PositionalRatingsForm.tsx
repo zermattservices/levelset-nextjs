@@ -53,7 +53,7 @@ interface PositionalRatingsFormProps {
 export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) {
   const { token } = useMobilePortal();
   const { t } = useTranslation('forms');
-  const { translate } = useTranslatedContent();
+  const { translate, language } = useTranslatedContent();
 
   const [loading, setLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState<string | null>(null);
@@ -151,8 +151,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
         const payload = (await response.json()) as LabelsResponse;
         if (!cancelled) {
           // Use translated labels based on current language
-          const { language: currentLang } = translate;
-          const fetchedLabels = currentLang === 'es' && payload.labels_es && payload.labels_es.length > 0
+          const fetchedLabels = language === 'es' && payload.labels_es && payload.labels_es.length > 0
             ? payload.labels_es
             : payload.labels ?? [];
           setLabels(fetchedLabels);
@@ -179,7 +178,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
     return () => {
       cancelled = true;
     };
-  }, [controls, selectedPosition, token, translate]);
+  }, [controls, selectedPosition, token, language]);
 
   const selectedEmployeeOption = React.useMemo(
     () => employees.find((item) => item.id === selectedEmployee),
