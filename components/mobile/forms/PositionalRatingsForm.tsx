@@ -51,7 +51,7 @@ interface PositionalRatingsFormProps {
 }
 
 export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) {
-  const { token } = useMobilePortal();
+  const { token, locationId } = useMobilePortal();
   const { t } = useTranslation('forms');
   const { translate, language } = useTranslatedContent();
 
@@ -59,6 +59,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
   const [loadError, setLoadError] = React.useState<string | null>(null);
   const [labelsError, setLabelsError] = React.useState<string | null>(null);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [thresholds, setThresholds] = React.useState<{ yellow_threshold: number; green_threshold: number } | null>(null);
 
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [leaders, setLeaders] = React.useState<EmployeeOption[]>([]);
@@ -83,6 +84,29 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
     setDirty(false);
     controls.setDirty(false);
   }, [controls]);
+
+  // Fetch rating thresholds
+  React.useEffect(() => {
+    if (!locationId) return;
+    
+    fetch(`/api/mobile/${encodeURIComponent(token)}/rating-thresholds`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.yellow_threshold && data.green_threshold) {
+          setThresholds({
+            yellow_threshold: Number(data.yellow_threshold),
+            green_threshold: Number(data.green_threshold),
+          });
+        } else {
+          // Fallback to defaults
+          setThresholds({ yellow_threshold: 1.75, green_threshold: 2.75 });
+        }
+      })
+      .catch(() => {
+        // Fallback to defaults on error
+        setThresholds({ yellow_threshold: 1.75, green_threshold: 2.75 });
+      });
+  }, [locationId, token]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -362,6 +386,104 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
 
       {labels.length > 0 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* Rating scale graphic */}
+          {thresholds && (
+            <Box
+              sx={{
+                backgroundColor: '#f9fafb',
+                borderRadius: '12px',
+                border: '1px solid #e5e7eb',
+                padding: '16px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1.5,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#111827',
+                  mb: 0.5,
+                }}
+              >
+                Rating Scale
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: '4px',
+                      backgroundColor: '#b91c1c',
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: '#4b5563',
+                    }}
+                  >
+                    <Box component="span" sx={{ fontWeight: 600, color: '#111827' }}>
+                      Not Yet:
+                    </Box>
+                    {' '}1.0 - {(thresholds.yellow_threshold - 0.01).toFixed(2)}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: '4px',
+                      backgroundColor: '#f59e0b',
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: '#4b5563',
+                    }}
+                  >
+                    <Box component="span" sx={{ fontWeight: 600, color: '#111827' }}>
+                      On the Rise:
+                    </Box>
+                    {' '}{thresholds.yellow_threshold.toFixed(2)} - {(thresholds.green_threshold - 0.01).toFixed(2)}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: '4px',
+                      backgroundColor: '#31664a',
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: '#4b5563',
+                    }}
+                  >
+                    <Box component="span" sx={{ fontWeight: 600, color: '#111827' }}>
+                      Crushing It:
+                    </Box>
+                    {' '}{thresholds.green_threshold.toFixed(2)} - 3.0
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          )}
+          
           {labels.map((label, index) => (
             <Box
               key={label ?? index}
@@ -437,6 +559,52 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
               </RadioGroup>
             </Box>
           ))}
+          
+          {/* Feedback reminder card */}
+          {selectedEmployeeOption && (
+            <Box
+              sx={{
+                backgroundColor: '#ffffff',
+                borderRadius: '12px',
+                border: '1px solid #e5e7eb',
+                padding: '16px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: '#111827',
+                }}
+              >
+                Did you share this feedback?
+              </Typography>
+              <Typography
+                sx={{
+                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: 15,
+                  fontWeight: 500,
+                  color: '#4b5563',
+                }}
+              >
+                Make sure{' '}
+                <Box
+                  component="span"
+                  sx={{
+                    fontWeight: 600,
+                    color: '#31664a',
+                  }}
+                >
+                  {selectedEmployeeOption.name.split(' ')[0]}
+                </Box>
+                {' '}knows the WHY.
+              </Typography>
+            </Box>
+          )}
         </Box>
       )}
 
