@@ -17,6 +17,11 @@
     "subtitle": "Capture calificaciones posicionales e infracciones disciplinarias rápidamente desde cualquier dispositivo."
   },
   "submitting": "Enviando…",
-  "proceed": "Continuar"
+  "proceed": "Continuar",
+  "success": {
+    "title": "Envío registrado",
+    "backToHome": "Volver al inicio",
+    "overallRating": "Calificación General"
+  }
 }
 

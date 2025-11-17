@@ -17,6 +17,11 @@
     "subtitle": "Capture positional ratings and discipline infractions quickly from any device."
   },
   "submitting": "Submitting…",
-  "proceed": "Proceed"
+  "proceed": "Proceed",
+  "success": {
+    "title": "Submission recorded",
+    "backToHome": "Back to home",
+    "overallRating": "Overall Rating"
+  }
 }
 

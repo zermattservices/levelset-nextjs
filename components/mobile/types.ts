@@ -6,6 +6,7 @@ export interface SubmissionSummary {
   detail: string;
   action?: string;
   points?: number | null;
+  overallRating?: number | null;
 }
 
 export interface FormControlCallbacks {

@@ -245,7 +245,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           color: '#111827',
         }}
       >
-        Submission recorded
+        {t('success.title')}
       </Typography>
       <Typography
         sx={{
@@ -256,15 +256,60 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
       >
         {summary.employeeName}
       </Typography>
-      <Typography
-        sx={{
-          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-          fontSize: 15,
-          color: '#4b5563',
-        }}
-      >
-        {summary.detail}
-      </Typography>
+      {summary.form === 'ratings' && typeof summary.overallRating === 'number' ? (
+        <Box
+          sx={{
+            marginTop: 2,
+            alignSelf: 'center',
+            borderRadius: '12px',
+            padding: '20px 32px',
+            backgroundColor:
+              summary.overallRating >= 2.75
+                ? '#d1fae5'
+                : summary.overallRating >= 1.75
+                ? '#fef3c7'
+                : '#fee2e2',
+            color:
+              summary.overallRating >= 2.75
+                ? '#065f46'
+                : summary.overallRating >= 1.75
+                ? '#92400e'
+                : '#991b1b',
+            fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            textAlign: 'center',
+            minWidth: '200px',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: 13,
+              fontWeight: 600,
+              marginBottom: 1,
+              opacity: 0.9,
+            }}
+          >
+            {t('success.overallRating')}
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: 32,
+              fontWeight: 700,
+            }}
+          >
+            {summary.overallRating.toFixed(2)}
+          </Typography>
+        </Box>
+      ) : (
+        <Typography
+          sx={{
+            fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontSize: 15,
+            color: '#4b5563',
+          }}
+        >
+          {summary.detail}
+        </Typography>
+      )}
       {summary.form === 'infractions' && typeof summary.points === 'number' && (
         <Box
           sx={{
@@ -295,7 +340,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           '&:hover': { backgroundColor: '#264d38' },
         }}
       >
-        Back to home
+        {t('success.backToHome')}
       </Button>
     </Box>
   ) : null;

@@ -231,11 +231,19 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
     }
 
     const result = await response.json();
+    
+    // Calculate overall rating (average of the 5 ratings)
+    const validRatings = ratings.filter((r) => r !== null && r !== undefined && r > 0);
+    const overallRating = validRatings.length > 0
+      ? validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length
+      : null;
+    
     resetDirty();
     controls.completeSubmission({
       form: 'ratings',
       employeeName: `Employee: ${result.employeeName ?? selectedEmployeeOption?.name ?? 'Team member'}`,
       detail: `${selectedPosition} • Positional ratings`,
+      overallRating: overallRating ? Number(overallRating.toFixed(2)) : null,
     });
   }, [controls, ratings, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedLeader, selectedPosition, token]);
 
