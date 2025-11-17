@@ -119,17 +119,17 @@ const SecondStickyHeader = styled(TableRow)(() => ({
   }
 }));
 
-const RatingCell = styled(TableCell)<{ $rating?: number | null }>(({ $rating }) => {
+const RatingCell = styled(TableCell)<{ $rating?: number | null; $greenThreshold?: number; $yellowThreshold?: number }>(({ $rating, $greenThreshold = 2.75, $yellowThreshold = 1.75 }) => {
   let bgColor = 'transparent';
   let textColor = '#111827';
   let fontWeight = 400;
 
   if ($rating !== null && $rating !== undefined) {
     fontWeight = 600;
-    if ($rating >= 2.75) {
+    if ($rating >= $greenThreshold) {
       bgColor = '#249e6b';
       textColor = '#fff';
-    } else if ($rating >= 1.75) {
+    } else if ($rating >= $yellowThreshold) {
       bgColor = '#ffb549';
       textColor = '#fff';
     } else if ($rating >= 1.0) {
@@ -252,8 +252,32 @@ export function PEAClassic({
   const [error, setError] = React.useState<string | null>(null);
   
   const [showRatingScale, setShowRatingScale] = React.useState(false);
+  const [thresholds, setThresholds] = React.useState<{ yellow_threshold: number; green_threshold: number } | null>(null);
 
   const cellPadding = density === "compact" ? 0.5 : 1;
+
+  // Fetch rating thresholds
+  React.useEffect(() => {
+    if (!locationId) return;
+    
+    fetch(`/api/rating-thresholds?location_id=${encodeURIComponent(locationId)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.yellow_threshold && data.green_threshold) {
+          setThresholds({
+            yellow_threshold: Number(data.yellow_threshold),
+            green_threshold: Number(data.green_threshold),
+          });
+        } else {
+          // Fallback to defaults
+          setThresholds({ yellow_threshold: 1.75, green_threshold: 2.75 });
+        }
+      })
+      .catch(() => {
+        // Fallback to defaults on error
+        setThresholds({ yellow_threshold: 1.75, green_threshold: 2.75 });
+      });
+  }, [locationId]);
 
   // Fetch positions list when area changes
   React.useEffect(() => {
@@ -493,6 +517,7 @@ export function PEAClassic({
             expandedRows={expandedRows}
             toggleRow={toggleRow}
             cellPadding={cellPadding}
+            thresholds={thresholds}
           />
         )}
 
@@ -504,6 +529,7 @@ export function PEAClassic({
             expandedRows={expandedRows}
             toggleRow={toggleRow}
             cellPadding={cellPadding}
+            thresholds={thresholds}
           />
         )}
 
@@ -514,6 +540,7 @@ export function PEAClassic({
             expandedRows={expandedRows}
             toggleRow={toggleRow}
             cellPadding={cellPadding}
+            thresholds={thresholds}
           />
         )}
       </Box>
@@ -534,7 +561,10 @@ export function PEAClassic({
           Rating Scale
         </DialogTitle>
         <DialogContent>
-          <PEARubric />
+          <PEARubric 
+            yellowThreshold={thresholds?.yellow_threshold}
+            greenThreshold={thresholds?.green_threshold}
+          />
         </DialogContent>
       </Dialog>
     </Box>
@@ -549,9 +579,10 @@ interface OverviewTableProps {
   expandedRows: Set<string>;
   toggleRow: (id: string) => void;
   cellPadding: number;
+  thresholds?: { yellow_threshold: number; green_threshold: number } | null;
 }
 
-function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding }: OverviewTableProps) {
+function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thresholds }: OverviewTableProps) {
   const positions = getPositionsByArea(area);
 
   return (
@@ -597,12 +628,23 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding }: Ove
                   {positions.map(pos => {
                     const rating = employee.positions[pos];
                     return (
-                      <RatingCell key={pos} $rating={rating} sx={{ py: cellPadding }}>
+                      <RatingCell 
+                        key={pos} 
+                        $rating={rating} 
+                        $greenThreshold={thresholds?.green_threshold}
+                        $yellowThreshold={thresholds?.yellow_threshold}
+                        sx={{ py: cellPadding }}
+                      >
                         {formatRating(rating)}
                       </RatingCell>
                     );
                   })}
-                  <RatingCell $rating={employee.overall_avg} sx={{ py: cellPadding }}>
+                  <RatingCell 
+                    $rating={employee.overall_avg} 
+                    $greenThreshold={thresholds?.green_threshold}
+                    $yellowThreshold={thresholds?.yellow_threshold}
+                    sx={{ py: cellPadding }}
+                  >
                     {formatRating(employee.overall_avg)}
                   </RatingCell>
                   <TableCell align="center" sx={{ py: cellPadding }}>
@@ -637,12 +679,12 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding }: Ove
                               <TableCell>{rating.rater_name}</TableCell>
                               <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
                               <TableCell>{cleanPositionName(rating.position)}</TableCell>
-                              <RatingCell $rating={rating.rating_1}>{formatRating(rating.rating_1)}</RatingCell>
-                              <RatingCell $rating={rating.rating_2}>{formatRating(rating.rating_2)}</RatingCell>
-                              <RatingCell $rating={rating.rating_3}>{formatRating(rating.rating_3)}</RatingCell>
-                              <RatingCell $rating={rating.rating_4}>{formatRating(rating.rating_4)}</RatingCell>
-                              <RatingCell $rating={rating.rating_5}>{formatRating(rating.rating_5)}</RatingCell>
-                              <RatingCell $rating={rating.rating_avg}>{formatRating(rating.rating_avg)}</RatingCell>
+                              <RatingCell $rating={rating.rating_1} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_1)}</RatingCell>
+                              <RatingCell $rating={rating.rating_2} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_2)}</RatingCell>
+                              <RatingCell $rating={rating.rating_3} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_3)}</RatingCell>
+                              <RatingCell $rating={rating.rating_4} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_4)}</RatingCell>
+                              <RatingCell $rating={rating.rating_5} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_5)}</RatingCell>
+                              <RatingCell $rating={rating.rating_avg} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_avg)}</RatingCell>
                             </TableRow>
                           ))}
                         </TableBody>
@@ -668,9 +710,10 @@ interface PositionTableProps {
   expandedRows: Set<string>;
   toggleRow: (id: string) => void;
   cellPadding: number;
+  thresholds?: { yellow_threshold: number; green_threshold: number } | null;
 }
 
-function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, cellPadding }: PositionTableProps) {
+function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, cellPadding, thresholds }: PositionTableProps) {
   return (
     <StyledContainer>
       <StyledTable>
@@ -734,7 +777,12 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
                     );
                   })}
                   
-                  <RatingCell $rating={employee.overall_avg} sx={{ py: cellPadding }}>
+                  <RatingCell 
+                    $rating={employee.overall_avg} 
+                    $greenThreshold={thresholds?.green_threshold}
+                    $yellowThreshold={thresholds?.yellow_threshold}
+                    sx={{ py: cellPadding }}
+                  >
                     {formatRating(employee.overall_avg)}
                   </RatingCell>
                   <TableCell align="center" sx={{ py: cellPadding }}>
@@ -767,12 +815,12 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
                             <TableRow key={idx}>
                               <TableCell>{rating.rater_name}</TableCell>
                               <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
-                              <RatingCell $rating={rating.rating_1}>{formatRating(rating.rating_1)}</RatingCell>
-                              <RatingCell $rating={rating.rating_2}>{formatRating(rating.rating_2)}</RatingCell>
-                              <RatingCell $rating={rating.rating_3}>{formatRating(rating.rating_3)}</RatingCell>
-                              <RatingCell $rating={rating.rating_4}>{formatRating(rating.rating_4)}</RatingCell>
-                              <RatingCell $rating={rating.rating_5}>{formatRating(rating.rating_5)}</RatingCell>
-                              <RatingCell $rating={rating.rating_avg}>{formatRating(rating.rating_avg)}</RatingCell>
+                              <RatingCell $rating={rating.rating_1} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_1)}</RatingCell>
+                              <RatingCell $rating={rating.rating_2} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_2)}</RatingCell>
+                              <RatingCell $rating={rating.rating_3} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_3)}</RatingCell>
+                              <RatingCell $rating={rating.rating_4} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_4)}</RatingCell>
+                              <RatingCell $rating={rating.rating_5} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_5)}</RatingCell>
+                              <RatingCell $rating={rating.rating_avg} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_avg)}</RatingCell>
                             </TableRow>
                           ))}
                         </TableBody>
@@ -797,9 +845,10 @@ interface LeadershipTableProps {
   expandedRows: Set<string>;
   toggleRow: (id: string) => void;
   cellPadding: number;
+  thresholds?: { yellow_threshold: number; green_threshold: number } | null;
 }
 
-function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding }: LeadershipTableProps) {
+function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding, thresholds }: LeadershipTableProps) {
   const positions = getPositionsByArea(area);
 
   return (
@@ -845,12 +894,23 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding }: L
                   {positions.map(pos => {
                     const rating = leader.positions[pos];
                     return (
-                      <RatingCell key={pos} $rating={rating} sx={{ py: cellPadding }}>
+                      <RatingCell 
+                        key={pos} 
+                        $rating={rating} 
+                        $greenThreshold={thresholds?.green_threshold}
+                        $yellowThreshold={thresholds?.yellow_threshold}
+                        sx={{ py: cellPadding }}
+                      >
                         {formatRating(rating)}
                       </RatingCell>
                     );
                   })}
-                  <RatingCell $rating={leader.overall_avg} sx={{ py: cellPadding }}>
+                  <RatingCell 
+                    $rating={leader.overall_avg} 
+                    $greenThreshold={thresholds?.green_threshold}
+                    $yellowThreshold={thresholds?.yellow_threshold}
+                    sx={{ py: cellPadding }}
+                  >
                     {formatRating(leader.overall_avg)}
                   </RatingCell>
                   <TableCell align="center" sx={{ py: cellPadding }}>
@@ -885,12 +945,12 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding }: L
                               <TableCell>{rating.employee_name}</TableCell>
                               <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
                               <TableCell>{cleanPositionName(rating.position)}</TableCell>
-                              <RatingCell $rating={rating.rating_1}>{formatRating(rating.rating_1)}</RatingCell>
-                              <RatingCell $rating={rating.rating_2}>{formatRating(rating.rating_2)}</RatingCell>
-                              <RatingCell $rating={rating.rating_3}>{formatRating(rating.rating_3)}</RatingCell>
-                              <RatingCell $rating={rating.rating_4}>{formatRating(rating.rating_4)}</RatingCell>
-                              <RatingCell $rating={rating.rating_5}>{formatRating(rating.rating_5)}</RatingCell>
-                              <RatingCell $rating={rating.rating_avg}>{formatRating(rating.rating_avg)}</RatingCell>
+                              <RatingCell $rating={rating.rating_1} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_1)}</RatingCell>
+                              <RatingCell $rating={rating.rating_2} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_2)}</RatingCell>
+                              <RatingCell $rating={rating.rating_3} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_3)}</RatingCell>
+                              <RatingCell $rating={rating.rating_4} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_4)}</RatingCell>
+                              <RatingCell $rating={rating.rating_5} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_5)}</RatingCell>
+                              <RatingCell $rating={rating.rating_avg} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_avg)}</RatingCell>
                             </TableRow>
                           ))}
                         </TableBody>

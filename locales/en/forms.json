@@ -35,7 +35,9 @@
       "notYet": "Not Yet",
       "onTheRise": "On the Rise",
       "crushingIt": "Crushing It"
-    }
+    },
+    "feedbackTitle": "Did you share this feedback?",
+    "feedbackBody": "Make sure {{name}} knows the WHY."
   }
 }
 

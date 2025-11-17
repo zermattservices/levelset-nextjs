@@ -35,7 +35,9 @@
       "notYet": "Aún No",
       "onTheRise": "En Ascenso",
       "crushingIt": "Destacando"
-    }
+    },
+    "feedbackTitle": "¿Compartiste esta retroalimentación?",
+    "feedbackBody": "Asegúrate de que {{name}} sepa el PORQUÉ."
   }
 }
 
