@@ -53,27 +53,15 @@ const InfractionDateTextField = React.forwardRef(function InfractionDateTextFiel
     <TextField
       {...props}
       ref={ref}
-      size="small"
       fullWidth
       sx={{
-        '& .MuiInputBase-input': {
+        '& .MuiInputBase-root': {
           fontFamily,
-          fontSize: 14,
-          padding: '10px 14px',
+          fontSize: 16,
         },
         '& .MuiInputLabel-root': {
           fontFamily,
-          fontSize: 12,
-        },
-        '& .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#e5e7eb',
-        },
-        '&:hover .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#d1d5db',
-        },
-        '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-          borderColor: levelsetGreen,
-          borderWidth: '2px',
+          fontSize: 16,
         },
         ...props.sx,
       }}
@@ -407,31 +395,11 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             slotProps={{
               textField: {
                 fullWidth: true,
-                size: 'small',
                 helperText: t('infraction.dateHelper'),
               },
               popper: {
                 sx: {
                   '& .MuiPaper-root': {
-                    fontFamily,
-                    borderRadius: '12px',
-                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
-                  },
-                  '& .MuiPickersCalendarHeader-root': {
-                    fontFamily,
-                  },
-                  '& .MuiPickersCalendarHeader-label': {
-                    fontFamily,
-                    fontSize: 14,
-                    fontWeight: 600,
-                  },
-                  '& .MuiPickersArrowSwitcher-root': {
-                    fontFamily,
-                  },
-                  '& .MuiIconButton-root': {
-                    fontFamily,
-                  },
-                  '& .MuiDayCalendar-weekContainer': {
                     fontFamily,
                   },
                   '& .MuiPickersDay-root': {
@@ -441,12 +409,6 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                       backgroundColor: `${levelsetGreen} !important`,
                       color: '#fff !important',
                     },
-                    '&:hover': {
-                      backgroundColor: 'rgba(49, 102, 74, 0.08)',
-                    },
-                  },
-                  '& .MuiPickersDay-today': {
-                    border: `1px solid ${levelsetGreen}`,
                   },
                 },
               },
