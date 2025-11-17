@@ -48,6 +48,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const supabase = createServerSupabaseClient();
 
+  // Try to load with Spanish columns, fallback to base columns if migration hasn't been run
+  let rubricQuery = supabase
+    .from('infractions_rubric')
+    .select('id, action, action_es, points')
+    .eq('location_id', location.id)
+    .order('points');
+
   const [{ data: employeesData, error: employeesError }, { data: rubricData, error: rubricError }] = await Promise.all([
     supabase
       .from('employees')
@@ -55,11 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq('location_id', location.id)
       .eq('active', true)
       .order('full_name'),
-    supabase
-      .from('infractions_rubric')
-      .select('id, action, action_es, points')
-      .eq('location_id', location.id)
-      .order('points'),
+    rubricQuery,
   ]);
 
   if (employeesError) {
@@ -67,7 +70,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Failed to load employees' });
   }
 
-  if (rubricError) {
+  // If rubric query failed, try without action_es column (migration may not be run)
+  let finalRubricData: any[] | null = rubricData;
+  
+  if (rubricError && rubricError.message?.includes('action_es')) {
+    console.warn('[mobile] action_es column not found, falling back to base columns', token);
+    const fallbackResult = await supabase
+      .from('infractions_rubric')
+      .select('id, action, points')
+      .eq('location_id', location.id)
+      .order('points');
+    
+    if (fallbackResult.error) {
+      console.error('[mobile] Failed to load infractions rubric', token, fallbackResult.error);
+      return res.status(500).json({ error: 'Failed to load infractions rubric' });
+    }
+    finalRubricData = fallbackResult.data;
+  } else if (rubricError) {
     console.error('[mobile] Failed to load infractions rubric', token, rubricError);
     return res.status(500).json({ error: 'Failed to load infractions rubric' });
   }
@@ -86,7 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       role: emp.role ?? null,
     }));
 
-  const infractions = (rubricData ?? []).map((item) => ({
+  const infractions = (finalRubricData ?? []).map((item: any) => ({
     id: item.id,
     action: item.action,
     action_es: item.action_es ?? null,

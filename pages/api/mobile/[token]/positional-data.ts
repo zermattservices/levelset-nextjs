@@ -45,6 +45,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const supabase = createServerSupabaseClient();
 
+  // Try to load with Spanish columns, fallback to base columns if migration hasn't been run
+  let positionsQuery = supabase
+    .from('position_big5_labels')
+    .select('position, position_es, zone')
+    .eq('location_id', location.id)
+    .order('zone', { ascending: true })
+    .order('position', { ascending: true });
+
   const [{ data: employeesData, error: employeesError }, { data: positionsData, error: positionsError }] =
     await Promise.all([
       supabase
@@ -53,12 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .eq('location_id', location.id)
         .eq('active', true)
         .order('full_name'),
-      supabase
-        .from('position_big5_labels')
-        .select('position, position_es, zone')
-        .eq('location_id', location.id)
-        .order('zone', { ascending: true })
-        .order('position', { ascending: true }),
+      positionsQuery,
     ]);
 
   if (employeesError) {
@@ -66,7 +69,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Failed to load employees' });
   }
 
-  if (positionsError) {
+  // If positions query failed, try without position_es column (migration may not be run)
+  let finalPositionsData: any[] | null = positionsData;
+  
+  if (positionsError && positionsError.message?.includes('position_es')) {
+    console.warn('[mobile] position_es column not found, falling back to base columns', token);
+    const fallbackResult = await supabase
+      .from('position_big5_labels')
+      .select('position, zone')
+      .eq('location_id', location.id)
+      .order('zone', { ascending: true })
+      .order('position', { ascending: true });
+    
+    if (fallbackResult.error) {
+      console.error('[mobile] Failed to fetch positions for token', token, fallbackResult.error);
+      return res.status(500).json({ error: 'Failed to load positions' });
+    }
+    finalPositionsData = fallbackResult.data;
+  } else if (positionsError) {
     console.error('[mobile] Failed to fetch positions for token', token, positionsError);
     return res.status(500).json({ error: 'Failed to load positions' });
   }
@@ -82,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const zoneOrder: Array<'FOH' | 'BOH'> = ['FOH', 'BOH'];
   const positionsMap = new Map<string, { name: string; name_es: string | null; zone: 'FOH' | 'BOH' }>();
 
-  (positionsData ?? []).forEach((item) => {
+  (finalPositionsData ?? []).forEach((item: any) => {
     const name = item.position?.trim();
     if (!name) return;
     const zone = (item.zone === 'BOH' ? 'BOH' : 'FOH') as 'FOH' | 'BOH';

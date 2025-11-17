@@ -28,14 +28,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const supabase = createServerSupabaseClient();
-  const { data, error } = await supabase
+  
+  // Try to load with Spanish columns, fallback to base columns if migration hasn't been run
+  let { data, error } = await supabase
     .from('position_big5_labels')
     .select('label_1, label_2, label_3, label_4, label_5, label_1_es, label_2_es, label_3_es, label_4_es, label_5_es')
     .eq('location_id', location.id)
     .eq('position', position)
     .maybeSingle();
 
-  if (error) {
+  // If query failed due to missing Spanish columns, try without them
+  if (error && error.message?.includes('label_1_es')) {
+    console.warn('[mobile] Spanish label columns not found, falling back to base columns', token, position);
+    const fallbackResult = await supabase
+      .from('position_big5_labels')
+      .select('label_1, label_2, label_3, label_4, label_5')
+      .eq('location_id', location.id)
+      .eq('position', position)
+      .maybeSingle();
+    
+    if (fallbackResult.error) {
+      console.error('[mobile] Failed to fetch labels for token', token, 'position', position, fallbackResult.error);
+      return res.status(500).json({ error: 'Failed to load labels' });
+    }
+    data = fallbackResult.data as any;
+    error = null;
+  } else if (error) {
     console.error('[mobile] Failed to fetch labels for token', token, 'position', position, error);
     return res.status(500).json({ error: 'Failed to load labels' });
   }
@@ -49,13 +67,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     labels: [data.label_1, data.label_2, data.label_3, data.label_4, data.label_5].filter(
       (label): label is string => Boolean(label)
     ),
-    labels_es: [
-      data.label_1_es,
-      data.label_2_es,
-      data.label_3_es,
-      data.label_4_es,
-      data.label_5_es,
-    ].filter((label): label is string => Boolean(label)),
+    labels_es: (data as any).label_1_es ? [
+      (data as any).label_1_es,
+      (data as any).label_2_es,
+      (data as any).label_3_es,
+      (data as any).label_4_es,
+      (data as any).label_5_es,
+    ].filter((label): label is string => Boolean(label)) : [],
   });
 }
 
