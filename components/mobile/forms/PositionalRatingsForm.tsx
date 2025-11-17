@@ -258,10 +258,15 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
     return zoneOrder
       .map((zone) => ({
         zone,
-        options: (grouped.get(zone) ?? []).slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })),
+        options: (grouped.get(zone) ?? []).slice().sort((a, b) => {
+          // Sort by translated position name
+          const aText = translate(a, 'name', a.name);
+          const bText = translate(b, 'name', b.name);
+          return aText.localeCompare(bText, undefined, { sensitivity: 'base' });
+        }),
       }))
       .filter((group) => group.options.length > 0);
-  }, [positions]);
+  }, [positions, language, translate]);
 
   if (loading) {
     return (

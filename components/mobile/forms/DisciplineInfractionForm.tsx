@@ -87,7 +87,7 @@ const InfractionDateTextField = React.forwardRef(function InfractionDateTextFiel
 export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormProps) {
   const { token, locationNumber } = useMobilePortal();
   const { t } = useTranslation('forms');
-  const { translate } = useTranslatedContent();
+  const { translate, language } = useTranslatedContent();
 
   const [passwordVerified, setPasswordVerified] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
@@ -203,9 +203,14 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
       options: byPoints
         .get(points)!
         .slice()
-        .sort((a, b) => a.action.localeCompare(b.action, undefined, { sensitivity: 'base' })),
+        .sort((a, b) => {
+          // Sort by translated action text
+          const aText = translate(a, 'action', a.action);
+          const bText = translate(b, 'action', b.action);
+          return aText.localeCompare(bText, undefined, { sensitivity: 'base' });
+        }),
     }));
-  }, [infractionOptions]);
+  }, [infractionOptions, language, translate]);
 
   const formatPointsLabel = React.useCallback((value: number) => {
     const suffix = Math.abs(value) === 1 ? 'Point' : 'Points';
@@ -370,6 +375,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
               markDirty();
             }}
             format="M/d/yyyy"
+            enableAccessibleFieldDOMStructure={false}
             slots={{
               textField: InfractionDateTextField,
             }}
