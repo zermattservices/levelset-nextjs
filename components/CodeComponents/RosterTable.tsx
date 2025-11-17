@@ -442,33 +442,59 @@ function EmployeesTableView({
 
   // Handle Certification status changes with API calls
   const handleCertificationStatusChange = async (id: string, newStatus: CertificationStatus) => {
-    // Close menu
-    setCertificationMenuAnchor(prev => ({ ...prev, [id]: null }));
-    
-    // Optimistically update UI
-    setData(prev => prev.map(emp => 
-      emp.id === id ? { ...emp, certifiedStatus: newStatus } : emp
-    ));
-    
-    // Call Supabase
+    setCertificationMenuAnchor((prev) => ({ ...prev, [id]: null }));
+
+    const previous = data.find((emp) => emp.id === id);
+
+    setData((prev) =>
+      prev.map((emp) =>
+        emp.id === id ? { ...emp, certifiedStatus: newStatus } : emp
+      )
+    );
+
     try {
-      const { createSupabaseClient } = await import("@/util/supabase/component");
-      const supabase = createSupabaseClient();
-      const { error } = await supabase
-        .from('employees')
-        .update({ certified_status: newStatus })
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Failed to update certification status:', error);
-        // Revert on error
-        fetchEmployees();
-      } else if (onCertifiedStatusChange) {
-        onCertifiedStatusChange(id, newStatus);
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          intent: 'update',
+          id,
+          certified_status: newStatus,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update certification status');
+
+      const result = await response.json();
+
+      setData((prev) =>
+        prev.map((emp) =>
+          emp.id === id
+            ? {
+                ...emp,
+                certifiedStatus: result.employee?.certified_status ?? newStatus,
+                calculatedPay: result.employee?.calculated_pay ?? emp.calculatedPay,
+              }
+            : emp
+        )
+      );
+
+      if (onCertifiedStatusChange) {
+        onCertifiedStatusChange(id, result.employee?.certified_status ?? newStatus);
       }
     } catch (err) {
       console.error('Failed to update certification status:', err);
-      fetchEmployees(); // Revert on error
+      if (previous) {
+        setData((prev) =>
+          prev.map((emp) =>
+            emp.id === id ? { ...emp, certifiedStatus: previous.certifiedStatus, calculatedPay: previous.calculatedPay } : emp
+          )
+        );
+      } else {
+        fetchEmployees();
+      }
     }
   };
 

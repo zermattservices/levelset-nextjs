@@ -9,7 +9,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { format } from 'date-fns';
 import { useMobilePortal } from '../MobilePortalContext';
+import { PasswordModal } from '../PasswordModal';
 import type { FormControlCallbacks } from '../types';
 
 interface EmployeeOption {
@@ -34,9 +39,52 @@ interface DisciplineInfractionFormProps {
   controls: FormControlCallbacks;
 }
 
-export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormProps) {
-  const { token } = useMobilePortal();
+const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+const levelsetGreen = '#31664a';
 
+const InfractionDateTextField = React.forwardRef(function InfractionDateTextField(
+  props: React.ComponentProps<typeof TextField>,
+  ref: React.Ref<HTMLInputElement>
+) {
+  return (
+    <TextField
+      {...props}
+      ref={ref}
+      fullWidth
+      sx={{
+        '& .MuiInputBase-root': {
+          fontFamily,
+          fontSize: 14,
+        },
+        '& .MuiInputBase-input': {
+          fontFamily,
+          fontSize: 14,
+          padding: '14px',
+        },
+        '& .MuiInputLabel-root': {
+          fontFamily,
+          fontSize: 14,
+        },
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: '#e5e7eb',
+        },
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+          borderColor: '#d1d5db',
+        },
+        '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderColor: levelsetGreen,
+          borderWidth: '2px',
+        },
+        ...props.sx,
+      }}
+    />
+  );
+});
+
+export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormProps) {
+  const { token, locationNumber } = useMobilePortal();
+
+  const [passwordVerified, setPasswordVerified] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState<string | null>(null);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
@@ -48,6 +96,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
   const [selectedLeader, setSelectedLeader] = React.useState('');
   const [selectedEmployee, setSelectedEmployee] = React.useState('');
   const [selectedInfraction, setSelectedInfraction] = React.useState('');
+  const [infractionDate, setInfractionDate] = React.useState<Date | null>(new Date());
   const [points, setPoints] = React.useState<number | null>(null);
   const [acknowledged, setAcknowledged] = React.useState(false);
   const [teamSignature, setTeamSignature] = React.useState('');
@@ -195,6 +244,9 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     if (!selectedLeader || !selectedEmployee || !selectedInfraction) {
       return false;
     }
+    if (!infractionDate) {
+      return false;
+    }
     if (!leaderSignature.trim()) {
       return false;
     }
@@ -202,7 +254,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
       return false;
     }
     return true;
-  }, [acknowledged, leaderSignature, selectedEmployee, selectedInfraction, selectedLeader, teamSignature]);
+  }, [acknowledged, infractionDate, leaderSignature, selectedEmployee, selectedInfraction, selectedLeader, teamSignature]);
 
   React.useEffect(() => {
     controls.setSubmitDisabled(!isComplete);
@@ -214,6 +266,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
       leaderId: selectedLeader,
       employeeId: selectedEmployee,
       infractionId: selectedInfraction,
+      infractionDate: infractionDate ? format(infractionDate, 'yyyy-MM-dd') : null,
       acknowledged,
       teamMemberSignature: teamSignature.trim() || null,
       leaderSignature: leaderSignature.trim(),
@@ -252,7 +305,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           ? result.points
           : selectedInfractionOption?.points ?? 0,
     });
-  }, [acknowledged, controls, leaderSignature, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedInfraction, selectedInfractionOption?.action, selectedInfractionOption?.points, selectedLeader, teamSignature, token]);
+  }, [acknowledged, controls, infractionDate, leaderSignature, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedInfraction, selectedInfractionOption?.action, selectedInfractionOption?.points, selectedLeader, teamSignature, token]);
 
   React.useEffect(() => {
     controls.setSubmitHandler(() => submit());
@@ -274,9 +327,74 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     );
   }
 
+  const correctPassword = locationNumber || '';
+  const showPasswordModal = !passwordVerified && correctPassword.length === 5;
+
+  if (showPasswordModal) {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <PasswordModal
+          open={true}
+          onClose={() => {
+            // Close the form drawer by calling the parent's close handler
+            // This is handled by the FormDrawer component's dirty check
+            controls.setDirty(false);
+          }}
+          onProceed={() => setPasswordVerified(true)}
+          correctPassword={correctPassword}
+          title="Enter Store Number"
+          description="Please enter the 5-digit store number to access the infraction form."
+        />
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            label="Infraction Date"
+            value={infractionDate}
+            onChange={(newValue) => {
+              setInfractionDate(newValue);
+              markDirty();
+            }}
+            format="M/d/yyyy"
+            slots={{
+              textField: InfractionDateTextField,
+            }}
+            slotProps={{
+              textField: {
+                helperText: 'When did this infraction occur?',
+              },
+              openPickerButton: {
+                sx: {
+                  color: levelsetGreen,
+                  '&:hover': {
+                    backgroundColor: 'rgba(49, 102, 74, 0.08)',
+                  },
+                },
+              },
+              popper: {
+                sx: {
+                  '& .MuiPaper-root': {
+                    fontFamily,
+                  },
+                  '& .MuiPickersDay-root': {
+                    fontFamily,
+                    fontSize: 12,
+                    '&.Mui-selected': {
+                      backgroundColor: `${levelsetGreen} !important`,
+                      color: '#fff !important',
+                    },
+                  },
+                },
+              },
+            }}
+          />
+        </LocalizationProvider>
+
         <Autocomplete
           options={leaderOptions}
           disablePortal

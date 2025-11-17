@@ -15,6 +15,8 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+const TARGET_LOCATION_NAME = 'Buda FSU';
+
 interface CSVRow {
   uniqueId: string;
   tmName: string;
@@ -97,6 +99,25 @@ function cleanPositionName(positionName: string): string {
 async function main() {
   console.log('Starting ratings import...');
   
+  // Resolve target location/org
+  const { data: targetLocation, error: locationError } = await supabase
+    .from('locations')
+    .select('id, org_id')
+    .eq('name', TARGET_LOCATION_NAME)
+    .maybeSingle();
+
+  if (locationError || !targetLocation) {
+    console.error(`Unable to resolve location "${TARGET_LOCATION_NAME}":`, locationError);
+    process.exit(1);
+  }
+
+  const targetLocationId = targetLocation.id;
+  const targetOrgId = targetLocation.org_id;
+
+  console.log(
+    `Resolved target location "${TARGET_LOCATION_NAME}" -> location_id=${targetLocationId}, org_id=${targetOrgId}`
+  );
+
   // Read CSV file
   const csvPath = path.join(process.cwd(), 'updated_ratings.csv');
   const csvContent = fs.readFileSync(csvPath, 'utf-8');
@@ -200,21 +221,6 @@ async function main() {
       continue;
     }
     
-    // Get org_id and location_id from the employee
-    const employee = employees.find(e => e.id === employeeId);
-    
-    // Fetch full employee data for org_id and location_id
-    const { data: employeeData, error: empDataError } = await supabase
-      .from('employees')
-      .select('org_id, location_id')
-      .eq('id', employeeId)
-      .single();
-    
-    if (empDataError || !employeeData) {
-      errors.push(`Could not fetch org/location for employee: ${row.tmName}`);
-      continue;
-    }
-    
     newRatings.push({
       employee_id: employeeId,
       rater_user_id: raterId,
@@ -226,8 +232,8 @@ async function main() {
       rating_5: rating5,
       // rating_avg is a generated column - don't insert it
       created_at: createdAt,
-      org_id: employeeData.org_id,
-      location_id: employeeData.location_id,
+      org_id: targetOrgId,
+      location_id: targetLocationId,
     });
   }
   
@@ -243,6 +249,13 @@ async function main() {
     if (errors.length > 10) {
       console.log(`  ... and ${errors.length - 10} more`);
     }
+    const uniqueErrors = Array.from(new Set(errors));
+    fs.writeFileSync(
+      path.join(process.cwd(), 'missing_rating_names.txt'),
+      uniqueErrors.join('\n'),
+      'utf-8'
+    );
+    console.log(`\nFull missing name list saved to missing_rating_names.txt (${uniqueErrors.length} entries).`);
   }
   
   if (newRatings.length === 0) {

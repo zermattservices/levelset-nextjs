@@ -2,7 +2,20 @@ import * as React from 'react';
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Menu,
+  MenuItem,
+  Typography,
+  IconButton,
+} from '@mui/material';
+import LanguageIcon from '@mui/icons-material/Language';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { fetchLocationByToken, type MobileLocation } from '@/lib/mobile-location';
 import { MobilePortalProvider } from '@/components/mobile/MobilePortalContext';
@@ -50,6 +63,13 @@ const cards: Array<{ key: MobileFormKey; title: string; description: string }> =
   },
 ];
 
+type Language = 'en' | 'es';
+
+const LANGUAGES: Array<{ code: Language; label: string; nativeLabel: string }> = [
+  { code: 'en', label: 'English', nativeLabel: 'English' },
+  { code: 'es', label: 'Spanish', nativeLabel: 'Español' },
+];
+
 function MobilePortalPage({ location, token }: MobilePortalPageProps) {
   const [activeForm, setActiveForm] = React.useState<MobileFormKey | null>(null);
   const [dirty, setDirty] = React.useState(false);
@@ -60,6 +80,8 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
   const [platform, setPlatform] = React.useState<'ios' | 'android' | null>(null);
   const [showInstallHint, setShowInstallHint] = React.useState(false);
   const [showIosGuide, setShowIosGuide] = React.useState(false);
+  const [language, setLanguage] = React.useState<Language>('en');
+  const [languageMenuAnchor, setLanguageMenuAnchor] = React.useState<HTMLElement | null>(null);
 
   React.useEffect(() => {
     if (typeof window === 'undefined') {
@@ -130,7 +152,10 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
       setSubmitDisabled,
       setSubmitting,
       completeSubmission: (result) => {
-        setSummary(result);
+        // Only show summary if it's a successful submission (has employee name)
+        if (result.employeeName && result.employeeName !== '') {
+          setSummary(result);
+        }
         closeDrawer();
       },
       setSubmitHandler: (handler) => {
@@ -293,8 +318,85 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          position: 'relative',
         }}
       >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            zIndex: 10,
+          }}
+        >
+          <IconButton
+            onClick={(e) => setLanguageMenuAnchor(e.currentTarget)}
+            sx={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e5e7eb',
+              borderRadius: 2,
+              padding: '8px 12px',
+              '&:hover': {
+                backgroundColor: '#f9fafb',
+              },
+            }}
+            aria-label="Change language"
+          >
+            <LanguageIcon sx={{ fontSize: 20, color: '#31664a', mr: 0.5 }} />
+            <Typography
+              sx={{
+                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#111827',
+                textTransform: 'uppercase',
+                mr: 0.5,
+              }}
+            >
+              {language}
+            </Typography>
+            <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+          </IconButton>
+          <Menu
+            anchorEl={languageMenuAnchor}
+            open={Boolean(languageMenuAnchor)}
+            onClose={() => setLanguageMenuAnchor(null)}
+            PaperProps={{
+              sx: {
+                borderRadius: 2,
+                mt: 1,
+                minWidth: 160,
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              },
+            }}
+          >
+            {LANGUAGES.map((lang) => (
+              <MenuItem
+                key={lang.code}
+                selected={language === lang.code}
+                onClick={() => {
+                  setLanguage(lang.code);
+                  setLanguageMenuAnchor(null);
+                }}
+                sx={{
+                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: 14,
+                  fontWeight: language === lang.code ? 600 : 500,
+                  color: language === lang.code ? '#31664a' : '#111827',
+                  '&.Mui-selected': {
+                    backgroundColor: '#f3f4f6',
+                    '&:hover': {
+                      backgroundColor: '#e5e7eb',
+                    },
+                  },
+                }}
+              >
+                {lang.nativeLabel}
+              </MenuItem>
+            ))}
+          </Menu>
+        </Box>
+
         <Box
           sx={{
             width: '100%',

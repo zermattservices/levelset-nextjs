@@ -6,6 +6,7 @@ interface InfractionsRequestBody {
   leaderId?: string;
   employeeId?: string;
   infractionId?: string;
+  infractionDate?: string | null;
   acknowledged?: boolean;
   teamMemberSignature?: string | null;
   leaderSignature?: string | null;
@@ -25,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const body: InfractionsRequestBody = req.body ?? {};
-  const { leaderId, employeeId, infractionId, acknowledged, teamMemberSignature, leaderSignature } = body;
+  const { leaderId, employeeId, infractionId, infractionDate, acknowledged, teamMemberSignature, leaderSignature } = body;
 
   if (!leaderId || !employeeId || !infractionId) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -84,7 +85,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const employeeRecord = employeesData.find((emp) => emp.id === employeeId);
 
-  const today = new Date().toISOString().split('T')[0];
+  // Use provided date or default to today
+  const dateToUse = infractionDate && /^\d{4}-\d{2}-\d{2}$/.test(infractionDate) 
+    ? infractionDate 
+    : new Date().toISOString().split('T')[0];
 
   const { data: inserted, error: insertError } = await supabase
     .from('infractions')
@@ -95,7 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       points: rubric.points ?? 0,
       acknowledgement: acknowledged ? 'Notified' : 'Not notified',
       ack_bool: Boolean(acknowledged),
-      infraction_date: today,
+      infraction_date: dateToUse,
       org_id: location.org_id,
       location_id: location.id,
       team_member_signature: teamMemberSignature ?? null,
