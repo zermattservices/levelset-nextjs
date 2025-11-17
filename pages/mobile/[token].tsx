@@ -36,13 +36,13 @@ interface MobilePortalPageProps {
 const cards: Array<{ key: MobileFormKey; titleKey: string; descriptionKey: string }> = [
   {
     key: 'ratings',
-    titleKey: 'forms.ratings.title',
-    descriptionKey: 'forms.ratings.description',
+    titleKey: 'forms:ratings.title',
+    descriptionKey: 'forms:ratings.description',
   },
   {
     key: 'infractions',
-    titleKey: 'forms.infraction.title',
-    descriptionKey: 'forms.infraction.description',
+    titleKey: 'forms:infraction.title',
+    descriptionKey: 'forms:infraction.description',
   },
 ];
 

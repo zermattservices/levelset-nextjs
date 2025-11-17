@@ -7,28 +7,36 @@ import formsEs from '../locales/es/forms.json';
 import errorsEn from '../locales/en/errors.json';
 import errorsEs from '../locales/es/errors.json';
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: {
-        common: commonEn,
-        forms: formsEn,
-        errors: errorsEn,
+// Only initialize if not already initialized (for Next.js SSR)
+if (!i18n.isInitialized) {
+  i18n
+    .use(initReactI18next)
+    .init({
+      resources: {
+        en: {
+          common: commonEn,
+          forms: formsEn,
+          errors: errorsEn,
+        },
+        es: {
+          common: commonEs,
+          forms: formsEs,
+          errors: errorsEs,
+        },
       },
-      es: {
-        common: commonEs,
-        forms: formsEs,
-        errors: errorsEs,
+      lng: typeof window !== 'undefined' 
+        ? (localStorage.getItem('levelset.mobile.language') || 'en')
+        : 'en',
+      fallbackLng: 'en',
+      interpolation: {
+        escapeValue: false, // React already escapes
       },
-    },
-    lng: 'en', // default language
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false, // React already escapes
-    },
-    defaultNS: 'common',
-  });
+      defaultNS: 'common',
+      react: {
+        useSuspense: false, // Disable suspense for Next.js compatibility
+      },
+    });
+}
 
 export default i18n;
 
