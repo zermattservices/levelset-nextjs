@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const supabase = createServerSupabaseClient();
   const { data, error } = await supabase
     .from('position_big5_labels')
-    .select('label_1, label_2, label_3, label_4, label_5')
+    .select('label_1, label_2, label_3, label_4, label_5, label_1_es, label_2_es, label_3_es, label_4_es, label_5_es')
     .eq('location_id', location.id)
     .eq('position', position)
     .maybeSingle();
@@ -49,6 +49,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     labels: [data.label_1, data.label_2, data.label_3, data.label_4, data.label_5].filter(
       (label): label is string => Boolean(label)
     ),
+    labels_es: [
+      data.label_1_es,
+      data.label_2_es,
+      data.label_3_es,
+      data.label_4_es,
+      data.label_5_es,
+    ].filter((label): label is string => Boolean(label)),
   });
 }
 

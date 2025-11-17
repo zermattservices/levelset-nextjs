@@ -10,12 +10,15 @@ import {
   Typography,
 } from '@mui/material';
 import { useMobilePortal } from '../MobilePortalContext';
+import { useTranslation } from 'react-i18next';
+import { useTranslatedContent } from '@/hooks/useTranslatedContent';
 import type { FormControlCallbacks } from '../types';
 
-const RATING_OPTIONS: Array<{ label: string; value: RatingValue; color: string }> = [
-  { label: 'Not Yet', value: 1, color: '#b91c1c' },
-  { label: 'On the Rise', value: 2, color: '#f59e0b' },
-  { label: 'Crushing It', value: 3, color: '#31664a' },
+// Rating options will be translated in component using useTranslation
+const RATING_OPTIONS: Array<{ labelKey: string; value: RatingValue; color: string }> = [
+  { labelKey: 'ratings.ratingLabels.notYet', value: 1, color: '#b91c1c' },
+  { labelKey: 'ratings.ratingLabels.onTheRise', value: 2, color: '#f59e0b' },
+  { labelKey: 'ratings.ratingLabels.crushingIt', value: 3, color: '#31664a' },
 ];
 
 type RatingValue = 1 | 2 | 3;
@@ -28,6 +31,7 @@ interface EmployeeOption {
 
 interface PositionOption {
   name: string;
+  name_es?: string | null;
   zone: 'FOH' | 'BOH';
 }
 
@@ -39,6 +43,7 @@ interface PositionalDataResponse {
 
 interface LabelsResponse {
   labels: string[];
+  labels_es?: string[];
 }
 
 interface PositionalRatingsFormProps {
@@ -47,6 +52,8 @@ interface PositionalRatingsFormProps {
 
 export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) {
   const { token } = useMobilePortal();
+  const { t } = useTranslation('forms');
+  const { translate } = useTranslatedContent();
 
   const [loading, setLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState<string | null>(null);
@@ -143,7 +150,11 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
         }
         const payload = (await response.json()) as LabelsResponse;
         if (!cancelled) {
-          const fetchedLabels = payload.labels ?? [];
+          // Use translated labels based on current language
+          const { language: currentLang } = translate;
+          const fetchedLabels = currentLang === 'es' && payload.labels_es && payload.labels_es.length > 0
+            ? payload.labels_es
+            : payload.labels ?? [];
           setLabels(fetchedLabels);
           setRatings(Array.from({ length: fetchedLabels.length }, () => null));
         }
@@ -168,7 +179,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
     return () => {
       cancelled = true;
     };
-  }, [controls, selectedPosition, token]);
+  }, [controls, selectedPosition, token, translate]);
 
   const selectedEmployeeOption = React.useMemo(
     () => employees.find((item) => item.id === selectedEmployee),
@@ -282,7 +293,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           }}
           getOptionLabel={(option) => option.name}
           renderInput={(params) => (
-            <TextField {...params} label="Leader name" helperText="Who is submitting this rating?" />
+            <TextField {...params} label={t('ratings.leader')} helperText={t('ratings.leaderHelper')} />
           )}
         />
 
@@ -296,14 +307,14 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           }}
           getOptionLabel={(option) => option.name}
           renderInput={(params) => (
-            <TextField {...params} label="Team member" helperText="Who is being evaluated?" />
+            <TextField {...params} label={t('ratings.employee')} helperText={t('ratings.employeeHelper')} />
           )}
         />
 
         <TextField
           select
           SelectProps={{ native: true }}
-          label="Position"
+          label={t('ratings.position')}
           value={selectedPosition}
           fullWidth
           onChange={(event) => {
@@ -311,9 +322,9 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             markDirty();
           }}
           InputLabelProps={{ shrink: true }}
-          helperText="Which role are you rating them for?"
+          helperText={t('ratings.positionHelper')}
         >
-          <option value="">Select position</option>
+          <option value="">{t('ratings.selectPosition')}</option>
           {positionsByZone.map((group) => (
             <optgroup
               key={group.zone}
@@ -322,7 +333,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             >
               {group.options.map((option) => (
                 <option key={option.name} value={option.name}>
-                  {option.name}
+                  {translate(option, 'name', option.name)}
                 </option>
               ))}
             </optgroup>
@@ -394,7 +405,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                         textAlign: 'center',
                       }}
                     >
-                      {option.label}
+                      {t(option.labelKey)}
                     </Typography>
                     <Radio
                       value={option.value}

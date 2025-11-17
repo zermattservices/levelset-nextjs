@@ -1,0 +1,41 @@
+{
+  "infraction": {
+    "title": "Discipline Infraction",
+    "description": "Document a discipline incident based on the Accountability Points System.",
+    "submitLabel": "Record Infraction",
+    "leader": "Leader name",
+    "leaderHelper": "Who is filing this infraction?",
+    "employee": "Team member",
+    "employeeHelper": "Who are you issuing an infraction for?",
+    "infraction": "Infraction",
+    "infractionHelper": "What happened?",
+    "selectInfraction": "Select infraction",
+    "points": "Points",
+    "date": "Infraction Date",
+    "dateHelper": "When did this infraction occur?",
+    "acknowledged": "Team Member has been made aware of this infraction",
+    "teamSignature": "Team member signature",
+    "teamSignatureHelperPresent": "Required when the team member is present.",
+    "teamSignatureHelperAbsent": "Optional if the team member is not present.",
+    "leaderSignature": "Leader signature",
+    "leaderSignatureHelper": "Required to confirm this record."
+  },
+  "ratings": {
+    "title": "Positional Ratings",
+    "description": "Evaluate Team Members across the Big 5 competencies for the selected position.",
+    "submitLabel": "Submit Rating",
+    "leader": "Leader name",
+    "leaderHelper": "Who is conducting this evaluation?",
+    "employee": "Team member",
+    "employeeHelper": "Who are you evaluating?",
+    "position": "Position",
+    "positionHelper": "Which position are you evaluating?",
+    "selectPosition": "Select position",
+    "ratingLabels": {
+      "notYet": "Not Yet",
+      "onTheRise": "On the Rise",
+      "crushingIt": "Crushing It"
+    }
+  }
+}
+

@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useTranslation } from 'react-i18next';
 
 interface PasswordModalProps {
   open: boolean;
@@ -26,32 +27,36 @@ export function PasswordModal({
   onClose,
   onProceed,
   correctPassword,
-  title = 'Enter Store Number',
-  description = 'Please enter the 5-digit store number to access this form.',
+  title,
+  description,
 }: PasswordModalProps) {
+  const { t } = useTranslation('common');
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
+  
+  const modalTitle = title ?? t('password.title');
+  const modalDescription = description ?? t('password.description');
 
   const handlePasswordChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.replace(/\D/g, '').slice(0, 5);
+    const value = event.target.value;
     setPassword(value);
     setError(null);
   }, []);
 
   const handleProceed = React.useCallback(() => {
-    if (password.length !== 5) {
-      setError('Please enter a 5-digit store number');
+    if (!password || password.trim().length === 0) {
+      setError(t('password.empty'));
       return;
     }
 
     if (password !== correctPassword) {
-      setError('Incorrect store number. Please try again.');
+      setError(t('password.error'));
       return;
     }
 
     setError(null);
     onProceed();
-  }, [password, correctPassword, onProceed]);
+  }, [password, correctPassword, onProceed, t]);
 
   const handleClose = React.useCallback(() => {
     setPassword('');
@@ -111,7 +116,7 @@ export function PasswordModal({
             flex: 1,
           }}
         >
-          {title}
+          {modalTitle}
         </DialogTitle>
       </Box>
 
@@ -124,20 +129,19 @@ export function PasswordModal({
             marginBottom: 3,
           }}
         >
-          {description}
+          {modalDescription}
         </Typography>
 
         <TextField
           autoFocus
           fullWidth
-          label="Store Number"
-          type="text"
-          inputMode="numeric"
+          label={t('password.label')}
+          type="password"
           value={password}
           onChange={handlePasswordChange}
           onKeyPress={handleKeyPress}
           error={Boolean(error)}
-          helperText={error || 'Enter 5 digits'}
+          helperText={error || ''}
           sx={{
             '& .MuiInputBase-root': {
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -162,20 +166,9 @@ export function PasswordModal({
 
       <DialogActions sx={{ padding: '0 24px 24px', gap: 1.5 }}>
         <Button
-          onClick={handleClose}
-          sx={{
-            textTransform: 'none',
-            fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-            color: '#6b7280',
-            fontWeight: 600,
-          }}
-        >
-          Back
-        </Button>
-        <Button
           variant="contained"
           onClick={handleProceed}
-          disabled={password.length !== 5}
+          disabled={!password || password.trim().length === 0}
           sx={{
             textTransform: 'none',
             fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -190,7 +183,7 @@ export function PasswordModal({
             },
           }}
         >
-          Proceed
+          {t('proceed', 'Proceed')}
         </Button>
       </DialogActions>
     </Dialog>

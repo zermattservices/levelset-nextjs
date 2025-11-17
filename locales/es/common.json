@@ -1,0 +1,22 @@
+{
+  "password": {
+    "title": "Ingresar Contraseña",
+    "description": "Por favor ingrese la contraseña para acceder a este formulario.",
+    "label": "Contraseña",
+    "error": "Contraseña incorrecta. Por favor intente de nuevo.",
+    "empty": "Por favor ingrese una contraseña"
+  },
+  "drawer": {
+    "discardTitle": "¿Descartar este formulario?",
+    "discardMessage": "Tiene cambios sin guardar. ¿Está seguro de que desea salir de este formulario y descartar su trabajo?",
+    "keepEditing": "Seguir Editando",
+    "discardForm": "Descartar Formulario"
+  },
+  "portal": {
+    "title": "Portal Móvil Levelset",
+    "subtitle": "Capture calificaciones posicionales e infracciones disciplinarias rápidamente desde cualquier dispositivo."
+  },
+  "submitting": "Enviando…",
+  "proceed": "Continuar"
+}
+

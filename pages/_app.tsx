@@ -8,6 +8,7 @@ import "../styles/datagrid-pro.css";
 import "../components/CodeComponents/scoreboard.css";
 import "../components/CodeComponents/RosterTable.css";
 import "../lib/logout"; // Initialize global logout function
+import "../lib/i18n"; // Initialize i18next
 
 // Initialize MUI X Pro license - must be called before rendering
 const licenseKey = process.env.NEXT_PUBLIC_MUI_X_LICENSE_KEY;

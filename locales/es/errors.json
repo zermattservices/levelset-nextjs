@@ -1,0 +1,10 @@
+{
+  "loading": "Cargando...",
+  "loadError": "Error al cargar datos",
+  "submitError": "Error al enviar",
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "invalid": "Valor inválido"
+  }
+}
+

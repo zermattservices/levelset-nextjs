@@ -15,6 +15,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { format } from 'date-fns';
 import { useMobilePortal } from '../MobilePortalContext';
 import { PasswordModal } from '../PasswordModal';
+import { useTranslation } from 'react-i18next';
+import { useTranslatedContent } from '@/hooks/useTranslatedContent';
 import type { FormControlCallbacks } from '../types';
 
 interface EmployeeOption {
@@ -26,6 +28,7 @@ interface EmployeeOption {
 interface InfractionOption {
   id: string;
   action: string;
+  action_es?: string | null;
   points: number;
 }
 
@@ -83,6 +86,8 @@ const InfractionDateTextField = React.forwardRef(function InfractionDateTextFiel
 
 export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormProps) {
   const { token, locationNumber } = useMobilePortal();
+  const { t } = useTranslation('forms');
+  const { translate } = useTranslatedContent();
 
   const [passwordVerified, setPasswordVerified] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
@@ -336,14 +341,18 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
         <PasswordModal
           open={true}
           onClose={() => {
-            // Close the form drawer by calling the parent's close handler
-            // This is handled by the FormDrawer component's dirty check
+            // Mark form as not dirty so drawer can close without confirmation
             controls.setDirty(false);
+            // Signal cancellation to parent - this will close the drawer
+            controls.completeSubmission({
+              form: 'infractions',
+              employeeName: '',
+              detail: 'Password entry cancelled',
+              points: 0,
+            });
           }}
           onProceed={() => setPasswordVerified(true)}
           correctPassword={correctPassword}
-          title="Enter Store Number"
-          description="Please enter the 5-digit store number to access the infraction form."
         />
       </Box>
     );
@@ -354,7 +363,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
-            label="Infraction Date"
+            label={t('infraction.date')}
             value={infractionDate}
             onChange={(newValue) => {
               setInfractionDate(newValue);
@@ -364,10 +373,10 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             slots={{
               textField: InfractionDateTextField,
             }}
-            slotProps={{
-              textField: {
-                helperText: 'When did this infraction occur?',
-              },
+          slotProps={{
+            textField: {
+              helperText: t('infraction.dateHelper'),
+            },
               openPickerButton: {
                 sx: {
                   color: levelsetGreen,
@@ -405,7 +414,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           }}
           getOptionLabel={(option) => option.name}
           renderInput={(params) => (
-            <TextField {...params} label="Leader name" helperText="Who is filing this infraction?" />
+            <TextField {...params} label={t('infraction.leader')} helperText={t('infraction.leaderHelper')} />
           )}
         />
 
@@ -419,14 +428,14 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           }}
           getOptionLabel={(option) => option.name}
           renderInput={(params) => (
-            <TextField {...params} label="Team member" helperText="Who are you issuing an infraction for?" />
+            <TextField {...params} label={t('infraction.employee')} helperText={t('infraction.employeeHelper')} />
           )}
         />
 
         <TextField
           select
           SelectProps={{ native: true }}
-          label="Infraction"
+          label={t('infraction.infraction')}
           value={selectedInfraction}
           fullWidth
           onChange={(event) => {
@@ -434,9 +443,9 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             markDirty();
           }}
           InputLabelProps={{ shrink: true }}
-          helperText="What happened?"
+          helperText={t('infraction.infractionHelper')}
         >
-          <option value="">Select infraction</option>
+          <option value="">{t('infraction.selectInfraction')}</option>
           {infractionGroups.map((group) => {
             const styles = getGroupStyles(group.points);
             return (
@@ -450,7 +459,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
               >
                 {group.options.map((option) => (
                   <option key={option.id} value={option.id}>
-                    {option.action}
+                    {translate(option, 'action', option.action)}
                   </option>
                 ))}
               </optgroup>
@@ -459,7 +468,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
         </TextField>
 
         <TextField
-          label="Points"
+          label={t('infraction.points')}
           value={points ?? 0}
           fullWidth
           InputProps={{ readOnly: true }}
@@ -486,7 +495,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
               }}
             />
           }
-          label="Team Member has been made aware of this infraction"
+          label={t('infraction.acknowledged')}
           sx={{
             '& .MuiFormControlLabel-label': {
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -495,7 +504,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
         />
 
         <TextField
-          label="Team member signature"
+          label={t('infraction.teamSignature')}
           value={teamSignature}
           onChange={(event) => {
             setTeamSignature(event.target.value);
@@ -503,11 +512,11 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           }}
           placeholder={selectedEmployeeOption?.name ?? 'Full name'}
           fullWidth
-          helperText={acknowledged ? 'Required when the team member is present.' : 'Optional if the team member is not present.'}
+          helperText={acknowledged ? t('infraction.teamSignatureHelperPresent') : t('infraction.teamSignatureHelperAbsent')}
         />
 
         <TextField
-          label="Leader signature"
+          label={t('infraction.leaderSignature')}
           value={leaderSignature}
           onChange={(event) => {
             setLeaderSignature(event.target.value);
@@ -515,7 +524,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           }}
           placeholder={selectedLeaderOption?.name ?? 'Full name'}
           fullWidth
-          helperText="Required to confirm this record."
+          helperText={t('infraction.leaderSignatureHelper')}
         />
       </Box>
 

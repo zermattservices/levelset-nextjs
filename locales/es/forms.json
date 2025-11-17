@@ -1,0 +1,41 @@
+{
+  "infraction": {
+    "title": "Infracción Disciplinaria",
+    "description": "Documente un incidente disciplinario según el Sistema de Puntos de Responsabilidad.",
+    "submitLabel": "Registrar Infracción",
+    "leader": "Nombre del líder",
+    "leaderHelper": "¿Quién está presentando esta infracción?",
+    "employee": "Miembro del equipo",
+    "employeeHelper": "¿Para quién está emitiendo una infracción?",
+    "infraction": "Infracción",
+    "infractionHelper": "¿Qué pasó?",
+    "selectInfraction": "Seleccionar infracción",
+    "points": "Puntos",
+    "date": "Fecha de la Infracción",
+    "dateHelper": "¿Cuándo ocurrió esta infracción?",
+    "acknowledged": "El miembro del equipo ha sido informado de esta infracción",
+    "teamSignature": "Firma del miembro del equipo",
+    "teamSignatureHelperPresent": "Requerido cuando el miembro del equipo está presente.",
+    "teamSignatureHelperAbsent": "Opcional si el miembro del equipo no está presente.",
+    "leaderSignature": "Firma del líder",
+    "leaderSignatureHelper": "Requerido para confirmar este registro."
+  },
+  "ratings": {
+    "title": "Calificaciones Posicionales",
+    "description": "Evalúe a los miembros del equipo en las 5 competencias principales para la posición seleccionada.",
+    "submitLabel": "Enviar Calificación",
+    "leader": "Nombre del líder",
+    "leaderHelper": "¿Quién está realizando esta evaluación?",
+    "employee": "Miembro del equipo",
+    "employeeHelper": "¿A quién está evaluando?",
+    "position": "Posición",
+    "positionHelper": "¿Qué posición está evaluando?",
+    "selectPosition": "Seleccionar posición",
+    "ratingLabels": {
+      "notYet": "Aún No",
+      "onTheRise": "En Ascenso",
+      "crushingIt": "Destacando"
+    }
+  }
+}
+

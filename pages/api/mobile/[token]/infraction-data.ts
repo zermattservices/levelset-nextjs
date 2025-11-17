@@ -57,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .order('full_name'),
     supabase
       .from('infractions_rubric')
-      .select('id, action, points')
+      .select('id, action, action_es, points')
       .eq('location_id', location.id)
       .order('points'),
   ]);
@@ -89,6 +89,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const infractions = (rubricData ?? []).map((item) => ({
     id: item.id,
     action: item.action,
+    action_es: item.action_es ?? null,
     points: item.points ?? 0,
   }));
 

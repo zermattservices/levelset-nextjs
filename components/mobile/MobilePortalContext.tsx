@@ -5,6 +5,7 @@ export interface MobilePortalContextValue {
   locationName: string | null;
   locationNumber: string | null;
   token: string;
+  language: 'en' | 'es';
 }
 
 const MobilePortalContext = React.createContext<MobilePortalContextValue | null>(null);

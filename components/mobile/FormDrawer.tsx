@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useTranslation } from 'react-i18next';
 
 interface FormDrawerProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function FormDrawer({
   submitting = false,
   dirty = false,
 }: FormDrawerProps) {
+  const { t } = useTranslation('common');
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   const attemptClose = React.useCallback(() => {
@@ -150,7 +152,7 @@ export function FormDrawer({
               },
             }}
           >
-            {submitting ? 'Submitting…' : submitLabel}
+            {submitting ? t('submitting', 'Submitting…') : submitLabel}
           </Button>
         </Box>
       </Drawer>
@@ -163,7 +165,7 @@ export function FormDrawer({
             fontSize: 18,
           }}
         >
-          Discard this form?
+          {t('drawer.discardTitle')}
         </DialogTitle>
         <DialogContent>
           <Typography
@@ -173,7 +175,7 @@ export function FormDrawer({
               color: '#4b5563',
             }}
           >
-            You have unsaved changes. Are you sure you want to leave this form and discard your work?
+            {t('drawer.discardMessage')}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ padding: '0 20px 16px', gap: 1.5 }}>
@@ -186,7 +188,7 @@ export function FormDrawer({
               fontWeight: 600,
             }}
           >
-            Keep Editing
+            {t('drawer.keepEditing')}
           </Button>
           <Button
             variant="contained"
@@ -203,7 +205,7 @@ export function FormDrawer({
               onClose();
             }}
           >
-            Discard Form
+            {t('drawer.discardForm')}
           </Button>
         </DialogActions>
       </Dialog>

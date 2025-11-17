@@ -1,0 +1,10 @@
+{
+  "loading": "Loading...",
+  "loadError": "Failed to load data",
+  "submitError": "Failed to submit",
+  "validation": {
+    "required": "This field is required",
+    "invalid": "Invalid value"
+  }
+}
+

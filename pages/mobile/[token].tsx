@@ -24,42 +24,25 @@ import { FormDrawer } from '@/components/mobile/FormDrawer';
 import { PositionalRatingsForm } from '@/components/mobile/forms/PositionalRatingsForm';
 import { DisciplineInfractionForm } from '@/components/mobile/forms/DisciplineInfractionForm';
 import type { FormControlCallbacks, MobileFormKey, SubmissionSummary } from '@/components/mobile/types';
+import { useTranslation } from 'react-i18next';
+import i18n from '@/lib/i18n';
 
 interface MobilePortalPageProps {
   location: MobileLocation;
   token: string;
 }
 
-const FORM_CONFIG: Record<
-  MobileFormKey,
-  {
-    title: string;
-    description: string;
-    submitLabel: string;
-  }
-> = {
-  ratings: {
-    title: 'Positional Ratings',
-    description: 'Evaluate Team Members across the Big 5 competencies for the selected position.',
-    submitLabel: 'Submit Rating',
-  },
-  infractions: {
-    title: 'Discipline Infraction',
-    description: 'Document a discipline incident based on the Accountability Points System.',
-    submitLabel: 'Record Infraction',
-  },
-};
-
-const cards: Array<{ key: MobileFormKey; title: string; description: string }> = [
+// Form config will be translated in component using useTranslation
+const cards: Array<{ key: MobileFormKey; titleKey: string; descriptionKey: string }> = [
   {
     key: 'ratings',
-    title: 'Submit Positional Ratings',
-    description: 'Capture Big 5 ratings in real time to keep coaching aligned.',
+    titleKey: 'forms.ratings.title',
+    descriptionKey: 'forms.ratings.description',
   },
   {
     key: 'infractions',
-    title: 'Log a Discipline Infraction',
-    description: 'Document infractions for Team Members according to the Accountability Points System.',
+    titleKey: 'forms.infraction.title',
+    descriptionKey: 'forms.infraction.description',
   },
 ];
 
@@ -71,6 +54,7 @@ const LANGUAGES: Array<{ code: Language; label: string; nativeLabel: string }> =
 ];
 
 function MobilePortalPage({ location, token }: MobilePortalPageProps) {
+  const { t } = useTranslation(['forms', 'common']);
   const [activeForm, setActiveForm] = React.useState<MobileFormKey | null>(null);
   const [dirty, setDirty] = React.useState(false);
   const [submitDisabled, setSubmitDisabled] = React.useState(true);
@@ -80,8 +64,28 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
   const [platform, setPlatform] = React.useState<'ios' | 'android' | null>(null);
   const [showInstallHint, setShowInstallHint] = React.useState(false);
   const [showIosGuide, setShowIosGuide] = React.useState(false);
-  const [language, setLanguage] = React.useState<Language>('en');
+  const [language, setLanguage] = React.useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('levelset.mobile.language');
+      return (saved === 'es' || saved === 'en') ? saved : 'en';
+    }
+    return 'en';
+  });
   const [languageMenuAnchor, setLanguageMenuAnchor] = React.useState<HTMLElement | null>(null);
+
+  // Initialize i18n with saved language
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      i18n.changeLanguage(language);
+    }
+  }, [language]);
+
+  // Persist language to localStorage
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('levelset.mobile.language', language);
+    }
+  }, [language]);
 
   React.useEffect(() => {
     if (typeof window === 'undefined') {
@@ -203,7 +207,11 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
     return <DisciplineInfractionForm controls={controls} />;
   }, [activeForm, controls]);
 
-  const activeConfig = activeForm ? FORM_CONFIG[activeForm] : null;
+  const activeConfig = activeForm ? {
+    title: activeForm === 'ratings' ? t('forms:ratings.title') : t('forms:infraction.title'),
+    description: activeForm === 'ratings' ? t('forms:ratings.description') : t('forms:infraction.description'),
+    submitLabel: activeForm === 'ratings' ? t('forms:ratings.submitLabel') : t('forms:infraction.submitLabel'),
+  } : null;
 
   const summaryCard = summary ? (
     <Box
@@ -299,6 +307,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         locationName: location.name ?? null,
         locationNumber: location.location_number ?? null,
         token,
+        language,
       }}
     >
       <Head>
@@ -375,7 +384,9 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                 key={lang.code}
                 selected={language === lang.code}
                 onClick={() => {
-                  setLanguage(lang.code);
+                  const newLang = lang.code;
+                  setLanguage(newLang);
+                  i18n.changeLanguage(newLang);
                   setLanguageMenuAnchor(null);
                 }}
                 sx={{
@@ -430,18 +441,6 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
               >
                 {location.name ?? 'Levelset Mobile'}
               </Typography>
-              {location.location_number && (
-                <Typography
-                  sx={{
-                    fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                    fontSize: 14,
-                    color: '#6b7280',
-                    marginTop: '4px',
-                  }}
-                >
-                  Store #{location.location_number}
-                </Typography>
-              )}
             </Box>
           )}
 
@@ -452,8 +451,8 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
               {cards.map((card) => (
                 <HomeCard
                   key={card.key}
-                  title={card.title}
-                  description={card.description}
+                  title={t(card.titleKey)}
+                  description={t(card.descriptionKey)}
                   onClick={() => handleOpenForm(card.key)}
                 />
               ))}

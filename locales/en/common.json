@@ -1,0 +1,22 @@
+{
+  "password": {
+    "title": "Enter Password",
+    "description": "Please enter the password in order to access this form.",
+    "label": "Password",
+    "error": "Incorrect password. Please try again.",
+    "empty": "Please enter a password"
+  },
+  "drawer": {
+    "discardTitle": "Discard this form?",
+    "discardMessage": "You have unsaved changes. Are you sure you want to leave this form and discard your work?",
+    "keepEditing": "Keep Editing",
+    "discardForm": "Discard Form"
+  },
+  "portal": {
+    "title": "Levelset Mobile Portal",
+    "subtitle": "Capture positional ratings and discipline infractions quickly from any device."
+  },
+  "submitting": "Submitting…",
+  "proceed": "Proceed"
+}
+
