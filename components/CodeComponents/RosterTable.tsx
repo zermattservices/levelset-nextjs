@@ -17,6 +17,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { EmployeeTableSkeleton } from "./Skeletons/EmployeeTableSkeleton";
 import { EvaluationsTable } from "./EvaluationsTable";
+import { PIPTable } from "./PIPTable";
 import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import { RolePill } from "./shared/RolePill";
 import { DataGridPro, GridColDef, gridClasses } from "@mui/x-data-grid-pro";
@@ -43,11 +44,11 @@ export interface RosterEntry {
 
 export function RosterTable(props: RosterTableProps) {
   const { locationId } = props;
-  const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations'>('employees');
+  const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations' | 'pip'>('employees');
   const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
 
   const handleTabChange = (_event: React.SyntheticEvent, value: string) => {
-    setActiveTab((value as 'employees' | 'evaluations') ?? 'employees');
+    setActiveTab((value as 'employees' | 'evaluations' | 'pip') ?? 'employees');
   };
 
   return (
@@ -73,17 +74,23 @@ export function RosterTable(props: RosterTableProps) {
             </Box>
           }
         />
+        <StyledTab label="PIP" value="pip" />
       </StyledTabs>
 
       <Box sx={{ mt: 2 }}>
         {activeTab === 'employees' ? (
           <EmployeesTableView {...props} />
+        ) : activeTab === 'evaluations' ? (
+          <EvaluationsTable
+            locationId={locationId}
+            className={props.className}
+            onPlannedStatusChange={setHasPlannedEvaluations}
+          />
         ) : (
-        <EvaluationsTable
-          locationId={locationId}
-          className={props.className}
-          onPlannedStatusChange={setHasPlannedEvaluations}
-        />
+          <PIPTable
+            locationId={locationId}
+            className={props.className}
+          />
         )}
       </Box>
     </Box>

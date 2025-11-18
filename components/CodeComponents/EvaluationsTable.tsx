@@ -733,7 +733,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
   return (
     <StyledContainer className={className}>
       <DataGridPro
-        style={{ flex: 1, width: '100%' }}
+        style={{ flex: 1, width: '100%', margin: 0, padding: 0 }}
         rows={rows}
         columns={columns}
         getRowId={(row) => row.id}
@@ -756,6 +756,15 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           fontFamily,
           border: '1px solid #e5e7eb',
           borderRadius: 2,
+          margin: 0,
+          padding: 0,
+          width: '100%',
+          '& .MuiDataGrid-main': {
+            width: '100%',
+          },
+          '& .MuiDataGrid-root': {
+            width: '100%',
+          },
           [`& .${gridClasses.columnHeaders}`]: {
             borderBottom: '1px solid #e5e7eb',
           },
