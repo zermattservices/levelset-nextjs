@@ -331,9 +331,12 @@ export function RecordActionModal({
   }, [open]);
 
   const handleSubmit = async () => {
-    const leader = actingLeader || currentUser;
-    if (!employee || !leader || !actionDate) {
-      alert('Missing required information. Please ensure you are logged in.');
+    if (!employee || !actingLeader || !actionDate) {
+      if (!actingLeader) {
+        alert('Unable to identify the acting leader. Your user account may not be linked to an employee record. Please contact an administrator.');
+      } else {
+        alert('Missing required information. Please ensure all fields are filled.');
+      }
       return;
     }
 
