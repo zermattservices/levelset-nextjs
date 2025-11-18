@@ -603,7 +603,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
       {
         field: 'status',
         headerName: 'Status',
-        width: 160,
+        flex: 1,
+        minWidth: 160,
         sortComparator: (v1, v2) => (STATUS_ORDER[v1 as string] ?? 99) - (STATUS_ORDER[v2 as string] ?? 99),
         renderCell: (params) => {
           const row = params.row;
@@ -739,6 +740,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
         disableRowSelectionOnClick
         disableColumnResize
         showColumnVerticalBorder={false}
+        hideFooter
         rowHeight={48}
         columnHeaderHeight={56}
         sortingOrder={['desc', 'asc']}
