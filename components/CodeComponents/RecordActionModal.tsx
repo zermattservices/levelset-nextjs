@@ -184,39 +184,48 @@ export function RecordActionModal({
             console.log('[RecordActionModal] App user error:', appUserError);
             
             if (!appUserError && appUserData) {
-              // Convert app_user to Employee-like object for display
-              const fullName = `${appUserData.first_name || ''} ${appUserData.last_name || ''}`.trim();
+              // Check if app_user has an employee_id - this is required for acting_leader
+              if (!appUserData.employee_id) {
+                console.error('[RecordActionModal] app_user has no employee_id! Cannot record action.');
+                alert('Your user account is not linked to an employee record. Please contact an administrator.');
+                setActingLeader(null);
+                setLoadingLeader(false);
+                return;
+              }
+
+              // Fetch the actual employee record
+              const { data: employeeData, error: employeeError } = await supabase
+                .from('employees')
+                .select('*')
+                .eq('id', appUserData.employee_id)
+                .maybeSingle();
+
+              if (employeeError || !employeeData) {
+                console.error('[RecordActionModal] Error fetching employee:', employeeError);
+                alert('Could not find employee record. Please contact an administrator.');
+                setActingLeader(null);
+                setLoadingLeader(false);
+                return;
+              }
+
+              // Use the employee record for acting_leader
               const employeeLike: Employee = {
-                id: appUserData.id,
-                full_name: fullName || appUserData.email || 'Unknown User',
-                role: appUserData.role || 'User',
-                org_id: appUserData.org_id,
-                location_id: appUserData.location_id || locationId,
-                active: true,
+                id: employeeData.id,
+                full_name: employeeData.full_name || `${employeeData.first_name || ''} ${employeeData.last_name || ''}`.trim() || 'Unknown',
+                role: employeeData.role || 'User',
+                org_id: employeeData.org_id,
+                location_id: employeeData.location_id || locationId,
+                active: employeeData.active ?? true,
               };
-              console.log('[RecordActionModal] Setting acting leader:', employeeLike);
+              console.log('[RecordActionModal] Setting acting leader (employee):', employeeLike);
               setActingLeader(employeeLike);
             } else {
               console.warn('[RecordActionModal] No app_user found for auth_user_id:', currentUserId);
-              setActingLeader({
-                id: currentUserId,
-                full_name: 'Current User',
-                role: 'User',
-                org_id: resolvedOrgId,
-                location_id: locationId,
-                active: true,
-              });
+              setActingLeader(null);
             }
           } catch (err) {
             console.error('[RecordActionModal] Error fetching app_user:', err);
-            setActingLeader({
-              id: currentUserId,
-              full_name: 'Current User',
-              role: 'User',
-              org_id: resolvedOrgId,
-              location_id: locationId,
-              active: true,
-            });
+            setActingLeader(null);
           } finally {
             setLoadingLeader(false);
           }
@@ -236,14 +245,44 @@ export function RecordActionModal({
               console.log('[RecordActionModal] Fetched app_user data:', appUserData);
               
               if (!appUserError && appUserData) {
-                const fullName = `${appUserData.first_name || ''} ${appUserData.last_name || ''}`.trim();
+                // Check if app_user has an employee_id
+                if (!appUserData.employee_id) {
+                  console.error('[RecordActionModal] app_user has no employee_id!');
+                  setActingLeader({
+                    id: '',
+                    full_name: 'Not available - No employee record',
+                    role: '',
+                  } as Employee);
+                  setLoadingLeader(false);
+                  return;
+                }
+
+                // Fetch the actual employee record
+                const { data: employeeData, error: employeeError } = await supabase
+                  .from('employees')
+                  .select('*')
+                  .eq('id', appUserData.employee_id)
+                  .maybeSingle();
+
+                if (employeeError || !employeeData) {
+                  console.error('[RecordActionModal] Error fetching employee:', employeeError);
+                  setActingLeader({
+                    id: '',
+                    full_name: 'Not available - Employee not found',
+                    role: '',
+                  } as Employee);
+                  setLoadingLeader(false);
+                  return;
+                }
+
+                // Use the employee record
                 const employeeLike: Employee = {
-                  id: appUserData.id,
-                  full_name: fullName || appUserData.email || 'Unknown User',
-                  role: appUserData.role || 'User',
-                  org_id: appUserData.org_id,
-                  location_id: appUserData.location_id || locationId,
-                  active: true,
+                  id: employeeData.id,
+                  full_name: employeeData.full_name || `${employeeData.first_name || ''} ${employeeData.last_name || ''}`.trim() || 'Unknown',
+                  role: employeeData.role || 'User',
+                  org_id: employeeData.org_id,
+                  location_id: employeeData.location_id || locationId,
+                  active: employeeData.active ?? true,
                 };
                 setActingLeader(employeeLike);
               } else {
@@ -302,16 +341,17 @@ export function RecordActionModal({
       setSaving(true);
 
       // Create disciplinary action record
+      // acting_leader must be an employee.id, not an app_user.id
       const { data: actionData, error: actionError } = await supabase
         .from('disc_actions')
         .insert({
           employee_id: employee.id,
-          org_id: locationOrgId ?? actingLeader?.org_id ?? employee.org_id ?? null,
+          org_id: locationOrgId ?? actingLeader.org_id ?? employee.org_id ?? null,
           location_id: locationId,
           action: recommendedAction,
           action_id: recommendedActionId,
           action_date: actionDate.toISOString().split('T')[0],
-          acting_leader: leader.id,
+          acting_leader: actingLeader.id, // This is now guaranteed to be an employee.id
           notes: notes || null,
         })
         .select()
@@ -325,7 +365,7 @@ export function RecordActionModal({
         .update({
           action_taken: 'action_recorded',
           action_taken_at: new Date().toISOString(),
-          action_taken_by: leader.id,
+          action_taken_by: actingLeader.id, // Use employee.id
           disc_action_id: actionData?.id,
         })
         .eq('employee_id', employee.id)
