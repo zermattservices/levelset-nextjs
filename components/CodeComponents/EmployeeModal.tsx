@@ -938,6 +938,12 @@ export function EmployeeModal({
           // Optionally refetch data
           fetchEmployeeData();
         }}
+        onDelete={(infractionId) => {
+          // Remove from the list
+          setInfractions(prev => prev.filter(inf => inf.id !== infractionId));
+          // Refetch data
+          fetchEmployeeData();
+        }}
         locationId={locationId}
       />
 
