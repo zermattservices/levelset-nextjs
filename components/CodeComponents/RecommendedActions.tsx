@@ -20,6 +20,7 @@ import { createSupabaseClient } from "@/util/supabase/component";
 import { RecordActionModal } from "./RecordActionModal";
 import { EmployeeModal } from "./EmployeeModal";
 import { DismissConfirmationModal } from "./DismissConfirmationModal";
+import { InfractionEditModal } from "./InfractionEditModal";
 import { useLocationContext } from "./LocationContext";
 
 export interface DisciplineNotificationsProps {
@@ -38,12 +39,19 @@ const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Se
 const levelsetGreen = '#31664a';
 
 // Infraction Card Component - for Infractions This Week section
-function InfractionCard({ infraction }: { infraction: Infraction }) {
+function InfractionCard({ 
+  infraction, 
+  onClick 
+}: { 
+  infraction: Infraction; 
+  onClick?: () => void;
+}) {
   const isPositive = (infraction.points || 0) < 0;
   const pointColor = isPositive ? "#178459" : "#d23230";
 
   return (
     <Box
+      onClick={onClick}
       sx={{
         display: "flex",
         flexDirection: "row",
@@ -55,6 +63,10 @@ function InfractionCard({ infraction }: { infraction: Infraction }) {
         border: "1px solid #e9eaeb",
         backgroundColor: "#ffffff",
         minWidth: 0,
+        cursor: onClick ? "pointer" : "default",
+        "&:hover": onClick ? {
+          backgroundColor: "#f9fafb",
+        } : undefined,
       }}
     >
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px", minWidth: 0 }}>
@@ -254,6 +266,8 @@ export function DisciplineNotifications({
   const [dismissModalOpen, setDismissModalOpen] = React.useState(false);
   const [recommendationToDismiss, setRecommendationToDismiss] = React.useState<RecommendedAction | null>(null);
   const [appUserId, setAppUserId] = React.useState<string | null>(null);
+  const [infractionEditModalOpen, setInfractionEditModalOpen] = React.useState(false);
+  const [selectedInfraction, setSelectedInfraction] = React.useState<Infraction | null>(null);
   const supabase = createSupabaseClient();
   const { selectedLocationOrgId } = useLocationContext();
 
@@ -528,7 +542,14 @@ export function DisciplineNotifications({
             >
               {weeklyInfractions.length > 0 ? (
                 weeklyInfractions.map((infraction) => (
-                  <InfractionCard key={infraction.id} infraction={infraction} />
+                  <InfractionCard 
+                    key={infraction.id} 
+                    infraction={infraction}
+                    onClick={() => {
+                      setSelectedInfraction(infraction);
+                      setInfractionEditModalOpen(true);
+                    }}
+                  />
                 ))
               ) : (
                 <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', textAlign: 'center', py: 2 }}>
@@ -791,6 +812,26 @@ export function DisciplineNotifications({
           setDismissModalOpen(false);
           setRecommendationToDismiss(null);
         }}
+      />
+
+      {/* Infraction Edit Modal */}
+      <InfractionEditModal
+        open={infractionEditModalOpen}
+        infraction={selectedInfraction}
+        onClose={() => {
+          setInfractionEditModalOpen(false);
+          setSelectedInfraction(null);
+        }}
+        onSave={(updatedInfraction) => {
+          // Refresh the weekly infractions list
+          fetchData();
+        }}
+        onDelete={(infractionId) => {
+          // Remove from local state and refresh
+          setWeeklyInfractions(prev => prev.filter(inf => inf.id !== infractionId));
+          fetchData();
+        }}
+        locationId={locationId}
       />
     </Box>
   );

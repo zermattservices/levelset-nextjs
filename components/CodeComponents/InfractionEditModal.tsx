@@ -22,12 +22,14 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { Infraction, Employee } from "@/lib/supabase.types";
+import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 
 export interface InfractionEditModalProps {
   open: boolean;
   infraction: Infraction | null;
   onClose: () => void;
   onSave?: (infraction: Infraction) => void;
+  onDelete?: (infractionId: string) => void;
   locationId: string;
   className?: string;
 }
@@ -122,6 +124,7 @@ export function InfractionEditModal({
   infraction,
   onClose,
   onSave,
+  onDelete,
   locationId,
   className = "",
 }: InfractionEditModalProps) {
@@ -138,6 +141,8 @@ export function InfractionEditModal({
   const [leaders, setLeaders] = React.useState<Employee[]>([]);
   const [discActionsRubricOptions, setDiscActionsRubricOptions] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
   const supabase = createSupabaseClient();
 
   // Load initial data
@@ -293,6 +298,34 @@ export function InfractionEditModal({
       alert('Failed to save infraction. Please try again.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!infraction) return;
+
+    try {
+      setDeleting(true);
+
+      const { error } = await supabase
+        .from('infractions')
+        .delete()
+        .eq('id', infraction.id);
+
+      if (error) throw error;
+
+      // Call onDelete callback if provided
+      if (onDelete) {
+        onDelete(infraction.id);
+      }
+
+      setDeleteConfirmOpen(false);
+      onClose();
+    } catch (err) {
+      console.error('Error deleting infraction:', err);
+      alert('Failed to delete infraction. Please try again.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -628,37 +661,71 @@ export function InfractionEditModal({
           />
 
           {/* Action Buttons */}
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 1 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, mt: 1 }}>
             <Button
-              onClick={onClose}
+              onClick={() => setDeleteConfirmOpen(true)}
+              disabled={saving || deleting}
               sx={{
                 fontFamily,
                 fontSize: 13,
                 textTransform: "none",
-                color: "#6b7280",
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              variant="contained"
-              sx={{
-                fontFamily,
-                fontSize: 13,
-                textTransform: "none",
-                backgroundColor: levelsetGreen,
+                color: "#dc2626",
+                borderColor: "#dc2626",
+                border: "1px solid",
+                padding: "6px 16px",
                 "&:hover": {
-                  backgroundColor: "#254d36",
+                  backgroundColor: "#fee2e2",
+                  borderColor: "#b91c1c",
+                },
+                "&:disabled": {
+                  borderColor: "#d1d5db",
+                  color: "#9ca3af",
                 },
               }}
             >
-              {saving ? "Saving..." : "Save Changes"}
+              Delete
             </Button>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Button
+                onClick={onClose}
+                disabled={saving || deleting}
+                sx={{
+                  fontFamily,
+                  fontSize: 13,
+                  textTransform: "none",
+                  color: "#6b7280",
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={saving || deleting}
+                variant="contained"
+                sx={{
+                  fontFamily,
+                  fontSize: 13,
+                  textTransform: "none",
+                  backgroundColor: levelsetGreen,
+                  "&:hover": {
+                    backgroundColor: "#254d36",
+                  },
+                }}
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Dialog>
+
+      <DeleteConfirmationModal
+        open={deleteConfirmOpen}
+        title="Delete Infraction"
+        message="Are you sure you want to delete this infraction? This action cannot be undone."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteConfirmOpen(false)}
+      />
     </LocalizationProvider>
   );
 }

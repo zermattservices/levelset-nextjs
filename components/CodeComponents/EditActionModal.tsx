@@ -20,12 +20,14 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { DisciplinaryAction, Employee } from "@/lib/supabase.types";
+import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 
 export interface EditActionModalProps {
   open: boolean;
   action: DisciplinaryAction | null;
   onClose: () => void;
   onSave?: (action: DisciplinaryAction) => void;
+  onDelete?: (actionId: string) => void;
   locationId: string;
   className?: string;
 }
@@ -120,6 +122,7 @@ export function EditActionModal({
   action,
   onClose,
   onSave,
+  onDelete,
   locationId,
   className = "",
 }: EditActionModalProps) {
@@ -134,6 +137,8 @@ export function EditActionModal({
   const [locationOrgId, setLocationOrgId] = React.useState<string | null>(null);
   const [discActionsRubricOptions, setDiscActionsRubricOptions] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
   const supabase = createSupabaseClient();
 
   // Load initial data
@@ -223,6 +228,34 @@ export function EditActionModal({
       alert('Failed to save disciplinary action. Please try again.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!action) return;
+
+    try {
+      setDeleting(true);
+
+      const { error } = await supabase
+        .from('disc_actions')
+        .delete()
+        .eq('id', action.id);
+
+      if (error) throw error;
+
+      // Call onDelete callback if provided
+      if (onDelete) {
+        onDelete(action.id);
+      }
+
+      setDeleteConfirmOpen(false);
+      onClose();
+    } catch (err) {
+      console.error('Error deleting disciplinary action:', err);
+      alert('Failed to delete disciplinary action. Please try again.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -464,41 +497,75 @@ export function EditActionModal({
           />
 
           {/* Action Buttons */}
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 1 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, mt: 1 }}>
             <Button
-              onClick={onClose}
+              onClick={() => setDeleteConfirmOpen(true)}
+              disabled={saving || deleting}
               sx={{
                 fontFamily,
                 fontSize: 13,
                 textTransform: "none",
-                color: "#6b7280",
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving || !actionType}
-              variant="contained"
-              sx={{
-                fontFamily,
-                fontSize: 13,
-                textTransform: "none",
-                backgroundColor: levelsetGreen,
+                color: "#dc2626",
+                borderColor: "#dc2626",
+                border: "1px solid",
+                padding: "6px 16px",
                 "&:hover": {
-                  backgroundColor: "#254d36",
+                  backgroundColor: "#fee2e2",
+                  borderColor: "#b91c1c",
                 },
                 "&:disabled": {
-                  backgroundColor: "#d1d5db",
+                  borderColor: "#d1d5db",
                   color: "#9ca3af",
                 },
               }}
             >
-              {saving ? "Saving..." : "Save Changes"}
+              Delete
             </Button>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Button
+                onClick={onClose}
+                disabled={saving || deleting}
+                sx={{
+                  fontFamily,
+                  fontSize: 13,
+                  textTransform: "none",
+                  color: "#6b7280",
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={saving || deleting || !actionType}
+                variant="contained"
+                sx={{
+                  fontFamily,
+                  fontSize: 13,
+                  textTransform: "none",
+                  backgroundColor: levelsetGreen,
+                  "&:hover": {
+                    backgroundColor: "#254d36",
+                  },
+                  "&:disabled": {
+                    backgroundColor: "#d1d5db",
+                    color: "#9ca3af",
+                  },
+                }}
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Dialog>
+
+      <DeleteConfirmationModal
+        open={deleteConfirmOpen}
+        title="Delete Disciplinary Action"
+        message="Are you sure you want to delete this disciplinary action? This action cannot be undone."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteConfirmOpen(false)}
+      />
     </LocalizationProvider>
   );
 }
