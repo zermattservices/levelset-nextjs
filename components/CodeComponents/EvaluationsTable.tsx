@@ -44,18 +44,18 @@ const MONTH_ORDER = [
   'December',
 ];
 
-const StyledContainer = styled('div')({
-  width: '100%',
-  height: 600,
+const StyledContainer = styled(Box)(() => ({
   borderRadius: 16,
-  border: '1px solid #e5e7eb',
-  backgroundColor: '#ffffff',
-  boxShadow: '0px 2px 6px rgba(15, 23, 42, 0.04)',
+  border: "1px solid #e5e7eb",
+  backgroundColor: "#ffffff",
+  overflow: "hidden",
+  boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
-  overflow: 'hidden',
-  display: 'flex',
-  flexDirection: 'column',
-});
+  width: "100%",
+  height: 600,
+  display: "flex",
+  flexDirection: "column",
+}));
 
 export interface EvaluationsTableProps {
   locationId: string;
@@ -733,7 +733,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
   return (
     <StyledContainer className={className}>
       <DataGridPro
-        style={{ flex: 1, width: '100%', margin: 0, padding: 0 }}
         rows={rows}
         columns={columns}
         getRowId={(row) => row.id}
@@ -743,6 +742,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
         rowHeight={48}
         columnHeaderHeight={56}
         sortingOrder={['desc', 'asc']}
+        style={{ flex: 1, width: '100%' }}
         initialState={{
           sorting: {
             sortModel: [
@@ -753,27 +753,16 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           },
         }}
         sx={{
+          border: "none",
           fontFamily,
-          border: '1px solid #e5e7eb',
-          borderRadius: 2,
-          margin: 0,
-          padding: 0,
-          width: '100%',
-          '& .MuiDataGrid-main': {
-            width: '100%',
-          },
-          '& .MuiDataGrid-root': {
-            width: '100%',
-          },
           [`& .${gridClasses.columnHeaders}`]: {
-            borderBottom: '1px solid #e5e7eb',
+            borderBottom: "1px solid #e5e7eb",
           },
           [`& .${gridClasses.columnHeader}`]: {
-            backgroundColor: '#f9fafb',
+            backgroundColor: "#f9fafb",
             fontWeight: 600,
             fontSize: 14,
-            color: '#111827',
-            fontFamily,
+            color: "#111827",
             '&:focus, &:focus-within': {
               outline: 'none',
             },
@@ -784,17 +773,11 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           [`& .${gridClasses.columnSeparator}`]: {
             display: 'none',
           },
-          '& .MuiDataGrid-cellContent': {
-            width: '100%',
-            overflow: 'visible',
-          },
           [`& .${gridClasses.cell}`]: {
             borderBottom: '1px solid #f3f4f6',
-            borderRight: 'none',
             fontSize: 13,
             fontWeight: 500,
             color: '#111827',
-            fontFamily,
             '&:focus, &:focus-within': {
               outline: 'none',
             },
@@ -805,8 +788,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           [`& .${gridClasses.row}:hover`]: {
             backgroundColor: '#f9fafb',
           },
-          [`& .${gridClasses.footerContainer}`]: {
-            borderTop: '1px solid #e5e7eb',
+          '& .MuiDataGrid-overlay': {
             fontFamily,
           },
         }}
