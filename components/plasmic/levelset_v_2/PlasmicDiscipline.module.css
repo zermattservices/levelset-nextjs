@@ -127,27 +127,6 @@
   font-weight: 600;
   font-family: "Mont";
 }
-.freeBox__c457R {
-  display: flex;
-  flex-direction: row;
-  position: relative;
-  align-items: stretch;
-  justify-content: flex-start;
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  min-width: 0;
-  padding: 0px;
-}
-.text___8HOob {
-  position: relative;
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  font-size: var(--token-BlA-iDkaAWvO);
-  font-family: "Satoshi";
-  min-width: 0;
-}
 .freeBox__lKzxl {
   display: flex;
   flex-direction: row;

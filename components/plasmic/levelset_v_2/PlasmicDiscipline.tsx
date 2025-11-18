@@ -467,22 +467,7 @@ function PlasmicDiscipline__RenderFunc(props: {
                         sty.text__wQDeC
                       )}
                     >
-                      {"APS Dashboard"}
-                    </div>
-                  </div>
-                  <div
-                    className={classNames(projectcss.all, sty.freeBox__c457R)}
-                  >
-                    <div
-                      className={classNames(
-                        projectcss.all,
-                        projectcss.__wab_text,
-                        sty.text___8HOob
-                      )}
-                    >
-                      {
-                        "Here\u2019s your organization's current discipline health. Click a Team Member to see their recent infractions."
-                      }
+                      {"Discipline Dashboard"}
                     </div>
                   </div>
                 </div>
