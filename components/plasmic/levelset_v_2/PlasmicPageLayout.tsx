@@ -170,18 +170,7 @@ function PlasmicPageLayout__RenderFunc(props: {
       <LoadingBoundary
         data-plasmic-name={"loadingBoundary"}
         data-plasmic-override={overrides.loadingBoundary}
-        loadingState={
-          <DataCtxReader__>
-            {$ctx => (
-              <div className={classNames(projectcss.all, sty.freeBox__bd9UW)}>
-                <IconIcon
-                  className={classNames(projectcss.all, sty.svg__tpMsc)}
-                  role={"img"}
-                />
-              </div>
-            )}
-          </DataCtxReader__>
-        }
+        loadingState={null}
       >
         <DataCtxReader__>
           {$ctx => (

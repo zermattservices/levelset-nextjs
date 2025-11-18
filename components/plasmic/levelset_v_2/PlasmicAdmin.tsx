@@ -647,562 +647,7 @@ function PlasmicAdmin__RenderFunc(props: {
         />
 
         <LoadingBoundary
-          loadingState={
-            <DataCtxReader__>
-              {$ctx => (
-                <LottieWrapper
-                  animationData={{
-                    nm: "Main Scene",
-                    ddd: 0,
-                    h: 540,
-                    w: 540,
-                    meta: { g: "@lottiefiles/creator 1.59.0" },
-                    layers: [
-                      {
-                        ty: 4,
-                        nm: "Dot4",
-                        sr: 1,
-                        st: 0,
-                        op: 360,
-                        ip: 0,
-                        hd: false,
-                        ddd: 0,
-                        bm: 0,
-                        hasMask: false,
-                        ao: 0,
-                        ks: {
-                          a: { a: 0, k: [-284, 92, 0], ix: 1 },
-                          s: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.167, y: 0.167 },
-                                i: { x: 0.833, y: 0.833 },
-                                s: [31, 31],
-                                t: 2
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [50, 50, 100],
-                                t: 25
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [75, 75, 100],
-                                t: 39
-                              },
-                              { s: [50, 50, 100], t: 55 }
-                            ],
-                            ix: 6
-                          },
-                          sk: { a: 0, k: 0 },
-                          p: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.167, y: 0.167 },
-                                i: { x: 0.833, y: 0.833 },
-                                s: [436, 270],
-                                t: 2
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [452, 270],
-                                t: 25
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [452, 230],
-                                t: 39
-                              },
-                              { s: [452, 270], t: 55 }
-                            ],
-                            ix: 2
-                          },
-                          r: { a: 0, k: 0, ix: 10 },
-                          sa: { a: 0, k: 0 },
-                          o: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [25],
-                                t: 25
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [100],
-                                t: 39
-                              },
-                              { s: [25], t: 55 }
-                            ],
-                            ix: 11
-                          }
-                        },
-                        shapes: [
-                          {
-                            ty: "gr",
-                            bm: 0,
-                            hd: false,
-                            mn: "ADBE Vector Group",
-                            nm: "Ellipse 1",
-                            ix: 1,
-                            cix: 2,
-                            np: 3,
-                            it: [
-                              {
-                                ty: "el",
-                                bm: 0,
-                                hd: false,
-                                mn: "ADBE Vector Shape - Ellipse",
-                                nm: "Ellipse Path 1",
-                                d: 1,
-                                p: { a: 0, k: [0, 0], ix: 3 },
-                                s: { a: 0, k: [120, 120], ix: 2 }
-                              },
-                              {
-                                ty: "fl",
-                                bm: 0,
-                                hd: false,
-                                mn: "ADBE Vector Graphic - Fill",
-                                nm: "Fill 1",
-                                c: { a: 0, k: [0.1922, 0.4, 0.2902], ix: 4 },
-                                r: 1,
-                                o: { a: 0, k: 100, ix: 5 }
-                              },
-                              {
-                                ty: "tr",
-                                a: { a: 0, k: [0, 0], ix: 1 },
-                                s: { a: 0, k: [100, 100], ix: 3 },
-                                sk: { a: 0, k: 0, ix: 4 },
-                                p: { a: 0, k: [-284, 92], ix: 2 },
-                                r: { a: 0, k: 0, ix: 6 },
-                                sa: { a: 0, k: 0, ix: 5 },
-                                o: { a: 0, k: 100, ix: 7 }
-                              }
-                            ]
-                          }
-                        ],
-                        ind: 1
-                      },
-                      {
-                        ty: 4,
-                        nm: "Dot3",
-                        sr: 1,
-                        st: 0,
-                        op: 360,
-                        ip: 0,
-                        hd: false,
-                        ddd: 0,
-                        bm: 0,
-                        hasMask: false,
-                        ao: 0,
-                        ks: {
-                          a: { a: 0, k: [-284, 92, 0], ix: 1 },
-                          s: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.167, y: 0.167 },
-                                i: { x: 0.833, y: 0.833 },
-                                s: [31, 31],
-                                t: 2
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [50, 50, 100],
-                                t: 17
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [75, 75, 100],
-                                t: 31
-                              },
-                              { s: [50, 50, 100], t: 47 }
-                            ],
-                            ix: 6
-                          },
-                          sk: { a: 0, k: 0 },
-                          p: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.167, y: 0.167 },
-                                i: { x: 0.833, y: 0.833 },
-                                s: [324, 270],
-                                t: 2
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [332, 270],
-                                t: 17
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [332, 230],
-                                t: 31
-                              },
-                              { s: [332, 270], t: 47 }
-                            ],
-                            ix: 2
-                          },
-                          r: { a: 0, k: 0, ix: 10 },
-                          sa: { a: 0, k: 0 },
-                          o: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [25],
-                                t: 17
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [100],
-                                t: 31
-                              },
-                              { s: [25], t: 47 }
-                            ],
-                            ix: 11
-                          }
-                        },
-                        shapes: [
-                          {
-                            ty: "gr",
-                            bm: 0,
-                            hd: false,
-                            mn: "ADBE Vector Group",
-                            nm: "Ellipse 1",
-                            ix: 1,
-                            cix: 2,
-                            np: 3,
-                            it: [
-                              {
-                                ty: "el",
-                                bm: 0,
-                                hd: false,
-                                mn: "ADBE Vector Shape - Ellipse",
-                                nm: "Ellipse Path 1",
-                                d: 1,
-                                p: { a: 0, k: [0, 0], ix: 3 },
-                                s: { a: 0, k: [120, 120], ix: 2 }
-                              },
-                              {
-                                ty: "fl",
-                                bm: 0,
-                                hd: false,
-                                mn: "ADBE Vector Graphic - Fill",
-                                nm: "Fill 1",
-                                c: { a: 0, k: [0.1922, 0.4, 0.2902], ix: 4 },
-                                r: 1,
-                                o: { a: 0, k: 100, ix: 5 }
-                              },
-                              {
-                                ty: "tr",
-                                a: { a: 0, k: [0, 0], ix: 1 },
-                                s: { a: 0, k: [100, 100], ix: 3 },
-                                sk: { a: 0, k: 0, ix: 4 },
-                                p: { a: 0, k: [-284, 92], ix: 2 },
-                                r: { a: 0, k: 0, ix: 6 },
-                                sa: { a: 0, k: 0, ix: 5 },
-                                o: { a: 0, k: 100, ix: 7 }
-                              }
-                            ]
-                          }
-                        ],
-                        ind: 2
-                      },
-                      {
-                        ty: 4,
-                        nm: "Dot2",
-                        sr: 1,
-                        st: 0,
-                        op: 360,
-                        ip: 0,
-                        hd: false,
-                        ddd: 0,
-                        bm: 0,
-                        hasMask: false,
-                        ao: 0,
-                        ks: {
-                          a: { a: 0, k: [-284, 92, 0], ix: 1 },
-                          s: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.167, y: 0.167 },
-                                i: { x: 0.833, y: 0.833 },
-                                s: [31, 31],
-                                t: 2
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [50, 50, 100],
-                                t: 9
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [75, 75, 100],
-                                t: 23
-                              },
-                              { s: [50, 50, 100], t: 39 }
-                            ],
-                            ix: 6
-                          },
-                          sk: { a: 0, k: 0 },
-                          p: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.167, y: 0.167 },
-                                i: { x: 0.833, y: 0.833 },
-                                s: [220, 270],
-                                t: 2
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [212, 270],
-                                t: 9
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [212, 230],
-                                t: 23
-                              },
-                              { s: [212, 270], t: 39 }
-                            ],
-                            ix: 2
-                          },
-                          r: { a: 0, k: 0, ix: 10 },
-                          sa: { a: 0, k: 0 },
-                          o: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [25],
-                                t: 9
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [100],
-                                t: 23
-                              },
-                              { s: [25], t: 39 }
-                            ],
-                            ix: 11
-                          }
-                        },
-                        shapes: [
-                          {
-                            ty: "gr",
-                            bm: 0,
-                            hd: false,
-                            mn: "ADBE Vector Group",
-                            nm: "Ellipse 1",
-                            ix: 1,
-                            cix: 2,
-                            np: 3,
-                            it: [
-                              {
-                                ty: "el",
-                                bm: 0,
-                                hd: false,
-                                mn: "ADBE Vector Shape - Ellipse",
-                                nm: "Ellipse Path 1",
-                                d: 1,
-                                p: { a: 0, k: [0, 0], ix: 3 },
-                                s: { a: 0, k: [120, 120], ix: 2 }
-                              },
-                              {
-                                ty: "fl",
-                                bm: 0,
-                                hd: false,
-                                mn: "ADBE Vector Graphic - Fill",
-                                nm: "Fill 1",
-                                c: { a: 0, k: [0.1922, 0.4, 0.2902], ix: 4 },
-                                r: 1,
-                                o: { a: 0, k: 100, ix: 5 }
-                              },
-                              {
-                                ty: "tr",
-                                a: { a: 0, k: [0, 0], ix: 1 },
-                                s: { a: 0, k: [100, 100], ix: 3 },
-                                sk: { a: 0, k: 0, ix: 4 },
-                                p: { a: 0, k: [-284, 92], ix: 2 },
-                                r: { a: 0, k: 0, ix: 6 },
-                                sa: { a: 0, k: 0, ix: 5 },
-                                o: { a: 0, k: 100, ix: 7 }
-                              }
-                            ]
-                          }
-                        ],
-                        ind: 3
-                      },
-                      {
-                        ty: 4,
-                        nm: "Dot1",
-                        sr: 1,
-                        st: 0,
-                        op: 360,
-                        ip: 0,
-                        hd: false,
-                        ddd: 0,
-                        bm: 0,
-                        hasMask: false,
-                        ao: 0,
-                        ks: {
-                          a: { a: 0, k: [-284, 92, 0], ix: 1 },
-                          s: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [50, 50, 100],
-                                t: 0
-                              },
-                              {
-                                o: { x: 0.167, y: 0.167 },
-                                i: { x: 0.833, y: 0.833 },
-                                s: [32.386446959656624, 32.386446959656624],
-                                t: 2
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [75, 75, 100],
-                                t: 14
-                              },
-                              { s: [50, 50, 100], t: 30 }
-                            ],
-                            ix: 6
-                          },
-                          sk: { a: 0, k: 0 },
-                          p: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [92, 270],
-                                t: 0
-                              },
-                              {
-                                o: { x: 0.167, y: 0.167 },
-                                i: { x: 0.833, y: 0.833 },
-                                s: [108, 270],
-                                t: 2
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [92, 230],
-                                t: 14
-                              },
-                              { s: [92, 270], t: 30 }
-                            ],
-                            ix: 2
-                          },
-                          r: { a: 0, k: 0, ix: 10 },
-                          sa: { a: 0, k: 0 },
-                          o: {
-                            a: 1,
-                            k: [
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [25],
-                                t: 0
-                              },
-                              {
-                                o: { x: 0.333, y: 0 },
-                                i: { x: 0.667, y: 1 },
-                                s: [100],
-                                t: 14
-                              },
-                              { s: [25], t: 30 }
-                            ],
-                            ix: 11
-                          }
-                        },
-                        shapes: [
-                          {
-                            ty: "gr",
-                            bm: 0,
-                            hd: false,
-                            mn: "ADBE Vector Group",
-                            nm: "Ellipse 1",
-                            ix: 1,
-                            cix: 2,
-                            np: 3,
-                            it: [
-                              {
-                                ty: "el",
-                                bm: 0,
-                                hd: false,
-                                mn: "ADBE Vector Shape - Ellipse",
-                                nm: "Ellipse Path 1",
-                                d: 1,
-                                p: { a: 0, k: [0, 0], ix: 3 },
-                                s: { a: 0, k: [120, 120], ix: 2 }
-                              },
-                              {
-                                ty: "fl",
-                                bm: 0,
-                                hd: false,
-                                mn: "ADBE Vector Graphic - Fill",
-                                nm: "Fill 1",
-                                c: { a: 0, k: [0.1922, 0.4, 0.2902], ix: 4 },
-                                r: 1,
-                                o: { a: 0, k: 100, ix: 5 }
-                              },
-                              {
-                                ty: "tr",
-                                a: { a: 0, k: [0, 0], ix: 1 },
-                                s: { a: 0, k: [100, 100], ix: 3 },
-                                sk: { a: 0, k: 0, ix: 4 },
-                                p: { a: 0, k: [-284, 92], ix: 2 },
-                                r: { a: 0, k: 0, ix: 6 },
-                                sa: { a: 0, k: 0, ix: 5 },
-                                o: { a: 0, k: 100, ix: 7 }
-                              }
-                            ]
-                          }
-                        ],
-                        ind: 4
-                      }
-                    ],
-                    v: "5.7.0",
-                    fr: 60,
-                    op: 81,
-                    ip: 0,
-                    assets: []
-                  }}
-                  className={classNames("__wab_instance", sty.lottie__ql0DM)}
-                  preview={true}
-                />
-              )}
-            </DataCtxReader__>
-          }
+          loadingState={null}
         >
           <DataCtxReader__>
             {$ctx => (
@@ -1781,1030 +1226,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                         )}
                                       >
                                         <LoadingBoundary
-                                          loadingState={
-                                            <DataCtxReader__>
-                                              {$ctx => (
-                                                <LottieWrapper
-                                                  animationData={{
-                                                    nm: "Main Scene",
-                                                    ddd: 0,
-                                                    h: 540,
-                                                    w: 540,
-                                                    meta: {
-                                                      g: "@lottiefiles/creator 1.59.0"
-                                                    },
-                                                    layers: [
-                                                      {
-                                                        ty: 4,
-                                                        nm: "Dot4",
-                                                        sr: 1,
-                                                        st: 0,
-                                                        op: 360,
-                                                        ip: 0,
-                                                        hd: false,
-                                                        ddd: 0,
-                                                        bm: 0,
-                                                        hasMask: false,
-                                                        ao: 0,
-                                                        ks: {
-                                                          a: {
-                                                            a: 0,
-                                                            k: [-284, 92, 0],
-                                                            ix: 1
-                                                          },
-                                                          s: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.167,
-                                                                  y: 0.167
-                                                                },
-                                                                i: {
-                                                                  x: 0.833,
-                                                                  y: 0.833
-                                                                },
-                                                                s: [31, 31],
-                                                                t: 2
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [
-                                                                  50, 50, 100
-                                                                ],
-                                                                t: 25
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [
-                                                                  75, 75, 100
-                                                                ],
-                                                                t: 39
-                                                              },
-                                                              {
-                                                                s: [
-                                                                  50, 50, 100
-                                                                ],
-                                                                t: 55
-                                                              }
-                                                            ],
-                                                            ix: 6
-                                                          },
-                                                          sk: { a: 0, k: 0 },
-                                                          p: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.167,
-                                                                  y: 0.167
-                                                                },
-                                                                i: {
-                                                                  x: 0.833,
-                                                                  y: 0.833
-                                                                },
-                                                                s: [436, 270],
-                                                                t: 2
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [452, 270],
-                                                                t: 25
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [452, 230],
-                                                                t: 39
-                                                              },
-                                                              {
-                                                                s: [452, 270],
-                                                                t: 55
-                                                              }
-                                                            ],
-                                                            ix: 2
-                                                          },
-                                                          r: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 10
-                                                          },
-                                                          sa: { a: 0, k: 0 },
-                                                          o: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [25],
-                                                                t: 25
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [100],
-                                                                t: 39
-                                                              },
-                                                              { s: [25], t: 55 }
-                                                            ],
-                                                            ix: 11
-                                                          }
-                                                        },
-                                                        shapes: [
-                                                          {
-                                                            ty: "gr",
-                                                            bm: 0,
-                                                            hd: false,
-                                                            mn: "ADBE Vector Group",
-                                                            nm: "Ellipse 1",
-                                                            ix: 1,
-                                                            cix: 2,
-                                                            np: 3,
-                                                            it: [
-                                                              {
-                                                                ty: "el",
-                                                                bm: 0,
-                                                                hd: false,
-                                                                mn: "ADBE Vector Shape - Ellipse",
-                                                                nm: "Ellipse Path 1",
-                                                                d: 1,
-                                                                p: {
-                                                                  a: 0,
-                                                                  k: [0, 0],
-                                                                  ix: 3
-                                                                },
-                                                                s: {
-                                                                  a: 0,
-                                                                  k: [120, 120],
-                                                                  ix: 2
-                                                                }
-                                                              },
-                                                              {
-                                                                ty: "fl",
-                                                                bm: 0,
-                                                                hd: false,
-                                                                mn: "ADBE Vector Graphic - Fill",
-                                                                nm: "Fill 1",
-                                                                c: {
-                                                                  a: 0,
-                                                                  k: [
-                                                                    0.1922, 0.4,
-                                                                    0.2902
-                                                                  ],
-                                                                  ix: 4
-                                                                },
-                                                                r: 1,
-                                                                o: {
-                                                                  a: 0,
-                                                                  k: 100,
-                                                                  ix: 5
-                                                                }
-                                                              },
-                                                              {
-                                                                ty: "tr",
-                                                                a: {
-                                                                  a: 0,
-                                                                  k: [0, 0],
-                                                                  ix: 1
-                                                                },
-                                                                s: {
-                                                                  a: 0,
-                                                                  k: [100, 100],
-                                                                  ix: 3
-                                                                },
-                                                                sk: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 4
-                                                                },
-                                                                p: {
-                                                                  a: 0,
-                                                                  k: [-284, 92],
-                                                                  ix: 2
-                                                                },
-                                                                r: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 6
-                                                                },
-                                                                sa: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 5
-                                                                },
-                                                                o: {
-                                                                  a: 0,
-                                                                  k: 100,
-                                                                  ix: 7
-                                                                }
-                                                              }
-                                                            ]
-                                                          }
-                                                        ],
-                                                        ind: 1
-                                                      },
-                                                      {
-                                                        ty: 4,
-                                                        nm: "Dot3",
-                                                        sr: 1,
-                                                        st: 0,
-                                                        op: 360,
-                                                        ip: 0,
-                                                        hd: false,
-                                                        ddd: 0,
-                                                        bm: 0,
-                                                        hasMask: false,
-                                                        ao: 0,
-                                                        ks: {
-                                                          a: {
-                                                            a: 0,
-                                                            k: [-284, 92, 0],
-                                                            ix: 1
-                                                          },
-                                                          s: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.167,
-                                                                  y: 0.167
-                                                                },
-                                                                i: {
-                                                                  x: 0.833,
-                                                                  y: 0.833
-                                                                },
-                                                                s: [31, 31],
-                                                                t: 2
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [
-                                                                  50, 50, 100
-                                                                ],
-                                                                t: 17
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [
-                                                                  75, 75, 100
-                                                                ],
-                                                                t: 31
-                                                              },
-                                                              {
-                                                                s: [
-                                                                  50, 50, 100
-                                                                ],
-                                                                t: 47
-                                                              }
-                                                            ],
-                                                            ix: 6
-                                                          },
-                                                          sk: { a: 0, k: 0 },
-                                                          p: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.167,
-                                                                  y: 0.167
-                                                                },
-                                                                i: {
-                                                                  x: 0.833,
-                                                                  y: 0.833
-                                                                },
-                                                                s: [324, 270],
-                                                                t: 2
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [332, 270],
-                                                                t: 17
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [332, 230],
-                                                                t: 31
-                                                              },
-                                                              {
-                                                                s: [332, 270],
-                                                                t: 47
-                                                              }
-                                                            ],
-                                                            ix: 2
-                                                          },
-                                                          r: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 10
-                                                          },
-                                                          sa: { a: 0, k: 0 },
-                                                          o: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [25],
-                                                                t: 17
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [100],
-                                                                t: 31
-                                                              },
-                                                              { s: [25], t: 47 }
-                                                            ],
-                                                            ix: 11
-                                                          }
-                                                        },
-                                                        shapes: [
-                                                          {
-                                                            ty: "gr",
-                                                            bm: 0,
-                                                            hd: false,
-                                                            mn: "ADBE Vector Group",
-                                                            nm: "Ellipse 1",
-                                                            ix: 1,
-                                                            cix: 2,
-                                                            np: 3,
-                                                            it: [
-                                                              {
-                                                                ty: "el",
-                                                                bm: 0,
-                                                                hd: false,
-                                                                mn: "ADBE Vector Shape - Ellipse",
-                                                                nm: "Ellipse Path 1",
-                                                                d: 1,
-                                                                p: {
-                                                                  a: 0,
-                                                                  k: [0, 0],
-                                                                  ix: 3
-                                                                },
-                                                                s: {
-                                                                  a: 0,
-                                                                  k: [120, 120],
-                                                                  ix: 2
-                                                                }
-                                                              },
-                                                              {
-                                                                ty: "fl",
-                                                                bm: 0,
-                                                                hd: false,
-                                                                mn: "ADBE Vector Graphic - Fill",
-                                                                nm: "Fill 1",
-                                                                c: {
-                                                                  a: 0,
-                                                                  k: [
-                                                                    0.1922, 0.4,
-                                                                    0.2902
-                                                                  ],
-                                                                  ix: 4
-                                                                },
-                                                                r: 1,
-                                                                o: {
-                                                                  a: 0,
-                                                                  k: 100,
-                                                                  ix: 5
-                                                                }
-                                                              },
-                                                              {
-                                                                ty: "tr",
-                                                                a: {
-                                                                  a: 0,
-                                                                  k: [0, 0],
-                                                                  ix: 1
-                                                                },
-                                                                s: {
-                                                                  a: 0,
-                                                                  k: [100, 100],
-                                                                  ix: 3
-                                                                },
-                                                                sk: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 4
-                                                                },
-                                                                p: {
-                                                                  a: 0,
-                                                                  k: [-284, 92],
-                                                                  ix: 2
-                                                                },
-                                                                r: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 6
-                                                                },
-                                                                sa: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 5
-                                                                },
-                                                                o: {
-                                                                  a: 0,
-                                                                  k: 100,
-                                                                  ix: 7
-                                                                }
-                                                              }
-                                                            ]
-                                                          }
-                                                        ],
-                                                        ind: 2
-                                                      },
-                                                      {
-                                                        ty: 4,
-                                                        nm: "Dot2",
-                                                        sr: 1,
-                                                        st: 0,
-                                                        op: 360,
-                                                        ip: 0,
-                                                        hd: false,
-                                                        ddd: 0,
-                                                        bm: 0,
-                                                        hasMask: false,
-                                                        ao: 0,
-                                                        ks: {
-                                                          a: {
-                                                            a: 0,
-                                                            k: [-284, 92, 0],
-                                                            ix: 1
-                                                          },
-                                                          s: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.167,
-                                                                  y: 0.167
-                                                                },
-                                                                i: {
-                                                                  x: 0.833,
-                                                                  y: 0.833
-                                                                },
-                                                                s: [31, 31],
-                                                                t: 2
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [
-                                                                  50, 50, 100
-                                                                ],
-                                                                t: 9
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [
-                                                                  75, 75, 100
-                                                                ],
-                                                                t: 23
-                                                              },
-                                                              {
-                                                                s: [
-                                                                  50, 50, 100
-                                                                ],
-                                                                t: 39
-                                                              }
-                                                            ],
-                                                            ix: 6
-                                                          },
-                                                          sk: { a: 0, k: 0 },
-                                                          p: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.167,
-                                                                  y: 0.167
-                                                                },
-                                                                i: {
-                                                                  x: 0.833,
-                                                                  y: 0.833
-                                                                },
-                                                                s: [220, 270],
-                                                                t: 2
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [212, 270],
-                                                                t: 9
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [212, 230],
-                                                                t: 23
-                                                              },
-                                                              {
-                                                                s: [212, 270],
-                                                                t: 39
-                                                              }
-                                                            ],
-                                                            ix: 2
-                                                          },
-                                                          r: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 10
-                                                          },
-                                                          sa: { a: 0, k: 0 },
-                                                          o: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [25],
-                                                                t: 9
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [100],
-                                                                t: 23
-                                                              },
-                                                              { s: [25], t: 39 }
-                                                            ],
-                                                            ix: 11
-                                                          }
-                                                        },
-                                                        shapes: [
-                                                          {
-                                                            ty: "gr",
-                                                            bm: 0,
-                                                            hd: false,
-                                                            mn: "ADBE Vector Group",
-                                                            nm: "Ellipse 1",
-                                                            ix: 1,
-                                                            cix: 2,
-                                                            np: 3,
-                                                            it: [
-                                                              {
-                                                                ty: "el",
-                                                                bm: 0,
-                                                                hd: false,
-                                                                mn: "ADBE Vector Shape - Ellipse",
-                                                                nm: "Ellipse Path 1",
-                                                                d: 1,
-                                                                p: {
-                                                                  a: 0,
-                                                                  k: [0, 0],
-                                                                  ix: 3
-                                                                },
-                                                                s: {
-                                                                  a: 0,
-                                                                  k: [120, 120],
-                                                                  ix: 2
-                                                                }
-                                                              },
-                                                              {
-                                                                ty: "fl",
-                                                                bm: 0,
-                                                                hd: false,
-                                                                mn: "ADBE Vector Graphic - Fill",
-                                                                nm: "Fill 1",
-                                                                c: {
-                                                                  a: 0,
-                                                                  k: [
-                                                                    0.1922, 0.4,
-                                                                    0.2902
-                                                                  ],
-                                                                  ix: 4
-                                                                },
-                                                                r: 1,
-                                                                o: {
-                                                                  a: 0,
-                                                                  k: 100,
-                                                                  ix: 5
-                                                                }
-                                                              },
-                                                              {
-                                                                ty: "tr",
-                                                                a: {
-                                                                  a: 0,
-                                                                  k: [0, 0],
-                                                                  ix: 1
-                                                                },
-                                                                s: {
-                                                                  a: 0,
-                                                                  k: [100, 100],
-                                                                  ix: 3
-                                                                },
-                                                                sk: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 4
-                                                                },
-                                                                p: {
-                                                                  a: 0,
-                                                                  k: [-284, 92],
-                                                                  ix: 2
-                                                                },
-                                                                r: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 6
-                                                                },
-                                                                sa: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 5
-                                                                },
-                                                                o: {
-                                                                  a: 0,
-                                                                  k: 100,
-                                                                  ix: 7
-                                                                }
-                                                              }
-                                                            ]
-                                                          }
-                                                        ],
-                                                        ind: 3
-                                                      },
-                                                      {
-                                                        ty: 4,
-                                                        nm: "Dot1",
-                                                        sr: 1,
-                                                        st: 0,
-                                                        op: 360,
-                                                        ip: 0,
-                                                        hd: false,
-                                                        ddd: 0,
-                                                        bm: 0,
-                                                        hasMask: false,
-                                                        ao: 0,
-                                                        ks: {
-                                                          a: {
-                                                            a: 0,
-                                                            k: [-284, 92, 0],
-                                                            ix: 1
-                                                          },
-                                                          s: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [
-                                                                  50, 50, 100
-                                                                ],
-                                                                t: 0
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.167,
-                                                                  y: 0.167
-                                                                },
-                                                                i: {
-                                                                  x: 0.833,
-                                                                  y: 0.833
-                                                                },
-                                                                s: [
-                                                                  32.386446959656624,
-                                                                  32.386446959656624
-                                                                ],
-                                                                t: 2
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [
-                                                                  75, 75, 100
-                                                                ],
-                                                                t: 14
-                                                              },
-                                                              {
-                                                                s: [
-                                                                  50, 50, 100
-                                                                ],
-                                                                t: 30
-                                                              }
-                                                            ],
-                                                            ix: 6
-                                                          },
-                                                          sk: { a: 0, k: 0 },
-                                                          p: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [92, 270],
-                                                                t: 0
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.167,
-                                                                  y: 0.167
-                                                                },
-                                                                i: {
-                                                                  x: 0.833,
-                                                                  y: 0.833
-                                                                },
-                                                                s: [108, 270],
-                                                                t: 2
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [92, 230],
-                                                                t: 14
-                                                              },
-                                                              {
-                                                                s: [92, 270],
-                                                                t: 30
-                                                              }
-                                                            ],
-                                                            ix: 2
-                                                          },
-                                                          r: {
-                                                            a: 0,
-                                                            k: 0,
-                                                            ix: 10
-                                                          },
-                                                          sa: { a: 0, k: 0 },
-                                                          o: {
-                                                            a: 1,
-                                                            k: [
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [25],
-                                                                t: 0
-                                                              },
-                                                              {
-                                                                o: {
-                                                                  x: 0.333,
-                                                                  y: 0
-                                                                },
-                                                                i: {
-                                                                  x: 0.667,
-                                                                  y: 1
-                                                                },
-                                                                s: [100],
-                                                                t: 14
-                                                              },
-                                                              { s: [25], t: 30 }
-                                                            ],
-                                                            ix: 11
-                                                          }
-                                                        },
-                                                        shapes: [
-                                                          {
-                                                            ty: "gr",
-                                                            bm: 0,
-                                                            hd: false,
-                                                            mn: "ADBE Vector Group",
-                                                            nm: "Ellipse 1",
-                                                            ix: 1,
-                                                            cix: 2,
-                                                            np: 3,
-                                                            it: [
-                                                              {
-                                                                ty: "el",
-                                                                bm: 0,
-                                                                hd: false,
-                                                                mn: "ADBE Vector Shape - Ellipse",
-                                                                nm: "Ellipse Path 1",
-                                                                d: 1,
-                                                                p: {
-                                                                  a: 0,
-                                                                  k: [0, 0],
-                                                                  ix: 3
-                                                                },
-                                                                s: {
-                                                                  a: 0,
-                                                                  k: [120, 120],
-                                                                  ix: 2
-                                                                }
-                                                              },
-                                                              {
-                                                                ty: "fl",
-                                                                bm: 0,
-                                                                hd: false,
-                                                                mn: "ADBE Vector Graphic - Fill",
-                                                                nm: "Fill 1",
-                                                                c: {
-                                                                  a: 0,
-                                                                  k: [
-                                                                    0.1922, 0.4,
-                                                                    0.2902
-                                                                  ],
-                                                                  ix: 4
-                                                                },
-                                                                r: 1,
-                                                                o: {
-                                                                  a: 0,
-                                                                  k: 100,
-                                                                  ix: 5
-                                                                }
-                                                              },
-                                                              {
-                                                                ty: "tr",
-                                                                a: {
-                                                                  a: 0,
-                                                                  k: [0, 0],
-                                                                  ix: 1
-                                                                },
-                                                                s: {
-                                                                  a: 0,
-                                                                  k: [100, 100],
-                                                                  ix: 3
-                                                                },
-                                                                sk: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 4
-                                                                },
-                                                                p: {
-                                                                  a: 0,
-                                                                  k: [-284, 92],
-                                                                  ix: 2
-                                                                },
-                                                                r: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 6
-                                                                },
-                                                                sa: {
-                                                                  a: 0,
-                                                                  k: 0,
-                                                                  ix: 5
-                                                                },
-                                                                o: {
-                                                                  a: 0,
-                                                                  k: 100,
-                                                                  ix: 7
-                                                                }
-                                                              }
-                                                            ]
-                                                          }
-                                                        ],
-                                                        ind: 4
-                                                      }
-                                                    ],
-                                                    v: "5.7.0",
-                                                    fr: 60,
-                                                    op: 81,
-                                                    ip: 0,
-                                                    assets: []
-                                                  }}
-                                                  className={classNames(
-                                                    "__wab_instance",
-                                                    sty.lottie___8VEo6
-                                                  )}
-                                                  preview={false}
-                                                />
-                                              )}
-                                            </DataCtxReader__>
-                                          }
+                                          loadingState={null}
                                         >
                                           <DataCtxReader__>
                                             {$ctx => (
@@ -3046,14 +1468,12 @@ function PlasmicAdmin__RenderFunc(props: {
                                                 <div
                                                   className={classNames(
                                                     projectcss.all,
-                                                    sty.freeBox__dbCj8
+                                                    sty.freeBox__cJ4H3
                                                   )}
                                                 />
 
                                                 <div
-                                                  data-plasmic-name={
-                                                    "inputAndText"
-                                                  }
+                                                  data-plasmic-name={"inputAndText"}
                                                   data-plasmic-override={
                                                     overrides.inputAndText
                                                   }
@@ -3063,9 +1483,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                   )}
                                                 >
                                                   <div
-                                                    data-plasmic-name={
-                                                      "iconAndText"
-                                                    }
+                                                    data-plasmic-name={"iconAndText"}
                                                     data-plasmic-override={
                                                       overrides.iconAndText
                                                     }
@@ -3075,9 +1493,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                     )}
                                                   >
                                                     <div
-                                                      data-plasmic-name={
-                                                        "text14"
-                                                      }
+                                                      data-plasmic-name={"text14"}
                                                       data-plasmic-override={
                                                         overrides.text14
                                                       }
@@ -3093,9 +1509,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                 </div>
                                                 <div
                                                   data-plasmic-name={"frame1"}
-                                                  data-plasmic-override={
-                                                    overrides.frame1
-                                                  }
+                                                  data-plasmic-override={overrides.frame1}
                                                   className={classNames(
                                                     projectcss.all,
                                                     sty.frame1
@@ -3109,13 +1523,10 @@ function PlasmicAdmin__RenderFunc(props: {
                                                         : [_par])(
                                                     (() => {
                                                       try {
-                                                        return $queries
-                                                          .infractionsQuery
-                                                          .data;
+                                                        return $queries.infractionsQuery.data;
                                                       } catch (e) {
                                                         if (
-                                                          e instanceof
-                                                            TypeError ||
+                                                          e instanceof TypeError ||
                                                           e?.plasmicType ===
                                                             "PlasmicUndefinedDataError"
                                                         ) {
@@ -3125,25 +1536,18 @@ function PlasmicAdmin__RenderFunc(props: {
                                                       }
                                                     })()
                                                   ).map(
-                                                    (
-                                                      __plasmic_item_0,
-                                                      __plasmic_idx_0
-                                                    ) => {
-                                                      const infraction =
-                                                        __plasmic_item_0;
-                                                      const currentIndex =
-                                                        __plasmic_idx_0;
+                                                    (__plasmic_item_0, __plasmic_idx_0) => {
+                                                      const infraction = __plasmic_item_0;
+                                                      const currentIndex = __plasmic_idx_0;
                                                       return (
                                                         <SlideoutListItem2
                                                           className={classNames(
                                                             "__wab_instance",
-                                                            sty.slideoutListItem2___7YeP
+                                                            sty.slideoutListItem2___3IN0E
                                                           )}
                                                           date2={
                                                             <div
-                                                              data-plasmic-name={
-                                                                "date4"
-                                                              }
+                                                              data-plasmic-name={"date4"}
                                                               data-plasmic-override={
                                                                 overrides.date4
                                                               }
@@ -3174,9 +1578,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                           }
                                                           documentingLeader={
                                                             <div
-                                                              data-plasmic-name={
-                                                                "leader4"
-                                                              }
+                                                              data-plasmic-name={"leader4"}
                                                               data-plasmic-override={
                                                                 overrides.leader4
                                                               }
@@ -3240,14 +1642,12 @@ function PlasmicAdmin__RenderFunc(props: {
                                                           }
                                                           infractionType={(() => {
                                                             try {
-                                                              return infraction.points >
-                                                                0
+                                                              return infraction.points > 0
                                                                 ? "negative"
                                                                 : "positive";
                                                             } catch (e) {
                                                               if (
-                                                                e instanceof
-                                                                  TypeError ||
+                                                                e instanceof TypeError ||
                                                                 e?.plasmicType ===
                                                                   "PlasmicUndefinedDataError"
                                                               ) {
@@ -3280,7 +1680,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                             <div
                                                               className={classNames(
                                                                 projectcss.all,
-                                                                sty.freeBox___7PCea
+                                                                sty.freeBox__m3Jjp
                                                               )}
                                                             >
                                                               <div
@@ -3323,16 +1723,12 @@ function PlasmicAdmin__RenderFunc(props: {
                                                   {(() => {
                                                     try {
                                                       return (
-                                                        (
-                                                          $queries
-                                                            .infractionsQuery
-                                                            .data ?? []
-                                                        ).length === 0
+                                                        ($queries.infractionsQuery.data ?? [])
+                                                          .length === 0
                                                       );
                                                     } catch (e) {
                                                       if (
-                                                        e instanceof
-                                                          TypeError ||
+                                                        e instanceof TypeError ||
                                                         e?.plasmicType ===
                                                           "PlasmicUndefinedDataError"
                                                       ) {
@@ -3342,9 +1738,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                     }
                                                   })() ? (
                                                     <div
-                                                      data-plasmic-name={
-                                                        "listItem"
-                                                      }
+                                                      data-plasmic-name={"listItem"}
                                                       data-plasmic-override={
                                                         overrides.listItem
                                                       }
@@ -3354,9 +1748,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                       )}
                                                     >
                                                       <div
-                                                        data-plasmic-name={
-                                                          "contents"
-                                                        }
+                                                        data-plasmic-name={"contents"}
                                                         data-plasmic-override={
                                                           overrides.contents
                                                         }
@@ -3366,9 +1758,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                         )}
                                                       >
                                                         <div
-                                                          data-plasmic-name={
-                                                            "content11"
-                                                          }
+                                                          data-plasmic-name={"content11"}
                                                           data-plasmic-override={
                                                             overrides.content11
                                                           }
@@ -3390,35 +1780,28 @@ function PlasmicAdmin__RenderFunc(props: {
                                                             )}
                                                           >
                                                             <div
-                                                              data-plasmic-name={
-                                                                "text24"
-                                                              }
+                                                              data-plasmic-name={"text24"}
                                                               data-plasmic-override={
                                                                 overrides.text24
                                                               }
                                                               className={classNames(
                                                                 projectcss.all,
+                                                                projectcss.__wab_text,
                                                                 sty.text24
                                                               )}
                                                             >
-                                                              {renderPlasmicSlot(
-                                                                {
-                                                                  defaultContents:
-                                                                    "No infractions in the last 90 days",
-                                                                  value:
-                                                                    args.itemName,
-                                                                  className:
-                                                                    classNames(
-                                                                      sty.slotTargetItemName
-                                                                    )
-                                                                }
-                                                              )}
+                                                              {renderPlasmicSlot({
+                                                                defaultContents:
+                                                                  "No infractions in the last 90 days",
+                                                                value: args.itemName,
+                                                                className: classNames(
+                                                                  sty.slotTargetItemName
+                                                                )
+                                                              })}
                                                             </div>
                                                           </div>
                                                           <div
-                                                            data-plasmic-name={
-                                                              "points"
-                                                            }
+                                                            data-plasmic-name={"points"}
                                                             data-plasmic-override={
                                                               overrides.points
                                                             }
@@ -3432,26 +1815,24 @@ function PlasmicAdmin__RenderFunc(props: {
                                                                 <div
                                                                   className={classNames(
                                                                     projectcss.all,
-                                                                    sty.freeBox__hzAqs
+                                                                    sty.freeBox__jVfOj
                                                                   )}
                                                                 >
                                                                   <div
                                                                     className={classNames(
                                                                       projectcss.all,
                                                                       projectcss.__wab_text,
-                                                                      sty.text__ta3I1
+                                                                      sty.text__mEHZ
                                                                     )}
                                                                   >
                                                                     {"10"}
                                                                   </div>
                                                                 </div>
                                                               ),
-                                                              value:
-                                                                args.pointValue3,
-                                                              className:
-                                                                classNames(
-                                                                  sty.slotTargetPointValue3
-                                                                )
+                                                              value: args.pointValue3,
+                                                              className: classNames(
+                                                                sty.slotTargetPointValue3
+                                                              )
                                                             })}
                                                             <div
                                                               data-plasmic-name={
@@ -3477,14 +1858,12 @@ function PlasmicAdmin__RenderFunc(props: {
                                                 <div
                                                   className={classNames(
                                                     projectcss.all,
-                                                    sty.freeBox__atDmp
+                                                    sty.freeBox__t3Ynp
                                                   )}
                                                 />
 
                                                 <div
-                                                  data-plasmic-name={
-                                                    "inputAndText2"
-                                                  }
+                                                  data-plasmic-name={"inputAndText2"}
                                                   data-plasmic-override={
                                                     overrides.inputAndText2
                                                   }
@@ -3494,9 +1873,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                   )}
                                                 >
                                                   <div
-                                                    data-plasmic-name={
-                                                      "iconAndText2"
-                                                    }
+                                                    data-plasmic-name={"iconAndText2"}
                                                     data-plasmic-override={
                                                       overrides.iconAndText2
                                                     }
@@ -3506,9 +1883,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                     )}
                                                   >
                                                     <div
-                                                      data-plasmic-name={
-                                                        "text27"
-                                                      }
+                                                      data-plasmic-name={"text27"}
                                                       data-plasmic-override={
                                                         overrides.text27
                                                       }
@@ -3520,1883 +1895,7 @@ function PlasmicAdmin__RenderFunc(props: {
                                                     >
                                                       {"Disciplinary Actions"}
                                                     </div>
-                                                    <AntdModal
-                                                      data-plasmic-name={
-                                                        "modal"
-                                                      }
-                                                      data-plasmic-override={
-                                                        overrides.modal
-                                                      }
-                                                      className={classNames(
-                                                        "__wab_instance",
-                                                        sty.modal
-                                                      )}
-                                                      defaultStylesClassName={classNames(
-                                                        projectcss.root_reset,
-                                                        projectcss.plasmic_default_styles,
-                                                        projectcss.plasmic_mixins,
-                                                        styleTokensClassNames
-                                                      )}
-                                                      hideFooter={true}
-                                                      modalContentClassName={classNames(
-                                                        {
-                                                          [sty[
-                                                            "pcls_q1Ljl5YCsg3m"
-                                                          ]]: true
-                                                        }
-                                                      )}
-                                                      modalScopeClassName={
-                                                        sty["modal__modal"]
-                                                      }
-                                                      onOpenChange={async (
-                                                        ...eventArgs: any
-                                                      ) => {
-                                                        generateStateOnChangeProp(
-                                                          $state,
-                                                          ["modal", "open"]
-                                                        ).apply(
-                                                          null,
-                                                          eventArgs
-                                                        );
-                                                      }}
-                                                      open={generateStateValueProp(
-                                                        $state,
-                                                        ["modal", "open"]
-                                                      )}
-                                                      title={
-                                                        <div
-                                                          className={classNames(
-                                                            projectcss.all,
-                                                            sty.freeBox__afR18
-                                                          )}
-                                                        >
-                                                          <div
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              projectcss.__wab_text,
-                                                              sty.text__ncG8
-                                                            )}
-                                                          >
-                                                            {
-                                                              "Record a Disciplinary Action for "
-                                                            }
-                                                          </div>
-                                                          <div
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              projectcss.__wab_text,
-                                                              sty.text__ilAz5
-                                                            )}
-                                                          >
-                                                            <React.Fragment>
-                                                              {(() => {
-                                                                try {
-                                                                  return $state
-                                                                    .selectedEmployee
-                                                                    ?.full_name;
-                                                                } catch (e) {
-                                                                  if (
-                                                                    e instanceof
-                                                                      TypeError ||
-                                                                    e?.plasmicType ===
-                                                                      "PlasmicUndefinedDataError"
-                                                                  ) {
-                                                                    return "Test Employee";
-                                                                  }
-                                                                  throw e;
-                                                                }
-                                                              })()}
-                                                            </React.Fragment>
-                                                          </div>
-                                                        </div>
-                                                      }
-                                                      trigger={
-                                                        <LevelsetButton
-                                                          className={classNames(
-                                                            "__wab_instance",
-                                                            sty.levelsetButton___1MFW
-                                                          )}
-                                                          color={"brand"}
-                                                          size={"compact"}
-                                                          startIcon={
-                                                            <SquarePlusIcon
-                                                              data-plasmic-name={
-                                                                "svg"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.svg
-                                                              }
-                                                              className={classNames(
-                                                                projectcss.all,
-                                                                sty.svg
-                                                              )}
-                                                              role={"img"}
-                                                            />
-                                                          }
-                                                          submitsForm={true}
-                                                        >
-                                                          <div
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              projectcss.__wab_text,
-                                                              sty.text__rhCyc
-                                                            )}
-                                                          >
-                                                            {"Record an Action"}
-                                                          </div>
-                                                        </LevelsetButton>
-                                                      }
-                                                      wrapClassName={classNames(
-                                                        {
-                                                          [sty[
-                                                            "pcls_rBsKd6hfKZfW"
-                                                          ]]: true
-                                                        }
-                                                      )}
-                                                    >
-                                                      {(() => {
-                                                        const child$Props = {
-                                                          className: classNames(
-                                                            "__wab_instance",
-                                                            sty.form
-                                                          ),
-                                                          extendedOnValuesChange:
-                                                            async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "value",
-                                                                [
-                                                                  "form",
-                                                                  "value"
-                                                                ],
-                                                                FormWrapper_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                          formItems: [
-                                                            {
-                                                              label: "Name",
-                                                              name: "name",
-                                                              inputType: "Text"
-                                                            },
-                                                            {
-                                                              label: "Message",
-                                                              name: "message",
-                                                              inputType:
-                                                                "Text Area"
-                                                            }
-                                                          ],
-                                                          labelCol: {
-                                                            span: 8,
-                                                            horizontalOnly: true
-                                                          },
-                                                          layout: "vertical",
-                                                          mode: "advanced",
-                                                          onFinish:
-                                                            async values => {
-                                                              const $steps = {};
-
-                                                              $steps[
-                                                                "defaultSubmit"
-                                                              ] = true
-                                                                ? (() => {
-                                                                    const actionArgs =
-                                                                      {
-                                                                        dataOp:
-                                                                          {
-                                                                            sourceId:
-                                                                              "wGi39M1g3x2KnbXK4J4Gyq",
-                                                                            opId: "a42b00c6-9c2e-4f56-8ae6-2ee207f3f05a",
-                                                                            userArgs:
-                                                                              {
-                                                                                variables:
-                                                                                  [
-                                                                                    $queries
-                                                                                      .activeAppUser
-                                                                                      .data[0]
-                                                                                      .employee_id,
-
-                                                                                    $queries
-                                                                                      .employeesDiscQuery
-                                                                                      .data[0]
-                                                                                      .id,
-
-                                                                                    $queries
-                                                                                      .employeesDiscQuery
-                                                                                      .data[0]
-                                                                                      .location_id,
-
-                                                                                    $queries
-                                                                                      .employeesDiscQuery
-                                                                                      .data[0]
-                                                                                      .org_id,
-
-                                                                                    $state
-                                                                                      .form
-                                                                                      .value
-                                                                                      .action_id,
-
-                                                                                    $state
-                                                                                      .form
-                                                                                      .value
-                                                                                      .action_date
-                                                                                  ]
-                                                                              },
-                                                                            cacheKey:
-                                                                              null,
-                                                                            invalidatedKeys:
-                                                                              [
-                                                                                "plasmic_refresh_all"
-                                                                              ],
-                                                                            roleId:
-                                                                              null
-                                                                          }
-                                                                      };
-                                                                    return (async ({
-                                                                      dataOp,
-                                                                      continueOnError
-                                                                    }) => {
-                                                                      try {
-                                                                        const response =
-                                                                          await executePlasmicDataOp(
-                                                                            dataOp,
-                                                                            {
-                                                                              userAuthToken:
-                                                                                dataSourcesCtx?.userAuthToken,
-                                                                              user: dataSourcesCtx?.user
-                                                                            }
-                                                                          );
-                                                                        await plasmicInvalidate(
-                                                                          dataOp.invalidatedKeys
-                                                                        );
-                                                                        return response;
-                                                                      } catch (e) {
-                                                                        if (
-                                                                          !continueOnError
-                                                                        ) {
-                                                                          throw e;
-                                                                        }
-                                                                        return e;
-                                                                      }
-                                                                    })?.apply(
-                                                                      null,
-                                                                      [
-                                                                        actionArgs
-                                                                      ]
-                                                                    );
-                                                                  })()
-                                                                : undefined;
-                                                              if (
-                                                                $steps[
-                                                                  "defaultSubmit"
-                                                                ] != null &&
-                                                                typeof $steps[
-                                                                  "defaultSubmit"
-                                                                ] ===
-                                                                  "object" &&
-                                                                typeof $steps[
-                                                                  "defaultSubmit"
-                                                                ].then ===
-                                                                  "function"
-                                                              ) {
-                                                                $steps[
-                                                                  "defaultSubmit"
-                                                                ] =
-                                                                  await $steps[
-                                                                    "defaultSubmit"
-                                                                  ];
-                                                              }
-
-                                                              $steps[
-                                                                "updateModalOpen"
-                                                              ] = true
-                                                                ? (() => {
-                                                                    const actionArgs =
-                                                                      {
-                                                                        variable:
-                                                                          {
-                                                                            objRoot:
-                                                                              $state,
-                                                                            variablePath:
-                                                                              [
-                                                                                "modal",
-                                                                                "open"
-                                                                              ]
-                                                                          },
-                                                                        operation: 4
-                                                                      };
-                                                                    return (({
-                                                                      variable,
-                                                                      value,
-                                                                      startIndex,
-                                                                      deleteCount
-                                                                    }) => {
-                                                                      if (
-                                                                        !variable
-                                                                      ) {
-                                                                        return;
-                                                                      }
-                                                                      const {
-                                                                        objRoot,
-                                                                        variablePath
-                                                                      } =
-                                                                        variable;
-
-                                                                      const oldValue =
-                                                                        $stateGet(
-                                                                          objRoot,
-                                                                          variablePath
-                                                                        );
-                                                                      $stateSet(
-                                                                        objRoot,
-                                                                        variablePath,
-                                                                        !oldValue
-                                                                      );
-                                                                      return !oldValue;
-                                                                    })?.apply(
-                                                                      null,
-                                                                      [
-                                                                        actionArgs
-                                                                      ]
-                                                                    );
-                                                                  })()
-                                                                : undefined;
-                                                              if (
-                                                                $steps[
-                                                                  "updateModalOpen"
-                                                                ] != null &&
-                                                                typeof $steps[
-                                                                  "updateModalOpen"
-                                                                ] ===
-                                                                  "object" &&
-                                                                typeof $steps[
-                                                                  "updateModalOpen"
-                                                                ].then ===
-                                                                  "function"
-                                                              ) {
-                                                                $steps[
-                                                                  "updateModalOpen"
-                                                                ] =
-                                                                  await $steps[
-                                                                    "updateModalOpen"
-                                                                  ];
-                                                              }
-
-                                                              $steps[
-                                                                "runActionOnForm"
-                                                              ] = true
-                                                                ? (() => {
-                                                                    const actionArgs =
-                                                                      {
-                                                                        tplRef:
-                                                                          "form",
-                                                                        action:
-                                                                          "clearFields"
-                                                                      };
-                                                                    return (({
-                                                                      tplRef,
-                                                                      action,
-                                                                      args
-                                                                    }) => {
-                                                                      return $refs?.[
-                                                                        tplRef
-                                                                      ]?.[
-                                                                        action
-                                                                      ]?.(
-                                                                        ...(args ??
-                                                                          [])
-                                                                      );
-                                                                    })?.apply(
-                                                                      null,
-                                                                      [
-                                                                        actionArgs
-                                                                      ]
-                                                                    );
-                                                                  })()
-                                                                : undefined;
-                                                              if (
-                                                                $steps[
-                                                                  "runActionOnForm"
-                                                                ] != null &&
-                                                                typeof $steps[
-                                                                  "runActionOnForm"
-                                                                ] ===
-                                                                  "object" &&
-                                                                typeof $steps[
-                                                                  "runActionOnForm"
-                                                                ].then ===
-                                                                  "function"
-                                                              ) {
-                                                                $steps[
-                                                                  "runActionOnForm"
-                                                                ] =
-                                                                  await $steps[
-                                                                    "runActionOnForm"
-                                                                  ];
-                                                              }
-                                                            },
-                                                          onFinishFailed:
-                                                            async data => {
-                                                              const $steps = {};
-
-                                                              $steps[
-                                                                "invokeGlobalAction"
-                                                              ] = true
-                                                                ? (() => {
-                                                                    const actionArgs =
-                                                                      {
-                                                                        args: [
-                                                                          "error",
-                                                                          "Form Error",
-                                                                          "We were unable to record your inputs at this time. Please try again later",
-                                                                          undefined,
-                                                                          "bottom"
-                                                                        ]
-                                                                      };
-                                                                    return $globalActions[
-                                                                      "plasmic-antd5-config-provider.showNotification"
-                                                                    ]?.apply(
-                                                                      null,
-                                                                      [
-                                                                        ...actionArgs.args
-                                                                      ]
-                                                                    );
-                                                                  })()
-                                                                : undefined;
-                                                              if (
-                                                                $steps[
-                                                                  "invokeGlobalAction"
-                                                                ] != null &&
-                                                                typeof $steps[
-                                                                  "invokeGlobalAction"
-                                                                ] ===
-                                                                  "object" &&
-                                                                typeof $steps[
-                                                                  "invokeGlobalAction"
-                                                                ].then ===
-                                                                  "function"
-                                                              ) {
-                                                                $steps[
-                                                                  "invokeGlobalAction"
-                                                                ] =
-                                                                  await $steps[
-                                                                    "invokeGlobalAction"
-                                                                  ];
-                                                              }
-                                                            },
-                                                          onIsSubmittingChange:
-                                                            async (
-                                                              ...eventArgs: any
-                                                            ) => {
-                                                              generateStateOnChangePropForCodeComponents(
-                                                                $state,
-                                                                "isSubmitting",
-                                                                [
-                                                                  "form",
-                                                                  "isSubmitting"
-                                                                ],
-                                                                FormWrapper_Helpers
-                                                              ).apply(
-                                                                null,
-                                                                eventArgs
-                                                              );
-                                                            },
-                                                          ref: ref => {
-                                                            $refs["form"] = ref;
-                                                          },
-                                                          submitSlot: null,
-                                                          wrapperCol: {
-                                                            span: 16,
-                                                            horizontalOnly: true
-                                                          }
-                                                        };
-                                                        initializeCodeComponentStates(
-                                                          $state,
-                                                          [
-                                                            {
-                                                              name: "value",
-                                                              plasmicStateName:
-                                                                "form.value"
-                                                            },
-                                                            {
-                                                              name: "isSubmitting",
-                                                              plasmicStateName:
-                                                                "form.isSubmitting"
-                                                            }
-                                                          ],
-                                                          [],
-                                                          FormWrapper_Helpers ??
-                                                            {},
-                                                          child$Props
-                                                        );
-
-                                                        return (
-                                                          <FormWrapper
-                                                            data-plasmic-name={
-                                                              "form"
-                                                            }
-                                                            data-plasmic-override={
-                                                              overrides.form
-                                                            }
-                                                            {...child$Props}
-                                                          >
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField__gX9
-                                                              )}
-                                                              hidden={true}
-                                                              initialValue={
-                                                                undefined
-                                                              }
-                                                              label={"id"}
-                                                              name={"id"}
-                                                            >
-                                                              {(() => {
-                                                                const child$Props =
-                                                                  {
-                                                                    className:
-                                                                      classNames(
-                                                                        "__wab_instance",
-                                                                        sty.input
-                                                                      ),
-                                                                    onChange:
-                                                                      async (
-                                                                        ...eventArgs: any
-                                                                      ) => {
-                                                                        generateStateOnChangePropForCodeComponents(
-                                                                          $state,
-                                                                          "value",
-                                                                          [
-                                                                            "input",
-                                                                            "value"
-                                                                          ],
-                                                                          AntdInput_Helpers
-                                                                        ).apply(
-                                                                          null,
-                                                                          eventArgs
-                                                                        );
-                                                                      },
-                                                                    value:
-                                                                      generateStateValueProp(
-                                                                        $state,
-                                                                        [
-                                                                          "input",
-                                                                          "value"
-                                                                        ]
-                                                                      )
-                                                                  };
-                                                                initializeCodeComponentStates(
-                                                                  $state,
-                                                                  [
-                                                                    {
-                                                                      name: "value",
-                                                                      plasmicStateName:
-                                                                        "input.value"
-                                                                    }
-                                                                  ],
-                                                                  [],
-                                                                  AntdInput_Helpers ??
-                                                                    {},
-                                                                  child$Props
-                                                                );
-
-                                                                return (
-                                                                  <AntdInput
-                                                                    data-plasmic-name={
-                                                                      "input"
-                                                                    }
-                                                                    data-plasmic-override={
-                                                                      overrides.input
-                                                                    }
-                                                                    {...child$Props}
-                                                                  />
-                                                                );
-                                                              })()}
-                                                            </FormItemWrapper>
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField__p4Jt5
-                                                              )}
-                                                              initialValue={
-                                                                undefined
-                                                              }
-                                                              label={
-                                                                <div
-                                                                  className={classNames(
-                                                                    projectcss.all,
-                                                                    projectcss.__wab_text,
-                                                                    sty.text__xnV6A
-                                                                  )}
-                                                                >
-                                                                  {
-                                                                    "Select the action taken"
-                                                                  }
-                                                                </div>
-                                                              }
-                                                              name={"action_id"}
-                                                              rules={[
-                                                                {
-                                                                  ruleType:
-                                                                    "required",
-                                                                  message:
-                                                                    "Please select an action"
-                                                                }
-                                                              ]}
-                                                              valuePropName={
-                                                                "action_id"
-                                                              }
-                                                            >
-                                                              <AntdSelect
-                                                                data-plasmic-name={
-                                                                  "select"
-                                                                }
-                                                                data-plasmic-override={
-                                                                  overrides.select
-                                                                }
-                                                                className={classNames(
-                                                                  "__wab_instance",
-                                                                  sty.select
-                                                                )}
-                                                                defaultOpen={
-                                                                  false
-                                                                }
-                                                                defaultStylesClassName={classNames(
-                                                                  projectcss.root_reset,
-                                                                  projectcss.plasmic_default_styles,
-                                                                  projectcss.plasmic_mixins,
-                                                                  styleTokensClassNames
-                                                                )}
-                                                                onChange={async (
-                                                                  ...eventArgs: any
-                                                                ) => {
-                                                                  generateStateOnChangeProp(
-                                                                    $state,
-                                                                    [
-                                                                      "select",
-                                                                      "value"
-                                                                    ]
-                                                                  ).apply(
-                                                                    null,
-                                                                    eventArgs
-                                                                  );
-                                                                }}
-                                                                options={(() => {
-                                                                  const __composite =
-                                                                    [
-                                                                      {
-                                                                        type: null,
-                                                                        label:
-                                                                          null,
-                                                                        value:
-                                                                          null
-                                                                      },
-                                                                      {
-                                                                        type: null,
-                                                                        label:
-                                                                          null,
-                                                                        value:
-                                                                          null
-                                                                      },
-                                                                      {
-                                                                        type: "option",
-                                                                        label:
-                                                                          null,
-                                                                        value:
-                                                                          null
-                                                                      },
-                                                                      {
-                                                                        type: "option",
-                                                                        label:
-                                                                          null,
-                                                                        value:
-                                                                          null
-                                                                      }
-                                                                    ];
-                                                                  __composite[
-                                                                    "0"
-                                                                  ]["type"] =
-                                                                    "option";
-                                                                  __composite[
-                                                                    "0"
-                                                                  ]["label"] =
-                                                                    $queries.discActionsRubric.data[0].action;
-                                                                  __composite[
-                                                                    "0"
-                                                                  ]["value"] =
-                                                                    $queries.discActionsRubric.data[0].id;
-                                                                  __composite[
-                                                                    "1"
-                                                                  ]["type"] =
-                                                                    "option";
-                                                                  __composite[
-                                                                    "1"
-                                                                  ]["label"] =
-                                                                    $queries.discActionsRubric.data[1].action;
-                                                                  __composite[
-                                                                    "1"
-                                                                  ]["value"] =
-                                                                    $queries.discActionsRubric.data[1].id;
-                                                                  __composite[
-                                                                    "2"
-                                                                  ]["label"] =
-                                                                    $queries.discActionsRubric.data[2].action;
-                                                                  __composite[
-                                                                    "2"
-                                                                  ]["value"] =
-                                                                    $queries.discActionsRubric.data[2].id;
-                                                                  __composite[
-                                                                    "3"
-                                                                  ]["label"] =
-                                                                    $queries.discActionsRubric.data[3].action;
-                                                                  __composite[
-                                                                    "3"
-                                                                  ]["value"] =
-                                                                    $queries.discActionsRubric.data[3].id;
-                                                                  return __composite;
-                                                                })()}
-                                                                placeholder={
-                                                                  "Select..."
-                                                                }
-                                                                popupScopeClassName={
-                                                                  sty[
-                                                                    "select__popup"
-                                                                  ]
-                                                                }
-                                                                value={generateStateValueProp(
-                                                                  $state,
-                                                                  [
-                                                                    "select",
-                                                                    "value"
-                                                                  ]
-                                                                )}
-                                                              />
-                                                            </FormItemWrapper>
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField__jgAmh
-                                                              )}
-                                                              initialValue={
-                                                                undefined
-                                                              }
-                                                              label={
-                                                                <div
-                                                                  className={classNames(
-                                                                    projectcss.all,
-                                                                    projectcss.__wab_text,
-                                                                    sty.text__rzuab
-                                                                  )}
-                                                                >
-                                                                  {
-                                                                    "Date the action was taken"
-                                                                  }
-                                                                </div>
-                                                              }
-                                                              name={
-                                                                "action_date"
-                                                              }
-                                                              rules={[
-                                                                {
-                                                                  ruleType:
-                                                                    "required",
-                                                                  message:
-                                                                    "Please select a date"
-                                                                }
-                                                              ]}
-                                                            >
-                                                              {(() => {
-                                                                const child$Props =
-                                                                  {
-                                                                    className:
-                                                                      classNames(
-                                                                        "__wab_instance",
-                                                                        sty.timePicker
-                                                                      ),
-                                                                    disabled: false,
-                                                                    onChange:
-                                                                      async (
-                                                                        ...eventArgs: any
-                                                                      ) => {
-                                                                        generateStateOnChangePropForCodeComponents(
-                                                                          $state,
-                                                                          "value",
-                                                                          [
-                                                                            "timePicker",
-                                                                            "value"
-                                                                          ],
-                                                                          AntdDatePicker_Helpers
-                                                                        ).apply(
-                                                                          null,
-                                                                          eventArgs
-                                                                        );
-                                                                      },
-                                                                    popupScopeClassName:
-                                                                      sty[
-                                                                        "timePicker__datePickerPopup"
-                                                                      ],
-                                                                    value:
-                                                                      generateStateValueProp(
-                                                                        $state,
-                                                                        [
-                                                                          "timePicker",
-                                                                          "value"
-                                                                        ]
-                                                                      )
-                                                                  };
-                                                                initializeCodeComponentStates(
-                                                                  $state,
-                                                                  [
-                                                                    {
-                                                                      name: "value",
-                                                                      plasmicStateName:
-                                                                        "timePicker.value"
-                                                                    }
-                                                                  ],
-                                                                  [],
-                                                                  AntdDatePicker_Helpers ??
-                                                                    {},
-                                                                  child$Props
-                                                                );
-
-                                                                return (
-                                                                  <AntdDatePicker
-                                                                    data-plasmic-name={
-                                                                      "timePicker"
-                                                                    }
-                                                                    data-plasmic-override={
-                                                                      overrides.timePicker
-                                                                    }
-                                                                    {...child$Props}
-                                                                  />
-                                                                );
-                                                              })()}
-                                                            </FormItemWrapper>
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField__vreVn
-                                                              )}
-                                                              hidden={true}
-                                                              initialValue={(() => {
-                                                                try {
-                                                                  return $queries
-                                                                    .employeesDiscQuery
-                                                                    .data[0]
-                                                                    .location_id;
-                                                                } catch (e) {
-                                                                  if (
-                                                                    e instanceof
-                                                                      TypeError ||
-                                                                    e?.plasmicType ===
-                                                                      "PlasmicUndefinedDataError"
-                                                                  ) {
-                                                                    return undefined;
-                                                                  }
-                                                                  throw e;
-                                                                }
-                                                              })()}
-                                                              label={
-                                                                <div
-                                                                  className={classNames(
-                                                                    projectcss.all,
-                                                                    projectcss.__wab_text,
-                                                                    sty.text__tmhve
-                                                                  )}
-                                                                >
-                                                                  {
-                                                                    "location_id"
-                                                                  }
-                                                                </div>
-                                                              }
-                                                              name={
-                                                                "location_id"
-                                                              }
-                                                            >
-                                                              {(() => {
-                                                                const child$Props =
-                                                                  {
-                                                                    className:
-                                                                      classNames(
-                                                                        "__wab_instance",
-                                                                        sty.input2
-                                                                      ),
-                                                                    onChange:
-                                                                      async (
-                                                                        ...eventArgs: any
-                                                                      ) => {
-                                                                        generateStateOnChangePropForCodeComponents(
-                                                                          $state,
-                                                                          "value",
-                                                                          [
-                                                                            "input2",
-                                                                            "value"
-                                                                          ],
-                                                                          AntdInput_Helpers
-                                                                        ).apply(
-                                                                          null,
-                                                                          eventArgs
-                                                                        );
-                                                                      },
-                                                                    value:
-                                                                      generateStateValueProp(
-                                                                        $state,
-                                                                        [
-                                                                          "input2",
-                                                                          "value"
-                                                                        ]
-                                                                      )
-                                                                  };
-                                                                initializeCodeComponentStates(
-                                                                  $state,
-                                                                  [
-                                                                    {
-                                                                      name: "value",
-                                                                      plasmicStateName:
-                                                                        "input2.value"
-                                                                    }
-                                                                  ],
-                                                                  [],
-                                                                  AntdInput_Helpers ??
-                                                                    {},
-                                                                  child$Props
-                                                                );
-
-                                                                return (
-                                                                  <AntdInput
-                                                                    data-plasmic-name={
-                                                                      "input2"
-                                                                    }
-                                                                    data-plasmic-override={
-                                                                      overrides.input2
-                                                                    }
-                                                                    {...child$Props}
-                                                                  />
-                                                                );
-                                                              })()}
-                                                            </FormItemWrapper>
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField__mrY1Y
-                                                              )}
-                                                              hidden={true}
-                                                              initialValue={
-                                                                undefined
-                                                              }
-                                                              label={
-                                                                <div
-                                                                  className={classNames(
-                                                                    projectcss.all,
-                                                                    projectcss.__wab_text,
-                                                                    sty.text__eBLg
-                                                                  )}
-                                                                >
-                                                                  {
-                                                                    "leader_name"
-                                                                  }
-                                                                </div>
-                                                              }
-                                                              name={
-                                                                "leader_name"
-                                                              }
-                                                            >
-                                                              {(() => {
-                                                                const child$Props =
-                                                                  {
-                                                                    className:
-                                                                      classNames(
-                                                                        "__wab_instance",
-                                                                        sty.input3
-                                                                      ),
-                                                                    onChange:
-                                                                      async (
-                                                                        ...eventArgs: any
-                                                                      ) => {
-                                                                        generateStateOnChangePropForCodeComponents(
-                                                                          $state,
-                                                                          "value",
-                                                                          [
-                                                                            "input3",
-                                                                            "value"
-                                                                          ],
-                                                                          AntdInput_Helpers
-                                                                        ).apply(
-                                                                          null,
-                                                                          eventArgs
-                                                                        );
-                                                                      },
-                                                                    value:
-                                                                      generateStateValueProp(
-                                                                        $state,
-                                                                        [
-                                                                          "input3",
-                                                                          "value"
-                                                                        ]
-                                                                      )
-                                                                  };
-                                                                initializeCodeComponentStates(
-                                                                  $state,
-                                                                  [
-                                                                    {
-                                                                      name: "value",
-                                                                      plasmicStateName:
-                                                                        "input3.value"
-                                                                    }
-                                                                  ],
-                                                                  [],
-                                                                  AntdInput_Helpers ??
-                                                                    {},
-                                                                  child$Props
-                                                                );
-
-                                                                return (
-                                                                  <AntdInput
-                                                                    data-plasmic-name={
-                                                                      "input3"
-                                                                    }
-                                                                    data-plasmic-override={
-                                                                      overrides.input3
-                                                                    }
-                                                                    {...child$Props}
-                                                                  />
-                                                                );
-                                                              })()}
-                                                            </FormItemWrapper>
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField___1Fpr
-                                                              )}
-                                                              hidden={true}
-                                                              initialValue={
-                                                                undefined
-                                                              }
-                                                              label={
-                                                                "created_at"
-                                                              }
-                                                              name={
-                                                                "created_at"
-                                                              }
-                                                            >
-                                                              {(() => {
-                                                                const child$Props =
-                                                                  {
-                                                                    className:
-                                                                      classNames(
-                                                                        "__wab_instance",
-                                                                        sty.input4
-                                                                      ),
-                                                                    onChange:
-                                                                      async (
-                                                                        ...eventArgs: any
-                                                                      ) => {
-                                                                        generateStateOnChangePropForCodeComponents(
-                                                                          $state,
-                                                                          "value",
-                                                                          [
-                                                                            "input4",
-                                                                            "value"
-                                                                          ],
-                                                                          AntdInput_Helpers
-                                                                        ).apply(
-                                                                          null,
-                                                                          eventArgs
-                                                                        );
-                                                                      },
-                                                                    value:
-                                                                      generateStateValueProp(
-                                                                        $state,
-                                                                        [
-                                                                          "input4",
-                                                                          "value"
-                                                                        ]
-                                                                      )
-                                                                  };
-                                                                initializeCodeComponentStates(
-                                                                  $state,
-                                                                  [
-                                                                    {
-                                                                      name: "value",
-                                                                      plasmicStateName:
-                                                                        "input4.value"
-                                                                    }
-                                                                  ],
-                                                                  [],
-                                                                  AntdInput_Helpers ??
-                                                                    {},
-                                                                  child$Props
-                                                                );
-
-                                                                return (
-                                                                  <AntdInput
-                                                                    data-plasmic-name={
-                                                                      "input4"
-                                                                    }
-                                                                    data-plasmic-override={
-                                                                      overrides.input4
-                                                                    }
-                                                                    {...child$Props}
-                                                                  />
-                                                                );
-                                                              })()}
-                                                            </FormItemWrapper>
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField__m4GBa
-                                                              )}
-                                                              hidden={true}
-                                                              initialValue={
-                                                                undefined
-                                                              }
-                                                              label={
-                                                                "employee_name"
-                                                              }
-                                                              name={
-                                                                "employee_name"
-                                                              }
-                                                            >
-                                                              {(() => {
-                                                                const child$Props =
-                                                                  {
-                                                                    className:
-                                                                      classNames(
-                                                                        "__wab_instance",
-                                                                        sty.input5
-                                                                      ),
-                                                                    onChange:
-                                                                      async (
-                                                                        ...eventArgs: any
-                                                                      ) => {
-                                                                        generateStateOnChangePropForCodeComponents(
-                                                                          $state,
-                                                                          "value",
-                                                                          [
-                                                                            "input5",
-                                                                            "value"
-                                                                          ],
-                                                                          AntdInput_Helpers
-                                                                        ).apply(
-                                                                          null,
-                                                                          eventArgs
-                                                                        );
-                                                                      },
-                                                                    value:
-                                                                      generateStateValueProp(
-                                                                        $state,
-                                                                        [
-                                                                          "input5",
-                                                                          "value"
-                                                                        ]
-                                                                      )
-                                                                  };
-                                                                initializeCodeComponentStates(
-                                                                  $state,
-                                                                  [
-                                                                    {
-                                                                      name: "value",
-                                                                      plasmicStateName:
-                                                                        "input5.value"
-                                                                    }
-                                                                  ],
-                                                                  [],
-                                                                  AntdInput_Helpers ??
-                                                                    {},
-                                                                  child$Props
-                                                                );
-
-                                                                return (
-                                                                  <AntdInput
-                                                                    data-plasmic-name={
-                                                                      "input5"
-                                                                    }
-                                                                    data-plasmic-override={
-                                                                      overrides.input5
-                                                                    }
-                                                                    {...child$Props}
-                                                                  />
-                                                                );
-                                                              })()}
-                                                            </FormItemWrapper>
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField___8Ws6X
-                                                              )}
-                                                              hidden={true}
-                                                              initialValue={
-                                                                undefined
-                                                              }
-                                                              label={"action"}
-                                                              name={"action"}
-                                                            >
-                                                              {(() => {
-                                                                const child$Props =
-                                                                  {
-                                                                    className:
-                                                                      classNames(
-                                                                        "__wab_instance",
-                                                                        sty.input6
-                                                                      ),
-                                                                    onChange:
-                                                                      async (
-                                                                        ...eventArgs: any
-                                                                      ) => {
-                                                                        generateStateOnChangePropForCodeComponents(
-                                                                          $state,
-                                                                          "value",
-                                                                          [
-                                                                            "input6",
-                                                                            "value"
-                                                                          ],
-                                                                          AntdInput_Helpers
-                                                                        ).apply(
-                                                                          null,
-                                                                          eventArgs
-                                                                        );
-                                                                      },
-                                                                    value:
-                                                                      generateStateValueProp(
-                                                                        $state,
-                                                                        [
-                                                                          "input6",
-                                                                          "value"
-                                                                        ]
-                                                                      )
-                                                                  };
-                                                                initializeCodeComponentStates(
-                                                                  $state,
-                                                                  [
-                                                                    {
-                                                                      name: "value",
-                                                                      plasmicStateName:
-                                                                        "input6.value"
-                                                                    }
-                                                                  ],
-                                                                  [],
-                                                                  AntdInput_Helpers ??
-                                                                    {},
-                                                                  child$Props
-                                                                );
-
-                                                                return (
-                                                                  <AntdInput
-                                                                    data-plasmic-name={
-                                                                      "input6"
-                                                                    }
-                                                                    data-plasmic-override={
-                                                                      overrides.input6
-                                                                    }
-                                                                    {...child$Props}
-                                                                  />
-                                                                );
-                                                              })()}
-                                                            </FormItemWrapper>
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField___5VFcs
-                                                              )}
-                                                              hidden={true}
-                                                              initialValue={(() => {
-                                                                try {
-                                                                  return $queries
-                                                                    .employeesDiscQuery
-                                                                    .data[0]
-                                                                    .org_id;
-                                                                } catch (e) {
-                                                                  if (
-                                                                    e instanceof
-                                                                      TypeError ||
-                                                                    e?.plasmicType ===
-                                                                      "PlasmicUndefinedDataError"
-                                                                  ) {
-                                                                    return undefined;
-                                                                  }
-                                                                  throw e;
-                                                                }
-                                                              })()}
-                                                              label={
-                                                                <div
-                                                                  className={classNames(
-                                                                    projectcss.all,
-                                                                    projectcss.__wab_text,
-                                                                    sty.text__aFmN
-                                                                  )}
-                                                                >
-                                                                  {"org_id"}
-                                                                </div>
-                                                              }
-                                                              name={"org_id"}
-                                                            >
-                                                              {(() => {
-                                                                const child$Props =
-                                                                  {
-                                                                    className:
-                                                                      classNames(
-                                                                        "__wab_instance",
-                                                                        sty.input7
-                                                                      ),
-                                                                    onChange:
-                                                                      async (
-                                                                        ...eventArgs: any
-                                                                      ) => {
-                                                                        generateStateOnChangePropForCodeComponents(
-                                                                          $state,
-                                                                          "value",
-                                                                          [
-                                                                            "input7",
-                                                                            "value"
-                                                                          ],
-                                                                          AntdInput_Helpers
-                                                                        ).apply(
-                                                                          null,
-                                                                          eventArgs
-                                                                        );
-                                                                      },
-                                                                    value:
-                                                                      generateStateValueProp(
-                                                                        $state,
-                                                                        [
-                                                                          "input7",
-                                                                          "value"
-                                                                        ]
-                                                                      )
-                                                                  };
-                                                                initializeCodeComponentStates(
-                                                                  $state,
-                                                                  [
-                                                                    {
-                                                                      name: "value",
-                                                                      plasmicStateName:
-                                                                        "input7.value"
-                                                                    }
-                                                                  ],
-                                                                  [],
-                                                                  AntdInput_Helpers ??
-                                                                    {},
-                                                                  child$Props
-                                                                );
-
-                                                                return (
-                                                                  <AntdInput
-                                                                    data-plasmic-name={
-                                                                      "input7"
-                                                                    }
-                                                                    data-plasmic-override={
-                                                                      overrides.input7
-                                                                    }
-                                                                    {...child$Props}
-                                                                  />
-                                                                );
-                                                              })()}
-                                                            </FormItemWrapper>
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField__mAbZm
-                                                              )}
-                                                              hidden={true}
-                                                              initialValue={(() => {
-                                                                try {
-                                                                  return $queries
-                                                                    .employeesDiscQuery
-                                                                    .data[0].id;
-                                                                } catch (e) {
-                                                                  if (
-                                                                    e instanceof
-                                                                      TypeError ||
-                                                                    e?.plasmicType ===
-                                                                      "PlasmicUndefinedDataError"
-                                                                  ) {
-                                                                    return undefined;
-                                                                  }
-                                                                  throw e;
-                                                                }
-                                                              })()}
-                                                              label={
-                                                                "employee_id"
-                                                              }
-                                                              name={
-                                                                "employee_id"
-                                                              }
-                                                            >
-                                                              {(() => {
-                                                                const child$Props =
-                                                                  {
-                                                                    className:
-                                                                      classNames(
-                                                                        "__wab_instance",
-                                                                        sty.input8
-                                                                      ),
-                                                                    onChange:
-                                                                      async (
-                                                                        ...eventArgs: any
-                                                                      ) => {
-                                                                        generateStateOnChangePropForCodeComponents(
-                                                                          $state,
-                                                                          "value",
-                                                                          [
-                                                                            "input8",
-                                                                            "value"
-                                                                          ],
-                                                                          AntdInput_Helpers
-                                                                        ).apply(
-                                                                          null,
-                                                                          eventArgs
-                                                                        );
-                                                                      },
-                                                                    value:
-                                                                      generateStateValueProp(
-                                                                        $state,
-                                                                        [
-                                                                          "input8",
-                                                                          "value"
-                                                                        ]
-                                                                      )
-                                                                  };
-                                                                initializeCodeComponentStates(
-                                                                  $state,
-                                                                  [
-                                                                    {
-                                                                      name: "value",
-                                                                      plasmicStateName:
-                                                                        "input8.value"
-                                                                    }
-                                                                  ],
-                                                                  [],
-                                                                  AntdInput_Helpers ??
-                                                                    {},
-                                                                  child$Props
-                                                                );
-
-                                                                return (
-                                                                  <AntdInput
-                                                                    data-plasmic-name={
-                                                                      "input8"
-                                                                    }
-                                                                    data-plasmic-override={
-                                                                      overrides.input8
-                                                                    }
-                                                                    {...child$Props}
-                                                                  />
-                                                                );
-                                                              })()}
-                                                            </FormItemWrapper>
-                                                            <FormItemWrapper
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.formField__hfcl0
-                                                              )}
-                                                              hidden={true}
-                                                              initialValue={(() => {
-                                                                try {
-                                                                  return $ctx
-                                                                    .auth.id;
-                                                                } catch (e) {
-                                                                  if (
-                                                                    e instanceof
-                                                                      TypeError ||
-                                                                    e?.plasmicType ===
-                                                                      "PlasmicUndefinedDataError"
-                                                                  ) {
-                                                                    return undefined;
-                                                                  }
-                                                                  throw e;
-                                                                }
-                                                              })()}
-                                                              label={
-                                                                "acting_leader"
-                                                              }
-                                                              name={
-                                                                "acting_leader"
-                                                              }
-                                                            >
-                                                              {(() => {
-                                                                const child$Props =
-                                                                  {
-                                                                    className:
-                                                                      classNames(
-                                                                        "__wab_instance",
-                                                                        sty.input9
-                                                                      ),
-                                                                    onChange:
-                                                                      async (
-                                                                        ...eventArgs: any
-                                                                      ) => {
-                                                                        generateStateOnChangePropForCodeComponents(
-                                                                          $state,
-                                                                          "value",
-                                                                          [
-                                                                            "input9",
-                                                                            "value"
-                                                                          ],
-                                                                          AntdInput_Helpers
-                                                                        ).apply(
-                                                                          null,
-                                                                          eventArgs
-                                                                        );
-                                                                      },
-                                                                    value:
-                                                                      generateStateValueProp(
-                                                                        $state,
-                                                                        [
-                                                                          "input9",
-                                                                          "value"
-                                                                        ]
-                                                                      )
-                                                                  };
-                                                                initializeCodeComponentStates(
-                                                                  $state,
-                                                                  [
-                                                                    {
-                                                                      name: "value",
-                                                                      plasmicStateName:
-                                                                        "input9.value"
-                                                                    }
-                                                                  ],
-                                                                  [],
-                                                                  AntdInput_Helpers ??
-                                                                    {},
-                                                                  child$Props
-                                                                );
-
-                                                                return (
-                                                                  <AntdInput
-                                                                    data-plasmic-name={
-                                                                      "input9"
-                                                                    }
-                                                                    data-plasmic-override={
-                                                                      overrides.input9
-                                                                    }
-                                                                    {...child$Props}
-                                                                  />
-                                                                );
-                                                              })()}
-                                                            </FormItemWrapper>
-                                                            <LevelsetButton
-                                                              className={classNames(
-                                                                "__wab_instance",
-                                                                sty.levelsetButton__wOho
-                                                              )}
-                                                              color={"brand"}
-                                                              size={"compact"}
-                                                              submitsForm={true}
-                                                            >
-                                                              <div
-                                                                className={classNames(
-                                                                  projectcss.all,
-                                                                  projectcss.__wab_text,
-                                                                  sty.text__ttn3E
-                                                                )}
-                                                              >
-                                                                {"Submit"}
-                                                              </div>
-                                                            </LevelsetButton>
-                                                          </FormWrapper>
-                                                        );
-                                                      })()}
-                                                    </AntdModal>
                                                   </div>
-                                                </div>
-                                                <div
-                                                  data-plasmic-name={"frame6"}
-                                                  data-plasmic-override={
-                                                    overrides.frame6
-                                                  }
-                                                  className={classNames(
-                                                    projectcss.all,
-                                                    sty.frame6
-                                                  )}
-                                                >
-                                                  {(_par =>
-                                                    !_par
-                                                      ? []
-                                                      : Array.isArray(_par)
-                                                        ? _par
-                                                        : [_par])(
-                                                    (() => {
-                                                      try {
-                                                        return $queries
-                                                          .discActions.data;
-                                                      } catch (e) {
-                                                        if (
-                                                          e instanceof
-                                                            TypeError ||
-                                                          e?.plasmicType ===
-                                                            "PlasmicUndefinedDataError"
-                                                        ) {
-                                                          return [];
-                                                        }
-                                                        throw e;
-                                                      }
-                                                    })()
-                                                  ).map(
-                                                    (
-                                                      __plasmic_item_0,
-                                                      __plasmic_idx_0
-                                                    ) => {
-                                                      const action =
-                                                        __plasmic_item_0;
-                                                      const currentIndex =
-                                                        __plasmic_idx_0;
-                                                      return (
-                                                        <SlideoutListItem2
-                                                          className={classNames(
-                                                            "__wab_instance",
-                                                            sty.slideoutListItem2__ajOvr
-                                                          )}
-                                                          date2={
-                                                            <div
-                                                              data-plasmic-name={
-                                                                "date2"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.date2
-                                                              }
-                                                              className={classNames(
-                                                                projectcss.all,
-                                                                projectcss.__wab_text,
-                                                                sty.date2
-                                                              )}
-                                                            >
-                                                              <React.Fragment>
-                                                                {(() => {
-                                                                  try {
-                                                                    return action.action_date;
-                                                                  } catch (e) {
-                                                                    if (
-                                                                      e instanceof
-                                                                        TypeError ||
-                                                                      e?.plasmicType ===
-                                                                        "PlasmicUndefinedDataError"
-                                                                    ) {
-                                                                      return "10/2/2025";
-                                                                    }
-                                                                    throw e;
-                                                                  }
-                                                                })()}
-                                                              </React.Fragment>
-                                                            </div>
-                                                          }
-                                                          disciplinaryAction={
-                                                            true
-                                                          }
-                                                          documentingLeader={
-                                                            <div
-                                                              data-plasmic-name={
-                                                                "leader2"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.leader2
-                                                              }
-                                                              className={classNames(
-                                                                projectcss.all,
-                                                                projectcss.__wab_text,
-                                                                sty.leader2
-                                                              )}
-                                                            >
-                                                              <React.Fragment>
-                                                                {(() => {
-                                                                  try {
-                                                                    return action.leader_name;
-                                                                  } catch (e) {
-                                                                    if (
-                                                                      e instanceof
-                                                                        TypeError ||
-                                                                      e?.plasmicType ===
-                                                                        "PlasmicUndefinedDataError"
-                                                                    ) {
-                                                                      return "Leader Name";
-                                                                    }
-                                                                    throw e;
-                                                                  }
-                                                                })()}
-                                                              </React.Fragment>
-                                                            </div>
-                                                          }
-                                                          itemName={
-                                                            <React.Fragment>
-                                                              {(() => {
-                                                                try {
-                                                                  return action.action;
-                                                                } catch (e) {
-                                                                  if (
-                                                                    e instanceof
-                                                                      TypeError ||
-                                                                    e?.plasmicType ===
-                                                                      "PlasmicUndefinedDataError"
-                                                                  ) {
-                                                                    return "Item Name";
-                                                                  }
-                                                                  throw e;
-                                                                }
-                                                              })()}
-                                                            </React.Fragment>
-                                                          }
-                                                          key={currentIndex}
-                                                        />
-                                                      );
-                                                    }
-                                                  )}
-                                                  {(() => {
-                                                    try {
-                                                      return (
-                                                        (
-                                                          $queries.discActions
-                                                            .data ?? []
-                                                        ).length === 0
-                                                      );
-                                                    } catch (e) {
-                                                      if (
-                                                        e instanceof
-                                                          TypeError ||
-                                                        e?.plasmicType ===
-                                                          "PlasmicUndefinedDataError"
-                                                      ) {
-                                                        return true;
-                                                      }
-                                                      throw e;
-                                                    }
-                                                  })() ? (
-                                                    <div
-                                                      data-plasmic-name={
-                                                        "listItem2"
-                                                      }
-                                                      data-plasmic-override={
-                                                        overrides.listItem2
-                                                      }
-                                                      className={classNames(
-                                                        projectcss.all,
-                                                        sty.listItem2
-                                                      )}
-                                                    >
-                                                      <div
-                                                        data-plasmic-name={
-                                                          "contents2"
-                                                        }
-                                                        data-plasmic-override={
-                                                          overrides.contents2
-                                                        }
-                                                        className={classNames(
-                                                          projectcss.all,
-                                                          sty.contents2
-                                                        )}
-                                                      >
-                                                        <div
-                                                          data-plasmic-name={
-                                                            "content12"
-                                                          }
-                                                          data-plasmic-override={
-                                                            overrides.content12
-                                                          }
-                                                          className={classNames(
-                                                            projectcss.all,
-                                                            sty.content12
-                                                          )}
-                                                        >
-                                                          <div
-                                                            data-plasmic-name={
-                                                              "listItemDetails2"
-                                                            }
-                                                            data-plasmic-override={
-                                                              overrides.listItemDetails2
-                                                            }
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              sty.listItemDetails2
-                                                            )}
-                                                          >
-                                                            <div
-                                                              data-plasmic-name={
-                                                                "text25"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.text25
-                                                              }
-                                                              className={classNames(
-                                                                projectcss.all,
-                                                                sty.text25
-                                                              )}
-                                                            >
-                                                              {renderPlasmicSlot(
-                                                                {
-                                                                  defaultContents:
-                                                                    "No disciplinary actions in the last 90 days",
-                                                                  value:
-                                                                    args.itemName2,
-                                                                  className:
-                                                                    classNames(
-                                                                      sty.slotTargetItemName2
-                                                                    )
-                                                                }
-                                                              )}
-                                                            </div>
-                                                          </div>
-                                                          <div
-                                                            data-plasmic-name={
-                                                              "points2"
-                                                            }
-                                                            data-plasmic-override={
-                                                              overrides.points2
-                                                            }
-                                                            className={classNames(
-                                                              projectcss.all,
-                                                              sty.points2
-                                                            )}
-                                                          >
-                                                            {renderPlasmicSlot({
-                                                              defaultContents: (
-                                                                <div
-                                                                  className={classNames(
-                                                                    projectcss.all,
-                                                                    sty.freeBox__lfRoR
-                                                                  )}
-                                                                >
-                                                                  <div
-                                                                    className={classNames(
-                                                                      projectcss.all,
-                                                                      projectcss.__wab_text,
-                                                                      sty.text__cv5ZU
-                                                                    )}
-                                                                  >
-                                                                    {"10"}
-                                                                  </div>
-                                                                </div>
-                                                              ),
-                                                              value:
-                                                                args.pointValue5,
-                                                              className:
-                                                                classNames(
-                                                                  sty.slotTargetPointValue5
-                                                                )
-                                                            })}
-                                                            <div
-                                                              data-plasmic-name={
-                                                                "pointsText2"
-                                                              }
-                                                              data-plasmic-override={
-                                                                overrides.pointsText2
-                                                              }
-                                                              className={classNames(
-                                                                projectcss.all,
-                                                                projectcss.__wab_text,
-                                                                sty.pointsText2
-                                                              )}
-                                                            >
-                                                              {"points"}
-                                                            </div>
-                                                          </div>
-                                                        </div>
-                                                      </div>
-                                                    </div>
-                                                  ) : null}
                                                 </div>
                                               </div>
                                             )}
@@ -5412,14 +1911,354 @@ function PlasmicAdmin__RenderFunc(props: {
                         </div>
                       </div>
                     </div>
-                  </div>
-                </DrawerV2>
-              </RedirectIf>
-            )}
-          </DataCtxReader__>
-        </LoadingBoundary>
-      </div>
-    </React.Fragment>
+                  </DrawerV2>
+                </div>
+              )}
+            </DataCtxReader__>
+          </LoadingBoundary>
+        </RichLayout>
+      ) as React.ReactElement | null;
+    }
+    
+    const PlasmicDescendants = {
+      root: ["root", "menuNavigation", "userRole", "loadingBoundary", "redirectIf", "freeBox__t6I6", "freeBox__qEcUx", "freeBox__qcdYx", "freeBox__bYvUh", "text__fFys8", "freeBox__m8LNv", "text__m1CSw", "freeBox__xbZ1E", "freeBox__hhgMy", "verticalStack", "text___0SGr3", "rosterTable", "drawerV2", "content2", "textAndSupportingText2", "textAndOnlineIndicator", "text2", "supportingText2", "panel", "header", "container", "statistics", "tabsContainer", "freeBox__jzZ9T", "freeBox__yzxnd", "tabButton__dEorM", "levelsetButton__tIZa", "text__n30Qb", "tabButton__x5KM9", "levelsetButton__jAuqF", "text__wca5J", "tabButton__apVlL", "levelsetButton__e2Wap", "text__mPdgN", "tabButton__gNC", "levelsetButton___9Ttto", "text___1Ewf", "tabUnderline", "freeBox__ldo6S", "pathwayContent", "freeBox__baC1I", "text__c9Rlf", "peContent", "freeBox__gzKhT", "text__bVv3Z", "evalsContent", "freeBox__gsf96", "text__aFsL2", "disciplineContent", "freeBox__m7WH", "discipline", "row", "text13", "row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2", "inputAndText", "iconAndText", "text14", "frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText", "inputAndText2", "iconAndText2", "text27"],
+      menuNavigation: ["menuNavigation"],
+      userRole: ["userRole"],
+      loadingBoundary: ["loadingBoundary", "redirectIf", "freeBox__t6I6", "freeBox__qEcUx", "freeBox__qcdYx", "freeBox__bYvUh", "text__fFys8", "freeBox__m8LNv", "text__m1CSw", "freeBox__xbZ1E", "freeBox__hhgMy", "verticalStack", "text___0SGr3", "rosterTable", "drawerV2", "content2", "textAndSupportingText2", "textAndOnlineIndicator", "text2", "supportingText2", "panel", "header", "container", "statistics", "tabsContainer", "freeBox__jzZ9T", "freeBox__yzxnd", "tabButton__dEorM", "levelsetButton__tIZa", "text__n30Qb", "tabButton__x5KM9", "levelsetButton__jAuqF", "text__wca5J", "tabButton__apVlL", "levelsetButton__e2Wap", "text__mPdgN", "tabButton__gNC", "levelsetButton___9Ttto", "text___1Ewf", "tabUnderline", "freeBox__ldo6S", "pathwayContent", "freeBox__baC1I", "text__c9Rlf", "peContent", "freeBox__gzKhT", "text__bVv3Z", "evalsContent", "freeBox__gsf96", "text__aFsL2", "disciplineContent", "freeBox__m7WH", "discipline", "row", "text13", "row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2", "inputAndText", "iconAndText", "text14", "frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText", "inputAndText2", "iconAndText2", "text27"],
+      redirectIf: ["redirectIf", "freeBox__t6I6", "freeBox__qEcUx", "freeBox__qcdYx", "freeBox__bYvUh", "text__fFys8", "freeBox__m8LNv", "text__m1CSw", "freeBox__xbZ1E", "freeBox__hhgMy", "verticalStack", "text___0SGr3", "rosterTable", "drawerV2", "content2", "textAndSupportingText2", "textAndOnlineIndicator", "text2", "supportingText2", "panel", "header", "container", "statistics", "tabsContainer", "freeBox__jzZ9T", "freeBox__yzxnd", "tabButton__dEorM", "levelsetButton__tIZa", "text__n30Qb", "tabButton__x5KM9", "levelsetButton__jAuqF", "text__wca5J", "tabButton__apVlL", "levelsetButton__e2Wap", "text__mPdgN", "tabButton__gNC", "levelsetButton___9Ttto", "text___1Ewf", "tabUnderline", "freeBox__ldo6S", "pathwayContent", "freeBox__baC1I", "text__c9Rlf", "peContent", "freeBox__gzKhT", "text__bVv3Z", "evalsContent", "freeBox__gsf96", "text__aFsL2", "disciplineContent", "freeBox__m7WH", "discipline", "row", "text13", "row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2", "inputAndText", "iconAndText", "text14", "frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText", "inputAndText2", "iconAndText2", "text27"],
+      freeBox__t6I6: ["freeBox__t6I6", "freeBox__qEcUx", "freeBox__qcdYx", "freeBox__bYvUh", "text__fFys8", "freeBox__m8LNv", "text__m1CSw", "freeBox__xbZ1E", "freeBox__hhgMy", "verticalStack", "text___0SGr3", "rosterTable", "drawerV2"],
+      freeBox__qEcUx: ["freeBox__qEcUx", "freeBox__qcdYx", "freeBox__bYvUh", "text__fFys8", "freeBox__m8LNv", "text__m1CSw"],
+      freeBox__qcdYx: ["freeBox__qcdYx", "freeBox__bYvUh", "text__fFys8", "freeBox__m8LNv", "text__m1CSw"],
+      freeBox__bYvUh: ["freeBox__bYvUh", "text__fFys8"],
+      text__fFys8: ["text__fFys8"],
+      freeBox__m8LNv: ["freeBox__m8LNv", "text__m1CSw"],
+      text__m1CSw: ["text__m1CSw"],
+      freeBox__xbZ1E: ["freeBox__xbZ1E", "freeBox__hhgMy", "verticalStack", "text___0SGr3", "rosterTable", "drawerV2"],
+      freeBox__hhgMy: ["freeBox__hhgMy", "verticalStack", "text___0SGr3", "rosterTable"],
+      verticalStack: ["verticalStack", "text___0SGr3", "rosterTable"],
+      text___0SGr3: ["text___0SGr3"],
+      rosterTable: ["rosterTable"],
+      drawerV2: ["drawerV2", "content2", "textAndSupportingText2", "textAndOnlineIndicator", "text2", "supportingText2", "panel", "header", "container", "statistics", "tabsContainer", "freeBox__jzZ9T", "freeBox__yzxnd", "tabButton__dEorM", "levelsetButton__tIZa", "text__n30Qb", "tabButton__x5KM9", "levelsetButton__jAuqF", "text__wca5J", "tabButton__apVlL", "levelsetButton__e2Wap", "text__mPdgN", "tabButton__gNC", "levelsetButton___9Ttto", "text___1Ewf", "tabUnderline", "freeBox__ldo6S", "pathwayContent", "freeBox__baC1I", "text__c9Rlf", "peContent", "freeBox__gzKhT", "text__bVv3Z", "evalsContent", "freeBox__gsf96", "text__aFsL2", "disciplineContent", "freeBox__m7WH", "discipline", "row", "text13", "row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2", "inputAndText", "iconAndText", "text14", "frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText", "inputAndText2", "iconAndText2", "text27"],
+      content2: ["content2", "textAndSupportingText2", "textAndOnlineIndicator", "text2", "supportingText2"],
+      textAndSupportingText2: ["textAndSupportingText2", "textAndOnlineIndicator", "text2", "supportingText2"],
+      textAndOnlineIndicator: ["textAndOnlineIndicator", "text2"],
+      text2: ["text2"],
+      supportingText2: ["supportingText2"],
+      panel: ["panel", "header", "container", "statistics", "tabsContainer", "freeBox__jzZ9T", "freeBox__yzxnd", "tabButton__dEorM", "levelsetButton__tIZa", "text__n30Qb", "tabButton__x5KM9", "levelsetButton__jAuqF", "text__wca5J", "tabButton__apVlL", "levelsetButton__e2Wap", "text__mPdgN", "tabButton__gNC", "levelsetButton___9Ttto", "text___1Ewf", "tabUnderline", "freeBox__ldo6S", "pathwayContent", "freeBox__baC1I", "text__c9Rlf", "peContent", "freeBox__gzKhT", "text__bVv3Z", "evalsContent", "freeBox__gsf96", "text__aFsL2", "disciplineContent", "freeBox__m7WH", "discipline", "row", "text13", "row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2", "inputAndText", "iconAndText", "text14", "frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText", "inputAndText2", "iconAndText2", "text27"],
+      header: ["header", "container", "statistics", "tabsContainer"],
+      container: ["container", "statistics", "tabsContainer"],
+      statistics: ["statistics", "tabsContainer"],
+      tabsContainer: ["tabsContainer", "freeBox__jzZ9T", "freeBox__yzxnd", "tabButton__dEorM", "levelsetButton__tIZa", "text__n30Qb", "tabButton__x5KM9", "levelsetButton__jAuqF", "text__wca5J", "tabButton__apVlL", "levelsetButton__e2Wap", "text__mPdgN", "tabButton__gNC", "levelsetButton___9Ttto", "text___1Ewf", "tabUnderline", "freeBox__ldo6S", "pathwayContent", "freeBox__baC1I", "text__c9Rlf", "peContent", "freeBox__gzKhT", "text__bVv3Z", "evalsContent", "freeBox__gsf96", "text__aFsL2", "disciplineContent", "freeBox__m7WH", "discipline", "row", "text13", "row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2", "inputAndText", "iconAndText", "text14", "frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText", "inputAndText2", "iconAndText2", "text27"],
+      freeBox__jzZ9T: ["freeBox__jzZ9T", "freeBox__yzxnd", "tabButton__dEorM", "levelsetButton__tIZa", "text__n30Qb", "tabButton__x5KM9", "levelsetButton__jAuqF", "text__wca5J", "tabButton__apVlL", "levelsetButton__e2Wap", "text__mPdgN", "tabButton__gNC", "levelsetButton___9Ttto", "text___1Ewf", "tabUnderline", "freeBox__ldo6S"],
+      freeBox__yzxnd: ["freeBox__yzxnd", "tabButton__dEorM", "levelsetButton__tIZa", "text__n30Qb", "tabButton__x5KM9", "levelsetButton__jAuqF", "text__wca5J", "tabButton__apVlL", "levelsetButton__e2Wap", "text__mPdgN", "tabButton__gNC", "levelsetButton___9Ttto", "text___1Ewf", "tabUnderline"],
+      tabButton__dEorM: ["tabButton__dEorM", "levelsetButton__tIZa", "text__n30Qb"],
+      levelsetButton__tIZa: ["levelsetButton__tIZa", "text__n30Qb"],
+      text__n30Qb: ["text__n30Qb"],
+      tabButton__x5KM9: ["tabButton__x5KM9", "levelsetButton__jAuqF", "text__wca5J"],
+      levelsetButton__jAuqF: ["levelsetButton__jAuqF", "text__wca5J"],
+      text__wca5J: ["text__wca5J"],
+      tabButton__apVlL: ["tabButton__apVlL", "levelsetButton__e2Wap", "text__mPdgN"],
+      levelsetButton__e2Wap: ["levelsetButton__e2Wap", "text__mPdgN"],
+      text__mPdgN: ["text__mPdgN"],
+      tabButton__gNC: ["tabButton__gNC", "levelsetButton___9Ttto", "text___1Ewf"],
+      levelsetButton___9Ttto: ["levelsetButton___9Ttto", "text___1Ewf"],
+      text___1Ewf: ["text___1Ewf"],
+      tabUnderline: ["tabUnderline"],
+      freeBox__ldo6S: ["freeBox__ldo6S", "pathwayContent", "freeBox__baC1I", "text__c9Rlf", "peContent", "freeBox__gzKhT", "text__bVv3Z", "evalsContent", "freeBox__gsf96", "text__aFsL2", "disciplineContent", "freeBox__m7WH", "discipline", "row", "text13", "row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2", "inputAndText", "iconAndText", "text14", "frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText", "inputAndText2", "iconAndText2", "text27"],
+      pathwayContent: ["pathwayContent", "freeBox__baC1I", "text__c9Rlf"],
+      freeBox__baC1I: ["freeBox__baC1I", "text__c9Rlf"],
+      text__c9Rlf: ["text__c9Rlf"],
+      peContent: ["peContent", "freeBox__gzKhT", "text__bVv3Z"],
+      freeBox__gzKhT: ["freeBox__gzKhT", "text__bVv3Z"],
+      text__bVv3Z: ["text__bVv3Z"],
+      evalsContent: ["evalsContent", "freeBox__gsf96", "text__aFsL2"],
+      freeBox__gsf96: ["freeBox__gsf96", "text__aFsL2"],
+      text__aFsL2: ["text__aFsL2"],
+      disciplineContent: ["disciplineContent", "freeBox__m7WH", "discipline", "row", "text13", "row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2", "inputAndText", "iconAndText", "text14", "frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText", "inputAndText2", "iconAndText2", "text27"],
+      freeBox__m7WH: ["freeBox__m7WH", "discipline", "row", "text13", "row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2", "inputAndText", "iconAndText", "text14", "frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText", "inputAndText2", "iconAndText2", "text27"],
+      discipline: ["discipline", "row", "text13", "row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2", "inputAndText", "iconAndText", "text14", "frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText", "inputAndText2", "iconAndText2", "text27"],
+      row: ["row", "text13"],
+      text13: ["text13"],
+      row2: ["row2", "metricItem", "headingAndNumber", "heading", "numberAndBadge", "number", "metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2"],
+      metricItem: ["metricItem", "headingAndNumber", "heading", "numberAndBadge", "number"],
+      headingAndNumber: ["headingAndNumber", "heading", "numberAndBadge", "number"],
+      heading: ["heading"],
+      numberAndBadge: ["numberAndBadge", "number"],
+      number: ["number"],
+      metricItem2: ["metricItem2", "headingAndNumber2", "heading2", "numberAndBadge2", "number2"],
+      headingAndNumber2: ["headingAndNumber2", "heading2", "numberAndBadge2", "number2"],
+      heading2: ["heading2"],
+      numberAndBadge2: ["numberAndBadge2", "number2"],
+      number2: ["number2"],
+      inputAndText: ["inputAndText", "iconAndText", "text14"],
+      iconAndText: ["iconAndText", "text14"],
+      text14: ["text14"],
+      frame1: ["frame1", "date4", "leader4", "informed4", "pointValue8", "listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText"],
+      date4: ["date4"],
+      leader4: ["leader4"],
+      informed4: ["informed4"],
+      pointValue8: ["pointValue8"],
+      listItem: ["listItem", "contents", "content11", "listItemDetails", "text24", "points", "pointsText"],
+      contents: ["contents", "content11", "listItemDetails", "text24", "points", "pointsText"],
+      content11: ["content11", "listItemDetails", "text24", "points", "pointsText"],
+      listItemDetails: ["listItemDetails", "text24"],
+      text24: ["text24"],
+      points: ["points", "pointsText"],
+      pointsText: ["pointsText"],
+      inputAndText2: ["inputAndText2", "iconAndText2", "text27"],
+      iconAndText2: ["iconAndText2", "text27"],
+      text27: ["text27"]
+    } as const;
+    type NodeNameType = keyof typeof PlasmicDescendants;
+    type DescendantsType<T extends NodeNameType> =
+      (typeof PlasmicDescendants)[T][number];
+    type NodeDefaultElementType = {
+      root: typeof RichLayout;
+      menuNavigation: typeof MenuNavigation;
+      userRole: typeof UserRole;
+      loadingBoundary: typeof LoadingBoundary;
+      redirectIf: typeof RedirectIf;
+      freeBox__t6I6: "div";
+      freeBox__qEcUx: "div";
+      freeBox__qcdYx: "div";
+      freeBox__bYvUh: "div";
+      text__fFys8: "div";
+      freeBox__m8LNv: "div";
+      text__m1CSw: "div";
+      freeBox__xbZ1E: "div";
+      freeBox__hhgMy: "div";
+      verticalStack: "div";
+      text___0SGr3: "div";
+      rosterTable: typeof RosterTable;
+      drawerV2: typeof DrawerV2;
+      content2: "div";
+      textAndSupportingText2: "div";
+      textAndOnlineIndicator: "div";
+      text2: "div";
+      supportingText2: "div";
+      panel: "div";
+      header: "div";
+      container: "div";
+      statistics: "div";
+      tabsContainer: typeof TabsContainer;
+      freeBox__jzZ9T: "div";
+      freeBox__yzxnd: "div";
+      tabButton__dEorM: typeof TabButton;
+      levelsetButton__tIZa: typeof LevelsetButton;
+      text__n30Qb: "div";
+      tabButton__x5KM9: typeof TabButton;
+      levelsetButton__jAuqF: typeof LevelsetButton;
+      text__wca5J: "div";
+      tabButton__apVlL: typeof TabButton;
+      levelsetButton__e2Wap: typeof LevelsetButton;
+      text__mPdgN: "div";
+      tabButton__gNC: typeof TabButton;
+      levelsetButton___9Ttto: typeof LevelsetButton;
+      text___1Ewf: "div";
+      tabUnderline: typeof TabUnderline;
+      freeBox__ldo6S: "div";
+      pathwayContent: typeof TabContent;
+      freeBox__baC1I: "div";
+      text__c9Rlf: "div";
+      peContent: typeof TabContent;
+      freeBox__gzKhT: "div";
+      text__bVv3Z: "div";
+      evalsContent: typeof TabContent;
+      freeBox__gsf96: "div";
+      text__aFsL2: "div";
+      disciplineContent: typeof TabContent;
+      freeBox__m7WH: "div";
+      discipline: "div";
+      row: "div";
+      text13: "div";
+      row2: "div";
+      metricItem: "div";
+      headingAndNumber: "div";
+      heading: "div";
+      numberAndBadge: "div";
+      number: "div";
+      metricItem2: "div";
+      headingAndNumber2: "div";
+      heading2: "div";
+      numberAndBadge2: "div";
+      number2: "div";
+      inputAndText: "div";
+      iconAndText: "div";
+      text14: "div";
+      frame1: "div";
+      date4: "div";
+      leader4: "div";
+      informed4: "div";
+      pointValue8: "div";
+      listItem: "div";
+      contents: "div";
+      content11: "div";
+      listItemDetails: "div";
+      text24: "div";
+      points: "div";
+      pointsText: "div";
+      inputAndText2: "div";
+      iconAndText2: "div";
+      text27: "div";
+    };
+    
+    type ReservedPropsType = "variants" | "args" | "overrides";
+    type NodeOverridesType<T extends NodeNameType> = Pick<
+      PlasmicAdmin__OverridesType,
+      DescendantsType<T>
+    >;
+    type NodeComponentProps<T extends NodeNameType> =
+      // Explicitly specify variants, args, and overrides as objects
+      {
+        variants?: PlasmicAdmin__VariantsArgs;
+        args?: PlasmicAdmin__ArgsType;
+        overrides?: NodeOverridesType<T>;
+      } &
+        // Specify variants directly as props
+        Omit<PlasmicAdmin__VariantsArgs, ReservedPropsType> &
+        // Specify args directly as props
+        Omit<PlasmicAdmin__ArgsType, ReservedPropsType> &
+        // Specify overrides for each element directly as props
+        Omit<
+          NodeOverridesType<T>,
+          ReservedPropsType | VariantPropType | ArgPropType
+        > &
+        // Specify props for the root element
+        Omit<
+          Partial<React.ComponentProps<NodeDefaultElementType[T]>>,
+          ReservedPropsType | VariantPropType | ArgPropType | DescendantsType<T>
+        >;
+    
+    function makeNodeComponent<NodeName extends NodeNameType>(nodeName: NodeName) {
+      type PropsType = NodeComponentProps<NodeName> & { key?: React.Key };
+      const func = function <T extends PropsType>(
+        props: T & StrictProps<T, PropsType>
+      ) {
+        const { variants, args, overrides } = React.useMemo(
+          () =>
+            deriveRenderOpts(props, {
+              name: nodeName,
+              descendantNames: PlasmicDescendants[nodeName],
+              internalArgPropNames: PlasmicAdmin__ArgProps,
+              internalVariantPropNames: PlasmicAdmin__VariantProps
+            }),
+          [props, nodeName]
+        );
+        return PlasmicAdmin__RenderFunc({
+          variants,
+          args,
+          overrides,
+          forNode: nodeName
+        });
+      };
+      if (nodeName === "root") {
+        func.displayName = "PlasmicAdmin";
+      } else {
+        func.displayName = `PlasmicAdmin.${nodeName}`;
+      }
+      return func;
+    }
+    
+    export const PlasmicAdmin = Object.assign(
+      // Top-level PlasmicAdmin renders the root element
+      makeNodeComponent("root"),
+      {
+        // Helper components rendering sub-elements
+        menuNavigation: makeNodeComponent("menuNavigation"),
+        userRole: makeNodeComponent("userRole"),
+        loadingBoundary: makeNodeComponent("loadingBoundary"),
+        redirectIf: makeNodeComponent("redirectIf"),
+        freeBox__t6I6: makeNodeComponent("freeBox__t6I6"),
+        freeBox__qEcUx: makeNodeComponent("freeBox__qEcUx"),
+        freeBox__qcdYx: makeNodeComponent("freeBox__qcdYx"),
+        freeBox__bYvUh: makeNodeComponent("freeBox__bYvUh"),
+        text__fFys8: makeNodeComponent("text__fFys8"),
+        freeBox__m8LNv: makeNodeComponent("freeBox__m8LNv"),
+        text__m1CSw: makeNodeComponent("text__m1CSw"),
+        freeBox__xbZ1E: makeNodeComponent("freeBox__xbZ1E"),
+        freeBox__hhgMy: makeNodeComponent("freeBox__hhgMy"),
+        verticalStack: makeNodeComponent("verticalStack"),
+        text___0SGr3: makeNodeComponent("text___0SGr3"),
+        rosterTable: makeNodeComponent("rosterTable"),
+        drawerV2: makeNodeComponent("drawerV2"),
+        content2: makeNodeComponent("content2"),
+        textAndSupportingText2: makeNodeComponent("textAndSupportingText2"),
+        textAndOnlineIndicator: makeNodeComponent("textAndOnlineIndicator"),
+        text2: makeNodeComponent("text2"),
+        supportingText2: makeNodeComponent("supportingText2"),
+        panel: makeNodeComponent("panel"),
+        header: makeNodeComponent("header"),
+        container: makeNodeComponent("container"),
+        statistics: makeNodeComponent("statistics"),
+        tabsContainer: makeNodeComponent("tabsContainer"),
+        freeBox__jzZ9T: makeNodeComponent("freeBox__jzZ9T"),
+        freeBox__yzxnd: makeNodeComponent("freeBox__yzxnd"),
+        tabButton__dEorM: makeNodeComponent("tabButton__dEorM"),
+        levelsetButton__tIZa: makeNodeComponent("levelsetButton__tIZa"),
+        text__n30Qb: makeNodeComponent("text__n30Qb"),
+        tabButton__x5KM9: makeNodeComponent("tabButton__x5KM9"),
+        levelsetButton__jAuqF: makeNodeComponent("levelsetButton__jAuqF"),
+        text__wca5J: makeNodeComponent("text__wca5J"),
+        tabButton__apVlL: makeNodeComponent("tabButton__apVlL"),
+        levelsetButton__e2Wap: makeNodeComponent("levelsetButton__e2Wap"),
+        text__mPdgN: makeNodeComponent("text__mPdgN"),
+        tabButton__gNC: makeNodeComponent("tabButton__gNC"),
+        levelsetButton___9Ttto: makeNodeComponent("levelsetButton___9Ttto"),
+        text___1Ewf: makeNodeComponent("text___1Ewf"),
+        tabUnderline: makeNodeComponent("tabUnderline"),
+        freeBox__ldo6S: makeNodeComponent("freeBox__ldo6S"),
+        pathwayContent: makeNodeComponent("pathwayContent"),
+        freeBox__baC1I: makeNodeComponent("freeBox__baC1I"),
+        text__c9Rlf: makeNodeComponent("text__c9Rlf"),
+        peContent: makeNodeComponent("peContent"),
+        freeBox__gzKhT: makeNodeComponent("freeBox__gzKhT"),
+        text__bVv3Z: makeNodeComponent("text__bVv3Z"),
+        evalsContent: makeNodeComponent("evalsContent"),
+        freeBox__gsf96: makeNodeComponent("freeBox__gsf96"),
+        text__aFsL2: makeNodeComponent("text__aFsL2"),
+        disciplineContent: makeNodeComponent("disciplineContent"),
+        freeBox__m7WH: makeNodeComponent("freeBox__m7WH"),
+        discipline: makeNodeComponent("discipline"),
+        row: makeNodeComponent("row"),
+        text13: makeNodeComponent("text13"),
+        row2: makeNodeComponent("row2"),
+        metricItem: makeNodeComponent("metricItem"),
+        headingAndNumber: makeNodeComponent("headingAndNumber"),
+        heading: makeNodeComponent("heading"),
+        numberAndBadge: makeNodeComponent("numberAndBadge"),
+        number: makeNodeComponent("number"),
+        metricItem2: makeNodeComponent("metricItem2"),
+        headingAndNumber2: makeNodeComponent("headingAndNumber2"),
+        heading2: makeNodeComponent("heading2"),
+        numberAndBadge2: makeNodeComponent("numberAndBadge2"),
+        number2: makeNodeComponent("number2"),
+        inputAndText: makeNodeComponent("inputAndText"),
+        iconAndText: makeNodeComponent("iconAndText"),
+        text14: makeNodeComponent("text14"),
+        frame1: makeNodeComponent("frame1"),
+        date4: makeNodeComponent("date4"),
+        leader4: makeNodeComponent("leader4"),
+        informed4: makeNodeComponent("informed4"),
+        pointValue8: makeNodeComponent("pointValue8"),
+        listItem: makeNodeComponent("listItem"),
+        contents: makeNodeComponent("contents"),
+        content11: makeNodeComponent("content11"),
+        listItemDetails: makeNodeComponent("listItemDetails"),
+        text24: makeNodeComponent("text24"),
+        points: makeNodeComponent("points"),
+        pointsText: makeNodeComponent("pointsText"),
+        inputAndText2: makeNodeComponent("inputAndText2"),
+        iconAndText2: makeNodeComponent("iconAndText2"),
+        text27: makeNodeComponent("text27"),
+    
+        // Metadata about props expected for PlasmicAdmin
+        internalVariantProps: PlasmicAdmin__VariantProps,
+        internalArgProps: PlasmicAdmin__ArgProps
+      }
+    );
+    
+    export default PlasmicAdmin;
+    /* prettier-ignore-end */
   ) as React.ReactElement | null;
 }
 

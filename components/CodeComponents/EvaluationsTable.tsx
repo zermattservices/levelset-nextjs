@@ -353,8 +353,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
       {
         field: 'employee_name',
         headerName: 'Employee',
-        flex: 1.2,
-        minWidth: 200,
+        width: 220,
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <Typography
@@ -386,8 +385,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
       {
         field: 'leader_id',
         headerName: 'Leader',
-        flex: 1,
-        minWidth: 200,
+        width: 200,
         sortable: false,
         renderCell: (params) => {
           const row = params.row;
@@ -604,7 +602,6 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
         field: 'status',
         headerName: 'Status',
         flex: 1,
-        minWidth: 160,
         sortComparator: (v1, v2) => (STATUS_ORDER[v1 as string] ?? 99) - (STATUS_ORDER[v2 as string] ?? 99),
         renderCell: (params) => {
           const row = params.row;
@@ -739,6 +736,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
         getRowId={(row) => row.id}
         disableRowSelectionOnClick
         disableColumnResize
+        disableColumnMenu
         showColumnVerticalBorder={false}
         hideFooter
         rowHeight={48}
