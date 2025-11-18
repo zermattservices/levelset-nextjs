@@ -55,7 +55,7 @@ function InfractionCard({
       sx={{
         display: "flex",
         flexDirection: "row",
-        alignItems: "flex-start",
+        alignItems: "center",
         justifyContent: "space-between",
         gap: "12px",
         padding: "12px 16px",
@@ -140,7 +140,7 @@ function InfractionCard({
               fontFamily: "Satoshi",
               fontSize: "14px",
               fontWeight: 500,
-              color: "#535862",
+              color: infraction.ack_bool ? "#535862" : "#dc2626",
               lineHeight: "20px",
             }}
           >
@@ -255,9 +255,11 @@ export function DisciplineNotifications({
 }: DisciplineNotificationsProps) {
   const [recommendations, setRecommendations] = React.useState<RecommendedAction[]>([]);
   const [weeklyInfractions, setWeeklyInfractions] = React.useState<Infraction[]>([]);
+  const [missingAcknowledgements, setMissingAcknowledgements] = React.useState<Infraction[]>([]);
   const [disciplineActions, setDisciplineActions] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [infractionsExpanded, setInfractionsExpanded] = React.useState(false);
+  const [missingAcknowledgementsExpanded, setMissingAcknowledgementsExpanded] = React.useState(false);
   const [actionsExpanded, setActionsExpanded] = React.useState(false);
   const [recordModalOpen, setRecordModalOpen] = React.useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = React.useState<RecommendedAction | null>(null);
@@ -366,10 +368,25 @@ export function DisciplineNotifications({
       } else {
         setWeeklyInfractions([]);
       }
+
+      // Fetch infractions with missing acknowledgements
+      const { data: missingAckData, error: missingAckError } = await supabase
+        .from('infractions')
+        .select('*')
+        .eq('location_id', locationId)
+        .eq('ack_bool', false)
+        .order('infraction_date', { ascending: false });
+
+      if (!missingAckError && missingAckData) {
+        setMissingAcknowledgements(missingAckData as Infraction[]);
+      } else {
+        setMissingAcknowledgements([]);
+      }
     } catch (err) {
       console.error('Error fetching data:', err);
       setRecommendations([]);
       setWeeklyInfractions([]);
+      setMissingAcknowledgements([]);
     } finally {
       setLoading(false);
     }
@@ -437,6 +454,38 @@ export function DisciplineNotifications({
       alert(`Failed to dismiss recommendation: ${err?.message || 'Please try again.'}`);
       setDismissModalOpen(false);
       setRecommendationToDismiss(null);
+    }
+  };
+
+  const handleMarkAsNotified = async (infraction: Infraction) => {
+    try {
+      const { error } = await supabase
+        .from('infractions')
+        .update({ 
+          ack_bool: true, 
+          acknowledgement: 'Notified' 
+        })
+        .eq('id', infraction.id);
+
+      if (error) throw error;
+
+      // Remove from missing acknowledgements list
+      setMissingAcknowledgements(prev => prev.filter(inf => inf.id !== infraction.id));
+      
+      // If the infraction is within the last 7 days, update weekly infractions too
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      if (infraction.infraction_date >= sevenDaysAgo) {
+        setWeeklyInfractions(prev => 
+          prev.map(inf => 
+            inf.id === infraction.id 
+              ? { ...inf, ack_bool: true, acknowledgement: 'Notified' }
+              : inf
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Error marking infraction as notified:', err);
+      alert('Failed to mark infraction as notified. Please try again.');
     }
   };
 
@@ -560,6 +609,109 @@ export function DisciplineNotifications({
           </AccordionDetails>
         </Accordion>
       )}
+
+      {/* Missing Acknowledgements Accordion */}
+      <Accordion
+        expanded={missingAcknowledgementsExpanded}
+        onChange={() => setMissingAcknowledgementsExpanded(!missingAcknowledgementsExpanded)}
+        disableGutters
+        elevation={0}
+        sx={{
+          '&:before': { display: 'none' },
+          '&.MuiAccordion-root': {
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            mt: 2,
+          },
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon sx={{ color: levelsetGreen }} />}
+          sx={{
+            padding: 0,
+            minHeight: 48,
+            '&.Mui-expanded': {
+              minHeight: 48,
+            },
+            '& .MuiAccordionSummary-content': {
+              margin: '12px 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+            },
+            '& .MuiAccordionSummary-expandIconWrapper': {
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+            },
+          }}
+        >
+          <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
+            Missing Acknowledgements ({missingAcknowledgements.length})
+          </Typography>
+          <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500, ml: 'auto', mr: 1 }}>
+            {missingAcknowledgementsExpanded ? 'Collapse' : 'Expand'}
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ padding: 0 }}>
+          <Box
+            sx={{
+              backgroundColor: "#f9fafb",
+              border: "1px solid #e5e7eb",
+              borderRadius: "12px",
+              padding: "16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
+            {missingAcknowledgements.length > 0 ? (
+              missingAcknowledgements.map((infraction) => (
+                <Box
+                  key={infraction.id}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
+                  <Box sx={{ flex: 1 }}>
+                    <InfractionCard 
+                      infraction={infraction}
+                      onClick={() => {
+                        setSelectedInfraction(infraction);
+                        setInfractionEditModalOpen(true);
+                      }}
+                    />
+                  </Box>
+                  <Button
+                    onClick={() => handleMarkAsNotified(infraction)}
+                    variant="contained"
+                    sx={{
+                      fontFamily,
+                      fontSize: 13,
+                      textTransform: "none",
+                      backgroundColor: levelsetGreen,
+                      padding: "6px 16px",
+                      flexShrink: 0,
+                      "&:hover": {
+                        backgroundColor: "#264d38",
+                      },
+                    }}
+                  >
+                    Mark as Notified
+                  </Button>
+                </Box>
+              ))
+            ) : (
+              <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', textAlign: 'center', py: 2 }}>
+                No infractions with missing acknowledgements
+              </Typography>
+            )}
+          </Box>
+        </AccordionDetails>
+      </Accordion>
 
       {/* Required Disciplinary Actions Accordion */}
       <Accordion

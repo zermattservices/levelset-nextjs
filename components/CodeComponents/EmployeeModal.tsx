@@ -128,7 +128,7 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
               fontFamily: "Satoshi",
               fontSize: "14px",
               fontWeight: 500,
-              color: "#535862",
+              color: infraction.ack_bool ? "#535862" : "#dc2626",
               lineHeight: "20px",
             }}
           >
