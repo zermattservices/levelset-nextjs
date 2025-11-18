@@ -101,13 +101,13 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
       });
 
       const evaluationMap = new Map<string, { rating_status: boolean | null; month: string | null }>();
-      sortedEvaluations.forEach((eval) => {
-        const empId = eval.employee_id;
+      sortedEvaluations.forEach((evaluation) => {
+        const empId = evaluation.employee_id;
         // Only set if not already set (first occurrence is most recent)
         if (!evaluationMap.has(empId)) {
           evaluationMap.set(empId, {
-            rating_status: eval.rating_status ?? null,
-            month: eval.month ?? null,
+            rating_status: evaluation.rating_status ?? null,
+            month: evaluation.month ?? null,
           });
         }
       });
