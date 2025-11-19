@@ -15,6 +15,7 @@ import {
   Menu,
   MenuItem,
   Checkbox,
+  Grid,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
@@ -341,19 +342,27 @@ export function AddEmployeeModal({
         )}
 
         <Stack spacing={3}>
-          <CustomTextField
-            label="First Name"
-            value={firstName}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
-            required
-          />
-
-          <CustomTextField
-            label="Last Name"
-            value={lastName}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
-            required
-          />
+          {/* First Name and Last Name in one row */}
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <CustomTextField
+                label="First Name"
+                value={firstName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                label="Last Name"
+                value={lastName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
+                required
+                fullWidth
+              />
+            </Grid>
+          </Grid>
 
           <Box>
             <Typography
@@ -385,104 +394,110 @@ export function AddEmployeeModal({
             </Box>
           </Box>
 
-          <Box>
-            <Typography
-              sx={{
-                fontFamily,
-                fontSize: 12,
-                fontWeight: 500,
-                color: "#6b7280",
-                mb: 1,
-              }}
-            >
-              Role
-            </Typography>
-            <Box>
-              <RolePill
-                role={role}
-                endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
-                onClick={handleRoleMenuOpen}
-              />
-              <Menu
-                anchorEl={roleMenuAnchor}
-                open={Boolean(roleMenuAnchor)}
-                onClose={handleRoleMenuClose}
-                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                transformOrigin={{ vertical: "top", horizontal: "left" }}
-                PaperProps={{
-                  sx: {
+          {/* Role and Availability in one row */}
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box>
+                <Typography
+                  sx={{
                     fontFamily,
-                    borderRadius: 2,
-                    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                    border: "1px solid #e5e7eb",
-                  },
-                }}
-              >
-                {(["New Hire", "Team Member", "Trainer", "Team Lead", "Director"] as Role[]).map((roleOption) => (
-                  <RoleMenuItem
-                    key={roleOption}
-                    selected={role === roleOption}
-                    onClick={() => handleRoleSelect(roleOption)}
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: "#6b7280",
+                    mb: 1,
+                  }}
+                >
+                  Role
+                </Typography>
+                <Box>
+                  <RolePill
+                    role={role}
+                    endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
+                    onClick={handleRoleMenuOpen}
+                  />
+                  <Menu
+                    anchorEl={roleMenuAnchor}
+                    open={Boolean(roleMenuAnchor)}
+                    onClose={handleRoleMenuClose}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                    transformOrigin={{ vertical: "top", horizontal: "left" }}
+                    PaperProps={{
+                      sx: {
+                        fontFamily,
+                        borderRadius: 2,
+                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                        border: "1px solid #e5e7eb",
+                      },
+                    }}
                   >
-                    <RolePill role={roleOption} />
-                  </RoleMenuItem>
-                ))}
-              </Menu>
-            </Box>
-          </Box>
-
-          <Box>
-            <Typography
-              sx={{
-                fontFamily,
-                fontSize: 12,
-                fontWeight: 500,
-                color: "#6b7280",
-                mb: 1,
-              }}
-            >
-              Availability
-            </Typography>
-            <Box>
-              <AvailabilityChip
-                className={availability.toLowerCase()}
-                onClick={handleAvailabilityMenuOpen}
-              >
-                {availability}
-                <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
-              </AvailabilityChip>
-              <Menu
-                anchorEl={availabilityMenuAnchor}
-                open={Boolean(availabilityMenuAnchor)}
-                onClose={handleAvailabilityMenuClose}
-                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                transformOrigin={{ vertical: "top", horizontal: "left" }}
-                PaperProps={{
-                  sx: {
+                    {(["New Hire", "Team Member", "Trainer", "Team Lead", "Director"] as Role[]).map((roleOption) => (
+                      <RoleMenuItem
+                        key={roleOption}
+                        selected={role === roleOption}
+                        onClick={() => handleRoleSelect(roleOption)}
+                      >
+                        <RolePill role={roleOption} />
+                      </RoleMenuItem>
+                    ))}
+                  </Menu>
+                </Box>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box>
+                <Typography
+                  sx={{
                     fontFamily,
-                    borderRadius: 2,
-                    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                    border: "1px solid #e5e7eb",
-                  },
-                }}
-              >
-                {(["Available", "Limited"] as AvailabilityType[]).map((option) => (
-                  <RoleMenuItem
-                    key={option}
-                    selected={availability === option}
-                    onClick={() => handleAvailabilitySelect(option)}
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: "#6b7280",
+                    mb: 1,
+                  }}
+                >
+                  Availability
+                </Typography>
+                <Box>
+                  <AvailabilityChip
+                    className={availability.toLowerCase()}
+                    onClick={handleAvailabilityMenuOpen}
                   >
-                    <AvailabilityChip
-                      className={option.toLowerCase()}
-                      sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
-                    >
-                      {option}
-                    </AvailabilityChip>
-                  </RoleMenuItem>
-                ))}
-              </Menu>
-            </Box>
-          </Box>
+                    {availability}
+                    <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
+                  </AvailabilityChip>
+                  <Menu
+                    anchorEl={availabilityMenuAnchor}
+                    open={Boolean(availabilityMenuAnchor)}
+                    onClose={handleAvailabilityMenuClose}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                    transformOrigin={{ vertical: "top", horizontal: "left" }}
+                    PaperProps={{
+                      sx: {
+                        fontFamily,
+                        borderRadius: 2,
+                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                        border: "1px solid #e5e7eb",
+                      },
+                    }}
+                  >
+                    {(["Available", "Limited"] as AvailabilityType[]).map((option) => (
+                      <RoleMenuItem
+                        key={option}
+                        selected={availability === option}
+                        onClick={() => handleAvailabilitySelect(option)}
+                      >
+                        <AvailabilityChip
+                          className={option.toLowerCase()}
+                          sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
+                        >
+                          {option}
+                        </AvailabilityChip>
+                      </RoleMenuItem>
+                    ))}
+                  </Menu>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
         </Stack>
       </Box>
 
