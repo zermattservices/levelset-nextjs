@@ -59,12 +59,6 @@ import {
   useGlobalActions
 } from "@plasmicapp/react-web/lib/host";
 
-import {
-  executePlasmicDataOp,
-  usePlasmicDataOp,
-  usePlasmicInvalidate
-} from "@plasmicapp/react-web/lib/data-sources";
-
 import MenuNavigation from "../../MenuNavigation"; // plasmic-import: eJlFBj1x_mCN/component
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
 import { CenteredLoadingSpinner } from "../../CodeComponents/CenteredLoadingSpinner"; // plasmic-import: iEXTq_V60EEp/codeComponent
@@ -72,7 +66,6 @@ import { RedirectIf } from "../../CodeComponents/RedirectIf"; // plasmic-import:
 import { DisciplineNotifications } from "../../CodeComponents/RecommendedActions"; // plasmic-import: p5JIJndPb_tu/codeComponent
 import { DisciplineTable } from "../../CodeComponents/DisciplineTable"; // plasmic-import: Gsr7FZewgF56/codeComponent
 import { DisciplineActionsTable } from "../../CodeComponents/DisciplineActionsTable"; // plasmic-import: gO99exJZ_N-6/codeComponent
-import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -145,9 +138,6 @@ function PlasmicDiscipline__RenderFunc(props: {
   const refsRef = React.useRef({});
   const $refs = refsRef.current;
 
-  let [$queries, setDollarQueries] = React.useState<
-    Record<string, ReturnType<typeof usePlasmicDataOp>>
-  >({});
   const stateSpecs: Parameters<typeof useDollarState>[0] = React.useMemo(
     () => [
       {
@@ -237,61 +227,9 @@ function PlasmicDiscipline__RenderFunc(props: {
   const $state = useDollarState(stateSpecs, {
     $props,
     $ctx,
-    $queries: $queries,
+    $queries: {},
     $refs
   });
-
-  const new$Queries: Record<string, ReturnType<typeof usePlasmicDataOp>> = {
-    discActionsRubric: usePlasmicDataOp(() => {
-      return {
-        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
-        opId: "16d21f59-38ef-44d0-868d-b5a0c1746cfa",
-        userArgs: {},
-        cacheKey: `plasmic.$.16d21f59-38ef-44d0-868d-b5a0c1746cfa.$.`,
-        invalidatedKeys: null,
-        roleId: null
-      };
-    }),
-    employeesDiscQuery: usePlasmicDataOp(() => {
-      return {
-        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
-        opId: "c3bd2802-6689-478d-a8a6-846360d08597",
-        userArgs: {
-          filters: [$state.selectedEmployee?.id]
-        },
-        cacheKey: `plasmic.$.c3bd2802-6689-478d-a8a6-846360d08597.$.`,
-        invalidatedKeys: null,
-        roleId: null
-      };
-    }),
-    directorsQuery: usePlasmicDataOp(() => {
-      return {
-        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
-        opId: "9fa90f8d-dff1-43d3-a2db-4a18759d94d6",
-        userArgs: {},
-        cacheKey: `plasmic.$.9fa90f8d-dff1-43d3-a2db-4a18759d94d6.$.`,
-        invalidatedKeys: null,
-        roleId: null
-      };
-    }),
-    activeAppUser: usePlasmicDataOp(() => {
-      return {
-        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
-        opId: "529cafaf-e958-44f9-9b3c-02174ee46a9d",
-        userArgs: {
-          filters: [$ctx.auth.id]
-        },
-        cacheKey: `plasmic.$.529cafaf-e958-44f9-9b3c-02174ee46a9d.$.`,
-        invalidatedKeys: null,
-        roleId: null
-      };
-    })
-  };
-  if (Object.keys(new$Queries).some(k => new$Queries[k] !== $queries[k])) {
-    setDollarQueries(new$Queries);
-
-    $queries = new$Queries;
-  }
 
   const styleTokensClassNames = _useStyleTokens();
 
