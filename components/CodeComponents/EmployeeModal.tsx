@@ -25,6 +25,7 @@ import { EditActionModal } from "./EditActionModal";
 import { RecordActionModal } from "./RecordActionModal";
 import { DismissConfirmationModal } from "./DismissConfirmationModal";
 import { PositionalRatings } from "./PositionalRatings";
+import { RolePill } from "./shared/RolePill";
 
 export interface EmployeeModalProps {
   open: boolean;
@@ -809,7 +810,7 @@ export function EmployeeModal({
     }
 
     return (
-      <Box sx={{ p: 0, height: "100%", overflow: "auto" }}>
+      <Box sx={{ p: 4, height: "100%", overflow: "auto" }}>
         <PositionalRatings
           locationId={locationId}
           employeeId={employee.id}
@@ -868,17 +869,20 @@ export function EmployeeModal({
           >
             {employee?.full_name || "Employee"}
           </Typography>
-          <Typography
+          <Box
             sx={{
-              fontFamily: "Satoshi",
-              fontSize: "18px",
-              fontWeight: 400,
-              color: "#535862",
-              lineHeight: "28px",
+              "& > div": {
+                fontSize: "18px !important",
+                fontWeight: 400,
+                height: "auto !important",
+                minHeight: "auto !important",
+                px: 1.5,
+                py: 0.5,
+              },
             }}
           >
-            {employee?.role || "Team Member"}
-          </Typography>
+            <RolePill role={employee?.role || "Team Member"} />
+          </Box>
         </Box>
         <IconButton
           onClick={onClose}

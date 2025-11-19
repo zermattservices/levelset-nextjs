@@ -47,11 +47,12 @@ import SearchIcon from '@mui/icons-material/Search';
 import CancelIcon from '@mui/icons-material/Cancel';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { createSupabaseClient } from '@/util/supabase/component';
-import type { Rating, PositionBig5Labels } from '@/lib/supabase.types';
+import type { Rating, PositionBig5Labels, Employee } from '@/lib/supabase.types';
 import { cleanPositionName, FOH_POSITIONS, BOH_POSITIONS } from '@/lib/ratings-data';
 import RatingsAnalytics from './RatingsAnalytics';
 import { pdf } from '@react-pdf/renderer';
 import PositionalRatingsPDF from './PositionalRatingsPDF';
+import { EmployeeModal } from './EmployeeModal';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
@@ -71,8 +72,10 @@ export interface PositionalRatingsProps {
 interface RatingRow extends Rating {
   id: string;
   employee_name: string;
+  employee_id: string;
   employee_role: string;
   rater_name: string;
+  rater_employee_id: string | null;
   position_cleaned: string;
   formatted_date: string;
 }
@@ -555,6 +558,10 @@ export function PositionalRatings({
   const [ratingToDelete, setRatingToDelete] = React.useState<RatingRow | null>(null);
   const [deleting, setDeleting] = React.useState(false);
   
+  // Employee modal state (only used when employeeId is NOT provided - full table view)
+  const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
+  const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
+  
   // Big 5 labels cache
   const [big5LabelsCache, setBig5LabelsCache] = React.useState<Map<string, PositionBig5Labels>>(new Map());
   
@@ -796,7 +803,7 @@ export function PositionalRatings({
           .select(`
           *,
           employee:employees!ratings_employee_id_fkey(full_name, first_name, last_name, role, is_foh, is_boh),
-          rater:employees!ratings_rater_user_id_fkey(full_name)
+          rater:employees!ratings_rater_user_id_fkey(full_name, id)
         `)
           .eq('location_id', locationId)
           .gte('created_at', startDate.toISOString())
@@ -835,13 +842,17 @@ export function PositionalRatings({
               'Unknown';
             const raterName = rating.rater?.full_name || 'Unknown';
             const employeeRole = rating.employee?.role || 'Team Member';
+            // rater_user_id is the employee_id of the rater
+            const raterEmployeeId = rating.rater_user_id || rating.rater?.id || null;
 
             return {
               ...rating,
               id: rating.id,
               employee_name: employeeName,
+              employee_id: rating.employee_id,
               employee_role: employeeRole,
               rater_name: raterName,
+              rater_employee_id: raterEmployeeId,
               position_cleaned: cleanPositionName(rating.position),
               formatted_date: formatDate(rating.created_at),
               created_at: rating.created_at,
@@ -998,6 +1009,29 @@ export function PositionalRatings({
     setDeleteModalOpen(false);
     setRatingToDelete(null);
   };
+
+  // Handle clicking on employee or leader name to open their modal
+  const handleNameClick = React.useCallback(async (empId: string | null) => {
+    if (!empId || employeeId) return; // Don't open modal if employeeId is provided (we're already in employee view)
+    
+    try {
+      const supabase = createSupabaseClient();
+      const { data: employee, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('id', empId)
+        .single();
+      
+      if (error) throw error;
+      
+      if (employee) {
+        setSelectedEmployee(employee as Employee);
+        setEmployeeModalOpen(true);
+      }
+    } catch (err) {
+      console.error('Error fetching employee:', err);
+    }
+  }, [employeeId]);
 
   // Handle date range preset - updates both the preset and the date pickers
   const handleDateRangePreset = (preset: 'mtd' | 'qtd' | '30d' | '90d') => {
@@ -1473,6 +1507,29 @@ export function PositionalRatings({
       filterable: !employeeId, // Disable filtering when employeeId is provided
       resizable: false, // Disable column resize to hide separators
       filterOperators: createDropdownOperators(uniqueEmployees),
+      renderCell: (params) => {
+        const row = params.row as RatingRow;
+        const isClickable = !employeeId && row.employee_id;
+        
+        return (
+          <Box
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 500,
+              color: isClickable ? levelsetGreen : '#111827',
+              cursor: isClickable ? 'pointer' : 'default',
+              textDecoration: 'none',
+              '&:hover': isClickable ? {
+                textDecoration: 'underline',
+              } : {},
+            }}
+            onClick={() => isClickable && handleNameClick(row.employee_id)}
+          >
+            {params.value}
+          </Box>
+        );
+      },
     },
     {
       field: 'employee_role',
@@ -1497,6 +1554,29 @@ export function PositionalRatings({
       filterable: true,
       resizable: false, // Disable column resize to hide separators
       filterOperators: createDropdownOperators(uniqueLeaders),
+      renderCell: (params) => {
+        const row = params.row as RatingRow;
+        const isClickable = !employeeId && row.rater_employee_id;
+        
+        return (
+          <Box
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 500,
+              color: isClickable ? levelsetGreen : '#111827',
+              cursor: isClickable ? 'pointer' : 'default',
+              textDecoration: 'none',
+              '&:hover': isClickable ? {
+                textDecoration: 'underline',
+              } : {},
+            }}
+            onClick={() => isClickable && handleNameClick(row.rater_employee_id)}
+          >
+            {params.value}
+          </Box>
+        );
+      },
     },
     {
       field: 'position_cleaned',
@@ -2374,6 +2454,20 @@ export function PositionalRatings({
             </Button>
           </DialogActions>
         </Dialog>
+        
+        {/* Employee Modal - only shown when employeeId is NOT provided (full table view) */}
+        {!employeeId && (
+          <EmployeeModal
+            open={employeeModalOpen}
+            employee={selectedEmployee}
+            onClose={() => {
+              setEmployeeModalOpen(false);
+              setSelectedEmployee(null);
+            }}
+            locationId={locationId}
+            initialTab="pe"
+          />
+        )}
       </StyledContainer>
     </LocalizationProvider>
   );
