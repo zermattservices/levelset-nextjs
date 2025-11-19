@@ -62,6 +62,7 @@ const bohColorLight = '#fffcf0';
 
 export interface PositionalRatingsProps {
   locationId: string;
+  employeeId?: string;
   className?: string;
   width?: string | number;
   maxWidth?: string | number;
@@ -336,9 +337,16 @@ function SelectFilterInput(props: SelectFilterInputProps) {
 
 // Custom Column Filter Input - matches SelectFilterInput pattern
 function ColumnFilterInput(props: any) {
-  const { item, applyValue, apiRef } = props;
+  const { item, applyValue, apiRef, employeeId } = props;
   const columns = apiRef?.current?.getAllColumns?.() || [];
-  const filterableColumns = columns.filter((col: any) => col.filterable !== false);
+  let filterableColumns = columns.filter((col: any) => col.filterable !== false);
+  
+  // Exclude employee_name and employee_role from filter dropdown when employeeId is provided
+  if (employeeId) {
+    filterableColumns = filterableColumns.filter(
+      (col: any) => col.field !== 'employee_name' && col.field !== 'employee_role'
+    );
+  }
 
   return (
     <FormControl fullWidth size="small" variant="outlined">
@@ -509,6 +517,7 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
 
 export function PositionalRatings({
   locationId,
+  employeeId,
   className = '',
   width,
   maxWidth,
@@ -521,9 +530,17 @@ export function PositionalRatings({
   const apiRef = useGridApiRef();
   const [filteredRows, setFilteredRows] = React.useState<GridRowsProp>([]);
   
-  // Filter states
+  // Filter states - when employeeId is provided, always show both FOH and BOH
   const [showFOH, setShowFOH] = React.useState(true);
   const [showBOH, setShowBOH] = React.useState(true);
+  
+  // Ensure FOH and BOH are both true when employeeId is provided
+  React.useEffect(() => {
+    if (employeeId) {
+      setShowFOH(true);
+      setShowBOH(true);
+    }
+  }, [employeeId]);
   const [dateRange, setDateRange] = React.useState<'mtd' | 'qtd' | '30d' | '90d' | 'custom'>('30d');
   const [startDate, setStartDate] = React.useState<Date | null>(null);
   const [endDate, setEndDate] = React.useState<Date | null>(null);
@@ -600,12 +617,14 @@ export function PositionalRatings({
     return [start, end];
   }, []);
 
-  // Initialize dates
+  // Initialize dates - default to QTD if employeeId is provided, otherwise 30d
   React.useEffect(() => {
-    const [start, end] = getDateRange('30d');
+    const preset = employeeId ? 'qtd' : '30d';
+    const [start, end] = getDateRange(preset);
     setStartDate(start);
     setEndDate(end);
-  }, [getDateRange]);
+    setDateRange(preset);
+  }, [getDateRange, employeeId]);
 
   // Fetch Big 5 labels for a position
   const fetchBig5Labels = React.useCallback(async (position: string) => {
@@ -647,19 +666,31 @@ export function PositionalRatings({
       const logoUrl = locationLogos[locationId] || '/logos/Circle C CFA.png'; // Default to Circle C
       
       // Prepare filter data
+      const columnFilters = filterModel?.items?.map((item: any) => ({
+        field: item.field || '',
+        operator: item.operator || '',
+        value: String(item.value || '')
+      })) || [];
+      
+      // Add employee filter if employeeId is provided
+      if (employeeId && rows.length > 0) {
+        const employeeName = rows[0]?.employee_name || '';
+        columnFilters.push({
+          field: 'employee_name',
+          operator: 'is',
+          value: employeeName
+        });
+      }
+      
       const filterData = {
         dateRange: {
           start: startDate?.toLocaleDateString() || '',
           end: endDate?.toLocaleDateString() || ''
         },
-        fohSelected: showFOH,
-        bohSelected: showBOH,
+        fohSelected: employeeId ? true : showFOH, // When employeeId is provided, show both FOH and BOH
+        bohSelected: employeeId ? true : showBOH,
         searchText: searchText || '',
-        columnFilters: filterModel?.items?.map((item: any) => ({
-          field: item.field || '',
-          operator: item.operator || '',
-          value: String(item.value || '')
-        })) || []
+        columnFilters
       };
 
       // Prepare metrics data
@@ -772,12 +803,22 @@ export function PositionalRatings({
           .lte('created_at', endDate.toISOString())
           .order('created_at', { ascending: false });
 
+        // Filter by employee_id if provided (background filter)
+        if (employeeId) {
+          query = query.eq('employee_id', employeeId);
+        }
+
         const { data: ratings, error: fetchError } = await query;
 
         if (fetchError) throw fetchError;
 
         const transformedRows: RatingRow[] = (ratings || [])
           .filter((rating: any) => {
+            // When employeeId is provided, show both FOH and BOH (no filtering)
+            if (employeeId) {
+              return true;
+            }
+            
             const isFOHPosition = FOH_POSITIONS.includes(rating.position);
             const isBOHPosition = BOH_POSITIONS.includes(rating.position);
 
@@ -844,7 +885,7 @@ export function PositionalRatings({
     return () => {
       isActive = false;
     };
-  }, [locationId, startDate, endDate, showFOH, showBOH, fetchBig5Labels]);
+  }, [locationId, employeeId, startDate, endDate, showFOH, showBOH, fetchBig5Labels]);
 
   // Update filtered rows from DataGrid API whenever filters or data changes
   React.useEffect(() => {
@@ -1031,30 +1072,35 @@ export function PositionalRatings({
       <GridToolbarContainer sx={{ p: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}>
         {/* Left side - FOH/BOH and Date filters */}
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1, flexWrap: 'wrap' }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <AreaPill
-              selected={showFOH}
-              area="FOH"
-              onClick={() => setShowFOH(!showFOH)}
-            >
-              FOH
-            </AreaPill>
-            <AreaPill
-              selected={showBOH}
-              area="BOH"
-              onClick={() => setShowBOH(!showBOH)}
-            >
-              BOH
-            </AreaPill>
-          </Box>
-          
-          {/* Grey divider */}
-          <Box sx={{ 
-            width: '1px', 
-            height: '24px', 
-            backgroundColor: 'rgba(0, 0, 0, 0.23)', // Match unfocused input border
-            mx: 1 
-          }} />
+          {/* Hide FOH/BOH buttons when employeeId is provided */}
+          {!employeeId && (
+            <>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <AreaPill
+                  selected={showFOH}
+                  area="FOH"
+                  onClick={() => setShowFOH(!showFOH)}
+                >
+                  FOH
+                </AreaPill>
+                <AreaPill
+                  selected={showBOH}
+                  area="BOH"
+                  onClick={() => setShowBOH(!showBOH)}
+                >
+                  BOH
+                </AreaPill>
+              </Box>
+              
+              {/* Grey divider */}
+              <Box sx={{ 
+                width: '1px', 
+                height: '24px', 
+                backgroundColor: 'rgba(0, 0, 0, 0.23)', // Match unfocused input border
+                mx: 1 
+              }} />
+            </>
+          )}
           
           <DateRangeContainer>
             <PillButton
@@ -1376,17 +1422,20 @@ export function PositionalRatings({
               },
             }}
           />
-          <GridToolbarQuickFilter 
-            quickFilterParser={(searchInput) => {
-              setSearchText(searchInput);
-              return searchInput.split(' ').filter(word => word !== '');
-            }}
-            sx={{
-              '& .MuiSvgIcon-root': {
-                color: `${levelsetGreen} !important`,
-              },
-            }}
-          />
+          {/* Hide search field when employeeId is provided */}
+          {!employeeId && (
+            <GridToolbarQuickFilter 
+              quickFilterParser={(searchInput) => {
+                setSearchText(searchInput);
+                return searchInput.split(' ').filter(word => word !== '');
+              }}
+              sx={{
+                '& .MuiSvgIcon-root': {
+                  color: `${levelsetGreen} !important`,
+                },
+              }}
+            />
+          )}
         </Box>
       </GridToolbarContainer>
     );
@@ -1421,7 +1470,7 @@ export function PositionalRatings({
       headerName: 'Employee',
       width: 160,
       sortable: true,
-      filterable: true,
+      filterable: !employeeId, // Disable filtering when employeeId is provided
       resizable: false, // Disable column resize to hide separators
       filterOperators: createDropdownOperators(uniqueEmployees),
     },
@@ -1430,11 +1479,12 @@ export function PositionalRatings({
       headerName: 'Employee Role',
       width: 140,
       sortable: true,
-      filterable: true,
+      filterable: !employeeId, // Disable filtering when employeeId is provided
       resizable: false, // Disable column resize to hide separators
       filterOperators: createDropdownOperators(uniqueRoles),
       headerAlign: 'center',
       align: 'center',
+      hide: !!employeeId, // Hide employee_role column when employeeId is provided
       renderCell: (params) => {
         const role = params.value as string;
         return <RoleChip label={role} size="small" roletype={role} />;

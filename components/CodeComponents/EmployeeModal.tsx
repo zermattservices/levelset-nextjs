@@ -24,6 +24,7 @@ import { AddActionModal } from "./AddActionModal";
 import { EditActionModal } from "./EditActionModal";
 import { RecordActionModal } from "./RecordActionModal";
 import { DismissConfirmationModal } from "./DismissConfirmationModal";
+import { PositionalRatings } from "./PositionalRatings";
 
 export interface EmployeeModalProps {
   open: boolean;
@@ -797,11 +798,22 @@ export function EmployeeModal({
   };
 
   const renderPETab = () => {
+    if (!employee) {
+      return (
+        <Box sx={{ p: 3, textAlign: "center" }}>
+          <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "#535862" }}>
+            No employee selected
+          </Typography>
+        </Box>
+      );
+    }
+
     return (
-      <Box sx={{ p: 3, textAlign: "center" }}>
-        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "#535862" }}>
-          Coming soon!
-        </Typography>
+      <Box sx={{ p: 0, height: "100%", overflow: "auto" }}>
+        <PositionalRatings
+          locationId={locationId}
+          employeeId={employee.id}
+        />
       </Box>
     );
   };
