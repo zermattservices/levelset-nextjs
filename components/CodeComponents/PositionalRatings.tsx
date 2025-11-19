@@ -1484,7 +1484,6 @@ export function PositionalRatings({
       filterOperators: createDropdownOperators(uniqueRoles),
       headerAlign: 'center',
       align: 'center',
-      hide: !!employeeId, // Hide employee_role column when employeeId is provided
       renderCell: (params) => {
         const role = params.value as string;
         return <RoleChip label={role} size="small" roletype={role} />;
@@ -1866,7 +1865,7 @@ export function PositionalRatings({
           <DataGridPro
             apiRef={apiRef}
             rows={rows}
-            columns={columns}
+            columns={employeeId ? columns.filter(col => col.field !== 'employee_role') : columns}
             loading={loading}
             onFilterModelChange={(newModel) => {
               setFilterModel(newModel);
