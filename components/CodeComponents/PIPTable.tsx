@@ -71,10 +71,11 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
         throw new Error('Location is required');
       }
 
-      // Fetch PIP employees and their evaluations
-      const [employeesRes, evaluationsRes] = await Promise.all([
+      // Fetch PIP employees, evaluations, and rating status
+      const [employeesRes, evaluationsRes, ratingStatusRes] = await Promise.all([
         fetch(`/api/employees?location_id=${locationId}`),
         fetch(`/api/evaluations?location_id=${locationId}`),
+        fetch(`/api/employees/rating-status?location_id=${locationId}`),
       ]);
 
       if (!employeesRes.ok) {
@@ -83,9 +84,13 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
       if (!evaluationsRes.ok) {
         throw new Error('Failed to fetch evaluations');
       }
+      if (!ratingStatusRes.ok) {
+        throw new Error('Failed to fetch rating status');
+      }
 
       const { employees } = await employeesRes.json();
       const { evaluations } = await evaluationsRes.json();
+      const { ratingStatusMap } = await ratingStatusRes.json();
 
       // Filter for PIP employees
       const pipEmployees = (employees as Employee[]).filter(
@@ -100,26 +105,26 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
         return dateB - dateA;
       });
 
-      const evaluationMap = new Map<string, { rating_status: boolean | null; month: string | null }>();
+      const evaluationMap = new Map<string, { month: string | null }>();
       sortedEvaluations.forEach((evaluation) => {
         const empId = evaluation.employee_id;
         // Only set if not already set (first occurrence is most recent)
         if (!evaluationMap.has(empId)) {
           evaluationMap.set(empId, {
-            rating_status: evaluation.rating_status ?? null,
             month: evaluation.month ?? null,
           });
         }
       });
 
-      // Transform to PIPRow format
+      // Transform to PIPRow format with dynamically calculated rating status
       const pipRows: PIPRow[] = pipEmployees.map((emp) => {
-        const evalData = evaluationMap.get(emp.id) || { rating_status: null, month: null };
+        const evalData = evaluationMap.get(emp.id) || { month: null };
+        const ratingStatus = ratingStatusMap[emp.id] ?? false;
         return {
           id: emp.id,
           employee_name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
           role: emp.role || '',
-          rating_status: evalData.rating_status,
+          rating_status: ratingStatus,
           month: evalData.month,
         };
       });
@@ -193,13 +198,13 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
         >
           {params.value !== null ? (
             <Chip
-              label={params.value ? 'Meets Threshold' : 'Needs Review'}
+              label={params.value ? 'Meets Threshold' : 'Below Threshold'}
               size="small"
               sx={{
                 fontFamily,
                 fontWeight: 600,
-                backgroundColor: params.value ? '#dcfce7' : '#fff7ed',
-                color: params.value ? '#166534' : '#b45309',
+                backgroundColor: params.value ? '#dcfce7' : '#fee2e2',
+                color: params.value ? '#166534' : '#991b1b',
                 height: 28,
               }}
             />

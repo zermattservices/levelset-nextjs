@@ -65,6 +65,7 @@ export interface EvaluationsTableProps {
 
 interface EvaluationRow {
   id: string;
+  employee_id: string;
   employee_name: string;
   role: string;
   leader_id: string | null;
@@ -230,9 +231,10 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
         throw new Error('Location is required');
       }
 
-      const [evaluationsRes, employeesRes] = await Promise.all([
+      const [evaluationsRes, employeesRes, thresholdsRes] = await Promise.all([
         fetch(`/api/evaluations?location_id=${locationId}`),
         fetch(`/api/employees?location_id=${locationId}`),
+        fetch(`/api/rating-thresholds?location_id=${locationId}`),
       ]);
 
       if (!evaluationsRes.ok) {
@@ -241,9 +243,33 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
       if (!employeesRes.ok) {
         throw new Error('Failed to fetch employees');
       }
+      if (!thresholdsRes.ok) {
+        throw new Error('Failed to fetch rating thresholds');
+      }
 
       const { evaluations } = await evaluationsRes.json();
       const { employees } = await employeesRes.json();
+      const thresholds = await thresholdsRes.json();
+
+      const greenThreshold = thresholds.green_threshold ?? 2.75;
+
+      // Fetch rating status for all employees
+      const ratingStatusRes = await fetch(`/api/employees/rating-status?location_id=${locationId}`);
+      if (!ratingStatusRes.ok) {
+        throw new Error('Failed to fetch rating status');
+      }
+      const { ratingStatusMap } = await ratingStatusRes.json();
+
+      // Update rating_status for each evaluation based on current position averages
+      const evaluationsWithStatus = (evaluations as EvaluationRow[]).map(evaluation => {
+        const employeeId = evaluation.employee_id;
+        const meetsThreshold = ratingStatusMap[employeeId] ?? false;
+
+        return {
+          ...evaluation,
+          rating_status: meetsThreshold,
+        };
+      });
 
       const leaderOptions: LeaderOption[] = (employees as EmployeeRow[])
         .filter((emp) => LEADER_ROLES.includes(emp.role ?? ''))
@@ -255,7 +281,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
       leaderOptions.sort((a, b) => a.name.localeCompare(b.name));
 
       setLeaders(leaderOptions);
-      setRows(applyFilters(evaluations as EvaluationRow[]));
+      setRows(applyFilters(evaluationsWithStatus));
     } catch (err) {
       console.error('[EvaluationsTable] fetch error', err);
       setError(err instanceof Error ? err.message : 'Failed to load evaluations');
@@ -353,7 +379,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
       {
         field: 'employee_name',
         headerName: 'Employee',
-        width: 220,
+        width: 180,
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <Typography
@@ -489,13 +515,13 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
             }}
           >
             <Chip
-              label={params.value ? 'Meets Threshold' : 'Needs Review'}
+              label={params.value ? 'Meets Threshold' : 'Below Threshold'}
               size="small"
               sx={{
                 fontFamily,
                 fontWeight: 600,
-                backgroundColor: params.value ? '#dcfce7' : '#fff7ed',
-                color: params.value ? '#166534' : '#b45309',
+                backgroundColor: params.value ? '#dcfce7' : '#fee2e2',
+                color: params.value ? '#166534' : '#991b1b',
                 height: 28,
               }}
             />
