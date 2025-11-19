@@ -265,7 +265,10 @@ export function AddEmployeeModal({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create employee');
+        const errorMessage = errorData.details 
+          ? `${errorData.error}: ${errorData.details}`
+          : errorData.error || 'Failed to create employee';
+        throw new Error(errorMessage);
       }
 
       const { employee } = await response.json();
