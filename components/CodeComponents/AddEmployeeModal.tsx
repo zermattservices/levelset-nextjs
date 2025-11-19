@@ -343,26 +343,22 @@ export function AddEmployeeModal({
 
         <Stack spacing={3}>
           {/* First Name and Last Name in one row */}
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <CustomTextField
-                label="First Name"
-                value={firstName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
-                required
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                label="Last Name"
-                value={lastName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
-                required
-                fullWidth
-              />
-            </Grid>
-          </Grid>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <CustomTextField
+              label="First Name"
+              value={firstName}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
+              required
+              sx={{ flex: 1 }}
+            />
+            <CustomTextField
+              label="Last Name"
+              value={lastName}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
+              required
+              sx={{ flex: 1 }}
+            />
+          </Box>
 
           <Box>
             <Typography
@@ -395,109 +391,105 @@ export function AddEmployeeModal({
           </Box>
 
           {/* Role and Availability in one row */}
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                sx={{
+                  fontFamily,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: "#6b7280",
+                  mb: 1,
+                }}
+              >
+                Role
+              </Typography>
               <Box>
-                <Typography
-                  sx={{
-                    fontFamily,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    color: "#6b7280",
-                    mb: 1,
+                <RolePill
+                  role={role}
+                  endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
+                  onClick={handleRoleMenuOpen}
+                />
+                <Menu
+                  anchorEl={roleMenuAnchor}
+                  open={Boolean(roleMenuAnchor)}
+                  onClose={handleRoleMenuClose}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                  transformOrigin={{ vertical: "top", horizontal: "left" }}
+                  PaperProps={{
+                    sx: {
+                      fontFamily,
+                      borderRadius: 2,
+                      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                      border: "1px solid #e5e7eb",
+                    },
                   }}
                 >
-                  Role
-                </Typography>
-                <Box>
-                  <RolePill
-                    role={role}
-                    endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
-                    onClick={handleRoleMenuOpen}
-                  />
-                  <Menu
-                    anchorEl={roleMenuAnchor}
-                    open={Boolean(roleMenuAnchor)}
-                    onClose={handleRoleMenuClose}
-                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                    transformOrigin={{ vertical: "top", horizontal: "left" }}
-                    PaperProps={{
-                      sx: {
-                        fontFamily,
-                        borderRadius: 2,
-                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                        border: "1px solid #e5e7eb",
-                      },
-                    }}
-                  >
-                    {(["New Hire", "Team Member", "Trainer", "Team Lead", "Director"] as Role[]).map((roleOption) => (
-                      <RoleMenuItem
-                        key={roleOption}
-                        selected={role === roleOption}
-                        onClick={() => handleRoleSelect(roleOption)}
-                      >
-                        <RolePill role={roleOption} />
-                      </RoleMenuItem>
-                    ))}
-                  </Menu>
-                </Box>
+                  {(["New Hire", "Team Member", "Trainer", "Team Lead", "Director"] as Role[]).map((roleOption) => (
+                    <RoleMenuItem
+                      key={roleOption}
+                      selected={role === roleOption}
+                      onClick={() => handleRoleSelect(roleOption)}
+                    >
+                      <RolePill role={roleOption} />
+                    </RoleMenuItem>
+                  ))}
+                </Menu>
               </Box>
-            </Grid>
-            <Grid item xs={6}>
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                sx={{
+                  fontFamily,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: "#6b7280",
+                  mb: 1,
+                }}
+              >
+                Availability
+              </Typography>
               <Box>
-                <Typography
-                  sx={{
-                    fontFamily,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    color: "#6b7280",
-                    mb: 1,
+                <AvailabilityChip
+                  className={availability.toLowerCase()}
+                  onClick={handleAvailabilityMenuOpen}
+                >
+                  {availability}
+                  <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
+                </AvailabilityChip>
+                <Menu
+                  anchorEl={availabilityMenuAnchor}
+                  open={Boolean(availabilityMenuAnchor)}
+                  onClose={handleAvailabilityMenuClose}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                  transformOrigin={{ vertical: "top", horizontal: "left" }}
+                  PaperProps={{
+                    sx: {
+                      fontFamily,
+                      borderRadius: 2,
+                      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                      border: "1px solid #e5e7eb",
+                    },
                   }}
                 >
-                  Availability
-                </Typography>
-                <Box>
-                  <AvailabilityChip
-                    className={availability.toLowerCase()}
-                    onClick={handleAvailabilityMenuOpen}
-                  >
-                    {availability}
-                    <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
-                  </AvailabilityChip>
-                  <Menu
-                    anchorEl={availabilityMenuAnchor}
-                    open={Boolean(availabilityMenuAnchor)}
-                    onClose={handleAvailabilityMenuClose}
-                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                    transformOrigin={{ vertical: "top", horizontal: "left" }}
-                    PaperProps={{
-                      sx: {
-                        fontFamily,
-                        borderRadius: 2,
-                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                        border: "1px solid #e5e7eb",
-                      },
-                    }}
-                  >
-                    {(["Available", "Limited"] as AvailabilityType[]).map((option) => (
-                      <RoleMenuItem
-                        key={option}
-                        selected={availability === option}
-                        onClick={() => handleAvailabilitySelect(option)}
+                  {(["Available", "Limited"] as AvailabilityType[]).map((option) => (
+                    <RoleMenuItem
+                      key={option}
+                      selected={availability === option}
+                      onClick={() => handleAvailabilitySelect(option)}
+                    >
+                      <AvailabilityChip
+                        className={option.toLowerCase()}
+                        sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
                       >
-                        <AvailabilityChip
-                          className={option.toLowerCase()}
-                          sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
-                        >
-                          {option}
-                        </AvailabilityChip>
-                      </RoleMenuItem>
-                    ))}
-                  </Menu>
-                </Box>
+                        {option}
+                      </AvailabilityChip>
+                    </RoleMenuItem>
+                  ))}
+                </Menu>
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Stack>
       </Box>
 

@@ -226,7 +226,6 @@ const StyledContainer = styled(Box)(() => ({
 }));
 
 const StyledTabs = styled(Tabs)(() => ({
-  borderBottom: '1px solid #e5e7eb',
   marginBottom: 16,
   '& .MuiTabs-indicator': {
     backgroundColor: '#31664a',
@@ -238,7 +237,6 @@ const TabContainer = styled(Box)(() => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  borderBottom: '1px solid #e5e7eb',
   marginBottom: 16,
 }));
 

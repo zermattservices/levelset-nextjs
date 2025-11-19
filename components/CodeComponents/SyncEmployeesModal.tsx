@@ -10,6 +10,8 @@ import {
   Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { styled } from "@mui/material/styles";
 
 export interface SyncEmployeesModalProps {
@@ -33,16 +35,46 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
+const UploadArea = styled(Box)(({ theme }) => ({
+  border: '2px dashed #d1d5db',
+  borderRadius: 12,
+  padding: '48px 24px',
+  textAlign: 'center',
+  backgroundColor: '#f9fafb',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    borderColor: levelsetGreen,
+    backgroundColor: '#f0f9f4',
+  },
+  '&.drag-over': {
+    borderColor: levelsetGreen,
+    backgroundColor: '#f0f9f4',
+  },
+}));
+
+const UploadIconWrapper = styled(Box)(() => ({
+  display: 'flex',
+  justifyContent: 'center',
+  marginBottom: 16,
+  '& svg': {
+    fontSize: 64,
+    color: '#6b7280',
+  },
+}));
+
 export function SyncEmployeesModal({
   open,
   onClose,
   className = "",
 }: SyncEmployeesModalProps) {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+  const [isDragOver, setIsDragOver] = React.useState(false);
 
   React.useEffect(() => {
     if (!open) {
       setSelectedFile(null);
+      setIsDragOver(false);
     }
   }, [open]);
 
@@ -51,6 +83,25 @@ export function SyncEmployeesModal({
     if (file) {
       setSelectedFile(file);
     }
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(false);
+    const file = event.dataTransfer.files?.[0];
+    if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+      setSelectedFile(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(false);
   };
 
   return (
@@ -100,54 +151,72 @@ export function SyncEmployeesModal({
       </DialogTitle>
 
       <Box sx={{ p: 3 }}>
-        <Typography
-          sx={{
-            fontFamily,
-            fontSize: 14,
-            color: "#535862",
-            mb: 3,
-          }}
+        <Box
+          component="label"
+          sx={{ display: 'block', cursor: 'pointer' }}
         >
-          Upload an Excel spreadsheet to sync employees. This functionality will be available soon.
-        </Typography>
-
-        <Box sx={{ mb: 2 }}>
-          <Button
-            component="label"
-            variant="outlined"
-            sx={{
-              fontFamily,
-              fontSize: 14,
-              fontWeight: 500,
-              textTransform: "none",
-              color: "#6b7280",
-              borderColor: "#d1d5db",
-              "&:hover": {
-                borderColor: "#9ca3af",
-                backgroundColor: "#f9fafb",
-              },
-            }}
+          <VisuallyHiddenInput
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleFileChange}
+          />
+          <UploadArea
+            className={isDragOver ? 'drag-over' : ''}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
           >
-            Choose File
-            <VisuallyHiddenInput
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleFileChange}
-            />
-          </Button>
-          {selectedFile && (
+            <UploadIconWrapper>
+              <CloudUploadIcon />
+            </UploadIconWrapper>
             <Typography
               sx={{
                 fontFamily,
-                fontSize: 14,
-                color: "#535862",
-                mt: 1,
+                fontSize: 16,
+                color: "#181d27",
+                mb: 3,
               }}
             >
-              Selected: {selectedFile.name}
+              Drop your content here or
             </Typography>
-          )}
+            <Button
+              variant="outlined"
+              startIcon={<UploadFileIcon />}
+              sx={{
+                fontFamily,
+                fontSize: 14,
+                fontWeight: 500,
+                textTransform: "none",
+                color: "#181d27",
+                borderColor: "#d1d5db",
+                backgroundColor: "#ffffff",
+                "&:hover": {
+                  borderColor: levelsetGreen,
+                  backgroundColor: "#ffffff",
+                  color: levelsetGreen,
+                },
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              Upload files
+            </Button>
+          </UploadArea>
         </Box>
+        {selectedFile && (
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: 14,
+              color: "#535862",
+              mt: 2,
+              textAlign: "center",
+            }}
+          >
+            Selected: {selectedFile.name}
+          </Typography>
+        )}
       </Box>
 
       <Box
