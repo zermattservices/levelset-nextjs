@@ -44,12 +44,65 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === 'POST') {
-      // Update employee
-      const { intent, id, role, is_certified, certified_status, is_foh, is_boh, availability } = req.body;
+      const { intent } = req.body;
 
-      if (intent !== 'update' || !id) {
-        return res.status(400).json({ error: 'Invalid request parameters' });
+      // Handle create employee
+      if (intent === 'create') {
+        const {
+          first_name,
+          last_name,
+          full_name,
+          role,
+          availability,
+          is_foh,
+          is_boh,
+          location_id,
+          org_id,
+        } = req.body;
+
+        if (!first_name || !last_name || !role || !availability || !location_id || !org_id) {
+          return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        if (!is_foh && !is_boh) {
+          return res.status(400).json({ error: 'At least one of is_foh or is_boh must be true' });
+        }
+
+        const employeeData: Partial<Employee> = {
+          first_name,
+          last_name,
+          full_name: full_name || `${first_name} ${last_name}`.trim(),
+          role,
+          availability,
+          is_foh: is_foh || false,
+          is_boh: is_boh || false,
+          location_id,
+          org_id,
+          active: true,
+          certified_status: 'Not Certified',
+        };
+
+        const { data, error } = await supabase
+          .from('employees')
+          .insert(employeeData)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error creating employee:', error);
+          return res.status(500).json({ error: 'Failed to create employee' });
+        }
+
+        return res.status(201).json({ employee: data });
       }
+
+      // Handle update employee
+      if (intent === 'update') {
+        const { id, role, is_certified, certified_status, is_foh, is_boh, availability } = req.body;
+
+        if (!id) {
+          return res.status(400).json({ error: 'Invalid request parameters' });
+        }
 
       // First, get current employee data to check location and calculate pay
       const { data: currentEmployee, error: fetchError } = await supabase
@@ -130,6 +183,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       return res.status(200).json({ employee: data });
+      }
+
+      return res.status(400).json({ error: 'Invalid intent. Use "create" or "update"' });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });

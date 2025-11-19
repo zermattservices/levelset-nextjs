@@ -15,12 +15,17 @@ import {
 import { styled } from "@mui/material/styles";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import AddIcon from "@mui/icons-material/Add";
+import SyncIcon from "@mui/icons-material/Sync";
 import { EmployeeTableSkeleton } from "./Skeletons/EmployeeTableSkeleton";
 import { EvaluationsTable } from "./EvaluationsTable";
 import { PIPTable } from "./PIPTable";
 import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import { RolePill } from "./shared/RolePill";
 import { DataGridPro, GridColDef, gridClasses } from "@mui/x-data-grid-pro";
+import { Button } from "@mui/material";
+import { AddEmployeeModal } from "./AddEmployeeModal";
+import { SyncEmployeesModal } from "./SyncEmployeesModal";
 
 export type Role =
   | "New Hire"
@@ -46,6 +51,9 @@ export function RosterTable(props: RosterTableProps) {
   const { locationId } = props;
   const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations' | 'pip'>('employees');
   const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
+  const [addEmployeeModalOpen, setAddEmployeeModalOpen] = React.useState(false);
+  const [syncEmployeesModalOpen, setSyncEmployeesModalOpen] = React.useState(false);
+  const [refreshKey, setRefreshKey] = React.useState(0);
 
   const handleTabChange = (_event: React.SyntheticEvent, value: string) => {
     setActiveTab((value as 'employees' | 'evaluations' | 'pip') ?? 'employees');
@@ -53,33 +61,74 @@ export function RosterTable(props: RosterTableProps) {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <StyledTabs value={activeTab} onChange={handleTabChange}>
-        <StyledTab label="Employees" value="employees" />
-        <StyledTab
-          value="evaluations"
-          label={
-            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
-              <span>Pending Evaluations</span>
-              {hasPlannedEvaluations && (
-                <Box
-                  component="span"
-                  sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    backgroundColor: '#facc15',
-                  }}
-                />
-              )}
-            </Box>
-          }
-        />
-        <StyledTab label="PIP" value="pip" />
-      </StyledTabs>
+      <TabContainer>
+        <StyledTabs value={activeTab} onChange={handleTabChange} sx={{ flex: 1 }}>
+          <StyledTab label="Employees" value="employees" />
+          <StyledTab
+            value="evaluations"
+            label={
+              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                <span>Pending Evaluations</span>
+                {hasPlannedEvaluations && (
+                  <Box
+                    component="span"
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      backgroundColor: '#facc15',
+                    }}
+                  />
+                )}
+              </Box>
+            }
+          />
+          <StyledTab label="PIP" value="pip" />
+        </StyledTabs>
+        <ButtonContainer>
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={() => setAddEmployeeModalOpen(true)}
+            sx={{
+              fontFamily,
+              fontSize: 14,
+              fontWeight: 500,
+              textTransform: 'none',
+              color: '#6b7280',
+              borderColor: '#d1d5db',
+              '&:hover': {
+                borderColor: '#9ca3af',
+                backgroundColor: '#f9fafb',
+              },
+            }}
+          >
+            Add Employee
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<SyncIcon />}
+            onClick={() => setSyncEmployeesModalOpen(true)}
+            sx={{
+              fontFamily,
+              fontSize: 14,
+              fontWeight: 500,
+              textTransform: 'none',
+              backgroundColor: '#31664a',
+              color: '#ffffff',
+              '&:hover': {
+                backgroundColor: '#2d5a42',
+              },
+            }}
+          >
+            Sync Employees
+          </Button>
+        </ButtonContainer>
+      </TabContainer>
 
       <Box sx={{ mt: 2 }}>
         {activeTab === 'employees' ? (
-          <EmployeesTableView {...props} />
+          <EmployeesTableView {...props} key={refreshKey} />
         ) : activeTab === 'evaluations' ? (
           <EvaluationsTable
             locationId={locationId}
@@ -93,6 +142,22 @@ export function RosterTable(props: RosterTableProps) {
           />
         )}
       </Box>
+
+      <AddEmployeeModal
+        open={addEmployeeModalOpen}
+        onClose={() => setAddEmployeeModalOpen(false)}
+        locationId={locationId}
+        onEmployeeCreated={() => {
+          setAddEmployeeModalOpen(false);
+          // Trigger refresh by changing key
+          setRefreshKey(prev => prev + 1);
+        }}
+      />
+
+      <SyncEmployeesModal
+        open={syncEmployeesModalOpen}
+        onClose={() => setSyncEmployeesModalOpen(false)}
+      />
     </Box>
   );
 }
@@ -167,6 +232,20 @@ const StyledTabs = styled(Tabs)(() => ({
     backgroundColor: '#31664a',
     height: 3,
   },
+}));
+
+const TabContainer = styled(Box)(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  borderBottom: '1px solid #e5e7eb',
+  marginBottom: 16,
+}));
+
+const ButtonContainer = styled(Box)(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
 }));
 
 const StyledTab = styled(Tab)(() => ({
