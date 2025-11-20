@@ -798,6 +798,11 @@
           "id": "RXWmr_6Q_0C9",
           "name": "user-02 3",
           "filePath": "../public/plasmic/levelset_v_2/images/user023.svg"
+        },
+        {
+          "id": "8skzTPAOAwQo",
+          "name": "Levelset no marging.png 2",
+          "filePath": "../public/plasmic/levelset_v_2/images/levelsetNoMargingPng2.png"
         }
       ],
       "indirect": false,

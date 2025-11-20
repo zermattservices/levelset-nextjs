@@ -71,7 +71,6 @@ import { LocationSelectDropdown } from "../../CodeComponents/LocationSelectDropd
 import LogoutButton from "../../LogoutButton"; // plasmic-import: UwKJxxQFYiGw/component
 import { SupabaseUserLogOut } from "../../CodeComponents/auth/SupabaseUserLogOut"; // plasmic-import: l-xO2VjafQ7l/codeComponent
 import DashboardSubmenu from "../../DashboardSubmenu"; // plasmic-import: DnrJ08NISsSS/component
-import { Fetcher } from "@plasmicapp/react-web/lib/data-sources";
 import { _useGlobalVariants } from "./plasmic"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/projectModule
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: eNCsaJXBZ9ykYnmvxCb8Zx/styleTokensProvider
 
@@ -82,8 +81,6 @@ import sty from "./PlasmicMenuNavigation.module.css"; // plasmic-import: eJlFBj1
 
 import CheckSvgIcon from "../levelset_tabs/icons/PlasmicIcon__CheckSvg"; // plasmic-import: dTo8s4EZdHvA/icon
 import IconIcon from "../levelset_tabs/icons/PlasmicIcon__Icon"; // plasmic-import: CEbmjO_n9jaW/icon
-import CircleDotFilledIcon from "../library_tabler_3_2_icons/icons/PlasmicIcon__CircleDotFilled"; // plasmic-import: PL4O-3ScZjiD/icon
-import ChevronSelectorVerticalIcon from "./icons/PlasmicIcon__ChevronSelectorVertical"; // plasmic-import: cjzcuVmo8rE7/icon
 
 createPlasmicElementProxy;
 
@@ -108,7 +105,6 @@ export type PlasmicMenuNavigation__ArgsType = {
   logoutShown?: boolean;
   lastName?: string;
   onLastNameChange?: (val: string) => void;
-  children2?: React.ReactNode;
   children3?: React.ReactNode;
   children?: React.ReactNode;
 };
@@ -123,7 +119,6 @@ export const PlasmicMenuNavigation__ArgProps = new Array<ArgPropType>(
   "logoutShown",
   "lastName",
   "onLastNameChange",
-  "children2",
   "children3",
   "children"
 );
@@ -147,7 +142,6 @@ export interface DefaultMenuNavigationProps {
   logoutShown?: boolean;
   lastName?: string;
   onLastNameChange?: (val: string) => void;
-  children2?: React.ReactNode;
   children3?: React.ReactNode;
   children?: React.ReactNode;
   dashboardOpen?: SingleBooleanChoiceArg<"dashboardOpen">;
@@ -195,9 +189,6 @@ function PlasmicMenuNavigation__RenderFunc(props: {
   const refsRef = React.useRef({});
   const $refs = refsRef.current;
 
-  let [$queries, setDollarQueries] = React.useState<
-    Record<string, ReturnType<typeof usePlasmicDataOp>>
-  >({});
   const stateSpecs: Parameters<typeof useDollarState>[0] = React.useMemo(
     () => [
       {
@@ -250,31 +241,11 @@ function PlasmicMenuNavigation__RenderFunc(props: {
   const $state = useDollarState(stateSpecs, {
     $props,
     $ctx,
-    $queries: $queries,
+    $queries: {},
     $refs
   });
   const dataSourcesCtx = usePlasmicDataSourceContext();
   const plasmicInvalidate = usePlasmicInvalidate();
-
-  const new$Queries: Record<string, ReturnType<typeof usePlasmicDataOp>> = {
-    locationsQuery: usePlasmicDataOp(() => {
-      return {
-        sourceId: "wGi39M1g3x2KnbXK4J4Gyq",
-        opId: "c177dd7a-eae9-4081-b6fb-a0298c0d1929",
-        userArgs: {
-          filters: ["54b9864f-9df9-4a15-a209-7b99e1c274f4"]
-        },
-        cacheKey: `plasmic.$.c177dd7a-eae9-4081-b6fb-a0298c0d1929.$.`,
-        invalidatedKeys: null,
-        roleId: null
-      };
-    })
-  };
-  if (Object.keys(new$Queries).some(k => new$Queries[k] !== $queries[k])) {
-    setDollarQueries(new$Queries);
-
-    $queries = new$Queries;
-  }
 
   const styleTokensClassNames = _useStyleTokens();
 
@@ -359,7 +330,7 @@ function PlasmicMenuNavigation__RenderFunc(props: {
               }
             }}
             src={{
-              src: "/plasmic/levelset_v_2/images/levelsetNoMargingPng.png",
+              src: "/plasmic/levelset_v_2/images/levelsetNoMargingPng2.png",
               fullWidth: 800,
               fullHeight: 250,
               aspectRatio: undefined
@@ -434,44 +405,6 @@ function PlasmicMenuNavigation__RenderFunc(props: {
                 {"Admin"}
               </div>
             </LevelsetButton>
-          </div>
-        </div>
-        <div className={classNames(projectcss.all, sty.freeBox__xTe9W)}>
-          <div className={classNames(projectcss.all, sty.freeBox__sltyv)}>
-            <CircleDotFilledIcon
-              className={classNames(projectcss.all, sty.svg__muTh2)}
-              role={"img"}
-            />
-
-            <div className={classNames(projectcss.all, sty.freeBox__tQdjE)}>
-              <div className={classNames(projectcss.all, sty.freeBox___68KqT)}>
-                {renderPlasmicSlot({
-                  defaultContents: (
-                    <React.Fragment>
-                      {(() => {
-                        try {
-                          return $state.headerLocationId;
-                        } catch (e) {
-                          if (
-                            e instanceof TypeError ||
-                            e?.plasmicType === "PlasmicUndefinedDataError"
-                          ) {
-                            return "Buda FSU";
-                          }
-                          throw e;
-                        }
-                      })()}
-                    </React.Fragment>
-                  ),
-                  value: args.children2,
-                  className: classNames(sty.slotTargetChildren2)
-                })}
-              </div>
-            </div>
-            <ChevronSelectorVerticalIcon
-              className={classNames(projectcss.all, sty.svg__jzG4)}
-              role={"img"}
-            />
           </div>
         </div>
         <div className={classNames(projectcss.all, sty.freeBox__rkbjc)}>
