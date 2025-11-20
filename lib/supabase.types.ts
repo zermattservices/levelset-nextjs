@@ -12,6 +12,7 @@ export interface Employee {
   location_id: string;
   active: boolean;
   email?: string;
+  phone?: string;
   is_foh?: boolean;
   is_boh?: boolean;
   is_leader?: boolean;

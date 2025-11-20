@@ -1,0 +1,246 @@
+import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { NextApiRequest, NextApiResponse } from 'next';
+import type { Employee } from '@/lib/supabase.types';
+import { calculatePay, shouldCalculatePay } from '@/lib/pay-calculator';
+
+interface HotSchedulesEmployee {
+  id?: string;
+  name?: string;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  phone?: string;
+  active?: boolean;
+  visible?: boolean;
+  type?: number;
+  [key: string]: any;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const supabase = createServerSupabaseClient();
+    const employees: HotSchedulesEmployee[] = req.body.employees || req.body;
+
+    if (!Array.isArray(employees) || employees.length === 0) {
+      return res.status(400).json({ error: 'Invalid request body. Expected array of employees.' });
+    }
+
+    // Step 1: Extract location number from HotSchedules data
+    const locationEmployee = employees.find(emp => {
+      if (emp.type !== 5) return false;
+      if (emp.name?.startsWith('x')) return false; // lowercase x
+      const match = emp.name?.match(/\b\d{5}\b/); // 5 consecutive digits
+      return match !== null;
+    });
+
+    if (!locationEmployee || !locationEmployee.name) {
+      return res.status(400).json({ error: 'Could not find location number in HotSchedules data. Expected employee with type: 5 and 5-digit location number in name.' });
+    }
+
+    const locationNumberMatch = locationEmployee.name.match(/\b\d{5}\b/);
+    const locationNumber = locationNumberMatch?.[0];
+
+    if (!locationNumber) {
+      return res.status(400).json({ error: 'Could not extract location number from employee name.' });
+    }
+
+    // Step 2: Look up location_id and org_id from locations table
+    const { data: locationData, error: locationError } = await supabase
+      .from('locations')
+      .select('id, org_id')
+      .eq('location_number', locationNumber)
+      .single();
+
+    if (locationError || !locationData) {
+      return res.status(404).json({ 
+        error: `Location not found for location number: ${locationNumber}`,
+        details: locationError?.message 
+      });
+    }
+
+    const locationId = locationData.id;
+    const orgId = locationData.org_id;
+
+    // Step 3: Filter and transform HotSchedules employees
+    const activeVisibleEmployees = employees.filter(emp => 
+      emp.visible === true && emp.active === true && emp.email
+    );
+
+    // Step 4: Get all existing employees for this location
+    const { data: existingEmployees, error: existingError } = await supabase
+      .from('employees')
+      .select('*')
+      .eq('location_id', locationId);
+
+    if (existingError) {
+      console.error('Error fetching existing employees:', existingError);
+      return res.status(500).json({ error: 'Failed to fetch existing employees', details: existingError.message });
+    }
+
+    const existingEmployeesMap = new Map<string, Employee>();
+    (existingEmployees || []).forEach(emp => {
+      if (emp.email) {
+        existingEmployeesMap.set(emp.email.toLowerCase(), emp);
+      }
+    });
+
+    // Step 5: Process employees
+    const processedEmployees: any[] = [];
+    const emailsInSync = new Set<string>();
+    let createdCount = 0;
+    let updatedCount = 0;
+
+    for (const hsEmployee of activeVisibleEmployees) {
+      if (!hsEmployee.email) continue; // Skip if no email
+
+      const emailLower = hsEmployee.email.toLowerCase();
+      emailsInSync.add(emailLower);
+
+      const existingEmployee = existingEmployeesMap.get(emailLower);
+
+      if (existingEmployee) {
+        // Update existing employee
+        const updateData: Partial<Employee> = {
+          first_name: hsEmployee.firstname || existingEmployee.first_name,
+          last_name: hsEmployee.lastname || existingEmployee.last_name,
+          email: hsEmployee.email,
+          phone: hsEmployee.phone || existingEmployee.phone,
+          active: true,
+        };
+
+        // Preserve existing values for role, is_foh, is_boh, availability, certified_status
+        if (existingEmployee.role) updateData.role = existingEmployee.role;
+        if (existingEmployee.is_foh !== undefined) updateData.is_foh = existingEmployee.is_foh;
+        if (existingEmployee.is_boh !== undefined) updateData.is_boh = existingEmployee.is_boh;
+        if (existingEmployee.availability) updateData.availability = existingEmployee.availability;
+        if (existingEmployee.certified_status) updateData.certified_status = existingEmployee.certified_status;
+
+        const { error: updateError } = await supabase
+          .from('employees')
+          .update(updateData)
+          .eq('id', existingEmployee.id);
+
+        if (updateError) {
+          console.error(`Error updating employee ${existingEmployee.id}:`, updateError);
+          continue;
+        }
+
+        updatedCount++;
+        processedEmployees.push({ ...existingEmployee, ...updateData });
+      } else {
+        // Create new employee
+        const newEmployeeData: Partial<Employee> = {
+          first_name: hsEmployee.firstname || '',
+          last_name: hsEmployee.lastname || '',
+          email: hsEmployee.email,
+          phone: hsEmployee.phone || null,
+          role: 'Team Member', // Default role
+          is_foh: false, // Default
+          is_boh: false, // Default
+          availability: 'Available', // Default
+          certified_status: 'Not Certified', // Default
+          active: true,
+          location_id: locationId,
+          org_id: orgId,
+        };
+
+        const { data: newEmployee, error: createError } = await supabase
+          .from('employees')
+          .insert(newEmployeeData)
+          .select()
+          .single();
+
+        if (createError) {
+          console.error(`Error creating employee ${hsEmployee.email}:`, createError);
+          continue;
+        }
+
+        // Calculate pay if needed
+        if (newEmployee && shouldCalculatePay(locationId)) {
+          const calculatedPay = calculatePay(newEmployee as Employee);
+          if (calculatedPay !== null) {
+            await supabase
+              .from('employees')
+              .update({ calculated_pay: calculatedPay })
+              .eq('id', newEmployee.id);
+            newEmployee.calculated_pay = calculatedPay;
+          }
+        }
+
+        createdCount++;
+        processedEmployees.push(newEmployee);
+      }
+    }
+
+    // Step 6: Mark missing employees as inactive
+    const employeesToDeactivate = (existingEmployees || []).filter(emp => {
+      if (!emp.email) return false;
+      return !emailsInSync.has(emp.email.toLowerCase());
+    });
+
+    let deactivatedCount = 0;
+    if (employeesToDeactivate.length > 0) {
+      const idsToDeactivate = employeesToDeactivate.map(emp => emp.id);
+      const { error: deactivateError } = await supabase
+        .from('employees')
+        .update({ active: false })
+        .in('id', idsToDeactivate);
+
+      if (deactivateError) {
+        console.error('Error deactivating employees:', deactivateError);
+      } else {
+        deactivatedCount = employeesToDeactivate.length;
+      }
+    }
+
+    // Step 7: Upload to Supabase storage
+    const timestamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0].replace('T', '_');
+    const fileName = `employees_${locationNumber}_${timestamp}.json`;
+    
+    const jsonData = JSON.stringify(processedEmployees, null, 2);
+    const { error: uploadError } = await supabase.storage
+      .from('hs_script_updates')
+      .upload(fileName, jsonData, {
+        contentType: 'application/json',
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error('Error uploading to storage:', uploadError);
+      // Don't fail the request if storage upload fails, just log it
+    }
+
+    return res.status(200).json({
+      success: true,
+      location_number: locationNumber,
+      location_id: locationId,
+      stats: {
+        created: createdCount,
+        updated: updatedCount,
+        deactivated: deactivatedCount,
+        total_processed: processedEmployees.length,
+      },
+      storage_file: uploadError ? null : fileName,
+    });
+
+  } catch (error) {
+    console.error('Error in sync-hotschedules:', error);
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}
+

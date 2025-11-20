@@ -25,7 +25,6 @@ import { RolePill } from "./shared/RolePill";
 import { DataGridPro, GridColDef, gridClasses } from "@mui/x-data-grid-pro";
 import { Button } from "@mui/material";
 import { AddEmployeeModal } from "./AddEmployeeModal";
-import { SyncEmployeesModal } from "./SyncEmployeesModal";
 
 export type Role =
   | "New Hire"
@@ -52,7 +51,6 @@ export function RosterTable(props: RosterTableProps) {
   const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations' | 'pip'>('employees');
   const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
   const [addEmployeeModalOpen, setAddEmployeeModalOpen] = React.useState(false);
-  const [syncEmployeesModalOpen, setSyncEmployeesModalOpen] = React.useState(false);
   const [refreshKey, setRefreshKey] = React.useState(0);
 
   const handleTabChange = (_event: React.SyntheticEvent, value: string) => {
@@ -108,7 +106,9 @@ export function RosterTable(props: RosterTableProps) {
           <Button
             variant="contained"
             startIcon={<SyncIcon />}
-            onClick={() => setSyncEmployeesModalOpen(true)}
+            onClick={() => {
+              window.open('https://app.hotschedules.com/hs/login.jsp', '_blank');
+            }}
             sx={{
               fontFamily,
               fontSize: 14,
@@ -154,10 +154,6 @@ export function RosterTable(props: RosterTableProps) {
         }}
       />
 
-      <SyncEmployeesModal
-        open={syncEmployeesModalOpen}
-        onClose={() => setSyncEmployeesModalOpen(false)}
-      />
     </Box>
   );
 }
