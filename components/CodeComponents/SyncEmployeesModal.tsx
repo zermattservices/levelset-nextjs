@@ -8,10 +8,15 @@ import {
   Box,
   Typography,
   Button,
+  Link,
+  Step,
+  Stepper,
+  StepLabel,
+  StepContent,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
+import SyncIcon from "@mui/icons-material/Sync";
+import LaunchIcon from "@mui/icons-material/Launch";
 import { styled } from "@mui/material/styles";
 
 export interface SyncEmployeesModalProps {
@@ -23,44 +28,29 @@ export interface SyncEmployeesModalProps {
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
 
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-});
-
-const UploadArea = styled(Box)(({ theme }) => ({
-  border: '2px dashed #d1d5db',
-  borderRadius: 12,
-  padding: '48px 24px',
-  textAlign: 'center',
-  backgroundColor: '#f9fafb',
-  cursor: 'pointer',
-  transition: 'all 0.2s ease-in-out',
+const BookmarkletLink = styled(Link)(() => ({
+  display: 'inline-block',
+  background: levelsetGreen,
+  color: 'white !important',
+  padding: '12px 24px',
+  borderRadius: '6px',
+  textDecoration: 'none',
+  fontWeight: 600,
+  fontSize: '14px',
+  margin: '8px 0',
+  cursor: 'move',
   '&:hover': {
-    borderColor: levelsetGreen,
-    backgroundColor: '#f0f9f4',
-  },
-  '&.drag-over': {
-    borderColor: levelsetGreen,
-    backgroundColor: '#f0f9f4',
+    background: '#2d5a42',
+    textDecoration: 'none',
   },
 }));
 
-const UploadIconWrapper = styled(Box)(() => ({
-  display: 'flex',
-  justifyContent: 'center',
-  marginBottom: 16,
-  '& svg': {
-    fontSize: 64,
-    color: '#6b7280',
-  },
+const InstructionBox = styled(Box)(() => ({
+  backgroundColor: '#f9fafb',
+  border: '1px solid #e5e7eb',
+  borderRadius: '8px',
+  padding: '16px',
+  margin: '12px 0',
 }));
 
 export function SyncEmployeesModal({
@@ -68,47 +58,160 @@ export function SyncEmployeesModal({
   onClose,
   className = "",
 }: SyncEmployeesModalProps) {
-  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
-  const [isDragOver, setIsDragOver] = React.useState(false);
+  // Generate bookmarklet with current domain
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  
+  const bookmarkletCode = React.useMemo(() => {
+    if (!baseUrl) return '';
+    
+    // Bookmarklet that automatically extracts employee data from HotSchedules page
+    const code = `javascript:(function(){
+var baseUrl='${baseUrl}';
+var employees=null;
+var errorMsg='';
+try{
+if(typeof window.hsEmployees!=='undefined'&&Array.isArray(window.hsEmployees)){
+employees=window.hsEmployees;
+}else if(typeof window.employees!=='undefined'&&Array.isArray(window.employees)){
+employees=window.employees;
+}else if(typeof window.app!=='undefined'&&window.app.employees&&Array.isArray(window.app.employees)){
+employees=window.app.employees;
+}else{
+var scripts=document.querySelectorAll('script');
+for(var i=0;i<scripts.length;i++){
+var text=scripts[i].textContent||scripts[i].innerText;
+if(text.includes('employees')&&text.includes('[')){
+try{
+var match=text.match(/employees\\s*[:=]\\s*(\\[[\\s\\S]*?\\])/);
+if(match){
+employees=JSON.parse(match[1]);
+break;
+}
+}catch(e){}
+}
+}
+}
+if(!employees||!Array.isArray(employees)||employees.length===0){
+errorMsg='Could not find employee data on this page. Please ensure you are on a HotSchedules page with employee data loaded.';
+}
+}catch(e){
+errorMsg='Error extracting employee data: '+e.message;
+}
+if(errorMsg){
+alert(errorMsg);
+return;
+}
+var loadingDiv=document.createElement('div');
+loadingDiv.style.cssText='position:fixed;top:20px;right:20px;background:#31664a;color:white;padding:15px 20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;';
+loadingDiv.textContent='Syncing employees...';
+document.body.appendChild(loadingDiv);
+fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(employees)}).then(function(r){return r.json();}).then(function(data){loadingDiv.remove();var resultDiv=document.createElement('div');resultDiv.style.cssText='position:fixed;top:20px;right:20px;background:'+(data.success?'#10b981':'#ef4444')+';color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';if(data.success){resultDiv.innerHTML='<strong>✓ Sync Successful!</strong><br><br>Created: '+data.stats.created+'<br>Updated: '+data.stats.updated+'<br>Deactivated: '+data.stats.deactivated+'<br>Total: '+data.stats.total_processed;}else{resultDiv.innerHTML='<strong>✗ Sync Failed</strong><br><br>'+data.error+(data.details?'<br><br>Details: '+data.details:'');}document.body.appendChild(resultDiv);setTimeout(function(){resultDiv.remove();},8000);}).catch(function(err){loadingDiv.remove();var errorDiv=document.createElement('div');errorDiv.style.cssText='position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';errorDiv.innerHTML='<strong>✗ Network Error</strong><br><br>'+err.message;document.body.appendChild(errorDiv);setTimeout(function(){errorDiv.remove();},8000);});
+})();`;
+    
+    return code;
+  }, [baseUrl]);
 
-  React.useEffect(() => {
-    if (!open) {
-      setSelectedFile(null);
-      setIsDragOver(false);
-    }
-  }, [open]);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
-
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragOver(false);
-    const file = event.dataTransfer.files?.[0];
-    if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
-      setSelectedFile(file);
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragOver(false);
-  };
+  const steps = [
+    {
+      label: 'Login to HotSchedules',
+      description: (
+        <>
+          <Typography variant="body2" sx={{ mb: 1, fontFamily }}>
+            First, make sure you're logged into HotSchedules. Click the button below to open HotSchedules in a new tab.
+          </Typography>
+          <Button
+            variant="outlined"
+            startIcon={<LaunchIcon />}
+            href="https://app.hotschedules.com/hs/login.jsp"
+            target="_blank"
+            sx={{
+              fontFamily,
+              fontSize: 14,
+              fontWeight: 500,
+              textTransform: "none",
+              borderColor: levelsetGreen,
+              color: levelsetGreen,
+              "&:hover": {
+                borderColor: "#2d5a42",
+                backgroundColor: "#f0f9f4",
+              },
+            }}
+          >
+            Open HotSchedules
+          </Button>
+        </>
+      ),
+    },
+    {
+      label: 'Install the Bookmarklet',
+      description: (
+        <>
+          <Typography variant="body2" sx={{ mb: 2, fontFamily }}>
+            Drag the bookmarklet link below to your browser's bookmarks bar:
+          </Typography>
+          <InstructionBox>
+            <Typography variant="body2" sx={{ fontFamily, mb: 1, fontWeight: 600 }}>
+              💡 Tip: If you don't see your bookmarks bar, press <code>Ctrl+Shift+B</code> (Windows/Linux) or <code>Cmd+Shift+B</code> (Mac) to show it.
+            </Typography>
+          </InstructionBox>
+          <Box sx={{ textAlign: 'center', my: 2 }}>
+            <BookmarkletLink
+              href={bookmarkletCode}
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData('text/plain', bookmarkletCode);
+                e.dataTransfer.effectAllowed = 'copy';
+              }}
+            >
+              🔗 Sync HotSchedules Employees
+            </BookmarkletLink>
+          </Box>
+          <Typography variant="body2" sx={{ fontFamily, fontSize: 12, color: '#6b7280', mt: 1 }}>
+            Drag this link to your bookmarks bar
+          </Typography>
+        </>
+      ),
+    },
+    {
+      label: 'Run the Sync',
+      description: (
+        <>
+          <Typography variant="body2" sx={{ mb: 1, fontFamily }}>
+            Once you're on a HotSchedules page with employee data loaded:
+          </Typography>
+          <ol style={{ fontFamily, paddingLeft: '20px', marginTop: '8px' }}>
+            <li style={{ marginBottom: '8px' }}>
+              <Typography variant="body2" component="span" sx={{ fontFamily }}>
+                Navigate to a page in HotSchedules that displays employee information (e.g., Employee List, Roster, etc.)
+              </Typography>
+            </li>
+            <li style={{ marginBottom: '8px' }}>
+              <Typography variant="body2" component="span" sx={{ fontFamily }}>
+                Click the bookmarklet you just added to your bookmarks bar
+              </Typography>
+            </li>
+            <li>
+              <Typography variant="body2" component="span" sx={{ fontFamily }}>
+                The bookmarklet will automatically extract employee data and sync it to Levelset
+              </Typography>
+            </li>
+          </ol>
+          <InstructionBox sx={{ mt: 2 }}>
+            <Typography variant="body2" sx={{ fontFamily, fontSize: 12, color: '#6b7280' }}>
+              <strong>Note:</strong> The bookmarklet will automatically detect employee data from the HotSchedules page. 
+              If it cannot find the data, make sure you're on a page that has employee information loaded.
+            </Typography>
+          </InstructionBox>
+        </>
+      ),
+    },
+  ];
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
@@ -127,16 +230,19 @@ export function SyncEmployeesModal({
           borderBottom: "1px solid #e9eaeb",
         }}
       >
-        <Typography
-          sx={{
-            fontFamily,
-            fontSize: "20px",
-            fontWeight: 600,
-            color: "#181d27",
-          }}
-        >
-          Sync Employees
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <SyncIcon sx={{ color: levelsetGreen }} />
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: "20px",
+              fontWeight: 600,
+              color: "#181d27",
+            }}
+          >
+            Sync Employees from HotSchedules
+          </Typography>
+        </Box>
         <IconButton
           onClick={onClose}
           sx={{
@@ -151,72 +257,28 @@ export function SyncEmployeesModal({
       </DialogTitle>
 
       <Box sx={{ p: 3 }}>
-        <Box
-          component="label"
-          sx={{ display: 'block', cursor: 'pointer' }}
-        >
-          <VisuallyHiddenInput
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFileChange}
-          />
-          <UploadArea
-            className={isDragOver ? 'drag-over' : ''}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-          >
-            <UploadIconWrapper>
-              <CloudUploadIcon />
-            </UploadIconWrapper>
-            <Typography
-              sx={{
-                fontFamily,
-                fontSize: 16,
-                color: "#181d27",
-                mb: 3,
-              }}
-            >
-              Drop your content here or
-            </Typography>
-            <Button
-              variant="outlined"
-              startIcon={<UploadFileIcon />}
-              sx={{
-                fontFamily,
-                fontSize: 14,
-                fontWeight: 500,
-                textTransform: "none",
-                color: "#181d27",
-                borderColor: "#d1d5db",
-                backgroundColor: "#ffffff",
-                "&:hover": {
-                  borderColor: levelsetGreen,
-                  backgroundColor: "#ffffff",
-                  color: levelsetGreen,
-                },
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              Upload files
-            </Button>
-          </UploadArea>
-        </Box>
-        {selectedFile && (
-          <Typography
-            sx={{
-              fontFamily,
-              fontSize: 14,
-              color: "#535862",
-              mt: 2,
-              textAlign: "center",
-            }}
-          >
-            Selected: {selectedFile.name}
-          </Typography>
-        )}
+        <Stepper orientation="vertical">
+          {steps.map((step, index) => (
+            <Step key={step.label} active={true} completed={false}>
+              <StepLabel
+                sx={{
+                  '& .MuiStepLabel-label': {
+                    fontFamily,
+                    fontWeight: 600,
+                    fontSize: '16px',
+                  },
+                }}
+              >
+                {step.label}
+              </StepLabel>
+              <StepContent>
+                <Box sx={{ mt: 1, mb: 2 }}>
+                  {step.description}
+                </Box>
+              </StepContent>
+            </Step>
+          ))}
+        </Stepper>
       </Box>
 
       <Box

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HotSchedules Sync Bookmarklet</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            color: #31664a;
+        }
+        .bookmarklet-instructions {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .bookmarklet-link {
+            display: inline-block;
+            background: #31664a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px 0;
+            cursor: move;
+        }
+        .bookmarklet-link:hover {
+            background: #2d5a42;
+        }
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .steps {
+            background: #fff;
+            border-left: 4px solid #31664a;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+        .steps ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .steps li {
+            margin: 8px 0;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #d97706;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+        .info {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>HotSchedules Employee Sync Bookmarklet</h1>
+    
+    <div class="info">
+        <strong>What is this?</strong><br>
+        This bookmarklet allows you to sync employee data from HotSchedules directly to your Levelset application. 
+        After logging into HotSchedules and retrieving employee data, you can use this bookmarklet to send it to your sync endpoint.
+    </div>
+
+    <div class="bookmarklet-instructions">
+        <h2>📌 Installation</h2>
+        <p><strong>Drag this link to your bookmarks bar:</strong></p>
+        <a href="javascript:(function(){var baseUrl=prompt('Enter your Levelset base URL (e.g., https://your-app.vercel.app) or leave empty to use current domain:','');if(baseUrl===null)return;baseUrl=baseUrl.trim()||window.location.origin;var employeesData=prompt('Paste the HotSchedules employee JSON array here:','');if(!employeesData)return;try{var employees=JSON.parse(employeesData);if(!Array.isArray(employees)){alert('Error: Data must be an array of employees');return;}var loadingDiv=document.createElement('div');loadingDiv.style.cssText='position:fixed;top:20px;right:20px;background:#31664a;color:white;padding:15px 20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;';loadingDiv.textContent='Syncing employees...';document.body.appendChild(loadingDiv);fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(employees)}).then(function(r){return r.json();}).then(function(data){loadingDiv.remove();var resultDiv=document.createElement('div');resultDiv.style.cssText='position:fixed;top:20px;right:20px;background:'+(data.success?'#10b981':'#ef4444')+';color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';if(data.success){resultDiv.innerHTML='<strong>✓ Sync Successful!</strong><br><br>Created: '+data.stats.created+'<br>Updated: '+data.stats.updated+'<br>Deactivated: '+data.stats.deactivated+'<br>Total: '+data.stats.total_processed;}else{resultDiv.innerHTML='<strong>✗ Sync Failed</strong><br><br>'+data.error+(data.details?'<br><br>Details: '+data.details:'');}document.body.appendChild(resultDiv);setTimeout(function(){resultDiv.remove();},8000);}).catch(function(err){loadingDiv.remove();var errorDiv=document.createElement('div');errorDiv.style.cssText='position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';errorDiv.innerHTML='<strong>✗ Network Error</strong><br><br>'+err.message;document.body.appendChild(errorDiv);setTimeout(function(){errorDiv.remove();},8000);});}catch(e){alert('Error parsing JSON: '+e.message);}})();" class="bookmarklet-link">🔗 Sync HotSchedules Employees</a>
+    </div>
+
+    <div class="steps">
+        <h2>📋 How to Use</h2>
+        <ol>
+            <li><strong>Install the bookmarklet:</strong> Drag the link above to your browser's bookmarks bar</li>
+            <li><strong>Log into HotSchedules:</strong> Go to <code>https://app.hotschedules.com/hs/login.jsp</code> and log in</li>
+            <li><strong>Get employee data:</strong> 
+                <ul>
+                    <li>If you have access to HotSchedules API, retrieve the employee data as JSON</li>
+                    <li>Or use browser DevTools to extract employee data from network requests</li>
+                    <li>The data should be an array of employee objects with fields like <code>firstname</code>, <code>lastname</code>, <code>email</code>, <code>phone</code>, <code>active</code>, <code>visible</code>, <code>type</code>, etc.</li>
+                </ul>
+            </li>
+            <li><strong>Run the bookmarklet:</strong> Click the bookmarklet in your bookmarks bar</li>
+            <li><strong>Enter your Levelset URL:</strong> When prompted, enter your Levelset application URL (e.g., <code>https://your-app.vercel.app</code>) or leave empty to use the current domain</li>
+            <li><strong>Paste employee data:</strong> Paste the JSON array of employees when prompted</li>
+            <li><strong>Wait for sync:</strong> The bookmarklet will show a success message with sync statistics</li>
+        </ol>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ Important Notes:</strong>
+        <ul>
+            <li>The employee data must include at least one employee with <code>type: 5</code> and a 5-digit location number in the name (e.g., "Location 04066")</li>
+            <li>Only employees with <code>visible: true</code>, <code>active: true</code>, and an <code>email</code> will be synced</li>
+            <li>Existing employees are matched by email (case-insensitive)</li>
+            <li>Employees not in the sync data will be marked as inactive</li>
+        </ul>
+    </div>
+
+    <div class="info">
+        <strong>💡 Tips:</strong>
+        <ul>
+            <li>You can save your Levelset URL in the bookmarklet code if you always use the same instance</li>
+            <li>The bookmarklet works on any page, but you'll need to paste the employee JSON data</li>
+            <li>Check the browser console (F12) if you encounter any errors</li>
+        </ul>
+    </div>
+
+    <h2>🔧 Advanced: Customize the Bookmarklet</h2>
+    <p>If you want to hardcode your Levelset URL, you can modify the bookmarklet code. Here's the readable version:</p>
+    <pre style="background: #f3f4f6; padding: 15px; border-radius: 6px; overflow-x: auto;"><code>javascript:(function(){
+  // Set your default Levelset URL here (or leave empty to prompt)
+  var DEFAULT_BASE_URL = ''; // e.g., 'https://your-app.vercel.app'
+  
+  var baseUrl = DEFAULT_BASE_URL || 
+    prompt('Enter your Levelset base URL (e.g., https://your-app.vercel.app) or leave empty to use current domain:', '');
+  
+  if (baseUrl === null) return;
+  baseUrl = baseUrl.trim() || window.location.origin;
+  
+  var employeesData = prompt('Paste the HotSchedules employee JSON array here:', '');
+  if (!employeesData) return;
+  
+  try {
+    var employees = JSON.parse(employeesData);
+    if (!Array.isArray(employees)) {
+      alert('Error: Data must be an array of employees');
+      return;
+    }
+    
+    // Show loading indicator
+    var loadingDiv = document.createElement('div');
+    loadingDiv.style.cssText = 'position:fixed;top:20px;right:20px;background:#31664a;color:white;padding:15px 20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;';
+    loadingDiv.textContent = 'Syncing employees...';
+    document.body.appendChild(loadingDiv);
+    
+    // Send to sync endpoint
+    fetch(baseUrl + '/api/employees/sync-hotschedules', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(employees)
+    })
+    .then(r => r.json())
+    .then(data => {
+      loadingDiv.remove();
+      
+      var resultDiv = document.createElement('div');
+      resultDiv.style.cssText = 'position:fixed;top:20px;right:20px;background:' + 
+        (data.success ? '#10b981' : '#ef4444') + 
+        ';color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';
+      
+      if (data.success) {
+        resultDiv.innerHTML = '<strong>✓ Sync Successful!</strong><br><br>' +
+          'Created: ' + data.stats.created + '<br>' +
+          'Updated: ' + data.stats.updated + '<br>' +
+          'Deactivated: ' + data.stats.deactivated + '<br>' +
+          'Total: ' + data.stats.total_processed;
+      } else {
+        resultDiv.innerHTML = '<strong>✗ Sync Failed</strong><br><br>' +
+          data.error + (data.details ? '<br><br>Details: ' + data.details : '');
+      }
+      
+      document.body.appendChild(resultDiv);
+      setTimeout(() => resultDiv.remove(), 8000);
+    })
+    .catch(err => {
+      loadingDiv.remove();
+      var errorDiv = document.createElement('div');
+      errorDiv.style.cssText = 'position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';
+      errorDiv.innerHTML = '<strong>✗ Network Error</strong><br><br>' + err.message;
+      document.body.appendChild(errorDiv);
+      setTimeout(() => errorDiv.remove(), 8000);
+    });
+  } catch(e) {
+    alert('Error parsing JSON: ' + e.message);
+  }
+})();</code></pre>
+</body>
+</html>
+
