@@ -10,6 +10,10 @@ interface HotSchedulesEmployee {
   lastname?: string;
   email?: string;
   phone?: string;
+  contactNumber?: {
+    formatted?: string;
+    [key: string]: any;
+  };
   active?: boolean;
   visible?: boolean;
   type?: number;
@@ -118,11 +122,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (existingEmployee) {
         // Update existing employee
+        const phoneNumber = hsEmployee.phone || hsEmployee.contactNumber?.formatted || existingEmployee.phone;
         const updateData: Partial<Employee> = {
           first_name: hsEmployee.firstname || existingEmployee.first_name,
           last_name: hsEmployee.lastname || existingEmployee.last_name,
           email: hsEmployee.email,
-          phone: hsEmployee.phone || existingEmployee.phone,
+          phone: phoneNumber || null,
           active: true,
         };
 
@@ -147,11 +152,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         processedEmployees.push({ ...existingEmployee, ...updateData });
       } else {
         // Create new employee
+        const phoneNumber = hsEmployee.phone || hsEmployee.contactNumber?.formatted || null;
         const newEmployeeData: Partial<Employee> = {
           first_name: hsEmployee.firstname || '',
           last_name: hsEmployee.lastname || '',
           email: hsEmployee.email,
-          phone: hsEmployee.phone || null,
+          phone: phoneNumber,
           role: 'Team Member', // Default role
           is_foh: false, // Default
           is_boh: false, // Default

@@ -64,48 +64,16 @@ export function SyncEmployeesModal({
   const bookmarkletCode = React.useMemo(() => {
     if (!baseUrl) return '';
     
-    // Bookmarklet that automatically extracts employee data from HotSchedules page
+    // Bookmarklet that fetches employee data from HotSchedules API
     const code = `javascript:(function(){
 var baseUrl='${baseUrl}';
-var employees=null;
-var errorMsg='';
-try{
-if(typeof window.hsEmployees!=='undefined'&&Array.isArray(window.hsEmployees)){
-employees=window.hsEmployees;
-}else if(typeof window.employees!=='undefined'&&Array.isArray(window.employees)){
-employees=window.employees;
-}else if(typeof window.app!=='undefined'&&window.app.employees&&Array.isArray(window.app.employees)){
-employees=window.app.employees;
-}else{
-var scripts=document.querySelectorAll('script');
-for(var i=0;i<scripts.length;i++){
-var text=scripts[i].textContent||scripts[i].innerText;
-if(text.includes('employees')&&text.includes('[')){
-try{
-var match=text.match(/employees\\s*[:=]\\s*(\\[[\\s\\S]*?\\])/);
-if(match){
-employees=JSON.parse(match[1]);
-break;
-}
-}catch(e){}
-}
-}
-}
-if(!employees||!Array.isArray(employees)||employees.length===0){
-errorMsg='Could not find employee data on this page. Please ensure you are on a HotSchedules page with employee data loaded.';
-}
-}catch(e){
-errorMsg='Error extracting employee data: '+e.message;
-}
-if(errorMsg){
-alert(errorMsg);
-return;
-}
 var loadingDiv=document.createElement('div');
 loadingDiv.style.cssText='position:fixed;top:20px;right:20px;background:#31664a;color:white;padding:15px 20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;';
-loadingDiv.textContent='Syncing employees...';
+loadingDiv.textContent='Fetching employee data...';
 document.body.appendChild(loadingDiv);
-fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(employees)}).then(function(r){return r.json();}).then(function(data){loadingDiv.remove();var resultDiv=document.createElement('div');resultDiv.style.cssText='position:fixed;top:20px;right:20px;background:'+(data.success?'#10b981':'#ef4444')+';color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';if(data.success){resultDiv.innerHTML='<strong>✓ Sync Successful!</strong><br><br>Created: '+data.stats.created+'<br>Updated: '+data.stats.updated+'<br>Deactivated: '+data.stats.deactivated+'<br>Total: '+data.stats.total_processed;}else{resultDiv.innerHTML='<strong>✗ Sync Failed</strong><br><br>'+data.error+(data.details?'<br><br>Details: '+data.details:'');}document.body.appendChild(resultDiv);setTimeout(function(){resultDiv.remove();},8000);}).catch(function(err){loadingDiv.remove();var errorDiv=document.createElement('div');errorDiv.style.cssText='position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';errorDiv.innerHTML='<strong>✗ Network Error</strong><br><br>'+err.message;document.body.appendChild(errorDiv);setTimeout(function(){errorDiv.remove();},8000);});
+var hsOrigin=window.location.origin;
+var apiUrl=hsOrigin+'/hs/spring/client/employee/?active=true&_='+Date.now();
+fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok){throw new Error('Failed to fetch employees: '+r.status);}return r.json();}).then(function(allEmployees){if(!Array.isArray(allEmployees)||allEmployees.length===0){throw new Error('No employee data received from HotSchedules API');}var visibleEmployees=allEmployees.filter(function(emp){return emp.visible===true;});if(visibleEmployees.length===0){throw new Error('No visible employees found in the data');}loadingDiv.textContent='Syncing employees...';return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(visibleEmployees)});}).then(function(r){if(!r.ok){return r.json().then(function(data){throw new Error(data.error||'Sync failed');});}return r.json();}).then(function(data){loadingDiv.remove();var resultDiv=document.createElement('div');resultDiv.style.cssText='position:fixed;top:20px;right:20px;background:'+(data.success?'#10b981':'#ef4444')+';color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';if(data.success){resultDiv.innerHTML='<strong>Sync Successful!</strong><br><br>Created: '+data.stats.created+'<br>Updated: '+data.stats.updated+'<br>Deactivated: '+data.stats.deactivated+'<br>Total: '+data.stats.total_processed;}else{resultDiv.innerHTML='<strong>Sync Failed</strong><br><br>'+data.error+(data.details?'<br><br>Details: '+data.details:'');}document.body.appendChild(resultDiv);setTimeout(function(){resultDiv.remove();},8000);}).catch(function(err){loadingDiv.remove();var errorDiv=document.createElement('div');errorDiv.style.cssText='position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';errorDiv.innerHTML='<strong>Error</strong><br><br>'+err.message;document.body.appendChild(errorDiv);setTimeout(function(){errorDiv.remove();},8000);});
 })();`;
     
     return code;
@@ -163,7 +131,7 @@ fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{'Conten
                 e.dataTransfer.effectAllowed = 'copy';
               }}
             >
-              🔗 Sync HotSchedules Employees
+              Levelset HS Sync
             </BookmarkletLink>
           </Box>
           <Typography variant="body2" sx={{ fontFamily, fontSize: 12, color: '#6b7280', mt: 1 }}>
