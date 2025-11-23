@@ -796,9 +796,12 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   }, [handleAvailabilityMenuClose]);
 
 
-  // Create columns only when on review page
-  // CRITICAL: Check both currentPage AND notification to prevent creating columns when modal first opens
-  const shouldCreateColumns = currentPage === 'review' && notification !== null;
+  // CRITICAL: Only create columns when modal is OPEN AND on review page with notification
+  // This prevents columns from being created when component is rendered but modal is closed
+  const shouldCreateColumns = open && currentPage === 'review' && notification !== null;
+  
+  // Stable empty array reference - created once and reused
+  const EMPTY_COLUMNS: GridColDef[] = [];
   
   // Log for debugging
   React.useEffect(() => {
@@ -811,20 +814,22 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     }
   }, [open, currentPage, notification, shouldCreateColumns]);
   
-  // Stable empty array reference
-  const EMPTY_COLUMNS: GridColDef[] = React.useMemo(() => [], []);
-  
   const editableColumns = React.useMemo<GridColDef[]>(() => {
-    console.log('[SyncEmployeesModal] editableColumns useMemo called', { shouldCreateColumns, currentPage, hasNotification: !!notification });
+    console.log('[SyncEmployeesModal] editableColumns useMemo called', { 
+      open, 
+      shouldCreateColumns, 
+      currentPage, 
+      hasNotification: !!notification 
+    });
     
-    // CRITICAL: Early return BEFORE any function calls
-    if (!shouldCreateColumns) {
-      console.log('[SyncEmployeesModal] Returning empty columns (not on review page)');
+    // CRITICAL: Early return BEFORE any function calls - check open state first
+    if (!open || !shouldCreateColumns) {
+      console.log('[SyncEmployeesModal] Returning empty columns (modal closed or not on review page)');
       return EMPTY_COLUMNS;
     }
     
     console.log('[SyncEmployeesModal] Creating editable columns');
-    // Only create columns when we're actually on the review page with notification data
+    // Only create columns when modal is open AND on review page with notification
     try {
       return createEmployeeColumns(true, false, {
         roleMenuAnchor,
@@ -851,6 +856,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       return EMPTY_COLUMNS;
     }
   }, [
+    open, // CRITICAL: Include open in dependencies
     shouldCreateColumns,
     editTrigger,
     employeeEdits,
@@ -866,15 +872,19 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     handleAvailabilityMenuClose,
     handleAvailabilitySelect,
     setKeptEmployees,
-    EMPTY_COLUMNS,
   ]);
   
   const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
-    console.log('[SyncEmployeesModal] readOnlyColumns useMemo called', { shouldCreateColumns, currentPage, hasNotification: !!notification });
+    console.log('[SyncEmployeesModal] readOnlyColumns useMemo called', { 
+      open, 
+      shouldCreateColumns, 
+      currentPage, 
+      hasNotification: !!notification 
+    });
     
-    // CRITICAL: Early return BEFORE any function calls
-    if (!shouldCreateColumns) {
-      console.log('[SyncEmployeesModal] Returning empty columns (not on review page)');
+    // CRITICAL: Early return BEFORE any function calls - check open state first
+    if (!open || !shouldCreateColumns) {
+      console.log('[SyncEmployeesModal] Returning empty columns (modal closed or not on review page)');
       return EMPTY_COLUMNS;
     }
     
@@ -905,6 +915,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       return EMPTY_COLUMNS;
     }
   }, [
+    open, // CRITICAL: Include open in dependencies
     shouldCreateColumns,
     keptEmployees,
     employeeEdits,
@@ -919,7 +930,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     handleAvailabilityMenuClose,
     handleAvailabilitySelect,
     setKeptEmployees,
-    EMPTY_COLUMNS,
   ]);
 
   // Render Page 2: Review Changes
