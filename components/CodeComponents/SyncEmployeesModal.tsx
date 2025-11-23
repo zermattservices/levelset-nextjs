@@ -190,10 +190,10 @@ function createEmployeeColumns(
       headerName: 'Name',
       width: 200,
       flex: 1,
-      align: "center",
+      align: "left",
       headerAlign: "center",
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', width: '100%' }}>
           <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827' }}>
             {params.row.first_name} {params.row.last_name}
           </Typography>
@@ -433,6 +433,7 @@ function createEmployeeColumns(
               backgroundColor: isKept ? 'transparent' : destructiveColor,
               color: isKept ? destructiveColor : 'white',
               borderColor: destructiveColor,
+              borderRadius: '8px', // Table button - no change
               '&:hover': {
                 backgroundColor: isKept ? '#fee2e2' : '#b91c1c',
               },
@@ -762,6 +763,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                   textTransform: "none",
                   borderColor: levelsetGreen,
                   color: levelsetGreen,
+                  borderRadius: '8px', // 4px default + 4px = 8px
                   "&:hover": {
                     borderColor: "#2d5a42",
                     backgroundColor: "#f0f9f4",
@@ -1167,6 +1169,22 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                         fontSize: 13,
                         fontWeight: 500,
                         color: '#111827',
+                        cursor: 'default',
+                        '&:focus': {
+                          outline: 'none',
+                        },
+                        '&:focus-within': {
+                          outline: 'none',
+                        },
+                      },
+                      '& .MuiDataGrid-cell:focus': {
+                        outline: 'none',
+                      },
+                      '& .MuiDataGrid-row': {
+                        cursor: 'default',
+                        '&:hover': {
+                          backgroundColor: 'transparent',
+                        },
                       },
                       '& .MuiDataGrid-columnHeaders': {
                         backgroundColor: '#f9fafb',
@@ -1351,6 +1369,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               color: '#ffffff',
               px: 4,
               py: 1.5,
+              borderRadius: '8px', // 4px default + 4px = 8px
               '&:hover': {
                 backgroundColor: '#2d5a42',
               },
@@ -1406,6 +1425,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             color: '#ffffff',
             px: 4,
             py: 1.5,
+            borderRadius: '8px', // 4px default + 4px = 8px
             '&:hover': {
               backgroundColor: '#2d5a42',
             },
@@ -1495,6 +1515,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               fontWeight: 500,
               textTransform: 'none',
               color: '#6b7280',
+              borderRadius: '8px', // 4px default + 4px = 8px
               '&:hover': {
                 backgroundColor: '#f3f4f6',
               },
@@ -1512,6 +1533,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               textTransform: 'none',
               backgroundColor: destructiveColor,
               color: '#ffffff',
+              borderRadius: '8px', // 4px default + 4px = 8px
               '&:hover': {
                 backgroundColor: '#b91c1c',
               },
