@@ -256,7 +256,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     
     setConfirming(true);
     try {
-      const newEmployees = (notification.sync_data.new_employees || []).map(emp => {
+      const newEmployeesUpdates = (notification.sync_data.new_employees || []).map(emp => {
         const edit = employeeEdits.get(emp.id);
         return {
           id: emp.id,
@@ -272,7 +272,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           notification_id: notification.id,
-          new_employees,
+          new_employees: newEmployeesUpdates,
           kept_employees: Array.from(keptEmployees),
         }),
       });
@@ -467,7 +467,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   const handleRoleSelect = (employeeId: string, role: string) => {
     handleRoleMenuClose(employeeId);
     const newEdits = new Map(employeeEdits);
-    const edit = newEdits.get(employeeId) || { id: employeeId };
+    const edit: EmployeeEdit = newEdits.get(employeeId) || { id: employeeId };
     edit.role = role;
     newEdits.set(employeeId, edit);
     setEmployeeEdits(newEdits);
@@ -485,7 +485,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   const handleAvailabilitySelect = (employeeId: string, availability: AvailabilityType) => {
     handleAvailabilityMenuClose(employeeId);
     const newEdits = new Map(employeeEdits);
-    const edit = newEdits.get(employeeId) || { id: employeeId };
+    const edit: EmployeeEdit = newEdits.get(employeeId) || { id: employeeId };
     edit.availability = availability;
     newEdits.set(employeeId, edit);
     setEmployeeEdits(newEdits);
@@ -564,7 +564,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                 onChange={(e) => {
                   if (editable) {
                     const newEdits = new Map(employeeEdits);
-                    const edit = newEdits.get(params.row.id) || { id: params.row.id };
+                    const edit: EmployeeEdit = newEdits.get(params.row.id) || { id: params.row.id };
                     edit.is_foh = e.target.checked;
                     newEdits.set(params.row.id, edit);
                     setEmployeeEdits(newEdits);
@@ -598,7 +598,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                 onChange={(e) => {
                   if (editable) {
                     const newEdits = new Map(employeeEdits);
-                    const edit = newEdits.get(params.row.id) || { id: params.row.id };
+                    const edit: EmployeeEdit = newEdits.get(params.row.id) || { id: params.row.id };
                     edit.is_boh = e.target.checked;
                     newEdits.set(params.row.id, edit);
                     setEmployeeEdits(newEdits);
@@ -866,16 +866,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                         backgroundColor: '#f9fafb',
                         borderBottom: '2px solid #e5e7eb',
                       },
-                    }}
-                    processRowUpdate={(newRow) => {
-                      // Update local state when row is edited
-                      const edit = employeeEdits.get(newRow.id) || { id: newRow.id };
-                      if (newRow.role) edit.role = newRow.role;
-                      if (newRow.is_foh !== undefined) edit.is_foh = newRow.is_foh;
-                      if (newRow.is_boh !== undefined) edit.is_boh = newRow.is_boh;
-                      if (newRow.availability) edit.availability = newRow.availability;
-                      setEmployeeEdits(new Map(employeeEdits.set(newRow.id, edit)));
-                      return newRow;
                     }}
                   />
                 </Box>
