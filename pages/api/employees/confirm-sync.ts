@@ -4,7 +4,9 @@ import type { Employee } from '@/lib/supabase.types';
 import { calculatePay, shouldCalculatePay } from '@/lib/pay-calculator';
 
 interface NewEmployeeUpdate {
-  id: string; // employee id from database
+  id?: string; // employee id from database (for existing employees)
+  email?: string; // email for matching new employees
+  hs_id?: number; // hs_id for matching new employees
   role?: string;
   is_foh?: boolean;
   is_boh?: boolean;
@@ -42,57 +44,129 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
 
     const locationId = notification.location_id;
+    const orgId = notification.org_id;
     let createdCount = 0;
     let updatedCount = 0;
     let deactivatedCount = 0;
 
-    // Process new employees with user overrides
+    // Process new employees - CREATE them first, then apply user overrides
     if (new_employees && Array.isArray(new_employees)) {
-      for (const empUpdate of new_employees as NewEmployeeUpdate[]) {
-        const updateData: Partial<Employee> = {};
-        
-        if (empUpdate.role !== undefined) updateData.role = empUpdate.role;
-        if (empUpdate.is_foh !== undefined) updateData.is_foh = empUpdate.is_foh;
-        if (empUpdate.is_boh !== undefined) updateData.is_boh = empUpdate.is_boh;
-        if (empUpdate.availability !== undefined) updateData.availability = empUpdate.availability;
-
-        if (Object.keys(updateData).length > 0) {
-          const { error } = await supabase
-            .from('employees')
-            .update(updateData)
-            .eq('id', empUpdate.id);
-
-          if (error) {
-            console.error(`Error updating new employee ${empUpdate.id}:`, error);
-          } else {
-            updatedCount++;
-            
-            // Recalculate pay if needed
-            if (shouldCalculatePay(locationId)) {
-              const { data: employee } = await supabase
-                .from('employees')
-                .select('*')
-                .eq('id', empUpdate.id)
-                .single();
-              
-              if (employee) {
-                const calculatedPay = calculatePay(employee as Employee);
-                if (calculatedPay !== null) {
-                  await supabase
-                    .from('employees')
-                    .update({ calculated_pay: calculatedPay })
-                    .eq('id', empUpdate.id);
-                }
-              }
-            }
+      // Create new employees from sync data
+      for (const newEmpData of syncData.new_employees || []) {
+        // Find user edits for this employee (match by email or hs_id)
+        let userEdit: NewEmployeeUpdate | undefined;
+        for (const edit of new_employees as any[]) {
+          if ((edit.email && edit.email === newEmpData.email) || 
+              (edit.hs_id && edit.hs_id === newEmpData.hs_id)) {
+            userEdit = edit;
+            break;
           }
-        } else {
-          createdCount++;
+        }
+
+        // Determine default role based on has_synced_before (we'll need to check this)
+        const { data: location } = await supabase
+          .from('locations')
+          .select('has_synced_before')
+          .eq('id', locationId)
+          .single();
+        
+        const defaultRole = location?.has_synced_before ? 'New Hire' : 'Team Member';
+
+        // Create the employee with defaults
+        const employeeData: Partial<Employee> = {
+          first_name: newEmpData.first_name || '',
+          last_name: newEmpData.last_name || '',
+          email: newEmpData.email,
+          phone: newEmpData.phone || null,
+          hs_id: newEmpData.hs_id || null,
+          birth_date: newEmpData.birth_date || null,
+          hire_date: newEmpData.hire_date || null,
+          role: userEdit?.role || defaultRole,
+          is_foh: userEdit?.is_foh !== undefined ? userEdit.is_foh : false,
+          is_boh: userEdit?.is_boh !== undefined ? userEdit.is_boh : false,
+          availability: userEdit?.availability || 'Available',
+          certified_status: 'Not Certified',
+          active: true,
+          location_id: locationId,
+          org_id: orgId,
+        };
+
+        const { data: createdEmployee, error: createError } = await supabase
+          .from('employees')
+          .insert(employeeData)
+          .select()
+          .single();
+
+        if (createError) {
+          console.error(`Error creating new employee ${newEmpData.email}:`, createError);
+          continue;
+        }
+
+        createdCount++;
+
+        // Calculate pay if needed
+        if (createdEmployee && shouldCalculatePay(locationId)) {
+          const calculatedPay = calculatePay(createdEmployee as Employee);
+          if (calculatedPay !== null) {
+            await supabase
+              .from('employees')
+              .update({ calculated_pay: calculatedPay })
+              .eq('id', createdEmployee.id);
+          }
         }
       }
     } else {
-      // Count new employees from sync data if no overrides provided
-      createdCount = syncData.new_employees?.length || 0;
+      // No user edits, create all new employees with defaults
+      for (const newEmpData of syncData.new_employees || []) {
+        const { data: location } = await supabase
+          .from('locations')
+          .select('has_synced_before')
+          .eq('id', locationId)
+          .single();
+        
+        const defaultRole = location?.has_synced_before ? 'New Hire' : 'Team Member';
+
+        const employeeData: Partial<Employee> = {
+          first_name: newEmpData.first_name || '',
+          last_name: newEmpData.last_name || '',
+          email: newEmpData.email,
+          phone: newEmpData.phone || null,
+          hs_id: newEmpData.hs_id || null,
+          birth_date: newEmpData.birth_date || null,
+          hire_date: newEmpData.hire_date || null,
+          role: defaultRole,
+          is_foh: false,
+          is_boh: false,
+          availability: 'Available',
+          certified_status: 'Not Certified',
+          active: true,
+          location_id: locationId,
+          org_id: orgId,
+        };
+
+        const { data: createdEmployee, error: createError } = await supabase
+          .from('employees')
+          .insert(employeeData)
+          .select()
+          .single();
+
+        if (createError) {
+          console.error(`Error creating new employee ${newEmpData.email}:`, createError);
+          continue;
+        }
+
+        createdCount++;
+
+        if (createdEmployee && shouldCalculatePay(locationId)) {
+          const calculatedPay = calculatePay(createdEmployee as Employee);
+          if (calculatedPay !== null) {
+            await supabase
+              .from('employees')
+              .update({ calculated_pay: calculatedPay })
+              .eq('id', createdEmployee.id);
+          }
+        }
+      }
     }
 
     // Process modified employees (if any user overrides provided)

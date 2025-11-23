@@ -45,6 +45,55 @@ const levelsetGreen = '#31664a';
 const warningColor = '#FACC15';
 const destructiveColor = '#dc2626';
 
+// Styled components matching RosterTable
+const RoleMenuItem = styled(MenuItem)(() => ({
+  fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+  fontSize: 12,
+  fontWeight: 500,
+  padding: "8px 12px",
+  margin: "2px 8px",
+  borderRadius: 8,
+  "&.Mui-selected": {
+    backgroundColor: "#f3f4f6",
+    "&:hover": {
+      backgroundColor: "#e5e7eb",
+    },
+  },
+  "&:hover": {
+    backgroundColor: "#f9fafb",
+  },
+}));
+
+const AvailabilityChip = styled(Box)(() => ({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 6,
+  padding: "0 16px",
+  minHeight: 28,
+  height: 28,
+  borderRadius: 14,
+  fontSize: 13,
+  fontWeight: 600,
+  fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+  cursor: "pointer",
+  transition: "all 0.15s ease-in-out",
+  backgroundColor: "#f3f4f6",
+  color: "#111827",
+  "&.available": {
+    backgroundColor: "#dcfce7",
+    color: "#166534",
+  },
+  "&.limited": {
+    backgroundColor: "#fef3c7",
+    color: "#d97706",
+  },
+  "&:hover": {
+    opacity: 0.9,
+    transform: "scale(1.02)",
+  },
+}));
+
 type Page = 'instructions' | 'review' | 'confirmation';
 
 interface SyncNotification {
@@ -141,16 +190,22 @@ function createEmployeeColumns(
       headerName: 'Name',
       width: 200,
       flex: 1,
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => (
-        <Typography sx={{ fontFamily, fontSize: 14 }}>
-          {params.row.first_name} {params.row.last_name}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827' }}>
+            {params.row.first_name} {params.row.last_name}
+          </Typography>
+        </Box>
       ),
     },
     {
       field: 'role',
       headerName: 'Current Role',
-      width: 150,
+      width: 180,
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => {
         const currentRole = params.value || 'Team Member';
         const menuAnchor = roleMenuAnchor[params.row.id] || null;
@@ -159,40 +214,41 @@ function createEmployeeColumns(
         return (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
             {editable ? (
-              <Button
-                onClick={(e) => handleRoleMenuOpen(e, params.row.id)}
-                sx={{ fontFamily, fontSize: 12, textTransform: 'none', p: 0 }}
-              >
-                <RolePill role={currentRole} />
-              </Button>
+              <>
+                <RolePill
+                  role={currentRole}
+                  endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
+                  onClick={(event) => handleRoleMenuOpen(event, params.row.id)}
+                />
+                <Menu
+                  anchorEl={menuAnchor}
+                  open={menuOpen}
+                  onClose={() => handleRoleMenuClose(params.row.id)}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                  transformOrigin={{ vertical: "top", horizontal: "left" }}
+                  PaperProps={{
+                    sx: {
+                      fontFamily,
+                      borderRadius: 2,
+                      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                      border: "1px solid #e5e7eb",
+                    },
+                  }}
+                >
+                  {roles.map((roleOption) => (
+                    <RoleMenuItem
+                      key={roleOption}
+                      selected={currentRole === roleOption}
+                      onClick={() => handleRoleSelect(params.row.id, roleOption)}
+                    >
+                      <RolePill role={roleOption} />
+                    </RoleMenuItem>
+                  ))}
+                </Menu>
+              </>
             ) : (
               <RolePill role={currentRole} />
             )}
-            <Menu
-              anchorEl={menuAnchor}
-              open={menuOpen}
-              onClose={() => handleRoleMenuClose(params.row.id)}
-              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-              transformOrigin={{ vertical: "top", horizontal: "left" }}
-              PaperProps={{
-                sx: {
-                  fontFamily,
-                  borderRadius: 2,
-                  boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                  border: "1px solid #e5e7eb",
-                },
-              }}
-            >
-              {roles.map((role) => (
-                <MenuItem
-                  key={role}
-                  onClick={() => handleRoleSelect(params.row.id, role)}
-                  sx={{ fontFamily, fontSize: 12 }}
-                >
-                  {role}
-                </MenuItem>
-              ))}
-            </Menu>
           </Box>
         );
       },
@@ -200,7 +256,9 @@ function createEmployeeColumns(
     {
       field: 'is_foh',
       headerName: 'FOH',
-      width: 80,
+      width: 100,
+      align: "center",
+      headerAlign: "center",
       type: 'boolean',
       renderCell: (params) => {
         const edit = employeeEdits.get(params.row.id);
@@ -234,7 +292,9 @@ function createEmployeeColumns(
     {
       field: 'is_boh',
       headerName: 'BOH',
-      width: 80,
+      width: 100,
+      align: "center",
+      headerAlign: "center",
       type: 'boolean',
       renderCell: (params) => {
         const edit = employeeEdits.get(params.row.id);
@@ -268,7 +328,9 @@ function createEmployeeColumns(
     {
       field: 'availability',
       headerName: 'Availability',
-      width: 150,
+      width: 160,
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => {
         const edit = employeeEdits.get(params.row.id);
         const avail = edit?.availability || params.value || 'Available';
@@ -278,70 +340,50 @@ function createEmployeeColumns(
         return (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
             {editable ? (
-              <Button
-                onClick={(e) => handleAvailabilityMenuOpen(e, params.row.id)}
-                sx={{ fontFamily, fontSize: 12, textTransform: 'none', p: 0 }}
-              >
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '4px 12px',
-                    borderRadius: '14px',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    fontFamily,
-                    backgroundColor: avail === 'Available' ? '#dcfce7' : '#fef3c7',
-                    color: avail === 'Available' ? '#166534' : '#d97706',
+              <>
+                <AvailabilityChip
+                  className={avail.toLowerCase()}
+                  onClick={(event) => handleAvailabilityMenuOpen(event, params.row.id)}
+                >
+                  {avail}
+                  <ExpandMoreIcon sx={{ fontSize: 14, ml: 0.5 }} />
+                </AvailabilityChip>
+                <Menu
+                  anchorEl={menuAnchor}
+                  open={menuOpen}
+                  onClose={() => handleAvailabilityMenuClose(params.row.id)}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                  transformOrigin={{ vertical: "top", horizontal: "left" }}
+                  PaperProps={{
+                    sx: {
+                      fontFamily,
+                      borderRadius: 2,
+                      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                      border: "1px solid #e5e7eb",
+                    },
                   }}
                 >
-                  {avail}
-                </Box>
-              </Button>
+                  {availabilities.map((option) => (
+                    <RoleMenuItem
+                      key={option}
+                      selected={avail === option}
+                      onClick={() => handleAvailabilitySelect(params.row.id, option)}
+                    >
+                      <AvailabilityChip
+                        className={option.toLowerCase()}
+                        sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
+                      >
+                        {option}
+                      </AvailabilityChip>
+                    </RoleMenuItem>
+                  ))}
+                </Menu>
+              </>
             ) : (
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '4px 12px',
-                  borderRadius: '14px',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  fontFamily,
-                  backgroundColor: avail === 'Available' ? '#dcfce7' : '#fef3c7',
-                  color: avail === 'Available' ? '#166534' : '#d97706',
-                }}
-              >
+              <AvailabilityChip className={avail.toLowerCase()}>
                 {avail}
-              </Box>
+              </AvailabilityChip>
             )}
-            <Menu
-              anchorEl={menuAnchor}
-              open={menuOpen}
-              onClose={() => handleAvailabilityMenuClose(params.row.id)}
-              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-              transformOrigin={{ vertical: "top", horizontal: "left" }}
-              PaperProps={{
-                sx: {
-                  fontFamily,
-                  borderRadius: 2,
-                  boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                  border: "1px solid #e5e7eb",
-                },
-              }}
-            >
-              {availabilities.map((avail) => (
-                <MenuItem
-                  key={avail}
-                  onClick={() => handleAvailabilitySelect(params.row.id, avail)}
-                  sx={{ fontFamily, fontSize: 12 }}
-                >
-                  {avail}
-                </MenuItem>
-              ))}
-            </Menu>
           </Box>
         );
       },
@@ -350,10 +392,14 @@ function createEmployeeColumns(
       field: 'hire_date',
       headerName: 'Hire Date',
       width: 120,
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => (
-        <Typography sx={{ fontFamily, fontSize: 14 }}>
-          {params.value ? new Date(params.value).toLocaleDateString() : '-'}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: '#111827' }}>
+            {params.value ? new Date(params.value).toLocaleDateString() : '-'}
+          </Typography>
+        </Box>
       ),
     },
   ];
@@ -620,10 +666,13 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     
     setConfirming(true);
     try {
+      // For new employees, use email or hs_id as key (they don't have IDs yet)
       const newEmployeesUpdates = (notification.sync_data.new_employees || []).map(emp => {
-        const edit = employeeEdits.get(emp.id);
+        const key = emp.email || `hs_${emp.hs_id}`;
+        const edit = employeeEdits.get(key);
         return {
-          id: emp.id,
+          email: emp.email,
+          hs_id: emp.hs_id,
           role: edit?.role,
           is_foh: edit?.is_foh,
           is_boh: edit?.is_boh,
@@ -977,9 +1026,13 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       return [];
     }
     return newEmployees.map(emp => {
-      const edit = employeeEdits.get(emp.id);
+      // Use email or hs_id as key for new employees (they don't have IDs yet)
+      const key = emp.email || `hs_${emp.hs_id}`;
+      const edit = employeeEdits.get(key);
       return {
-        id: emp.id,
+        id: key, // Use key as id for DataGrid
+        email: emp.email,
+        hs_id: emp.hs_id,
         first_name: emp.first_name,
         last_name: emp.last_name,
         role: edit?.role || (hasSyncedBefore ? 'New Hire' : 'Team Member'),
@@ -987,7 +1040,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
         is_boh: edit?.is_boh !== undefined ? edit.is_boh : false,
         availability: edit?.availability || ('Available' as AvailabilityType),
         hire_date: emp.hire_date,
-        hs_id: emp.hs_id,
       };
     });
   }, [notification, currentPage, newEmployees, employeeEdits, hasSyncedBefore, editTrigger]);
@@ -1056,7 +1108,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             '&.MuiAccordion-root': {
               backgroundColor: 'transparent',
               boxShadow: 'none',
-              border: `1px solid ${levelsetGreen}`,
+              border: 'none',
               borderRadius: '8px',
               mb: 2,
             },
@@ -1091,21 +1143,40 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
           <AccordionDetails sx={{ padding: 0 }}>
             {newEmployees.length > 0 && currentPage === 'review' && notification !== null && (
               <Box sx={{ p: 2 }}>
-                <Box sx={{ height: 400, width: '100%' }}>
+                <Box sx={{ 
+                  height: 400, 
+                  width: '100%',
+                  borderRadius: 16,
+                  border: "1px solid #e5e7eb",
+                  backgroundColor: "#ffffff",
+                  overflow: "hidden",
+                  boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
+                }}>
                   <DataGridPro
                     rows={newEmployeesData}
                     columns={editableColumns}
                     disableRowSelectionOnClick
                     hideFooter
+                    rowHeight={48}
+                    columnHeaderHeight={56}
                     sx={{
                       fontFamily,
-                      border: 'none',
+                      border: "none",
                       '& .MuiDataGrid-cell': {
-                        borderBottom: '1px solid #e5e7eb',
+                        borderBottom: '1px solid #f3f4f6',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: '#111827',
                       },
                       '& .MuiDataGrid-columnHeaders': {
                         backgroundColor: '#f9fafb',
                         borderBottom: '2px solid #e5e7eb',
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: '#111827',
+                      },
+                      '& .MuiDataGrid-columnHeaderTitleContainer': {
+                        padding: '0 16px',
                       },
                     }}
                   />
@@ -1125,7 +1196,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             '&.MuiAccordion-root': {
               backgroundColor: 'transparent',
               boxShadow: 'none',
-              border: `1px solid ${warningColor}`,
+              border: 'none',
               borderRadius: '8px',
               mb: 2,
             },
@@ -1170,7 +1241,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             '&.MuiAccordion-root': {
               backgroundColor: 'transparent',
               boxShadow: 'none',
-              border: `1px solid ${destructiveColor}`,
+              border: 'none',
               borderRadius: '8px',
               mb: 2,
             },
@@ -1205,20 +1276,33 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
           <AccordionDetails sx={{ padding: 0 }}>
             {terminatedEmployeesData.length > 0 && currentPage === 'review' && notification !== null && (
               <Box sx={{ p: 2 }}>
-                <Box sx={{ height: 400, width: '100%' }}>
+                <Box sx={{ 
+                  height: 400, 
+                  width: '100%',
+                  borderRadius: 16,
+                  border: "1px solid #e5e7eb",
+                  backgroundColor: "#ffffff",
+                  overflow: "hidden",
+                  boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
+                }}>
                   <DataGridPro
                     rows={terminatedEmployeesData}
                     columns={readOnlyColumns}
                     disableRowSelectionOnClick
                     hideFooter
+                    rowHeight={48}
+                    columnHeaderHeight={56}
                     getRowClassName={(params) => 
                       keptEmployees.has(Number(params.row.hs_id)) ? '' : 'terminated-row'
                     }
                     sx={{
                       fontFamily,
-                      border: 'none',
+                      border: "none",
                       '& .MuiDataGrid-cell': {
-                        borderBottom: '1px solid #e5e7eb',
+                        borderBottom: '1px solid #f3f4f6',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: '#111827',
                       },
                       '& .MuiDataGrid-columnHeaders': {
                         backgroundColor: '#f9fafb',

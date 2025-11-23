@@ -163,17 +163,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
-    // Step 5: Process employees and track changes
-    const processedEmployees: any[] = [];
+    // Step 5: Identify changes WITHOUT creating/updating employees
+    // Employees will only be created/updated when user confirms in the modal
     const hsIdsInSync = new Set<number>();
     const newEmployees: any[] = [];
     const modifiedEmployees: any[] = [];
-    let createdCount = 0;
-    let updatedCount = 0;
     let skippedCount = 0;
-    let errorCount = 0;
 
-    console.log(`[Sync] Starting to process ${activeVisibleEmployees.length} employees`);
+    console.log(`[Sync] Starting to identify changes for ${activeVisibleEmployees.length} employees`);
 
     for (const hsEmployee of activeVisibleEmployees) {
       if (!hsEmployee.email) {
@@ -202,108 +199,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const phoneNumber = hsEmployee.phone || hsEmployee.contactNumber?.formatted || null;
 
       if (existingEmployee) {
-        // Update existing employee
-        const updateData: Partial<Employee> = {
+        // Track as modified employee (will be updated in confirm-sync if needed)
+        modifiedEmployees.push({
+          id: existingEmployee.id,
+          hs_id: hsId,
+          email: hsEmployee.email,
           first_name: hsEmployee.firstname || existingEmployee.first_name,
           last_name: hsEmployee.lastname || existingEmployee.last_name,
-          email: hsEmployee.email,
-          phone: phoneNumber || null,
-          active: true,
-          hs_id: hsId || existingEmployee.hs_id || null,
-          birth_date: birthDate || existingEmployee.birth_date || null,
-          hire_date: hireDate || existingEmployee.hire_date || null,
-        };
-
-        // Preserve existing values for role, is_foh, is_boh, availability, certified_status
-        if (existingEmployee.role) updateData.role = existingEmployee.role;
-        if (existingEmployee.is_foh !== undefined) updateData.is_foh = existingEmployee.is_foh;
-        if (existingEmployee.is_boh !== undefined) updateData.is_boh = existingEmployee.is_boh;
-        if (existingEmployee.availability) updateData.availability = existingEmployee.availability;
-        if (existingEmployee.certified_status) updateData.certified_status = existingEmployee.certified_status;
-
-        const { error: updateError } = await supabase
-          .from('employees')
-          .update(updateData)
-          .eq('id', existingEmployee.id);
-
-        if (updateError) {
-          console.error(`[Sync] Error updating employee ${existingEmployee.id} (${hsEmployee.email}):`, updateError);
-          errorCount++;
-          continue;
-        }
-
-        updatedCount++;
-        const updatedEmployee = { ...existingEmployee, ...updateData };
-        processedEmployees.push(updatedEmployee);
-        modifiedEmployees.push({
-          id: updatedEmployee.id,
-          hs_id: hsId,
-          email: hsEmployee.email,
-          first_name: updatedEmployee.first_name,
-          last_name: updatedEmployee.last_name,
-        });
-        console.log(`[Sync] Updated employee: ${hsEmployee.email}`);
-      } else {
-        // Create new employee
-        const newEmployeeData: Partial<Employee> = {
-          first_name: hsEmployee.firstname || '',
-          last_name: hsEmployee.lastname || '',
-          email: hsEmployee.email,
           phone: phoneNumber,
-          hs_id: hsId || null,
           birth_date: birthDate,
           hire_date: hireDate,
-          role: 'Team Member', // Default role
-          is_foh: false, // Default
-          is_boh: false, // Default
-          availability: 'Available', // Default
-          certified_status: 'Not Certified', // Default
-          active: true,
-          location_id: finalLocationId,
-          org_id: finalOrgId,
-        };
-
-        const { data: newEmployee, error: createError } = await supabase
-          .from('employees')
-          .insert(newEmployeeData)
-          .select()
-          .single();
-
-        if (createError) {
-          console.error(`[Sync] Error creating employee ${hsEmployee.email}:`, createError);
-          console.error(`[Sync] Employee data:`, JSON.stringify(newEmployeeData, null, 2));
-          errorCount++;
-          continue;
-        }
-
-        // Calculate pay if needed
-        if (newEmployee && shouldCalculatePay(finalLocationId)) {
-          const calculatedPay = calculatePay(newEmployee as Employee);
-          if (calculatedPay !== null) {
-            await supabase
-              .from('employees')
-              .update({ calculated_pay: calculatedPay })
-              .eq('id', newEmployee.id);
-            newEmployee.calculated_pay = calculatedPay;
-          }
-        }
-
-        createdCount++;
-        processedEmployees.push(newEmployee);
+        });
+        console.log(`[Sync] Identified modified employee: ${hsEmployee.email}`);
+      } else {
+        // Track as new employee (will be created in confirm-sync)
         newEmployees.push({
-          id: newEmployee.id,
           hs_id: hsId,
           email: hsEmployee.email,
-          first_name: newEmployee.first_name,
-          last_name: newEmployee.last_name,
+          first_name: hsEmployee.firstname || '',
+          last_name: hsEmployee.lastname || '',
+          phone: phoneNumber,
+          birth_date: birthDate,
           hire_date: hireDate,
         });
         if (hsId) hsIdsInSync.add(hsId);
-        console.log(`[Sync] Created employee: ${hsEmployee.email}`);
+        console.log(`[Sync] Identified new employee: ${hsEmployee.email}`);
       }
     }
 
-    console.log(`[Sync] Processing complete - Created: ${createdCount}, Updated: ${updatedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}`);
+    console.log(`[Sync] Change identification complete - New: ${newEmployees.length}, Modified: ${modifiedEmployees.length}, Skipped: ${skippedCount}`);
 
     // Step 6: Identify terminated employees (in DB but not in sync, by hs_id)
     const terminatedEmployees = (existingEmployees || [])
@@ -319,11 +243,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         last_name: emp.last_name,
       }));
 
-    // Step 7: Upload to Supabase storage
+    // Step 7: Upload raw HotSchedules data to Supabase storage (for reference)
     const timestamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0].replace('T', '_');
     const fileName = `employees_${locationNumber}_${timestamp}.json`;
     
-    const jsonData = JSON.stringify(processedEmployees, null, 2);
+    const jsonData = JSON.stringify(activeVisibleEmployees, null, 2);
     const { error: uploadError } = await supabase.storage
       .from('hs_script_updates')
       .upload(fileName, jsonData, {
@@ -376,10 +300,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       location_id: finalLocationId,
       notification_id: notification?.id || null,
       stats: {
-        created: createdCount,
-        updated: updatedCount,
+        new: newEmployees.length,
+        modified: modifiedEmployees.length,
         terminated: terminatedEmployees.length,
-        total_processed: processedEmployees.length,
       },
       storage_file: uploadError ? null : fileName,
       debug: {
@@ -387,7 +310,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         after_filter: activeVisibleEmployees.length,
         existing_count: existingEmployees?.length || 0,
         skipped: skippedCount,
-        errors: errorCount,
       },
     });
 
