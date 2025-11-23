@@ -84,9 +84,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const orgId = locationData.org_id;
 
     // Step 3: Filter and transform HotSchedules employees
+    console.log(`[Sync] Total employees received: ${employees.length}`);
     const activeVisibleEmployees = employees.filter(emp => 
       emp.visible === true && emp.active === true && emp.email
     );
+    console.log(`[Sync] Employees after filter (visible=true, active=true, has email): ${activeVisibleEmployees.length}`);
+    
+    // Debug: Log why employees are being filtered out
+    if (activeVisibleEmployees.length === 0 && employees.length > 0) {
+      const sample = employees.slice(0, 5);
+      console.log('[Sync] Sample of received employees:', JSON.stringify(sample.map(emp => ({
+        name: emp.name,
+        visible: emp.visible,
+        active: emp.active,
+        hasEmail: !!emp.email,
+        email: emp.email
+      })), null, 2));
+    }
 
     // Step 4: Get all existing employees for this location
     const { data: existingEmployees, error: existingError } = await supabase
@@ -245,6 +259,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         total_processed: processedEmployees.length,
       },
       storage_file: uploadError ? null : fileName,
+      debug: {
+        total_received: employees.length,
+        after_filter: activeVisibleEmployees.length,
+        existing_count: existingEmployees?.length || 0,
+      },
     });
 
   } catch (error) {
