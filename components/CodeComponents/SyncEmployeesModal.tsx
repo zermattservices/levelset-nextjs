@@ -742,6 +742,23 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     return columns;
   };
 
+  // Memoize columns to prevent recreation on every render
+  // Note: We need to recreate columns when state changes because renderCell functions reference state
+  // Use editTrigger as a dependency to force recreation when edits change
+  // Convert Maps/Sets to serializable format for dependency tracking
+  const employeeEditsSize = employeeEdits.size;
+  const roleMenuAnchorKeys = Object.keys(roleMenuAnchor).length;
+  const availabilityMenuAnchorKeys = Object.keys(availabilityMenuAnchor).length;
+  const keptEmployeesSize = keptEmployees.size;
+  
+  const editableColumns = React.useMemo(() => {
+    return createEmployeeColumns(true, false);
+  }, [editTrigger, employeeEditsSize, roleMenuAnchorKeys, availabilityMenuAnchorKeys]);
+  
+  const readOnlyColumns = React.useMemo(() => {
+    return createEmployeeColumns(false, true);
+  }, [keptEmployeesSize]);
+
   // Render Page 2: Review Changes
   const renderReviewPage = () => {
     if (!notification) return null;
@@ -848,12 +865,12 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
-            {newEmployees.length > 0 && (
+            {newEmployees.length > 0 && editableColumns.length > 0 && (
               <Box sx={{ p: 2 }}>
                 <Box sx={{ height: 400, width: '100%' }}>
                   <DataGridPro
                     rows={newEmployeesData}
-                    columns={createEmployeeColumns(true, false)}
+                    columns={editableColumns}
                     disableRowSelectionOnClick
                     hideFooter
                     sx={{
@@ -962,12 +979,12 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
-            {terminatedEmployeesData.length > 0 && (
+            {terminatedEmployeesData.length > 0 && readOnlyColumns.length > 0 && (
               <Box sx={{ p: 2 }}>
                 <Box sx={{ height: 400, width: '100%' }}>
                   <DataGridPro
                     rows={terminatedEmployeesData}
-                    columns={createEmployeeColumns(false, true)}
+                    columns={readOnlyColumns}
                     disableRowSelectionOnClick
                     hideFooter
                     getRowClassName={(params) => 
@@ -1136,8 +1153,8 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
 
         <ScrollableContent>
           {currentPage === 'instructions' && renderInstructionsPage()}
-          {currentPage === 'review' && renderReviewPage()}
-          {currentPage === 'confirmation' && renderConfirmationPage()}
+          {currentPage === 'review' && notification && renderReviewPage()}
+          {currentPage === 'confirmation' && confirmationStats && renderConfirmationPage()}
         </ScrollableContent>
       </StyledDialog>
 
