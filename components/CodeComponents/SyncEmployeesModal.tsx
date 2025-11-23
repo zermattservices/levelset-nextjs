@@ -172,8 +172,16 @@ function createEmployeeColumns(
               anchorEl={menuAnchor}
               open={menuOpen}
               onClose={() => handleRoleMenuClose(params.row.id)}
-              disableAutoFocusItem
-              MenuListProps={{ 'aria-labelledby': undefined }}
+              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+              transformOrigin={{ vertical: "top", horizontal: "left" }}
+              PaperProps={{
+                sx: {
+                  fontFamily,
+                  borderRadius: 2,
+                  boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #e5e7eb",
+                },
+              }}
             >
               {roles.map((role) => (
                 <MenuItem
@@ -313,8 +321,16 @@ function createEmployeeColumns(
               anchorEl={menuAnchor}
               open={menuOpen}
               onClose={() => handleAvailabilityMenuClose(params.row.id)}
-              disableAutoFocusItem
-              MenuListProps={{ 'aria-labelledby': undefined }}
+              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+              transformOrigin={{ vertical: "top", horizontal: "left" }}
+              PaperProps={{
+                sx: {
+                  fontFamily,
+                  borderRadius: 2,
+                  boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #e5e7eb",
+                },
+              }}
             >
               {availabilities.map((avail) => (
                 <MenuItem
@@ -808,10 +824,14 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   }, [open, currentPage, notification]);
 
 
-  // CRITICAL: Always create columns unconditionally to ensure consistent hook count
-  // The column structure (including Menu components in renderCell) must always be defined
-  // DataGridPro will only render them when needed, but the structure is always consistent
+  // Only create columns when on review page - DataGridPro is only rendered on page 2
+  // This prevents Menu components (which use hooks) from being created unnecessarily on page 1
+  const shouldCreateColumns = currentPage === 'review' && notification !== null;
+  
   const editableColumns = React.useMemo<GridColDef[]>(() => {
+    if (!shouldCreateColumns) {
+      return []; // Return empty array when not needed
+    }
     return createEmployeeColumns(true, false, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -833,6 +853,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       destructiveColor,
     });
   }, [
+    shouldCreateColumns,
     editTrigger,
     employeeEdits,
     roleMenuAnchor,
@@ -850,6 +871,9 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   ]);
 
   const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
+    if (!shouldCreateColumns) {
+      return []; // Return empty array when not needed
+    }
     return createEmployeeColumns(false, true, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -871,6 +895,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       destructiveColor,
     });
   }, [
+    shouldCreateColumns,
     keptEmployees,
     employeeEdits,
     roleMenuAnchor,
@@ -1235,12 +1260,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       </Box>
     );
   };
-
-  // CRITICAL: Don't render anything when modal is closed to prevent hook order issues
-  // This ensures columns (and their Menu components with hooks) are never created when modal is closed
-  if (!open) {
-    return null;
-  }
 
   return (
     <>
