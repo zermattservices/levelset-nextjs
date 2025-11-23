@@ -754,76 +754,102 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   const roles: string[] = ['New Hire', 'Team Member', 'Trainer', 'Team Lead', 'Director', 'Executive', 'Operator'];
   const availabilities: AvailabilityType[] = ['Available', 'Limited'];
 
-  const handleRoleMenuOpen = (event: React.MouseEvent<HTMLElement>, employeeId: string) => {
+  // Memoize handlers to prevent column recreation on every render
+  const handleRoleMenuOpen = React.useCallback((event: React.MouseEvent<HTMLElement>, employeeId: string) => {
     setRoleMenuAnchor(prev => ({ ...prev, [employeeId]: event.currentTarget }));
-  };
+  }, []);
 
-  const handleRoleMenuClose = (employeeId: string) => {
+  const handleRoleMenuClose = React.useCallback((employeeId: string) => {
     setRoleMenuAnchor(prev => ({ ...prev, [employeeId]: null }));
-  };
+  }, []);
 
-  const handleRoleSelect = (employeeId: string, role: string) => {
+  const handleRoleSelect = React.useCallback((employeeId: string, role: string) => {
     handleRoleMenuClose(employeeId);
-    const newEdits = new Map(employeeEdits);
-    const edit: EmployeeEdit = newEdits.get(employeeId) || { id: employeeId };
-    edit.role = role;
-    newEdits.set(employeeId, edit);
-    setEmployeeEdits(newEdits);
+    setEmployeeEdits(prev => {
+      const newEdits = new Map(prev);
+      const edit: EmployeeEdit = newEdits.get(employeeId) || { id: employeeId };
+      edit.role = role;
+      newEdits.set(employeeId, edit);
+      return newEdits;
+    });
     setEditTrigger(prev => prev + 1);
-  };
+  }, [handleRoleMenuClose]);
 
-  const handleAvailabilityMenuOpen = (event: React.MouseEvent<HTMLElement>, employeeId: string) => {
+  const handleAvailabilityMenuOpen = React.useCallback((event: React.MouseEvent<HTMLElement>, employeeId: string) => {
     setAvailabilityMenuAnchor(prev => ({ ...prev, [employeeId]: event.currentTarget }));
-  };
+  }, []);
 
-  const handleAvailabilityMenuClose = (employeeId: string) => {
+  const handleAvailabilityMenuClose = React.useCallback((employeeId: string) => {
     setAvailabilityMenuAnchor(prev => ({ ...prev, [employeeId]: null }));
-  };
+  }, []);
 
-  const handleAvailabilitySelect = (employeeId: string, availability: AvailabilityType) => {
+  const handleAvailabilitySelect = React.useCallback((employeeId: string, availability: AvailabilityType) => {
     handleAvailabilityMenuClose(employeeId);
-    const newEdits = new Map(employeeEdits);
-    const edit: EmployeeEdit = newEdits.get(employeeId) || { id: employeeId };
-    edit.availability = availability;
-    newEdits.set(employeeId, edit);
-    setEmployeeEdits(newEdits);
+    setEmployeeEdits(prev => {
+      const newEdits = new Map(prev);
+      const edit: EmployeeEdit = newEdits.get(employeeId) || { id: employeeId };
+      edit.availability = availability;
+      newEdits.set(employeeId, edit);
+      return newEdits;
+    });
     setEditTrigger(prev => prev + 1);
-  };
+  }, [handleAvailabilityMenuClose]);
 
 
   // Create columns only when on review page
-  // Use empty array as stable reference when not on review page to avoid hook issues
-  // IMPORTANT: We must check both currentPage AND notification to prevent creating columns
-  // when the modal first opens (before notification exists)
+  // CRITICAL: Check both currentPage AND notification to prevent creating columns when modal first opens
   const shouldCreateColumns = currentPage === 'review' && notification !== null;
   
-  const editableColumns = React.useMemo<GridColDef[]>(() => {
-    // CRITICAL: Early return with stable empty array - don't call createEmployeeColumns when not on review page
-    if (!shouldCreateColumns) {
-      return [];
+  // Log for debugging
+  React.useEffect(() => {
+    if (open) {
+      console.log('[SyncEmployeesModal] Modal opened', {
+        currentPage,
+        hasNotification: !!notification,
+        shouldCreateColumns,
+      });
     }
+  }, [open, currentPage, notification, shouldCreateColumns]);
+  
+  // Stable empty array reference
+  const EMPTY_COLUMNS: GridColDef[] = React.useMemo(() => [], []);
+  
+  const editableColumns = React.useMemo<GridColDef[]>(() => {
+    console.log('[SyncEmployeesModal] editableColumns useMemo called', { shouldCreateColumns, currentPage, hasNotification: !!notification });
+    
+    // CRITICAL: Early return BEFORE any function calls
+    if (!shouldCreateColumns) {
+      console.log('[SyncEmployeesModal] Returning empty columns (not on review page)');
+      return EMPTY_COLUMNS;
+    }
+    
+    console.log('[SyncEmployeesModal] Creating editable columns');
     // Only create columns when we're actually on the review page with notification data
-    // Pass all dependencies as parameters to avoid closure issues
-    return createEmployeeColumns(true, false, {
-      roleMenuAnchor,
-      handleRoleMenuOpen,
-      handleRoleMenuClose,
-      handleRoleSelect,
-      employeeEdits,
-      setEmployeeEdits,
-      setEditTrigger,
-      availabilityMenuAnchor,
-      handleAvailabilityMenuOpen,
-      handleAvailabilityMenuClose,
-      handleAvailabilitySelect,
-      keptEmployees,
-      setKeptEmployees,
-      roles,
-      availabilities,
-      fontFamily,
-      levelsetGreen,
-      destructiveColor,
-    });
+    try {
+      return createEmployeeColumns(true, false, {
+        roleMenuAnchor,
+        handleRoleMenuOpen,
+        handleRoleMenuClose,
+        handleRoleSelect,
+        employeeEdits,
+        setEmployeeEdits,
+        setEditTrigger,
+        availabilityMenuAnchor,
+        handleAvailabilityMenuOpen,
+        handleAvailabilityMenuClose,
+        handleAvailabilitySelect,
+        keptEmployees,
+        setKeptEmployees,
+        roles,
+        availabilities,
+        fontFamily,
+        levelsetGreen,
+        destructiveColor,
+      });
+    } catch (error) {
+      console.error('[SyncEmployeesModal] Error creating editable columns:', error);
+      return EMPTY_COLUMNS;
+    }
   }, [
     shouldCreateColumns,
     editTrigger,
@@ -840,34 +866,44 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     handleAvailabilityMenuClose,
     handleAvailabilitySelect,
     setKeptEmployees,
+    EMPTY_COLUMNS,
   ]);
   
   const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
-    // CRITICAL: Early return with stable empty array - don't call createEmployeeColumns when not on review page
+    console.log('[SyncEmployeesModal] readOnlyColumns useMemo called', { shouldCreateColumns, currentPage, hasNotification: !!notification });
+    
+    // CRITICAL: Early return BEFORE any function calls
     if (!shouldCreateColumns) {
-      return [];
+      console.log('[SyncEmployeesModal] Returning empty columns (not on review page)');
+      return EMPTY_COLUMNS;
     }
-    // Only create columns when we're actually on the review page with notification data
-    return createEmployeeColumns(false, true, {
-      roleMenuAnchor,
-      handleRoleMenuOpen,
-      handleRoleMenuClose,
-      handleRoleSelect,
-      employeeEdits,
-      setEmployeeEdits,
-      setEditTrigger,
-      availabilityMenuAnchor,
-      handleAvailabilityMenuOpen,
-      handleAvailabilityMenuClose,
-      handleAvailabilitySelect,
-      keptEmployees,
-      setKeptEmployees,
-      roles,
-      availabilities,
-      fontFamily,
-      levelsetGreen,
-      destructiveColor,
-    });
+    
+    console.log('[SyncEmployeesModal] Creating read-only columns');
+    try {
+      return createEmployeeColumns(false, true, {
+        roleMenuAnchor,
+        handleRoleMenuOpen,
+        handleRoleMenuClose,
+        handleRoleSelect,
+        employeeEdits,
+        setEmployeeEdits,
+        setEditTrigger,
+        availabilityMenuAnchor,
+        handleAvailabilityMenuOpen,
+        handleAvailabilityMenuClose,
+        handleAvailabilitySelect,
+        keptEmployees,
+        setKeptEmployees,
+        roles,
+        availabilities,
+        fontFamily,
+        levelsetGreen,
+        destructiveColor,
+      });
+    } catch (error) {
+      console.error('[SyncEmployeesModal] Error creating read-only columns:', error);
+      return EMPTY_COLUMNS;
+    }
   }, [
     shouldCreateColumns,
     keptEmployees,
@@ -883,6 +919,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     handleAvailabilityMenuClose,
     handleAvailabilitySelect,
     setKeptEmployees,
+    EMPTY_COLUMNS,
   ]);
 
   // Render Page 2: Review Changes
