@@ -1247,6 +1247,12 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     );
   };
 
+  // CRITICAL: Don't render anything when modal is closed to prevent hook order issues
+  // This ensures columns (and their Menu components with hooks) are never created when modal is closed
+  if (!open) {
+    return null;
+  }
+
   return (
     <>
       <StyledDialog
