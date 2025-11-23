@@ -808,16 +808,10 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   }, [open, currentPage, notification]);
 
 
-  // CRITICAL: Create columns at component level (unconditionally) to satisfy React rules
-  // But only create real columns when modal is open AND on review page
-  // Use empty array when not needed to prevent Menu components (hooks) from being created
-  const shouldCreateColumns = open && currentPage === 'review' && notification !== null;
-  const EMPTY_COLUMNS: GridColDef[] = [];
-  
+  // CRITICAL: Always create columns unconditionally to ensure consistent hook count
+  // The column structure (including Menu components in renderCell) must always be defined
+  // DataGridPro will only render them when needed, but the structure is always consistent
   const editableColumns = React.useMemo<GridColDef[]>(() => {
-    if (!shouldCreateColumns) {
-      return EMPTY_COLUMNS;
-    }
     return createEmployeeColumns(true, false, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -839,7 +833,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       destructiveColor,
     });
   }, [
-    shouldCreateColumns,
     editTrigger,
     employeeEdits,
     roleMenuAnchor,
@@ -857,9 +850,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   ]);
 
   const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
-    if (!shouldCreateColumns) {
-      return EMPTY_COLUMNS;
-    }
     return createEmployeeColumns(false, true, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -881,7 +871,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       destructiveColor,
     });
   }, [
-    shouldCreateColumns,
     keptEmployees,
     employeeEdits,
     roleMenuAnchor,
