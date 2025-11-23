@@ -987,6 +987,12 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     }));
   }, [notification, currentPage, terminatedEmployees]);
 
+  // Count terminated employees (excluding kept ones) - always calculate
+  const terminatedCount = React.useMemo(() => {
+    if (!notification || currentPage !== 'review') return 0;
+    return terminatedEmployeesData.filter(emp => !keptEmployees.has(Number(emp.hs_id))).length;
+  }, [notification, currentPage, terminatedEmployeesData, keptEmployees]);
+
   // Render Page 2: Review Changes
   const renderReviewPage = () => {
     console.log('[SyncEmployeesModal] renderReviewPage called', { hasNotification: !!notification });
