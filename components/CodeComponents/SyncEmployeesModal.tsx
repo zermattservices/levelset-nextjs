@@ -118,8 +118,14 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             Drag the bookmarklet link below to your browser's bookmarks bar:
           </Typography>
           <InstructionBox>
-            <Typography variant="body2" sx={{ fontFamily, mb: 1, fontWeight: 600 }}>
-              💡 Tip: If you don't see your bookmarks bar, press <code>Ctrl+Shift+B</code> (Windows/Linux) or <code>Cmd+Shift+B</code> (Mac) to show it.
+            <Typography variant="body2" sx={{ fontFamily, mb: 0.5, fontWeight: 600 }}>
+              💡 Tip: If you don't see your bookmarks bar, press:
+            </Typography>
+            <Typography variant="body2" sx={{ fontFamily, mb: 0.5, ml: 2 }}>
+              <code>Ctrl+Shift+B</code> (Windows)
+            </Typography>
+            <Typography variant="body2" sx={{ fontFamily, ml: 2 }}>
+              <code>Cmd+Shift+B</code> (Mac)
             </Typography>
           </InstructionBox>
           <Box sx={{ textAlign: 'center', my: 2 }}>
@@ -133,10 +139,10 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             >
               Levelset HS Sync
             </BookmarkletLink>
+            <Typography variant="body2" sx={{ fontFamily, fontSize: 12, color: '#6b7280', mt: 1 }}>
+              Drag this link to your bookmarks bar
+            </Typography>
           </Box>
-          <Typography variant="body2" sx={{ fontFamily, fontSize: 12, color: '#6b7280', mt: 1 }}>
-            Drag this link to your bookmarks bar
-          </Typography>
         </>
       ),
     },
@@ -145,29 +151,29 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       description: (
         <>
           <Typography variant="body2" sx={{ mb: 1, fontFamily }}>
-            Once you're on a HotSchedules page with employee data loaded:
+            Once you've logged in to HotSchedules:
           </Typography>
           <ol style={{ fontFamily, paddingLeft: '20px', marginTop: '8px' }}>
             <li style={{ marginBottom: '8px' }}>
               <Typography variant="body2" component="span" sx={{ fontFamily }}>
-                Navigate to a page in HotSchedules that displays employee information (e.g., Employee List, Roster, etc.)
+                Navigate to the Scheduling page
               </Typography>
             </li>
             <li style={{ marginBottom: '8px' }}>
               <Typography variant="body2" component="span" sx={{ fontFamily }}>
-                Click the bookmarklet you just added to your bookmarks bar
+                Click the bookmark you just added to your bookmarks bar
               </Typography>
             </li>
             <li>
               <Typography variant="body2" component="span" sx={{ fontFamily }}>
-                The bookmarklet will automatically extract employee data and sync it to Levelset
+                The bookmark will automatically extract employee data and sync it to Levelset
               </Typography>
             </li>
           </ol>
           <InstructionBox sx={{ mt: 2 }}>
             <Typography variant="body2" sx={{ fontFamily, fontSize: 12, color: '#6b7280' }}>
-              <strong>Note:</strong> The bookmarklet will automatically detect employee data from the HotSchedules page. 
-              If it cannot find the data, make sure you're on a page that has employee information loaded.
+              <strong>Note:</strong> The bookmark will automatically detect employee data from the HotSchedules page. 
+              If you're having issues with it, make sure you're on either the Scheduling page.
             </Typography>
           </InstructionBox>
         </>
@@ -225,7 +231,26 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       </DialogTitle>
 
       <Box sx={{ p: 3 }}>
-        <Stepper orientation="vertical">
+        <Stepper 
+          orientation="vertical"
+          sx={{
+            '& .MuiStepIcon-root': {
+              color: '#d1d5db',
+              fontSize: '28px', // Increased by 4px from default 24px
+              '&.Mui-active': {
+                color: levelsetGreen,
+              },
+              '&.Mui-completed': {
+                color: levelsetGreen,
+              },
+            },
+            '& .MuiStepIcon-text': {
+              fill: 'white',
+              fontSize: '16px',
+              fontWeight: 600,
+            },
+          }}
+        >
           {steps.map((step, index) => (
             <Step key={step.label} active={true} completed={false}>
               <StepLabel
