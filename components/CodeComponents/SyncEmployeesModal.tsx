@@ -515,35 +515,38 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
         width: 150,
         renderCell: (params) => {
           const currentRole = params.value || 'Team Member';
+          const menuAnchor = roleMenuAnchor[params.row.id] || null;
+          const menuOpen = editable && Boolean(menuAnchor);
+          
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
               {editable ? (
-                <>
-                  <Button
-                    onClick={(e) => handleRoleMenuOpen(e, params.row.id)}
-                    sx={{ fontFamily, fontSize: 12, textTransform: 'none', p: 0 }}
-                  >
-                    <RolePill role={currentRole} />
-                  </Button>
-                  <Menu
-                    anchorEl={roleMenuAnchor[params.row.id]}
-                    open={Boolean(roleMenuAnchor[params.row.id])}
-                    onClose={() => handleRoleMenuClose(params.row.id)}
-                  >
-                    {roles.map((role) => (
-                      <MenuItem
-                        key={role}
-                        onClick={() => handleRoleSelect(params.row.id, role)}
-                        sx={{ fontFamily, fontSize: 12 }}
-                      >
-                        {role}
-                      </MenuItem>
-                    ))}
-                  </Menu>
-                </>
+                <Button
+                  onClick={(e) => handleRoleMenuOpen(e, params.row.id)}
+                  sx={{ fontFamily, fontSize: 12, textTransform: 'none', p: 0 }}
+                >
+                  <RolePill role={currentRole} />
+                </Button>
               ) : (
                 <RolePill role={currentRole} />
               )}
+              <Menu
+                anchorEl={menuAnchor}
+                open={menuOpen}
+                onClose={() => handleRoleMenuClose(params.row.id)}
+                disableAutoFocusItem
+                MenuListProps={{ 'aria-labelledby': undefined }}
+              >
+                {roles.map((role) => (
+                  <MenuItem
+                    key={role}
+                    onClick={() => handleRoleSelect(params.row.id, role)}
+                    sx={{ fontFamily, fontSize: 12 }}
+                  >
+                    {role}
+                  </MenuItem>
+                ))}
+              </Menu>
             </Box>
           );
         },
@@ -623,47 +626,33 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
         renderCell: (params) => {
           const edit = employeeEdits.get(params.row.id);
           const avail = edit?.availability || params.value || 'Available';
+          const menuAnchor = availabilityMenuAnchor[params.row.id] || null;
+          const menuOpen = editable && Boolean(menuAnchor);
+          
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
               {editable ? (
-                <>
-                  <Button
-                    onClick={(e) => handleAvailabilityMenuOpen(e, params.row.id)}
-                    sx={{ fontFamily, fontSize: 12, textTransform: 'none', p: 0 }}
+                <Button
+                  onClick={(e) => handleAvailabilityMenuOpen(e, params.row.id)}
+                  sx={{ fontFamily, fontSize: 12, textTransform: 'none', p: 0 }}
+                >
+                  <Box
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '4px 12px',
+                      borderRadius: '14px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      fontFamily,
+                      backgroundColor: avail === 'Available' ? '#dcfce7' : '#fef3c7',
+                      color: avail === 'Available' ? '#166534' : '#d97706',
+                    }}
                   >
-                    <Box
-                      sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '4px 12px',
-                        borderRadius: '14px',
-                        fontSize: 13,
-                        fontWeight: 600,
-                        fontFamily,
-                        backgroundColor: avail === 'Available' ? '#dcfce7' : '#fef3c7',
-                        color: avail === 'Available' ? '#166534' : '#d97706',
-                      }}
-                    >
-                      {avail}
-                    </Box>
-                  </Button>
-                  <Menu
-                    anchorEl={availabilityMenuAnchor[params.row.id]}
-                    open={Boolean(availabilityMenuAnchor[params.row.id])}
-                    onClose={() => handleAvailabilityMenuClose(params.row.id)}
-                  >
-                    {availabilities.map((avail) => (
-                      <MenuItem
-                        key={avail}
-                        onClick={() => handleAvailabilitySelect(params.row.id, avail)}
-                        sx={{ fontFamily, fontSize: 12 }}
-                      >
-                        {avail}
-                      </MenuItem>
-                    ))}
-                  </Menu>
-                </>
+                    {avail}
+                  </Box>
+                </Button>
               ) : (
                 <Box
                   sx={{
@@ -682,6 +671,23 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                   {avail}
                 </Box>
               )}
+              <Menu
+                anchorEl={menuAnchor}
+                open={menuOpen}
+                onClose={() => handleAvailabilityMenuClose(params.row.id)}
+                disableAutoFocusItem
+                MenuListProps={{ 'aria-labelledby': undefined }}
+              >
+                {availabilities.map((avail) => (
+                  <MenuItem
+                    key={avail}
+                    onClick={() => handleAvailabilitySelect(params.row.id, avail)}
+                    sx={{ fontFamily, fontSize: 12 }}
+                  >
+                    {avail}
+                  </MenuItem>
+                ))}
+              </Menu>
             </Box>
           );
         },
@@ -742,22 +748,22 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     return columns;
   };
 
-  // Memoize columns to prevent recreation on every render
-  // Note: We need to recreate columns when state changes because renderCell functions reference state
-  // Use editTrigger as a dependency to force recreation when edits change
   // Convert Maps/Sets to serializable format for dependency tracking
   const employeeEditsSize = employeeEdits.size;
   const roleMenuAnchorKeys = Object.keys(roleMenuAnchor).length;
   const availabilityMenuAnchorKeys = Object.keys(availabilityMenuAnchor).length;
   const keptEmployeesSize = keptEmployees.size;
   
+  // Memoize columns - only create when on review page to avoid hook order issues
   const editableColumns = React.useMemo(() => {
+    if (currentPage !== 'review') return [];
     return createEmployeeColumns(true, false);
-  }, [editTrigger, employeeEditsSize, roleMenuAnchorKeys, availabilityMenuAnchorKeys]);
+  }, [currentPage, editTrigger, employeeEditsSize, roleMenuAnchorKeys, availabilityMenuAnchorKeys]);
   
   const readOnlyColumns = React.useMemo(() => {
+    if (currentPage !== 'review') return [];
     return createEmployeeColumns(false, true);
-  }, [keptEmployeesSize]);
+  }, [currentPage, keptEmployeesSize]);
 
   // Render Page 2: Review Changes
   const renderReviewPage = () => {
