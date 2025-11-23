@@ -463,23 +463,44 @@ export function SyncEmployeesModal({
   className = "",
   onSyncComplete,
 }: SyncEmployeesModalProps) {
+  console.log('[SyncEmployeesModal] Component render start', { open, renderId: Math.random() });
+  
   const [currentPage, setCurrentPage] = React.useState<Page>('instructions');
+  console.log('[SyncEmployeesModal] useState: currentPage =', currentPage);
+  
   const [exitConfirmOpen, setExitConfirmOpen] = React.useState(false);
+  console.log('[SyncEmployeesModal] useState: exitConfirmOpen =', exitConfirmOpen);
+  
   const [notification, setNotification] = React.useState<SyncNotification | null>(null);
+  console.log('[SyncEmployeesModal] useState: notification =', notification ? 'exists' : 'null');
+  
   const [hasSyncedBefore, setHasSyncedBefore] = React.useState(false);
+  console.log('[SyncEmployeesModal] useState: hasSyncedBefore =', hasSyncedBefore);
+  
   const [employeeEdits, setEmployeeEdits] = React.useState<Map<string, EmployeeEdit>>(new Map());
+  console.log('[SyncEmployeesModal] useState: employeeEdits size =', employeeEdits.size);
+  
   const [keptEmployees, setKeptEmployees] = React.useState<Set<number>>(new Set());
+  console.log('[SyncEmployeesModal] useState: keptEmployees size =', keptEmployees.size);
+  
   const [confirming, setConfirming] = React.useState(false);
+  console.log('[SyncEmployeesModal] useState: confirming =', confirming);
+  
   const [editTrigger, setEditTrigger] = React.useState(0); // Force re-render when edits change
+  console.log('[SyncEmployeesModal] useState: editTrigger =', editTrigger);
+  
   const [confirmationStats, setConfirmationStats] = React.useState<{
     created: number;
     updated: number;
     deactivated: number;
   } | null>(null);
+  console.log('[SyncEmployeesModal] useState: confirmationStats =', confirmationStats);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  console.log('[SyncEmployeesModal] baseUrl =', baseUrl);
   
   const bookmarkletCode = React.useMemo(() => {
+    console.log('[SyncEmployeesModal] useMemo: bookmarkletCode called', { baseUrl, locationId, orgId });
     if (!baseUrl) return '';
     if (!locationId || !orgId) return '';
     
@@ -766,7 +787,10 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
 
   // Menu state for role and availability dropdowns
   const [roleMenuAnchor, setRoleMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
+  console.log('[SyncEmployeesModal] useState: roleMenuAnchor keys =', Object.keys(roleMenuAnchor).length);
+  
   const [availabilityMenuAnchor, setAvailabilityMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
+  console.log('[SyncEmployeesModal] useState: availabilityMenuAnchor keys =', Object.keys(availabilityMenuAnchor).length);
 
   const roles: string[] = ['New Hire', 'Team Member', 'Trainer', 'Team Lead', 'Director', 'Executive', 'Operator'];
   const availabilities: AvailabilityType[] = ['Available', 'Limited'];
@@ -827,11 +851,15 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   // Only create columns when on review page - DataGridPro is only rendered on page 2
   // This prevents Menu components (which use hooks) from being created unnecessarily on page 1
   const shouldCreateColumns = currentPage === 'review' && notification !== null;
+  console.log('[SyncEmployeesModal] shouldCreateColumns =', shouldCreateColumns, { currentPage, hasNotification: !!notification });
   
   const editableColumns = React.useMemo<GridColDef[]>(() => {
+    console.log('[SyncEmployeesModal] useMemo: editableColumns called', { shouldCreateColumns });
     if (!shouldCreateColumns) {
+      console.log('[SyncEmployeesModal] useMemo: editableColumns returning empty array');
       return []; // Return empty array when not needed
     }
+    console.log('[SyncEmployeesModal] useMemo: editableColumns calling createEmployeeColumns');
     return createEmployeeColumns(true, false, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -871,9 +899,12 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   ]);
 
   const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
+    console.log('[SyncEmployeesModal] useMemo: readOnlyColumns called', { shouldCreateColumns });
     if (!shouldCreateColumns) {
+      console.log('[SyncEmployeesModal] useMemo: readOnlyColumns returning empty array');
       return []; // Return empty array when not needed
     }
+    console.log('[SyncEmployeesModal] useMemo: readOnlyColumns calling createEmployeeColumns');
     return createEmployeeColumns(false, true, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -913,6 +944,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
 
   // Render Page 2: Review Changes
   const renderReviewPage = () => {
+    console.log('[SyncEmployeesModal] renderReviewPage called', { hasNotification: !!notification });
     if (!notification) return null;
 
     const syncData = notification.sync_data;
@@ -1261,6 +1293,8 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     );
   };
 
+  console.log('[SyncEmployeesModal] About to render Dialog', { open, currentPage });
+  
   return (
     <>
       <StyledDialog
