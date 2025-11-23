@@ -13,6 +13,8 @@ export interface Employee {
   active: boolean;
   email?: string;
   phone?: string;
+  hs_id?: number;
+  birth_date?: string;
   is_foh?: boolean;
   is_boh?: boolean;
   is_leader?: boolean;
@@ -128,5 +130,21 @@ export interface CertificationAudit {
   position_averages: Record<string, number>; // e.g., {"iPOS": 2.9, "Host": 2.85}
   created_at: string;
   notes?: string;
+}
+
+export interface Location {
+  id: string;
+  org_id: string;
+  name: string;
+  location_number: string;
+  address?: string;
+  phone?: string;
+  operator?: string;
+  code?: string;
+  location_type?: string;
+  image_url?: string;
+  location_mobile_token?: string;
+  has_synced_before?: boolean;
+  created_at?: string;
 }
 

@@ -26,6 +26,7 @@ import { DataGridPro, GridColDef, gridClasses } from "@mui/x-data-grid-pro";
 import { Button } from "@mui/material";
 import { AddEmployeeModal } from "./AddEmployeeModal";
 import { SyncEmployeesModal } from "./SyncEmployeesModal";
+import { useLocationContext } from "./LocationContext";
 
 export type Role =
   | "New Hire"
@@ -49,6 +50,7 @@ export interface RosterEntry {
 
 export function RosterTable(props: RosterTableProps) {
   const { locationId } = props;
+  const { selectedLocationOrgId } = useLocationContext();
   const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations' | 'pip'>('employees');
   const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
   const [addEmployeeModalOpen, setAddEmployeeModalOpen] = React.useState(false);
@@ -159,6 +161,11 @@ export function RosterTable(props: RosterTableProps) {
       <SyncEmployeesModal
         open={syncEmployeesModalOpen}
         onClose={() => setSyncEmployeesModalOpen(false)}
+        locationId={locationId}
+        orgId={selectedLocationOrgId || undefined}
+        onSyncComplete={() => {
+          setRefreshKey(prev => prev + 1);
+        }}
       />
 
     </Box>
