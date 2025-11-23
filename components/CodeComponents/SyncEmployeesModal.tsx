@@ -848,18 +848,14 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   }, [open, currentPage, notification]);
 
 
-  // Only create columns when on review page - DataGridPro is only rendered on page 2
-  // This prevents Menu components (which use hooks) from being created unnecessarily on page 1
-  const shouldCreateColumns = currentPage === 'review' && notification !== null;
-  console.log('[SyncEmployeesModal] shouldCreateColumns =', shouldCreateColumns, { currentPage, hasNotification: !!notification });
+  // CRITICAL: Always create columns unconditionally to ensure consistent hook count
+  // The column structure (including Menu components in renderCell) must always be defined
+  // DataGridPro will only render them when needed, but the structure is always consistent
+  // This prevents React from seeing different hook counts when shouldCreateColumns changes
+  console.log('[SyncEmployeesModal] Creating columns unconditionally', { currentPage, hasNotification: !!notification });
   
   const editableColumns = React.useMemo<GridColDef[]>(() => {
-    console.log('[SyncEmployeesModal] useMemo: editableColumns called', { shouldCreateColumns });
-    if (!shouldCreateColumns) {
-      console.log('[SyncEmployeesModal] useMemo: editableColumns returning empty array');
-      return []; // Return empty array when not needed
-    }
-    console.log('[SyncEmployeesModal] useMemo: editableColumns calling createEmployeeColumns');
+    console.log('[SyncEmployeesModal] useMemo: editableColumns called - ALWAYS creating columns');
     return createEmployeeColumns(true, false, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -881,7 +877,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       destructiveColor,
     });
   }, [
-    shouldCreateColumns,
     editTrigger,
     employeeEdits,
     roleMenuAnchor,
@@ -899,12 +894,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   ]);
 
   const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
-    console.log('[SyncEmployeesModal] useMemo: readOnlyColumns called', { shouldCreateColumns });
-    if (!shouldCreateColumns) {
-      console.log('[SyncEmployeesModal] useMemo: readOnlyColumns returning empty array');
-      return []; // Return empty array when not needed
-    }
-    console.log('[SyncEmployeesModal] useMemo: readOnlyColumns calling createEmployeeColumns');
+    console.log('[SyncEmployeesModal] useMemo: readOnlyColumns called - ALWAYS creating columns');
     return createEmployeeColumns(false, true, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -926,7 +916,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       destructiveColor,
     });
   }, [
-    shouldCreateColumns,
     keptEmployees,
     employeeEdits,
     roleMenuAnchor,
@@ -1049,7 +1038,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
-            {newEmployees.length > 0 && editableColumns.length > 0 && (
+            {newEmployees.length > 0 && currentPage === 'review' && notification !== null && (
               <Box sx={{ p: 2 }}>
                 <Box sx={{ height: 400, width: '100%' }}>
                   <DataGridPro
@@ -1163,7 +1152,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
-            {terminatedEmployeesData.length > 0 && readOnlyColumns.length > 0 && (
+            {terminatedEmployeesData.length > 0 && currentPage === 'review' && notification !== null && (
               <Box sx={{ p: 2 }}>
                 <Box sx={{ height: 400, width: '100%' }}>
                   <DataGridPro
