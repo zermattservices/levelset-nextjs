@@ -87,6 +87,7 @@ interface EmployeeEdit {
   availability?: AvailabilityType;
 }
 
+
 // Column creation function moved outside component to avoid closure issues
 // This prevents React from seeing hooks called conditionally
 function createEmployeeColumns(
@@ -806,12 +807,22 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     }
   }, [open, currentPage, notification]);
 
-  // CRITICAL FIX: Always create columns to ensure hooks are always called
-  // This prevents "rendered more hooks" error by ensuring consistent hook count
-  // We'll only USE these columns when actually rendering DataGridPro
+  // CRITICAL FIX: Only create columns when modal is open AND on review page
+  // This prevents Menu components (which use hooks) from being created when modal is closed
+  // We MUST check open state to prevent columns from being created on initial render
+  const shouldCreateColumns = open && currentPage === 'review' && notification !== null;
+  
+  // Stable empty array - created once and reused
+  const EMPTY_COLUMNS: GridColDef[] = React.useMemo(() => [], []);
+  
+  // Only create columns when ALL conditions are met
   const editableColumns = React.useMemo<GridColDef[]>(() => {
-    // Always create columns - this ensures Menu components (which use hooks) are always created
-    // DataGridPro will only render them when rows are provided
+    // CRITICAL: Early return with stable empty array when modal is closed or not on review page
+    // This prevents Menu components (hooks) from being created
+    if (!shouldCreateColumns) {
+      return EMPTY_COLUMNS;
+    }
+    console.log('[SyncEmployeesModal] Creating editable columns');
     return createEmployeeColumns(true, false, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -833,6 +844,8 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       destructiveColor,
     });
   }, [
+    shouldCreateColumns, // CRITICAL: Include this to trigger re-evaluation
+    EMPTY_COLUMNS, // CRITICAL: Include stable reference
     editTrigger,
     employeeEdits,
     roleMenuAnchor,
@@ -850,7 +863,11 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   ]);
 
   const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
-    // Always create columns - this ensures Menu components (which use hooks) are always created
+    // CRITICAL: Early return with stable empty array when modal is closed or not on review page
+    if (!shouldCreateColumns) {
+      return EMPTY_COLUMNS;
+    }
+    console.log('[SyncEmployeesModal] Creating read-only columns');
     return createEmployeeColumns(false, true, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -872,6 +889,8 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       destructiveColor,
     });
   }, [
+    shouldCreateColumns, // CRITICAL: Include this to trigger re-evaluation
+    EMPTY_COLUMNS, // CRITICAL: Include stable reference
     keptEmployees,
     employeeEdits,
     roleMenuAnchor,
