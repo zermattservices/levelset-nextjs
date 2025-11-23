@@ -496,6 +496,9 @@ export function SyncEmployeesModal({
   } | null>(null);
   console.log('[SyncEmployeesModal] useState: confirmationStats =', confirmationStats);
 
+  // Track when modal opened to only accept notifications created after this time
+  const [modalOpenTime, setModalOpenTime] = React.useState<Date | null>(null);
+
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   console.log('[SyncEmployeesModal] baseUrl =', baseUrl);
   
@@ -540,9 +543,20 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     fetchLocationData();
   }, [locationId, open]);
 
-  // Poll for sync notifications on Page 1
+  // Track when modal opens
   React.useEffect(() => {
-    if (currentPage !== 'instructions' || !locationId || !open) return;
+    if (open && !modalOpenTime) {
+      setModalOpenTime(new Date());
+      console.log('[SyncEmployeesModal] Modal opened, tracking time:', new Date().toISOString());
+    } else if (!open && modalOpenTime) {
+      setModalOpenTime(null);
+    }
+  }, [open, modalOpenTime]);
+
+  // Poll for sync notifications on Page 1
+  // Only accept notifications created AFTER the modal opened
+  React.useEffect(() => {
+    if (currentPage !== 'instructions' || !locationId || !open || !modalOpenTime) return;
 
     const pollInterval = setInterval(async () => {
       try {
@@ -551,8 +565,21 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
         
         const data = await response.json();
         if (data.notification) {
-          setNotification(data.notification);
-          setCurrentPage('review');
+          // Only accept notifications created after modal opened
+          const notificationTime = new Date(data.notification.created_at);
+          if (notificationTime > modalOpenTime) {
+            console.log('[SyncEmployeesModal] New notification received after modal opened', {
+              notificationTime: notificationTime.toISOString(),
+              modalOpenTime: modalOpenTime.toISOString(),
+            });
+            setNotification(data.notification);
+            setCurrentPage('review');
+          } else {
+            console.log('[SyncEmployeesModal] Ignoring old notification', {
+              notificationTime: notificationTime.toISOString(),
+              modalOpenTime: modalOpenTime.toISOString(),
+            });
+          }
         }
       } catch (error) {
         console.error('Error polling for notifications:', error);
@@ -560,7 +587,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     }, 2500); // Poll every 2.5 seconds
 
     return () => clearInterval(pollInterval);
-  }, [currentPage, locationId, open]);
+  }, [currentPage, locationId, open, modalOpenTime]);
 
   // Reset state when modal opens/closes
   React.useEffect(() => {
@@ -571,6 +598,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       setKeptEmployees(new Set());
       setConfirmationStats(null);
       setExitConfirmOpen(false);
+      setModalOpenTime(null);
     }
   }, [open]);
 
