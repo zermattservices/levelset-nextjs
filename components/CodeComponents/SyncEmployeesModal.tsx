@@ -493,6 +493,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   };
 
   // Helper to create employee table columns
+  // NOTE: This function captures state via closure, but we only call it when on review page
   const createEmployeeColumns = (
     editable: boolean,
     showKeepButton: boolean = false
@@ -748,33 +749,31 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     return columns;
   };
 
-  // Convert Maps/Sets to serializable format for dependency tracking
-  const employeeEditsSize = employeeEdits.size;
-  const roleMenuAnchorKeys = Object.keys(roleMenuAnchor).length;
-  const availabilityMenuAnchorKeys = Object.keys(availabilityMenuAnchor).length;
-  const keptEmployeesSize = keptEmployees.size;
-  
   // Create columns only when on review page
-  // IMPORTANT: We must always call useMemo with the same dependencies to avoid hook order issues
-  // But we can return null when not on review page to prevent column creation
-  const editableColumns = React.useMemo<GridColDef[] | null>(() => {
-    // Early return - don't call createEmployeeColumns when not on review page
-    // This prevents the function from creating closures with state
-    if (currentPage !== 'review') {
-      return null;
-    }
-    // Only create columns when we're actually on the review page
-    return createEmployeeColumns(true, false);
-  }, [currentPage, editTrigger, employeeEditsSize, roleMenuAnchorKeys, availabilityMenuAnchorKeys]);
+  // Use empty array as stable reference when not on review page to avoid hook issues
+  // IMPORTANT: We must check both currentPage AND notification to prevent creating columns
+  // when the modal first opens (before notification exists)
+  const shouldCreateColumns = currentPage === 'review' && notification !== null;
   
-  const readOnlyColumns = React.useMemo<GridColDef[] | null>(() => {
-    // Early return - don't call createEmployeeColumns when not on review page
-    if (currentPage !== 'review') {
-      return null;
+  const editableColumns = React.useMemo<GridColDef[]>(() => {
+    // CRITICAL: Early return with stable empty array - don't call createEmployeeColumns when not on review page
+    // This prevents the function from being evaluated and creating closures with state
+    if (!shouldCreateColumns) {
+      return [];
     }
-    // Only create columns when we're actually on the review page
+    // Only create columns when we're actually on the review page with notification data
+    // The function will be called here, but only when shouldCreateColumns is true
+    return createEmployeeColumns(true, false);
+  }, [shouldCreateColumns, editTrigger, employeeEdits.size, Object.keys(roleMenuAnchor).length, Object.keys(availabilityMenuAnchor).length]);
+  
+  const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
+    // CRITICAL: Early return with stable empty array - don't call createEmployeeColumns when not on review page
+    if (!shouldCreateColumns) {
+      return [];
+    }
+    // Only create columns when we're actually on the review page with notification data
     return createEmployeeColumns(false, true);
-  }, [currentPage, keptEmployeesSize]);
+  }, [shouldCreateColumns, keptEmployees.size]);
 
   // Render Page 2: Review Changes
   const renderReviewPage = () => {
@@ -882,7 +881,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
-            {newEmployees.length > 0 && editableColumns && editableColumns.length > 0 && (
+            {newEmployees.length > 0 && editableColumns.length > 0 && (
               <Box sx={{ p: 2 }}>
                 <Box sx={{ height: 400, width: '100%' }}>
                   <DataGridPro
@@ -996,7 +995,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
-            {terminatedEmployeesData.length > 0 && readOnlyColumns && readOnlyColumns.length > 0 && (
+            {terminatedEmployeesData.length > 0 && readOnlyColumns.length > 0 && (
               <Box sx={{ p: 2 }}>
                 <Box sx={{ height: 400, width: '100%' }}>
                   <DataGridPro
