@@ -1142,13 +1142,13 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               {newEmployees.length > 0 ? `${newEmployees.length} employees` : 'No employees'}
             </Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{ padding: 0 }}>
+          <AccordionDetails sx={{ padding: 0, overflow: 'visible' }}>
             {newEmployees.length > 0 && currentPage === 'review' && notification !== null && (
-              <Box sx={{ p: 2 }}>
+              <Box sx={{ p: 2, overflow: 'visible' }}>
                 <Box sx={{ 
                   height: 400, 
                   width: '100%',
-                  borderRadius: 16,
+                  borderRadius: '16px',
                   border: "1px solid #e5e7eb",
                   backgroundColor: "#ffffff",
                   overflow: "hidden",
@@ -1164,6 +1164,8 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                     sx={{
                       fontFamily,
                       border: "none",
+                      borderRadius: '16px',
+                      overflow: 'hidden',
                       '& .MuiDataGrid-cell': {
                         borderBottom: '1px solid #f3f4f6',
                         fontSize: 13,
@@ -1291,13 +1293,13 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               {terminatedCount > 0 ? `${terminatedCount} employees` : 'No employees'}
             </Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{ padding: 0 }}>
+          <AccordionDetails sx={{ padding: 0, overflow: 'visible' }}>
             {terminatedEmployeesData.length > 0 && currentPage === 'review' && notification !== null && (
-              <Box sx={{ p: 2 }}>
+              <Box sx={{ p: 2, overflow: 'visible' }}>
                 <Box sx={{ 
                   height: 400, 
                   width: '100%',
-                  borderRadius: 16,
+                  borderRadius: '16px',
                   border: "1px solid #e5e7eb",
                   backgroundColor: "#ffffff",
                   overflow: "hidden",
@@ -1316,6 +1318,8 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                     sx={{
                       fontFamily,
                       border: "none",
+                      borderRadius: '16px',
+                      overflow: 'hidden',
                       '& .MuiDataGrid-cell': {
                         borderBottom: '1px solid #f3f4f6',
                         fontSize: 13,
