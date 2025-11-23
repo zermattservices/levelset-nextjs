@@ -806,6 +806,104 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     }
   }, [open, currentPage, notification]);
 
+  // CRITICAL: Always call useMemo (unconditionally) to satisfy React rules
+  // But only create columns when modal is open AND on review page
+  // Stable empty array - created once and reused
+  const EMPTY_COLUMNS: GridColDef[] = [];
+
+  const editableColumns = React.useMemo<GridColDef[]>(() => {
+    // CRITICAL: Check conditions directly - don't create columns if modal is closed or not on review page
+    const shouldCreate = open && currentPage === 'review' && notification !== null;
+    if (!shouldCreate) {
+      return EMPTY_COLUMNS;
+    }
+    console.log('[SyncEmployeesModal] Creating editable columns');
+    return createEmployeeColumns(true, false, {
+      roleMenuAnchor,
+      handleRoleMenuOpen,
+      handleRoleMenuClose,
+      handleRoleSelect,
+      employeeEdits,
+      setEmployeeEdits,
+      setEditTrigger,
+      availabilityMenuAnchor,
+      handleAvailabilityMenuOpen,
+      handleAvailabilityMenuClose,
+      handleAvailabilitySelect,
+      keptEmployees,
+      setKeptEmployees,
+      roles,
+      availabilities,
+      fontFamily,
+      levelsetGreen,
+      destructiveColor,
+    });
+  }, [
+    open, // CRITICAL: Include open to trigger re-evaluation
+    currentPage, // CRITICAL: Include currentPage to trigger re-evaluation
+    notification, // CRITICAL: Include notification to trigger re-evaluation
+    editTrigger,
+    employeeEdits,
+    roleMenuAnchor,
+    availabilityMenuAnchor,
+    keptEmployees,
+    handleRoleMenuOpen,
+    handleRoleMenuClose,
+    handleRoleSelect,
+    setEmployeeEdits,
+    setEditTrigger,
+    handleAvailabilityMenuOpen,
+    handleAvailabilityMenuClose,
+    handleAvailabilitySelect,
+    setKeptEmployees,
+  ]);
+
+  const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
+    // CRITICAL: Check conditions directly - don't create columns if modal is closed or not on review page
+    const shouldCreate = open && currentPage === 'review' && notification !== null;
+    if (!shouldCreate) {
+      return EMPTY_COLUMNS;
+    }
+    console.log('[SyncEmployeesModal] Creating read-only columns');
+    return createEmployeeColumns(false, true, {
+      roleMenuAnchor,
+      handleRoleMenuOpen,
+      handleRoleMenuClose,
+      handleRoleSelect,
+      employeeEdits,
+      setEmployeeEdits,
+      setEditTrigger,
+      availabilityMenuAnchor,
+      handleAvailabilityMenuOpen,
+      handleAvailabilityMenuClose,
+      handleAvailabilitySelect,
+      keptEmployees,
+      setKeptEmployees,
+      roles,
+      availabilities,
+      fontFamily,
+      levelsetGreen,
+      destructiveColor,
+    });
+  }, [
+    open, // CRITICAL: Include open to trigger re-evaluation
+    currentPage, // CRITICAL: Include currentPage to trigger re-evaluation
+    notification, // CRITICAL: Include notification to trigger re-evaluation
+    keptEmployees,
+    employeeEdits,
+    roleMenuAnchor,
+    availabilityMenuAnchor,
+    handleRoleMenuOpen,
+    handleRoleMenuClose,
+    handleRoleSelect,
+    setEmployeeEdits,
+    setEditTrigger,
+    handleAvailabilityMenuOpen,
+    handleAvailabilityMenuClose,
+    handleAvailabilitySelect,
+    setKeptEmployees,
+  ]);
+
   // Render Page 2: Review Changes
   const renderReviewPage = () => {
     if (!notification) return null;
@@ -865,85 +963,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
 
     // Count terminated employees (excluding kept ones)
     const terminatedCount = terminatedEmployeesData.filter(emp => !keptEmployees.has(Number(emp.hs_id))).length;
-
-    // CRITICAL: Create columns ONLY when rendering the review page
-    // This prevents columns from being created when modal is closed
-    const editableColumns = React.useMemo(() => {
-      console.log('[SyncEmployeesModal] Creating editable columns (inside renderReviewPage)');
-      return createEmployeeColumns(true, false, {
-        roleMenuAnchor,
-        handleRoleMenuOpen,
-        handleRoleMenuClose,
-        handleRoleSelect,
-        employeeEdits,
-        setEmployeeEdits,
-        setEditTrigger,
-        availabilityMenuAnchor,
-        handleAvailabilityMenuOpen,
-        handleAvailabilityMenuClose,
-        handleAvailabilitySelect,
-        keptEmployees,
-        setKeptEmployees,
-        roles,
-        availabilities,
-        fontFamily,
-        levelsetGreen,
-        destructiveColor,
-      });
-    }, [
-      editTrigger,
-      employeeEdits,
-      roleMenuAnchor,
-      availabilityMenuAnchor,
-      keptEmployees,
-      handleRoleMenuOpen,
-      handleRoleMenuClose,
-      handleRoleSelect,
-      setEmployeeEdits,
-      setEditTrigger,
-      handleAvailabilityMenuOpen,
-      handleAvailabilityMenuClose,
-      handleAvailabilitySelect,
-      setKeptEmployees,
-    ]);
-
-    const readOnlyColumns = React.useMemo(() => {
-      console.log('[SyncEmployeesModal] Creating read-only columns (inside renderReviewPage)');
-      return createEmployeeColumns(false, true, {
-        roleMenuAnchor,
-        handleRoleMenuOpen,
-        handleRoleMenuClose,
-        handleRoleSelect,
-        employeeEdits,
-        setEmployeeEdits,
-        setEditTrigger,
-        availabilityMenuAnchor,
-        handleAvailabilityMenuOpen,
-        handleAvailabilityMenuClose,
-        handleAvailabilitySelect,
-        keptEmployees,
-        setKeptEmployees,
-        roles,
-        availabilities,
-        fontFamily,
-        levelsetGreen,
-        destructiveColor,
-      });
-    }, [
-      keptEmployees,
-      employeeEdits,
-      roleMenuAnchor,
-      availabilityMenuAnchor,
-      handleRoleMenuOpen,
-      handleRoleMenuClose,
-      handleRoleSelect,
-      setEmployeeEdits,
-      setEditTrigger,
-      handleAvailabilityMenuOpen,
-      handleAvailabilityMenuClose,
-      handleAvailabilitySelect,
-      setKeptEmployees,
-    ]);
 
     return (
       <Box>
