@@ -87,6 +87,304 @@ interface EmployeeEdit {
   availability?: AvailabilityType;
 }
 
+// Column creation function moved outside component to avoid closure issues
+// This prevents React from seeing hooks called conditionally
+function createEmployeeColumns(
+  editable: boolean,
+  showKeepButton: boolean,
+  dependencies: {
+    roleMenuAnchor: Record<string, HTMLElement | null>;
+    handleRoleMenuOpen: (e: React.MouseEvent<HTMLElement>, employeeId: string) => void;
+    handleRoleMenuClose: (employeeId: string) => void;
+    handleRoleSelect: (employeeId: string, role: string) => void;
+    employeeEdits: Map<string, EmployeeEdit>;
+    setEmployeeEdits: (edits: Map<string, EmployeeEdit>) => void;
+    setEditTrigger: (fn: (prev: number) => number) => void;
+    availabilityMenuAnchor: Record<string, HTMLElement | null>;
+    handleAvailabilityMenuOpen: (e: React.MouseEvent<HTMLElement>, employeeId: string) => void;
+    handleAvailabilityMenuClose: (employeeId: string) => void;
+    handleAvailabilitySelect: (employeeId: string, availability: AvailabilityType) => void;
+    keptEmployees: Set<number>;
+    setKeptEmployees: (fn: (prev: Set<number>) => Set<number>) => void;
+    roles: string[];
+    availabilities: AvailabilityType[];
+    fontFamily: string;
+    levelsetGreen: string;
+    destructiveColor: string;
+  }
+): GridColDef[] {
+  const {
+    roleMenuAnchor,
+    handleRoleMenuOpen,
+    handleRoleMenuClose,
+    handleRoleSelect,
+    employeeEdits,
+    setEmployeeEdits,
+    setEditTrigger,
+    availabilityMenuAnchor,
+    handleAvailabilityMenuOpen,
+    handleAvailabilityMenuClose,
+    handleAvailabilitySelect,
+    keptEmployees,
+    setKeptEmployees,
+    roles,
+    availabilities,
+    fontFamily,
+    levelsetGreen,
+    destructiveColor,
+  } = dependencies;
+
+  const columns: GridColDef[] = [
+    {
+      field: 'name',
+      headerName: 'Name',
+      width: 200,
+      flex: 1,
+      renderCell: (params) => (
+        <Typography sx={{ fontFamily, fontSize: 14 }}>
+          {params.row.first_name} {params.row.last_name}
+        </Typography>
+      ),
+    },
+    {
+      field: 'role',
+      headerName: 'Current Role',
+      width: 150,
+      renderCell: (params) => {
+        const currentRole = params.value || 'Team Member';
+        const menuAnchor = roleMenuAnchor[params.row.id] || null;
+        const menuOpen = editable && Boolean(menuAnchor);
+        
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+            {editable ? (
+              <Button
+                onClick={(e) => handleRoleMenuOpen(e, params.row.id)}
+                sx={{ fontFamily, fontSize: 12, textTransform: 'none', p: 0 }}
+              >
+                <RolePill role={currentRole} />
+              </Button>
+            ) : (
+              <RolePill role={currentRole} />
+            )}
+            <Menu
+              anchorEl={menuAnchor}
+              open={menuOpen}
+              onClose={() => handleRoleMenuClose(params.row.id)}
+              disableAutoFocusItem
+              MenuListProps={{ 'aria-labelledby': undefined }}
+            >
+              {roles.map((role) => (
+                <MenuItem
+                  key={role}
+                  onClick={() => handleRoleSelect(params.row.id, role)}
+                  sx={{ fontFamily, fontSize: 12 }}
+                >
+                  {role}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'is_foh',
+      headerName: 'FOH',
+      width: 80,
+      type: 'boolean',
+      renderCell: (params) => {
+        const edit = employeeEdits.get(params.row.id);
+        const checked = edit?.is_foh !== undefined ? edit.is_foh : (params.value || false);
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+            <Checkbox
+              checked={checked}
+              disabled={!editable}
+              onChange={(e) => {
+                if (editable) {
+                  const newEdits = new Map(employeeEdits);
+                  const edit: EmployeeEdit = newEdits.get(params.row.id) || { id: params.row.id };
+                  edit.is_foh = e.target.checked;
+                  newEdits.set(params.row.id, edit);
+                  setEmployeeEdits(newEdits);
+                  setEditTrigger(prev => prev + 1);
+                }
+              }}
+              sx={{
+                color: '#9ca3af',
+                '&.Mui-checked': {
+                  color: levelsetGreen,
+                },
+              }}
+            />
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'is_boh',
+      headerName: 'BOH',
+      width: 80,
+      type: 'boolean',
+      renderCell: (params) => {
+        const edit = employeeEdits.get(params.row.id);
+        const checked = edit?.is_boh !== undefined ? edit.is_boh : (params.value || false);
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+            <Checkbox
+              checked={checked}
+              disabled={!editable}
+              onChange={(e) => {
+                if (editable) {
+                  const newEdits = new Map(employeeEdits);
+                  const edit: EmployeeEdit = newEdits.get(params.row.id) || { id: params.row.id };
+                  edit.is_boh = e.target.checked;
+                  newEdits.set(params.row.id, edit);
+                  setEmployeeEdits(newEdits);
+                  setEditTrigger(prev => prev + 1);
+                }
+              }}
+              sx={{
+                color: '#9ca3af',
+                '&.Mui-checked': {
+                  color: levelsetGreen,
+                },
+              }}
+            />
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'availability',
+      headerName: 'Availability',
+      width: 150,
+      renderCell: (params) => {
+        const edit = employeeEdits.get(params.row.id);
+        const avail = edit?.availability || params.value || 'Available';
+        const menuAnchor = availabilityMenuAnchor[params.row.id] || null;
+        const menuOpen = editable && Boolean(menuAnchor);
+        
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+            {editable ? (
+              <Button
+                onClick={(e) => handleAvailabilityMenuOpen(e, params.row.id)}
+                sx={{ fontFamily, fontSize: 12, textTransform: 'none', p: 0 }}
+              >
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '4px 12px',
+                    borderRadius: '14px',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    fontFamily,
+                    backgroundColor: avail === 'Available' ? '#dcfce7' : '#fef3c7',
+                    color: avail === 'Available' ? '#166534' : '#d97706',
+                  }}
+                >
+                  {avail}
+                </Box>
+              </Button>
+            ) : (
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '4px 12px',
+                  borderRadius: '14px',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  fontFamily,
+                  backgroundColor: avail === 'Available' ? '#dcfce7' : '#fef3c7',
+                  color: avail === 'Available' ? '#166534' : '#d97706',
+                }}
+              >
+                {avail}
+              </Box>
+            )}
+            <Menu
+              anchorEl={menuAnchor}
+              open={menuOpen}
+              onClose={() => handleAvailabilityMenuClose(params.row.id)}
+              disableAutoFocusItem
+              MenuListProps={{ 'aria-labelledby': undefined }}
+            >
+              {availabilities.map((avail) => (
+                <MenuItem
+                  key={avail}
+                  onClick={() => handleAvailabilitySelect(params.row.id, avail)}
+                  sx={{ fontFamily, fontSize: 12 }}
+                >
+                  {avail}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'hire_date',
+      headerName: 'Hire Date',
+      width: 120,
+      renderCell: (params) => (
+        <Typography sx={{ fontFamily, fontSize: 14 }}>
+          {params.value ? new Date(params.value).toLocaleDateString() : '-'}
+        </Typography>
+      ),
+    },
+  ];
+
+  if (showKeepButton) {
+    columns.push({
+      field: 'actions',
+      headerName: '',
+      width: 100,
+      renderCell: (params) => {
+        const isKept = keptEmployees.has(Number(params.row.hs_id));
+        return (
+          <Button
+            variant={isKept ? 'outlined' : 'contained'}
+            onClick={() => {
+              const hsId = Number(params.row.hs_id);
+              if (isKept) {
+                setKeptEmployees(prev => {
+                  const next = new Set(prev);
+                  next.delete(hsId);
+                  return next;
+                });
+              } else {
+                setKeptEmployees(prev => new Set(prev).add(hsId));
+              }
+            }}
+            sx={{
+              fontFamily,
+              fontSize: 12,
+              textTransform: 'none',
+              backgroundColor: isKept ? 'transparent' : destructiveColor,
+              color: isKept ? destructiveColor : 'white',
+              borderColor: destructiveColor,
+              '&:hover': {
+                backgroundColor: isKept ? '#fee2e2' : '#b91c1c',
+              },
+            }}
+          >
+            {isKept ? 'Kept' : 'Keep'}
+          </Button>
+        );
+      },
+    });
+  }
+
+  return columns;
+}
+
 const BookmarkletLink = styled(Link)(() => ({
   display: 'inline-block',
   background: levelsetGreen,
@@ -492,262 +790,6 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     setEditTrigger(prev => prev + 1);
   };
 
-  // Helper to create employee table columns
-  // NOTE: This function captures state via closure, but we only call it when on review page
-  const createEmployeeColumns = (
-    editable: boolean,
-    showKeepButton: boolean = false
-  ): GridColDef[] => {
-    const columns: GridColDef[] = [
-      {
-        field: 'name',
-        headerName: 'Name',
-        width: 200,
-        flex: 1,
-        renderCell: (params) => (
-          <Typography sx={{ fontFamily, fontSize: 14 }}>
-            {params.row.first_name} {params.row.last_name}
-          </Typography>
-        ),
-      },
-      {
-        field: 'role',
-        headerName: 'Current Role',
-        width: 150,
-        renderCell: (params) => {
-          const currentRole = params.value || 'Team Member';
-          const menuAnchor = roleMenuAnchor[params.row.id] || null;
-          const menuOpen = editable && Boolean(menuAnchor);
-          
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-              {editable ? (
-                <Button
-                  onClick={(e) => handleRoleMenuOpen(e, params.row.id)}
-                  sx={{ fontFamily, fontSize: 12, textTransform: 'none', p: 0 }}
-                >
-                  <RolePill role={currentRole} />
-                </Button>
-              ) : (
-                <RolePill role={currentRole} />
-              )}
-              <Menu
-                anchorEl={menuAnchor}
-                open={menuOpen}
-                onClose={() => handleRoleMenuClose(params.row.id)}
-                disableAutoFocusItem
-                MenuListProps={{ 'aria-labelledby': undefined }}
-              >
-                {roles.map((role) => (
-                  <MenuItem
-                    key={role}
-                    onClick={() => handleRoleSelect(params.row.id, role)}
-                    sx={{ fontFamily, fontSize: 12 }}
-                  >
-                    {role}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
-          );
-        },
-      },
-      {
-        field: 'is_foh',
-        headerName: 'FOH',
-        width: 80,
-        type: 'boolean',
-        renderCell: (params) => {
-          const edit = employeeEdits.get(params.row.id);
-          const checked = edit?.is_foh !== undefined ? edit.is_foh : (params.value || false);
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-              <Checkbox
-                checked={checked}
-                disabled={!editable}
-                onChange={(e) => {
-                  if (editable) {
-                    const newEdits = new Map(employeeEdits);
-                    const edit: EmployeeEdit = newEdits.get(params.row.id) || { id: params.row.id };
-                    edit.is_foh = e.target.checked;
-                    newEdits.set(params.row.id, edit);
-                    setEmployeeEdits(newEdits);
-                    setEditTrigger(prev => prev + 1);
-                  }
-                }}
-                sx={{
-                  color: '#9ca3af',
-                  '&.Mui-checked': {
-                    color: levelsetGreen,
-                  },
-                }}
-              />
-            </Box>
-          );
-        },
-      },
-      {
-        field: 'is_boh',
-        headerName: 'BOH',
-        width: 80,
-        type: 'boolean',
-        renderCell: (params) => {
-          const edit = employeeEdits.get(params.row.id);
-          const checked = edit?.is_boh !== undefined ? edit.is_boh : (params.value || false);
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-              <Checkbox
-                checked={checked}
-                disabled={!editable}
-                onChange={(e) => {
-                  if (editable) {
-                    const newEdits = new Map(employeeEdits);
-                    const edit: EmployeeEdit = newEdits.get(params.row.id) || { id: params.row.id };
-                    edit.is_boh = e.target.checked;
-                    newEdits.set(params.row.id, edit);
-                    setEmployeeEdits(newEdits);
-                    setEditTrigger(prev => prev + 1);
-                  }
-                }}
-                sx={{
-                  color: '#9ca3af',
-                  '&.Mui-checked': {
-                    color: levelsetGreen,
-                  },
-                }}
-              />
-            </Box>
-          );
-        },
-      },
-      {
-        field: 'availability',
-        headerName: 'Availability',
-        width: 150,
-        renderCell: (params) => {
-          const edit = employeeEdits.get(params.row.id);
-          const avail = edit?.availability || params.value || 'Available';
-          const menuAnchor = availabilityMenuAnchor[params.row.id] || null;
-          const menuOpen = editable && Boolean(menuAnchor);
-          
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-              {editable ? (
-                <Button
-                  onClick={(e) => handleAvailabilityMenuOpen(e, params.row.id)}
-                  sx={{ fontFamily, fontSize: 12, textTransform: 'none', p: 0 }}
-                >
-                  <Box
-                    sx={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '4px 12px',
-                      borderRadius: '14px',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      fontFamily,
-                      backgroundColor: avail === 'Available' ? '#dcfce7' : '#fef3c7',
-                      color: avail === 'Available' ? '#166534' : '#d97706',
-                    }}
-                  >
-                    {avail}
-                  </Box>
-                </Button>
-              ) : (
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '4px 12px',
-                    borderRadius: '14px',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    fontFamily,
-                    backgroundColor: avail === 'Available' ? '#dcfce7' : '#fef3c7',
-                    color: avail === 'Available' ? '#166534' : '#d97706',
-                  }}
-                >
-                  {avail}
-                </Box>
-              )}
-              <Menu
-                anchorEl={menuAnchor}
-                open={menuOpen}
-                onClose={() => handleAvailabilityMenuClose(params.row.id)}
-                disableAutoFocusItem
-                MenuListProps={{ 'aria-labelledby': undefined }}
-              >
-                {availabilities.map((avail) => (
-                  <MenuItem
-                    key={avail}
-                    onClick={() => handleAvailabilitySelect(params.row.id, avail)}
-                    sx={{ fontFamily, fontSize: 12 }}
-                  >
-                    {avail}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
-          );
-        },
-      },
-      {
-        field: 'hire_date',
-        headerName: 'Hire Date',
-        width: 120,
-        renderCell: (params) => (
-          <Typography sx={{ fontFamily, fontSize: 14 }}>
-            {params.value ? new Date(params.value).toLocaleDateString() : '-'}
-          </Typography>
-        ),
-      },
-    ];
-
-    if (showKeepButton) {
-      columns.push({
-        field: 'actions',
-        headerName: '',
-        width: 100,
-        renderCell: (params) => {
-          const isKept = keptEmployees.has(Number(params.row.hs_id));
-          return (
-            <Button
-              variant={isKept ? 'outlined' : 'contained'}
-              onClick={() => {
-                const hsId = Number(params.row.hs_id);
-                if (isKept) {
-                  setKeptEmployees(prev => {
-                    const next = new Set(prev);
-                    next.delete(hsId);
-                    return next;
-                  });
-                } else {
-                  setKeptEmployees(prev => new Set(prev).add(hsId));
-                }
-              }}
-              sx={{
-                fontFamily,
-                fontSize: 12,
-                textTransform: 'none',
-                backgroundColor: isKept ? 'transparent' : destructiveColor,
-                color: isKept ? destructiveColor : 'white',
-                borderColor: destructiveColor,
-                '&:hover': {
-                  backgroundColor: isKept ? '#fee2e2' : '#b91c1c',
-                },
-              }}
-            >
-              {isKept ? 'Kept' : 'Keep'}
-            </Button>
-          );
-        },
-      });
-    }
-
-    return columns;
-  };
 
   // Create columns only when on review page
   // Use empty array as stable reference when not on review page to avoid hook issues
@@ -757,14 +799,48 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   
   const editableColumns = React.useMemo<GridColDef[]>(() => {
     // CRITICAL: Early return with stable empty array - don't call createEmployeeColumns when not on review page
-    // This prevents the function from being evaluated and creating closures with state
     if (!shouldCreateColumns) {
       return [];
     }
     // Only create columns when we're actually on the review page with notification data
-    // The function will be called here, but only when shouldCreateColumns is true
-    return createEmployeeColumns(true, false);
-  }, [shouldCreateColumns, editTrigger, employeeEdits.size, Object.keys(roleMenuAnchor).length, Object.keys(availabilityMenuAnchor).length]);
+    // Pass all dependencies as parameters to avoid closure issues
+    return createEmployeeColumns(true, false, {
+      roleMenuAnchor,
+      handleRoleMenuOpen,
+      handleRoleMenuClose,
+      handleRoleSelect,
+      employeeEdits,
+      setEmployeeEdits,
+      setEditTrigger,
+      availabilityMenuAnchor,
+      handleAvailabilityMenuOpen,
+      handleAvailabilityMenuClose,
+      handleAvailabilitySelect,
+      keptEmployees,
+      setKeptEmployees,
+      roles,
+      availabilities,
+      fontFamily,
+      levelsetGreen,
+      destructiveColor,
+    });
+  }, [
+    shouldCreateColumns,
+    editTrigger,
+    employeeEdits,
+    roleMenuAnchor,
+    availabilityMenuAnchor,
+    keptEmployees,
+    handleRoleMenuOpen,
+    handleRoleMenuClose,
+    handleRoleSelect,
+    setEmployeeEdits,
+    setEditTrigger,
+    handleAvailabilityMenuOpen,
+    handleAvailabilityMenuClose,
+    handleAvailabilitySelect,
+    setKeptEmployees,
+  ]);
   
   const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
     // CRITICAL: Early return with stable empty array - don't call createEmployeeColumns when not on review page
@@ -772,8 +848,42 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       return [];
     }
     // Only create columns when we're actually on the review page with notification data
-    return createEmployeeColumns(false, true);
-  }, [shouldCreateColumns, keptEmployees.size]);
+    return createEmployeeColumns(false, true, {
+      roleMenuAnchor,
+      handleRoleMenuOpen,
+      handleRoleMenuClose,
+      handleRoleSelect,
+      employeeEdits,
+      setEmployeeEdits,
+      setEditTrigger,
+      availabilityMenuAnchor,
+      handleAvailabilityMenuOpen,
+      handleAvailabilityMenuClose,
+      handleAvailabilitySelect,
+      keptEmployees,
+      setKeptEmployees,
+      roles,
+      availabilities,
+      fontFamily,
+      levelsetGreen,
+      destructiveColor,
+    });
+  }, [
+    shouldCreateColumns,
+    keptEmployees,
+    employeeEdits,
+    roleMenuAnchor,
+    availabilityMenuAnchor,
+    handleRoleMenuOpen,
+    handleRoleMenuClose,
+    handleRoleSelect,
+    setEmployeeEdits,
+    setEditTrigger,
+    handleAvailabilityMenuOpen,
+    handleAvailabilityMenuClose,
+    handleAvailabilitySelect,
+    setKeptEmployees,
+  ]);
 
   // Render Page 2: Review Changes
   const renderReviewPage = () => {
