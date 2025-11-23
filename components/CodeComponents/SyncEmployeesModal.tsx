@@ -931,15 +931,66 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     setKeptEmployees,
   ]);
 
+  // CRITICAL: Move useMemo hooks out of renderReviewPage to component body
+  // This ensures hooks are always called in the same order, preventing hook order violations
+  const syncData = notification?.sync_data;
+  const newEmployees = syncData?.new_employees || [];
+  const modifiedEmployees = syncData?.modified_employees || [];
+  const terminatedEmployees = syncData?.terminated_employees || [];
+
+  // Prepare new employees data with default role - reactive to edits
+  // Always call useMemo, return empty array when not on review page
+  const newEmployeesData = React.useMemo(() => {
+    console.log('[SyncEmployeesModal] useMemo: newEmployeesData called', { 
+      hasNotification: !!notification, 
+      newEmployeesCount: newEmployees.length 
+    });
+    if (!notification || currentPage !== 'review') {
+      return [];
+    }
+    return newEmployees.map(emp => {
+      const edit = employeeEdits.get(emp.id);
+      return {
+        id: emp.id,
+        first_name: emp.first_name,
+        last_name: emp.last_name,
+        role: edit?.role || (hasSyncedBefore ? 'New Hire' : 'Team Member'),
+        is_foh: edit?.is_foh !== undefined ? edit.is_foh : false,
+        is_boh: edit?.is_boh !== undefined ? edit.is_boh : false,
+        availability: edit?.availability || ('Available' as AvailabilityType),
+        hire_date: emp.hire_date,
+        hs_id: emp.hs_id,
+      };
+    });
+  }, [notification, currentPage, newEmployees, employeeEdits, hasSyncedBefore, editTrigger]);
+
+  // Prepare terminated employees data
+  // Always call useMemo, return empty array when not on review page
+  const terminatedEmployeesData = React.useMemo(() => {
+    console.log('[SyncEmployeesModal] useMemo: terminatedEmployeesData called', { 
+      hasNotification: !!notification, 
+      terminatedEmployeesCount: terminatedEmployees.length 
+    });
+    if (!notification || currentPage !== 'review') {
+      return [];
+    }
+    return terminatedEmployees.map(emp => ({
+      id: emp.id,
+      first_name: emp.first_name,
+      last_name: emp.last_name,
+      role: 'Team Member', // Default, not editable
+      is_foh: false,
+      is_boh: false,
+      availability: 'Available' as AvailabilityType,
+      hire_date: null,
+      hs_id: emp.hs_id,
+    }));
+  }, [notification, currentPage, terminatedEmployees]);
+
   // Render Page 2: Review Changes
   const renderReviewPage = () => {
     console.log('[SyncEmployeesModal] renderReviewPage called', { hasNotification: !!notification });
     if (!notification) return null;
-
-    const syncData = notification.sync_data;
-    const newEmployees = syncData.new_employees || [];
-    const modifiedEmployees = syncData.modified_employees || [];
-    const terminatedEmployees = syncData.terminated_employees || [];
 
     const hasChanges = newEmployees.length > 0 || modifiedEmployees.length > 0 || terminatedEmployees.length > 0;
 
@@ -956,41 +1007,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       );
     }
 
-    // Prepare new employees data with default role - reactive to edits
-    const newEmployeesData = React.useMemo(() => {
-      return newEmployees.map(emp => {
-        const edit = employeeEdits.get(emp.id);
-        return {
-          id: emp.id,
-          first_name: emp.first_name,
-          last_name: emp.last_name,
-          role: edit?.role || (hasSyncedBefore ? 'New Hire' : 'Team Member'),
-          is_foh: edit?.is_foh !== undefined ? edit.is_foh : false,
-          is_boh: edit?.is_boh !== undefined ? edit.is_boh : false,
-          availability: edit?.availability || ('Available' as AvailabilityType),
-          hire_date: emp.hire_date,
-          hs_id: emp.hs_id,
-        };
-      });
-    }, [newEmployees, employeeEdits, hasSyncedBefore, editTrigger]);
-
-    // Prepare terminated employees data
-    const terminatedEmployeesData = React.useMemo(() => {
-      return terminatedEmployees.map(emp => ({
-        id: emp.id,
-        first_name: emp.first_name,
-        last_name: emp.last_name,
-        role: 'Team Member', // Default, not editable
-        is_foh: false,
-        is_boh: false,
-        availability: 'Available' as AvailabilityType,
-        hire_date: null,
-        hs_id: emp.hs_id,
-      }));
-    }, [terminatedEmployees]);
-
-    // Count terminated employees (excluding kept ones)
-    const terminatedCount = terminatedEmployeesData.filter(emp => !keptEmployees.has(Number(emp.hs_id))).length;
+    // Count terminated employees (excluding kept ones) - moved outside renderReviewPage
 
     return (
       <Box>
