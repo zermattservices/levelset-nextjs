@@ -125,9 +125,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const emailsInSync = new Set<string>();
     let createdCount = 0;
     let updatedCount = 0;
+    let skippedCount = 0;
+    let errorCount = 0;
+
+    console.log(`[Sync] Starting to process ${activeVisibleEmployees.length} employees`);
 
     for (const hsEmployee of activeVisibleEmployees) {
-      if (!hsEmployee.email) continue; // Skip if no email
+      if (!hsEmployee.email) {
+        skippedCount++;
+        console.log(`[Sync] Skipping employee ${hsEmployee.name || hsEmployee.id} - no email`);
+        continue; // Skip if no email
+      }
 
       const emailLower = hsEmployee.email.toLowerCase();
       emailsInSync.add(emailLower);
@@ -158,12 +166,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .eq('id', existingEmployee.id);
 
         if (updateError) {
-          console.error(`Error updating employee ${existingEmployee.id}:`, updateError);
+          console.error(`[Sync] Error updating employee ${existingEmployee.id} (${hsEmployee.email}):`, updateError);
+          errorCount++;
           continue;
         }
 
         updatedCount++;
         processedEmployees.push({ ...existingEmployee, ...updateData });
+        console.log(`[Sync] Updated employee: ${hsEmployee.email}`);
       } else {
         // Create new employee
         const phoneNumber = hsEmployee.phone || hsEmployee.contactNumber?.formatted || null;
@@ -189,7 +199,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .single();
 
         if (createError) {
-          console.error(`Error creating employee ${hsEmployee.email}:`, createError);
+          console.error(`[Sync] Error creating employee ${hsEmployee.email}:`, createError);
+          console.error(`[Sync] Employee data:`, JSON.stringify(newEmployeeData, null, 2));
+          errorCount++;
           continue;
         }
 
@@ -207,8 +219,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         createdCount++;
         processedEmployees.push(newEmployee);
+        console.log(`[Sync] Created employee: ${hsEmployee.email}`);
       }
     }
+
+    console.log(`[Sync] Processing complete - Created: ${createdCount}, Updated: ${updatedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}`);
 
     // Step 6: Mark missing employees as inactive
     const employeesToDeactivate = (existingEmployees || []).filter(emp => {
@@ -263,6 +278,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         total_received: employees.length,
         after_filter: activeVisibleEmployees.length,
         existing_count: existingEmployees?.length || 0,
+        skipped: skippedCount,
+        errors: errorCount,
       },
     });
 
