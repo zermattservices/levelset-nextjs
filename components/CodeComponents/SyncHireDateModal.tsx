@@ -301,6 +301,15 @@ export function SyncHireDateModal({
 
           if (notificationData) {
             setNotification(notificationData as PayrollSyncNotification);
+            // Initialize unmatchedMappings with suggested matches
+            const syncData = notificationData.sync_data;
+            const initialMappings: Record<string, string | null> = {};
+            (syncData.unmatched_employees || []).forEach((emp: any) => {
+              if (emp.suggested_match_id) {
+                initialMappings[emp.payroll_name] = emp.suggested_match_id;
+              }
+            });
+            setUnmatchedMappings(initialMappings);
           }
         } catch (error) {
           console.error('Error processing file:', error);
@@ -1078,7 +1087,10 @@ export function SyncHireDateModal({
                 }}>
                   <Box sx={{ p: 2 }}>
                     {unmatchedEmployees.map((emp: any, idx: number) => {
-                      const selectedEmployeeId = unmatchedMappings[emp.payroll_name] || emp.suggested_match_id || '';
+                      // Pre-select suggested match if available and not already manually selected
+                      const defaultSelection = unmatchedMappings[emp.payroll_name] !== undefined 
+                        ? unmatchedMappings[emp.payroll_name] 
+                        : (emp.suggested_match_id || '');
                       return (
                         <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, pb: 2, borderBottom: idx < unmatchedEmployees.length - 1 ? '1px solid #e5e7eb' : 'none' }}>
                           <Box sx={{ flex: 1 }}>
@@ -1089,7 +1101,7 @@ export function SyncHireDateModal({
                           <ArrowForwardIcon sx={{ color: '#6b7280', fontSize: 20 }} />
                           <FormControl size="small" sx={{ flex: 1, minWidth: 200 }}>
                             <Select
-                              value={selectedEmployeeId}
+                              value={defaultSelection}
                               onChange={(e: SelectChangeEvent<string>) => {
                                 setUnmatchedMappings(prev => ({
                                   ...prev,

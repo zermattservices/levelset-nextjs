@@ -132,13 +132,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const matchResult = matchEmployee(parsedName, existingEmployees || []);
 
       if (matchResult.employee && matchResult.confidence !== 'none' && matchResult.confidence !== 'low') {
-        // Auto-matched with high confidence - add to modified
-        modifiedEmployees.push({
-          id: matchResult.employee.id,
-          payroll_name: payrollName,
-          hire_date: hireDate,
-          matched_employee_name: matchResult.employee.full_name,
-        });
+        // Only auto-match to modified if employee already has payroll_name set
+        // If they don't have payroll_name, they need user confirmation in unmatched accordion
+        if (matchResult.employee.payroll_name) {
+          // Employee already has payroll_name - auto-match to modified
+          modifiedEmployees.push({
+            id: matchResult.employee.id,
+            payroll_name: payrollName,
+            hire_date: hireDate,
+            matched_employee_name: matchResult.employee.full_name,
+          });
+        } else {
+          // Employee doesn't have payroll_name - needs user confirmation
+          // Pre-fill the suggested match in unmatched accordion
+          unmatchedEmployees.push({
+            payroll_name: payrollName,
+            hire_date: hireDate,
+            parsed_first_name: parsedName.firstName,
+            parsed_last_name: parsedName.lastName,
+            suggested_match_id: matchResult.employee.id,
+            suggested_match_name: matchResult.employee.full_name,
+          });
+        }
       } else {
         // No match found - needs user selection
         unmatchedEmployees.push({
