@@ -136,13 +136,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Only auto-match to modified if employee already has payroll_name set
         // If they don't have payroll_name, they need user confirmation in unmatched accordion
         if (matchResult.employee.payroll_name) {
-          // Employee already has payroll_name - auto-match to modified
-          modifiedEmployees.push({
-            id: matchResult.employee.id,
-            payroll_name: payrollName,
-            hire_date: hireDate,
-            matched_employee_name: matchResult.employee.full_name,
-          });
+          // Employee already has payroll_name - require HIGH confidence to prevent false matches
+          // This prevents matching "Castro, Jessica" to "Jessica Badejo" just because first names match
+          if (matchResult.confidence === 'high' || matchResult.confidence === 'exact') {
+            // Employee already has payroll_name - auto-match to modified
+            modifiedEmployees.push({
+              id: matchResult.employee.id,
+              payroll_name: payrollName,
+              hire_date: hireDate,
+              matched_employee_name: matchResult.employee.full_name,
+            });
+          }
+          // If confidence is only 'medium', skip auto-matching to prevent false positives
         } else {
           // Employee doesn't have payroll_name - needs user confirmation
           // Check if this employee has already been suggested for another payroll name

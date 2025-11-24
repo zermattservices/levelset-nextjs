@@ -123,6 +123,7 @@ function calculateSimilarity(parsed: ParsedName, employee: Employee): number {
   const normalizedParsedLast = normalize(parsed.lastName);
   const normalizedEmpLast = normalize(empLastName);
   
+  // Only give high score if last names actually match (not just first name)
   if (normalizedParsedFirst === normalizedEmpFirst && 
       (normalizedParsedLast === normalizedEmpLast || 
        normalizedParsedLast.includes(normalizedEmpLast) || 
@@ -134,6 +135,23 @@ function calculateSimilarity(parsed: ParsedName, employee: Employee): number {
   if (normalizedParsedLast === normalizedEmpFirst && 
       normalizedParsedFirst === normalizedEmpLast) {
     return 0.85;
+  }
+  
+  // If first names match but last names are completely different, penalize heavily
+  // This prevents "Castro, Jessica" from matching "Jessica Badejo"
+  if (normalizedParsedFirst === normalizedEmpFirst && normalizedParsedFirst.length > 0) {
+    const lastNameDistance = levenshteinDistance(normalizedParsedLast, normalizedEmpLast);
+    const lastNameMaxLen = Math.max(normalizedParsedLast.length, normalizedEmpLast.length);
+    const lastNameSimilarity = lastNameMaxLen > 0
+      ? 1 - (lastNameDistance / lastNameMaxLen)
+      : 0;
+    
+    // If last names are very different (similarity < 0.3), don't give a high score
+    // This means last names must have at least some similarity
+    if (lastNameSimilarity < 0.3) {
+      // Return a lower score that won't meet the 'high' confidence threshold
+      return Math.min(0.65, weightedSimilarity);
+    }
   }
 
   // Calculate Levenshtein distance for first name
