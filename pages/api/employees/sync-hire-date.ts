@@ -133,21 +133,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const matchResult = matchEmployee(parsedName, existingEmployees || []);
 
       if (matchResult.employee && matchResult.confidence !== 'none' && matchResult.confidence !== 'low') {
-        // Only auto-match to modified if employee already has payroll_name set
-        // If they don't have payroll_name, they need user confirmation in unmatched accordion
+        // If employee already has payroll_name set, NEVER override it via fuzzy matching
+        // The only way to update payroll_name is through exact match (handled above)
+        // or through user confirmation in unmatched employees accordion
         if (matchResult.employee.payroll_name) {
-          // Employee already has payroll_name - require HIGH confidence to prevent false matches
-          // This prevents matching "Castro, Jessica" to "Jessica Badejo" just because first names match
-          if (matchResult.confidence === 'high' || matchResult.confidence === 'exact') {
-            // Employee already has payroll_name - auto-match to modified
-            modifiedEmployees.push({
-              id: matchResult.employee.id,
-              payroll_name: payrollName,
-              hire_date: hireDate,
-              matched_employee_name: matchResult.employee.full_name,
-            });
-          }
-          // If confidence is only 'medium', skip auto-matching to prevent false positives
+          // Employee already has payroll_name - skip fuzzy matching
+          // Their payroll_name should never be overridden automatically
+          // They will only appear in modified if exact match found above
         } else {
           // Employee doesn't have payroll_name - needs user confirmation
           // Check if this employee has already been suggested for another payroll name
