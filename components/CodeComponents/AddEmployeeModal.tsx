@@ -513,6 +513,7 @@ export function AddEmployeeModal({
             fontWeight: 500,
             textTransform: "none",
             color: "#6b7280",
+            borderRadius: '8px',
           }}
         >
           Cancel
@@ -528,6 +529,7 @@ export function AddEmployeeModal({
             textTransform: "none",
             backgroundColor: levelsetGreen,
             color: "#ffffff",
+            borderRadius: '8px',
             "&:hover": {
               backgroundColor: "#2d5a42",
             },

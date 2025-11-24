@@ -610,6 +610,7 @@ export function RecordActionModal({
                 fontSize: 13,
                 textTransform: "none",
                 color: "#6b7280",
+                borderRadius: '8px',
                 "&:hover": {
                   backgroundColor: "#f3f4f6",
                 },
@@ -626,6 +627,7 @@ export function RecordActionModal({
                 fontSize: 13,
                 textTransform: "none",
                 backgroundColor: levelsetGreen,
+                borderRadius: '8px',
                 "&:hover": {
                   backgroundColor: "#264d38",
                 },

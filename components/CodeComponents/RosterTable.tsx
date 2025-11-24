@@ -11,6 +11,8 @@ import {
   Box,
   Tabs,
   Tab,
+  Dialog,
+  DialogTitle,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -26,6 +28,7 @@ import { DataGridPro, GridColDef, gridClasses } from "@mui/x-data-grid-pro";
 import { Button } from "@mui/material";
 import { AddEmployeeModal } from "./AddEmployeeModal";
 import { SyncEmployeesModal } from "./SyncEmployeesModal";
+import { EmployeeModal } from "./EmployeeModal";
 import { useLocationContext } from "./LocationContext";
 
 export type Role =
@@ -99,6 +102,7 @@ export function RosterTable(props: RosterTableProps) {
               textTransform: 'none',
               color: '#6b7280',
               borderColor: '#d1d5db',
+              borderRadius: '8px',
               '&:hover': {
                 borderColor: '#9ca3af',
                 backgroundColor: '#f9fafb',
@@ -120,6 +124,7 @@ export function RosterTable(props: RosterTableProps) {
               textTransform: 'none',
               backgroundColor: '#31664a',
               color: '#ffffff',
+              borderRadius: '8px',
               '&:hover': {
                 backgroundColor: '#2d5a42',
               },
@@ -426,6 +431,17 @@ function EmployeesTableView({
   
   // Certification status dropdown state
   const [certificationMenuAnchor, setCertificationMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
+
+  // Actions menu state
+  const [actionsMenuAnchor, setActionsMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
+
+  // Employee modal state
+  const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
+  const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
+
+  // Terminate confirmation modal state
+  const [terminateConfirmOpen, setTerminateConfirmOpen] = React.useState(false);
+  const [employeeToTerminate, setEmployeeToTerminate] = React.useState<{ id: string; name: string } | null>(null);
 
   // Unchangeable roles
   const unchangeableRoles: Role[] = ["Operator", "Executive"];
@@ -829,6 +845,74 @@ function EmployeesTableView({
     }
   };
 
+  // Actions menu handlers
+  const handleActionsMenuOpen = (event: React.MouseEvent<HTMLElement>, employeeId: string) => {
+    setActionsMenuAnchor(prev => ({ ...prev, [employeeId]: event.currentTarget }));
+  };
+
+  const handleActionsMenuClose = (employeeId: string) => {
+    setActionsMenuAnchor(prev => ({ ...prev, [employeeId]: null }));
+  };
+
+  const handleViewProfile = async (employeeId: string) => {
+    handleActionsMenuClose(employeeId);
+    
+    try {
+      // Fetch full employee data
+      const response = await fetch(`/api/employees?location_id=${locationId}&id=${employeeId}`);
+      if (!response.ok) throw new Error('Failed to fetch employee');
+      
+      const result = await response.json() as { employees: Employee[] };
+      const employee = result.employees.find(emp => emp.id === employeeId);
+      
+      if (employee) {
+        setSelectedEmployee(employee);
+        setEmployeeModalOpen(true);
+      }
+    } catch (err) {
+      console.error('Error fetching employee:', err);
+      alert('Failed to load employee profile');
+    }
+  };
+
+  const handleTerminateEmployee = (employeeId: string, employeeName: string) => {
+    handleActionsMenuClose(employeeId);
+    setEmployeeToTerminate({ id: employeeId, name: employeeName });
+    setTerminateConfirmOpen(true);
+  };
+
+  const handleConfirmTerminate = async () => {
+    if (!employeeToTerminate) return;
+    
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          intent: 'update',
+          id: employeeToTerminate.id,
+          active: false,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to terminate employee');
+
+      // Update local state
+      setData(prev => prev.filter(emp => emp.id !== employeeToTerminate.id));
+      
+      setTerminateConfirmOpen(false);
+      setEmployeeToTerminate(null);
+      
+      // Refresh data
+      fetchEmployees();
+    } catch (err) {
+      console.error('Error terminating employee:', err);
+      alert('Failed to terminate employee. Please try again.');
+    }
+  };
+
   const rows = React.useMemo(
     () =>
       data.map((e) => ({
@@ -1099,15 +1183,51 @@ function EmployeesTableView({
         align: "right",
         headerAlign: "right",
         sortable: false,
-        renderCell: (params) => (
-          <ActionsButton
-            onClick={() => onEdit?.(params.row.id as string)}
-            className="actions-button"
-            aria-label={`Actions for ${params.row.name}`}
-          >
-            <MoreVertIcon fontSize="small" />
-          </ActionsButton>
-        ),
+        renderCell: (params) => {
+          const employeeId = params.row.id as string;
+          const employeeName = params.row.name as string;
+          const anchor = actionsMenuAnchor[employeeId] || null;
+          
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', width: '100%', height: '100%' }}>
+              <ActionsButton
+                onClick={(e) => handleActionsMenuOpen(e, employeeId)}
+                className="actions-button"
+                aria-label={`Actions for ${employeeName}`}
+              >
+                <MoreVertIcon fontSize="small" />
+              </ActionsButton>
+              <Menu
+                anchorEl={anchor}
+                open={Boolean(anchor)}
+                onClose={() => handleActionsMenuClose(employeeId)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                PaperProps={{
+                  sx: {
+                    fontFamily,
+                    borderRadius: 2,
+                    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                    border: "1px solid #e5e7eb",
+                    minWidth: 180,
+                  },
+                }}
+              >
+                <RoleMenuItem
+                  onClick={() => handleViewProfile(employeeId)}
+                >
+                  View profile
+                </RoleMenuItem>
+                <RoleMenuItem
+                  onClick={() => handleTerminateEmployee(employeeId, employeeName)}
+                  sx={{ color: '#dc2626' }}
+                >
+                  Terminate employee
+                </RoleMenuItem>
+              </Menu>
+            </Box>
+          );
+        },
       });
     }
 
@@ -1127,6 +1247,11 @@ function EmployeesTableView({
     roleMenuAnchor,
     showActions,
     onEdit,
+    actionsMenuAnchor,
+    handleActionsMenuOpen,
+    handleActionsMenuClose,
+    handleViewProfile,
+    handleTerminateEmployee,
   ]);
 
   if (loading && data.length === 0) {
@@ -1185,61 +1310,140 @@ function EmployeesTableView({
   }
 
   return (
-    <StyledContainer
-      className={`roster-table-container ${className}`}
-      data-plasmic-name="roster-table-container"
-    >
-      <DataGridPro
-        rows={rows}
-        columns={columns}
-        disableRowSelectionOnClick
-        loading={loading}
-        hideFooter
-        rowHeight={48}
-        columnHeaderHeight={56}
-        style={{ flex: 1, width: '100%' }}
-        sx={{
-          border: "none",
-          fontFamily,
-          [`& .${gridClasses.columnHeaders}`]: {
-            borderBottom: "1px solid #e5e7eb",
-          },
-          [`& .${gridClasses.columnHeader}`]: {
-            backgroundColor: "#f9fafb",
-            fontWeight: 600,
-            fontSize: 14,
-            color: "#111827",
-            '&:focus, &:focus-within': {
-              outline: 'none',
-            },
-          },
-          '& .MuiDataGrid-columnHeaderTitleContainer': {
-            padding: '0 16px',
-          },
-          [`& .${gridClasses.columnSeparator}`]: {
-            display: 'none',
-          },
-          [`& .${gridClasses.cell}`]: {
-            borderBottom: '1px solid #f3f4f6',
-            fontSize: 13,
-            fontWeight: 500,
-            color: '#111827',
-            '&:focus, &:focus-within': {
-              outline: 'none',
-            },
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0 16px',
-          },
-          [`& .${gridClasses.row}:hover`]: {
-            backgroundColor: '#f9fafb',
-          },
-          '& .MuiDataGrid-overlay': {
+    <>
+      <StyledContainer
+        className={`roster-table-container ${className}`}
+        data-plasmic-name="roster-table-container"
+      >
+        <DataGridPro
+          rows={rows}
+          columns={columns}
+          disableRowSelectionOnClick
+          loading={loading}
+          hideFooter
+          rowHeight={48}
+          columnHeaderHeight={56}
+          style={{ flex: 1, width: '100%' }}
+          sx={{
+            border: "none",
             fontFamily,
+            [`& .${gridClasses.columnHeaders}`]: {
+              borderBottom: "1px solid #e5e7eb",
+            },
+            [`& .${gridClasses.columnHeader}`]: {
+              backgroundColor: "#f9fafb",
+              fontWeight: 600,
+              fontSize: 14,
+              color: "#111827",
+              '&:focus, &:focus-within': {
+                outline: 'none',
+              },
+            },
+            '& .MuiDataGrid-columnHeaderTitleContainer': {
+              padding: '0 16px',
+            },
+            [`& .${gridClasses.columnSeparator}`]: {
+              display: 'none',
+            },
+            [`& .${gridClasses.cell}`]: {
+              borderBottom: '1px solid #f3f4f6',
+              fontSize: 13,
+              fontWeight: 500,
+              color: '#111827',
+              '&:focus, &:focus-within': {
+                outline: 'none',
+              },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 16px',
+            },
+            [`& .${gridClasses.row}:hover`]: {
+              backgroundColor: '#f9fafb',
+            },
+            '& .MuiDataGrid-overlay': {
+              fontFamily,
+            },
+          }}
+        />
+      </StyledContainer>
+
+      {/* Employee Modal */}
+      <EmployeeModal
+        open={employeeModalOpen}
+        employee={selectedEmployee}
+        onClose={() => {
+          setEmployeeModalOpen(false);
+          setSelectedEmployee(null);
+        }}
+        locationId={locationId}
+        initialTab="pe"
+      />
+
+      {/* Terminate Confirmation Modal */}
+      <Dialog
+        open={terminateConfirmOpen}
+        onClose={() => {
+          setTerminateConfirmOpen(false);
+          setEmployeeToTerminate(null);
+        }}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            fontFamily,
+            padding: '24px',
+            maxWidth: '500px',
           },
         }}
-      />
-    </StyledContainer>
+      >
+        <DialogTitle sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827', pb: 1 }}>
+          Terminate Employee
+        </DialogTitle>
+        <Box sx={{ px: 3, pb: 2 }}>
+          <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', mb: 3 }}>
+            Are you sure you want to terminate {employeeToTerminate?.name}? This will mark them as inactive in your roster.
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button
+              onClick={() => {
+                setTerminateConfirmOpen(false);
+                setEmployeeToTerminate(null);
+              }}
+              sx={{
+                fontFamily,
+                fontSize: 14,
+                fontWeight: 500,
+                textTransform: 'none',
+                color: '#6b7280',
+                borderRadius: '8px',
+                '&:hover': {
+                  backgroundColor: '#f3f4f6',
+                },
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleConfirmTerminate}
+              sx={{
+                fontFamily,
+                fontSize: 14,
+                fontWeight: 500,
+                textTransform: 'none',
+                backgroundColor: '#dc2626',
+                color: '#ffffff',
+                borderRadius: '8px',
+                '&:hover': {
+                  backgroundColor: '#b91c1c',
+                },
+              }}
+            >
+              Terminate
+            </Button>
+          </Box>
+        </Box>
+      </Dialog>
+    </>
   );
 }
