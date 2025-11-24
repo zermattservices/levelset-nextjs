@@ -28,6 +28,7 @@ import { DataGridPro, GridColDef, gridClasses } from "@mui/x-data-grid-pro";
 import { Button } from "@mui/material";
 import { AddEmployeeModal } from "./AddEmployeeModal";
 import { SyncEmployeesModal } from "./SyncEmployeesModal";
+import { SyncHireDateModal } from "./SyncHireDateModal";
 import { EmployeeModal } from "./EmployeeModal";
 import { useLocationContext } from "./LocationContext";
 
@@ -58,6 +59,8 @@ export function RosterTable(props: RosterTableProps) {
   const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
   const [addEmployeeModalOpen, setAddEmployeeModalOpen] = React.useState(false);
   const [syncEmployeesModalOpen, setSyncEmployeesModalOpen] = React.useState(false);
+  const [syncHireDateModalOpen, setSyncHireDateModalOpen] = React.useState(false);
+  const [syncMenuAnchor, setSyncMenuAnchor] = React.useState<null | HTMLElement>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
 
   const handleTabChange = (_event: React.SyntheticEvent, value: string) => {
@@ -114,8 +117,9 @@ export function RosterTable(props: RosterTableProps) {
           <Button
             variant="contained"
             startIcon={<SyncIcon />}
-            onClick={() => {
-              setSyncEmployeesModalOpen(true);
+            endIcon={<ExpandMoreIcon />}
+            onClick={(e) => {
+              setSyncMenuAnchor(e.currentTarget);
             }}
             sx={{
               fontFamily,
@@ -132,6 +136,51 @@ export function RosterTable(props: RosterTableProps) {
           >
             Sync Employees
           </Button>
+          <Menu
+            anchorEl={syncMenuAnchor}
+            open={Boolean(syncMenuAnchor)}
+            onClose={() => setSyncMenuAnchor(null)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            PaperProps={{
+              sx: {
+                fontFamily,
+                borderRadius: 2,
+                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                border: "1px solid #e5e7eb",
+                minWidth: 200,
+              },
+            }}
+          >
+            <MenuItem
+              onClick={() => {
+                setSyncMenuAnchor(null);
+                setSyncEmployeesModalOpen(true);
+              }}
+              sx={{
+                fontFamily,
+                fontSize: 14,
+                fontWeight: 500,
+                padding: "8px 16px",
+              }}
+            >
+              HotSchedules
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setSyncMenuAnchor(null);
+                setSyncHireDateModalOpen(true);
+              }}
+              sx={{
+                fontFamily,
+                fontSize: 14,
+                fontWeight: 500,
+                padding: "8px 16px",
+              }}
+            >
+              HR/Payroll Report
+            </MenuItem>
+          </Menu>
         </ButtonContainer>
       </TabContainer>
 
@@ -166,6 +215,16 @@ export function RosterTable(props: RosterTableProps) {
       <SyncEmployeesModal
         open={syncEmployeesModalOpen}
         onClose={() => setSyncEmployeesModalOpen(false)}
+        locationId={locationId}
+        orgId={selectedLocationOrgId || undefined}
+        onSyncComplete={() => {
+          setRefreshKey(prev => prev + 1);
+        }}
+      />
+
+      <SyncHireDateModal
+        open={syncHireDateModalOpen}
+        onClose={() => setSyncHireDateModalOpen(false)}
         locationId={locationId}
         orgId={selectedLocationOrgId || undefined}
         onSyncComplete={() => {
