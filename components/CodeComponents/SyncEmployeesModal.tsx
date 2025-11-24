@@ -1043,6 +1043,11 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
         availability: edit?.availability || ('Available' as AvailabilityType),
         hire_date: emp.hire_date,
       };
+    }).sort((a, b) => {
+      // Sort by first name (case-insensitive)
+      const firstNameA = (a.first_name || '').toLowerCase();
+      const firstNameB = (b.first_name || '').toLowerCase();
+      return firstNameA.localeCompare(firstNameB);
     });
   }, [notification, currentPage, newEmployees, employeeEdits, hasSyncedBefore, editTrigger]);
 
@@ -1066,7 +1071,12 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       availability: 'Available' as AvailabilityType,
       hire_date: null,
       hs_id: emp.hs_id,
-    }));
+    })).sort((a, b) => {
+      // Sort by first name (case-insensitive)
+      const firstNameA = (a.first_name || '').toLowerCase();
+      const firstNameB = (b.first_name || '').toLowerCase();
+      return firstNameA.localeCompare(firstNameB);
+    });
   }, [notification, currentPage, terminatedEmployees]);
 
   // Count terminated employees (excluding kept ones) - always calculate
