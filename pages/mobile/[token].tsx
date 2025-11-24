@@ -602,6 +602,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                 textTransform: 'none',
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 color: '#31664a',
+                borderRadius: '8px',
               }}
             >
               Not now
