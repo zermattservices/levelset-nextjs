@@ -545,6 +545,7 @@ export function EmployeeModal({
                   color: "#31664a",
                   padding: "4px 12px",
                   minWidth: "auto",
+                  borderRadius: '8px',
                   "&:hover": {
                     backgroundColor: "rgba(49, 102, 74, 0.04)",
                   },
@@ -618,6 +619,7 @@ export function EmployeeModal({
                   color: "#31664a",
                   padding: "4px 12px",
                   minWidth: "auto",
+                  borderRadius: '8px',
                   "&:hover": {
                     backgroundColor: "rgba(49, 102, 74, 0.04)",
                   },
@@ -710,6 +712,7 @@ export function EmployeeModal({
                         color: "#6b7280",
                         borderColor: "#d1d5db",
                         padding: "6px 16px",
+                        borderRadius: '8px',
                         "&:hover": {
                           backgroundColor: "#f3f4f6",
                           borderColor: "#9ca3af",
@@ -730,6 +733,7 @@ export function EmployeeModal({
                         textTransform: "none",
                         backgroundColor: "#31664a",
                         padding: "6px 16px",
+                        borderRadius: '8px',
                         "&:hover": {
                           backgroundColor: "#254d36",
                         },

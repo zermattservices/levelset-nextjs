@@ -148,14 +148,14 @@ export function MobileFormDrawer({
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelDiscard} sx={{ fontFamily: 'Satoshi, sans-serif' }}>
+          <Button onClick={handleCancelDiscard} sx={{ fontFamily: 'Satoshi, sans-serif', borderRadius: '8px' }}>
             Keep editing
           </Button>
           <Button
             onClick={handleConfirmDiscard}
             color="error"
             variant="contained"
-            sx={{ fontFamily: 'Satoshi, sans-serif', textTransform: 'none' }}
+            sx={{ fontFamily: 'Satoshi, sans-serif', textTransform: 'none', borderRadius: '8px' }}
           >
             Discard form
           </Button>

@@ -511,6 +511,7 @@ export function AddActionModal({
                 fontSize: 13,
                 textTransform: "none",
                 color: "#6b7280",
+                borderRadius: '8px',
               }}
             >
               Cancel
@@ -524,6 +525,7 @@ export function AddActionModal({
                 fontSize: 13,
                 textTransform: "none",
                 backgroundColor: levelsetGreen,
+                borderRadius: '8px',
                 "&:hover": {
                   backgroundColor: "#254d36",
                 },

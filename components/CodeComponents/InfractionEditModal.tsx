@@ -673,6 +673,7 @@ export function InfractionEditModal({
                 borderColor: "#dc2626",
                 border: "1px solid",
                 padding: "6px 16px",
+                borderRadius: '8px',
                 "&:hover": {
                   backgroundColor: "#fee2e2",
                   borderColor: "#b91c1c",
@@ -694,6 +695,7 @@ export function InfractionEditModal({
                   fontSize: 13,
                   textTransform: "none",
                   color: "#6b7280",
+                  borderRadius: '8px',
                 }}
               >
                 Cancel
@@ -707,6 +709,7 @@ export function InfractionEditModal({
                   fontSize: 13,
                   textTransform: "none",
                   backgroundColor: levelsetGreen,
+                  borderRadius: '8px',
                   "&:hover": {
                     backgroundColor: "#254d36",
                   },

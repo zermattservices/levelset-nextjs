@@ -174,6 +174,7 @@ export function PasswordModal({
             fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             fontWeight: 600,
             backgroundColor: '#31664a',
+            borderRadius: '8px',
             '&:hover': {
               backgroundColor: '#264d38',
             },

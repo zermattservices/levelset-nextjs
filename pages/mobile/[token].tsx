@@ -361,6 +361,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           textTransform: 'none',
           fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           fontWeight: 600,
+          borderRadius: '8px',
           '&:hover': { backgroundColor: '#264d38' },
         }}
       >

@@ -147,6 +147,7 @@ export function FormDrawer({
               fontSize: 16,
               fontWeight: 600,
               padding: '12px 16px',
+              borderRadius: '8px',
               '&:hover': {
                 backgroundColor: '#264d38',
               },
@@ -186,6 +187,7 @@ export function FormDrawer({
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               color: '#31664a',
               fontWeight: 600,
+              borderRadius: '8px',
             }}
           >
             {t('drawer.keepEditing')}
@@ -198,6 +200,7 @@ export function FormDrawer({
               fontWeight: 600,
               backgroundColor: '#b91c1c',
               color: '#ffffff',
+              borderRadius: '8px',
               '&:hover': { backgroundColor: '#991b1b' },
             }}
             onClick={() => {

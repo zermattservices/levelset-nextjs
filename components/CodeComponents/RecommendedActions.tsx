@@ -695,6 +695,7 @@ export function DisciplineNotifications({
                       backgroundColor: levelsetGreen,
                       padding: "6px 16px",
                       flexShrink: 0,
+                      borderRadius: '8px',
                       "&:hover": {
                         backgroundColor: "#264d38",
                       },
@@ -878,6 +879,7 @@ export function DisciplineNotifications({
                       padding: "6px 16px",
                       minWidth: 100,
                       flexShrink: 0,
+                      borderRadius: '8px',
                       "&:hover": {
                         backgroundColor: "#f3f4f6",
                         borderColor: "#9ca3af",
@@ -899,6 +901,7 @@ export function DisciplineNotifications({
                       padding: "6px 16px",
                       minWidth: 120,
                       flexShrink: 0,
+                      borderRadius: '8px',
                       "&:hover": {
                         backgroundColor: "#264d38",
                       },

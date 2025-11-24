@@ -86,6 +86,7 @@ export default function MobileLaunchPage() {
               sx={{
                 textTransform: 'none',
                 backgroundColor: '#31664a',
+                borderRadius: '8px',
                 '&:hover': { backgroundColor: '#264d38' },
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               }}

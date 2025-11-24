@@ -222,6 +222,7 @@ const CustomBaseButton = React.forwardRef((props: any, ref: any) => (
       fontSize: 12,
       textTransform: 'none',
       color: levelsetGreen,
+      borderRadius: '8px',
       '&:hover': {
         backgroundColor: 'rgba(49, 102, 74, 0.04)',
       },

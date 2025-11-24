@@ -77,6 +77,7 @@ export function DismissConfirmationModal({
             borderColor: "#d1d5db",
             border: "1px solid",
             padding: "6px 16px",
+            borderRadius: '8px',
             "&:hover": {
               backgroundColor: "#f3f4f6",
               borderColor: "#9ca3af",
@@ -94,6 +95,7 @@ export function DismissConfirmationModal({
             textTransform: "none",
             backgroundColor: "#dc2626",
             padding: "6px 16px",
+            borderRadius: '8px',
             "&:hover": {
               backgroundColor: "#b91c1c",
             },

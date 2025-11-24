@@ -151,6 +151,7 @@ export function MobileShell({ location }: MobileShellProps) {
               fontWeight: 600,
               textTransform: 'none',
               padding: '14px 12px',
+              borderRadius: '8px',
               '&:hover': {
                 backgroundColor: '#28533f',
               },
@@ -182,6 +183,7 @@ export function MobileShell({ location }: MobileShellProps) {
               fontWeight: 600,
               textTransform: 'none',
               padding: '14px 12px',
+              borderRadius: '8px',
               '&:hover': {
                 backgroundColor: '#28533f',
               },
