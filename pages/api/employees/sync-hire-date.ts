@@ -73,6 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const newEmployees: any[] = [];
     const modifiedEmployees: any[] = [];
     const unmatchedEmployees: any[] = [];
+    const suggestedEmployeeIds = new Set<string>(); // Track which employees have been suggested
 
     // Map of spreadsheet payroll_name -> employee_id (from user selections)
     const userMappings = new Map<string, string>();
@@ -144,14 +145,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
         } else {
           // Employee doesn't have payroll_name - needs user confirmation
-          // Pre-fill the suggested match in unmatched accordion
+          // Only suggest if this employee hasn't been suggested for another payroll name
+          const suggestedMatchId = suggestedEmployeeIds.has(matchResult.employee.id) 
+            ? null 
+            : matchResult.employee.id;
+          
+          if (suggestedMatchId) {
+            suggestedEmployeeIds.add(suggestedMatchId);
+          }
+          
           unmatchedEmployees.push({
             payroll_name: payrollName,
             hire_date: hireDate,
             parsed_first_name: parsedName.firstName,
             parsed_last_name: parsedName.lastName,
-            suggested_match_id: matchResult.employee.id,
-            suggested_match_name: matchResult.employee.full_name,
+            suggested_match_id: suggestedMatchId,
+            suggested_match_name: suggestedMatchId ? matchResult.employee.full_name : null,
           });
         }
       } else {
@@ -161,8 +170,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           hire_date: hireDate,
           parsed_first_name: parsedName.firstName,
           parsed_last_name: parsedName.lastName,
-          suggested_match_id: matchResult.employee?.id || null,
-          suggested_match_name: matchResult.employee?.full_name || null,
+          suggested_match_id: null,
+          suggested_match_name: null,
         });
       }
     }

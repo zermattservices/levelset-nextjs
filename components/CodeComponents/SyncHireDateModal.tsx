@@ -30,6 +30,7 @@ import SyncIcon from "@mui/icons-material/Sync";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import AddIcon from "@mui/icons-material/Add";
 import { styled } from "@mui/material/styles";
 import { DataGridPro, GridColDef } from "@mui/x-data-grid-pro";
 import type { Employee, AvailabilityType } from "@/lib/supabase.types";
@@ -1167,8 +1168,11 @@ export function SyncHireDateModal({
                                 },
                               }}
                             >
-                              <MenuItem value="">
-                                <em style={{ fontFamily, color: '#9ca3af' }}>Select employee...</em>
+                              <MenuItem value="" sx={{ fontFamily, fontSize: 13, fontWeight: 600 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <AddIcon sx={{ fontSize: 18, color: levelsetGreen }} />
+                                  <span style={{ color: levelsetGreen }}>New Employee</span>
+                                </Box>
                               </MenuItem>
                               {allEmployees.map(employee => {
                                 // Check if this employee is already selected
