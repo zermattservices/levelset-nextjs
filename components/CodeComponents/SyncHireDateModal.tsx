@@ -590,7 +590,7 @@ export function SyncHireDateModal({
       {
         field: 'payroll_name',
         headerName: 'Payroll Name',
-        width: 200,
+        minWidth: 250,
         flex: 1,
         align: "left",
         headerAlign: "center",
@@ -613,26 +613,28 @@ export function SyncHireDateModal({
           const edit = employeeEdits.get(key);
           const value = edit?.first_name !== undefined ? edit.first_name : params.value;
           return (
-            <TextField
-              size="small"
-              value={value}
-              onChange={(e) => {
-                const newEdits = new Map(employeeEdits);
-                const empEdit: EmployeeEdit = newEdits.get(key) || { id: key, payroll_name: key };
-                empEdit.first_name = e.target.value;
-                newEdits.set(key, empEdit);
-                setEmployeeEdits(newEdits);
-                setEditTrigger(prev => prev + 1);
-              }}
-              sx={{
-                width: '100%',
-                '& .MuiOutlinedInput-root': {
-                  fontFamily,
-                  fontSize: 13,
-                  height: 32,
-                },
-              }}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+              <TextField
+                size="small"
+                value={value}
+                onChange={(e) => {
+                  const newEdits = new Map(employeeEdits);
+                  const empEdit: EmployeeEdit = newEdits.get(key) || { id: key, payroll_name: key };
+                  empEdit.first_name = e.target.value;
+                  newEdits.set(key, empEdit);
+                  setEmployeeEdits(newEdits);
+                  setEditTrigger(prev => prev + 1);
+                }}
+                sx={{
+                  width: '100%',
+                  '& .MuiOutlinedInput-root': {
+                    fontFamily,
+                    fontSize: 13,
+                    height: 32,
+                  },
+                }}
+              />
+            </Box>
           );
         },
       },
@@ -647,33 +649,35 @@ export function SyncHireDateModal({
           const edit = employeeEdits.get(key);
           const value = edit?.last_name !== undefined ? edit.last_name : params.value;
           return (
-            <TextField
-              size="small"
-              value={value}
-              onChange={(e) => {
-                const newEdits = new Map(employeeEdits);
-                const empEdit: EmployeeEdit = newEdits.get(key) || { id: key, payroll_name: key };
-                empEdit.last_name = e.target.value;
-                newEdits.set(key, empEdit);
-                setEmployeeEdits(newEdits);
-                setEditTrigger(prev => prev + 1);
-              }}
-              sx={{
-                width: '100%',
-                '& .MuiOutlinedInput-root': {
-                  fontFamily,
-                  fontSize: 13,
-                  height: 32,
-                },
-              }}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+              <TextField
+                size="small"
+                value={value}
+                onChange={(e) => {
+                  const newEdits = new Map(employeeEdits);
+                  const empEdit: EmployeeEdit = newEdits.get(key) || { id: key, payroll_name: key };
+                  empEdit.last_name = e.target.value;
+                  newEdits.set(key, empEdit);
+                  setEmployeeEdits(newEdits);
+                  setEditTrigger(prev => prev + 1);
+                }}
+                sx={{
+                  width: '100%',
+                  '& .MuiOutlinedInput-root': {
+                    fontFamily,
+                    fontSize: 13,
+                    height: 32,
+                  },
+                }}
+              />
+            </Box>
           );
         },
       },
       {
         field: 'role',
         headerName: 'Current Role',
-        width: 180,
+        width: 150,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => {
@@ -787,7 +791,7 @@ export function SyncHireDateModal({
       {
         field: 'availability',
         headerName: 'Availability',
-        width: 160,
+        width: 140,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => {
@@ -845,7 +849,7 @@ export function SyncHireDateModal({
       {
         field: 'hire_date',
         headerName: 'Hire Date',
-        width: 150,
+        width: 130,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => (
@@ -1085,12 +1089,40 @@ export function SyncHireDateModal({
                   overflow: "hidden",
                   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
                 }}>
+                  {/* Table Headers */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 2, 
+                    p: 2, 
+                    borderBottom: '2px solid #e5e7eb',
+                    backgroundColor: '#f9fafb',
+                  }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827', textAlign: 'center' }}>
+                        HR/Payroll Name
+                      </Typography>
+                    </Box>
+                    <Box sx={{ width: 24 }} /> {/* Spacer for arrow */}
+                    <Box sx={{ flex: 1 }}>
+                      <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827', textAlign: 'center' }}>
+                        Employee
+                      </Typography>
+                    </Box>
+                  </Box>
                   <Box sx={{ p: 2 }}>
                     {unmatchedEmployees.map((emp: any, idx: number) => {
                       // Pre-select suggested match if available and not already manually selected
                       const defaultSelection = unmatchedMappings[emp.payroll_name] !== undefined 
                         ? unmatchedMappings[emp.payroll_name] 
                         : (emp.suggested_match_id || '');
+                      
+                      // Check if this employee ID is already selected by another payroll name
+                      const isDuplicate = defaultSelection && defaultSelection !== '' && 
+                        Object.entries(unmatchedMappings).some(([payrollName, employeeId]) => 
+                          payrollName !== emp.payroll_name && employeeId === defaultSelection
+                        );
+                      
                       return (
                         <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, pb: 2, borderBottom: idx < unmatchedEmployees.length - 1 ? '1px solid #e5e7eb' : 'none' }}>
                           <Box sx={{ flex: 1 }}>
@@ -1103,29 +1135,71 @@ export function SyncHireDateModal({
                             <Select
                               value={defaultSelection}
                               onChange={(e: SelectChangeEvent<string>) => {
+                                const newEmployeeId = e.target.value || null;
+                                
+                                // Check if this employee is already selected elsewhere
+                                const isAlreadySelected = newEmployeeId && 
+                                  Object.entries(unmatchedMappings).some(([payrollName, employeeId]) => 
+                                    payrollName !== emp.payroll_name && employeeId === newEmployeeId
+                                  );
+                                
+                                if (isAlreadySelected) {
+                                  // Don't update if duplicate, but show error
+                                  return;
+                                }
+                                
                                 setUnmatchedMappings(prev => ({
                                   ...prev,
-                                  [emp.payroll_name]: e.target.value || null,
+                                  [emp.payroll_name]: newEmployeeId,
                                 }));
                               }}
                               displayEmpty
+                              error={isDuplicate}
                               sx={{
                                 fontFamily,
                                 fontSize: 13,
                                 '& .MuiSelect-select': {
                                   padding: '8px 32px 8px 12px',
                                 },
+                                '&.Mui-error': {
+                                  '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: '#dc2626',
+                                  },
+                                },
                               }}
                             >
                               <MenuItem value="">
                                 <em style={{ fontFamily, color: '#9ca3af' }}>Select employee...</em>
                               </MenuItem>
-                              {allEmployees.map(employee => (
-                                <MenuItem key={employee.id} value={employee.id} sx={{ fontFamily, fontSize: 13 }}>
-                                  {employee.full_name || `${employee.first_name} ${employee.last_name}`}
-                                </MenuItem>
-                              ))}
+                              {allEmployees.map(employee => {
+                                // Check if this employee is already selected
+                                const isSelected = Object.entries(unmatchedMappings).some(([payrollName, employeeId]) => 
+                                  payrollName !== emp.payroll_name && employeeId === employee.id
+                                );
+                                return (
+                                  <MenuItem 
+                                    key={employee.id} 
+                                    value={employee.id} 
+                                    disabled={isSelected}
+                                    sx={{ 
+                                      fontFamily, 
+                                      fontSize: 13,
+                                      '&.Mui-disabled': {
+                                        opacity: 0.5,
+                                      },
+                                    }}
+                                  >
+                                    {employee.full_name || `${employee.first_name} ${employee.last_name}`}
+                                    {isSelected && ' (already selected)'}
+                                  </MenuItem>
+                                );
+                              })}
                             </Select>
+                            {isDuplicate && (
+                              <Typography sx={{ fontFamily, fontSize: 12, color: '#dc2626', mt: 0.5 }}>
+                                Employee already selected
+                              </Typography>
+                            )}
                           </FormControl>
                         </Box>
                       );
