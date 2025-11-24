@@ -678,7 +678,8 @@ export function SyncHireDateModal({
       {
         field: 'role',
         headerName: 'Current Role',
-        width: 150,
+        flex: 1,
+        minWidth: 120,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => {
@@ -792,7 +793,8 @@ export function SyncHireDateModal({
       {
         field: 'availability',
         headerName: 'Availability',
-        width: 140,
+        flex: 1,
+        minWidth: 120,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => {
@@ -850,7 +852,8 @@ export function SyncHireDateModal({
       {
         field: 'hire_date',
         headerName: 'Hire Date',
-        width: 130,
+        flex: 1,
+        minWidth: 100,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => (
@@ -1155,6 +1158,18 @@ export function SyncHireDateModal({
                                 }));
                               }}
                               displayEmpty
+                              renderValue={(value) => {
+                                if (!value || value === '') {
+                                  return (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                      <AddIcon sx={{ fontSize: 18, color: levelsetGreen }} />
+                                      <span style={{ fontFamily, fontSize: 13, fontWeight: 600, color: levelsetGreen }}>New Employee</span>
+                                    </Box>
+                                  );
+                                }
+                                const selectedEmployee = allEmployees.find(emp => emp.id === value);
+                                return selectedEmployee ? (selectedEmployee.full_name || `${selectedEmployee.first_name} ${selectedEmployee.last_name}`) : '';
+                              }}
                               sx={{
                                 fontFamily,
                                 fontSize: 13,

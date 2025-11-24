@@ -77,8 +77,10 @@ function partialMatch(parsed: ParsedName, employee: Employee): boolean {
     return true;
   }
 
-  // Check first name match
-  if (!exactMatch(parsed.firstName, empFirstName)) {
+  // Check first name match (case-insensitive)
+  const normalizedParsedFirst = normalize(parsed.firstName);
+  const normalizedEmpFirst = normalize(empFirstName);
+  if (normalizedParsedFirst !== normalizedEmpFirst) {
     return false;
   }
 
@@ -110,9 +112,28 @@ function calculateSimilarity(parsed: ParsedName, employee: Employee): number {
     return 0.95;
   }
 
-  // Partial match (first matches, last contains) = 0.8
+  // Partial match (first matches, last contains) = 0.85 (increased from 0.8)
   if (partialMatch(parsed, employee)) {
-    return 0.8;
+    return 0.85;
+  }
+
+  // Also check if first name matches and last name is very similar (handles "Zavodny, Lucy" -> "Lucy Zavodny")
+  const normalizedParsedFirst = normalize(parsed.firstName);
+  const normalizedEmpFirst = normalize(empFirstName);
+  const normalizedParsedLast = normalize(parsed.lastName);
+  const normalizedEmpLast = normalize(empLastName);
+  
+  if (normalizedParsedFirst === normalizedEmpFirst && 
+      (normalizedParsedLast === normalizedEmpLast || 
+       normalizedParsedLast.includes(normalizedEmpLast) || 
+       normalizedEmpLast.includes(normalizedParsedLast))) {
+    return 0.85;
+  }
+  
+  // Reverse check: parsed last matches emp first, parsed first matches emp last (handles name order differences)
+  if (normalizedParsedLast === normalizedEmpFirst && 
+      normalizedParsedFirst === normalizedEmpLast) {
+    return 0.85;
   }
 
   // Calculate Levenshtein distance for first name
@@ -179,6 +200,7 @@ export function matchEmployee(
   matches.sort((a, b) => b.score - a.score);
 
   const bestMatch = matches[0];
+  const secondBestMatch = matches[1];
 
   if (!bestMatch || bestMatch.score === 0) {
     return {
@@ -200,6 +222,20 @@ export function matchEmployee(
     confidence = 'low';
   } else {
     confidence = 'none';
+  }
+
+  // If there's a second best match that's very close, be more conservative
+  // Only return match if best match is significantly better than second best
+  if (secondBestMatch && secondBestMatch.score > 0) {
+    const scoreDifference = bestMatch.score - secondBestMatch.score;
+    // If scores are too close (within 0.15), don't auto-match
+    if (scoreDifference < 0.15 && bestMatch.score < 0.9) {
+      return {
+        employee: null,
+        confidence: 'none',
+        score: bestMatch.score,
+      };
+    }
   }
 
   // Only return match if confidence is at least medium

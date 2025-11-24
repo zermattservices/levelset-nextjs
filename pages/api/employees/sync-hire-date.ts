@@ -145,23 +145,56 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
         } else {
           // Employee doesn't have payroll_name - needs user confirmation
-          // Only suggest if this employee hasn't been suggested for another payroll name
-          const suggestedMatchId = suggestedEmployeeIds.has(matchResult.employee.id) 
-            ? null 
-            : matchResult.employee.id;
+          // Check if this employee has already been suggested for another payroll name
+          // If so, compare match scores to keep the best match
+          const existingSuggestionIndex = unmatchedEmployees.findIndex(
+            (u: any) => u.suggested_match_id === matchResult.employee.id
+          );
           
-          if (suggestedMatchId) {
-            suggestedEmployeeIds.add(suggestedMatchId);
+          if (existingSuggestionIndex >= 0) {
+            // Employee already suggested - check if this match is better
+            const existingMatch = matchEmployee(
+              parseEmployeeName(unmatchedEmployees[existingSuggestionIndex].payroll_name),
+              [matchResult.employee]
+            );
+            
+            // If current match is better (higher score), replace the existing suggestion
+            if (matchResult.score > existingMatch.score) {
+              // Remove suggestion from existing entry
+              unmatchedEmployees[existingSuggestionIndex].suggested_match_id = null;
+              unmatchedEmployees[existingSuggestionIndex].suggested_match_name = null;
+              
+              // Add suggestion to current entry
+              unmatchedEmployees.push({
+                payroll_name: payrollName,
+                hire_date: hireDate,
+                parsed_first_name: parsedName.firstName,
+                parsed_last_name: parsedName.lastName,
+                suggested_match_id: matchResult.employee.id,
+                suggested_match_name: matchResult.employee.full_name,
+              });
+            } else {
+              // Existing match is better, don't suggest for this one
+              unmatchedEmployees.push({
+                payroll_name: payrollName,
+                hire_date: hireDate,
+                parsed_first_name: parsedName.firstName,
+                parsed_last_name: parsedName.lastName,
+                suggested_match_id: null,
+                suggested_match_name: null,
+              });
+            }
+          } else {
+            // Employee not yet suggested - add suggestion
+            unmatchedEmployees.push({
+              payroll_name: payrollName,
+              hire_date: hireDate,
+              parsed_first_name: parsedName.firstName,
+              parsed_last_name: parsedName.lastName,
+              suggested_match_id: matchResult.employee.id,
+              suggested_match_name: matchResult.employee.full_name,
+            });
           }
-          
-          unmatchedEmployees.push({
-            payroll_name: payrollName,
-            hire_date: hireDate,
-            parsed_first_name: parsedName.firstName,
-            parsed_last_name: parsedName.lastName,
-            suggested_match_id: suggestedMatchId,
-            suggested_match_name: suggestedMatchId ? matchResult.employee.full_name : null,
-          });
         }
       } else {
         // No match found - needs user selection
