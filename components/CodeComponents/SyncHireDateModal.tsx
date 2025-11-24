@@ -1113,14 +1113,14 @@ export function SyncHireDateModal({
                   <Box sx={{ p: 2 }}>
                     {unmatchedEmployees.map((emp: any, idx: number) => {
                       // Pre-select suggested match if available and not already manually selected
-                      const defaultSelection = unmatchedMappings[emp.payroll_name] !== undefined 
+                      const currentSelection = unmatchedMappings[emp.payroll_name] !== undefined 
                         ? unmatchedMappings[emp.payroll_name] 
                         : (emp.suggested_match_id || '');
                       
                       // Check if this employee ID is already selected by another payroll name
-                      const isDuplicate = defaultSelection && defaultSelection !== '' && 
+                      const isDuplicate = currentSelection && currentSelection !== '' && 
                         Object.entries(unmatchedMappings).some(([payrollName, employeeId]) => 
-                          payrollName !== emp.payroll_name && employeeId === defaultSelection
+                          payrollName !== emp.payroll_name && employeeId === currentSelection
                         );
                       
                       return (
@@ -1131,9 +1131,9 @@ export function SyncHireDateModal({
                             </Typography>
                           </Box>
                           <ArrowForwardIcon sx={{ color: '#6b7280', fontSize: 20 }} />
-                          <FormControl size="small" sx={{ flex: 1, minWidth: 200 }}>
+                          <FormControl size="small" sx={{ flex: 1, minWidth: 200 }} error={isDuplicate}>
                             <Select
-                              value={defaultSelection}
+                              value={currentSelection}
                               onChange={(e: SelectChangeEvent<string>) => {
                                 const newEmployeeId = e.target.value || null;
                                 
@@ -1154,7 +1154,6 @@ export function SyncHireDateModal({
                                 }));
                               }}
                               displayEmpty
-                              error={isDuplicate}
                               sx={{
                                 fontFamily,
                                 fontSize: 13,
