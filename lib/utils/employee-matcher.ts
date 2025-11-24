@@ -150,7 +150,8 @@ function calculateSimilarity(parsed: ParsedName, employee: Employee): number {
     // This means last names must have at least some similarity
     if (lastNameSimilarity < 0.3) {
       // Return a lower score that won't meet the 'high' confidence threshold
-      return Math.min(0.65, weightedSimilarity);
+      // Cap at 0.65 to prevent false matches when only first name matches
+      return 0.65;
     }
   }
 
