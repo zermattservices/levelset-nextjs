@@ -828,11 +828,12 @@ export function PositionalRatings({
         });
 
         // Get all ratings where either:
-        // 1. The employee being rated exists in the current location (via consolidated_employee_id)
-        // 2. The rater exists in the current location (via consolidated_employee_id)
-        // We'll fetch all ratings in the date range and filter in memory for now
-        // (Supabase doesn't easily support this complex join in a single query)
-        let query = supabase
+        // 1. The rating's location_id matches the current location (primary query)
+        // 2. The employee or rater exists in current location (via consolidated_employee_id) - secondary query
+        // We'll do two queries: one for ratings at current location, one for consolidated ratings from other locations
+        
+        // Primary query: ratings at current location
+        let primaryQuery = supabase
           .from('ratings')
           .select(`
           *,
@@ -855,19 +856,132 @@ export function PositionalRatings({
             location_number
           )
         `)
+          .eq('location_id', locationId)
           .gte('created_at', startDate.toISOString())
           .lte('created_at', endDate.toISOString())
           .order('created_at', { ascending: false })
-          .limit(50000); // Remove Supabase's default 1000 row limit
+          .limit(50000);
 
         // Filter by employee_id if provided (background filter)
         if (employeeId) {
-          query = query.eq('employee_id', employeeId);
+          primaryQuery = primaryQuery.eq('employee_id', employeeId);
         }
 
-        const { data: ratings, error: fetchError } = await query;
+        // Execute primary query (ratings at current location)
+        const primaryResult = await primaryQuery;
+        
+        // Secondary queries: ratings from other locations where employee/rater is consolidated
+        // Build list of consolidated employee IDs to filter by
+        const consolidatedIdsArray = Array.from(currentLocationConsolidatedIds);
+        
+        let secondaryRatings: any[] = [];
+        let raterRatings: any[] = [];
+        
+        // Only fetch consolidated ratings if we have consolidated IDs
+        if (consolidatedIdsArray.length > 0) {
+          // Split into chunks of 100 to avoid query size limits
+          const chunkSize = 100;
+          const chunks: string[][] = [];
+          for (let i = 0; i < consolidatedIdsArray.length; i += chunkSize) {
+            chunks.push(consolidatedIdsArray.slice(i, i + chunkSize));
+          }
+          
+          // Fetch ratings where employee is consolidated
+          const secondaryPromises = chunks.map(chunk => 
+            supabase
+              .from('ratings')
+              .select(`
+              *,
+              employee:employees!ratings_employee_id_fkey(
+                full_name, 
+                first_name, 
+                last_name, 
+                role, 
+                is_foh, 
+                is_boh,
+                consolidated_employee_id
+              ),
+              rater:employees!ratings_rater_user_id_fkey(
+                full_name, 
+                id,
+                consolidated_employee_id
+              ),
+              rating_location:locations!fk_ratings_location(
+                id,
+                location_number
+              )
+            `)
+              .neq('location_id', locationId)
+              .in('employee_id', chunk)
+              .gte('created_at', startDate.toISOString())
+              .lte('created_at', endDate.toISOString())
+              .order('created_at', { ascending: false })
+              .limit(50000)
+          );
+          
+          // Fetch ratings where rater is consolidated
+          const raterPromises = chunks.map(chunk =>
+            supabase
+              .from('ratings')
+              .select(`
+              *,
+              employee:employees!ratings_employee_id_fkey(
+                full_name, 
+                first_name, 
+                last_name, 
+                role, 
+                is_foh, 
+                is_boh,
+                consolidated_employee_id
+              ),
+              rater:employees!ratings_rater_user_id_fkey(
+                full_name, 
+                id,
+                consolidated_employee_id
+              ),
+              rating_location:locations!fk_ratings_location(
+                id,
+                location_number
+              )
+            `)
+              .neq('location_id', locationId)
+              .in('rater_user_id', chunk)
+              .gte('created_at', startDate.toISOString())
+              .lte('created_at', endDate.toISOString())
+              .order('created_at', { ascending: false })
+              .limit(50000)
+          );
+          
+          const [secondaryResults, raterResults] = await Promise.all([
+            Promise.all(secondaryPromises),
+            Promise.all(raterPromises)
+          ]);
+          
+          // Flatten results
+          secondaryRatings = secondaryResults.flatMap(result => result.data || []);
+          raterRatings = raterResults.flatMap(result => result.data || []);
+          
+          // Check for errors
+          secondaryResults.forEach(result => { if (result.error) throw result.error; });
+          raterResults.forEach(result => { if (result.error) throw result.error; });
+        }
 
-        if (fetchError) throw fetchError;
+        // Combine results, removing duplicates
+        const primaryRatings = primaryResult.data || [];
+        
+        // Combine and deduplicate by rating id
+        const ratingsMap = new Map();
+        [...primaryRatings, ...secondaryRatings, ...raterRatings].forEach((rating: any) => {
+          if (!ratingsMap.has(rating.id)) {
+            ratingsMap.set(rating.id, rating);
+          }
+        });
+        const ratings = Array.from(ratingsMap.values());
+
+        // Check for errors
+        if (primaryResult.error) throw primaryResult.error;
+        if (secondaryResult.error) throw secondaryResult.error;
+        if (raterResult.error) throw raterResult.error;
 
         const transformedRows: RatingRow[] = (ratings || [])
           .filter((rating: any) => {
