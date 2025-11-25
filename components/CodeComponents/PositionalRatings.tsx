@@ -650,6 +650,12 @@ export function PositionalRatings({
       const response = await fetch(
         `/api/position-labels?location_id=${locationId}&position=${encodeURIComponent(position)}`
       );
+      
+      if (!response.ok) {
+        // Endpoint doesn't exist or failed - return null gracefully
+        return null;
+      }
+      
       const result = await response.json();
       
       if (result.success && result.labels) {
@@ -657,7 +663,8 @@ export function PositionalRatings({
         return result.labels;
       }
     } catch (err) {
-      console.error('Error fetching Big 5 labels:', err);
+      // Silently fail - this is not critical for displaying ratings
+      return null;
     }
     
     return null;
@@ -802,11 +809,11 @@ export function PositionalRatings({
         const supabase = createSupabaseClient();
 
         // First, get all employee IDs in the current location (for filtering dropdowns)
+        // Include both active and inactive employees to ensure ratings match correctly
         const { data: currentLocationEmployees, error: locationEmpError } = await supabase
           .from('employees')
           .select('id, consolidated_employee_id')
-          .eq('location_id', locationId)
-          .eq('active', true);
+          .eq('location_id', locationId);
 
         if (locationEmpError) throw locationEmpError;
 
