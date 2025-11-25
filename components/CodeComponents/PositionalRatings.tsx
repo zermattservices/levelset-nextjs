@@ -861,6 +861,12 @@ export function PositionalRatings({
 
         const transformedRows: RatingRow[] = (ratings || [])
           .filter((rating: any) => {
+            // Show rating if:
+            // 1. The rating's location_id matches the current location, OR
+            // 2. The employee or rater exists in current location (via consolidated_employee_id)
+            const ratingLocationId = rating.location_id || '';
+            const isRatingAtCurrentLocation = ratingLocationId === locationId;
+            
             // Check if employee or rater exists in current location (via consolidated_employee_id)
             const employeeConsolidatedId = rating.employee?.consolidated_employee_id || rating.employee_id;
             const raterConsolidatedId = rating.rater?.consolidated_employee_id || rating.rater_user_id;
@@ -868,8 +874,8 @@ export function PositionalRatings({
             const employeeInLocation = currentLocationConsolidatedIds.has(employeeConsolidatedId);
             const raterInLocation = raterConsolidatedId && currentLocationConsolidatedIds.has(raterConsolidatedId);
             
-            // Show rating if either employee or rater exists in current location
-            if (!employeeInLocation && !raterInLocation) {
+            // Show rating if rating is at current location OR employee/rater exists in current location
+            if (!isRatingAtCurrentLocation && !employeeInLocation && !raterInLocation) {
               return false;
             }
             
