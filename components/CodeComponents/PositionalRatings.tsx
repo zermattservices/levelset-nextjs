@@ -78,6 +78,8 @@ interface RatingRow extends Rating {
   rater_employee_id: string | null;
   position_cleaned: string;
   formatted_date: string;
+  rating_location_id: string;
+  rating_location_number: string | null;
 }
 
 
@@ -799,17 +801,54 @@ export function PositionalRatings({
       try {
         const supabase = createSupabaseClient();
 
+        // First, get all employee IDs in the current location (for filtering dropdowns)
+        const { data: currentLocationEmployees, error: locationEmpError } = await supabase
+          .from('employees')
+          .select('id, consolidated_employee_id')
+          .eq('location_id', locationId)
+          .eq('active', true);
+
+        if (locationEmpError) throw locationEmpError;
+
+        // Get consolidated employee IDs for current location employees
+        const currentLocationConsolidatedIds = new Set(
+          (currentLocationEmployees || []).map((emp: any) => 
+            emp.consolidated_employee_id || emp.id
+          )
+        );
+
+        // Get all ratings where either:
+        // 1. The employee being rated exists in the current location (via consolidated_employee_id)
+        // 2. The rater exists in the current location (via consolidated_employee_id)
+        // We'll fetch all ratings in the date range and filter in memory for now
+        // (Supabase doesn't easily support this complex join in a single query)
         let query = supabase
           .from('ratings')
           .select(`
           *,
-          employee:employees!ratings_employee_id_fkey(full_name, first_name, last_name, role, is_foh, is_boh),
-          rater:employees!ratings_rater_user_id_fkey(full_name, id)
+          employee:employees!ratings_employee_id_fkey(
+            full_name, 
+            first_name, 
+            last_name, 
+            role, 
+            is_foh, 
+            is_boh,
+            consolidated_employee_id
+          ),
+          rater:employees!ratings_rater_user_id_fkey(
+            full_name, 
+            id,
+            consolidated_employee_id
+          ),
+          rating_location:locations!fk_ratings_location(
+            id,
+            location_number
+          )
         `)
-          .eq('location_id', locationId)
           .gte('created_at', startDate.toISOString())
           .lte('created_at', endDate.toISOString())
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(50000); // Remove Supabase's default 1000 row limit
 
         // Filter by employee_id if provided (background filter)
         if (employeeId) {
@@ -822,6 +861,18 @@ export function PositionalRatings({
 
         const transformedRows: RatingRow[] = (ratings || [])
           .filter((rating: any) => {
+            // Check if employee or rater exists in current location (via consolidated_employee_id)
+            const employeeConsolidatedId = rating.employee?.consolidated_employee_id || rating.employee_id;
+            const raterConsolidatedId = rating.rater?.consolidated_employee_id || rating.rater_user_id;
+            
+            const employeeInLocation = currentLocationConsolidatedIds.has(employeeConsolidatedId);
+            const raterInLocation = raterConsolidatedId && currentLocationConsolidatedIds.has(raterConsolidatedId);
+            
+            // Show rating if either employee or rater exists in current location
+            if (!employeeInLocation && !raterInLocation) {
+              return false;
+            }
+            
             // When employeeId is provided, show both FOH and BOH (no filtering)
             if (employeeId) {
               return true;
@@ -845,6 +896,11 @@ export function PositionalRatings({
             const employeeRole = rating.employee?.role || 'Team Member';
             // rater_user_id is the employee_id of the rater
             const raterEmployeeId = rating.rater_user_id || rating.rater?.id || null;
+            
+            // Get location info for pill display
+            const ratingLocationId = rating.location_id || '';
+            const ratingLocationNumber = rating.rating_location?.location_number || null;
+            const isDifferentLocation = ratingLocationId !== locationId;
 
             return {
               ...rating,
@@ -857,6 +913,8 @@ export function PositionalRatings({
               position_cleaned: cleanPositionName(rating.position),
               formatted_date: formatDate(rating.created_at),
               created_at: rating.created_at,
+              rating_location_id: ratingLocationId,
+              rating_location_number: ratingLocationNumber,
             };
           });
 
@@ -866,8 +924,37 @@ export function PositionalRatings({
 
         setRows(transformedRows);
 
-        const employees = Array.from(new Set(transformedRows.map((r) => r.employee_name))).sort();
-        const leaders = Array.from(new Set(transformedRows.map((r) => r.rater_name))).sort();
+        // Filter dropdowns to only show employees/leaders from current location
+        // Get employee names from current location employees only
+        const { data: currentLocationEmployeeNames, error: namesError } = await supabase
+          .from('employees')
+          .select('id, full_name, consolidated_employee_id')
+          .eq('location_id', locationId)
+          .eq('active', true);
+
+        if (namesError) throw namesError;
+
+        const currentLocationEmployeeNamesSet = new Set(
+          (currentLocationEmployeeNames || []).map((emp: any) => emp.full_name).filter(Boolean)
+        );
+
+        // Filter to only show employees/leaders from current location
+        const employees = Array.from(
+          new Set(
+            transformedRows
+              .filter((r) => currentLocationEmployeeNamesSet.has(r.employee_name))
+              .map((r) => r.employee_name)
+          )
+        ).sort();
+        
+        const leaders = Array.from(
+          new Set(
+            transformedRows
+              .filter((r) => currentLocationEmployeeNamesSet.has(r.rater_name))
+              .map((r) => r.rater_name)
+          )
+        ).sort();
+        
         const roles = Array.from(new Set(transformedRows.map((r) => r.employee_role))).sort();
         const positions = Array.from(new Set(transformedRows.map((r) => r.position_cleaned))).sort();
 
@@ -1511,23 +1598,49 @@ export function PositionalRatings({
       renderCell: (params) => {
         const row = params.row as RatingRow;
         const isClickable = !employeeId && row.employee_id;
+        const isDifferentLocation = row.rating_location_id !== locationId && row.rating_location_number;
         
         return (
           <Box
             sx={{
-              fontFamily,
-              fontSize: 13,
-              fontWeight: 500,
-              color: isClickable ? levelsetGreen : '#111827',
-              cursor: isClickable ? 'pointer' : 'default',
-              textDecoration: 'none',
-              '&:hover': isClickable ? {
-                textDecoration: 'underline',
-              } : {},
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
             }}
-            onClick={() => isClickable && handleNameClick(row.employee_id)}
           >
-            {params.value}
+            <Box
+              sx={{
+                fontFamily,
+                fontSize: 13,
+                fontWeight: 500,
+                color: isClickable ? levelsetGreen : '#111827',
+                cursor: isClickable ? 'pointer' : 'default',
+                textDecoration: 'none',
+                '&:hover': isClickable ? {
+                  textDecoration: 'underline',
+                } : {},
+              }}
+              onClick={() => isClickable && handleNameClick(row.employee_id)}
+            >
+              {params.value}
+            </Box>
+            {isDifferentLocation && (
+              <Chip
+                label={row.rating_location_number}
+                size="small"
+                sx={{
+                  fontFamily,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  height: 20,
+                  backgroundColor: '#f3f4f6',
+                  color: '#6b7280',
+                  '& .MuiChip-label': {
+                    padding: '0 6px',
+                  },
+                }}
+              />
+            )}
           </Box>
         );
       },
@@ -1558,23 +1671,49 @@ export function PositionalRatings({
       renderCell: (params) => {
         const row = params.row as RatingRow;
         const isClickable = !employeeId && row.rater_employee_id;
+        const isDifferentLocation = row.rating_location_id !== locationId && row.rating_location_number;
         
         return (
           <Box
             sx={{
-              fontFamily,
-              fontSize: 13,
-              fontWeight: 500,
-              color: isClickable ? levelsetGreen : '#111827',
-              cursor: isClickable ? 'pointer' : 'default',
-              textDecoration: 'none',
-              '&:hover': isClickable ? {
-                textDecoration: 'underline',
-              } : {},
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
             }}
-            onClick={() => isClickable && handleNameClick(row.rater_employee_id)}
           >
-            {params.value}
+            <Box
+              sx={{
+                fontFamily,
+                fontSize: 13,
+                fontWeight: 500,
+                color: isClickable ? levelsetGreen : '#111827',
+                cursor: isClickable ? 'pointer' : 'default',
+                textDecoration: 'none',
+                '&:hover': isClickable ? {
+                  textDecoration: 'underline',
+                } : {},
+              }}
+              onClick={() => isClickable && handleNameClick(row.rater_employee_id)}
+            >
+              {params.value}
+            </Box>
+            {isDifferentLocation && (
+              <Chip
+                label={row.rating_location_number}
+                size="small"
+                sx={{
+                  fontFamily,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  height: 20,
+                  backgroundColor: '#f3f4f6',
+                  color: '#6b7280',
+                  '& .MuiChip-label': {
+                    padding: '0 6px',
+                  },
+                }}
+              />
+            )}
           </Box>
         );
       },
