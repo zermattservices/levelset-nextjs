@@ -811,11 +811,14 @@ export function PositionalRatings({
         if (locationEmpError) throw locationEmpError;
 
         // Get consolidated employee IDs for current location employees
-        const currentLocationConsolidatedIds = new Set(
-          (currentLocationEmployees || []).map((emp: any) => 
-            emp.consolidated_employee_id || emp.id
-          )
-        );
+        // Include both the employee's id and their consolidated_employee_id (if different)
+        const currentLocationConsolidatedIds = new Set<string>();
+        (currentLocationEmployees || []).forEach((emp: any) => {
+          currentLocationConsolidatedIds.add(emp.id);
+          if (emp.consolidated_employee_id && emp.consolidated_employee_id !== emp.id) {
+            currentLocationConsolidatedIds.add(emp.consolidated_employee_id);
+          }
+        });
 
         // Get all ratings where either:
         // 1. The employee being rated exists in the current location (via consolidated_employee_id)
@@ -867,12 +870,16 @@ export function PositionalRatings({
             const ratingLocationId = rating.location_id || '';
             const isRatingAtCurrentLocation = ratingLocationId === locationId;
             
-            // Check if employee or rater exists in current location (via consolidated_employee_id)
-            const employeeConsolidatedId = rating.employee?.consolidated_employee_id || rating.employee_id;
-            const raterConsolidatedId = rating.rater?.consolidated_employee_id || rating.rater_user_id;
+            // Check if the rating's employee_id or rater_user_id matches any consolidated ID in current location
+            // The currentLocationConsolidatedIds set contains both employee IDs and their consolidated_employee_id values
+            const ratingEmployeeId = rating.employee_id;
+            const ratingRaterId = rating.rater_user_id;
             
-            const employeeInLocation = currentLocationConsolidatedIds.has(employeeConsolidatedId);
-            const raterInLocation = raterConsolidatedId && currentLocationConsolidatedIds.has(raterConsolidatedId);
+            // Check if employee_id is in the consolidated IDs set (this handles both direct matches and consolidated matches)
+            const employeeInLocation = currentLocationConsolidatedIds.has(ratingEmployeeId);
+            
+            // Check if rater_user_id is in the consolidated IDs set
+            const raterInLocation = ratingRaterId && currentLocationConsolidatedIds.has(ratingRaterId);
             
             // Show rating if rating is at current location OR employee/rater exists in current location
             if (!isRatingAtCurrentLocation && !employeeInLocation && !raterInLocation) {
