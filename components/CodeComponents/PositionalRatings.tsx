@@ -872,25 +872,29 @@ export function PositionalRatings({
         const transformedRows: RatingRow[] = (ratings || [])
           .filter((rating: any) => {
             // Show rating if:
-            // 1. The rating's location_id matches the current location, OR
+            // 1. The rating's location_id matches the current location (always show these), OR
             // 2. The employee or rater exists in current location (via consolidated_employee_id)
             const ratingLocationId = rating.location_id || '';
             const isRatingAtCurrentLocation = ratingLocationId === locationId;
             
-            // Check if the rating's employee_id or rater_user_id matches any consolidated ID in current location
-            // The currentLocationConsolidatedIds set contains both employee IDs and their consolidated_employee_id values
-            const ratingEmployeeId = rating.employee_id;
-            const ratingRaterId = rating.rater_user_id;
-            
-            // Check if employee_id is in the consolidated IDs set (this handles both direct matches and consolidated matches)
-            const employeeInLocation = currentLocationConsolidatedIds.has(ratingEmployeeId);
-            
-            // Check if rater_user_id is in the consolidated IDs set
-            const raterInLocation = ratingRaterId && currentLocationConsolidatedIds.has(ratingRaterId);
-            
-            // Show rating if rating is at current location OR employee/rater exists in current location
-            if (!isRatingAtCurrentLocation && !employeeInLocation && !raterInLocation) {
-              return false;
+            // If rating is at current location, always show it (regardless of employee/rater status)
+            if (isRatingAtCurrentLocation) {
+              // Skip to FOH/BOH filtering
+            } else {
+              // For ratings from other locations, check if employee or rater exists in current location
+              const ratingEmployeeId = rating.employee_id;
+              const ratingRaterId = rating.rater_user_id;
+              
+              // Check if employee_id is in the consolidated IDs set (this handles both direct matches and consolidated matches)
+              const employeeInLocation = ratingEmployeeId && currentLocationConsolidatedIds.has(ratingEmployeeId);
+              
+              // Check if rater_user_id is in the consolidated IDs set
+              const raterInLocation = ratingRaterId && currentLocationConsolidatedIds.has(ratingRaterId);
+              
+              // If neither employee nor rater exists in current location, exclude this rating
+              if (!employeeInLocation && !raterInLocation) {
+                return false;
+              }
             }
             
             // When employeeId is provided, show both FOH and BOH (no filtering)
