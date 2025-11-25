@@ -891,8 +891,17 @@ export function PositionalRatings({
               return true;
             }
             
-            const isFOHPosition = FOH_POSITIONS.includes(rating.position);
-            const isBOHPosition = BOH_POSITIONS.includes(rating.position);
+            // Clean the position name to match the format in FOH_POSITIONS/BOH_POSITIONS arrays
+            // First remove " | Spanish" part, then remove " FOH"/" BOH" suffixes
+            let cleanedPosition = rating.position || '';
+            // Remove Spanish translation part (everything after " | ")
+            if (cleanedPosition.includes(' | ')) {
+              cleanedPosition = cleanedPosition.split(' | ')[0].trim();
+            }
+            // Remove FOH/BOH suffixes
+            cleanedPosition = cleanPositionName(cleanedPosition);
+            const isFOHPosition = FOH_POSITIONS.includes(cleanedPosition);
+            const isBOHPosition = BOH_POSITIONS.includes(cleanedPosition);
 
             if (!showFOH && !showBOH) return false;
             if (showFOH && !showBOH) return isFOHPosition;
