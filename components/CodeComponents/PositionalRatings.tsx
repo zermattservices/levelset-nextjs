@@ -826,6 +826,10 @@ export function PositionalRatings({
             currentLocationConsolidatedIds.add(emp.consolidated_employee_id);
           }
         });
+        
+        console.log('[PositionalRatings] Location:', locationId);
+        console.log('[PositionalRatings] Current location employees count:', currentLocationEmployees?.length || 0);
+        console.log('[PositionalRatings] Consolidated IDs count:', currentLocationConsolidatedIds.size);
 
         // Get all ratings where either:
         // 1. The rating's location_id matches the current location (primary query)
@@ -868,7 +872,9 @@ export function PositionalRatings({
         }
 
         // Execute primary query (ratings at current location)
+        console.log('[PositionalRatings] Executing primary query for location_id:', locationId);
         const primaryResult = await primaryQuery;
+        console.log('[PositionalRatings] Primary query returned:', primaryResult.data?.length || 0, 'ratings');
         
         // Secondary queries: ratings from other locations where employee/rater is consolidated
         // Build list of consolidated employee IDs to filter by
@@ -952,6 +958,9 @@ export function PositionalRatings({
               .limit(50000)
           );
           
+          console.log('[PositionalRatings] Executing', secondaryPromises.length, 'secondary queries (employee consolidated)');
+          console.log('[PositionalRatings] Executing', raterPromises.length, 'rater queries (rater consolidated)');
+          
           const [secondaryResults, raterResults] = await Promise.all([
             Promise.all(secondaryPromises),
             Promise.all(raterPromises)
@@ -961,6 +970,9 @@ export function PositionalRatings({
           secondaryRatings = secondaryResults.flatMap(result => result.data || []);
           raterRatings = raterResults.flatMap(result => result.data || []);
           
+          console.log('[PositionalRatings] Secondary queries returned:', secondaryRatings.length, 'ratings');
+          console.log('[PositionalRatings] Rater queries returned:', raterRatings.length, 'ratings');
+          
           // Check for errors
           secondaryResults.forEach(result => { if (result.error) throw result.error; });
           raterResults.forEach(result => { if (result.error) throw result.error; });
@@ -968,6 +980,8 @@ export function PositionalRatings({
 
         // Combine results, removing duplicates
         const primaryRatings = primaryResult.data || [];
+        
+        console.log('[PositionalRatings] Total before deduplication:', primaryRatings.length + secondaryRatings.length + raterRatings.length);
         
         // Combine and deduplicate by rating id
         const ratingsMap = new Map();
@@ -977,12 +991,18 @@ export function PositionalRatings({
           }
         });
         const ratings = Array.from(ratingsMap.values());
+        
+        console.log('[PositionalRatings] Total after deduplication:', ratings.length);
 
         // Check for errors
         if (primaryResult.error) throw primaryResult.error;
         if (secondaryResult.error) throw secondaryResult.error;
         if (raterResult.error) throw raterResult.error;
 
+        let filteredOutCount = 0;
+        let filteredByLocation = 0;
+        let filteredByFOHBOH = 0;
+        
         const transformedRows: RatingRow[] = (ratings || [])
           .filter((rating: any) => {
             // Show rating if:
@@ -1007,6 +1027,8 @@ export function PositionalRatings({
               
               // If neither employee nor rater exists in current location, exclude this rating
               if (!employeeInLocation && !raterInLocation) {
+                filteredOutCount++;
+                filteredByLocation++;
                 return false;
               }
             }
@@ -1028,9 +1050,25 @@ export function PositionalRatings({
             const isFOHPosition = FOH_POSITIONS.includes(cleanedPosition);
             const isBOHPosition = BOH_POSITIONS.includes(cleanedPosition);
 
-            if (!showFOH && !showBOH) return false;
-            if (showFOH && !showBOH) return isFOHPosition;
-            if (!showFOH && showBOH) return isBOHPosition;
+            if (!showFOH && !showBOH) {
+              filteredOutCount++;
+              filteredByFOHBOH++;
+              return false;
+            }
+            if (showFOH && !showBOH) {
+              if (!isFOHPosition) {
+                filteredOutCount++;
+                filteredByFOHBOH++;
+                return false;
+              }
+            }
+            if (!showFOH && showBOH) {
+              if (!isBOHPosition) {
+                filteredOutCount++;
+                filteredByFOHBOH++;
+                return false;
+              }
+            }
 
             return true;
           })
@@ -1068,6 +1106,13 @@ export function PositionalRatings({
         if (!isActive) {
           return;
         }
+
+        console.log('[PositionalRatings] After filtering:');
+        console.log('  - Filtered out by location:', filteredByLocation);
+        console.log('  - Filtered out by FOH/BOH:', filteredByFOHBOH);
+        console.log('  - Total filtered out:', filteredOutCount);
+        console.log('  - Final transformed rows:', transformedRows.length);
+        console.log('  - showFOH:', showFOH, 'showBOH:', showBOH);
 
         setRows(transformedRows);
 
