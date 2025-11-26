@@ -2769,13 +2769,14 @@ WHERE NOT EXISTS (
 
 -- Report results
 SELECT 
-  l.location_name,
+  l.name as location_name,
+  l.location_number,
   COUNT(*) as ratings_imported
 FROM ratings r
 JOIN locations l ON r.location_id = l.id
 WHERE r.location_id IN ('67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'e437119c-27d9-4114-9273-350925016738')
-GROUP BY l.location_name, l.id
-ORDER BY l.location_name;
+GROUP BY l.name, l.location_number, l.id
+ORDER BY l.name;
 
 -- Drop temp table
 DROP TABLE temp_ratings_import;
