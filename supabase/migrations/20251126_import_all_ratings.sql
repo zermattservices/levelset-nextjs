@@ -1,5 +1,5 @@
 -- Import all ratings for Buda and West Buda
--- Generated: 2025-11-26T23:04:23.890Z
+-- Generated: 2025-11-26T23:04:59.140Z
 -- Buda (04066): 67e00fb2-29f5-41ce-9c1c-93e2f7f392dd (1552 ratings)
 -- West Buda (05508): e437119c-27d9-4114-9273-350925016738 (1129 ratings)
 -- Org ID: 54b9864f-9df9-4a15-a209-7b99e1c274f4
