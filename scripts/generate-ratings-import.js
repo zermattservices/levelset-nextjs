@@ -107,13 +107,10 @@ function generateInsertStatements(rows, locationId, locationName) {
   return statements;
 }
 
-// Parse both CSV files (use fixed versions if they exist)
+// Parse both CSV files (use original files as provided by user)
 console.log('Parsing CSV files...');
-const budaPath = path.join(__dirname, '../public/04066_ratingsUpdate_fixed.csv');
-const westBudaPath = path.join(__dirname, '../public/05508_ratingsUpdate_fixed.csv');
-
-const budaRows = parseCsv(fs.existsSync(budaPath) ? budaPath : path.join(__dirname, '../public/04066_ratingsUpdate.csv'));
-const westBudaRows = parseCsv(fs.existsSync(westBudaPath) ? westBudaPath : path.join(__dirname, '../public/05508_ratingsUpdate.csv'));
+const budaRows = parseCsv(path.join(__dirname, '../public/04066_ratingsUpdate.csv'));
+const westBudaRows = parseCsv(path.join(__dirname, '../public/05508_ratingsUpdate.csv'));
 
 console.log(`Buda rows: ${budaRows.length}`);
 console.log(`West Buda rows: ${westBudaRows.length}`);

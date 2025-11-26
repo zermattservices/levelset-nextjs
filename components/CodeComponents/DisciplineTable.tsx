@@ -163,36 +163,64 @@ export function DisciplineTable({
             setDisciplineActions(actionsData);
           }
           
-      // Fetch employees (filter by active) and join to sum points from infractions within last 90 days
+      // Fetch employees (filter by active) - only show employees in current location
             const { data: employees, error: empError } = await supabase
               .from('employees')
-        .select('*')
+        .select('*, consolidated_employee_id')
               .eq('location_id', locationId)
               .eq('active', true);
               
             if (empError) throw empError;
             
             if (employees && employees.length > 0) {
-        // Get infractions for all employees from last 90 days
-              const employeeIds = employees.map(emp => emp.id);
+        // Get consolidated employee IDs for current location employees
+              const currentLocationConsolidatedIds = new Set(
+                employees.map((emp: any) => emp.consolidated_employee_id || emp.id)
+              );
+              
+        // Get infractions for all employees (via consolidated_employee_id) from last 90 days
+        // Include infractions from any location where the employee exists in current location
         const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
               
-              const { data: infractions, error: infError } = await supabase
+              // Fetch all infractions in date range, then filter by consolidated employee ID
+              const { data: allInfractions, error: infError } = await supabase
                 .from('infractions')
-                .select('employee_id, points, infraction_date')
-                .in('employee_id', employeeIds)
-                .eq('location_id', locationId)
-          .gte('infraction_date', ninetyDaysAgo)
+                .select(`
+                  employee_id, 
+                  points, 
+                  infraction_date,
+                  location_id,
+                  employee:employees!infractions_employee_id_fkey(
+                    consolidated_employee_id,
+                    location:locations!infractions_location_id_fkey(location_number)
+                  )
+                `)
+                .gte('infraction_date', ninetyDaysAgo)
                 .order('infraction_date', { ascending: false });
                 
               if (infError) {
                 console.warn('Error fetching infractions, continuing with empty infractions:', infError);
               }
               
+              // Filter infractions to only those where employee exists in current location (via consolidated_employee_id)
+              const infractions = (allInfractions || []).filter((inf: any) => {
+                const employeeConsolidatedId = inf.employee?.consolidated_employee_id || inf.employee_id;
+                return currentLocationConsolidatedIds.has(employeeConsolidatedId);
+              });
+                
+              if (infError) {
+                console.warn('Error fetching infractions, continuing with empty infractions:', infError);
+              }
+              
               // Calculate current points and last infraction for each employee
+              // Use consolidated_employee_id to match infractions
               transformedData = employees.map(emp => {
-                const empInfractions = infractions?.filter(inf => inf.employee_id === emp.id) || [];
-                const current_points = empInfractions.reduce((sum, inf) => sum + (inf.points || 0), 0);
+                const empConsolidatedId = emp.consolidated_employee_id || emp.id;
+                const empInfractions = infractions?.filter((inf: any) => {
+                  const infEmployeeConsolidatedId = inf.employee?.consolidated_employee_id || inf.employee_id;
+                  return infEmployeeConsolidatedId === empConsolidatedId;
+                }) || [];
+                const current_points = empInfractions.reduce((sum: number, inf: any) => sum + (inf.points || 0), 0);
                 const last_infraction = empInfractions && empInfractions.length > 0 ? empInfractions[0]?.infraction_date : null;
                 
                 return {

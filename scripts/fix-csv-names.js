@@ -11,6 +11,9 @@ const employeeNameMappings = {
   'Jason': 'Jason Luna',
   'Jenny': 'Jenny Reyes Ramos',
   'Jessica': 'Jessica Badejo',
+  'Kaiya': 'Kianna Ramos',
+  'Monica': 'Monica Alonso Feliciano',
+  'Nayeli': 'Nayeli Del Toro',
   'Tim': 'Timothy Lane',
 };
 
@@ -18,11 +21,9 @@ const employeeNameMappings = {
 const raterNameMappings = {
   'Amanda': 'Amanda Luna',
   'Angeles': 'Angeles Carbajal',
-  'Bessie': 'Bessie Anderson', // Assuming
   'Carlos': 'Carlos Hermosillo',
   'Daniel': 'Daniel Van Cleave',
   'Dom': 'Dominique Miller',
-  'Doris': 'Doris Martinez', // Assuming
   'Eric': 'Eric Reyna',
   'Ethan': 'Ethan Coniker',
   'Jason': 'Jason Luna',
@@ -37,6 +38,9 @@ const raterNameMappings = {
   'Nestor': 'Nestor Reyes',
   'Tim': 'Timothy Lane',
   'Vanessa': 'Vanessa Hicks',
+  // Skip these - they don't exist in the database
+  'Bessie': '__SKIP__',
+  'Doris': '__SKIP__',
 };
 
 function fixCsvFile(inputPath, outputPath) {
@@ -90,8 +94,15 @@ function fixCsvFile(inputPath, outputPath) {
     const criteria5 = parts[9];
     const rating = parts[10];
     
-    // Skip Greyca ratings
-    if (tmName === 'Greyca' || leaderName === 'Greyca') {
+    // Skip Greyca ratings and unknown raters
+    if (tmName === 'Greyca' || leaderName === 'Greyca' || leaderName === '__SKIP__') {
+      greyca_count++;
+      continue;
+    }
+    
+    // After rater mapping, check if it's still a skip marker
+    const mappedRater = raterNameMappings[leaderName];
+    if (mappedRater === '__SKIP__') {
       greyca_count++;
       continue;
     }
