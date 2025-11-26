@@ -2722,31 +2722,19 @@ SELECT
   t.location_id,
   '54b9864f-9df9-4a15-a209-7b99e1c274f4'::uuid as org_id
 FROM temp_ratings_import t
-JOIN employees e ON (
-  -- Match employee name (handle common variations)
-  e.full_name = t.tm_name
-  -- Add common name mappings here if needed
-)
-AND (e.location_id = t.location_id OR e.consolidated_employee_id IN (
-  SELECT id FROM employees WHERE location_id = t.location_id
-))
-JOIN employees r ON (
-  -- Match rater name (handle common variations)
-  r.full_name = t.leader_name
-  -- Add common name mappings here if needed
-)
-AND r.org_id = '54b9864f-9df9-4a15-a209-7b99e1c274f4'::uuid
-AND r.active = true;
+JOIN employees e ON e.full_name = t.tm_name AND e.location_id = t.location_id
+JOIN employees r ON r.full_name = t.leader_name AND r.org_id = '54b9864f-9df9-4a15-a209-7b99e1c274f4'::uuid;
 
 -- Report results
 SELECT 
-  l.location_name,
+  l.name as location_name,
+  l.location_number,
   COUNT(*) as ratings_imported
 FROM ratings r
 JOIN locations l ON r.location_id = l.id
 WHERE r.location_id IN ('67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', 'e437119c-27d9-4114-9273-350925016738')
-GROUP BY l.location_name, l.id
-ORDER BY l.location_name;
+GROUP BY l.name, l.location_number, l.id
+ORDER BY l.name;
 
 -- Drop temp table
 DROP TABLE temp_ratings_import;
