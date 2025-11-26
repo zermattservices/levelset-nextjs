@@ -808,95 +808,41 @@ export function PositionalRatings({
       try {
         const supabase = createSupabaseClient();
 
-        // First, get all employee IDs in the current location (for filtering dropdowns)
-        // Include both active and inactive employees to ensure ratings match correctly
-        const { data: currentLocationEmployees, error: locationEmpError } = await supabase
-          .from('employees')
-          .select('id, consolidated_employee_id')
-          .eq('location_id', locationId);
+        let ratings: any[] = [];
+        let error: any = null;
 
-        if (locationEmpError) throw locationEmpError;
-
-        // Get consolidated employee IDs for current location employees
-        // Include both the employee's id and their consolidated_employee_id (if different)
-        const currentLocationConsolidatedIds = new Set<string>();
-        (currentLocationEmployees || []).forEach((emp: any) => {
-          currentLocationConsolidatedIds.add(emp.id);
-          if (emp.consolidated_employee_id && emp.consolidated_employee_id !== emp.id) {
-            currentLocationConsolidatedIds.add(emp.consolidated_employee_id);
-          }
-        });
-        
-        console.log('[PositionalRatings] Location:', locationId);
-        console.log('[PositionalRatings] Current location employees count:', currentLocationEmployees?.length || 0);
-        console.log('[PositionalRatings] Consolidated IDs count:', currentLocationConsolidatedIds.size);
-
-        // Get all ratings where either:
-        // 1. The rating's location_id matches the current location (primary query)
-        // 2. The employee or rater exists in current location (via consolidated_employee_id) - secondary query
-        // We'll do two queries: one for ratings at current location, one for consolidated ratings from other locations
-        
-        // Primary query: ratings at current location
-        let primaryQuery = supabase
-          .from('ratings')
-          .select(`
-          *,
-          employee:employees!ratings_employee_id_fkey(
-            full_name, 
-            first_name, 
-            last_name, 
-            role, 
-            is_foh, 
-            is_boh,
-            consolidated_employee_id
-          ),
-          rater:employees!ratings_rater_user_id_fkey(
-            full_name, 
-            id,
-            consolidated_employee_id
-          ),
-          rating_location:locations!fk_ratings_location(
-            id,
-            location_number
-          )
-        `)
-          .eq('location_id', locationId)
-          .gte('created_at', startDate.toISOString())
-          .lte('created_at', endDate.toISOString())
-          .order('created_at', { ascending: false })
-          .limit(50000);
-
-        // Filter by employee_id if provided (background filter)
         if (employeeId) {
-          primaryQuery = primaryQuery.eq('employee_id', employeeId);
-        }
+          // Employee Modal View: Fetch ratings for this employee across all locations in the org
+          // 1. Get employee and their org_id
+          const { data: employee, error: employeeError } = await supabase
+            .from('employees')
+            .select('id, org_id, consolidated_employee_id')
+            .eq('id', employeeId)
+            .single();
 
-        // Execute primary query (ratings at current location)
-        console.log('[PositionalRatings] Executing primary query for location_id:', locationId);
-        const primaryResult = await primaryQuery;
-        console.log('[PositionalRatings] Primary query returned:', primaryResult.data?.length || 0, 'ratings');
-        
-        // Secondary queries: ratings from other locations where employee/rater is consolidated
-        // Build list of consolidated employee IDs to filter by
-        const consolidatedIdsArray = Array.from(currentLocationConsolidatedIds);
-        
-        let secondaryRatings: any[] = [];
-        let raterRatings: any[] = [];
-        
-        // Only fetch consolidated ratings if we have consolidated IDs
-        if (consolidatedIdsArray.length > 0) {
-          // Split into chunks of 100 to avoid query size limits
-          const chunkSize = 100;
-          const chunks: string[][] = [];
-          for (let i = 0; i < consolidatedIdsArray.length; i += chunkSize) {
-            chunks.push(consolidatedIdsArray.slice(i, i + chunkSize));
+          if (employeeError) throw employeeError;
+          if (!employee) throw new Error('Employee not found');
+
+          // 2. Build set of all employee IDs for this person (handle consolidated employees)
+          const employeeIds = new Set([employeeId]);
+          if (employee.consolidated_employee_id) {
+            employeeIds.add(employee.consolidated_employee_id);
           }
-          
-          // Fetch ratings where employee is consolidated
-          const secondaryPromises = chunks.map(chunk => 
-            supabase
-              .from('ratings')
-              .select(`
+
+          // Find other employees pointing to this person or their consolidated ID
+          const { data: relatedEmployees, error: relatedError } = await supabase
+            .from('employees')
+            .select('id')
+            .or(`consolidated_employee_id.eq.${employeeId}${employee.consolidated_employee_id ? `,consolidated_employee_id.eq.${employee.consolidated_employee_id}` : ''}`)
+            .eq('org_id', employee.org_id);
+
+          if (relatedError) throw relatedError;
+          relatedEmployees?.forEach(e => employeeIds.add(e.id));
+
+          // 3. Fetch all ratings for these employee IDs in the same org
+          const { data: ratingsData, error: ratingsError } = await supabase
+            .from('ratings')
+            .select(`
               *,
               employee:employees!ratings_employee_id_fkey(
                 full_name, 
@@ -904,32 +850,32 @@ export function PositionalRatings({
                 last_name, 
                 role, 
                 is_foh, 
-                is_boh,
-                consolidated_employee_id
+                is_boh
               ),
               rater:employees!ratings_rater_user_id_fkey(
                 full_name, 
-                id,
-                consolidated_employee_id
+                id
               ),
               rating_location:locations!fk_ratings_location(
                 id,
                 location_number
               )
             `)
-              .neq('location_id', locationId)
-              .in('employee_id', chunk)
-              .gte('created_at', startDate.toISOString())
-              .lte('created_at', endDate.toISOString())
-              .order('created_at', { ascending: false })
-              .limit(50000)
-          );
-          
-          // Fetch ratings where rater is consolidated
-          const raterPromises = chunks.map(chunk =>
-            supabase
-              .from('ratings')
-              .select(`
+            .in('employee_id', Array.from(employeeIds))
+            .eq('org_id', employee.org_id)
+            .gte('created_at', startDate.toISOString())
+            .lte('created_at', endDate.toISOString())
+            .order('created_at', { ascending: false })
+            .limit(50000);
+
+          if (ratingsError) throw ratingsError;
+          ratings = ratingsData || [];
+          error = ratingsError;
+        } else {
+          // Main Table View: Only fetch ratings for the current location
+          const { data: ratingsData, error: ratingsError } = await supabase
+            .from('ratings')
+            .select(`
               *,
               employee:employees!ratings_employee_id_fkey(
                 full_name, 
@@ -937,100 +883,33 @@ export function PositionalRatings({
                 last_name, 
                 role, 
                 is_foh, 
-                is_boh,
-                consolidated_employee_id
+                is_boh
               ),
               rater:employees!ratings_rater_user_id_fkey(
                 full_name, 
-                id,
-                consolidated_employee_id
+                id
               ),
               rating_location:locations!fk_ratings_location(
                 id,
                 location_number
               )
             `)
-              .neq('location_id', locationId)
-              .in('rater_user_id', chunk)
-              .gte('created_at', startDate.toISOString())
-              .lte('created_at', endDate.toISOString())
-              .order('created_at', { ascending: false })
-              .limit(50000)
-          );
-          
-          console.log('[PositionalRatings] Executing', secondaryPromises.length, 'secondary queries (employee consolidated)');
-          console.log('[PositionalRatings] Executing', raterPromises.length, 'rater queries (rater consolidated)');
-          
-          const [secondaryResults, raterResults] = await Promise.all([
-            Promise.all(secondaryPromises),
-            Promise.all(raterPromises)
-          ]);
-          
-          // Flatten results
-          secondaryRatings = secondaryResults.flatMap(result => result.data || []);
-          raterRatings = raterResults.flatMap(result => result.data || []);
-          
-          console.log('[PositionalRatings] Secondary queries returned:', secondaryRatings.length, 'ratings');
-          console.log('[PositionalRatings] Rater queries returned:', raterRatings.length, 'ratings');
-          
-          // Check for errors
-          secondaryResults.forEach(result => { if (result.error) throw result.error; });
-          raterResults.forEach(result => { if (result.error) throw result.error; });
-        }
+            .eq('location_id', locationId)
+            .gte('created_at', startDate.toISOString())
+            .lte('created_at', endDate.toISOString())
+            .order('created_at', { ascending: false })
+            .limit(50000);
 
-        // Combine results, removing duplicates
-        const primaryRatings = primaryResult.data || [];
-        
-        console.log('[PositionalRatings] Total before deduplication:', primaryRatings.length + secondaryRatings.length + raterRatings.length);
-        
-        // Combine and deduplicate by rating id
-        const ratingsMap = new Map();
-        [...primaryRatings, ...secondaryRatings, ...raterRatings].forEach((rating: any) => {
-          if (!ratingsMap.has(rating.id)) {
-            ratingsMap.set(rating.id, rating);
-          }
-        });
-        const ratings = Array.from(ratingsMap.values());
-        
-        console.log('[PositionalRatings] Total after deduplication:', ratings.length);
+          if (ratingsError) throw ratingsError;
+          ratings = ratingsData || [];
+          error = ratingsError;
+        }
 
         // Check for errors
-        if (primaryResult.error) throw primaryResult.error;
-
-        let filteredOutCount = 0;
-        let filteredByLocation = 0;
-        let filteredByFOHBOH = 0;
+        if (error) throw error;
         
         const transformedRows: RatingRow[] = (ratings || [])
           .filter((rating: any) => {
-            // Show rating if:
-            // 1. The rating's location_id matches the current location (always show these), OR
-            // 2. The employee or rater exists in current location (via consolidated_employee_id)
-            const ratingLocationId = rating.location_id || '';
-            const isRatingAtCurrentLocation = ratingLocationId === locationId;
-            
-            // If rating is at current location, always show it (regardless of employee/rater status)
-            if (isRatingAtCurrentLocation) {
-              // Skip to FOH/BOH filtering
-            } else {
-              // For ratings from other locations, check if employee or rater exists in current location
-              const ratingEmployeeId = rating.employee_id;
-              const ratingRaterId = rating.rater_user_id;
-              
-              // Check if employee_id is in the consolidated IDs set (this handles both direct matches and consolidated matches)
-              const employeeInLocation = ratingEmployeeId && currentLocationConsolidatedIds.has(ratingEmployeeId);
-              
-              // Check if rater_user_id is in the consolidated IDs set
-              const raterInLocation = ratingRaterId && currentLocationConsolidatedIds.has(ratingRaterId);
-              
-              // If neither employee nor rater exists in current location, exclude this rating
-              if (!employeeInLocation && !raterInLocation) {
-                filteredOutCount++;
-                filteredByLocation++;
-                return false;
-              }
-            }
-            
             // When employeeId is provided, show both FOH and BOH (no filtering)
             if (employeeId) {
               return true;
@@ -1049,21 +928,15 @@ export function PositionalRatings({
             const isBOHPosition = BOH_POSITIONS.includes(cleanedPosition);
 
             if (!showFOH && !showBOH) {
-              filteredOutCount++;
-              filteredByFOHBOH++;
               return false;
             }
             if (showFOH && !showBOH) {
               if (!isFOHPosition) {
-                filteredOutCount++;
-                filteredByFOHBOH++;
                 return false;
               }
             }
             if (!showFOH && showBOH) {
               if (!isBOHPosition) {
-                filteredOutCount++;
-                filteredByFOHBOH++;
                 return false;
               }
             }
@@ -1105,45 +978,46 @@ export function PositionalRatings({
           return;
         }
 
-        console.log('[PositionalRatings] After filtering:');
-        console.log('  - Filtered out by location:', filteredByLocation);
-        console.log('  - Filtered out by FOH/BOH:', filteredByFOHBOH);
-        console.log('  - Total filtered out:', filteredOutCount);
-        console.log('  - Final transformed rows:', transformedRows.length);
-        console.log('  - showFOH:', showFOH, 'showBOH:', showBOH);
-
         setRows(transformedRows);
 
-        // Filter dropdowns to only show employees/leaders from current location
-        // Get employee names from current location employees only
-        const { data: currentLocationEmployeeNames, error: namesError } = await supabase
-          .from('employees')
-          .select('id, full_name, consolidated_employee_id')
-          .eq('location_id', locationId)
-          .eq('active', true);
-
-        if (namesError) throw namesError;
-
-        const currentLocationEmployeeNamesSet = new Set(
-          (currentLocationEmployeeNames || []).map((emp: any) => emp.full_name).filter(Boolean)
-        );
-
-        // Filter to only show employees/leaders from current location
-        const employees = Array.from(
-          new Set(
-            transformedRows
-              .filter((r) => currentLocationEmployeeNamesSet.has(r.employee_name))
-              .map((r) => r.employee_name)
-          )
-        ).sort();
+        // Build unique lists for dropdown filters
+        let employees: string[];
+        let leaders: string[];
         
-        const leaders = Array.from(
-          new Set(
-            transformedRows
-              .filter((r) => currentLocationEmployeeNamesSet.has(r.rater_name))
-              .map((r) => r.rater_name)
-          )
-        ).sort();
+        if (employeeId) {
+          // Employee modal view: show all employees/leaders from ratings (already filtered to this employee)
+          employees = Array.from(new Set(transformedRows.map((r) => r.employee_name))).sort();
+          leaders = Array.from(new Set(transformedRows.map((r) => r.rater_name))).sort();
+        } else {
+          // Main table view: filter to only show employees/leaders from current location
+          const { data: currentLocationEmployees, error: namesError } = await supabase
+            .from('employees')
+            .select('full_name')
+            .eq('location_id', locationId)
+            .eq('active', true);
+
+          if (namesError) throw namesError;
+
+          const currentLocationNamesSet = new Set(
+            (currentLocationEmployees || []).map((emp: any) => emp.full_name).filter(Boolean)
+          );
+
+          employees = Array.from(
+            new Set(
+              transformedRows
+                .filter((r) => currentLocationNamesSet.has(r.employee_name))
+                .map((r) => r.employee_name)
+            )
+          ).sort();
+          
+          leaders = Array.from(
+            new Set(
+              transformedRows
+                .filter((r) => currentLocationNamesSet.has(r.rater_name))
+                .map((r) => r.rater_name)
+            )
+          ).sort();
+        }
         
         const roles = Array.from(new Set(transformedRows.map((r) => r.employee_role))).sort();
         const positions = Array.from(new Set(transformedRows.map((r) => r.position_cleaned))).sort();
