@@ -996,8 +996,6 @@ export function PositionalRatings({
 
         // Check for errors
         if (primaryResult.error) throw primaryResult.error;
-        if (secondaryResult.error) throw secondaryResult.error;
-        if (raterResult.error) throw raterResult.error;
 
         let filteredOutCount = 0;
         let filteredByLocation = 0;
