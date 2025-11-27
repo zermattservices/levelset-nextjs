@@ -866,7 +866,7 @@ export function PositionalRatings({
             .gte('created_at', startDate.toISOString())
             .lte('created_at', endDate.toISOString())
             .order('created_at', { ascending: false })
-            .limit(50000);
+            .range(0, 999999);
 
           if (ratingsError) throw ratingsError;
           ratings = ratingsData || [];
@@ -898,7 +898,7 @@ export function PositionalRatings({
             .gte('created_at', startDate.toISOString())
             .lte('created_at', endDate.toISOString())
             .order('created_at', { ascending: false })
-            .limit(50000);
+            .range(0, 999999);
 
           if (ratingsError) throw ratingsError;
           ratings = ratingsData || [];
