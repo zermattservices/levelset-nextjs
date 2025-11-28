@@ -521,6 +521,33 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
   />
 ));
 
+// Helper function to fetch all rows using pagination (bypasses 1000 row limit)
+async function fetchAllRatings(
+  queryBuilder: any,
+  batchSize: number = 1000
+): Promise<any[]> {
+  const allRatings: any[] = [];
+  let offset = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await queryBuilder.range(offset, offset + batchSize - 1);
+    
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      allRatings.push(...data);
+      // If we got less than batchSize, we've reached the end
+      hasMore = data.length === batchSize;
+      offset += batchSize;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  return allRatings;
+}
+
 export function PositionalRatings({
   locationId,
   employeeId,
@@ -839,8 +866,8 @@ export function PositionalRatings({
           if (relatedError) throw relatedError;
           relatedEmployees?.forEach(e => employeeIds.add(e.id));
 
-          // 3. Fetch all ratings for these employee IDs in the same org
-          const { data: ratingsData, error: ratingsError } = await supabase
+          // 3. Fetch all ratings for these employee IDs in the same org (with pagination)
+          const queryBuilder = supabase
             .from('ratings')
             .select(`
               *,
@@ -865,15 +892,13 @@ export function PositionalRatings({
             .eq('org_id', employee.org_id)
             .gte('created_at', startDate.toISOString())
             .lte('created_at', endDate.toISOString())
-            .order('created_at', { ascending: false })
-            .range(0, 999999);
+            .order('created_at', { ascending: false });
 
-          if (ratingsError) throw ratingsError;
-          ratings = ratingsData || [];
-          error = ratingsError;
+          ratings = await fetchAllRatings(queryBuilder);
+          error = null;
         } else {
-          // Main Table View: Only fetch ratings for the current location
-          const { data: ratingsData, error: ratingsError } = await supabase
+          // Main Table View: Only fetch ratings for the current location (with pagination)
+          const queryBuilder = supabase
             .from('ratings')
             .select(`
               *,
@@ -897,12 +922,10 @@ export function PositionalRatings({
             .eq('location_id', locationId)
             .gte('created_at', startDate.toISOString())
             .lte('created_at', endDate.toISOString())
-            .order('created_at', { ascending: false })
-            .range(0, 999999);
+            .order('created_at', { ascending: false });
 
-          if (ratingsError) throw ratingsError;
-          ratings = ratingsData || [];
-          error = ratingsError;
+          ratings = await fetchAllRatings(queryBuilder);
+          error = null;
         }
 
         // Check for errors
