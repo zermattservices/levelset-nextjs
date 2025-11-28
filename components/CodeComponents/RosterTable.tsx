@@ -31,6 +31,7 @@ import { SyncEmployeesModal } from "./SyncEmployeesModal";
 import { SyncHireDateModal } from "./SyncHireDateModal";
 import { EmployeeModal } from "./EmployeeModal";
 import { useLocationContext } from "./LocationContext";
+import { useDataEnv } from '@plasmicapp/react-web/lib/host';
 
 export type Role =
   | "New Hire"
@@ -502,8 +503,55 @@ function EmployeesTableView({
   const [terminateConfirmOpen, setTerminateConfirmOpen] = React.useState(false);
   const [employeeToTerminate, setEmployeeToTerminate] = React.useState<{ id: string; name: string } | null>(null);
 
-  // Unchangeable roles
-  const unchangeableRoles: Role[] = ["Operator", "Executive"];
+  // Get current user's role and employee_id from auth context
+  const dataEnv = useDataEnv?.();
+  const currentUserRole = dataEnv?.auth?.role || '';
+  const currentUserEmployeeId = dataEnv?.auth?.employee_id || '';
+
+  // Helper function to get available roles based on user permissions
+  const getAvailableRoles = React.useCallback((employeeId: string, currentEmployeeRole: Role): Role[] => {
+    const isEditingSelf = employeeId === currentUserEmployeeId;
+    const allRoles: Role[] = ["New Hire", "Team Member", "Trainer", "Team Lead", "Director", "Executive", "Operator"];
+
+    // Levelset Admin: Can change any employee's role to any role option, operator included
+    if (currentUserRole === 'Levelset Admin') {
+      return allRoles;
+    }
+
+    // Operator (Owner/Operator): Can change anyone else's role (not their own), including executive
+    if (currentUserRole === 'Owner/Operator') {
+      if (isEditingSelf) {
+        return []; // Cannot change own role
+      }
+      return allRoles; // Can change anyone else to any role
+    }
+
+    // Executive: Can change to any role except operator (same as operator)
+    if (currentUserRole === 'Executive') {
+      if (isEditingSelf) {
+        return []; // Cannot change own role
+      }
+      return allRoles.filter(role => role !== 'Operator'); // Can change to any role except Operator
+    }
+
+    // Director: Can change anyone below them (new hire, team member, trainer, team lead) but not director
+    if (currentUserRole === 'Director') {
+      if (isEditingSelf) {
+        return []; // Cannot change own role
+      }
+      // Can only change to roles below Director
+      return ["New Hire", "Team Member", "Trainer", "Team Lead"];
+    }
+
+    // Default: No permissions to change roles
+    return [];
+  }, [currentUserRole, currentUserEmployeeId]);
+
+  // Helper function to check if a role can be changed
+  const canChangeRole = React.useCallback((employeeId: string, currentEmployeeRole: Role): boolean => {
+    const availableRoles = getAvailableRoles(employeeId, currentEmployeeRole);
+    return availableRoles.length > 0;
+  }, [getAvailableRoles]);
 
   // Fetch employees from Supabase - memoized to avoid recreating on every render
   const fetchEmployees = React.useCallback(async () => {
@@ -1021,11 +1069,12 @@ function EmployeesTableView({
         renderCell: (params) => {
           const employeeId = params.row.id as string;
           const role = params.value as Role;
-          const immutable = unchangeableRoles.includes(role);
+          const canChange = canChangeRole(employeeId, role);
+          const availableRoles = getAvailableRoles(employeeId, role);
           const anchor = roleMenuAnchor[employeeId] ?? null;
           return (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
-              {immutable ? (
+              {!canChange ? (
                 <RolePill role={role} />
               ) : (
                 <>
@@ -1049,7 +1098,7 @@ function EmployeesTableView({
                       },
                     }}
                   >
-                    {(["New Hire", "Team Member", "Trainer", "Team Lead", "Director"] as Role[]).map((roleOption) => (
+                    {availableRoles.map((roleOption) => (
                       <RoleMenuItem
                         key={roleOption}
                         selected={role === roleOption}
@@ -1311,6 +1360,8 @@ function EmployeesTableView({
     handleActionsMenuClose,
     handleViewProfile,
     handleTerminateEmployee,
+    canChangeRole,
+    getAvailableRoles,
   ]);
 
   if (loading && data.length === 0) {
