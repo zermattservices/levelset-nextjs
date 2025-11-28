@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: colors.grey200,
-    paddingVertical: 6,
+    paddingVertical: 4,
     paddingHorizontal: 4,
     minHeight: 32,
     alignItems: 'center',
@@ -183,6 +183,17 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  locationTag: {
+    fontSize: 7,
+    fontWeight: 600,
+    backgroundColor: '#f3f4f6',
+    color: '#6b7280',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 8,
+    marginLeft: 3,
+    lineHeight: 1.5,
   },
   tableHeaderCell: {
     fontSize: 10,
@@ -357,6 +368,7 @@ interface PDFDocumentProps {
     rating4: number | null;
     rating5: number | null;
     overall: number | null;
+    locationNumber: string | null;
   }>;
 }
 
@@ -608,7 +620,12 @@ export const PositionalRatingsPDF: React.FC<PDFDocumentProps> = ({
           {tableData.map((row, index) => (
             <View key={index} style={styles.tableRow} wrap={false}>
               <Text style={[styles.tableCell, styles.colDate]}>{row.date}</Text>
-              <Text style={[styles.tableCell, styles.colEmployee]}>{row.employeeName}</Text>
+              <View style={[styles.tableCell, styles.colEmployee, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }]}>
+                <Text>{row.employeeName}</Text>
+                {row.locationNumber && (
+                  <Text style={styles.locationTag}>{row.locationNumber}</Text>
+                )}
+              </View>
               <View style={[styles.tableCell, styles.colRole, styles.pillWrapper]}>
                 <View style={getRolePillStyle(row.employeeRole)}>
                   <Text>{row.employeeRole}</Text>

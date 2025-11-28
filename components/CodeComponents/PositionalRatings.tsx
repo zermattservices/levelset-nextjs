@@ -728,6 +728,16 @@ export function PositionalRatings({
         });
       }
       
+      // Add rater filter if raterUserId is provided
+      if (raterUserId && rows.length > 0) {
+        const raterName = rows[0]?.rater_name || '';
+        columnFilters.push({
+          field: 'rater_name',
+          operator: 'is',
+          value: raterName
+        });
+      }
+      
       const filterData = {
         dateRange: {
           start: startDate?.toLocaleDateString() || '',
@@ -788,6 +798,7 @@ export function PositionalRatings({
         rating4: row.rating_4,
         rating5: row.rating_5,
         overall: row.rating_avg,
+        locationNumber: row.rating_location_id !== locationId ? row.rating_location_number : null,
       }));
 
       // Generate PDF blob
@@ -1779,11 +1790,13 @@ export function PositionalRatings({
                   fontFamily,
                   fontSize: 10,
                   fontWeight: 600,
-                  height: 20,
+                  height: '1.5em', // Match line height of text (13px * 1.5 = 19.5px)
+                  lineHeight: 1.5,
                   backgroundColor: '#f3f4f6',
                   color: '#6b7280',
                   '& .MuiChip-label': {
                     padding: '0 6px',
+                    lineHeight: 1.5,
                   },
                 }}
               />
@@ -1818,49 +1831,23 @@ export function PositionalRatings({
       renderCell: (params) => {
         const row = params.row as RatingRow;
         const isClickable = !employeeId && row.rater_employee_id;
-        const isDifferentLocation = row.rating_location_id !== locationId && row.rating_location_number;
         
         return (
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 500,
+              color: isClickable ? levelsetGreen : '#111827',
+              cursor: isClickable ? 'pointer' : 'default',
+              textDecoration: 'none',
+              '&:hover': isClickable ? {
+                textDecoration: 'underline',
+              } : {},
             }}
+            onClick={() => isClickable && handleNameClick(row.rater_employee_id)}
           >
-            <Box
-              sx={{
-                fontFamily,
-                fontSize: 13,
-                fontWeight: 500,
-                color: isClickable ? levelsetGreen : '#111827',
-                cursor: isClickable ? 'pointer' : 'default',
-                textDecoration: 'none',
-                '&:hover': isClickable ? {
-                  textDecoration: 'underline',
-                } : {},
-              }}
-              onClick={() => isClickable && handleNameClick(row.rater_employee_id)}
-            >
-              {params.value}
-            </Box>
-            {isDifferentLocation && (
-              <Chip
-                label={row.rating_location_number}
-                size="small"
-                sx={{
-                  fontFamily,
-                  fontSize: 10,
-                  fontWeight: 600,
-                  height: 20,
-                  backgroundColor: '#f3f4f6',
-                  color: '#6b7280',
-                  '& .MuiChip-label': {
-                    padding: '0 6px',
-                  },
-                }}
-              />
-            )}
+            {params.value}
           </Box>
         );
       },
