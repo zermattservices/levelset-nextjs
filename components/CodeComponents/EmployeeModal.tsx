@@ -289,12 +289,14 @@ export function EmployeeModal({
   const [selectedRecommendation, setSelectedRecommendation] = React.useState<any>(null);
   const [dismissConfirmationOpen, setDismissConfirmationOpen] = React.useState(false);
   const [recommendationToDismiss, setRecommendationToDismiss] = React.useState<any>(null);
+  const [peViewMode, setPeViewMode] = React.useState<'employee' | 'rater'>('employee');
   const supabase = createSupabaseClient();
 
   // Reset to discipline tab when modal opens
   React.useEffect(() => {
     if (open && employee) {
       setCurrentTab(initialTab);
+      setPeViewMode('employee'); // Reset view mode when modal opens
     }
   }, [open, employee, initialTab]);
 
@@ -817,8 +819,6 @@ export function EmployeeModal({
     const qualifiedRoles = ['Trainer', 'Team Lead', 'Director', 'Executive', 'Operator'];
     const showToggle = qualifiedRoles.includes(employee.role || '');
 
-    const [viewMode, setViewMode] = React.useState<'employee' | 'rater'>('employee');
-
     return (
       <Box sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {showToggle && (
@@ -853,7 +853,7 @@ export function EmployeeModal({
               }}
             >
               <Button
-                onClick={() => setViewMode('employee')}
+                onClick={() => setPeViewMode('employee')}
                 sx={{
                   fontFamily: "Satoshi",
                   fontSize: "13px",
@@ -862,10 +862,10 @@ export function EmployeeModal({
                   borderRadius: "18px",
                   padding: "6px 16px",
                   minWidth: "auto",
-                  backgroundColor: viewMode === 'employee' ? "#31664a" : "transparent",
-                  color: viewMode === 'employee' ? "#ffffff" : "#6b7280",
+                  backgroundColor: peViewMode === 'employee' ? "#31664a" : "transparent",
+                  color: peViewMode === 'employee' ? "#ffffff" : "#6b7280",
                   "&:hover": {
-                    backgroundColor: viewMode === 'employee' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
+                    backgroundColor: peViewMode === 'employee' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
                   },
                   transition: "all 0.2s ease-in-out",
                 }}
@@ -873,7 +873,7 @@ export function EmployeeModal({
                 Employee
               </Button>
               <Button
-                onClick={() => setViewMode('rater')}
+                onClick={() => setPeViewMode('rater')}
                 sx={{
                   fontFamily: "Satoshi",
                   fontSize: "13px",
@@ -882,10 +882,10 @@ export function EmployeeModal({
                   borderRadius: "18px",
                   padding: "6px 16px",
                   minWidth: "auto",
-                  backgroundColor: viewMode === 'rater' ? "#31664a" : "transparent",
-                  color: viewMode === 'rater' ? "#ffffff" : "#6b7280",
+                  backgroundColor: peViewMode === 'rater' ? "#31664a" : "transparent",
+                  color: peViewMode === 'rater' ? "#ffffff" : "#6b7280",
                   "&:hover": {
-                    backgroundColor: viewMode === 'rater' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
+                    backgroundColor: peViewMode === 'rater' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
                   },
                   transition: "all 0.2s ease-in-out",
                 }}
@@ -898,8 +898,8 @@ export function EmployeeModal({
         <Box sx={{ flex: 1, overflow: "auto", p: 4 }}>
           <PositionalRatings
             locationId={locationId}
-            employeeId={viewMode === 'employee' ? employee.id : undefined}
-            raterUserId={viewMode === 'rater' ? employee.id : undefined}
+            employeeId={peViewMode === 'employee' ? employee.id : undefined}
+            raterUserId={peViewMode === 'rater' ? employee.id : undefined}
           />
         </Box>
       </Box>
