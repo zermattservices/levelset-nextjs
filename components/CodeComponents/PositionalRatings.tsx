@@ -64,6 +64,7 @@ const bohColorLight = '#fffcf0';
 export interface PositionalRatingsProps {
   locationId: string;
   employeeId?: string;
+  raterUserId?: string;
   className?: string;
   width?: string | number;
   maxWidth?: string | number;
@@ -343,12 +344,12 @@ function SelectFilterInput(props: SelectFilterInputProps) {
 
 // Custom Column Filter Input - matches SelectFilterInput pattern
 function ColumnFilterInput(props: any) {
-  const { item, applyValue, apiRef, employeeId } = props;
+  const { item, applyValue, apiRef, employeeId, raterUserId } = props;
   const columns = apiRef?.current?.getAllColumns?.() || [];
   let filterableColumns = columns.filter((col: any) => col.filterable !== false);
   
-  // Exclude employee_name and employee_role from filter dropdown when employeeId is provided
-  if (employeeId) {
+  // Exclude employee_name and employee_role from filter dropdown when employeeId or raterUserId is provided
+  if (employeeId || raterUserId) {
     filterableColumns = filterableColumns.filter(
       (col: any) => col.field !== 'employee_name' && col.field !== 'employee_role'
     );
@@ -551,6 +552,7 @@ async function fetchAllRatings(
 export function PositionalRatings({
   locationId,
   employeeId,
+  raterUserId,
   className = '',
   width,
   maxWidth,
@@ -563,17 +565,17 @@ export function PositionalRatings({
   const apiRef = useGridApiRef();
   const [filteredRows, setFilteredRows] = React.useState<GridRowsProp>([]);
   
-  // Filter states - when employeeId is provided, always show both FOH and BOH
+  // Filter states - when employeeId or raterUserId is provided, always show both FOH and BOH
   const [showFOH, setShowFOH] = React.useState(true);
   const [showBOH, setShowBOH] = React.useState(true);
   
-  // Ensure FOH and BOH are both true when employeeId is provided
+  // Ensure FOH and BOH are both true when employeeId or raterUserId is provided
   React.useEffect(() => {
-    if (employeeId) {
+    if (employeeId || raterUserId) {
       setShowFOH(true);
       setShowBOH(true);
     }
-  }, [employeeId]);
+  }, [employeeId, raterUserId]);
   const [dateRange, setDateRange] = React.useState<'mtd' | 'qtd' | '30d' | '90d' | 'custom'>('30d');
   const [startDate, setStartDate] = React.useState<Date | null>(null);
   const [endDate, setEndDate] = React.useState<Date | null>(null);
@@ -654,14 +656,14 @@ export function PositionalRatings({
     return [start, end];
   }, []);
 
-  // Initialize dates - default to QTD if employeeId is provided, otherwise 30d
+  // Initialize dates - default to QTD if employeeId or raterUserId is provided, otherwise 30d
   React.useEffect(() => {
-    const preset = employeeId ? 'qtd' : '30d';
+    const preset = (employeeId || raterUserId) ? 'qtd' : '30d';
     const [start, end] = getDateRange(preset);
     setStartDate(start);
     setEndDate(end);
     setDateRange(preset);
-  }, [getDateRange, employeeId]);
+  }, [getDateRange, employeeId, raterUserId]);
 
   // Fetch Big 5 labels for a position
   const fetchBig5Labels = React.useCallback(async (position: string) => {
@@ -838,7 +840,65 @@ export function PositionalRatings({
         let ratings: any[] = [];
         let error: any = null;
 
-        if (employeeId) {
+        if (raterUserId) {
+          // Rater View: Fetch ratings where this employee is the rater across all locations in the org
+          // 1. Get employee and their org_id
+          const { data: employee, error: employeeError } = await supabase
+            .from('employees')
+            .select('id, org_id, consolidated_employee_id')
+            .eq('id', raterUserId)
+            .single();
+
+          if (employeeError) throw employeeError;
+          if (!employee) throw new Error('Employee not found');
+
+          // 2. Build set of all employee IDs for this person (handle consolidated employees)
+          const raterIds = new Set([raterUserId]);
+          if (employee.consolidated_employee_id) {
+            raterIds.add(employee.consolidated_employee_id);
+          }
+
+          // Find other employees pointing to this person or their consolidated ID
+          const { data: relatedEmployees, error: relatedError } = await supabase
+            .from('employees')
+            .select('id')
+            .or(`consolidated_employee_id.eq.${raterUserId}${employee.consolidated_employee_id ? `,consolidated_employee_id.eq.${employee.consolidated_employee_id}` : ''}`)
+            .eq('org_id', employee.org_id);
+
+          if (relatedError) throw relatedError;
+          relatedEmployees?.forEach(e => raterIds.add(e.id));
+
+          // 3. Fetch all ratings where these IDs are the rater in the same org (with pagination)
+          const queryBuilder = supabase
+            .from('ratings')
+            .select(`
+              *,
+              employee:employees!ratings_employee_id_fkey(
+                full_name, 
+                first_name, 
+                last_name, 
+                role, 
+                is_foh, 
+                is_boh
+              ),
+              rater:employees!ratings_rater_user_id_fkey(
+                full_name, 
+                id
+              ),
+              rating_location:locations!fk_ratings_location(
+                id,
+                location_number
+              )
+            `)
+            .in('rater_user_id', Array.from(raterIds))
+            .eq('org_id', employee.org_id)
+            .gte('created_at', startDate.toISOString())
+            .lte('created_at', endDate.toISOString())
+            .order('created_at', { ascending: false });
+
+          ratings = await fetchAllRatings(queryBuilder);
+          error = null;
+        } else if (employeeId) {
           // Employee Modal View: Fetch ratings for this employee across all locations in the org
           // 1. Get employee and their org_id
           const { data: employee, error: employeeError } = await supabase
@@ -933,8 +993,8 @@ export function PositionalRatings({
         
         const transformedRows: RatingRow[] = (ratings || [])
           .filter((rating: any) => {
-            // When employeeId is provided, show both FOH and BOH (no filtering)
-            if (employeeId) {
+            // When employeeId or raterUserId is provided, show both FOH and BOH (no filtering)
+            if (employeeId || raterUserId) {
               return true;
             }
             
@@ -1007,8 +1067,8 @@ export function PositionalRatings({
         let employees: string[];
         let leaders: string[];
         
-        if (employeeId) {
-          // Employee modal view: show all employees/leaders from ratings (already filtered to this employee)
+        if (employeeId || raterUserId) {
+          // Employee/Rater modal view: show all employees/leaders from ratings (already filtered)
           employees = Array.from(new Set(transformedRows.map((r) => r.employee_name))).sort();
           leaders = Array.from(new Set(transformedRows.map((r) => r.rater_name))).sort();
         } else {
@@ -1679,12 +1739,12 @@ export function PositionalRatings({
       headerName: 'Employee',
       width: 160,
       sortable: true,
-      filterable: !employeeId, // Disable filtering when employeeId is provided
+      filterable: !employeeId && !raterUserId, // Disable filtering when employeeId or raterUserId is provided
       resizable: false, // Disable column resize to hide separators
       filterOperators: createDropdownOperators(uniqueEmployees),
       renderCell: (params) => {
         const row = params.row as RatingRow;
-        const isClickable = !employeeId && row.employee_id;
+        const isClickable = !employeeId && !raterUserId && row.employee_id;
         const isDifferentLocation = row.rating_location_id !== locationId && row.rating_location_number;
         
         return (
@@ -1737,7 +1797,7 @@ export function PositionalRatings({
       headerName: 'Employee Role',
       width: 140,
       sortable: true,
-      filterable: !employeeId, // Disable filtering when employeeId is provided
+      filterable: !employeeId && !raterUserId, // Disable filtering when employeeId or raterUserId is provided
       resizable: false, // Disable column resize to hide separators
       filterOperators: createDropdownOperators(uniqueRoles),
       headerAlign: 'center',
@@ -2172,7 +2232,7 @@ export function PositionalRatings({
           <DataGridPro
             apiRef={apiRef}
             rows={rows}
-            columns={employeeId ? columns.filter(col => col.field !== 'employee_role') : columns}
+            columns={(employeeId || raterUserId) ? columns.filter(col => col.field !== 'employee_role') : columns}
             loading={loading}
             onFilterModelChange={(newModel) => {
               setFilterModel(newModel);

@@ -813,12 +813,95 @@ export function EmployeeModal({
       );
     }
 
+    // Check if employee role qualifies for the toggle (trainer, team lead, director, executive, or operator)
+    const qualifiedRoles = ['Trainer', 'Team Lead', 'Director', 'Executive', 'Operator'];
+    const showToggle = qualifiedRoles.includes(employee.role || '');
+
+    const [viewMode, setViewMode] = React.useState<'employee' | 'rater'>('employee');
+
     return (
-      <Box sx={{ p: 4, height: "100%", overflow: "auto" }}>
-        <PositionalRatings
-          locationId={locationId}
-          employeeId={employee.id}
-        />
+      <Box sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        {showToggle && (
+          <Box
+            sx={{
+              p: 3,
+              pb: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              borderBottom: "1px solid #e9eaeb",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: "Satoshi",
+                fontSize: "14px",
+                fontWeight: 500,
+                color: "#414651",
+              }}
+            >
+              View ratings as a:
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 0.5,
+                backgroundColor: "#f3f4f6",
+                borderRadius: "20px",
+                padding: "2px",
+              }}
+            >
+              <Button
+                onClick={() => setViewMode('employee')}
+                sx={{
+                  fontFamily: "Satoshi",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  borderRadius: "18px",
+                  padding: "6px 16px",
+                  minWidth: "auto",
+                  backgroundColor: viewMode === 'employee' ? "#31664a" : "transparent",
+                  color: viewMode === 'employee' ? "#ffffff" : "#6b7280",
+                  "&:hover": {
+                    backgroundColor: viewMode === 'employee' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
+                  },
+                  transition: "all 0.2s ease-in-out",
+                }}
+              >
+                Employee
+              </Button>
+              <Button
+                onClick={() => setViewMode('rater')}
+                sx={{
+                  fontFamily: "Satoshi",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  borderRadius: "18px",
+                  padding: "6px 16px",
+                  minWidth: "auto",
+                  backgroundColor: viewMode === 'rater' ? "#31664a" : "transparent",
+                  color: viewMode === 'rater' ? "#ffffff" : "#6b7280",
+                  "&:hover": {
+                    backgroundColor: viewMode === 'rater' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
+                  },
+                  transition: "all 0.2s ease-in-out",
+                }}
+              >
+                Rater
+              </Button>
+            </Box>
+          </Box>
+        )}
+        <Box sx={{ flex: 1, overflow: "auto", p: 4 }}>
+          <PositionalRatings
+            locationId={locationId}
+            employeeId={viewMode === 'employee' ? employee.id : undefined}
+            raterUserId={viewMode === 'rater' ? employee.id : undefined}
+          />
+        </Box>
       </Box>
     );
   };
