@@ -842,7 +842,7 @@ export function EmployeeModal({
                 color: "#414651",
               }}
             >
-              View ratings as a:
+              View ratings as:
             </Typography>
             <Box
               sx={{
@@ -851,6 +851,7 @@ export function EmployeeModal({
                 backgroundColor: "#f3f4f6",
                 borderRadius: "20px",
                 padding: "2px",
+                transition: "all 0.3s ease-in-out",
               }}
             >
               <Button
@@ -868,7 +869,7 @@ export function EmployeeModal({
                   "&:hover": {
                     backgroundColor: peViewMode === 'employee' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
                   },
-                  transition: "all 0.2s ease-in-out",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               >
                 Employee
@@ -888,7 +889,7 @@ export function EmployeeModal({
                   "&:hover": {
                     backgroundColor: peViewMode === 'rater' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
                   },
-                  transition: "all 0.2s ease-in-out",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               >
                 Rater

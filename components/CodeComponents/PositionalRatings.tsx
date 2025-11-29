@@ -1702,8 +1702,8 @@ export function PositionalRatings({
               },
             }}
           />
-          {/* Hide search field when employeeId is provided */}
-          {!employeeId && (
+          {/* Hide search field when employeeId or raterUserId is provided */}
+          {!employeeId && !raterUserId && (
             <GridToolbarQuickFilter 
               quickFilterParser={(searchInput) => {
                 setSearchText(searchInput);
