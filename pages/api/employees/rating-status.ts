@@ -120,6 +120,22 @@ export default async function handler(
         Object.keys(positionAverages).length > 0 &&
         allPositionsQualified(positionAverages, greenThreshold);
       
+      // Debug logging for specific employee (Paola Ruiz)
+      if (employeeId === '89afee38-30e0-4436-b83a-e114432fcb6f') {
+        console.log('[rating-status] Paola Ruiz debug:', {
+          employeeId,
+          positionAverages,
+          positionCount: Object.keys(positionAverages).length,
+          greenThreshold,
+          meetsThreshold,
+          allPositions: Object.entries(positionAverages).map(([pos, avg]) => ({
+            position: pos,
+            average: avg,
+            meets: avg >= greenThreshold
+          }))
+        });
+      }
+      
       ratingStatusMap[employeeId] = meetsThreshold;
     });
 
