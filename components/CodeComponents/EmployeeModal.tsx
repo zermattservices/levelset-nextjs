@@ -824,7 +824,8 @@ export function EmployeeModal({
         {showToggle && (
           <Box
             sx={{
-              p: 3,
+              px: 3,
+              pt: 3,
               pb: 2,
               display: "flex",
               alignItems: "center",
@@ -895,7 +896,7 @@ export function EmployeeModal({
             </Box>
           </Box>
         )}
-        <Box sx={{ flex: 1, overflow: "auto", p: 4 }}>
+        <Box sx={{ flex: 1, overflow: "auto", pt: 2, px: 4, pb: 4 }}>
           <PositionalRatings
             locationId={locationId}
             employeeId={peViewMode === 'employee' ? employee.id : undefined}

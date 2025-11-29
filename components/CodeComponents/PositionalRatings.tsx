@@ -1352,8 +1352,8 @@ export function PositionalRatings({
       <GridToolbarContainer sx={{ p: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}>
         {/* Left side - FOH/BOH and Date filters */}
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1, flexWrap: 'wrap' }}>
-          {/* Hide FOH/BOH buttons when employeeId is provided */}
-          {!employeeId && (
+          {/* Hide FOH/BOH buttons when employeeId or raterUserId is provided */}
+          {!employeeId && !raterUserId && (
             <>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <AreaPill
@@ -1748,7 +1748,7 @@ export function PositionalRatings({
     {
       field: 'employee_name',
       headerName: 'Employee',
-      width: 160,
+      width: 190,
       sortable: true,
       filterable: !employeeId && !raterUserId, // Disable filtering when employeeId or raterUserId is provided
       resizable: false, // Disable column resize to hide separators
@@ -1823,7 +1823,7 @@ export function PositionalRatings({
     {
       field: 'rater_name',
       headerName: 'Leader',
-      width: 160,
+      width: 180,
       sortable: true,
       filterable: true,
       resizable: false, // Disable column resize to hide separators
