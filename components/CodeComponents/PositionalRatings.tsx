@@ -1002,7 +1002,16 @@ export function PositionalRatings({
         // Check for errors
         if (error) throw error;
         
-        const transformedRows: RatingRow[] = (ratings || [])
+        // Deduplicate ratings by id (in case of any duplicates from query)
+        const ratingsMap = new Map();
+        (ratings || []).forEach((rating: any) => {
+          if (!ratingsMap.has(rating.id)) {
+            ratingsMap.set(rating.id, rating);
+          }
+        });
+        const uniqueRatings = Array.from(ratingsMap.values());
+        
+        const transformedRows: RatingRow[] = uniqueRatings
           .filter((rating: any) => {
             // When employeeId or raterUserId is provided, show both FOH and BOH (no filtering)
             if (employeeId || raterUserId) {
