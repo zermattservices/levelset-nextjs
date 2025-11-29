@@ -894,7 +894,8 @@ export function PositionalRatings({
               ),
               rater:employees!ratings_rater_user_id_fkey(
                 full_name, 
-                id
+                id,
+                consolidated_employee_id
               ),
               rating_location:locations!fk_ratings_location(
                 id,
@@ -952,7 +953,8 @@ export function PositionalRatings({
               ),
               rater:employees!ratings_rater_user_id_fkey(
                 full_name, 
-                id
+                id,
+                consolidated_employee_id
               ),
               rating_location:locations!fk_ratings_location(
                 id,
@@ -983,7 +985,8 @@ export function PositionalRatings({
               ),
               rater:employees!ratings_rater_user_id_fkey(
                 full_name, 
-                id
+                id,
+                consolidated_employee_id
               ),
               rating_location:locations!fk_ratings_location(
                 id,
@@ -1002,14 +1005,28 @@ export function PositionalRatings({
         // Check for errors
         if (error) throw error;
         
-        // Deduplicate ratings by id (in case of any duplicates from query)
-        const ratingsMap = new Map();
+        // Deduplicate ratings by id first (in case of any duplicates from query)
+        const ratingsById = new Map();
         (ratings || []).forEach((rating: any) => {
-          if (!ratingsMap.has(rating.id)) {
-            ratingsMap.set(rating.id, rating);
+          if (!ratingsById.has(rating.id)) {
+            ratingsById.set(rating.id, rating);
           }
         });
-        const uniqueRatings = Array.from(ratingsMap.values());
+        
+        // Additional deduplication: remove duplicates based on employee, rater (by consolidated ID), timestamp, and position
+        // This handles cases where the same person has multiple employee records across locations
+        const ratingsByKey = new Map<string, any>();
+        Array.from(ratingsById.values()).forEach((rating: any) => {
+          const raterConsolidatedId = rating.rater?.consolidated_employee_id || rating.rater?.id || rating.rater_user_id;
+          const key = `${rating.employee_id}_${raterConsolidatedId}_${rating.created_at}_${rating.position}_${rating.location_id}`;
+          
+          // Keep the rating with the highest ID (most recent) if duplicates exist
+          if (!ratingsByKey.has(key) || rating.id > ratingsByKey.get(key).id) {
+            ratingsByKey.set(key, rating);
+          }
+        });
+        
+        const uniqueRatings = Array.from(ratingsByKey.values());
         
         const transformedRows: RatingRow[] = uniqueRatings
           .filter((rating: any) => {
