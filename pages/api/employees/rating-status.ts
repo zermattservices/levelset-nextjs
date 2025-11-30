@@ -42,16 +42,32 @@ export default async function handler(
     const thresholds = await getRatingThresholds(location_id);
     const greenThreshold = thresholds.green_threshold;
 
-    // Fetch ALL ratings for ALL employees in a single query (optimized)
-    const { data: allRatings, error: ratingsError } = await supabase
-      .from('ratings')
-      .select('employee_id, position, rating_avg, created_at')
-      .in('employee_id', employeeIds)
-      .not('rating_avg', 'is', null)
-      .order('created_at', { ascending: false });
+    // Fetch ALL ratings for ALL employees with pagination to bypass PostgREST limit
+    let allRatings: any[] = [];
+    let offset = 0;
+    const limit = 1000;
+    let hasMore = true;
 
-    if (ratingsError) {
-      throw ratingsError;
+    while (hasMore) {
+      const { data, error: ratingsError } = await supabase
+        .from('ratings')
+        .select('employee_id, position, rating_avg, created_at')
+        .in('employee_id', employeeIds)
+        .not('rating_avg', 'is', null)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (ratingsError) {
+        throw ratingsError;
+      }
+
+      if (data && data.length > 0) {
+        allRatings = allRatings.concat(data);
+        hasMore = data.length === limit;
+        offset += limit;
+      } else {
+        hasMore = false;
+      }
     }
 
     // Group ratings by employee_id and position, then calculate rolling-4 averages
