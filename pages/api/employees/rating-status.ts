@@ -136,37 +136,6 @@ export default async function handler(
         Object.keys(positionAverages).length > 0 &&
         allPositionsQualified(positionAverages, greenThreshold);
       
-      // Debug logging for specific employee (Paola Ruiz)
-      if (employeeId === '89afee38-30e0-4436-b83a-e114432fcb6f') {
-        const positionDetails: Record<string, any> = {};
-        positionMap.forEach((ratings, position) => {
-          const last4 = ratings.slice(0, 4);
-          positionDetails[position] = {
-            totalRatings: ratings.length,
-            last4Count: last4.length,
-            last4Ratings: last4.map(r => ({
-              rating_avg: r.rating_avg,
-              created_at: r.created_at
-            })),
-            calculatedAverage: positionAverages[position]
-          };
-        });
-        
-        console.log('[rating-status] Paola Ruiz debug:', {
-          employeeId,
-          positionAverages,
-          positionCount: Object.keys(positionAverages).length,
-          greenThreshold,
-          meetsThreshold,
-          allPositions: Object.entries(positionAverages).map(([pos, avg]) => ({
-            position: pos,
-            average: avg,
-            meets: avg >= greenThreshold
-          })),
-          positionDetails
-        });
-      }
-      
       ratingStatusMap[employeeId] = meetsThreshold;
     });
 

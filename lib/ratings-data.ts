@@ -77,21 +77,37 @@ export async function fetchOverviewData(
     return [];
   }
 
-  // Get all ratings for this area with employee names
-  const { data: ratings, error } = await supabase
-    .from('ratings')
-    .select(`
-      *,
-      employee:employees!ratings_employee_id_fkey(full_name, first_name, last_name),
-      rater:employees!ratings_rater_user_id_fkey(full_name)
-    `)
-    .eq('location_id', locationId)
-    .in('position', positions)
-    .order('created_at', { ascending: false });
+  // Get all ratings for this area with employee names (with pagination to bypass PostgREST limit)
+  let ratings: any[] = [];
+  let offset = 0;
+  const limit = 1000;
+  let hasMore = true;
 
-  if (error) {
-    console.error('Error fetching overview ratings:', error);
-    // Continue with empty ratings - show all employees even if ratings fail
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('ratings')
+      .select(`
+        *,
+        employee:employees!ratings_employee_id_fkey(full_name, first_name, last_name),
+        rater:employees!ratings_rater_user_id_fkey(full_name)
+      `)
+      .eq('location_id', locationId)
+      .in('position', positions)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Error fetching overview ratings:', error);
+      break;
+    }
+
+    if (data && data.length > 0) {
+      ratings = ratings.concat(data);
+      hasMore = data.length === limit;
+      offset += limit;
+    } else {
+      hasMore = false;
+    }
   }
 
   // Group ratings by employee_id
