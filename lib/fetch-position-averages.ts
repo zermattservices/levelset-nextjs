@@ -28,14 +28,35 @@ export async function fetchEmployeePositionAverages(
   for (const employee of employees) {
     const employeeName = employee.full_name || `${employee.first_name} ${employee.last_name || ''}`.trim();
     
-    // Fetch all ratings for this employee, ordered by date (most recent first)
-    const { data: ratings, error } = await supabase
-      .from('ratings')
-      .select('*')
-      .eq('employee_id', employee.id)
-      .order('created_at', { ascending: false });
+    // Fetch all ratings for this employee with pagination to bypass PostgREST limit
+    let ratings: Rating[] = [];
+    let offset = 0;
+    const limit = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('ratings')
+        .select('*')
+        .eq('employee_id', employee.id)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) {
+        console.error(`[fetchEmployeePositionAverages] Error fetching ratings for ${employee.id}:`, error);
+        break;
+      }
+
+      if (data && data.length > 0) {
+        ratings = ratings.concat(data);
+        hasMore = data.length === limit;
+        offset += limit;
+      } else {
+        hasMore = false;
+      }
+    }
     
-    if (error || !ratings || ratings.length === 0) {
+    if (ratings.length === 0) {
       // No ratings found for this employee
       continue;
     }
