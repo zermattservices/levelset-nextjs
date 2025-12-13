@@ -182,24 +182,43 @@ export function DisciplineTable({
         // Include infractions from any location where the employee exists in current location
         const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
               
-              // Fetch all infractions in date range, then filter by consolidated employee ID
-              const { data: allInfractions, error: infError } = await supabase
-                .from('infractions')
-                .select(`
-                  employee_id, 
-                  points, 
-                  infraction_date,
-                  location_id,
-                  employee:employees!infractions_employee_id_fkey(
-                    consolidated_employee_id,
-                    location:locations!infractions_location_id_fkey(location_number)
-                  )
-                `)
-                .gte('infraction_date', ninetyDaysAgo)
-                .order('infraction_date', { ascending: false });
-                
-              if (infError) {
-                console.warn('Error fetching infractions, continuing with empty infractions:', infError);
+              // Fetch all infractions in date range with pagination to bypass PostgREST limit
+              let allInfractions: any[] = [];
+              let offset = 0;
+              const limit = 1000;
+              let hasMore = true;
+              let infError: any = null;
+
+              while (hasMore) {
+                const { data, error } = await supabase
+                  .from('infractions')
+                  .select(`
+                    employee_id, 
+                    points, 
+                    infraction_date,
+                    location_id,
+                    employee:employees!infractions_employee_id_fkey(
+                      id,
+                      consolidated_employee_id
+                    )
+                  `)
+                  .gte('infraction_date', ninetyDaysAgo)
+                  .order('infraction_date', { ascending: false })
+                  .range(offset, offset + limit - 1);
+
+                if (error) {
+                  infError = error;
+                  console.warn('Error fetching infractions:', error);
+                  break;
+                }
+
+                if (data && data.length > 0) {
+                  allInfractions = allInfractions.concat(data);
+                  hasMore = data.length === limit;
+                  offset += limit;
+                } else {
+                  hasMore = false;
+                }
               }
               
               // Filter infractions to only those where employee exists in current location (via consolidated_employee_id)
@@ -207,10 +226,6 @@ export function DisciplineTable({
                 const employeeConsolidatedId = inf.employee?.consolidated_employee_id || inf.employee_id;
                 return currentLocationConsolidatedIds.has(employeeConsolidatedId);
               });
-                
-              if (infError) {
-                console.warn('Error fetching infractions, continuing with empty infractions:', infError);
-              }
               
               // Calculate current points and last infraction for each employee
               // Use consolidated_employee_id to match infractions
