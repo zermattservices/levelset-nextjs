@@ -1,11 +1,11 @@
 /**
  * Cron job API endpoint for automated PEA Audit Day certifications evaluation
- * This should be called daily, but it will only run evaluations on PEA Audit Days
+ * This runs daily, but it will only execute evaluations on PEA Audit Days (4th Thursday and 3rd Friday)
  * 
  * Setup in Vercel:
  * 1. Add environment variable: CRON_SECRET=<your-secret-key>
  * 2. Create cron job in vercel.json or use Vercel Cron Jobs UI
- *    Schedule: 0 8 * * 1 (Every Monday at 8am UTC)
+ *    Schedule: 0 8 * * * (Every day at 8am UTC)
  * 3. Include Authorization header with cron secret
  */
 

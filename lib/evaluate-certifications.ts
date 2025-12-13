@@ -350,13 +350,45 @@ async function fetchTeamMembers(
 
 async function buildPositionAverageMap(
   supabase: any,
-  employees: Employee[]
+  employees: Employee[],
+  useDailyAverages: boolean = true
 ): Promise<Map<string, PositionAverages>> {
   const map = new Map<string, PositionAverages>();
   if (employees.length === 0) {
     return map;
   }
 
+  // If using daily averages, fetch from database
+  if (useDailyAverages) {
+    const today = new Date().toISOString().split('T')[0];
+    const employeeIds = employees.map(e => e.id);
+    
+    const { data: dailyAverages, error } = await supabase
+      .from('daily_position_averages')
+      .select('employee_id, position_averages')
+      .in('employee_id', employeeIds)
+      .eq('calculation_date', today);
+    
+    if (!error && dailyAverages && dailyAverages.length > 0) {
+      dailyAverages.forEach((avg: any) => {
+        const employee = employees.find(e => e.id === avg.employee_id);
+        if (employee) {
+          map.set(avg.employee_id, {
+            employeeId: avg.employee_id,
+            employeeName: employee.full_name || `${employee.first_name} ${employee.last_name || ''}`.trim(),
+            positions: avg.position_averages,
+          });
+        }
+      });
+      // Only return if we got averages for all employees, otherwise fall through to on-demand
+      if (map.size === employees.length) {
+        return map;
+      }
+    }
+    // Fallback to on-demand calculation if daily averages not available
+  }
+
+  // On-demand calculation (existing logic)
   const averages = await fetchEmployeePositionAverages(employees, supabase);
   averages.forEach((avg) => {
     map.set(avg.employeeId, avg);
