@@ -18,6 +18,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
   
+  // Only run in production environment to avoid duplicate evaluations
+  const vercelEnv = process.env.VERCEL_ENV;
+  if (vercelEnv !== 'production') {
+    console.log(`[Cron] Skipping evaluation - not in production environment (current: ${vercelEnv})`);
+    return res.status(200).json({
+      success: false,
+      message: `Skipped - running in ${vercelEnv} environment. Only production runs evaluations.`,
+      timestamp: new Date().toISOString(),
+    });
+  }
+  
   // Verify cron secret for security
   const authHeader = req.headers.authorization;
   const cronSecret = process.env.CRON_SECRET;
