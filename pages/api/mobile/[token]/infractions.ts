@@ -2,6 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { fetchLocationByToken } from '@/lib/mobile-location';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 
+// Location numbers for which discipline (infractions) should be disabled
+const DISCIPLINE_DISABLED_LOCATIONS = ['05467'];
+
 interface InfractionsRequestBody {
   leaderId?: string;
   employeeId?: string;
@@ -44,6 +47,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!location) {
     return res.status(404).json({ error: 'Location not found' });
+  }
+
+  // Block discipline access for disabled locations
+  if (DISCIPLINE_DISABLED_LOCATIONS.includes(location.location_number ?? '')) {
+    return res.status(403).json({ error: 'Discipline features are not available for this location' });
   }
 
   if (!location.org_id) {
