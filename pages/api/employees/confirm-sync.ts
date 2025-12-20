@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { Employee } from '@/lib/supabase.types';
-import { calculatePay, shouldCalculatePay } from '@/lib/pay-calculator';
+import { calculatePayForLocation, shouldCalculatePay } from '@/lib/pay-calculator';
 
 interface NewEmployeeUpdate {
   id?: string; // employee id from database (for existing employees)
@@ -106,7 +106,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Calculate pay if needed
         if (createdEmployee && shouldCalculatePay(locationId)) {
-          const calculatedPay = calculatePay(createdEmployee as Employee);
+          const calculatedPay = calculatePayForLocation(createdEmployee as Employee, locationId);
           if (calculatedPay !== null) {
             await supabase
               .from('employees')
@@ -158,7 +158,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         createdCount++;
 
         if (createdEmployee && shouldCalculatePay(locationId)) {
-          const calculatedPay = calculatePay(createdEmployee as Employee);
+          const calculatedPay = calculatePayForLocation(createdEmployee as Employee, locationId);
           if (calculatedPay !== null) {
             await supabase
               .from('employees')

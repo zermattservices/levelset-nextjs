@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { Employee } from '@/lib/supabase.types';
-import { calculatePay, shouldCalculatePay } from '@/lib/pay-calculator';
+import { calculatePayForLocation, shouldCalculatePay } from '@/lib/pay-calculator';
 
 interface HotSchedulesEmployee {
   id?: number | string;

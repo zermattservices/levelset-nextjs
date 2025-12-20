@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { Employee } from '@/lib/supabase.types';
-import { calculatePay, shouldCalculatePay } from '@/lib/pay-calculator';
+import { calculatePayForLocation, shouldCalculatePay } from '@/lib/pay-calculator';
 import { allPositionsQualified } from '@/lib/certification-utils';
 import { fetchEmployeePositionAverages } from '@/lib/fetch-position-averages';
 
@@ -103,7 +103,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             active: true,
             certified_status: 'Not Certified',
           };
-          const calculatedPay = calculatePay(tempEmployee);
+          const calculatedPay = calculatePayForLocation(tempEmployee, location_id);
           if (calculatedPay !== null) {
             employeeData.calculated_pay = calculatedPay;
           }
@@ -189,7 +189,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Calculate pay if this is a CFA Buda/West Buda location and pay-affecting fields changed
       if (payFieldsChanged && shouldCalculatePay(currentEmployee.location_id)) {
         const updatedEmployee = { ...currentEmployee, ...updateData };
-        const calculatedPay = calculatePay(updatedEmployee);
+        const calculatedPay = calculatePayForLocation(updatedEmployee, currentEmployee.location_id);
         if (calculatedPay !== null) {
           updateData.calculated_pay = calculatedPay;
         }

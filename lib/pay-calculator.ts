@@ -1,15 +1,21 @@
 /**
- * Pay Calculator for CFA Buda and CFA West Buda locations
- * Based on 2025 Pay Ranges chart
+ * Pay Calculator for multiple organizations
+ * Each organization can have its own pay structure
  */
 
 import type { Employee, AvailabilityType, CertificationStatus } from './supabase.types';
 
-// CFA Buda and CFA West Buda location IDs
-// These locations use the special pay calculation logic
+// CFA Buda and CFA West Buda location IDs (Reece Howard organization)
+// These locations use the special pay calculation logic with certification
 export const CFA_BUDA_LOCATION_IDS = [
   '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', // CFA Buda
   'e437119c-27d9-4114-9273-350925016738', // CFA West Buda
+];
+
+// Riley Emter organization location IDs
+// These locations use a simpler pay structure without certification
+export const RILEY_EMTER_LOCATION_IDS = [
+  'd2f47920-543d-44d2-bcd4-d5f9a63009c0', // Manor FSU (05467)
 ];
 
 // Pay structure based on the 2025 pay chart
@@ -51,6 +57,49 @@ const CFA_BUDA_PAY_STRUCTURE: PayStructure = {
   teamLeader: { starting: 21, certified: 25 },
   director: { starting: 27, certified: 30 },
   executive: { starting: 32, certified: 36 },
+};
+
+// Riley Emter pay structure (no certification logic - simpler flat rates)
+interface RileyEmterPayStructure {
+  teamMember: {
+    fohLimited: number;
+    fohAvailable: number;
+    bohLimited: number;
+    bohAvailable: number;
+  };
+  trainer: {
+    fohLimited: number;
+    fohAvailable: number;
+    bohLimited: number;
+    bohAvailable: number;
+  };
+  teamLeader: {
+    foh: number;
+    boh: number;
+  };
+  areaCoordinator: number;
+  director: number;
+}
+
+const RILEY_EMTER_PAY_STRUCTURE: RileyEmterPayStructure = {
+  teamMember: {
+    fohLimited: 12,
+    fohAvailable: 14,
+    bohLimited: 13,
+    bohAvailable: 15,
+  },
+  trainer: {
+    fohLimited: 15,
+    fohAvailable: 16,
+    bohLimited: 16,
+    bohAvailable: 17,
+  },
+  teamLeader: {
+    foh: 18,
+    boh: 19,
+  },
+  areaCoordinator: 22,
+  director: 24,
 };
 
 /**
@@ -159,10 +208,115 @@ export function calculatePay(employee: Employee): number | null {
 }
 
 /**
- * Check if a location should use CFA Buda pay calculation
+ * Calculate pay for Riley Emter organization employees
+ * 
+ * Rules:
+ * - Team Member pay varies by FOH/BOH and availability
+ * - Trainer pay varies by FOH/BOH and availability
+ * - Team Leader pay varies by FOH/BOH only (availability ignored)
+ * - Area Coordinator and Director have flat rates (FOH/BOH ignored)
+ * - If both FOH and BOH, use the higher of the two (BOH)
+ * - If neither FOH nor BOH, return null
+ */
+export function calculatePayRileyEmter(employee: Employee): number | null {
+  const role = employee.role?.trim();
+  const availability = employee.availability || 'Available';
+  const isFoh = employee.is_foh === true;
+  const isBoh = employee.is_boh === true;
+
+  // If neither FOH nor BOH is set, return null
+  if (!isFoh && !isBoh) {
+    return null;
+  }
+
+  // Normalize role names
+  const normalizedRole = role?.toLowerCase();
+
+  // Team Member or New Hire
+  if (normalizedRole === 'team member' || normalizedRole === 'new hire') {
+    // If both, use BOH (higher pay)
+    if (isBoh) {
+      return availability === 'Limited'
+        ? RILEY_EMTER_PAY_STRUCTURE.teamMember.bohLimited
+        : RILEY_EMTER_PAY_STRUCTURE.teamMember.bohAvailable;
+    } else {
+      return availability === 'Limited'
+        ? RILEY_EMTER_PAY_STRUCTURE.teamMember.fohLimited
+        : RILEY_EMTER_PAY_STRUCTURE.teamMember.fohAvailable;
+    }
+  }
+
+  // Trainer
+  if (normalizedRole === 'trainer') {
+    // If both, use BOH (higher pay)
+    if (isBoh) {
+      return availability === 'Limited'
+        ? RILEY_EMTER_PAY_STRUCTURE.trainer.bohLimited
+        : RILEY_EMTER_PAY_STRUCTURE.trainer.bohAvailable;
+    } else {
+      return availability === 'Limited'
+        ? RILEY_EMTER_PAY_STRUCTURE.trainer.fohLimited
+        : RILEY_EMTER_PAY_STRUCTURE.trainer.fohAvailable;
+    }
+  }
+
+  // Team Leader (availability ignored)
+  if (normalizedRole === 'team lead' || normalizedRole === 'team leader') {
+    // If both, use BOH (higher pay)
+    return isBoh
+      ? RILEY_EMTER_PAY_STRUCTURE.teamLeader.boh
+      : RILEY_EMTER_PAY_STRUCTURE.teamLeader.foh;
+  }
+
+  // Area Coordinator (FOH/BOH doesn't affect pay, but must be set)
+  if (normalizedRole === 'area coordinator') {
+    return RILEY_EMTER_PAY_STRUCTURE.areaCoordinator;
+  }
+
+  // Director (FOH/BOH doesn't affect pay, but must be set)
+  if (normalizedRole === 'director') {
+    return RILEY_EMTER_PAY_STRUCTURE.director;
+  }
+
+  // Operator and unknown roles return null
+  return null;
+}
+
+/**
+ * Check if a location should use pay calculation
  */
 export function shouldCalculatePay(locationId: string): boolean {
-  return CFA_BUDA_LOCATION_IDS.includes(locationId);
+  return CFA_BUDA_LOCATION_IDS.includes(locationId) || RILEY_EMTER_LOCATION_IDS.includes(locationId);
+}
+
+/**
+ * Check which pay calculation to use for a location
+ */
+export function getPayCalculationType(locationId: string): 'cfa_buda' | 'riley_emter' | null {
+  if (CFA_BUDA_LOCATION_IDS.includes(locationId)) {
+    return 'cfa_buda';
+  }
+  if (RILEY_EMTER_LOCATION_IDS.includes(locationId)) {
+    return 'riley_emter';
+  }
+  return null;
+}
+
+/**
+ * Calculate pay for an employee based on their location
+ */
+export function calculatePayForLocation(employee: Employee, locationId: string): number | null {
+  const payType = getPayCalculationType(locationId);
+  
+  if (payType === 'cfa_buda') {
+    return calculatePay(employee);
+  }
+  
+  if (payType === 'riley_emter') {
+    return calculatePayRileyEmter(employee);
+  }
+  
+  return null;
 }
 
 /**
