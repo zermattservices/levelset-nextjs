@@ -26,7 +26,16 @@ function ArrowUpIcon({ className }: { className?: string }) {
   );
 }
 
-type MetricVariant = 'positional-excellence' | 'discipline-points';
+type MetricVariant = 
+  | 'positional-excellence' 
+  | 'discipline-points'
+  | 'pathway-completion'
+  | 'coaching-evaluations'
+  | 'caring-interactions'
+  | 'great-food'
+  | 'quick-accurate'
+  | 'creating-moments'
+  | 'inviting-atmosphere';
 
 interface DashboardMetricCardProps {
   variant: MetricVariant;
@@ -34,6 +43,7 @@ interface DashboardMetricCardProps {
   linkHref?: string;
   onClick?: () => void;
   className?: string;
+  isPlaceholder?: boolean; // For blurred/coming soon cards
 }
 
 interface MetricConfig {
@@ -69,6 +79,62 @@ const VARIANT_CONFIG: Record<MetricVariant, MetricConfig> = {
     dateColumn: 'infraction_date',
     invertTrend: true,
   },
+  'pathway-completion': {
+    title: 'Pathway Completion',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'coaching-evaluations': {
+    title: 'Coaching Evaluations',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'caring-interactions': {
+    title: 'Caring Interactions',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'great-food': {
+    title: 'Great Food',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'quick-accurate': {
+    title: 'Quick & Accurate',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'creating-moments': {
+    title: 'Creating Moments',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'inviting-atmosphere': {
+    title: 'Inviting Atmosphere',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
 };
 
 function formatNumber(value: number): string {
@@ -81,11 +147,15 @@ export function DashboardMetricCard({
   linkHref,
   onClick,
   className,
+  isPlaceholder = false,
 }: DashboardMetricCardProps) {
   const router = useRouter();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
   const effectiveLocationId = locationId || undefined;
+  
+  // Check if this is a placeholder variant (no table configured)
+  const isPlaceholderVariant = !VARIANT_CONFIG[variant]?.table;
 
   const [metricState, setMetricState] = React.useState<MetricState | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -94,6 +164,18 @@ export function DashboardMetricCard({
   const config = VARIANT_CONFIG[variant];
 
   const fetchMetrics = React.useCallback(async () => {
+    // For placeholder variants, show static zero data
+    if (isPlaceholder || isPlaceholderVariant) {
+      setMetricState({
+        total: 0,
+        change: 0,
+        percent: 0,
+        timestamp: new Date(),
+      });
+      setLoading(false);
+      return;
+    }
+    
     if (!effectiveLocationId) {
       setMetricState(null);
       setError(null);
@@ -166,6 +248,8 @@ export function DashboardMetricCard({
     config.dateColumn,
     config.table,
     effectiveLocationId,
+    isPlaceholder,
+    isPlaceholderVariant,
     supabase,
     variant,
   ]);

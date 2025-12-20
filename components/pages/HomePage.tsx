@@ -8,7 +8,6 @@ import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { RedirectIf } from '@/components/CodeComponents/RedirectIf';
 import { LocationSelectModal } from '@/components/CodeComponents/LocationSelectModal';
 import { DashboardMetricCard } from '@/components/CodeComponents/DashboardMetricCard';
-import { MetricCard } from '@/components/ui/MetricCard/MetricCard';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
 
@@ -128,22 +127,24 @@ export function HomePage() {
                       variant="discipline-points"
                     />
 
-                    {/* Blurred placeholder cards */}
+                    {/* Blurred placeholder cards - Pathway Completion & Coaching Evaluations */}
                     <div className={classNames(projectcss.all, sty.blurredStack)}>
-                      <MetricCard
-                        className={classNames("__wab_instance", sty.metricCard__cbTb)}
-                        metricName="Coming Soon"
+                      <DashboardMetricCard
+                        className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
+                        variant="pathway-completion"
+                        isPlaceholder
                       />
-                      <MetricCard
-                        className={classNames("__wab_instance", sty.metricCard__ahd6K)}
-                        metricName="Coaching Evaluations"
+                      <DashboardMetricCard
+                        className={classNames("__wab_instance", sty.dashboardMetricCard__e62Fz)}
+                        variant="coaching-evaluations"
+                        isPlaceholder
                       />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Operational Excellence Section (WHED) */}
+              {/* Operational Excellence Section */}
               <div className={classNames(projectcss.all, sty.whedStack)}>
                 <div className={classNames(projectcss.all, sty.freeBox___6YHFb)}>
                   <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text___3DmR3)}>
@@ -155,25 +156,30 @@ export function HomePage() {
                 </div>
                 <div className={classNames(projectcss.all, sty.freeBox__hvq52)}>
                   <div className={classNames(projectcss.all, sty.freeBox___1VsLt)}>
-                    <MetricCard
-                      className={classNames("__wab_instance", sty.metricCard__n5Vp1)}
-                      metricName="Hospitality"
+                    <DashboardMetricCard
+                      className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
+                      variant="caring-interactions"
+                      isPlaceholder
                     />
-                    <MetricCard
-                      className={classNames("__wab_instance", sty.metricCard__nLige)}
-                      metricName="Expertise"
+                    <DashboardMetricCard
+                      className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
+                      variant="great-food"
+                      isPlaceholder
                     />
-                    <MetricCard
-                      className={classNames("__wab_instance", sty.metricCard__msF2)}
-                      metricName="Winning"
+                    <DashboardMetricCard
+                      className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
+                      variant="quick-accurate"
+                      isPlaceholder
                     />
-                    <MetricCard
-                      className={classNames("__wab_instance", sty.metricCard__r453M)}
-                      metricName="Drive Thru"
+                    <DashboardMetricCard
+                      className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
+                      variant="creating-moments"
+                      isPlaceholder
                     />
-                    <MetricCard
-                      className={classNames("__wab_instance", sty.metricCard__zoe3T)}
-                      metricName="Overall"
+                    <DashboardMetricCard
+                      className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
+                      variant="inviting-atmosphere"
+                      isPlaceholder
                     />
                   </div>
                 </div>

@@ -2,6 +2,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import sty from './MenuNavigation.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 import { LevelsetButton } from '../LevelsetButton/LevelsetButton';
@@ -49,7 +50,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
           <Link href="/">
             <Image
               className={sty.logo}
-              src="/levelset.png"
+              src="/logos/Levelset no margin.png"
               alt="Levelset"
               width={100}
               height={48}
@@ -98,12 +99,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               <div className={classNames(projectcss.all, sty.freeBox__pKjWu)}>
                 <div className={classNames(projectcss.all, sty.freeBox__cVk2)}>
                   <span className={sty.slotTargetChildren3}>
-                    <span className={classNames(projectcss.all, projectcss.__wab_text, sty.text__wg9Jo)}>
-                      Hello,{' '}
-                    </span>
-                    <span className={classNames(projectcss.all, projectcss.__wab_text, sty.text__gFy0A)}>
-                      {displayFirstName || 'User'}
-                    </span>
+                    Hello, <span className={sty.text__gFy0A}>{displayFirstName || 'User'}</span>
                   </span>
                 </div>
               </div>
@@ -115,15 +111,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
 
               {/* Account icon */}
               <div className={classNames(projectcss.all, sty.freeBox__kYv9N)}>
-                <div className={classNames(projectcss.all, sty.freeBox__yUskQ)}>
-                  <Image
-                    className={sty.account}
-                    src="/account.svg"
-                    alt="Account"
-                    width={24}
-                    height={24}
-                  />
-                </div>
+                <AccountCircleIcon className={sty.accountIcon} sx={{ fontSize: 32, color: '#31664a' }} />
               </div>
             </div>
           </div>
