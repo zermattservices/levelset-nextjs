@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import sty from './MenuNavigation.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
@@ -22,7 +21,6 @@ export interface MenuNavigationProps {
 }
 
 export function MenuNavigation({ className, firstName, userRole }: MenuNavigationProps) {
-  const router = useRouter();
   const auth = useAuth();
   const [dashboardOpen, setDashboardOpen] = React.useState(false);
 
@@ -44,84 +42,67 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
       )}
     >
       {/* Main navigation bar */}
-      <div className={classNames(projectcss.all, sty.freeBox__qAtX2)}>
-        <div className={classNames(projectcss.all, sty.freeBox__a3UdP)}>
+      <div className={sty.navBar}>
+        <div className={sty.navContent}>
           {/* Logo */}
-          <Link href="/">
+          <Link href="/" className={sty.logoLink}>
             <Image
               className={sty.logo}
               src="/logos/Levelset no margin.png"
               alt="Levelset"
               width={100}
-              height={48}
+              height={30}
+              style={{ objectFit: 'contain', width: '100px', height: 'auto' }}
               priority
             />
           </Link>
 
           {/* Navigation buttons */}
-          <div className={classNames(projectcss.all, sty.freeBox___9Xy55)}>
-            {/* Dashboards dropdown trigger */}
+          <div className={sty.navButtons}>
             <LevelsetButton
-              className={sty.levelsetButton___5Tvwa}
               color="clear"
               size="compact"
               onClick={() => setDashboardOpen(!dashboardOpen)}
             >
-              <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__ayRwz)}>
-                Dashboards
-              </div>
+              Dashboards
             </LevelsetButton>
 
-            {/* Admin link - only show for admins */}
             {isAdmin && (
               <LevelsetButton
-                className={sty.levelsetButton__fBkbv}
                 color="clear"
                 size="compact"
                 link="/admin"
               >
-                <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__mNyQw)}>
-                  Admin
-                </div>
+                Admin
               </LevelsetButton>
             )}
           </div>
 
-          {/* Right side - Location selector, user info, logout */}
-          <div className={classNames(projectcss.all, sty.freeBox__rkbjc)}>
-            <div className={classNames(projectcss.all, sty.freeBox___1LyUp)}>
-              {/* Location dropdown */}
-              <div className={classNames(projectcss.all, sty.freeBox__agUzE)}>
-                <LocationSelectDropdown className={sty.locationSelectDropdown} />
-              </div>
+          {/* Right side - Location selector, user info, logout, profile icon */}
+          <div className={sty.rightSection}>
+            {/* Location dropdown */}
+            <LocationSelectDropdown className={sty.locationDropdown} />
 
-              {/* User info */}
-              <div className={classNames(projectcss.all, sty.freeBox__pKjWu)}>
-                <div className={classNames(projectcss.all, sty.freeBox__cVk2)}>
-                  <span className={sty.slotTargetChildren3}>
-                    Hello, <span className={sty.text__gFy0A}>{displayFirstName || 'User'}</span>
-                  </span>
-                </div>
-              </div>
-
-              {/* Logout button */}
+            {/* User info and logout stacked */}
+            <div className={sty.userSection}>
+              <span className={sty.helloText}>
+                Hello, <span className={sty.userName}>{displayFirstName || 'User'}</span>
+              </span>
               <LogoutButton className={sty.logoutButton}>
                 Log out
               </LogoutButton>
-
-              {/* Account icon */}
-              <div className={classNames(projectcss.all, sty.freeBox__kYv9N)}>
-                <AccountCircleIcon className={sty.accountIcon} sx={{ fontSize: 32, color: '#31664a' }} />
-              </div>
             </div>
+
+            {/* Account icon */}
+            <AccountCircleIcon className={sty.accountIcon} sx={{ fontSize: 32, color: '#31664a' }} />
           </div>
         </div>
       </div>
 
       {/* Dashboard submenu - shown when dashboardOpen is true */}
       {dashboardOpen && (
-        <div className={classNames(projectcss.all, sty.freeBox___8OAdU, sty.freeBoxdashboardOpen___8OAdUkDcoZ)}>
-          <DashboardSubmenu className={sty.dashboardSubmenu__zwXjo} />
+        <div className={sty.submenuContainer}>
+          <DashboardSubmenu className={sty.dashboardSubmenu} />
         </div>
       )}
     </div>

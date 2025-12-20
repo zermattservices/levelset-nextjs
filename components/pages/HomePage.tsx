@@ -97,6 +97,7 @@ export function HomePage() {
                 alt=""
                 width={150}
                 height={97}
+                style={{ objectFit: 'contain', width: '150px', height: 'auto' }}
               />
             </div>
           </div>
