@@ -83,9 +83,6 @@ export function RosterPage() {
           <div className={classNames(projectcss.all, sty.freeBox__xbZ1E)}>
             <div className={classNames(projectcss.all, sty.freeBox__hhgMy)}>
               <div className={classNames(projectcss.all, sty.verticalStack)}>
-                <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text___0SGr3)}>
-                  Employees
-                </div>
                 <RosterTable
                   className={classNames("__wab_instance", sty.rosterTable)}
                   density="comfortable"
