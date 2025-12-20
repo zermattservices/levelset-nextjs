@@ -13,41 +13,6 @@ interface SpreadsheetRow {
   'Operator Hire Date': string;
 }
 
-// Map HR/Payroll job titles to Levelset roles
-function mapJobToRole(job: string): string {
-  if (!job) return 'Team Member';
-  
-  const jobLower = job.toLowerCase().trim();
-  
-  // Operator/Owner
-  if (jobLower.includes('operator') || jobLower.includes('owner') || jobLower.includes('franchisee')) {
-    return 'Operator';
-  }
-  
-  // Executive
-  if (jobLower.includes('executive') || jobLower.includes('exec')) {
-    return 'Executive';
-  }
-  
-  // Director
-  if (jobLower.includes('director') || jobLower.includes('manager') || jobLower.includes('kitchen manager') || jobLower.includes('front of house manager') || jobLower.includes('foh manager') || jobLower.includes('boh manager')) {
-    return 'Director';
-  }
-  
-  // Team Lead / Shift Leader
-  if (jobLower.includes('team lead') || jobLower.includes('shift lead') || jobLower.includes('shift leader') || jobLower.includes('team leader') || jobLower.includes('supervisor')) {
-    return 'Team Lead';
-  }
-  
-  // Trainer
-  if (jobLower.includes('trainer') || jobLower.includes('training')) {
-    return 'Trainer';
-  }
-  
-  // Team Member (default for various positions)
-  return 'Team Member';
-}
-
 // Convert MM/DD/YYYY to YYYY-MM-DD
 function parseDate(dateStr: string): string | null {
   if (!dateStr) return null;
@@ -125,8 +90,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!payrollName) continue;
 
       const hireDate = parseDate(row['Location Hire Date']);
-      const jobTitle = row['Job']?.trim() || '';
-      const mappedRole = mapJobToRole(jobTitle);
       payrollNamesInSpreadsheet.add(payrollName);
 
       // Check if employee exists with matching payroll_name
@@ -157,8 +120,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           unmatchedEmployees.push({
             payroll_name: payrollName,
             hire_date: hireDate,
-            job_title: jobTitle,
-            mapped_role: mappedRole,
             mapped_employee_id: mappedEmployeeId,
             parsed_first_name: parseEmployeeName(payrollName).firstName,
             parsed_last_name: parseEmployeeName(payrollName).lastName,
@@ -204,8 +165,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               unmatchedEmployees.push({
                 payroll_name: payrollName,
                 hire_date: hireDate,
-                job_title: jobTitle,
-                mapped_role: mappedRole,
                 parsed_first_name: parsedName.firstName,
                 parsed_last_name: parsedName.lastName,
                 suggested_match_id: matchResult.employee.id,
@@ -216,8 +175,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               unmatchedEmployees.push({
                 payroll_name: payrollName,
                 hire_date: hireDate,
-                job_title: jobTitle,
-                mapped_role: mappedRole,
                 parsed_first_name: parsedName.firstName,
                 parsed_last_name: parsedName.lastName,
                 suggested_match_id: null,
@@ -229,8 +186,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             unmatchedEmployees.push({
               payroll_name: payrollName,
               hire_date: hireDate,
-              job_title: jobTitle,
-              mapped_role: mappedRole,
               parsed_first_name: parsedName.firstName,
               parsed_last_name: parsedName.lastName,
               suggested_match_id: matchResult.employee.id,
@@ -243,8 +198,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         unmatchedEmployees.push({
           payroll_name: payrollName,
           hire_date: hireDate,
-          job_title: jobTitle,
-          mapped_role: mappedRole,
           parsed_first_name: parsedName.firstName,
           parsed_last_name: parsedName.lastName,
           suggested_match_id: null,

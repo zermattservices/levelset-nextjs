@@ -541,15 +541,12 @@ export function SyncHireDateModal({
     return newEmployees.map((emp: any) => {
       const key = emp.payroll_name;
       const edit = employeeEdits.get(key);
-      // Use mapped_role from spreadsheet if available, otherwise fall back to defaults
-      const defaultRole = emp.mapped_role || (hasSyncedBefore ? 'New Hire' : 'Team Member');
       return {
         id: key,
         payroll_name: emp.payroll_name,
-        job_title: emp.job_title || '',
         first_name: edit?.first_name || emp.parsed_first_name || '',
         last_name: edit?.last_name || emp.parsed_last_name || '',
-        role: edit?.role || defaultRole,
+        role: edit?.role || (hasSyncedBefore ? 'New Hire' : 'Team Member'),
         is_foh: edit?.is_foh !== undefined ? edit.is_foh : false,
         is_boh: edit?.is_boh !== undefined ? edit.is_boh : false,
         availability: edit?.availability || ('Available' as AvailabilityType),

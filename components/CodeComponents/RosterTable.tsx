@@ -30,6 +30,14 @@ import { SyncEmployeesModal } from "./SyncEmployeesModal";
 import { SyncHireDateModal } from "./SyncHireDateModal";
 import { EmployeeModal } from "./EmployeeModal";
 import { useLocationContext } from "./LocationContext";
+import { createSupabaseClient } from "@/util/supabase/component";
+
+// Feature toggles interface
+interface OrgFeatureToggles {
+  enable_certified_status: boolean;
+  enable_evaluations: boolean;
+  enable_pip_logic: boolean;
+}
 
 export type Role =
   | "New Hire"
@@ -61,6 +69,35 @@ export function RosterTable(props: RosterTableProps) {
   const [syncHireDateModalOpen, setSyncHireDateModalOpen] = React.useState(false);
   const [syncMenuAnchor, setSyncMenuAnchor] = React.useState<null | HTMLElement>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
+  const [featureToggles, setFeatureToggles] = React.useState<OrgFeatureToggles>({
+    enable_certified_status: false,
+    enable_evaluations: false,
+    enable_pip_logic: false,
+  });
+
+  // Fetch feature toggles for the current organization
+  React.useEffect(() => {
+    const fetchFeatureToggles = async () => {
+      if (!selectedLocationOrgId) return;
+      
+      const supabase = createSupabaseClient();
+      const { data, error } = await supabase
+        .from('org_feature_toggles')
+        .select('enable_certified_status, enable_evaluations, enable_pip_logic')
+        .eq('org_id', selectedLocationOrgId)
+        .single();
+      
+      if (!error && data) {
+        setFeatureToggles({
+          enable_certified_status: data.enable_certified_status ?? false,
+          enable_evaluations: data.enable_evaluations ?? false,
+          enable_pip_logic: data.enable_pip_logic ?? false,
+        });
+      }
+    };
+    
+    fetchFeatureToggles();
+  }, [selectedLocationOrgId]);
 
   const handleTabChange = (_event: React.SyntheticEvent, value: string) => {
     setActiveTab((value as 'employees' | 'evaluations' | 'pip') ?? 'employees');
@@ -71,26 +108,30 @@ export function RosterTable(props: RosterTableProps) {
       <TabContainer>
         <StyledTabs value={activeTab} onChange={handleTabChange} sx={{ flex: 1 }}>
           <StyledTab label="Employees" value="employees" />
-          <StyledTab
-            value="evaluations"
-            label={
-              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
-                <span>Pending Evaluations</span>
-                {hasPlannedEvaluations && (
-                  <Box
-                    component="span"
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      backgroundColor: '#facc15',
-                    }}
-                  />
-                )}
-              </Box>
-            }
-          />
-          <StyledTab label="PIP" value="pip" />
+          {featureToggles.enable_evaluations && (
+            <StyledTab
+              value="evaluations"
+              label={
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                  <span>Pending Evaluations</span>
+                  {hasPlannedEvaluations && (
+                    <Box
+                      component="span"
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: '#facc15',
+                      }}
+                    />
+                  )}
+                </Box>
+              }
+            />
+          )}
+          {featureToggles.enable_pip_logic && (
+            <StyledTab label="PIP" value="pip" />
+          )}
         </StyledTabs>
         <ButtonContainer>
           <Button
@@ -185,7 +226,7 @@ export function RosterTable(props: RosterTableProps) {
 
       <Box sx={{ mt: 2 }}>
         {activeTab === 'employees' ? (
-          <EmployeesTableView {...props} key={refreshKey} />
+          <EmployeesTableView {...props} key={refreshKey} featureToggles={featureToggles} />
         ) : activeTab === 'evaluations' ? (
           <EvaluationsTable
             locationId={locationId}
@@ -481,7 +522,8 @@ function EmployeesTableView({
   onEmployeeCreate,
   onEmployeeUpdate,
   onEmployeeDelete,
-}: RosterTableProps) {
+  featureToggles,
+}: RosterTableProps & { featureToggles?: OrgFeatureToggles }) {
   const [data, setData] = React.useState<RosterEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -1204,58 +1246,6 @@ function EmployeesTableView({
         },
       },
       {
-        field: "certifiedStatus",
-        headerName: "Certified",
-        width: 170,
-        align: "center",
-        headerAlign: "center",
-        sortable: false,
-        renderCell: (params) => {
-          const employeeId = params.row.id as string;
-          const status = params.value as CertificationStatus;
-          const anchor = certificationMenuAnchor[employeeId] ?? null;
-          return (
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
-              <CertificationChip
-                className={status.toLowerCase().replace(" ", "-")}
-                onClick={(event) =>
-                  setCertificationMenuAnchor((prev) => ({ ...prev, [employeeId]: event.currentTarget }))
-                }
-              >
-                {status}
-                <ExpandMoreIcon sx={{ fontSize: 16, ml: 0.5 }} />
-              </CertificationChip>
-              <Menu
-                anchorEl={anchor}
-                open={Boolean(anchor)}
-                onClose={() => setCertificationMenuAnchor((prev) => ({ ...prev, [employeeId]: null }))}
-                PaperProps={{
-                  sx: {
-                    mt: 0.5,
-                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    borderRadius: 2,
-                  },
-                }}
-              >
-                {(["Not Certified", "Pending", "Certified", "PIP"] as CertificationStatus[]).map((option) => (
-                  <RoleMenuItem
-                    key={option}
-                    selected={status === option}
-                    onClick={() => handleCertificationStatusChange(employeeId, option)}
-                  >
-                    <CertificationChip className={option.toLowerCase().replace(" ", "-")}
-                      sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
-                    >
-                      {option}
-                    </CertificationChip>
-                  </RoleMenuItem>
-                ))}
-              </Menu>
-            </Box>
-          );
-        },
-      },
-      {
         field: "calculatedPay",
         headerName: "Suggested Pay",
         width: 170,
@@ -1279,6 +1269,66 @@ function EmployeesTableView({
         },
       },
     ];
+
+    // Conditionally add certified status column based on feature toggles
+    if (featureToggles?.enable_certified_status) {
+      // Insert before calculatedPay column
+      const calculatedPayIndex = baseColumns.findIndex(col => col.field === 'calculatedPay');
+      if (calculatedPayIndex !== -1) {
+        baseColumns.splice(calculatedPayIndex, 0, {
+          field: "certifiedStatus",
+          headerName: "Certified",
+          width: 170,
+          align: "center",
+          headerAlign: "center",
+          sortable: false,
+          renderCell: (params) => {
+            const employeeId = params.row.id as string;
+            const status = params.value as CertificationStatus;
+            const anchor = certificationMenuAnchor[employeeId] ?? null;
+            return (
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+                <CertificationChip
+                  className={status.toLowerCase().replace(" ", "-")}
+                  onClick={(event) =>
+                    setCertificationMenuAnchor((prev) => ({ ...prev, [employeeId]: event.currentTarget }))
+                  }
+                >
+                  {status}
+                  <ExpandMoreIcon sx={{ fontSize: 16, ml: 0.5 }} />
+                </CertificationChip>
+                <Menu
+                  anchorEl={anchor}
+                  open={Boolean(anchor)}
+                  onClose={() => setCertificationMenuAnchor((prev) => ({ ...prev, [employeeId]: null }))}
+                  PaperProps={{
+                    sx: {
+                      mt: 0.5,
+                      boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                      borderRadius: 2,
+                    },
+                  }}
+                >
+                  {(["Not Certified", "Pending", "Certified", "PIP"] as CertificationStatus[]).map((option) => (
+                    <RoleMenuItem
+                      key={option}
+                      selected={status === option}
+                      onClick={() => handleCertificationStatusChange(employeeId, option)}
+                    >
+                      <CertificationChip className={option.toLowerCase().replace(" ", "-")}
+                        sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
+                      >
+                        {option}
+                      </CertificationChip>
+                    </RoleMenuItem>
+                  ))}
+                </Menu>
+              </Box>
+            );
+          },
+        });
+      }
+    }
 
     if (showActions) {
       baseColumns.push({
@@ -1359,6 +1409,7 @@ function EmployeesTableView({
     handleTerminateEmployee,
     canChangeRole,
     getAvailableRoles,
+    featureToggles,
   ]);
 
   if (loading && data.length === 0) {

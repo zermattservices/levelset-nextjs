@@ -67,16 +67,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             hire_date: unmatched.hire_date || null,
           };
 
-          // Apply user edits if any (takes priority)
+          // Apply user edits if any
           const edits = (employee_edits || []).find((e: any) => e.id === employeeId);
           if (edits) {
             if (edits.role) updateData.role = edits.role;
             if (edits.is_foh !== undefined) updateData.is_foh = edits.is_foh;
             if (edits.is_boh !== undefined) updateData.is_boh = edits.is_boh;
             if (edits.availability) updateData.availability = edits.availability;
-          } else if (unmatched.mapped_role) {
-            // If no user edits, apply the mapped role from the spreadsheet
-            updateData.role = unmatched.mapped_role;
           }
 
           const { error: updateError } = await supabase
@@ -97,28 +94,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           (e.first_name === unmatched.parsed_first_name && e.last_name === unmatched.parsed_last_name)
         );
 
-        // Determine the role: user edits take priority, then mapped_role from spreadsheet, then defaults
-        let employeeRole: string;
-        if (edits?.role) {
-          employeeRole = edits.role;
-        } else if (unmatched.mapped_role) {
-          employeeRole = unmatched.mapped_role;
-        } else {
-          // Fallback to default
-          const { data: location } = await supabase
-            .from('locations')
-            .select('has_synced_before')
-            .eq('id', locationId)
-            .single();
-          employeeRole = location?.has_synced_before ? 'New Hire' : 'Team Member';
-        }
+        const { data: location } = await supabase
+          .from('locations')
+          .select('has_synced_before')
+          .eq('id', locationId)
+          .single();
+        
+        const defaultRole = location?.has_synced_before ? 'New Hire' : 'Team Member';
 
         const employeeData: Partial<Employee> = {
           first_name: edits?.first_name || unmatched.parsed_first_name || '',
           last_name: edits?.last_name || unmatched.parsed_last_name || '',
           payroll_name: payrollName,
           hire_date: unmatched.hire_date || null,
-          role: employeeRole,
+          role: edits?.role || defaultRole,
           is_foh: edits?.is_foh !== undefined ? edits.is_foh : false,
           is_boh: edits?.is_boh !== undefined ? edits.is_boh : false,
           availability: edits?.availability || 'Available',
