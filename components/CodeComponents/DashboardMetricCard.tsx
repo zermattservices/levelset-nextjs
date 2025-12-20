@@ -1,13 +1,30 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
-import { useDataEnv } from '@plasmicapp/react-web/lib/host';
 import { Skeleton } from '@mui/material';
 
 import { createSupabaseClient } from '@/util/supabase/component';
-
-import ArrowUpIcon from '@/components/plasmic/levelset_v_2/icons/PlasmicIcon__ArrowUp';
 import styles from './DashboardMetricCard.module.css';
+
+// Inline ArrowUp icon to avoid Plasmic dependency
+function ArrowUpIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 20 20"
+      height="1em"
+      className={className}
+    >
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.5"
+        d="M10 15.833V4.167m0 0L4.167 10M10 4.167 15.833 10"
+      />
+    </svg>
+  );
+}
 
 type MetricVariant = 'positional-excellence' | 'discipline-points';
 
@@ -66,11 +83,9 @@ export function DashboardMetricCard({
   className,
 }: DashboardMetricCardProps) {
   const router = useRouter();
-  const inEditor = usePlasmicCanvasContext();
-  const dataEnv = useDataEnv?.();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
-  const effectiveLocationId = locationId || dataEnv?.auth?.location_id || undefined;
+  const effectiveLocationId = locationId || undefined;
 
   const [metricState, setMetricState] = React.useState<MetricState | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -79,18 +94,6 @@ export function DashboardMetricCard({
   const config = VARIANT_CONFIG[variant];
 
   const fetchMetrics = React.useCallback(async () => {
-    // Provide representative sample data in Plasmic Studio when IDs are absent
-    if (inEditor && !effectiveLocationId) {
-      const sample: MetricState =
-        variant === 'positional-excellence'
-          ? { total: 863, change: 27, percent: 11.1, timestamp: new Date() }
-          : { total: 55, change: 3, percent: 5.8, timestamp: new Date() };
-      setMetricState(sample);
-      setError(null);
-      setLoading(false);
-      return;
-    }
-
     if (!effectiveLocationId) {
       setMetricState(null);
       setError(null);
@@ -163,7 +166,6 @@ export function DashboardMetricCard({
     config.dateColumn,
     config.table,
     effectiveLocationId,
-    inEditor,
     supabase,
     variant,
   ]);
