@@ -1,0 +1,146 @@
+.root {
+  display: inline-flex;
+  flex-direction: column;
+  position: relative;
+  width: auto;
+  height: auto;
+  justify-content: flex-start;
+  align-items: center;
+  justify-self: flex-start;
+}
+.metricItem {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: inset 0px 0px 0px 1px rgba(233, 234, 235, 1);
+  filter: drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05000000074505806));
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  row-gap: 8px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-width: 0;
+  border-radius: 16px;
+  padding: 20px;
+}
+.titleAndTrend {
+  height: auto;
+  display: flex;
+  position: relative;
+  align-self: stretch;
+  flex-direction: row;
+  column-gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.number {
+  display: flex;
+  flex-grow: 1;
+  position: relative;
+  height: 38px;
+  flex-direction: row;
+}
+.slotTargetMetricName {
+  font-family: "Satoshi";
+  font-size: 24px;
+  font-weight: 600;
+  color: rgba(24, 29, 39, 1);
+  line-height: 32px;
+  letter-spacing: 0em;
+}
+.trendCard__xu1Ph:global(.__wab_instance) {
+  animation: none;
+  max-width: 100%;
+}
+.text__yElZe {
+  padding-right: 0px;
+  color: #249e6b;
+}
+.supportingMetrics {
+  height: auto;
+  display: flex;
+  position: relative;
+  align-self: stretch;
+  flex-direction: column;
+  row-gap: 2px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.numberAndBadge {
+  height: auto;
+  display: flex;
+  position: relative;
+  align-self: stretch;
+  flex-direction: row;
+  column-gap: var(--token-IUVIp1DHBSFd);
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+.heading {
+  display: flex;
+  flex-grow: 0;
+  width: auto;
+  align-self: stretch;
+  position: relative;
+  flex-direction: row;
+}
+.slotTargetChildren {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(83, 88, 98, 1);
+  line-height: 24px;
+  letter-spacing: 0em;
+}
+.metricTotal {
+  display: flex;
+  flex-grow: 1;
+  align-self: stretch;
+  position: relative;
+  flex-direction: row;
+}
+.slotTargetMetricTotal2 {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(83, 88, 98, 1);
+  line-height: 24px;
+  letter-spacing: 0em;
+}
+.slotTargetDelta {
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(36, 158, 107, 1);
+  line-height: 24px;
+  letter-spacing: 0em;
+}
+.heading3 {
+  display: block;
+  font-size: 16px;
+  font-family: "Satoshi";
+  font-weight: 500;
+  letter-spacing: 0em;
+  line-height: 24px;
+  color: rgba(83, 88, 98, 1);
+  position: relative;
+  padding-left: 0px;
+}
+.numberAndBadge2 {
+  height: auto;
+  display: flex;
+  position: relative;
+  align-self: stretch;
+  flex-direction: row;
+  column-gap: 4px;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+.slotTargetHeading5 {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(83, 88, 98, 1);
+  line-height: 24px;
+  letter-spacing: 0em;
+}

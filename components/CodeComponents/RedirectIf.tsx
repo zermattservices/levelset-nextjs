@@ -1,21 +1,23 @@
+import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import React from 'react';
 
 export interface RedirectIfProps {
-  children?: React.ReactNode;
+  children?: any;
   className?: string;
-  condition?: boolean;
+  condition?: any;
   onFalse?: () => void;
 }
 
 export function RedirectIf(props: RedirectIfProps) {
   const { children, className, onFalse, condition } = props;
+  const inEditor = usePlasmicCanvasContext();
 
   React.useEffect(() => {
-    if (!onFalse || condition) {
+    if (inEditor || !onFalse || condition) {
       return;
     }
     onFalse();
-  }, [condition, onFalse]);
+  }, [condition, inEditor, onFalse]);
 
   // Validation
   if (typeof condition === 'undefined') {

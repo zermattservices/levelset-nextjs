@@ -1,27 +1,8 @@
 import * as React from 'react';
 import { Box, Skeleton } from '@mui/material';
 import AnalyticsMetricCard from './AnalyticsMetricCard';
+import TrendCard from '../TrendCard';
 import type { GridRowsProp, GridFilterModel } from '@mui/x-data-grid-pro';
-
-// Simple TrendBadge component to replace the Plasmic TrendCard
-function TrendBadge({ value, negative }: { value: string; negative?: boolean }) {
-  return (
-    <Box
-      sx={{
-        backgroundColor: negative ? '#fee2e2' : '#dcfce7',
-        color: negative ? '#991b1b' : '#166534',
-        padding: '4px 12px',
-        borderRadius: 2,
-        fontSize: 12,
-        fontWeight: 600,
-        display: 'inline-flex',
-        alignItems: 'center',
-      }}
-    >
-      {negative ? '↓' : '↑'} {value}%
-    </Box>
-  );
-}
 
 interface RatingsAnalyticsProps {
   locationId: string;
@@ -234,9 +215,9 @@ export function RatingsAnalytics({
         metricValue={currentMetrics.count.toLocaleString()}
         trendCard={
           hasPriorData ? (
-            <TrendBadge
-              value={`${Math.abs(calculatePercentChange(currentMetrics.count, priorMetrics.count)).toFixed(1)}`}
-              negative={calculatePercentChange(currentMetrics.count, priorMetrics.count) < 0}
+            <TrendCard
+              text3={`${Math.abs(calculatePercentChange(currentMetrics.count, priorMetrics.count)).toFixed(1)}`}
+              negative={calculatePercentChange(currentMetrics.count, priorMetrics.count) < 0 ? 'negative' : undefined}
             />
           ) : (
             <Box sx={{ 
@@ -269,9 +250,9 @@ export function RatingsAnalytics({
         metricValue={currentMetrics.avgRating.toFixed(2)}
         trendCard={
           hasPriorData ? (
-            <TrendBadge
-              value={`${Math.abs(calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating)).toFixed(1)}`}
-              negative={calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating) < 0}
+            <TrendCard
+              text3={`${Math.abs(calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating)).toFixed(1)}`}
+              negative={calculatePercentChange(currentMetrics.avgRating, priorMetrics.avgRating) < 0 ? 'negative' : undefined}
             />
           ) : (
             <Box sx={{ 
@@ -304,9 +285,9 @@ export function RatingsAnalytics({
         metricValue={currentMetrics.ratingsPerDay.toFixed(1)}
         trendCard={
           hasPriorData ? (
-            <TrendBadge
-              value={`${Math.abs(calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay)).toFixed(1)}`}
-              negative={calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay) < 0}
+            <TrendCard
+              text3={`${Math.abs(calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay)).toFixed(1)}`}
+              negative={calculatePercentChange(currentMetrics.ratingsPerDay, priorMetrics.ratingsPerDay) < 0 ? 'negative' : undefined}
             />
           ) : (
             <Box sx={{ 

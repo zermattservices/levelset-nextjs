@@ -1,0 +1,226 @@
+.fileUploadItemBase5 {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: inset 0px 0px 0px 1px rgba(233, 234, 235, 1);
+  height: auto;
+  display: flex;
+  overflow: hidden;
+  flex-direction: row;
+  column-gap: 4px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: relative;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+.content12 {
+  height: auto;
+  display: flex;
+  position: relative;
+  flex-grow: 1;
+  flex-direction: row;
+  column-gap: 12px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.fileTypeIcon5 {
+  width: 40px;
+  height: 40px;
+  display: block;
+  position: relative;
+  flex-shrink: 0;
+}
+.img__e8NIs {
+  object-fit: cover;
+  max-width: 100%;
+  width: 32px;
+  height: 40px;
+  display: block;
+  position: absolute;
+  top: 0%;
+  left: 10%;
+}
+.img__e8NIs > picture > img {
+  object-fit: cover;
+}
+.fileType5 {
+  display: block;
+  font-size: 9px;
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0em;
+  line-height: 100%;
+  color: rgba(255, 255, 255, 1);
+  position: absolute;
+  top: 57.49%;
+  left: 10%;
+  width: 80%;
+}
+.content13 {
+  height: auto;
+  display: flex;
+  position: relative;
+  flex-grow: 1;
+  flex-direction: row;
+  column-gap: 4px;
+  align-items: center;
+  justify-content: flex-start;
+}
+.textAndSupportingText7 {
+  height: auto;
+  display: flex;
+  position: relative;
+  flex-grow: 1;
+  flex-direction: column;
+  row-gap: 4px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.text28 {
+  display: block;
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  letter-spacing: 0em;
+  line-height: 20px;
+  color: rgba(65, 70, 81, 1);
+  align-self: stretch;
+  position: relative;
+}
+.supportingTextAndPercentage5 {
+  height: auto;
+  display: flex;
+  position: relative;
+  align-self: stretch;
+  flex-direction: row;
+  column-gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+}
+.supportingText11 {
+  display: block;
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0em;
+  line-height: 20px;
+  color: rgba(83, 88, 98, 1);
+  position: relative;
+}
+.svg__bwUhY {
+  object-fit: cover;
+  max-width: 100%;
+  color: #d5d7da;
+  width: 2px;
+  height: 14px;
+  display: block;
+  position: relative;
+  flex-shrink: 0;
+}
+.iconAndPercentage5 {
+  width: auto;
+  height: auto;
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  column-gap: 4px;
+  align-items: center;
+  justify-content: flex-start;
+}
+.img__y8TGo {
+  object-fit: cover;
+  max-width: 100%;
+  width: 16px;
+  height: 16px;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.img__y8TGo > picture > img {
+  object-fit: cover;
+}
+.percentage5 {
+  display: block;
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0em;
+  line-height: 20px;
+  color: rgba(83, 88, 98, 1);
+  position: relative;
+}
+.svg__yvcpn {
+  object-fit: cover;
+  max-width: 100%;
+  color: #d5d7da;
+  width: 2px;
+  height: 14px;
+  display: block;
+  position: relative;
+  flex-shrink: 0;
+}
+.supportingText12 {
+  display: block;
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0em;
+  line-height: 20px;
+  color: rgba(210, 50, 48, 1);
+  position: relative;
+}
+.frame7 {
+  width: auto;
+  display: flex;
+  position: relative;
+  align-self: stretch;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.text29 {
+  display: block;
+  font-size: 24px;
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0em;
+  line-height: 32px;
+  color: rgba(210, 50, 48, 1);
+  position: relative;
+}
+.text30 {
+  display: block;
+  font-size: 12px;
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  letter-spacing: 0em;
+  line-height: 18px;
+  color: rgba(65, 70, 81, 1);
+  position: relative;
+}
+.buttonsButtonUtility5 {
+  width: auto;
+  height: auto;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 6px;
+}
+.svg___0YpYj {
+  object-fit: cover;
+  max-width: 100%;
+  color: #a4a7ae;
+  width: 16px;
+  height: 16px;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}

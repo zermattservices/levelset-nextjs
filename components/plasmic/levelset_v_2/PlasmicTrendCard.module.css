@@ -1,0 +1,84 @@
+.root {
+  display: inline-flex;
+  flex-direction: column;
+  position: relative;
+  width: auto;
+  height: auto;
+  justify-content: flex-start;
+  align-items: center;
+  justify-self: flex-start;
+}
+.change {
+  background: rgba(214, 245, 226, 1);
+  width: auto;
+  height: auto;
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  column-gap: 4px;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: 6px;
+  padding: 4px 16px 4px 14px;
+}
+.changenegative {
+  background: #fce4e4;
+}
+.svg___1K5Ie {
+  object-fit: cover;
+  max-width: 100%;
+  color: #249e6b;
+  width: 20px;
+  height: 20px;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.svgnegative___1K5IeBpiLs {
+  display: none;
+}
+.svg__t2LFa {
+  object-fit: cover;
+  max-width: 100%;
+  color: #ad2624;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: none;
+}
+.svgnegative__t2LFaBpiLs {
+  display: block;
+}
+.slotTargetText3 {
+  font-family: "Satoshi";
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(36, 158, 107, 1);
+  text-align: center;
+  line-height: 28px;
+  letter-spacing: 0em;
+}
+.slotTargetText3negative {
+  color: #ad2624;
+}
+.text__rZw6B {
+  padding-right: 0px;
+  color: #249e6b;
+}
+.text {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  font-weight: 700;
+  font-size: 18px;
+  color: #249e6b;
+  font-family: "Satoshi";
+  min-width: 0;
+}
+.textnegative {
+  color: #ad2624;
+}
