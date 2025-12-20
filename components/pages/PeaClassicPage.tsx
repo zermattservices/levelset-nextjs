@@ -20,9 +20,12 @@ export function PeaClassicPage() {
   const auth = useAuth();
   const { selectedLocationId } = useLocationContext();
 
-  const handleAuthFalse = async () => {
-    router.push('/auth/login');
-  };
+  // Redirect unauthenticated users
+  React.useEffect(() => {
+    if (auth.isLoaded && !auth.authUser) {
+      router.push('/auth/login');
+    }
+  }, [auth.isLoaded, auth.authUser, router]);
 
   const handleBackToSmartView = () => {
     router.push('/positional-excellence');
@@ -62,7 +65,7 @@ export function PeaClassicPage() {
         <RedirectIf
           className={classNames("__wab_instance", sty.redirectIf)}
           condition={!!(auth.authUser && auth.authUser.email)}
-          onFalse={handleAuthFalse}
+          onFalse={() => router.push('/auth/login')}
         >
           {/* Header section */}
           <div className={classNames(projectcss.all, sty.freeBox__evXNr)}>

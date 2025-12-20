@@ -27,7 +27,8 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const displayFirstName = firstName || auth.first_name || '';
   const displayRole = userRole || auth.role || '';
 
-  const isAdmin = displayRole === 'Levelset Admin' || displayRole === 'Operator';
+  const isAdmin = displayRole === 'Levelset Admin' || displayRole === 'Operator' || displayRole === 'Owner/Operator';
+  const isLevelsetAdmin = displayRole === 'Levelset Admin';
 
   return (
     <div
@@ -64,22 +65,33 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               size="compact"
               onClick={() => setDashboardOpen(!dashboardOpen)}
             >
-              Dashboards
+              <span className={sty.navButtonText}>Dashboards</span>
             </LevelsetButton>
 
             {isAdmin && (
               <LevelsetButton
                 color="clear"
                 size="compact"
-                link="/admin"
+                link="/roster"
               >
-                Admin
+                <span className={sty.navButtonText}>Roster</span>
               </LevelsetButton>
             )}
           </div>
 
-          {/* Right side - Location selector, user info, logout, profile icon */}
+          {/* Right side - Admin Mode, Location selector, user info, logout, profile icon */}
           <div className={sty.rightSection}>
+            {/* Admin Mode - only for Levelset Admin */}
+            {isLevelsetAdmin && (
+              <LevelsetButton
+                color="softGreen"
+                size="compact"
+                link="/admin/locations"
+              >
+                <span className={sty.adminModeButton}>Admin Mode</span>
+              </LevelsetButton>
+            )}
+
             {/* Location dropdown */}
             <LocationSelectDropdown className={sty.locationDropdown} />
 
@@ -89,7 +101,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
                 Hello, <span className={sty.userName}>{displayFirstName || 'User'}</span>
               </span>
               <LogoutButton className={sty.logoutButton}>
-                Log out
+                Log Out
               </LogoutButton>
             </div>
 

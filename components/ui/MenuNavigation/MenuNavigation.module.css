@@ -68,7 +68,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: 0;
 }
 
 .helloText {
@@ -77,6 +77,7 @@
   font-weight: 600;
   color: #666;
   white-space: nowrap;
+  line-height: 1.2;
 }
 
 .userName {
@@ -85,7 +86,22 @@
 }
 
 .logoutButton {
-  font-size: 12px;
+  font-size: 14px;
+  padding: 0;
+  line-height: 1.2;
+}
+
+.navButtonText {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.adminModeButton {
+  color: #31664a;
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .accountIcon {

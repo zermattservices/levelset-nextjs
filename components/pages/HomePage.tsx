@@ -20,9 +20,12 @@ export function HomePage() {
   const auth = useAuth();
   const { selectedLocationId } = useLocationContext();
 
-  const handleAuthFalse = async () => {
-    router.push('/auth/login');
-  };
+  // Redirect unauthenticated users
+  React.useEffect(() => {
+    if (auth.isLoaded && !auth.authUser) {
+      router.push('/auth/login');
+    }
+  }, [auth.isLoaded, auth.authUser, router]);
 
   const handleGoToPositionalExcellence = () => {
     router.push('/positional-excellence');
@@ -66,7 +69,7 @@ export function HomePage() {
         <RedirectIf
           className={classNames("__wab_instance", sty.redirectIf)}
           condition={!!(auth.authUser && auth.authUser.email)}
-          onFalse={handleAuthFalse}
+          onFalse={() => router.push('/auth/login')}
         >
           {/* Location Select Modal */}
           <LocationSelectModal className={classNames("__wab_instance", sty.locationSelectModal)} />

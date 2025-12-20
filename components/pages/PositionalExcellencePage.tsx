@@ -19,9 +19,12 @@ export function PositionalExcellencePage() {
   const auth = useAuth();
   const { selectedLocationId } = useLocationContext();
 
-  const handleAuthFalse = async () => {
-    router.push('/auth/login');
-  };
+  // Redirect unauthenticated users
+  React.useEffect(() => {
+    if (auth.isLoaded && !auth.authUser) {
+      router.push('/auth/login');
+    }
+  }, [auth.isLoaded, auth.authUser, router]);
 
   const handleGoToClassic = () => {
     router.push('/positional-excellence-classic');
@@ -61,7 +64,7 @@ export function PositionalExcellencePage() {
         <RedirectIf
           className={classNames("__wab_instance", sty.redirectIf)}
           condition={!!(auth.authUser && auth.authUser.email)}
-          onFalse={handleAuthFalse}
+          onFalse={() => router.push('/auth/login')}
         >
           {/* Header section */}
           <div className={classNames(projectcss.all, sty.freeBox__ktUyf)}>

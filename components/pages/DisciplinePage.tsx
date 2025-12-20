@@ -21,9 +21,12 @@ export function DisciplinePage() {
   const auth = useAuth();
   const { selectedLocationId } = useLocationContext();
 
-  const handleAuthFalse = async () => {
-    router.push('/auth/login');
-  };
+  // Redirect unauthenticated users
+  React.useEffect(() => {
+    if (auth.isLoaded && !auth.authUser) {
+      router.push('/auth/login');
+    }
+  }, [auth.isLoaded, auth.authUser, router]);
 
   return (
     <>
@@ -67,7 +70,7 @@ export function DisciplinePage() {
           <RedirectIf
             className={classNames("__wab_instance", sty.redirectIf)}
             condition={true}
-            onFalse={handleAuthFalse}
+            onFalse={() => router.push('/auth/login')}
           >
             {/* Header section */}
             <div className={classNames(projectcss.all, sty.freeBox__jtUkZ)}>

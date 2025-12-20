@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import sty from './AdminPage.module.css';
+import sty from './RosterPage.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { RedirectIf } from '@/components/CodeComponents/RedirectIf';
@@ -13,22 +13,25 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-export function AdminPage() {
+export function RosterPage() {
   const router = useRouter();
   const auth = useAuth();
   const { selectedLocationId } = useLocationContext();
 
-  const handleAuthFalse = async () => {
-    router.push('/auth/login');
-  };
+  // Redirect unauthenticated users
+  React.useEffect(() => {
+    if (auth.isLoaded && !auth.authUser) {
+      router.push('/auth/login');
+    }
+  }, [auth.isLoaded, auth.authUser, router]);
 
   return (
     <>
       <Head>
         <meta name="twitter:card" content="summary" />
-        <title key="title">Admin | Levelset</title>
-        <meta key="og:title" property="og:title" content="Admin | Levelset" />
-        <meta key="twitter:title" name="twitter:title" content="Admin | Levelset" />
+        <title key="title">Roster | Levelset</title>
+        <meta key="og:title" property="og:title" content="Roster | Levelset" />
+        <meta key="twitter:title" name="twitter:title" content="Roster | Levelset" />
       </Head>
 
       <style>{`
@@ -55,8 +58,8 @@ export function AdminPage() {
 
         <RedirectIf
           className={classNames("__wab_instance", sty.redirectIf)}
-          condition={true}
-          onFalse={handleAuthFalse}
+          condition={!!(auth.authUser && auth.authUser.email)}
+          onFalse={() => router.push('/auth/login')}
         >
           {/* Header section */}
           <div className={classNames(projectcss.all, sty.freeBox__t6I6)}>
@@ -64,7 +67,7 @@ export function AdminPage() {
               <div className={classNames(projectcss.all, sty.freeBox__qcdYx)}>
                 <div className={classNames(projectcss.all, sty.freeBox__bYvUh)}>
                   <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__fFys8)}>
-                    Admin Dashboard
+                    Roster Management
                   </div>
                 </div>
                 <div className={classNames(projectcss.all, sty.freeBox__m8LNv)}>
@@ -100,4 +103,4 @@ export function AdminPage() {
   );
 }
 
-export default AdminPage;
+export default RosterPage;

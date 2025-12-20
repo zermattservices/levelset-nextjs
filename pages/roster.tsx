@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { AdminPage } from '@/components/pages/AdminPage';
+import { RosterPage } from '@/components/pages/RosterPage';
 import { AppProviders } from '@/lib/providers/AppProviders';
 
-function AdminPageWrapper() {
+function RosterPageWrapper() {
   return (
     <AppProviders>
-      <AdminPage />
+      <RosterPage />
     </AppProviders>
   );
 }
 
-export default AdminPageWrapper;
+export default RosterPageWrapper;
