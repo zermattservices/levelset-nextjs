@@ -1,12 +1,11 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
-import { useDataEnv } from '@plasmicapp/react-web/lib/host';
 import { Skeleton } from '@mui/material';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 import { createSupabaseClient } from '@/util/supabase/component';
-
-import ArrowUpIcon from '@/components/plasmic/levelset_v_2/icons/PlasmicIcon__ArrowUp';
+import { useLocationContext } from './LocationContext';
 import styles from './DashboardMetricCard.module.css';
 
 type MetricVariant = 'positional-excellence' | 'discipline-points';
@@ -66,11 +65,10 @@ export function DashboardMetricCard({
   className,
 }: DashboardMetricCardProps) {
   const router = useRouter();
-  const inEditor = usePlasmicCanvasContext();
-  const dataEnv = useDataEnv?.();
+  const { selectedLocationId } = useLocationContext();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
-  const effectiveLocationId = locationId || dataEnv?.auth?.location_id || undefined;
+  const effectiveLocationId = locationId || selectedLocationId || undefined;
 
   const [metricState, setMetricState] = React.useState<MetricState | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -79,18 +77,6 @@ export function DashboardMetricCard({
   const config = VARIANT_CONFIG[variant];
 
   const fetchMetrics = React.useCallback(async () => {
-    // Provide representative sample data in Plasmic Studio when IDs are absent
-    if (inEditor && !effectiveLocationId) {
-      const sample: MetricState =
-        variant === 'positional-excellence'
-          ? { total: 863, change: 27, percent: 11.1, timestamp: new Date() }
-          : { total: 55, change: 3, percent: 5.8, timestamp: new Date() };
-      setMetricState(sample);
-      setError(null);
-      setLoading(false);
-      return;
-    }
-
     if (!effectiveLocationId) {
       setMetricState(null);
       setError(null);
@@ -163,7 +149,6 @@ export function DashboardMetricCard({
     config.dateColumn,
     config.table,
     effectiveLocationId,
-    inEditor,
     supabase,
     variant,
   ]);
@@ -261,7 +246,11 @@ export function DashboardMetricCard({
             />
           ) : (
             <div className={percentTrendClasses} aria-live="polite">
-              <ArrowUpIcon className={arrowClasses} />
+              {change >= 0 ? (
+                <TrendingUpIcon className={arrowClasses} sx={{ fontSize: 18 }} />
+              ) : (
+                <TrendingDownIcon className={arrowClasses} sx={{ fontSize: 18 }} />
+              )}
               <span>{percentText}</span>
             </div>
           )}

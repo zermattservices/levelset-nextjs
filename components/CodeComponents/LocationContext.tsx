@@ -1,5 +1,4 @@
 import React from 'react';
-import { DataProvider, usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import { createSupabaseClient } from '@/util/supabase/component';
 
 interface LocationRecord {
@@ -99,7 +98,6 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
   const [error, setError] = React.useState<string | null>(null);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
-  const inEditor = usePlasmicCanvasContext();
   const isMountedRef = React.useRef(true);
 
   React.useEffect(() => {
@@ -144,24 +142,6 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     setError(null);
 
     try {
-      if (inEditor) {
-        const sampleLocations: LocationRecord[] = [
-          { id: '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', location_number: '04056', name: 'Buda', location_mobile_token: 'SAMPLETOKEN01' },
-          { id: 'c0d86fa1-0000-0000-0000-000000000000', location_number: '05508', name: 'Preview Location', location_mobile_token: 'SAMPLETOKEN02' },
-        ];
-        if (!isMountedRef.current) {
-          return;
-        }
-        setLocations(sampleLocations);
-        setUserId('plasmic-editor');
-        userIdRef.current = 'plasmic-editor';
-        setSelectedLocationId(sampleLocations[0].id);
-        setSelectedLocationNumber(sampleLocations[0].location_number ?? null);
-        setSelectedLocationMobileToken(sampleLocations[0].location_mobile_token ?? null);
-        setLoading(false);
-        return;
-      }
-
       const { userId: fetchedUserId, locations: fetchedLocations } = await fetchAccessibleLocations(supabase);
 
       if (!isMountedRef.current) {
@@ -188,7 +168,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       setError(loadError?.message ?? 'Failed to load locations');
       setLoading(false);
     }
-  }, [ensureSelectionConsistent, inEditor, supabase]);
+  }, [ensureSelectionConsistent, supabase]);
 
   React.useEffect(() => {
     loadLocations();
@@ -262,25 +242,9 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken]
   );
 
-  const plasmicData = React.useMemo(() => ({
-    locations,
-    selectedLocationId,
-    selectedLocationNumber,
-    selectedLocationOrgId,
-    selectedLocationMobileToken,
-    loading,
-    error,
-  }), [error, loading, locations, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken]);
-
-  if (typeof globalThis !== 'undefined') {
-    (globalThis as any).locationContext = plasmicData;
-  }
-
   return (
     <LocationContext.Provider value={value}>
-      <DataProvider name="locationContext" data={plasmicData}>
-        {children}
-      </DataProvider>
+      {children}
     </LocationContext.Provider>
   );
 }

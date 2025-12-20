@@ -22,7 +22,6 @@ import SyncIcon from "@mui/icons-material/Sync";
 import { EmployeeTableSkeleton } from "./Skeletons/EmployeeTableSkeleton";
 import { EvaluationsTable } from "./EvaluationsTable";
 import { PIPTable } from "./PIPTable";
-import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import { RolePill } from "./shared/RolePill";
 import { DataGridPro, GridColDef, gridClasses } from "@mui/x-data-grid-pro";
 import { Button } from "@mui/material";
@@ -31,7 +30,7 @@ import { SyncEmployeesModal } from "./SyncEmployeesModal";
 import { SyncHireDateModal } from "./SyncHireDateModal";
 import { EmployeeModal } from "./EmployeeModal";
 import { useLocationContext } from "./LocationContext";
-import { useDataEnv } from '@plasmicapp/react-web/lib/host';
+import { useAuth } from './AuthContext';
 
 export type Role =
   | "New Hire"
@@ -481,8 +480,7 @@ function EmployeesTableView({
   const [data, setData] = React.useState<RosterEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const inEditor = usePlasmicCanvasContext();
-  
+
   // Role dropdown state
   const [roleMenuAnchor, setRoleMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
   
@@ -504,9 +502,7 @@ function EmployeesTableView({
   const [employeeToTerminate, setEmployeeToTerminate] = React.useState<{ id: string; name: string } | null>(null);
 
   // Get current user's role and employee_id from auth context
-  const dataEnv = useDataEnv?.();
-  const currentUserRole = dataEnv?.auth?.role || '';
-  const currentUserEmployeeId = dataEnv?.auth?.employee_id || '';
+  const { role: currentUserRole, employeeId: currentUserEmployeeId } = useAuth();
 
   // Helper function to get available roles based on user permissions
   const getAvailableRoles = React.useCallback((employeeId: string, currentEmployeeRole: Role): Role[] => {
@@ -599,19 +595,14 @@ function EmployeesTableView({
   // Fetch employees on mount and when location changes
   React.useEffect(() => {
     if (!locationId) {
-      if (inEditor) {
-        setData(sampleData);
-        setError(null);
-      } else {
-        setData([]);
-        setError('Select a location to view the roster.');
-      }
+      setData([]);
+      setError('Select a location to view the roster.');
       setLoading(false);
       return;
     }
 
     fetchEmployees();
-  }, [locationId, fetchEmployees, inEditor]);
+  }, [locationId, fetchEmployees]);
 
   // Real-time subscription disabled - Realtime not enabled on employees table
   // If you need real-time updates, enable Realtime on the employees table in Supabase
