@@ -88,6 +88,19 @@ export function InfractionsTab({ orgId }: InfractionsTabProps) {
     fetchInfractions();
   }, [orgId, supabase]);
 
+  // Sort infractions by points when blur occurs
+  const sortInfractions = () => {
+    setInfractions(prev => [...prev].sort((a, b) => {
+      const aPoints = a.points ?? Infinity;
+      const bPoints = b.points ?? Infinity;
+      return aPoints - bPoints;
+    }));
+  };
+
+  const handlePointsBlur = () => {
+    sortInfractions();
+  };
+
   const handleAddInfraction = () => {
     const newInfraction: Infraction = {
       id: `new-${Date.now()}`,
@@ -166,12 +179,18 @@ export function InfractionsTab({ orgId }: InfractionsTabProps) {
 
         if (insertError) throw insertError;
 
-        // Update local state with real IDs
+        // Update local state with real IDs and sort
         if (insertedData) {
           setInfractions(prev => {
             const existingIds = new Set(existingInfractions.map(i => i.id));
             const filteredPrev = prev.filter(i => existingIds.has(i.id));
-            return [...filteredPrev, ...insertedData.map(i => ({ ...i, isNew: false }))];
+            const combined = [...filteredPrev, ...insertedData.map(i => ({ ...i, isNew: false }))];
+            // Sort by points
+            return combined.sort((a, b) => {
+              const aPoints = a.points ?? Infinity;
+              const bPoints = b.points ?? Infinity;
+              return aPoints - bPoints;
+            });
           });
         }
       }
@@ -228,6 +247,7 @@ export function InfractionsTab({ orgId }: InfractionsTabProps) {
               <StyledTextField
                 value={infraction.points ?? ''}
                 onChange={(e) => handleInfractionChange(infraction.id, 'points', e.target.value ? parseFloat(e.target.value) : null)}
+                onBlur={handlePointsBlur}
                 placeholder="Points"
                 size="small"
                 type="number"

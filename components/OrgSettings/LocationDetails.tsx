@@ -70,19 +70,22 @@ export function LocationDetails({ locationId }: LocationDetailsProps) {
     setSuccess(null);
 
     try {
-      // Generate unique filename
+      // Generate unique filename in logos folder
       const fileExt = file.name.split('.').pop();
-      const fileName = `${locationId}/${Date.now()}.${fileExt}`;
+      const fileName = `logos/${locationId}/${Date.now()}.${fileExt}`;
 
       // Delete old image if exists
       if (logoUrl) {
-        const oldPath = logoUrl.split('/').slice(-2).join('/');
-        await supabase.storage.from('location_logos').remove([oldPath]);
+        // Extract the path after the bucket name
+        const urlParts = logoUrl.split('/location_assets/');
+        if (urlParts[1]) {
+          await supabase.storage.from('location_assets').remove([urlParts[1]]);
+        }
       }
 
       // Upload new image
       const { error: uploadError } = await supabase.storage
-        .from('location_logos')
+        .from('location_assets')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: true,
@@ -92,7 +95,7 @@ export function LocationDetails({ locationId }: LocationDetailsProps) {
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from('location_logos')
+        .from('location_assets')
         .getPublicUrl(fileName);
 
       const newUrl = urlData.publicUrl;
@@ -127,9 +130,11 @@ export function LocationDetails({ locationId }: LocationDetailsProps) {
     setSuccess(null);
 
     try {
-      // Delete from storage
-      const filePath = logoUrl.split('/').slice(-2).join('/');
-      await supabase.storage.from('location_logos').remove([filePath]);
+      // Delete from storage - extract path after bucket name
+      const urlParts = logoUrl.split('/location_assets/');
+      if (urlParts[1]) {
+        await supabase.storage.from('location_assets').remove([urlParts[1]]);
+      }
 
       // Update location record
       const { error: updateError } = await supabase

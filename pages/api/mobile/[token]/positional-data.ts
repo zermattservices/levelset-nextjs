@@ -91,6 +91,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Failed to load positions' });
   }
 
+  // Fetch role permissions for filtering positions by leader role
+  // Map role -> position names they can rate
+  let rolePermissions: Record<string, string[]> = {};
+  if (location.org_id) {
+    const { data: permissionsData } = await supabase
+      .from('position_role_permissions')
+      .select('position_id, role_name, org_positions!inner(name)')
+      .eq('org_positions.org_id', location.org_id);
+
+    if (permissionsData && permissionsData.length > 0) {
+      // Build a map of role -> position names
+      permissionsData.forEach((p: any) => {
+        const positionName = p.org_positions?.name;
+        if (positionName && p.role_name) {
+          if (!rolePermissions[p.role_name]) {
+            rolePermissions[p.role_name] = [];
+          }
+          if (!rolePermissions[p.role_name].includes(positionName)) {
+            rolePermissions[p.role_name].push(positionName);
+          }
+        }
+      });
+    }
+  }
+
   const employees = (employeesData ?? []).map((emp) => ({
     id: emp.id,
     name: normalizeName(emp.full_name, emp.first_name, emp.last_name),
@@ -130,6 +155,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     employees,
     leaders,
     positions,
+    rolePermissions, // Map of role -> position names that role can rate
   });
 }
 

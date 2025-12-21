@@ -2,7 +2,7 @@
  * Script to upload location logos to Supabase storage and update the locations table
  * 
  * Prerequisites:
- * 1. Create the 'location_logos' bucket in Supabase Dashboard (Storage > New bucket)
+ * 1. Ensure the 'location_assets' bucket exists in Supabase Dashboard (Storage)
  * 2. Make the bucket PUBLIC (or configure appropriate RLS policies)
  * 
  * Run with: npx ts-node scripts/upload-location-logos.ts
@@ -27,16 +27,21 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Mapping of location IDs to their logo files
 const locationLogoMapping: { [locationId: string]: string } = {
-  '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd': 'CFA Buda Logo.png',      // Buda FSU
-  'e437119c-27d9-4114-9273-350925016738': 'CFA West Buda Logo.png', // West Buda FSU
-  '0d462b41-b957-419b-9d83-978e5c6e2279': 'Circle C CFA.png',       // Lake Travis FSU
+  '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd': 'CFA Buda Logo.png',      // Buda FSU (04066)
+  'e437119c-27d9-4114-9273-350925016738': 'CFA West Buda Logo.png', // West Buda FSU (05508)
+  '0d462b41-b957-419b-9d83-978e5c6e2279': 'Circle C CFA.png',       // Lake Travis FSU (01656)
+  // Note: Manor FSU (05467), 6th & Congress (04547), and Mock Location (99999) don't have logos yet
 };
 
-const BUCKET_NAME = 'location_logos';
+const BUCKET_NAME = 'location_assets';
+const LOGOS_FOLDER = 'logos';
 const LOGOS_DIR = path.join(__dirname, '../public/logos');
 
 async function uploadLogos() {
   console.log('Starting logo upload...\n');
+  console.log(`Bucket: ${BUCKET_NAME}`);
+  console.log(`Folder: ${LOGOS_FOLDER}`);
+  console.log(`Source: ${LOGOS_DIR}\n`);
 
   for (const [locationId, logoFile] of Object.entries(locationLogoMapping)) {
     const filePath = path.join(LOGOS_DIR, logoFile);
@@ -47,7 +52,7 @@ async function uploadLogos() {
     }
 
     const fileBuffer = fs.readFileSync(filePath);
-    const storagePath = `${locationId}/${logoFile}`;
+    const storagePath = `${LOGOS_FOLDER}/${locationId}/${logoFile}`;
 
     console.log(`Uploading ${logoFile} for location ${locationId}...`);
 

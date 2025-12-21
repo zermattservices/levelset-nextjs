@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import sty from './DisciplineSettings.module.css';
 import { InfractionsTab } from './InfractionsTab';
 import { DisciplineActionsTab } from './DisciplineActionsTab';
+import { DisciplineAccessTab } from './DisciplineAccessTab';
 import { ComingSoonPlaceholder } from './ComingSoonPlaceholder';
 
 const fontFamily = '"Satoshi", sans-serif';
@@ -32,11 +33,12 @@ const StyledTab = styled(Tab)(() => ({
 
 interface DisciplineSettingsProps {
   orgId: string | null;
+  locationId: string | null;
 }
 
-type TabValue = 'infractions' | 'actions' | 'notifications';
+type TabValue = 'infractions' | 'actions' | 'access' | 'notifications';
 
-export function DisciplineSettings({ orgId }: DisciplineSettingsProps) {
+export function DisciplineSettings({ orgId, locationId }: DisciplineSettingsProps) {
   const [activeTab, setActiveTab] = React.useState<TabValue>('infractions');
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
@@ -49,6 +51,8 @@ export function DisciplineSettings({ orgId }: DisciplineSettingsProps) {
         return <InfractionsTab orgId={orgId} />;
       case 'actions':
         return <DisciplineActionsTab orgId={orgId} />;
+      case 'access':
+        return <DisciplineAccessTab orgId={orgId} locationId={locationId} />;
       case 'notifications':
         return <ComingSoonPlaceholder title="Notifications" description="Configure automated discipline notifications coming soon." />;
       default:
@@ -61,7 +65,7 @@ export function DisciplineSettings({ orgId }: DisciplineSettingsProps) {
       <div className={sty.header}>
         <h2 className={sty.title}>Discipline</h2>
         <p className={sty.description}>
-          Configure infractions, disciplinary actions, and notifications for your organization.
+          Configure infractions, disciplinary actions, access controls, and notifications for your organization.
         </p>
       </div>
 
@@ -69,6 +73,7 @@ export function DisciplineSettings({ orgId }: DisciplineSettingsProps) {
         <StyledTabs value={activeTab} onChange={handleTabChange}>
           <StyledTab label="Infractions" value="infractions" />
           <StyledTab label="Actions" value="actions" />
+          <StyledTab label="Access" value="access" />
           <StyledTab label="Notifications" value="notifications" />
         </StyledTabs>
 

@@ -36,6 +36,7 @@ interface InfractionDataResponse {
   employees: EmployeeOption[];
   leaders: EmployeeOption[];
   infractions: InfractionOption[];
+  disciplinePassword?: string;
 }
 
 interface DisciplineInfractionFormProps {
@@ -70,7 +71,7 @@ const InfractionDateTextField = React.forwardRef(function InfractionDateTextFiel
 });
 
 export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormProps) {
-  const { token, locationNumber } = useMobilePortal();
+  const { token } = useMobilePortal();
   const { t } = useTranslation('forms');
   const { translate, language } = useTranslatedContent();
 
@@ -78,6 +79,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
   const [loading, setLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState<string | null>(null);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [disciplinePassword, setDisciplinePassword] = React.useState<string>('');
 
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [leaders, setLeaders] = React.useState<EmployeeOption[]>([]);
@@ -129,6 +131,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             : payload.employees ?? [];
           setLeaders(leaderOptions);
           setInfractionOptions(payload.infractions ?? []);
+          setDisciplinePassword(payload.disciplinePassword ?? '');
           setSelectedLeader('');
           setSelectedEmployee('');
           setSelectedInfraction('');
@@ -322,8 +325,8 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     );
   }
 
-  const correctPassword = locationNumber || '';
-  const showPasswordModal = !passwordVerified && correctPassword.length === 5;
+  const correctPassword = disciplinePassword || '';
+  const showPasswordModal = !passwordVerified && correctPassword.length > 0;
 
   if (showPasswordModal) {
     return (

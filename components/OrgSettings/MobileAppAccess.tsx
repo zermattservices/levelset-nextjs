@@ -1,14 +1,141 @@
 import * as React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { styled } from '@mui/material/styles';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import PrintIcon from '@mui/icons-material/Print';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import CheckIcon from '@mui/icons-material/Check';
 import sty from './MobileAppAccess.module.css';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
+import { createSupabaseClient } from '@/util/supabase/component';
+
+const fontFamily = '"Satoshi", sans-serif';
+
+const StyledTextField = styled(TextField)(() => ({
+  '& .MuiOutlinedInput-root': {
+    fontFamily,
+    fontSize: 14,
+    '&:hover fieldset': {
+      borderColor: '#31664a',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#31664a',
+    },
+  },
+}));
 
 export function MobileAppAccess() {
-  const { selectedLocationMobileToken, selectedLocationNumber } = useLocationContext();
+  const { selectedLocationMobileToken, selectedLocationNumber, selectedLocationId } = useLocationContext();
+  const [copied, setCopied] = React.useState(false);
+  
+  // Password state
+  const [password, setPassword] = React.useState<string>('');
+  const [originalPassword, setOriginalPassword] = React.useState<string>('');
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [passwordLoading, setPasswordLoading] = React.useState(true);
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+  const [pendingPassword, setPendingPassword] = React.useState<string>('');
+  const [error, setError] = React.useState<string | null>(null);
+
+  const supabase = React.useMemo(() => createSupabaseClient(), []);
 
   const pwaUrl = selectedLocationMobileToken 
     ? `https://app.levelset.io/mobile/${selectedLocationMobileToken}`
     : null;
+
+  // Fetch password
+  React.useEffect(() => {
+    async function fetchPassword() {
+      if (!selectedLocationId) {
+        setPasswordLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error: fetchError } = await supabase
+          .from('locations')
+          .select('discipline_password')
+          .eq('id', selectedLocationId)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        setPassword(data?.discipline_password || '');
+        setOriginalPassword(data?.discipline_password || '');
+      } catch (err) {
+        console.error('Error fetching password:', err);
+      } finally {
+        setPasswordLoading(false);
+      }
+    }
+
+    fetchPassword();
+  }, [selectedLocationId, supabase]);
+
+  const handleCopyUrl = async () => {
+    if (!pwaUrl) return;
+    try {
+      await navigator.clipboard.writeText(pwaUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const handlePrint = () => {
+    // Open the PDF from storage bucket if it exists
+    if (selectedLocationId) {
+      const pdfUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/location_assets/pwa/info_pdf/${selectedLocationId}.pdf`;
+      window.open(pdfUrl, '_blank');
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+  };
+
+  const handleSavePassword = () => {
+    if (password !== originalPassword) {
+      setPendingPassword(password);
+      setShowConfirmModal(true);
+    }
+  };
+
+  const confirmPasswordChange = async () => {
+    if (!selectedLocationId) return;
+
+    try {
+      const { error: updateError } = await supabase
+        .from('locations')
+        .update({ discipline_password: pendingPassword })
+        .eq('id', selectedLocationId);
+
+      if (updateError) throw updateError;
+
+      setOriginalPassword(pendingPassword);
+      setShowConfirmModal(false);
+    } catch (err) {
+      console.error('Error updating password:', err);
+      setError('Failed to update password');
+    }
+  };
+
+  const cancelPasswordChange = () => {
+    setShowConfirmModal(false);
+    setPassword(originalPassword);
+  };
+
+  const hasPasswordChanges = password !== originalPassword;
 
   return (
     <div className={sty.container}>
@@ -30,6 +157,7 @@ export function MobileAppAccess() {
                 size={200}
                 level="H"
                 includeMargin={true}
+                fgColor="#31664a"
                 imageSettings={{
                   src: '/favicon.ico',
                   x: undefined,
@@ -44,7 +172,17 @@ export function MobileAppAccess() {
               <p className={sty.locationLabel}>
                 Location: <strong>{selectedLocationNumber || 'Unknown'}</strong>
               </p>
-              <p className={sty.urlText}>{pwaUrl}</p>
+              <div className={sty.urlRow}>
+                <p className={sty.urlText}>{pwaUrl}</p>
+                <IconButton
+                  size="small"
+                  onClick={handleCopyUrl}
+                  title="Copy link"
+                  sx={{ color: copied ? '#31664a' : '#666' }}
+                >
+                  {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
+                </IconButton>
+              </div>
             </div>
             <div className={sty.instructions}>
               <h4 className={sty.instructionsTitle}>How to use:</h4>
@@ -55,6 +193,24 @@ export function MobileAppAccess() {
                 <li>Leaders can add the app to their home screen for quick access</li>
               </ol>
             </div>
+            <Button
+              variant="outlined"
+              startIcon={<PrintIcon />}
+              onClick={handlePrint}
+              sx={{
+                fontFamily,
+                textTransform: 'none',
+                borderColor: '#31664a',
+                color: '#31664a',
+                marginTop: 2,
+                '&:hover': {
+                  borderColor: '#31664a',
+                  backgroundColor: 'rgba(49, 102, 74, 0.08)',
+                },
+              }}
+            >
+              Print This Page
+            </Button>
           </>
         ) : (
           <div className={sty.noToken}>
@@ -63,6 +219,86 @@ export function MobileAppAccess() {
           </div>
         )}
       </div>
+
+      {/* Discipline Password Section */}
+      <div className={sty.passwordSection}>
+        <h4 className={sty.sectionTitle}>Discipline Form Password</h4>
+        <p className={sty.sectionDescription}>
+          This password is required to access the discipline form in the mobile app. 
+          Leaders must enter this password before they can submit a discipline form.
+        </p>
+
+        {error && <div className={sty.errorMessage}>{error}</div>}
+
+        <div className={sty.passwordRow}>
+          <StyledTextField
+            type={showPassword ? 'text' : 'password'}
+            value={passwordLoading ? '' : password}
+            onChange={handlePasswordChange}
+            placeholder={passwordLoading ? 'Loading...' : 'Enter password'}
+            disabled={passwordLoading}
+            size="small"
+            sx={{ width: 280 }}
+            InputProps={{
+              endAdornment: (
+                <IconButton
+                  onClick={() => setShowPassword(!showPassword)}
+                  edge="end"
+                  size="small"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              ),
+            }}
+          />
+          {hasPasswordChanges && (
+            <Button
+              variant="contained"
+              onClick={handleSavePassword}
+              sx={{
+                fontFamily,
+                textTransform: 'none',
+                backgroundColor: '#31664a',
+                '&:hover': {
+                  backgroundColor: '#264d38',
+                },
+              }}
+            >
+              Save Password
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      <Dialog open={showConfirmModal} onClose={cancelPasswordChange}>
+        <DialogTitle sx={{ fontFamily }}>Confirm Password Change</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily }}>
+            Are you sure you want to change the discipline form password? 
+            All leaders will need to use the new password to access the discipline form.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelPasswordChange} sx={{ fontFamily, textTransform: 'none' }}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={confirmPasswordChange} 
+            variant="contained"
+            sx={{
+              fontFamily,
+              textTransform: 'none',
+              backgroundColor: '#31664a',
+              '&:hover': {
+                backgroundColor: '#264d38',
+              },
+            }}
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

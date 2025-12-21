@@ -39,6 +39,7 @@ interface PositionalDataResponse {
   employees: EmployeeOption[];
   leaders: EmployeeOption[];
   positions: PositionOption[];
+  rolePermissions?: Record<string, string[]>;
 }
 
 interface LabelsResponse {
@@ -63,6 +64,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [leaders, setLeaders] = React.useState<EmployeeOption[]>([]);
   const [positions, setPositions] = React.useState<PositionOption[]>([]);
+  const [rolePermissions, setRolePermissions] = React.useState<Record<string, string[]>>({});
 
   const [selectedLeader, setSelectedLeader] = React.useState('');
   const [selectedEmployee, setSelectedEmployee] = React.useState('');
@@ -107,6 +109,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             : payload.employees ?? [];
           setLeaders(leaderOptions);
           setPositions((payload.positions ?? []).map((item) => ({ ...item })));
+          setRolePermissions(payload.rolePermissions ?? {});
           setSelectedLeader('');
           setSelectedEmployee('');
           setSelectedPosition('');
@@ -253,9 +256,34 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
 
   const leaderOptions = leaders.length ? leaders : employees;
 
+  // Get selected leader's role
+  const selectedLeaderRole = React.useMemo(() => {
+    const leader = leaderOptions.find(l => l.id === selectedLeader);
+    return leader?.role ?? null;
+  }, [leaderOptions, selectedLeader]);
+
+  // Filter positions based on selected leader's role permissions
+  const filteredPositions = React.useMemo(() => {
+    // If no role permissions are configured, show all positions
+    const hasPermissions = Object.keys(rolePermissions).length > 0;
+    if (!hasPermissions || !selectedLeaderRole) {
+      return positions;
+    }
+
+    // Get allowed positions for this role
+    const allowedPositions = rolePermissions[selectedLeaderRole];
+    if (!allowedPositions || allowedPositions.length === 0) {
+      // If no permissions defined for this role, show all positions (fallback)
+      return positions;
+    }
+
+    // Filter positions to only those allowed for this role
+    return positions.filter(p => allowedPositions.includes(p.name));
+  }, [positions, rolePermissions, selectedLeaderRole]);
+
   const positionsByZone = React.useMemo(() => {
     const grouped = new Map<'FOH' | 'BOH', PositionOption[]>();
-    positions.forEach((option) => {
+    filteredPositions.forEach((option) => {
       const zone = option.zone ?? 'FOH';
       if (!grouped.has(zone)) {
         grouped.set(zone, []);
@@ -274,7 +302,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
         }),
       }))
       .filter((group) => group.options.length > 0);
-  }, [positions, language, translate]);
+  }, [filteredPositions, language, translate]);
 
   if (loading) {
     return (
@@ -301,6 +329,10 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           value={leaderOptions.find((option) => option.id === selectedLeader) ?? null}
           onChange={(_, option) => {
             setSelectedLeader(option?.id ?? '');
+            // Clear position selection when leader changes (positions may be filtered)
+            setSelectedPosition('');
+            setLabels([]);
+            setRatings([]);
             markDirty();
           }}
           getOptionLabel={(option) => option.name}

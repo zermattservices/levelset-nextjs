@@ -52,8 +52,8 @@ export function OrgSettingsPage() {
     {
       group: 'Users and Security',
       items: [
-        { id: 'users', label: 'Users', status: 'placeholder' },
-        { id: 'permissions', label: 'Permissions', status: 'placeholder' },
+        { id: 'users', label: 'Users', status: 'coming-soon' },
+        { id: 'permissions', label: 'Permissions', status: 'coming-soon' },
       ],
     },
     {
@@ -77,15 +77,15 @@ export function OrgSettingsPage() {
       case 'positional-excellence':
         return <PositionalExcellenceSettings orgId={selectedLocationOrgId} />;
       case 'discipline':
-        return <DisciplineSettings orgId={selectedLocationOrgId} />;
+        return <DisciplineSettings orgId={selectedLocationOrgId} locationId={selectedLocationId} />;
       case 'pathway':
         return <ComingSoonPlaceholder title="Pathway" description="Career pathway and development tracking coming soon." />;
       case 'evaluations':
         return <ComingSoonPlaceholder title="Evaluations" description="Performance evaluation scheduling and tracking coming soon." />;
       case 'users':
-        return <PlaceholderContent title="User Management" description="Manage users who have access to the Levelset platform." />;
+        return <ComingSoonPlaceholder title="User Management" description="Manage users who have access to the Levelset platform coming soon." />;
       case 'permissions':
-        return <PlaceholderContent title="Permissions" description="Configure role-based permissions for your organization." />;
+        return <ComingSoonPlaceholder title="Permissions" description="Configure role-based permissions for your organization coming soon." />;
       case 'mobile-access':
         return <MobileAppAccess />;
       case 'mobile-config':

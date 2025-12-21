@@ -288,28 +288,35 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
                     value={selectedArray}
                     onChange={(e) => handleRoleChange(pos.id, e.target.value as string[])}
                     input={<OutlinedInput />}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {(selected as string[]).length === 0 ? (
-                          <span className={sty.placeholder}>Select roles</span>
-                        ) : (
-                          (selected as string[]).map((value) => (
-                            <Chip
-                              key={value}
-                              label={value}
-                              size="small"
-                              sx={{
-                                fontFamily,
-                                fontSize: 11,
-                                height: 22,
-                                backgroundColor: lockedRoles.has(value) ? '#f0f0f0' : '#f6fffa',
-                                color: lockedRoles.has(value) ? '#666' : '#31664a',
-                              }}
-                            />
-                          ))
-                        )}
-                      </Box>
-                    )}
+                    renderValue={(selected) => {
+                      const sortedSelected = [...(selected as string[])].sort((a, b) => {
+                        const aLevel = roles.find(r => r.role_name === a)?.hierarchy_level ?? Infinity;
+                        const bLevel = roles.find(r => r.role_name === b)?.hierarchy_level ?? Infinity;
+                        return aLevel - bLevel;
+                      });
+                      return (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {sortedSelected.length === 0 ? (
+                            <span className={sty.placeholder}>Select roles</span>
+                          ) : (
+                            sortedSelected.map((value) => (
+                              <Chip
+                                key={value}
+                                label={value}
+                                size="small"
+                                sx={{
+                                  fontFamily,
+                                  fontSize: 11,
+                                  height: 22,
+                                  backgroundColor: lockedRoles.has(value) ? '#f0f0f0' : '#f6fffa',
+                                  color: lockedRoles.has(value) ? '#666' : '#31664a',
+                                }}
+                              />
+                            ))
+                          )}
+                        </Box>
+                      );
+                    }}
                     disabled={saving}
                     MenuProps={{
                       PaperProps: {
