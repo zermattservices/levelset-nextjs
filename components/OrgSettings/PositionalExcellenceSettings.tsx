@@ -40,39 +40,17 @@ type TabValue = 'positions' | 'criteria' | 'role-mapping' | 'rating-scale';
 
 export function PositionalExcellenceSettings({ orgId }: PositionalExcellenceSettingsProps) {
   const [activeTab, setActiveTab] = React.useState<TabValue>('positions');
-  const [positionsComplete, setPositionsComplete] = React.useState(false);
-  const [criteriaComplete, setCriteriaComplete] = React.useState(false);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
     setActiveTab(newValue);
   };
 
-  const handleNextFromPositions = () => {
-    setActiveTab('criteria');
-  };
-
-  const handleNextFromCriteria = () => {
-    setActiveTab('role-mapping');
-  };
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'positions':
-        return (
-          <PositionsTab
-            orgId={orgId}
-            onComplete={(complete) => setPositionsComplete(complete)}
-            onNext={handleNextFromPositions}
-          />
-        );
+        return <PositionsTab orgId={orgId} />;
       case 'criteria':
-        return (
-          <RatingCriteriaTab
-            orgId={orgId}
-            onComplete={(complete) => setCriteriaComplete(complete)}
-            onNext={handleNextFromCriteria}
-          />
-        );
+        return <RatingCriteriaTab orgId={orgId} />;
       case 'role-mapping':
         return <RoleMappingTab orgId={orgId} />;
       case 'rating-scale':
@@ -94,20 +72,9 @@ export function PositionalExcellenceSettings({ orgId }: PositionalExcellenceSett
       <Box sx={{ width: '100%' }}>
         <StyledTabs value={activeTab} onChange={handleTabChange}>
           <StyledTab label="Positions" value="positions" />
-          <StyledTab 
-            label="Rating Criteria" 
-            value="criteria" 
-            disabled={!positionsComplete}
-          />
-          <StyledTab 
-            label="Role Mapping" 
-            value="role-mapping" 
-            disabled={!criteriaComplete}
-          />
-          <StyledTab 
-            label="Rating Scale" 
-            value="rating-scale"
-          />
+          <StyledTab label="Rating Criteria" value="criteria" />
+          <StyledTab label="Role Mapping" value="role-mapping" />
+          <StyledTab label="Rating Scale" value="rating-scale" />
         </StyledTabs>
 
         <div className={sty.tabContent}>

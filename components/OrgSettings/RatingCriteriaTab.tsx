@@ -63,11 +63,9 @@ interface Criteria {
 
 interface RatingCriteriaTabProps {
   orgId: string | null;
-  onComplete: (complete: boolean) => void;
-  onNext: () => void;
 }
 
-export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaTabProps) {
+export function RatingCriteriaTab({ orgId }: RatingCriteriaTabProps) {
   const [positions, setPositions] = React.useState<Position[]>([]);
   const [selectedPositionId, setSelectedPositionId] = React.useState<string>('');
   const [criteria, setCriteria] = React.useState<Criteria[]>([]);
@@ -171,35 +169,6 @@ export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaT
     fetchCriteria();
   }, [selectedPositionId, supabase]);
 
-  // Check completion status
-  React.useEffect(() => {
-    async function checkCompletion() {
-      if (!orgId || positions.length === 0) {
-        onComplete(false);
-        return;
-      }
-
-      try {
-        // Check if all positions have at least one criteria
-        const { data, error: fetchError } = await supabase
-          .from('position_criteria')
-          .select('position_id')
-          .in('position_id', positions.map(p => p.id));
-
-        if (fetchError) throw fetchError;
-
-        const positionsWithCriteria = new Set((data || []).map(c => c.position_id));
-        const allComplete = positions.every(p => positionsWithCriteria.has(p.id));
-        onComplete(allComplete);
-      } catch (err) {
-        console.error('Error checking completion:', err);
-        onComplete(false);
-      }
-    }
-
-    checkCompletion();
-  }, [orgId, positions, supabase, onComplete]);
-
   const handlePositionChange = async (newPositionId: string) => {
     // Auto-save current criteria before switching
     if (hasChanges) {
@@ -258,13 +227,6 @@ export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaT
     }
   };
 
-  const handleNext = async () => {
-    if (hasChanges) {
-      await handleSave();
-    }
-    onNext();
-  };
-
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
@@ -275,7 +237,6 @@ export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaT
 
   const fohPositions = positions.filter(p => p.zone === 'FOH');
   const bohPositions = positions.filter(p => p.zone === 'BOH');
-  const hasAnyCriteria = criteria.some(c => c.name.trim() !== '');
 
   return (
     <div className={sty.container}>
@@ -388,24 +349,6 @@ export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaT
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           )}
-          <Button
-            variant="contained"
-            onClick={handleNext}
-            disabled={!hasAnyCriteria || saving}
-            sx={{
-              fontFamily,
-              textTransform: 'none',
-              backgroundColor: '#31664a',
-              '&:hover': {
-                backgroundColor: '#264d38',
-              },
-              '&.Mui-disabled': {
-                backgroundColor: '#e0e0e0',
-              },
-            }}
-          >
-            Next
-          </Button>
         </div>
       </div>
     </div>

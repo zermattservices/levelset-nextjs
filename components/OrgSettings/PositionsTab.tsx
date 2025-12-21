@@ -49,11 +49,9 @@ interface Position {
 
 interface PositionsTabProps {
   orgId: string | null;
-  onComplete: (complete: boolean) => void;
-  onNext: () => void;
 }
 
-export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
+export function PositionsTab({ orgId }: PositionsTabProps) {
   const [positions, setPositions] = React.useState<Position[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
@@ -92,7 +90,6 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
         if (fetchError) throw fetchError;
 
         setPositions(data || []);
-        onComplete((data || []).length > 0);
       } catch (err) {
         console.error('Error fetching positions:', err);
         setError('Failed to load positions');
@@ -102,7 +99,7 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
     }
 
     fetchPositions();
-  }, [orgId, supabase, onComplete]);
+  }, [orgId, supabase]);
 
   const handleAddPosition = (zone: 'FOH' | 'BOH') => {
     const newPosition: Position = {
@@ -189,20 +186,12 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
       }
 
       setHasChanges(false);
-      onComplete(positions.length > 0);
     } catch (err) {
       console.error('Error saving positions:', err);
       setError('Failed to save positions');
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleNext = async () => {
-    if (hasChanges) {
-      await handleSave();
-    }
-    onNext();
   };
 
   const handleTextareaChange = (id: string, value: string, textarea: HTMLTextAreaElement) => {
@@ -222,7 +211,6 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
 
   const fohPositions = positions.filter(p => p.zone === 'FOH');
   const bohPositions = positions.filter(p => p.zone === 'BOH');
-  const canProceed = positions.length > 0 && positions.every(p => p.name.trim() !== '');
 
   const renderPositionSection = (sectionPositions: Position[], zone: 'FOH' | 'BOH', title: string) => (
     <div className={sty.section}>
@@ -327,24 +315,6 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           )}
-          <Button
-            variant="contained"
-            onClick={handleNext}
-            disabled={!canProceed || saving}
-            sx={{
-              fontFamily,
-              textTransform: 'none',
-              backgroundColor: '#31664a',
-              '&:hover': {
-                backgroundColor: '#264d38',
-              },
-              '&.Mui-disabled': {
-                backgroundColor: '#e0e0e0',
-              },
-            }}
-          >
-            Next
-          </Button>
         </div>
       </div>
     </div>
