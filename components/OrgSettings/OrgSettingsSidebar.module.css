@@ -4,6 +4,7 @@
   width: 220px;
   flex-shrink: 0;
   gap: 24px;
+  height: fit-content;
 }
 
 .menuGroup {

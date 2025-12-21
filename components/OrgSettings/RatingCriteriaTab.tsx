@@ -30,6 +30,10 @@ const StyledSelect = styled(Select)(() => ({
   fontFamily,
   fontSize: 14,
   borderRadius: 12,
+  height: 40,
+  '& .MuiSelect-select': {
+    padding: '8px 14px',
+  },
   '& .MuiOutlinedInput-notchedOutline': {
     borderColor: '#e0e0e0',
     borderRadius: 12,
