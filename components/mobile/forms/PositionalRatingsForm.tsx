@@ -33,6 +33,7 @@ interface PositionOption {
   name: string;
   name_es?: string | null;
   zone: 'FOH' | 'BOH';
+  description?: string | null;
 }
 
 interface PositionalDataResponse {
@@ -45,6 +46,7 @@ interface PositionalDataResponse {
 interface LabelsResponse {
   labels: string[];
   labels_es?: string[];
+  descriptions?: string[];
 }
 
 interface PositionalRatingsFormProps {
@@ -70,6 +72,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
   const [selectedEmployee, setSelectedEmployee] = React.useState('');
   const [selectedPosition, setSelectedPosition] = React.useState('');
   const [labels, setLabels] = React.useState<string[]>([]);
+  const [descriptions, setDescriptions] = React.useState<string[]>([]);
   const [ratings, setRatings] = React.useState<Array<RatingValue | null>>([]);
 
   const [dirty, setDirty] = React.useState(false);
@@ -142,6 +145,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
       controls.setSubmitDisabled(true);
       setLabelsError(null);
       setLabels([]);
+      setDescriptions([]);
       setRatings([]);
       try {
         const response = await fetch(
@@ -158,12 +162,14 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             ? payload.labels_es
             : payload.labels ?? [];
           setLabels(fetchedLabels);
+          setDescriptions(payload.descriptions ?? []);
           setRatings(Array.from({ length: fetchedLabels.length }, () => null));
         }
       } catch (err: any) {
         if (!cancelled) {
           setLabelsError(err?.message ?? 'Unable to load position details');
           setLabels([]);
+          setDescriptions([]);
           setRatings([]);
         }
       }
@@ -171,6 +177,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
 
     if (!selectedPosition) {
       setLabels([]);
+      setDescriptions([]);
       setRatings([]);
       setLabelsError(null);
       return;
@@ -384,6 +391,30 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             </optgroup>
           ))}
         </TextField>
+
+        {/* Position description */}
+        {selectedPosition && (() => {
+          const selectedPos = filteredPositions.find(p => p.name === selectedPosition);
+          if (selectedPos?.description) {
+            return (
+              <Typography
+                sx={{
+                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: '#4b5563',
+                  backgroundColor: '#f9fafb',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  lineHeight: 1.5,
+                }}
+              >
+                {selectedPos.description}
+              </Typography>
+            );
+          }
+          return null;
+        })()}
       </Box>
 
       {labelsError && (
@@ -407,16 +438,31 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                 gap: 2,
               }}
             >
-              <Typography
-                sx={{
-                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: '#111827',
-                }}
-              >
-                {label}
-              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Typography
+                  sx={{
+                    fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: '#111827',
+                  }}
+                >
+                  {label}
+                </Typography>
+                {descriptions[index] && (
+                  <Typography
+                    sx={{
+                      fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: '#6b7280',
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {descriptions[index]}
+                  </Typography>
+                )}
+              </Box>
               <RadioGroup
                 row
                 value={ratings[index] ?? ''}

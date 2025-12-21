@@ -53,7 +53,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .order('zone', { ascending: true })
     .order('position', { ascending: true });
 
-  const [{ data: employeesData, error: employeesError }, { data: positionsData, error: positionsError }] =
+  // Also fetch org-level positions with descriptions
+  const orgPositionsQuery = location.org_id 
+    ? supabase
+        .from('org_positions')
+        .select('name, description, zone')
+        .eq('org_id', location.org_id)
+        .eq('is_active', true)
+    : Promise.resolve({ data: null, error: null });
+
+  const [{ data: employeesData, error: employeesError }, { data: positionsData, error: positionsError }, { data: orgPositionsData }] =
     await Promise.all([
       supabase
         .from('employees')
@@ -62,6 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .eq('active', true)
         .order('full_name'),
       positionsQuery,
+      orgPositionsQuery,
     ]);
 
   if (employeesError) {
@@ -125,17 +135,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const leaders = employees.filter((emp) => isLeaderRole(emp.role));
 
   const zoneOrder: Array<'FOH' | 'BOH'> = ['FOH', 'BOH'];
-  const positionsMap = new Map<string, { name: string; name_es: string | null; zone: 'FOH' | 'BOH' }>();
+  const positionsMap = new Map<string, { name: string; name_es: string | null; zone: 'FOH' | 'BOH'; description: string | null }>();
+
+  // Build a map of position descriptions from org_positions
+  const orgPositionDescriptions = new Map<string, string>();
+  (orgPositionsData ?? []).forEach((item: any) => {
+    if (item.name && item.description) {
+      orgPositionDescriptions.set(item.name.toLowerCase(), item.description);
+    }
+  });
 
   (finalPositionsData ?? []).forEach((item: any) => {
     const name = item.position?.trim();
     if (!name) return;
     const zone = (item.zone === 'BOH' ? 'BOH' : 'FOH') as 'FOH' | 'BOH';
     if (!positionsMap.has(name)) {
+      // Look up description from org_positions
+      const description = orgPositionDescriptions.get(name.toLowerCase()) ?? null;
       positionsMap.set(name, { 
         name, 
         name_es: item.position_es ?? null,
-        zone 
+        zone,
+        description,
       });
     }
   });
@@ -144,6 +165,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     name: p.name,
     name_es: p.name_es,
     zone: p.zone,
+    description: p.description,
   })).sort((a, b) => {
     const zoneDiff = zoneOrder.indexOf(a.zone) - zoneOrder.indexOf(b.zone);
     if (zoneDiff !== 0) return zoneDiff;
