@@ -15,6 +15,7 @@ interface LocationContextValue {
   selectedLocationNumber: string | null;
   selectedLocationOrgId: string | null;
   selectedLocationMobileToken: string | null;
+  userHierarchyLevel: number | null;
   loading: boolean;
   error: string | null;
   selectLocation: (locationId: string) => void;
@@ -34,7 +35,7 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
   const user = sessionData.session?.user;
 
   if (!user) {
-    return { userId: null, locations: [] as LocationRecord[] };
+    return { userId: null, userRole: null, locations: [] as LocationRecord[] };
   }
 
   const { data: appUser, error: appUserError } = await supabase
@@ -61,6 +62,7 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
 
     return {
       userId: user.id,
+      userRole: appUser?.role ?? null,
       locations: location ? [location] : [],
     };
   }
@@ -82,6 +84,7 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
 
   return {
     userId: user.id,
+    userRole: appUser?.role ?? null,
     locations: locations ?? [],
   };
 }
@@ -92,7 +95,9 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
   const [selectedLocationNumber, setSelectedLocationNumber] = React.useState<string | null>(null);
   const [selectedLocationOrgId, setSelectedLocationOrgId] = React.useState<string | null>(null);
   const [selectedLocationMobileToken, setSelectedLocationMobileToken] = React.useState<string | null>(null);
+  const [userHierarchyLevel, setUserHierarchyLevel] = React.useState<number | null>(null);
   const [userId, setUserId] = React.useState<string | null>(null);
+  const [userRole, setUserRole] = React.useState<string | null>(null);
   const userIdRef = React.useRef<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -142,13 +147,14 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     setError(null);
 
     try {
-      const { userId: fetchedUserId, locations: fetchedLocations } = await fetchAccessibleLocations(supabase);
+      const { userId: fetchedUserId, userRole: fetchedUserRole, locations: fetchedLocations } = await fetchAccessibleLocations(supabase);
 
       if (!isMountedRef.current) {
         return;
       }
 
       setUserId(fetchedUserId);
+      setUserRole(fetchedUserRole);
       userIdRef.current = fetchedUserId;
       setLocations(fetchedLocations);
 
@@ -169,6 +175,44 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       setLoading(false);
     }
   }, [ensureSelectionConsistent, supabase]);
+
+  // Fetch user hierarchy level when location or role changes
+  React.useEffect(() => {
+    async function fetchHierarchyLevel() {
+      // Levelset Admin and Owner/Operator always have access (level 0)
+      if (userRole === 'Levelset Admin' || userRole === 'Owner/Operator') {
+        setUserHierarchyLevel(0);
+        return;
+      }
+
+      if (!selectedLocationId || !userRole) {
+        setUserHierarchyLevel(null);
+        return;
+      }
+
+      try {
+        const { data: hierarchyData, error: hierarchyError } = await supabase
+          .from('location_role_hierarchy')
+          .select('hierarchy_level')
+          .eq('location_id', selectedLocationId)
+          .eq('role_name', userRole)
+          .maybeSingle();
+
+        if (hierarchyError) {
+          console.error('[LocationProvider] Failed to fetch hierarchy level', hierarchyError);
+          setUserHierarchyLevel(null);
+          return;
+        }
+
+        setUserHierarchyLevel(hierarchyData?.hierarchy_level ?? null);
+      } catch (err) {
+        console.error('[LocationProvider] Error fetching hierarchy level', err);
+        setUserHierarchyLevel(null);
+      }
+    }
+
+    fetchHierarchyLevel();
+  }, [selectedLocationId, userRole, supabase]);
 
   React.useEffect(() => {
     loadLocations();
@@ -220,6 +264,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     setSelectedLocationNumber(null);
     setSelectedLocationOrgId(null);
     setSelectedLocationMobileToken(null);
+    setUserHierarchyLevel(null);
 
     if (typeof window !== 'undefined') {
       const key = buildStorageKey(userId);
@@ -234,12 +279,13 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       selectedLocationNumber,
       selectedLocationOrgId,
       selectedLocationMobileToken,
+      userHierarchyLevel,
       loading,
       error,
       selectLocation,
       clearSelection,
     }),
-    [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken]
+    [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken, userHierarchyLevel]
   );
 
   return (

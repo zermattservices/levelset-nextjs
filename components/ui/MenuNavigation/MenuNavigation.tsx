@@ -2,6 +2,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import SettingsIcon from '@mui/icons-material/Settings';
 import sty from './MenuNavigation.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 import { LevelsetButton } from '../LevelsetButton/LevelsetButton';
@@ -9,6 +10,7 @@ import { LogoutButton } from '../LogoutButton/LogoutButton';
 import { DashboardSubmenu } from '../DashboardSubmenu/DashboardSubmenu';
 import { LocationSelectDropdown } from '@/components/CodeComponents/LocationSelectDropdown';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -22,13 +24,36 @@ export interface MenuNavigationProps {
 
 export function MenuNavigation({ className, firstName, userRole }: MenuNavigationProps) {
   const auth = useAuth();
+  const { userHierarchyLevel } = useLocationContext();
   const [dashboardOpen, setDashboardOpen] = React.useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
+  const profileDropdownRef = React.useRef<HTMLDivElement>(null);
 
   const displayFirstName = firstName || auth.first_name || '';
   const displayRole = userRole || auth.role || '';
 
   const isAdmin = displayRole === 'Levelset Admin' || displayRole === 'Operator' || displayRole === 'Owner/Operator';
   const isLevelsetAdmin = displayRole === 'Levelset Admin';
+  
+  // Check if user can access org settings (hierarchy level 0 or 1)
+  const canAccessOrgSettings = userHierarchyLevel !== null && userHierarchyLevel <= 1;
+
+  // Close profile dropdown when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    }
+    
+    if (profileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [profileDropdownOpen]);
 
   return (
     <div
@@ -105,8 +130,22 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               </LogoutButton>
             </div>
 
-            {/* Account icon */}
-            <AccountCircleIcon className={sty.accountIcon} sx={{ fontSize: 32, color: '#31664a' }} />
+            {/* Account icon with dropdown */}
+            <div className={sty.profileDropdownContainer} ref={profileDropdownRef}>
+              <AccountCircleIcon 
+                className={sty.accountIcon} 
+                sx={{ fontSize: 32, color: '#31664a' }} 
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+              />
+              {profileDropdownOpen && canAccessOrgSettings && (
+                <div className={sty.profileDropdown}>
+                  <Link href="/org-settings" className={sty.profileDropdownItem} onClick={() => setProfileDropdownOpen(false)}>
+                    <SettingsIcon sx={{ fontSize: 18, color: '#666' }} />
+                    <span>Organization Settings</span>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
