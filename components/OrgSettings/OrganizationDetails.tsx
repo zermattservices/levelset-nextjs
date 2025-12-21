@@ -121,8 +121,7 @@ export function OrganizationDetails({ orgId }: OrganizationDetailsProps) {
       <div className={sty.section}>
         <label className={sty.fieldLabel}>Team Member Website</label>
         <p className={sty.fieldDescription}>
-          The website URL where team members can access resources, schedules, 
-          or other organization-specific information.
+          The website URL where team members can access resources or other organization-specific information.
         </p>
 
         <StyledTextField
