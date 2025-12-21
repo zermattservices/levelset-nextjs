@@ -15,8 +15,9 @@ export function MobileAppAccess() {
       <div className={sty.intro}>
         <h3 className={sty.introTitle}>Mobile App Access</h3>
         <p className={sty.introDescription}>
-          Use this QR code to give team members access to the Levelset mobile app. 
-          When scanned, it will open the app directly for this location.
+          Use this QR code to give leaders access to the Levelset mobile app. 
+          The mobile app allows leaders to complete forms like positional ratings and discipline 
+          documentation on the go. When scanned, it will open the app directly for this location.
         </p>
       </div>
 
@@ -48,10 +49,10 @@ export function MobileAppAccess() {
             <div className={sty.instructions}>
               <h4 className={sty.instructionsTitle}>How to use:</h4>
               <ol className={sty.instructionsList}>
-                <li>Print this page or display it on a screen</li>
-                <li>Have team members scan the QR code with their phone camera</li>
+                <li>Print this page or display it on a screen in the back office</li>
+                <li>Have leaders scan the QR code with their phone camera</li>
                 <li>They will be taken directly to the Levelset mobile app</li>
-                <li>Team members can add the app to their home screen for quick access</li>
+                <li>Leaders can add the app to their home screen for quick access</li>
               </ol>
             </div>
           </>
