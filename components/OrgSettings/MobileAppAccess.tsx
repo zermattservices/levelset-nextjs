@@ -33,6 +33,23 @@ const StyledTextField = styled(TextField)(() => ({
   },
 }));
 
+const PasswordTextField = styled(TextField)(() => ({
+  '& .MuiOutlinedInput-root': {
+    fontFamily,
+    fontSize: 14,
+    '&:hover fieldset': {
+      borderColor: '#31664a',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#31664a',
+    },
+  },
+  '& input[type="password"]': {
+    fontSize: 24,
+    letterSpacing: 4,
+  },
+}));
+
 export function MobileAppAccess() {
   const { selectedLocationMobileToken, selectedLocationNumber, selectedLocationId } = useLocationContext();
   const [copied, setCopied] = React.useState(false);
@@ -231,7 +248,7 @@ export function MobileAppAccess() {
         {error && <div className={sty.errorMessage}>{error}</div>}
 
         <div className={sty.passwordRow}>
-          <StyledTextField
+          <PasswordTextField
             type={showPassword ? 'text' : 'password'}
             value={passwordLoading ? '' : password}
             onChange={handlePasswordChange}
@@ -271,7 +288,15 @@ export function MobileAppAccess() {
       </div>
 
       {/* Confirmation Modal */}
-      <Dialog open={showConfirmModal} onClose={cancelPasswordChange}>
+      <Dialog 
+        open={showConfirmModal} 
+        onClose={cancelPasswordChange}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+          }
+        }}
+      >
         <DialogTitle sx={{ fontFamily }}>Confirm Password Change</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ fontFamily }}>
@@ -280,7 +305,18 @@ export function MobileAppAccess() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={cancelPasswordChange} sx={{ fontFamily, textTransform: 'none' }}>
+          <Button 
+            onClick={cancelPasswordChange} 
+            sx={{ 
+              fontFamily, 
+              textTransform: 'none',
+              color: '#dc2626',
+              backgroundColor: '#fef2f2',
+              '&:hover': {
+                backgroundColor: '#fee2e2',
+              },
+            }}
+          >
             Cancel
           </Button>
           <Button 

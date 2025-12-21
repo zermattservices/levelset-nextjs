@@ -42,6 +42,23 @@ const StyledTextField = styled(TextField)(() => ({
   },
 }));
 
+const PasswordTextField = styled(TextField)(() => ({
+  '& .MuiOutlinedInput-root': {
+    fontFamily,
+    fontSize: 14,
+    '&:hover fieldset': {
+      borderColor: '#31664a',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#31664a',
+    },
+  },
+  '& input[type="password"]': {
+    fontSize: 24,
+    letterSpacing: 4,
+  },
+}));
+
 interface Role {
   role_name: string;
   hierarchy_level: number;
@@ -102,11 +119,24 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
         (accessData || []).forEach(a => accessMap.set(a.role_name, a.can_submit));
 
         // Combine roles with their access settings
-        const combinedRoles: Role[] = (rolesData || []).map(r => ({
-          role_name: r.role_name,
-          hierarchy_level: r.hierarchy_level,
-          can_submit: accessMap.get(r.role_name) ?? false,
-        }));
+        // Filter out the highest level role (e.g., Team Member)
+        const maxLevel = Math.max(...(rolesData || []).map(r => r.hierarchy_level));
+        const filteredRoles = (rolesData || []).filter(r => r.hierarchy_level < maxLevel);
+        
+        const combinedRoles: Role[] = filteredRoles.map(r => {
+          // Default values based on hierarchy level:
+          // Level 0 and 1: always checked (default true)
+          // Level 2: checked by default
+          // Others: unchecked by default
+          const defaultChecked = r.hierarchy_level <= 2;
+          const savedValue = accessMap.get(r.role_name);
+          
+          return {
+            role_name: r.role_name,
+            hierarchy_level: r.hierarchy_level,
+            can_submit: savedValue !== undefined ? savedValue : defaultChecked,
+          };
+        });
 
         setRoles(combinedRoles);
       } catch (err) {
@@ -257,16 +287,20 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
               No roles found. Please set up a role hierarchy for this location first.
             </div>
           ) : (
-            roles.map((role) => (
-              <div key={role.role_name} className={sty.roleRow}>
-                <BrandCheckbox
-                  checked={role.can_submit}
-                  onChange={(e) => handleRoleToggle(role.role_name, e.target.checked)}
-                />
-                <span className={sty.roleName}>{role.role_name}</span>
-                <span className={sty.roleLevel}>Level {role.hierarchy_level}</span>
-              </div>
-            ))
+            roles.map((role) => {
+              // Levels 0, 1, and 2 are disabled (not editable)
+              const isDisabled = role.hierarchy_level <= 2;
+              return (
+                <div key={role.role_name} className={sty.roleRow}>
+                  <BrandCheckbox
+                    checked={role.can_submit}
+                    onChange={(e) => handleRoleToggle(role.role_name, e.target.checked)}
+                    disabled={isDisabled}
+                  />
+                  <span className={sty.roleName}>{role.role_name}</span>
+                </div>
+              );
+            })
           )}
         </div>
       </div>
@@ -280,7 +314,7 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
         </p>
 
         <div className={sty.passwordRow}>
-          <StyledTextField
+          <PasswordTextField
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={handlePasswordChange}
@@ -319,7 +353,15 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
       </div>
 
       {/* Confirmation Modal */}
-      <Dialog open={showConfirmModal} onClose={cancelPasswordChange}>
+      <Dialog 
+        open={showConfirmModal} 
+        onClose={cancelPasswordChange}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+          }
+        }}
+      >
         <DialogTitle sx={{ fontFamily }}>Confirm Password Change</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ fontFamily }}>
@@ -328,7 +370,18 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={cancelPasswordChange} sx={{ fontFamily, textTransform: 'none' }}>
+          <Button 
+            onClick={cancelPasswordChange} 
+            sx={{ 
+              fontFamily, 
+              textTransform: 'none',
+              color: '#dc2626',
+              backgroundColor: '#fef2f2',
+              '&:hover': {
+                backgroundColor: '#fee2e2',
+              },
+            }}
+          >
             Cancel
           </Button>
           <Button 

@@ -67,12 +67,12 @@
 }
 
 .rolesList {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   gap: 4px;
   background: #fafafa;
   border-radius: 8px;
-  padding: 8px;
+  padding: 8px 12px 8px 8px;
 }
 
 .roleRow {
@@ -93,13 +93,6 @@
   font-size: 14px;
   font-weight: 500;
   color: #0d1b14;
-  flex: 1;
-}
-
-.roleLevel {
-  font-family: "Satoshi";
-  font-size: 12px;
-  color: #9ca3af;
 }
 
 .emptyState {
