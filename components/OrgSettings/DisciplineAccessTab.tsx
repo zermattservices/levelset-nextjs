@@ -125,16 +125,18 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
         
         const combinedRoles: Role[] = filteredRoles.map(r => {
           // Default values based on hierarchy level:
-          // Level 0 and 1: always checked (default true)
-          // Level 2: checked by default
-          // Others: unchecked by default
+          // Level 0 and 1: ALWAYS checked (forced true, cannot change)
+          // Level 2: checked by default but editable
+          // Others: unchecked by default, editable
+          const isForced = r.hierarchy_level <= 1;
           const defaultChecked = r.hierarchy_level <= 2;
           const savedValue = accessMap.get(r.role_name);
           
           return {
             role_name: r.role_name,
             hierarchy_level: r.hierarchy_level,
-            can_submit: savedValue !== undefined ? savedValue : defaultChecked,
+            // Level 0 and 1 are always true regardless of saved value
+            can_submit: isForced ? true : (savedValue !== undefined ? savedValue : defaultChecked),
           };
         });
 
@@ -288,8 +290,8 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
             </div>
           ) : (
             roles.map((role) => {
-              // Levels 0, 1, and 2 are disabled (not editable)
-              const isDisabled = role.hierarchy_level <= 2;
+              // Only levels 0 and 1 are disabled (forced true)
+              const isDisabled = role.hierarchy_level <= 1;
               return (
                 <div key={role.role_name} className={sty.roleRow}>
                   <BrandCheckbox

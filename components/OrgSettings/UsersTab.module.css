@@ -1,0 +1,176 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+}
+
+.intro {
+  margin-bottom: 8px;
+}
+
+.introTitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.introDescription {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.errorMessage {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: #dc2626;
+}
+
+.tableContainer {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.headerCell {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 16px;
+  text-align: left;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.headerCellActions {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 12px 16px;
+  text-align: right;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  width: 60px;
+}
+
+.row {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row:hover {
+  background-color: #f9fafb;
+}
+
+.cell {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: #111827;
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+
+.cellActions {
+  padding: 8px 16px;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.userName {
+  font-weight: 500;
+}
+
+.operatorBadge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #31664a;
+  background-color: #d1fae5;
+  border-radius: 12px;
+}
+
+.emailRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.email {
+  color: #4b5563;
+}
+
+.editEmailRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.editButton {
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: #6b7280;
+}
+
+.row:hover .editButton {
+  opacity: 1;
+}
+
+.editButton:hover {
+  color: #31664a;
+}
+
+.deleteButton {
+  color: #6b7280;
+}
+
+.deleteButton:hover {
+  color: #dc2626;
+}
+
+.roleBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+}
+
+.emptyState {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+  padding: 32px 16px;
+}

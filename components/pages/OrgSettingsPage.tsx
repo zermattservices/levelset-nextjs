@@ -14,6 +14,7 @@ import { PlaceholderContent } from '@/components/OrgSettings/PlaceholderContent'
 import { MobileAppAccess } from '@/components/OrgSettings/MobileAppAccess';
 import { LocationDetails } from '@/components/OrgSettings/LocationDetails';
 import { OrganizationDetails } from '@/components/OrgSettings/OrganizationDetails';
+import { UsersTab } from '@/components/OrgSettings/UsersTab';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -52,7 +53,7 @@ export function OrgSettingsPage() {
     {
       group: 'Users and Security',
       items: [
-        { id: 'users', label: 'Users', status: 'coming-soon' },
+        { id: 'users', label: 'Users', status: 'active' },
         { id: 'permissions', label: 'Permissions', status: 'coming-soon' },
       ],
     },
@@ -83,7 +84,7 @@ export function OrgSettingsPage() {
       case 'evaluations':
         return <ComingSoonPlaceholder title="Evaluations" description="Performance evaluation scheduling and tracking coming soon." />;
       case 'users':
-        return <ComingSoonPlaceholder title="User Management" description="Manage users who have access to the Levelset platform coming soon." />;
+        return <UsersTab orgId={selectedLocationOrgId} />;
       case 'permissions':
         return <ComingSoonPlaceholder title="Permissions" description="Configure role-based permissions for your organization coming soon." />;
       case 'mobile-access':
