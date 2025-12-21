@@ -59,8 +59,19 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
   const [saving, setSaving] = React.useState(false);
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const textareaRefs = React.useRef<Map<string, HTMLTextAreaElement>>(new Map());
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+
+  // Auto-resize all textareas on initial load
+  React.useEffect(() => {
+    textareaRefs.current.forEach((textarea) => {
+      if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      }
+    });
+  }, [positions]);
 
   // Fetch positions
   React.useEffect(() => {
@@ -93,11 +104,11 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
     fetchPositions();
   }, [orgId, supabase, onComplete]);
 
-  const handleAddPosition = () => {
+  const handleAddPosition = (zone: 'FOH' | 'BOH') => {
     const newPosition: Position = {
       id: `new-${Date.now()}`,
       name: '',
-      zone: 'FOH',
+      zone,
       description: '',
       display_order: positions.length,
       is_active: true,
@@ -194,6 +205,13 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
     onNext();
   };
 
+  const handleTextareaChange = (id: string, value: string, textarea: HTMLTextAreaElement) => {
+    handlePositionChange(id, 'description', value);
+    // Auto-grow
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  };
+
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
@@ -202,30 +220,43 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
     );
   }
 
+  const fohPositions = positions.filter(p => p.zone === 'FOH');
+  const bohPositions = positions.filter(p => p.zone === 'BOH');
   const canProceed = positions.length > 0 && positions.every(p => p.name.trim() !== '');
 
-  return (
-    <div className={sty.container}>
-      <div className={sty.intro}>
-        <h3 className={sty.introTitle}>Manage Positions</h3>
-        <p className={sty.introDescription}>
-          Define the positions available for positional ratings in your organization. 
-          Each position needs a name, FOH/BOH designation, and an optional description.
-        </p>
+  const renderPositionSection = (sectionPositions: Position[], zone: 'FOH' | 'BOH', title: string) => (
+    <div className={sty.section}>
+      <div className={sty.sectionHeader}>
+        <h4 className={sty.sectionTitle}>{title}</h4>
+        <Button
+          variant="text"
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={() => handleAddPosition(zone)}
+          sx={{
+            fontFamily,
+            fontSize: 12,
+            textTransform: 'none',
+            color: '#31664a',
+            '&:hover': {
+              backgroundColor: 'rgba(49, 102, 74, 0.08)',
+            },
+          }}
+        >
+          Add {zone} Position
+        </Button>
       </div>
 
-      {error && <div className={sty.errorMessage}>{error}</div>}
+      <div className={sty.positionsHeader}>
+        <span className={sty.headerName}>Position Name</span>
+        <span className={sty.headerDescription}>Description</span>
+        <span className={sty.headerActions}></span>
+      </div>
 
-      <div className={sty.positionsList}>
-        <div className={sty.positionsHeader}>
-          <span className={sty.headerName}>Position Name</span>
-          <span className={sty.headerZone}>FOH</span>
-          <span className={sty.headerZone}>BOH</span>
-          <span className={sty.headerDescription}>Description</span>
-          <span className={sty.headerActions}></span>
-        </div>
-
-        {positions.map((position) => (
+      {sectionPositions.length === 0 ? (
+        <div className={sty.emptySection}>No {zone} positions yet</div>
+      ) : (
+        sectionPositions.map((position) => (
           <div key={position.id} className={sty.positionRow}>
             <StyledTextField
               value={position.name}
@@ -234,28 +265,12 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
               size="small"
               className={sty.nameField}
             />
-            <div className={sty.zoneCheckbox}>
-              <BrandCheckbox
-                checked={position.zone === 'FOH'}
-                onChange={(e) => handleZoneChange(position.id, 'FOH', e.target.checked)}
-                size="small"
-              />
-            </div>
-            <div className={sty.zoneCheckbox}>
-              <BrandCheckbox
-                checked={position.zone === 'BOH'}
-                onChange={(e) => handleZoneChange(position.id, 'BOH', e.target.checked)}
-                size="small"
-              />
-            </div>
             <textarea
-              value={position.description}
-              onChange={(e) => {
-                handlePositionChange(position.id, 'description', e.target.value);
-                // Auto-grow
-                e.target.style.height = 'auto';
-                e.target.style.height = e.target.scrollHeight + 'px';
+              ref={(el) => {
+                if (el) textareaRefs.current.set(position.id, el);
               }}
+              value={position.description}
+              onChange={(e) => handleTextareaChange(position.id, e.target.value, e.target)}
               placeholder="Position description..."
               className={sty.descriptionField}
               rows={1}
@@ -268,28 +283,30 @@ export function PositionsTab({ orgId, onComplete, onNext }: PositionsTabProps) {
               <DeleteIcon fontSize="small" />
             </IconButton>
           </div>
-        ))}
+        ))
+      )}
+    </div>
+  );
+
+  return (
+    <div className={sty.container}>
+      <div className={sty.intro}>
+        <h3 className={sty.introTitle}>Manage Positions</h3>
+        <p className={sty.introDescription}>
+          Define the positions available for positional ratings in your organization. 
+          Each position needs a name and an optional description.
+        </p>
+      </div>
+
+      {error && <div className={sty.errorMessage}>{error}</div>}
+
+      <div className={sty.scrollContainer}>
+        {renderPositionSection(fohPositions, 'FOH', 'FOH Positions')}
+        {renderPositionSection(bohPositions, 'BOH', 'BOH Positions')}
       </div>
 
       <div className={sty.actions}>
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={handleAddPosition}
-          sx={{
-            fontFamily,
-            textTransform: 'none',
-            borderColor: '#31664a',
-            color: '#31664a',
-            '&:hover': {
-              borderColor: '#31664a',
-              backgroundColor: 'rgba(49, 102, 74, 0.08)',
-            },
-          }}
-        >
-          Add Position
-        </Button>
-
+        <div></div>
         <div className={sty.rightActions}>
           {hasChanges && (
             <Button

@@ -6,6 +6,8 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import FormControl from '@mui/material/FormControl';
+import Checkbox from '@mui/material/Checkbox';
+import ListItemText from '@mui/material/ListItemText';
 import CircularProgress from '@mui/material/CircularProgress';
 import sty from './RoleMappingTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
@@ -16,14 +18,27 @@ const fontFamily = '"Satoshi", sans-serif';
 const StyledSelect = styled(Select)(() => ({
   fontFamily,
   fontSize: 14,
+  borderRadius: 12,
   '& .MuiOutlinedInput-notchedOutline': {
     borderColor: '#e0e0e0',
+    borderRadius: 12,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
     borderColor: '#31664a',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
     borderColor: '#31664a',
+  },
+}));
+
+const BrandCheckbox = styled(Checkbox)(() => ({
+  color: "#9ca3af",
+  padding: 4,
+  "&.Mui-checked": {
+    color: "#31664a",
+  },
+  "&:hover": {
+    backgroundColor: "rgba(49, 102, 74, 0.08)",
   },
 }));
 
@@ -38,13 +53,6 @@ interface Role {
   hierarchy_level: number;
 }
 
-interface RoleMapping {
-  position_id: string;
-  role_name: string;
-  is_default: boolean;
-  is_locked: boolean;
-}
-
 interface RoleMappingTabProps {
   orgId: string | null;
 }
@@ -57,6 +65,7 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [initialized, setInitialized] = React.useState(false);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
@@ -138,6 +147,7 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
           });
 
           setMappings(newMappings);
+          setInitialized(true);
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -152,7 +162,7 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
 
   // Initialize mappings with defaults for positions that have no mappings
   React.useEffect(() => {
-    if (positions.length > 0 && roles.length > 0 && mappings.size > 0) {
+    if (initialized && positions.length > 0 && roles.length > 0 && mappings.size > 0) {
       let needsUpdate = false;
       const newMappings = new Map(mappings);
 
@@ -173,7 +183,7 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
         saveAllMappings(newMappings);
       }
     }
-  }, [positions, roles, defaultRoles]);
+  }, [initialized, positions, roles, defaultRoles]);
 
   const saveAllMappings = async (mappingsToSave: Map<string, Set<string>>) => {
     if (!orgId) return;
@@ -261,7 +271,7 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
             return (
               <div key={pos.id} className={sty.positionRow}>
                 <span className={sty.positionName}>{pos.name}</span>
-                <FormControl size="small" sx={{ flex: 1, minWidth: 200 }}>
+                <FormControl size="small" sx={{ width: 220 }}>
                   <StyledSelect
                     multiple
                     value={selectedArray}
@@ -269,31 +279,49 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
                     input={<OutlinedInput />}
                     renderValue={(selected) => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {(selected as string[]).map((value) => (
-                          <Chip
-                            key={value}
-                            label={value}
-                            size="small"
-                            sx={{
-                              fontFamily,
-                              fontSize: 12,
-                              backgroundColor: lockedRoles.has(value) ? '#f0f0f0' : '#f6fffa',
-                              color: lockedRoles.has(value) ? '#666' : '#31664a',
-                            }}
-                          />
-                        ))}
+                        {(selected as string[]).length === 0 ? (
+                          <span className={sty.placeholder}>Select roles</span>
+                        ) : (
+                          (selected as string[]).map((value) => (
+                            <Chip
+                              key={value}
+                              label={value}
+                              size="small"
+                              sx={{
+                                fontFamily,
+                                fontSize: 11,
+                                height: 22,
+                                backgroundColor: lockedRoles.has(value) ? '#f0f0f0' : '#f6fffa',
+                                color: lockedRoles.has(value) ? '#666' : '#31664a',
+                              }}
+                            />
+                          ))
+                        )}
                       </Box>
                     )}
                     disabled={saving}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: { maxHeight: 300 }
+                      }
+                    }}
                   >
                     {roles.map((role) => (
                       <MenuItem
                         key={role.role_name}
                         value={role.role_name}
                         disabled={lockedRoles.has(role.role_name)}
-                        sx={{ fontFamily }}
+                        sx={{ fontFamily, padding: '4px 8px' }}
                       >
-                        {role.role_name}
+                        <BrandCheckbox
+                          checked={selectedArray.includes(role.role_name)}
+                          disabled={lockedRoles.has(role.role_name)}
+                          size="small"
+                        />
+                        <ListItemText 
+                          primary={role.role_name}
+                          primaryTypographyProps={{ fontFamily, fontSize: 14 }}
+                        />
                         {lockedRoles.has(role.role_name) && (
                           <span className={sty.lockedBadge}>Required</span>
                         )}
@@ -321,8 +349,10 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
 
       {error && <div className={sty.errorMessage}>{error}</div>}
 
-      {renderPositionSection(fohPositions, 'FOH Positions')}
-      {renderPositionSection(bohPositions, 'BOH Positions')}
+      <div className={sty.scrollContainer}>
+        {renderPositionSection(fohPositions, 'FOH Positions')}
+        {renderPositionSection(bohPositions, 'BOH Positions')}
+      </div>
 
       {saving && (
         <div className={sty.savingIndicator}>

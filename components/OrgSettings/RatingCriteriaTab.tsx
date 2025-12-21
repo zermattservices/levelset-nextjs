@@ -29,8 +29,10 @@ const StyledTextField = styled(TextField)(() => ({
 const StyledSelect = styled(Select)(() => ({
   fontFamily,
   fontSize: 14,
+  borderRadius: 12,
   '& .MuiOutlinedInput-notchedOutline': {
     borderColor: '#e0e0e0',
+    borderRadius: 12,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
     borderColor: '#31664a',
@@ -272,7 +274,7 @@ export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaT
 
       {error && <div className={sty.errorMessage}>{error}</div>}
 
-      <FormControl fullWidth>
+      <FormControl sx={{ width: 280 }}>
         <StyledSelect
           value={selectedPositionId}
           onChange={(e) => handlePositionChange(e.target.value as string)}
@@ -307,31 +309,34 @@ export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaT
       </FormControl>
 
       {selectedPositionId && (
-        <div className={sty.criteriaList}>
-          {criteria.map((c, index) => (
-            <div key={c.criteria_order} className={sty.criteriaRow}>
-              <span className={sty.criteriaNumber}>{index + 1}</span>
-              <div className={sty.criteriaFields}>
+        <div className={sty.scrollContainer}>
+          <div className={sty.criteriaHeader}>
+            <span className={sty.headerNumber}>#</span>
+            <span className={sty.headerCriteriaName}>Criteria Name</span>
+            <span className={sty.headerDescription}>Description</span>
+          </div>
+
+          <div className={sty.criteriaList}>
+            {criteria.map((c, index) => (
+              <div key={c.criteria_order} className={sty.criteriaRow}>
+                <span className={sty.criteriaNumber}>{index + 1}</span>
                 <StyledTextField
                   value={c.name}
                   onChange={(e) => handleCriteriaChange(c.criteria_order, 'name', e.target.value)}
                   placeholder="Criteria name"
                   size="small"
-                  fullWidth
+                  className={sty.criteriaNameField}
                 />
                 <StyledTextField
                   value={c.description}
                   onChange={(e) => handleCriteriaChange(c.criteria_order, 'description', e.target.value)}
                   placeholder="Description (optional)"
                   size="small"
-                  fullWidth
-                  multiline
-                  minRows={1}
-                  maxRows={3}
+                  className={sty.criteriaDescriptionField}
                 />
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
