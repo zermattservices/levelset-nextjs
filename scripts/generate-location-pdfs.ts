@@ -15,6 +15,7 @@
 import { createClient } from '@supabase/supabase-js';
 import QRCode from 'qrcode';
 import PDFDocument from 'pdfkit';
+import sharp from 'sharp';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -50,9 +51,9 @@ interface Location {
 }
 
 async function generateQRCodeWithLogo(url: string): Promise<Buffer> {
-  // Generate QR code as data URL first
-  const qrDataUrl = await QRCode.toDataURL(url, {
-    type: 'image/png',
+  // Generate QR code buffer
+  const qrBuffer = await QRCode.toBuffer(url, {
+    type: 'png',
     width: 400,
     margin: 2,
     color: {
@@ -62,20 +63,45 @@ async function generateQRCodeWithLogo(url: string): Promise<Buffer> {
     errorCorrectionLevel: 'H',
   });
 
-  // For the PNG storage, we'll use the simple QR with logo overlay
-  // The PDF will use the same image
-  const options: QRCode.QRCodeToBufferOptions = {
-    type: 'png',
-    width: 400,
-    margin: 2,
-    color: {
-      dark: LEVELSET_GREEN,
-      light: '#ffffff',
-    },
-    errorCorrectionLevel: 'H',
-  };
+  // Get the favicon or logo to overlay
+  const faviconPath = path.join(__dirname, '../public/favicon.ico');
+  const levelsetIconPath = path.join(__dirname, '../public/levelset-icon.png');
+  
+  // Check which logo file exists
+  let logoPath: string | null = null;
+  if (fs.existsSync(levelsetIconPath)) {
+    logoPath = levelsetIconPath;
+  } else if (fs.existsSync(faviconPath)) {
+    logoPath = faviconPath;
+  }
 
-  return QRCode.toBuffer(url, options);
+  if (!logoPath) {
+    console.log('  No logo found, using plain QR code');
+    return qrBuffer;
+  }
+
+  try {
+    // Resize logo to appropriate size for QR code center
+    const logoSize = 80; // Size of logo in center
+    const logoBuffer = await sharp(logoPath)
+      .resize(logoSize, logoSize, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
+      .png()
+      .toBuffer();
+
+    // Composite logo onto QR code center
+    const qrWithLogo = await sharp(qrBuffer)
+      .composite([{
+        input: logoBuffer,
+        gravity: 'center',
+      }])
+      .png()
+      .toBuffer();
+
+    return qrWithLogo;
+  } catch (err) {
+    console.log('  Error compositing logo, using plain QR code:', err);
+    return qrBuffer;
+  }
 }
 
 async function generatePDF(
@@ -144,19 +170,10 @@ async function generatePDF(
       .text(locationName, 0, 165, { align: 'center' });
 
     // Add QR code centered - make it larger to fill space
+    // The QR code already has the logo composited in the center
     const qrSize = 280;
     const qrY = 210;
     doc.image(qrCodeBuffer, centerX - qrSize / 2, qrY, { width: qrSize });
-
-    // Add favicon/logo overlay on QR code center
-    const faviconPath = path.join(__dirname, '../public/favicon.ico');
-    const logoPngPath = path.join(__dirname, '../public/levelset-icon.png');
-    const overlayPath = fs.existsSync(logoPngPath) ? logoPngPath : (fs.existsSync(faviconPath) ? faviconPath : null);
-    
-    if (overlayPath) {
-      const overlaySize = 50;
-      doc.image(overlayPath, centerX - overlaySize / 2, qrY + qrSize / 2 - overlaySize / 2, { width: overlaySize });
-    }
 
     // Instructions heading
     const instructionsY = qrY + qrSize + 30;
