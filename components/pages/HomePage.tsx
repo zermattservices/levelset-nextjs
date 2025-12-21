@@ -18,7 +18,7 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
 export function HomePage() {
   const router = useRouter();
   const auth = useAuth();
-  const { selectedLocationId } = useLocationContext();
+  const { selectedLocationId, selectedLocationImageUrl } = useLocationContext();
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -94,14 +94,14 @@ export function HomePage() {
                   </div>
                 </div>
               </div>
-              <Image
-                className={sty.img}
-                src="/plasmic/levelset_v_2/images/cfaBudaLogoPng.png"
-                alt=""
-                width={150}
-                height={97}
-                style={{ objectFit: 'contain', width: '150px', height: 'auto' }}
-              />
+              {selectedLocationImageUrl && (
+                <img
+                  className={sty.img}
+                  src={selectedLocationImageUrl}
+                  alt="Location Logo"
+                  style={{ objectFit: 'contain', width: '150px', height: 'auto', maxHeight: '100px' }}
+                />
+              )}
             </div>
           </div>
 

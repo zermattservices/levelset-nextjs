@@ -7,6 +7,7 @@ interface LocationRecord {
   name?: string | null;
   org_id?: string | null;
   location_mobile_token?: string | null;
+  image_url?: string | null;
 }
 
 interface LocationContextValue {
@@ -15,6 +16,7 @@ interface LocationContextValue {
   selectedLocationNumber: string | null;
   selectedLocationOrgId: string | null;
   selectedLocationMobileToken: string | null;
+  selectedLocationImageUrl: string | null;
   userHierarchyLevel: number | null;
   loading: boolean;
   error: string | null;
@@ -52,7 +54,7 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
   if (appUser?.location_id) {
     const { data: location, error: locationError } = await supabase
       .from('locations')
-      .select('id, location_number, name, org_id, location_mobile_token')
+      .select('id, location_number, name, org_id, location_mobile_token, image_url')
       .eq('id', appUser.location_id)
       .maybeSingle();
 
@@ -69,7 +71,7 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
 
   const query = supabase
     .from('locations')
-    .select('id, location_number, name, org_id, location_mobile_token')
+    .select('id, location_number, name, org_id, location_mobile_token, image_url')
     .order('location_number', { ascending: true });
 
   if (appUser?.org_id) {
@@ -95,6 +97,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
   const [selectedLocationNumber, setSelectedLocationNumber] = React.useState<string | null>(null);
   const [selectedLocationOrgId, setSelectedLocationOrgId] = React.useState<string | null>(null);
   const [selectedLocationMobileToken, setSelectedLocationMobileToken] = React.useState<string | null>(null);
+  const [selectedLocationImageUrl, setSelectedLocationImageUrl] = React.useState<string | null>(null);
   const [userHierarchyLevel, setUserHierarchyLevel] = React.useState<number | null>(null);
   const [userId, setUserId] = React.useState<string | null>(null);
   const [userRole, setUserRole] = React.useState<string | null>(null);
@@ -119,6 +122,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
         setSelectedLocationNumber(null);
         setSelectedLocationOrgId(null);
         setSelectedLocationMobileToken(null);
+        setSelectedLocationImageUrl(null);
         return;
       }
 
@@ -129,6 +133,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
           setSelectedLocationNumber(match.location_number ?? null);
           setSelectedLocationOrgId(match.org_id ?? null);
           setSelectedLocationMobileToken(match.location_mobile_token ?? null);
+          setSelectedLocationImageUrl(match.image_url ?? null);
           return;
         }
       }
@@ -138,6 +143,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       setSelectedLocationNumber(null);
       setSelectedLocationOrgId(null);
       setSelectedLocationMobileToken(null);
+      setSelectedLocationImageUrl(null);
     },
     []
   );
@@ -250,6 +256,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       setSelectedLocationNumber(match.location_number ?? null);
       setSelectedLocationOrgId(match.org_id ?? null);
       setSelectedLocationMobileToken(match.location_mobile_token ?? null);
+      setSelectedLocationImageUrl(match.image_url ?? null);
 
       if (typeof window !== 'undefined') {
         const key = buildStorageKey(userId);
@@ -264,6 +271,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     setSelectedLocationNumber(null);
     setSelectedLocationOrgId(null);
     setSelectedLocationMobileToken(null);
+    setSelectedLocationImageUrl(null);
     setUserHierarchyLevel(null);
 
     if (typeof window !== 'undefined') {
@@ -279,13 +287,14 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       selectedLocationNumber,
       selectedLocationOrgId,
       selectedLocationMobileToken,
+      selectedLocationImageUrl,
       userHierarchyLevel,
       loading,
       error,
       selectLocation,
       clearSelection,
     }),
-    [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken, userHierarchyLevel]
+    [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken, selectedLocationImageUrl, userHierarchyLevel]
   );
 
   return (

@@ -17,7 +17,7 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
 export function PositionalExcellencePage() {
   const router = useRouter();
   const auth = useAuth();
-  const { selectedLocationId } = useLocationContext();
+  const { selectedLocationId, selectedLocationImageUrl } = useLocationContext();
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -105,6 +105,7 @@ export function PositionalExcellencePage() {
                 <PositionalRatings
                   className={classNames("__wab_instance", sty.positionalRatings)}
                   locationId={selectedLocationId || ''}
+                  locationImageUrl={selectedLocationImageUrl}
                 />
               </div>
             </div>
