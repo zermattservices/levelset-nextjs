@@ -10,6 +10,9 @@ import { OrgSettingsSidebar, type MenuItem } from '@/components/OrgSettings/OrgS
 import { PositionalExcellenceSettings } from '@/components/OrgSettings/PositionalExcellenceSettings';
 import { ComingSoonPlaceholder } from '@/components/OrgSettings/ComingSoonPlaceholder';
 import { PlaceholderContent } from '@/components/OrgSettings/PlaceholderContent';
+import { MobileAppAccess } from '@/components/OrgSettings/MobileAppAccess';
+import { LocationDetails } from '@/components/OrgSettings/LocationDetails';
+import { OrganizationDetails } from '@/components/OrgSettings/OrganizationDetails';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -46,10 +49,24 @@ export function OrgSettingsPage() {
       ],
     },
     {
-      group: 'User Management',
+      group: 'Users and Security',
       items: [
         { id: 'users', label: 'Users', status: 'placeholder' },
         { id: 'permissions', label: 'Permissions', status: 'placeholder' },
+      ],
+    },
+    {
+      group: 'Mobile App',
+      items: [
+        { id: 'mobile-access', label: 'Access', status: 'active' },
+        { id: 'mobile-config', label: 'Configuration', status: 'coming-soon' },
+      ],
+    },
+    {
+      group: 'General',
+      items: [
+        { id: 'location-details', label: 'Location Details', status: 'active' },
+        { id: 'org-details', label: 'Organization Details', status: 'active' },
       ],
     },
   ];
@@ -68,6 +85,14 @@ export function OrgSettingsPage() {
         return <PlaceholderContent title="User Management" description="Manage users who have access to the Levelset platform." />;
       case 'permissions':
         return <PlaceholderContent title="Permissions" description="Configure role-based permissions for your organization." />;
+      case 'mobile-access':
+        return <MobileAppAccess />;
+      case 'mobile-config':
+        return <ComingSoonPlaceholder title="Mobile App Configuration" description="Configure mobile app settings and features coming soon." />;
+      case 'location-details':
+        return <LocationDetails locationId={selectedLocationId} />;
+      case 'org-details':
+        return <OrganizationDetails orgId={selectedLocationOrgId} />;
       default:
         return <PositionalExcellenceSettings orgId={selectedLocationOrgId} />;
     }

@@ -161,6 +161,7 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
   }, [orgId, selectedLocationId, supabase]);
 
   // Initialize mappings with defaults for positions that have no mappings
+  // Also ensure locked roles are always present
   React.useEffect(() => {
     if (initialized && positions.length > 0 && roles.length > 0 && mappings.size > 0) {
       let needsUpdate = false;
@@ -168,12 +169,22 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
 
       positions.forEach(pos => {
         const positionMappings = newMappings.get(pos.id);
-        if (positionMappings && positionMappings.size === 0) {
-          // Add default roles for positions with no mappings
-          defaultRoles.forEach(role => {
-            positionMappings.add(role);
-          });
-          needsUpdate = true;
+        if (positionMappings) {
+          if (positionMappings.size === 0) {
+            // Add default roles for positions with no mappings
+            defaultRoles.forEach(role => {
+              positionMappings.add(role);
+            });
+            needsUpdate = true;
+          } else {
+            // Ensure locked roles are always present even for existing mappings
+            lockedRoles.forEach(role => {
+              if (!positionMappings.has(role)) {
+                positionMappings.add(role);
+                needsUpdate = true;
+              }
+            });
+          }
         }
       });
 
@@ -183,7 +194,7 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
         saveAllMappings(newMappings);
       }
     }
-  }, [initialized, positions, roles, defaultRoles]);
+  }, [initialized, positions, roles, defaultRoles, lockedRoles]);
 
   const saveAllMappings = async (mappingsToSave: Map<string, Set<string>>) => {
     if (!orgId) return;
@@ -271,7 +282,7 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
             return (
               <div key={pos.id} className={sty.positionRow}>
                 <span className={sty.positionName}>{pos.name}</span>
-                <FormControl size="small" sx={{ width: 220 }}>
+                <FormControl size="small" sx={{ width: 660 }}>
                   <StyledSelect
                     multiple
                     value={selectedArray}

@@ -75,8 +75,19 @@ export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaT
   const [saving, setSaving] = React.useState(false);
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const textareaRefs = React.useRef<Map<number, HTMLTextAreaElement>>(new Map());
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+
+  // Auto-resize all textareas on criteria load
+  React.useEffect(() => {
+    textareaRefs.current.forEach((textarea) => {
+      if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      }
+    });
+  }, [criteria]);
 
   // Fetch positions
   React.useEffect(() => {
@@ -278,39 +289,42 @@ export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaT
 
       {error && <div className={sty.errorMessage}>{error}</div>}
 
-      <FormControl sx={{ width: 280 }}>
-        <StyledSelect
-          value={selectedPositionId}
-          onChange={(e) => handlePositionChange(e.target.value as string)}
-          displayEmpty
-          renderValue={(value) => {
-            if (!value) return <span className={sty.placeholder}>Select a position</span>;
-            const pos = positions.find(p => p.id === value);
-            return pos ? `${pos.name} (${pos.zone})` : '';
-          }}
-        >
-          {fohPositions.length > 0 && (
-            <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' }}>
-              FOH Positions
-            </ListSubheader>
-          )}
-          {fohPositions.map(pos => (
-            <MenuItem key={pos.id} value={pos.id} sx={{ fontFamily }}>
-              {pos.name}
-            </MenuItem>
-          ))}
-          {bohPositions.length > 0 && (
-            <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' }}>
-              BOH Positions
-            </ListSubheader>
-          )}
-          {bohPositions.map(pos => (
-            <MenuItem key={pos.id} value={pos.id} sx={{ fontFamily }}>
-              {pos.name}
-            </MenuItem>
-          ))}
-        </StyledSelect>
-      </FormControl>
+      <div className={sty.dropdownRow}>
+        <label className={sty.dropdownLabel}>Select a position:</label>
+        <FormControl sx={{ width: 280 }}>
+          <StyledSelect
+            value={selectedPositionId}
+            onChange={(e) => handlePositionChange(e.target.value as string)}
+            displayEmpty
+            renderValue={(value) => {
+              if (!value) return <span className={sty.placeholder}>Select a position</span>;
+              const pos = positions.find(p => p.id === value);
+              return pos ? `${pos.name} (${pos.zone})` : '';
+            }}
+          >
+            {fohPositions.length > 0 && (
+              <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' }}>
+                FOH Positions
+              </ListSubheader>
+            )}
+            {fohPositions.map(pos => (
+              <MenuItem key={pos.id} value={pos.id} sx={{ fontFamily }}>
+                {pos.name}
+              </MenuItem>
+            ))}
+            {bohPositions.length > 0 && (
+              <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' }}>
+                BOH Positions
+              </ListSubheader>
+            )}
+            {bohPositions.map(pos => (
+              <MenuItem key={pos.id} value={pos.id} sx={{ fontFamily }}>
+                {pos.name}
+              </MenuItem>
+            ))}
+          </StyledSelect>
+        </FormControl>
+      </div>
 
       {selectedPositionId && (
         <div className={sty.scrollContainer}>
@@ -332,6 +346,9 @@ export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaT
                   className={sty.criteriaNameField}
                 />
                 <textarea
+                  ref={(el) => {
+                    if (el) textareaRefs.current.set(c.criteria_order, el);
+                  }}
                   value={c.description}
                   onChange={(e) => {
                     handleCriteriaChange(c.criteria_order, 'description', e.target.value);

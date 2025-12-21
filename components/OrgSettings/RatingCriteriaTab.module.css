@@ -47,11 +47,25 @@
   color: #9ca3af;
 }
 
+.dropdownRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.dropdownLabel {
+  font-family: "Satoshi";
+  font-size: 14px;
+  font-weight: 500;
+  color: #0d1b14;
+}
+
 .scrollContainer {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 24px;
+  margin-top: 12px;
 }
 
 .criteriaHeader {
