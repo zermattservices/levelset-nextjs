@@ -8,6 +8,7 @@ import { useLocationContext } from '@/components/CodeComponents/LocationContext'
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { OrgSettingsSidebar, type MenuItem } from '@/components/OrgSettings/OrgSettingsSidebar';
 import { PositionalExcellenceSettings } from '@/components/OrgSettings/PositionalExcellenceSettings';
+import { DisciplineSettings } from '@/components/OrgSettings/DisciplineSettings';
 import { ComingSoonPlaceholder } from '@/components/OrgSettings/ComingSoonPlaceholder';
 import { PlaceholderContent } from '@/components/OrgSettings/PlaceholderContent';
 import { MobileAppAccess } from '@/components/OrgSettings/MobileAppAccess';
@@ -43,7 +44,7 @@ export function OrgSettingsPage() {
       group: 'Modules',
       items: [
         { id: 'positional-excellence', label: 'Positional Excellence', status: 'active' },
-        { id: 'discipline', label: 'Discipline', status: 'placeholder' },
+        { id: 'discipline', label: 'Discipline', status: 'active' },
         { id: 'pathway', label: 'Pathway', status: 'coming-soon' },
         { id: 'evaluations', label: 'Evaluations', status: 'coming-soon' },
       ],
@@ -76,7 +77,7 @@ export function OrgSettingsPage() {
       case 'positional-excellence':
         return <PositionalExcellenceSettings orgId={selectedLocationOrgId} />;
       case 'discipline':
-        return <PlaceholderContent title="Discipline Settings" description="Configure discipline rules and infractions for your organization." />;
+        return <DisciplineSettings orgId={selectedLocationOrgId} />;
       case 'pathway':
         return <ComingSoonPlaceholder title="Pathway" description="Career pathway and development tracking coming soon." />;
       case 'evaluations':

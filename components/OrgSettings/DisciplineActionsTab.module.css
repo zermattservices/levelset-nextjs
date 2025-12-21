@@ -1,0 +1,124 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.introTitle {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 600;
+  color: #0d1b14;
+  margin: 0;
+}
+
+.introDescription {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+}
+
+.errorMessage {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.scrollContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 1fr 140px 40px;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.headerName,
+.headerPoints,
+.headerActions {
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 140px 40px;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+}
+
+.nameField {
+  width: 100%;
+}
+
+.pointsField {
+  width: 100%;
+}
+
+.pointsField input {
+  text-align: center;
+}
+
+.deleteButton {
+  color: #9ca3af;
+}
+
+.deleteButton:hover {
+  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.08);
+}
+
+.emptyState {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #9ca3af;
+  text-align: center;
+  padding: 32px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.rightActions {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}

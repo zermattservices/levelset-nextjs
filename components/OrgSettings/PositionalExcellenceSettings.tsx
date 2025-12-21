@@ -8,6 +8,7 @@ import sty from './PositionalExcellenceSettings.module.css';
 import { PositionsTab } from './PositionsTab';
 import { RatingCriteriaTab } from './RatingCriteriaTab';
 import { RoleMappingTab } from './RoleMappingTab';
+import { RatingScaleTab } from './RatingScaleTab';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -35,7 +36,7 @@ interface PositionalExcellenceSettingsProps {
   orgId: string | null;
 }
 
-type TabValue = 'positions' | 'criteria' | 'role-mapping';
+type TabValue = 'positions' | 'criteria' | 'role-mapping' | 'rating-scale';
 
 export function PositionalExcellenceSettings({ orgId }: PositionalExcellenceSettingsProps) {
   const [activeTab, setActiveTab] = React.useState<TabValue>('positions');
@@ -74,6 +75,8 @@ export function PositionalExcellenceSettings({ orgId }: PositionalExcellenceSett
         );
       case 'role-mapping':
         return <RoleMappingTab orgId={orgId} />;
+      case 'rating-scale':
+        return <RatingScaleTab orgId={orgId} />;
       default:
         return null;
     }
@@ -100,6 +103,10 @@ export function PositionalExcellenceSettings({ orgId }: PositionalExcellenceSett
             label="Role Mapping" 
             value="role-mapping" 
             disabled={!criteriaComplete}
+          />
+          <StyledTab 
+            label="Rating Scale" 
+            value="rating-scale"
           />
         </StyledTabs>
 

@@ -31,13 +31,13 @@ export function LocationDetails({ locationId }: LocationDetailsProps) {
       try {
         const { data, error: fetchError } = await supabase
           .from('locations')
-          .select('location_logo_url')
+          .select('image_url')
           .eq('id', locationId)
           .single();
 
         if (fetchError) throw fetchError;
 
-        setLogoUrl(data?.location_logo_url || null);
+        setLogoUrl(data?.image_url || null);
       } catch (err) {
         console.error('Error fetching location:', err);
         setError('Failed to load location details');
@@ -100,7 +100,7 @@ export function LocationDetails({ locationId }: LocationDetailsProps) {
       // Update location record
       const { error: updateError } = await supabase
         .from('locations')
-        .update({ location_logo_url: newUrl })
+        .update({ image_url: newUrl })
         .eq('id', locationId);
 
       if (updateError) throw updateError;
@@ -134,7 +134,7 @@ export function LocationDetails({ locationId }: LocationDetailsProps) {
       // Update location record
       const { error: updateError } = await supabase
         .from('locations')
-        .update({ location_logo_url: null })
+        .update({ image_url: null })
         .eq('id', locationId);
 
       if (updateError) throw updateError;

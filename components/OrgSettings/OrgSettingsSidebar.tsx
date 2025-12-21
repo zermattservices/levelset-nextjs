@@ -33,7 +33,7 @@ export function OrgSettingsSidebar({ menuItems, activeSection, onSectionChange }
                 >
                   <span className={sty.menuItemLabel}>{item.label}</span>
                   {item.status === 'coming-soon' && (
-                    <span className={sty.comingSoonBadge}>Soon</span>
+                    <span className={sty.comingSoonBadge}>Coming Soon</span>
                   )}
                 </button>
               </li>

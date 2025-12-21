@@ -1,0 +1,33 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.title {
+  font-family: "Satoshi";
+  font-size: 18px;
+  font-weight: 600;
+  color: #0d1b14;
+  margin: 0;
+}
+
+.description {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+}
