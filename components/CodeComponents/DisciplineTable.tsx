@@ -152,14 +152,44 @@ export function DisciplineTable({
           
           let transformedData: DisciplineEntry[] = [];
           
-          // Fetch discipline actions for styling
-          const { data: actionsData, error: actionsError } = await supabase
-            .from('disc_actions_rubric')
-            .select('*')
-            .eq('location_id', locationId)
-            .order('points_threshold', { ascending: true });
+          // Fetch discipline actions for styling - org-level first, then location-level
+          // First get the org_id for this location
+          const { data: locData } = await supabase
+            .from('locations')
+            .select('org_id')
+            .eq('id', locationId)
+            .single();
+          
+          let actionsData: any[] | null = null;
+          
+          // Try org-level actions first (location_id IS NULL)
+          if (locData?.org_id) {
+            const { data: orgActionsData, error: orgActionsError } = await supabase
+              .from('disc_actions_rubric')
+              .select('*')
+              .eq('org_id', locData.org_id)
+              .is('location_id', null)
+              .order('points_threshold', { ascending: true });
             
-          if (!actionsError && actionsData) {
+            if (!orgActionsError && orgActionsData && orgActionsData.length > 0) {
+              actionsData = orgActionsData;
+            }
+          }
+          
+          // Fallback to location-specific actions
+          if (!actionsData || actionsData.length === 0) {
+            const { data: locActionsData, error: locActionsError } = await supabase
+              .from('disc_actions_rubric')
+              .select('*')
+              .eq('location_id', locationId)
+              .order('points_threshold', { ascending: true });
+            
+            if (!locActionsError && locActionsData) {
+              actionsData = locActionsData;
+            }
+          }
+            
+          if (actionsData) {
             setDisciplineActions(actionsData);
           }
           

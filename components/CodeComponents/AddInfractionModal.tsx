@@ -196,14 +196,37 @@ export function AddInfractionModal({
           setLeaders(leadersData as Employee[]);
         }
 
-        // Fetch infractions_rubric options
-        const { data: rubricData, error: rubricError } = await supabase
-          .from('infractions_rubric')
-          .select('*')
-          .eq('location_id', locationId)
-          .order('points', { ascending: true }); // Order by points, lowest to highest
+        // Fetch infractions_rubric options - first try org-level, then fallback to location-level
+        let rubricData: any[] | null = null;
         
-        if (!rubricError && rubricData) {
+        // First, try org-level infractions (location_id IS NULL)
+        if (locData?.org_id) {
+          const { data: orgRubricData, error: orgRubricError } = await supabase
+            .from('infractions_rubric')
+            .select('*')
+            .eq('org_id', locData.org_id)
+            .is('location_id', null)
+            .order('points', { ascending: true });
+          
+          if (!orgRubricError && orgRubricData && orgRubricData.length > 0) {
+            rubricData = orgRubricData;
+          }
+        }
+        
+        // Fallback to location-specific infractions
+        if (!rubricData || rubricData.length === 0) {
+          const { data: locRubricData, error: locRubricError } = await supabase
+            .from('infractions_rubric')
+            .select('*')
+            .eq('location_id', locationId)
+            .order('points', { ascending: true });
+          
+          if (!locRubricError && locRubricData) {
+            rubricData = locRubricData;
+          }
+        }
+        
+        if (rubricData) {
           setInfractionsRubricOptions(rubricData);
         }
 

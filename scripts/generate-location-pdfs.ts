@@ -4,12 +4,12 @@
  * This script:
  * 1. Fetches all locations from the database
  * 2. For each location:
- *    - Generates a QR code as PNG (Levelset green)
+ *    - Generates a QR code as PNG (Levelset green with logo)
  *    - Uploads the QR to location_assets/pwa/qr_img/{location_id}.png
- *    - Generates a PDF with Levelset branding
+ *    - Generates a PDF with Levelset branding using Satoshi font
  *    - Uploads the PDF to location_assets/pwa/info_pdf/{location_id}.pdf
  * 
- * Run with: npx ts-node scripts/generate-location-pdfs.ts
+ * Run with: npx ts-node --esm scripts/generate-location-pdfs.ts
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -49,14 +49,28 @@ interface Location {
   location_mobile_token: string | null;
 }
 
-async function generateQRCode(url: string): Promise<Buffer> {
+async function generateQRCodeWithLogo(url: string): Promise<Buffer> {
+  // Generate QR code as data URL first
+  const qrDataUrl = await QRCode.toDataURL(url, {
+    type: 'image/png',
+    width: 400,
+    margin: 2,
+    color: {
+      dark: LEVELSET_GREEN,
+      light: '#ffffff',
+    },
+    errorCorrectionLevel: 'H',
+  });
+
+  // For the PNG storage, we'll use the simple QR with logo overlay
+  // The PDF will use the same image
   const options: QRCode.QRCodeToBufferOptions = {
     type: 'png',
     width: 400,
     margin: 2,
     color: {
       dark: LEVELSET_GREEN,
-      light: '#ffffff00', // Transparent background
+      light: '#ffffff',
     },
     errorCorrectionLevel: 'H',
   };
@@ -70,10 +84,26 @@ async function generatePDF(
 ): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
+    
+    // Register Satoshi fonts if available (use Variable font which is TTF)
+    const satoshiVariablePath = path.join(__dirname, '../public/fonts/Satoshi-Variable.ttf');
+    
+    const hasSatoshi = fs.existsSync(satoshiVariablePath);
+    
     const doc = new PDFDocument({
       size: 'LETTER',
       margin: 50,
+      autoFirstPage: true,
+      bufferPages: true,
     });
+
+    // Register fonts if available (Satoshi-Variable.ttf is a variable font)
+    if (hasSatoshi) {
+      doc.registerFont('Satoshi', satoshiVariablePath);
+      doc.registerFont('Satoshi-Bold', satoshiVariablePath);
+      doc.registerFont('Satoshi-Medium', satoshiVariablePath);
+      doc.registerFont('Satoshi-Italic', satoshiVariablePath);
+    }
 
     doc.on('data', (chunk) => chunks.push(chunk));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
@@ -81,71 +111,87 @@ async function generatePDF(
 
     // Get page dimensions
     const pageWidth = doc.page.width;
-    const pageHeight = doc.page.height;
     const centerX = pageWidth / 2;
+
+    // Use Satoshi if available, otherwise Helvetica
+    const fontRegular = hasSatoshi ? 'Satoshi' : 'Helvetica';
+    const fontBold = hasSatoshi ? 'Satoshi-Bold' : 'Helvetica-Bold';
+    const fontMedium = hasSatoshi ? 'Satoshi-Medium' : 'Helvetica';
+    const fontItalic = hasSatoshi ? 'Satoshi-Italic' : 'Helvetica-Oblique';
 
     // Add Levelset logo at the top
     const logoPath = path.join(__dirname, '../public/logos/Levelset no margin.png');
     if (fs.existsSync(logoPath)) {
-      doc.image(logoPath, centerX - 75, 60, { width: 150 });
+      doc.image(logoPath, centerX - 75, 50, { width: 150 });
     } else {
       // Fallback to text if logo not found
       doc.fontSize(32)
         .fillColor(LEVELSET_GREEN)
-        .font('Helvetica-Bold')
-        .text('Levelset', 0, 80, { align: 'center' });
+        .font(fontBold)
+        .text('Levelset', 0, 60, { align: 'center' });
     }
 
     // Title
-    doc.moveDown(4);
     doc.fontSize(24)
       .fillColor('#0d1b14')
-      .font('Helvetica-Bold')
-      .text('Mobile App Access', { align: 'center' });
+      .font(fontBold)
+      .text('Mobile App Access', 0, 130, { align: 'center' });
 
     // Location name
-    doc.moveDown(0.5);
     doc.fontSize(18)
       .fillColor('#666666')
-      .font('Helvetica')
-      .text(locationName, { align: 'center' });
+      .font(fontRegular)
+      .text(locationName, 0, 165, { align: 'center' });
 
-    // Add QR code centered
-    const qrSize = 250;
-    const qrY = 260;
+    // Add QR code centered - make it larger to fill space
+    const qrSize = 280;
+    const qrY = 210;
     doc.image(qrCodeBuffer, centerX - qrSize / 2, qrY, { width: qrSize });
 
-    // Instructions
-    const instructionsY = qrY + qrSize + 40;
-    doc.fontSize(14)
-      .fillColor(LEVELSET_GREEN)
-      .font('Helvetica-Bold')
-      .text('Scan to access the Levelset mobile app', 0, instructionsY, { align: 'center' });
+    // Add favicon/logo overlay on QR code center
+    const faviconPath = path.join(__dirname, '../public/favicon.ico');
+    const logoPngPath = path.join(__dirname, '../public/levelset-icon.png');
+    const overlayPath = fs.existsSync(logoPngPath) ? logoPngPath : (fs.existsSync(faviconPath) ? faviconPath : null);
+    
+    if (overlayPath) {
+      const overlaySize = 50;
+      doc.image(overlayPath, centerX - overlaySize / 2, qrY + qrSize / 2 - overlaySize / 2, { width: overlaySize });
+    }
 
-    doc.moveDown(1.5);
+    // Instructions heading
+    const instructionsY = qrY + qrSize + 30;
+    doc.fontSize(16)
+      .fillColor(LEVELSET_GREEN)
+      .font(fontBold)
+      .text('Scan to access the Levelset mobile app', 0, instructionsY, { align: 'center', width: pageWidth });
+
+    // Description
     doc.fontSize(12)
       .fillColor('#666666')
-      .font('Helvetica')
-      .text('Use this QR code to give leaders quick access to:', { align: 'center' });
+      .font(fontRegular)
+      .text('Use this QR code to give leaders quick access to:', 0, instructionsY + 35, { align: 'center', width: pageWidth });
 
-    doc.moveDown(0.8);
-    doc.fontSize(11)
+    // Bullet points - centered
+    const bulletY = instructionsY + 65;
+    doc.fontSize(12)
       .fillColor('#0d1b14')
-      .text('• Submit positional ratings', { align: 'center' });
-    doc.text('• Document discipline infractions', { align: 'center' });
-    doc.text('• Complete other mobile forms', { align: 'center' });
+      .font(fontMedium);
+    
+    doc.text('• Submit positional ratings', 0, bulletY, { align: 'center', width: pageWidth });
+    doc.text('• Document discipline infractions', 0, bulletY + 20, { align: 'center', width: pageWidth });
+    doc.text('• View the PEA Classic page', 0, bulletY + 40, { align: 'center', width: pageWidth });
 
-    doc.moveDown(1.5);
+    // Tip
     doc.fontSize(11)
       .fillColor('#666666')
-      .font('Helvetica-Oblique')
-      .text('Tip: Add the app to your home screen for quick access!', { align: 'center' });
+      .font(fontItalic)
+      .text('Tip: Add the app to your home screen for quick access!', 0, bulletY + 75, { align: 'center', width: pageWidth });
 
-    // Footer
-    doc.fontSize(9)
+    // Footer - positioned at bottom of page
+    doc.fontSize(10)
       .fillColor('#999999')
-      .font('Helvetica')
-      .text('Powered by Levelset', 0, pageHeight - 60, { align: 'center' });
+      .font(fontRegular)
+      .text('Powered by Levelset', 0, 720, { align: 'center', width: pageWidth });
 
     doc.end();
   });
@@ -183,9 +229,9 @@ async function processLocation(location: Location): Promise<void> {
   console.log(`  PWA URL: ${pwaUrl}`);
 
   try {
-    // Generate QR code
+    // Generate QR code with logo
     console.log('  Generating QR code...');
-    const qrBuffer = await generateQRCode(pwaUrl);
+    const qrBuffer = await generateQRCodeWithLogo(pwaUrl);
 
     // Upload QR code
     const qrPath = `${QR_FOLDER}/${location.id}.png`;
@@ -195,13 +241,15 @@ async function processLocation(location: Location): Promise<void> {
       console.log(`  QR uploaded: ${qrUrl}`);
     }
 
-    // Generate PDF
+    // Generate PDF with proper naming
     console.log('  Generating PDF...');
     const pdfBuffer = await generatePDF(location.name, qrBuffer);
 
-    // Upload PDF
+    // Upload PDF - use friendly name format: "Levelset App Access - Location Name.pdf"
+    const sanitizedName = location.name.replace(/[^a-zA-Z0-9\s-]/g, '').trim();
+    const pdfFileName = `Levelset App Access - ${sanitizedName}.pdf`;
     const pdfPath = `${PDF_FOLDER}/${location.id}.pdf`;
-    console.log(`  Uploading PDF to ${pdfPath}...`);
+    console.log(`  Uploading PDF as "${pdfFileName}" to ${pdfPath}...`);
     const pdfUrl = await uploadToStorage(BUCKET_NAME, pdfPath, pdfBuffer, 'application/pdf');
     if (pdfUrl) {
       console.log(`  PDF uploaded: ${pdfUrl}`);

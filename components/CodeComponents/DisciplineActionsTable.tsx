@@ -73,21 +73,52 @@ export function DisciplineActionsTable({
   const [error, setError] = React.useState<string | null>(null);
   const supabase = createSupabaseClient();
 
-  // Fetch discipline actions from Supabase
+  // Fetch discipline actions from Supabase - org-level first, then location-level
   const fetchDisciplineActions = React.useCallback(async () => {
     try {
       setLoading(true);
       console.log('Fetching discipline actions for location:', locationId);
       
-      const { data: actionsData, error: actionsError } = await supabase
-        .from('disc_actions_rubric')
-        .select('*')
-        .eq('location_id', locationId)
-        .order('points_threshold', { ascending: true });
-        
-      if (actionsError) throw actionsError;
+      // First get the org_id for this location
+      const { data: locData, error: locError } = await supabase
+        .from('locations')
+        .select('org_id')
+        .eq('id', locationId)
+        .single();
       
-      console.log('Loaded discipline actions:', actionsData?.length || 0, 'entries');
+      if (locError) {
+        console.error('Error fetching location:', locError);
+      }
+      
+      let actionsData: any[] | null = null;
+      
+      // Try org-level actions first (location_id IS NULL)
+      if (locData?.org_id) {
+        const { data: orgActionsData, error: orgActionsError } = await supabase
+          .from('disc_actions_rubric')
+          .select('*')
+          .eq('org_id', locData.org_id)
+          .is('location_id', null)
+          .order('points_threshold', { ascending: true });
+        
+        if (!orgActionsError && orgActionsData && orgActionsData.length > 0) {
+          actionsData = orgActionsData;
+          console.log('Using org-level discipline actions:', actionsData.length, 'entries');
+        }
+      }
+      
+      // Fallback to location-specific actions
+      if (!actionsData || actionsData.length === 0) {
+        const { data: locActionsData, error: locActionsError } = await supabase
+          .from('disc_actions_rubric')
+          .select('*')
+          .eq('location_id', locationId)
+          .order('points_threshold', { ascending: true });
+        
+        if (locActionsError) throw locActionsError;
+        actionsData = locActionsData;
+        console.log('Using location-level discipline actions:', actionsData?.length || 0, 'entries');
+      }
       
       const transformedData: DisciplineAction[] = (actionsData || []).map((action: any) => ({
         id: action.id,
