@@ -331,12 +331,17 @@ export function RatingCriteriaTab({ orgId, onComplete, onNext }: RatingCriteriaT
                   size="small"
                   className={sty.criteriaNameField}
                 />
-                <StyledTextField
+                <textarea
                   value={c.description}
-                  onChange={(e) => handleCriteriaChange(c.criteria_order, 'description', e.target.value)}
+                  onChange={(e) => {
+                    handleCriteriaChange(c.criteria_order, 'description', e.target.value);
+                    // Auto-grow
+                    e.target.style.height = 'auto';
+                    e.target.style.height = e.target.scrollHeight + 'px';
+                  }}
                   placeholder="Description (optional)"
-                  size="small"
-                  className={sty.criteriaDescriptionField}
+                  className={sty.descriptionTextarea}
+                  rows={1}
                 />
               </div>
             ))}

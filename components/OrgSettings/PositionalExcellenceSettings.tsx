@@ -88,8 +88,8 @@ export function PositionalExcellenceSettings({ orgId }: PositionalExcellenceSett
         </p>
       </div>
 
-      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-        <StyledTabs value={activeTab} onChange={handleTabChange} sx={{ flexShrink: 0 }}>
+      <Box sx={{ width: '100%' }}>
+        <StyledTabs value={activeTab} onChange={handleTabChange}>
           <StyledTab label="Positions" value="positions" />
           <StyledTab 
             label="Rating Criteria" 
