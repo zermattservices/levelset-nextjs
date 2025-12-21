@@ -14,11 +14,13 @@ import PrintIcon from '@mui/icons-material/Print';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import CheckIcon from '@mui/icons-material/Check';
+import CircularProgress from '@mui/material/CircularProgress';
 import sty from './MobileAppAccess.module.css';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { createSupabaseClient } from '@/util/supabase/component';
 
 const fontFamily = '"Satoshi", sans-serif';
+const STORAGE_DOMAIN = 'https://files.levelset.io';
 
 const StyledTextField = styled(TextField)(() => ({
   '& .MuiOutlinedInput-root': {
@@ -54,6 +56,11 @@ export function MobileAppAccess() {
   const { selectedLocationMobileToken, selectedLocationNumber, selectedLocationId } = useLocationContext();
   const [copied, setCopied] = React.useState(false);
   
+  // QR image state - try to load from storage first
+  const [qrImageUrl, setQrImageUrl] = React.useState<string | null>(null);
+  const [qrLoading, setQrLoading] = React.useState(true);
+  const [useLocalQr, setUseLocalQr] = React.useState(false);
+  
   // Password state
   const [password, setPassword] = React.useState<string>('');
   const [originalPassword, setOriginalPassword] = React.useState<string>('');
@@ -68,6 +75,38 @@ export function MobileAppAccess() {
   const pwaUrl = selectedLocationMobileToken 
     ? `https://app.levelset.io/mobile/${selectedLocationMobileToken}`
     : null;
+
+  // Try to load QR image from storage
+  React.useEffect(() => {
+    async function loadQrImage() {
+      if (!selectedLocationId) {
+        setQrLoading(false);
+        return;
+      }
+
+      setQrLoading(true);
+      const qrUrl = `${STORAGE_DOMAIN}/storage/v1/object/public/location_assets/pwa/qr_img/${selectedLocationId}.png`;
+      
+      try {
+        // Check if the QR image exists in storage
+        const response = await fetch(qrUrl, { method: 'HEAD' });
+        if (response.ok) {
+          setQrImageUrl(qrUrl);
+          setUseLocalQr(false);
+        } else {
+          // Fall back to local generation
+          setUseLocalQr(true);
+        }
+      } catch (err) {
+        console.log('Could not load QR from storage, using local generation');
+        setUseLocalQr(true);
+      } finally {
+        setQrLoading(false);
+      }
+    }
+
+    loadQrImage();
+  }, [selectedLocationId]);
 
   // Fetch password
   React.useEffect(() => {
@@ -110,9 +149,9 @@ export function MobileAppAccess() {
   };
 
   const handlePrint = () => {
-    // Open the PDF from storage bucket if it exists
+    // Open the PDF from storage bucket using custom domain
     if (selectedLocationId) {
-      const pdfUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/location_assets/pwa/info_pdf/${selectedLocationId}.pdf`;
+      const pdfUrl = `${STORAGE_DOMAIN}/storage/v1/object/public/location_assets/pwa/info_pdf/${selectedLocationId}.pdf`;
       window.open(pdfUrl, '_blank');
     }
   };
@@ -169,21 +208,33 @@ export function MobileAppAccess() {
         {pwaUrl ? (
           <>
             <div className={sty.qrContainer}>
-              <QRCodeSVG
-                value={pwaUrl}
-                size={200}
-                level="H"
-                includeMargin={true}
-                fgColor="#31664a"
-                imageSettings={{
-                  src: '/favicon.ico',
-                  x: undefined,
-                  y: undefined,
-                  height: 40,
-                  width: 40,
-                  excavate: true,
-                }}
-              />
+              {qrLoading ? (
+                <CircularProgress size={32} sx={{ color: '#31664a' }} />
+              ) : qrImageUrl && !useLocalQr ? (
+                // Use QR from storage (same as PDF)
+                <img 
+                  src={qrImageUrl} 
+                  alt="QR Code" 
+                  style={{ width: 200, height: 200 }}
+                />
+              ) : (
+                // Fallback to local QR generation
+                <QRCodeSVG
+                  value={pwaUrl}
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                  fgColor="#31664a"
+                  imageSettings={{
+                    src: '/Levelset Icon Non Trans.png',
+                    x: undefined,
+                    y: undefined,
+                    height: 40,
+                    width: 40,
+                    excavate: true,
+                  }}
+                />
+              )}
             </div>
             <div className={sty.qrInfo}>
               <p className={sty.locationLabel}>

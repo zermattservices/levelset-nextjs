@@ -51,45 +51,67 @@ interface Location {
 }
 
 async function generateQRCodeWithLogo(url: string): Promise<Buffer> {
-  // Generate QR code buffer
+  // Generate QR code buffer with larger size and higher error correction for logo
+  const qrSize = 400;
   const qrBuffer = await QRCode.toBuffer(url, {
     type: 'png',
-    width: 400,
+    width: qrSize,
     margin: 2,
     color: {
       dark: LEVELSET_GREEN,
       light: '#ffffff',
     },
-    errorCorrectionLevel: 'H',
+    errorCorrectionLevel: 'H', // High error correction allows 30% coverage
   });
 
-  // Get the favicon or logo to overlay
-  const faviconPath = path.join(__dirname, '../public/favicon.ico');
-  const levelsetIconPath = path.join(__dirname, '../public/levelset-icon.png');
+  // Use the PNG logo (ICO doesn't work well with sharp)
+  const levelsetIconPath = path.join(__dirname, '../public/Levelset Icon Non Trans.png');
+  const logoPath = path.join(__dirname, '../public/logos/Levelset no margin.png');
   
   // Check which logo file exists
-  let logoPath: string | null = null;
+  let usableLogo: string | null = null;
   if (fs.existsSync(levelsetIconPath)) {
-    logoPath = levelsetIconPath;
-  } else if (fs.existsSync(faviconPath)) {
-    logoPath = faviconPath;
+    usableLogo = levelsetIconPath;
+    console.log('  Using Levelset Icon Non Trans.png for logo');
+  } else if (fs.existsSync(logoPath)) {
+    usableLogo = logoPath;
+    console.log('  Using Levelset no margin.png for logo');
   }
 
-  if (!logoPath) {
-    console.log('  No logo found, using plain QR code');
+  if (!usableLogo) {
+    console.log('  No suitable logo found, using plain QR code');
     return qrBuffer;
   }
 
   try {
-    // Resize logo to appropriate size for QR code center
-    const logoSize = 80; // Size of logo in center
-    const logoBuffer = await sharp(logoPath)
+    // Get the QR code dimensions
+    const qrMetadata = await sharp(qrBuffer).metadata();
+    const qrWidth = qrMetadata.width || qrSize;
+    const qrHeight = qrMetadata.height || qrSize;
+    
+    // Logo should be about 20% of QR code size
+    const logoSize = Math.floor(qrWidth * 0.22);
+    
+    // Create a white background circle/square for the logo
+    const padding = 8;
+    const bgSize = logoSize + padding * 2;
+    const bgBuffer = await sharp({
+      create: {
+        width: bgSize,
+        height: bgSize,
+        channels: 4,
+        background: { r: 255, g: 255, b: 255, alpha: 1 },
+      }
+    }).png().toBuffer();
+    
+    // Resize logo
+    const logoBuffer = await sharp(usableLogo)
       .resize(logoSize, logoSize, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
       .png()
       .toBuffer();
 
-    // Composite logo onto QR code center
-    const qrWithLogo = await sharp(qrBuffer)
+    // Composite: bg with logo
+    const logoWithBg = await sharp(bgBuffer)
       .composite([{
         input: logoBuffer,
         gravity: 'center',
@@ -97,6 +119,16 @@ async function generateQRCodeWithLogo(url: string): Promise<Buffer> {
       .png()
       .toBuffer();
 
+    // Composite logo onto QR code center
+    const qrWithLogo = await sharp(qrBuffer)
+      .composite([{
+        input: logoWithBg,
+        gravity: 'center',
+      }])
+      .png()
+      .toBuffer();
+
+    console.log('  Logo composited successfully');
     return qrWithLogo;
   } catch (err) {
     console.log('  Error compositing logo, using plain QR code:', err);
@@ -214,24 +246,37 @@ async function generatePDF(
   });
 }
 
-async function uploadToStorage(bucket: string, path: string, buffer: Buffer, contentType: string): Promise<string | null> {
+const STORAGE_DOMAIN = 'https://files.levelset.io';
+
+async function uploadToStorage(
+  bucket: string, 
+  storagePath: string, 
+  buffer: Buffer, 
+  contentType: string,
+  downloadFilename?: string
+): Promise<string | null> {
+  const options: any = {
+    contentType,
+    upsert: true,
+  };
+  
+  // Set Content-Disposition for PDFs to suggest filename
+  if (downloadFilename && contentType === 'application/pdf') {
+    options.contentType = 'application/pdf';
+    // Note: Supabase handles Content-Disposition based on filename in path
+  }
+  
   const { error: uploadError } = await supabase.storage
     .from(bucket)
-    .upload(path, buffer, {
-      contentType,
-      upsert: true,
-    });
+    .upload(storagePath, buffer, options);
 
   if (uploadError) {
-    console.error(`  Error uploading ${path}:`, uploadError.message);
+    console.error(`  Error uploading ${storagePath}:`, uploadError.message);
     return null;
   }
 
-  const { data: urlData } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(path);
-
-  return urlData.publicUrl;
+  // Return the custom domain URL
+  return `${STORAGE_DOMAIN}/storage/v1/object/public/${bucket}/${storagePath}`;
 }
 
 async function processLocation(location: Location): Promise<void> {
