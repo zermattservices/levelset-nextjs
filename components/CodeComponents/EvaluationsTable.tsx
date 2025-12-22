@@ -61,6 +61,7 @@ export interface EvaluationsTableProps {
   locationId: string;
   className?: string;
   onPlannedStatusChange?: (hasPlanned: boolean) => void;
+  readOnly?: boolean;
 }
 
 interface EvaluationRow {
@@ -184,7 +185,7 @@ const DropdownMenuItem = styled(MenuItem)(() => ({
   },
 }));
 
-export function EvaluationsTable({ locationId, className, onPlannedStatusChange }: EvaluationsTableProps) {
+export function EvaluationsTable({ locationId, className, onPlannedStatusChange, readOnly = false }: EvaluationsTableProps) {
   const [rows, setRows] = React.useState<EvaluationRow[]>([]);
   const [leaders, setLeaders] = React.useState<LeaderOption[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -415,12 +416,45 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
         sortable: false,
         renderCell: (params) => {
           const row = params.row;
-          const disabled = updatingIds.has(row.id);
+          const disabled = updatingIds.has(row.id) || readOnly;
           const leaderId = row.leader_id ?? '';
           const leaderName = leaderId
             ? leaders.find((leader) => leader.id === leaderId)?.name ?? 'Unassigned'
             : 'Unassigned';
           const anchor = leaderMenuAnchor[row.id] ?? null;
+          
+          // View-only mode for level 2+ users
+          if (readOnly) {
+            return (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                <Box sx={{ width: '100%', px: 0.5 }}>
+                  <InlineSelectChip
+                    sx={{
+                      backgroundColor: '#f3f4f6',
+                      color: leaderId ? '#374151' : '#6b7280',
+                      cursor: 'default',
+                      justifyContent: 'center',
+                      '&:hover': { transform: 'none', opacity: 1 },
+                    }}
+                  >
+                    <Typography
+                      component="span"
+                      sx={{
+                        fontSize: 13,
+                        textAlign: 'center',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {leaderName || 'Unassigned'}
+                    </Typography>
+                  </InlineSelectChip>
+                </Box>
+              </Box>
+            );
+          }
+          
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
               <Box sx={{ width: '100%', px: 0.5 }}>
@@ -555,8 +589,29 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
         width: 200,
         renderCell: (params) => {
           const row = params.row;
-          const disabled = updatingIds.has(row.id);
+          const disabled = updatingIds.has(row.id) || readOnly;
           const dateValue = row.evaluation_date ? new Date(row.evaluation_date) : null;
+          
+          // View-only mode for level 2+ users
+          if (readOnly) {
+            return (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  width: '100%',
+                  paddingX: 1,
+                }}
+              >
+                <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: '#111827' }}>
+                  {dateValue ? format(dateValue, 'M/d/yyyy') : '—'}
+                </Typography>
+              </Box>
+            );
+          }
+          
           return (
             <Box
               sx={{
@@ -634,7 +689,37 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
           const status = row.status;
           const colors = STATUS_STYLES[status] ?? STATUS_STYLES.Planned;
           const anchor = statusMenuAnchor[row.id] ?? null;
-          const disabled = updatingIds.has(row.id);
+          const disabled = updatingIds.has(row.id) || readOnly;
+          
+          // View-only mode for level 2+ users
+          if (readOnly) {
+            return (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                <Box sx={{ width: '100%', px: 0.5 }}>
+                  <InlineSelectChip
+                    sx={{
+                      backgroundColor: colors.bg,
+                      color: colors.color,
+                      cursor: 'default',
+                      justifyContent: 'center',
+                      '&:hover': { transform: 'none', opacity: 1 },
+                    }}
+                  >
+                    <Typography
+                      component="span"
+                      sx={{
+                        fontSize: 13,
+                        textAlign: 'center',
+                      }}
+                    >
+                      {status}
+                    </Typography>
+                  </InlineSelectChip>
+                </Box>
+              </Box>
+            );
+          }
+          
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
               <Box sx={{ width: '100%', px: 0.5 }}>
@@ -723,6 +808,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange 
       handleStatusMenuClose,
       handleStatusSelect,
       leaderMenuAnchor,
+      readOnly,
     ]
   );
 

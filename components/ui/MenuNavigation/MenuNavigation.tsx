@@ -35,8 +35,8 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const isAdmin = displayRole === 'Levelset Admin' || displayRole === 'Operator' || displayRole === 'Owner/Operator';
   const isLevelsetAdmin = displayRole === 'Levelset Admin';
   
-  // Check if user can access org settings (hierarchy level 0 or 1)
-  const canAccessOrgSettings = userHierarchyLevel !== null && userHierarchyLevel <= 1;
+  // All authenticated users can access org settings (read-only for level 2+)
+  const canAccessOrgSettings = userHierarchyLevel !== null;
 
   // Close profile dropdown when clicking outside
   React.useEffect(() => {

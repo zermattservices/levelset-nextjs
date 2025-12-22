@@ -55,8 +55,8 @@ export interface RosterEntry {
 }
 
 export function RosterTable(props: RosterTableProps) {
-  const { locationId } = props;
-  const { selectedLocationOrgId } = useLocationContext();
+  const { locationId, currentUserRoleProp } = props;
+  const { selectedLocationOrgId, userHierarchyLevel } = useLocationContext();
   const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations' | 'pip'>('employees');
   const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
   const [addEmployeeModalOpen, setAddEmployeeModalOpen] = React.useState(false);
@@ -69,6 +69,15 @@ export function RosterTable(props: RosterTableProps) {
     enable_evaluations: false,
     enable_pip_logic: false,
   });
+  
+  // Determine if user can edit more than just FOH/BOH
+  // Level 0, 1, and Levelset Admin can edit everything
+  // Level 2+ can only edit FOH/BOH (and view evaluations/PIP read-only)
+  const canEditFullRoster = React.useMemo(() => {
+    if (currentUserRoleProp === 'Levelset Admin') return true;
+    if (userHierarchyLevel === null) return false;
+    return userHierarchyLevel <= 1;
+  }, [currentUserRoleProp, userHierarchyLevel]);
 
   // Fetch feature toggles for the current organization
   React.useEffect(() => {
@@ -227,6 +236,7 @@ export function RosterTable(props: RosterTableProps) {
             locationId={locationId}
             className={props.className}
             onPlannedStatusChange={setHasPlannedEvaluations}
+            readOnly={!canEditFullRoster}
           />
         ) : (
           <PIPTable
@@ -519,7 +529,16 @@ function EmployeesTableView({
   onEmployeeDelete,
   featureToggles,
 }: RosterTableProps & { featureToggles?: OrgFeatureToggles }) {
-  const { selectedLocationOrgId } = useLocationContext();
+  const { selectedLocationOrgId, userHierarchyLevel } = useLocationContext();
+  
+  // Determine if user can edit more than just FOH/BOH
+  // Level 0, 1, and Levelset Admin can edit everything
+  // Level 2+ can only edit FOH/BOH
+  const canEditFullRoster = React.useMemo(() => {
+    if (currentUserRoleProp === 'Levelset Admin') return true;
+    if (userHierarchyLevel === null) return false;
+    return userHierarchyLevel <= 1;
+  }, [currentUserRoleProp, userHierarchyLevel]);
   const [data, setData] = React.useState<RosterEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -1154,7 +1173,8 @@ function EmployeesTableView({
         renderCell: (params) => {
           const employeeId = params.row.id as string;
           const role = params.value as Role;
-          const canChange = canChangeRole(employeeId, role);
+          // Level 2+ users cannot change roles at all
+          const canChange = canEditFullRoster && canChangeRole(employeeId, role);
           const availableRoles = getAvailableRoles(employeeId, role);
           const anchor = roleMenuAnchor[employeeId] ?? null;
           const roleColorKey = getRoleColorKey(role);
@@ -1250,6 +1270,21 @@ function EmployeesTableView({
           const employeeId = params.row.id as string;
           const availability = params.value as AvailabilityType;
           const anchor = availabilityMenuAnchor[employeeId] ?? null;
+          
+          // Level 2+ users cannot change availability
+          if (!canEditFullRoster) {
+            return (
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+                <AvailabilityChip
+                  className={availability.toLowerCase()}
+                  sx={{ cursor: "default", '&:hover': { transform: 'none', opacity: 1 } }}
+                >
+                  {availability}
+                </AvailabilityChip>
+              </Box>
+            );
+          }
+          
           return (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
               <AvailabilityChip
@@ -1334,6 +1369,21 @@ function EmployeesTableView({
             const employeeId = params.row.id as string;
             const status = params.value as CertificationStatus;
             const anchor = certificationMenuAnchor[employeeId] ?? null;
+            
+            // Level 2+ users cannot change certification status
+            if (!canEditFullRoster) {
+              return (
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+                  <CertificationChip
+                    className={status.toLowerCase().replace(" ", "-")}
+                    sx={{ cursor: "default", '&:hover': { transform: 'none', opacity: 1 } }}
+                  >
+                    {status}
+                  </CertificationChip>
+                </Box>
+              );
+            }
+            
             return (
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
                 <CertificationChip
@@ -1459,6 +1509,7 @@ function EmployeesTableView({
     getAvailableRoles,
     getRoleColorKey,
     featureToggles,
+    canEditFullRoster,
   ]);
 
   if (loading && data.length === 0) {
