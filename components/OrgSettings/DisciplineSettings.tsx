@@ -35,6 +35,7 @@ interface DisciplineSettingsProps {
   orgId: string | null;
   locationId: string | null;
   onNavigate?: (section: string) => void;
+  disabled?: boolean;
 }
 
 type TabValue = 'infractions' | 'actions' | 'access' | 'notifications';
