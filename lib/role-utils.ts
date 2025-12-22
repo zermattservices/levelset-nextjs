@@ -40,6 +40,19 @@ export function getRandomRoleColor(): RoleColorKey {
 }
 
 /**
+ * Get a unique role color that isn't already used by existing roles
+ * Falls back to random if all colors are used
+ */
+export function getUniqueRoleColor(usedColors: (RoleColorKey | string)[]): RoleColorKey {
+  const availableColors = ROLE_COLOR_KEYS.filter(color => !usedColors.includes(color));
+  if (availableColors.length > 0) {
+    return availableColors[Math.floor(Math.random() * availableColors.length)];
+  }
+  // All colors used, fall back to random
+  return getRandomRoleColor();
+}
+
+/**
  * Interface for org role data from database
  */
 export interface OrgRole {

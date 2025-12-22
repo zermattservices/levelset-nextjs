@@ -11,7 +11,7 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import CircularProgress from '@mui/material/CircularProgress';
 import sty from './RolesTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
-import { DEFAULT_ROLE_COLORS, ROLE_COLOR_KEYS, getRandomRoleColor, type RoleColorKey } from '@/lib/role-utils';
+import { DEFAULT_ROLE_COLORS, ROLE_COLOR_KEYS, getUniqueRoleColor, type RoleColorKey } from '@/lib/role-utils';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -169,6 +169,7 @@ export function RolesTab({ orgId }: RolesTabProps) {
     if (!orgId) return;
 
     const maxLevel = Math.max(...roles.map(r => r.hierarchy_level), -1);
+    const usedColors = roles.map(r => r.color);
     const newRole: Role = {
       id: `temp-${Date.now()}`,
       org_id: orgId,
@@ -176,7 +177,7 @@ export function RolesTab({ orgId }: RolesTabProps) {
       hierarchy_level: maxLevel + 1,
       is_leader: false,
       is_trainer: false,
-      color: getRandomRoleColor(),
+      color: getUniqueRoleColor(usedColors),
       employee_count: 0,
       isNew: true,
     };
@@ -405,12 +406,11 @@ export function RolesTab({ orgId }: RolesTabProps) {
               <div className={sty.colorCell}>
                 <button
                   className={sty.colorSwatch}
-                  style={{ backgroundColor: colorStyle.bg, color: colorStyle.text }}
+                  style={{ backgroundColor: colorStyle.bg, borderColor: colorStyle.text }}
                   onClick={(e) => openColorPicker(e, role.id)}
                   title="Click to change color"
-                >
-                  {role.color}
-                </button>
+                  aria-label={`Color: ${role.color}`}
+                />
               </div>
               
               <div className={sty.countCell}>
@@ -464,26 +464,30 @@ export function RolesTab({ orgId }: RolesTabProps) {
         onClose={closeColorPicker}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
       >
         <Box sx={{ p: 1.5, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 1 }}>
           {ROLE_COLOR_KEYS.map((colorKey) => {
             const colorStyle = DEFAULT_ROLE_COLORS[colorKey];
+            const currentRole = roles.find(r => r.id === colorPickerRoleId);
+            const isSelected = currentRole?.color === colorKey;
             return (
               <button
                 key={colorKey}
                 className={sty.colorPickerSwatch}
-                style={{ backgroundColor: colorStyle.bg, color: colorStyle.text }}
+                style={{ 
+                  backgroundColor: colorStyle.bg, 
+                  borderColor: isSelected ? colorStyle.text : 'transparent',
+                }}
                 onClick={() => colorPickerRoleId && handleColorChange(colorPickerRoleId, colorKey)}
                 title={colorKey}
-              >
-                {colorKey.charAt(0).toUpperCase()}
-              </button>
+                aria-label={`Select ${colorKey} color`}
+              />
             );
           })}
         </Box>
