@@ -8,9 +8,10 @@ import { createSupabaseClient } from '@/util/supabase/component';
 
 interface LocationDetailsProps {
   locationId: string | null;
+  disabled?: boolean;
 }
 
-export function LocationDetails({ locationId }: LocationDetailsProps) {
+export function LocationDetails({ locationId, disabled = false }: LocationDetailsProps) {
   const [logoUrl, setLogoUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [uploading, setUploading] = React.useState(false);
@@ -188,57 +189,62 @@ export function LocationDetails({ locationId }: LocationDetailsProps) {
               <div className={sty.imagePreview}>
                 <img src={logoUrl} alt="Location logo" className={sty.previewImage} />
               </div>
-              <div className={sty.imageActions}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<CloudUploadIcon />}
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  sx={{
-                    fontFamily: '"Satoshi", sans-serif',
-                    fontSize: 12,
-                    textTransform: 'none',
-                    borderColor: '#31664a',
-                    color: '#31664a',
-                    '&:hover': {
+              {!disabled && (
+                <div className={sty.imageActions}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<CloudUploadIcon />}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    sx={{
+                      fontFamily: '"Satoshi", sans-serif',
+                      fontSize: 12,
+                      textTransform: 'none',
                       borderColor: '#31664a',
-                      backgroundColor: 'rgba(49, 102, 74, 0.08)',
-                    },
-                  }}
-                >
-                  Replace
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<DeleteIcon />}
-                  onClick={handleRemove}
-                  disabled={uploading}
-                  sx={{
-                    fontFamily: '"Satoshi", sans-serif',
-                    fontSize: 12,
-                    textTransform: 'none',
-                    borderColor: '#dc2626',
-                    color: '#dc2626',
-                    '&:hover': {
+                      color: '#31664a',
+                      '&:hover': {
+                        borderColor: '#31664a',
+                        backgroundColor: 'rgba(49, 102, 74, 0.08)',
+                      },
+                    }}
+                  >
+                    Replace
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<DeleteIcon />}
+                    onClick={handleRemove}
+                    disabled={uploading}
+                    sx={{
+                      fontFamily: '"Satoshi", sans-serif',
+                      fontSize: 12,
+                      textTransform: 'none',
                       borderColor: '#dc2626',
-                      backgroundColor: 'rgba(220, 38, 38, 0.08)',
-                    },
-                  }}
-                >
-                  Remove
-                </Button>
-              </div>
+                      color: '#dc2626',
+                      '&:hover': {
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.08)',
+                      },
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <div
-              className={sty.uploadPlaceholder}
-              onClick={() => fileInputRef.current?.click()}
+              className={`${sty.uploadPlaceholder} ${disabled ? sty.uploadPlaceholderDisabled : ''}`}
+              onClick={() => !disabled && fileInputRef.current?.click()}
+              style={{ cursor: disabled ? 'default' : 'pointer' }}
             >
               <CloudUploadIcon sx={{ fontSize: 32, color: '#9ca3af' }} />
-              <span className={sty.uploadText}>Click to upload an image</span>
-              <span className={sty.uploadHint}>PNG, JPG up to 5MB</span>
+              <span className={sty.uploadText}>
+                {disabled ? 'No logo uploaded' : 'Click to upload an image'}
+              </span>
+              {!disabled && <span className={sty.uploadHint}>PNG, JPG up to 5MB</span>}
             </div>
           )}
 

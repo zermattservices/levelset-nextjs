@@ -49,9 +49,10 @@ interface Position {
 
 interface PositionsTabProps {
   orgId: string | null;
+  disabled?: boolean;
 }
 
-export function PositionsTab({ orgId }: PositionsTabProps) {
+export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
   const [positions, setPositions] = React.useState<Position[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
@@ -216,23 +217,25 @@ export function PositionsTab({ orgId }: PositionsTabProps) {
     <div className={sty.section}>
       <div className={sty.sectionHeader}>
         <h4 className={sty.sectionTitle}>{title}</h4>
-        <Button
-          variant="text"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => handleAddPosition(zone)}
-          sx={{
-            fontFamily,
-            fontSize: 12,
-            textTransform: 'none',
-            color: '#31664a',
-            '&:hover': {
-              backgroundColor: 'rgba(49, 102, 74, 0.08)',
-            },
-          }}
-        >
-          Add {zone} Position
-        </Button>
+        {!disabled && (
+          <Button
+            variant="text"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => handleAddPosition(zone)}
+            sx={{
+              fontFamily,
+              fontSize: 12,
+              textTransform: 'none',
+              color: '#31664a',
+              '&:hover': {
+                backgroundColor: 'rgba(49, 102, 74, 0.08)',
+              },
+            }}
+          >
+            Add {zone} Position
+          </Button>
+        )}
       </div>
 
       <div className={sty.positionsHeader}>
@@ -252,6 +255,7 @@ export function PositionsTab({ orgId }: PositionsTabProps) {
               placeholder="Position name"
               size="small"
               className={sty.nameField}
+              disabled={disabled}
             />
             <textarea
               ref={(el) => {
@@ -262,14 +266,17 @@ export function PositionsTab({ orgId }: PositionsTabProps) {
               placeholder="Position description..."
               className={sty.descriptionField}
               rows={1}
+              disabled={disabled}
             />
-            <IconButton
-              size="small"
-              onClick={() => handleDeletePosition(position.id)}
-              className={sty.deleteButton}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
+            {!disabled && (
+              <IconButton
+                size="small"
+                onClick={() => handleDeletePosition(position.id)}
+                className={sty.deleteButton}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            )}
           </div>
         ))
       )}
@@ -293,30 +300,32 @@ export function PositionsTab({ orgId }: PositionsTabProps) {
         {renderPositionSection(bohPositions, 'BOH', 'BOH Positions')}
       </div>
 
-      <div className={sty.actions}>
-        <div></div>
-        <div className={sty.rightActions}>
-          {hasChanges && (
-            <Button
-              variant="outlined"
-              onClick={handleSave}
-              disabled={saving}
-              sx={{
-                fontFamily,
-                textTransform: 'none',
-                borderColor: '#31664a',
-                color: '#31664a',
-                '&:hover': {
+      {!disabled && (
+        <div className={sty.actions}>
+          <div></div>
+          <div className={sty.rightActions}>
+            {hasChanges && (
+              <Button
+                variant="outlined"
+                onClick={handleSave}
+                disabled={saving}
+                sx={{
+                  fontFamily,
+                  textTransform: 'none',
                   borderColor: '#31664a',
-                  backgroundColor: 'rgba(49, 102, 74, 0.08)',
-                },
-              }}
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          )}
+                  color: '#31664a',
+                  '&:hover': {
+                    borderColor: '#31664a',
+                    backgroundColor: 'rgba(49, 102, 74, 0.08)',
+                  },
+                }}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { LocationDetails } from '@/components/OrgSettings/LocationDetails';
 import { OrganizationDetails } from '@/components/OrgSettings/OrganizationDetails';
 import { UsersTab } from '@/components/OrgSettings/UsersTab';
 import { RolesTab } from '@/components/OrgSettings/RolesTab';
+import { createSupabaseClient } from '@/util/supabase/component';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -26,6 +27,37 @@ export function OrgSettingsPage() {
   const auth = useAuth();
   const { selectedLocationId, selectedLocationOrgId, userHierarchyLevel } = useLocationContext();
   const [activeSection, setActiveSection] = React.useState<string>('positional-excellence');
+  const [level1RoleName, setLevel1RoleName] = React.useState<string>('');
+  
+  const supabase = React.useMemo(() => createSupabaseClient(), []);
+  
+  // Determine if user can edit settings
+  // Only Level 0, Level 1, and Levelset Admin can edit
+  const canEdit = React.useMemo(() => {
+    if (auth.role === 'Levelset Admin') return true;
+    if (userHierarchyLevel === null) return false;
+    return userHierarchyLevel <= 1;
+  }, [auth.role, userHierarchyLevel]);
+
+  // Fetch level 1 role name for warning message
+  React.useEffect(() => {
+    async function fetchLevel1Role() {
+      if (!selectedLocationOrgId) return;
+      
+      const { data } = await supabase
+        .from('org_roles')
+        .select('role_name')
+        .eq('org_id', selectedLocationOrgId)
+        .eq('hierarchy_level', 1)
+        .single();
+      
+      if (data) {
+        setLevel1RoleName(data.role_name);
+      }
+    }
+    
+    fetchLevel1Role();
+  }, [selectedLocationOrgId, supabase]);
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -33,13 +65,6 @@ export function OrgSettingsPage() {
       router.push('/auth/login');
     }
   }, [auth.isLoaded, auth.authUser, router]);
-
-  // Redirect users without proper permissions (hierarchy level > 1)
-  React.useEffect(() => {
-    if (auth.isLoaded && auth.authUser && userHierarchyLevel !== null && userHierarchyLevel > 1) {
-      router.push('/');
-    }
-  }, [auth.isLoaded, auth.authUser, userHierarchyLevel, router]);
 
   const menuItems: MenuItem[] = [
     {
@@ -78,29 +103,29 @@ export function OrgSettingsPage() {
   const renderContent = () => {
     switch (activeSection) {
       case 'positional-excellence':
-        return <PositionalExcellenceSettings orgId={selectedLocationOrgId} />;
+        return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'discipline':
-        return <DisciplineSettings orgId={selectedLocationOrgId} locationId={selectedLocationId} />;
+        return <DisciplineSettings orgId={selectedLocationOrgId} locationId={selectedLocationId} onNavigate={setActiveSection} disabled={!canEdit} />;
       case 'pathway':
         return <ComingSoonPlaceholder title="Pathway" description="Career pathway and development tracking coming soon." />;
       case 'evaluations':
         return <ComingSoonPlaceholder title="Evaluations" description="Performance evaluation scheduling and tracking coming soon." />;
       case 'users':
-        return <UsersTab orgId={selectedLocationOrgId} />;
+        return <UsersTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'roles':
-        return <RolesTab orgId={selectedLocationOrgId} />;
+        return <RolesTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'permissions':
         return <ComingSoonPlaceholder title="Permissions" description="Configure role-based permissions for your organization coming soon." />;
       case 'mobile-access':
-        return <MobileAppAccess />;
+        return <MobileAppAccess disabled={!canEdit} />;
       case 'mobile-config':
         return <ComingSoonPlaceholder title="Mobile App Configuration" description="Configure mobile app settings and features coming soon." />;
       case 'location-details':
-        return <LocationDetails locationId={selectedLocationId} />;
+        return <LocationDetails locationId={selectedLocationId} disabled={!canEdit} />;
       case 'org-details':
-        return <OrganizationDetails orgId={selectedLocationOrgId} />;
+        return <OrganizationDetails orgId={selectedLocationOrgId} disabled={!canEdit} />;
       default:
-        return <PositionalExcellenceSettings orgId={selectedLocationOrgId} />;
+        return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} />;
     }
   };
 
@@ -153,6 +178,11 @@ export function OrgSettingsPage() {
                 Configure settings and preferences for your organization.
               </p>
             </div>
+            {!canEdit && (
+              <div className={sty.readOnlyWarning}>
+                Only the Operator and {level1RoleName || 'Level 1'}s are able to edit these settings.
+              </div>
+            )}
           </div>
         </div>
 

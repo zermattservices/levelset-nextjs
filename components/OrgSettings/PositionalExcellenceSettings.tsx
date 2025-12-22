@@ -34,11 +34,12 @@ const StyledTab = styled(Tab)(() => ({
 
 interface PositionalExcellenceSettingsProps {
   orgId: string | null;
+  disabled?: boolean;
 }
 
 type TabValue = 'positions' | 'criteria' | 'role-mapping' | 'rating-scale';
 
-export function PositionalExcellenceSettings({ orgId }: PositionalExcellenceSettingsProps) {
+export function PositionalExcellenceSettings({ orgId, disabled = false }: PositionalExcellenceSettingsProps) {
   const [activeTab, setActiveTab] = React.useState<TabValue>('positions');
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
@@ -48,13 +49,13 @@ export function PositionalExcellenceSettings({ orgId }: PositionalExcellenceSett
   const renderTabContent = () => {
     switch (activeTab) {
       case 'positions':
-        return <PositionsTab orgId={orgId} />;
+        return <PositionsTab orgId={orgId} disabled={disabled} />;
       case 'criteria':
-        return <RatingCriteriaTab orgId={orgId} />;
+        return <RatingCriteriaTab orgId={orgId} disabled={disabled} />;
       case 'role-mapping':
-        return <RoleMappingTab orgId={orgId} />;
+        return <RoleMappingTab orgId={orgId} disabled={disabled} />;
       case 'rating-scale':
-        return <RatingScaleTab orgId={orgId} />;
+        return <RatingScaleTab orgId={orgId} disabled={disabled} />;
       default:
         return null;
     }

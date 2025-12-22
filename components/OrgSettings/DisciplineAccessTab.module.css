@@ -109,3 +109,26 @@
   align-items: center;
   gap: 12px;
 }
+
+.helpText {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #666;
+  margin: 8px 0 0 0;
+}
+
+.helpLink {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #31664a;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.helpLink:hover {
+  color: #264d38;
+}

@@ -52,7 +52,11 @@ const PasswordTextField = styled(TextField)(() => ({
   },
 }));
 
-export function MobileAppAccess() {
+interface MobileAppAccessProps {
+  disabled?: boolean;
+}
+
+export function MobileAppAccess({ disabled = false }: MobileAppAccessProps) {
   const { selectedLocationMobileToken, selectedLocationNumber, selectedLocationId } = useLocationContext();
   const [copied, setCopied] = React.useState(false);
   
@@ -304,7 +308,7 @@ export function MobileAppAccess() {
             value={passwordLoading ? '' : password}
             onChange={handlePasswordChange}
             placeholder={passwordLoading ? 'Loading...' : 'Enter password'}
-            disabled={passwordLoading}
+            disabled={passwordLoading || disabled}
             size="small"
             sx={{ width: 280 }}
             InputProps={{
@@ -319,7 +323,7 @@ export function MobileAppAccess() {
               ),
             }}
           />
-          {hasPasswordChanges && (
+          {hasPasswordChanges && !disabled && (
             <Button
               variant="contained"
               onClick={handleSavePassword}

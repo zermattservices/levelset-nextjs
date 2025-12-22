@@ -55,9 +55,10 @@ interface Role {
 
 interface RoleMappingTabProps {
   orgId: string | null;
+  disabled?: boolean;
 }
 
-export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
+export function RoleMappingTab({ orgId, disabled = false }: RoleMappingTabProps) {
   const { selectedLocationId } = useLocationContext();
   const [positions, setPositions] = React.useState<Position[]>([]);
   const [roles, setRoles] = React.useState<Role[]>([]);
@@ -315,7 +316,7 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
                         </Box>
                       );
                     }}
-                    disabled={saving}
+                    disabled={saving || disabled}
                     MenuProps={{
                       PaperProps: {
                         sx: { maxHeight: 300 }

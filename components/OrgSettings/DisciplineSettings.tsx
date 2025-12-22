@@ -34,11 +34,12 @@ const StyledTab = styled(Tab)(() => ({
 interface DisciplineSettingsProps {
   orgId: string | null;
   locationId: string | null;
+  onNavigate?: (section: string) => void;
 }
 
 type TabValue = 'infractions' | 'actions' | 'access' | 'notifications';
 
-export function DisciplineSettings({ orgId, locationId }: DisciplineSettingsProps) {
+export function DisciplineSettings({ orgId, locationId, onNavigate, disabled = false }: DisciplineSettingsProps) {
   const [activeTab, setActiveTab] = React.useState<TabValue>('infractions');
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
@@ -48,11 +49,11 @@ export function DisciplineSettings({ orgId, locationId }: DisciplineSettingsProp
   const renderTabContent = () => {
     switch (activeTab) {
       case 'infractions':
-        return <InfractionsTab orgId={orgId} />;
+        return <InfractionsTab orgId={orgId} disabled={disabled} />;
       case 'actions':
-        return <DisciplineActionsTab orgId={orgId} />;
+        return <DisciplineActionsTab orgId={orgId} disabled={disabled} />;
       case 'access':
-        return <DisciplineAccessTab orgId={orgId} locationId={locationId} />;
+        return <DisciplineAccessTab orgId={orgId} locationId={locationId} onNavigate={onNavigate} disabled={disabled} />;
       case 'notifications':
         return <ComingSoonPlaceholder title="Notifications" description="Configure automated discipline notifications coming soon." />;
       default:

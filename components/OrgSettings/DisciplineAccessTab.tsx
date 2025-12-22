@@ -68,9 +68,11 @@ interface Role {
 interface DisciplineAccessTabProps {
   orgId: string | null;
   locationId: string | null;
+  onNavigate?: (section: string) => void;
+  disabled?: boolean;
 }
 
-export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabProps) {
+export function DisciplineAccessTab({ orgId, locationId, onNavigate, disabled = false }: DisciplineAccessTabProps) {
   const [roles, setRoles] = React.useState<Role[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -291,7 +293,7 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
           ) : (
             roles.map((role) => {
               // Only levels 0 and 1 are disabled (forced true)
-              const isDisabled = role.hierarchy_level <= 1;
+              const isDisabled = role.hierarchy_level <= 1 || disabled;
               return (
                 <div key={role.role_name} className={sty.roleRow}>
                   <BrandCheckbox
@@ -305,6 +307,16 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
             })
           )}
         </div>
+        
+        <p className={sty.helpText}>
+          Looking to configure roles in your organization?{' '}
+          <button 
+            className={sty.helpLink} 
+            onClick={() => onNavigate?.('roles')}
+          >
+            Go to Roles settings
+          </button>
+        </p>
       </div>
 
       {/* Password Section */}
@@ -323,6 +335,7 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
             placeholder="Enter password"
             size="small"
             sx={{ width: 280 }}
+            disabled={disabled}
             InputProps={{
               endAdornment: (
                 <IconButton
@@ -335,7 +348,7 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
               ),
             }}
           />
-          {hasPasswordChanges && (
+          {hasPasswordChanges && !disabled && (
             <Button
               variant="contained"
               onClick={handleSavePassword}
@@ -352,6 +365,16 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
             </Button>
           )}
         </div>
+        
+        <p className={sty.helpText}>
+          Looking for the link to your mobile app?{' '}
+          <button 
+            className={sty.helpLink} 
+            onClick={() => onNavigate?.('mobile-access')}
+          >
+            Go to Mobile App Access
+          </button>
+        </p>
       </div>
 
       {/* Confirmation Modal */}

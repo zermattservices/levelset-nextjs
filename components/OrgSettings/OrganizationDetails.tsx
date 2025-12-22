@@ -27,9 +27,10 @@ const StyledTextField = styled(TextField)(() => ({
 
 interface OrganizationDetailsProps {
   orgId: string | null;
+  disabled?: boolean;
 }
 
-export function OrganizationDetails({ orgId }: OrganizationDetailsProps) {
+export function OrganizationDetails({ orgId, disabled = false }: OrganizationDetailsProps) {
   const [teamMemberWebsite, setTeamMemberWebsite] = React.useState<string>('');
   const [originalValue, setOriginalValue] = React.useState<string>('');
   const [orgName, setOrgName] = React.useState<string>('');
@@ -134,29 +135,32 @@ export function OrganizationDetails({ orgId }: OrganizationDetailsProps) {
           fullWidth
           size="small"
           sx={{ maxWidth: 480 }}
+          disabled={disabled}
         />
       </div>
 
-      <div className={sty.actions}>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={!hasChanges || saving}
-          sx={{
-            fontFamily,
-            textTransform: 'none',
-            backgroundColor: '#31664a',
-            '&:hover': {
-              backgroundColor: '#264d38',
-            },
-            '&.Mui-disabled': {
-              backgroundColor: '#e0e0e0',
-            },
-          }}
-        >
-          {saving ? 'Saving...' : 'Save Changes'}
-        </Button>
-      </div>
+      {!disabled && (
+        <div className={sty.actions}>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={!hasChanges || saving}
+            sx={{
+              fontFamily,
+              textTransform: 'none',
+              backgroundColor: '#31664a',
+              '&:hover': {
+                backgroundColor: '#264d38',
+              },
+              '&.Mui-disabled': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

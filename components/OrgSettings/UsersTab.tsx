@@ -51,9 +51,10 @@ interface AdminOnlyUser {
 interface UsersTabProps {
   orgId: string | null;
   currentUserRole?: string | null;
+  disabled?: boolean;
 }
 
-export function UsersTab({ orgId, currentUserRole }: UsersTabProps) {
+export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabProps) {
   const { selectedLocationId } = useLocationContext();
   
   // Check if current user can edit operator emails (only Operator or Levelset Admin)
@@ -129,10 +130,11 @@ export function UsersTab({ orgId, currentUserRole }: UsersTabProps) {
         is_operator: user.permissions === 'operator',
       }));
 
-      // Sort with operators first
+      // Sort by hierarchy level (0 first), then alphabetically within each level
       linkedUsers.sort((a, b) => {
-        if (a.is_operator && !b.is_operator) return -1;
-        if (!a.is_operator && b.is_operator) return 1;
+        const levelA = (rolesData || []).find(r => r.role_name === a.employee_role)?.hierarchy_level ?? 999;
+        const levelB = (rolesData || []).find(r => r.role_name === b.employee_role)?.hierarchy_level ?? 999;
+        if (levelA !== levelB) return levelA - levelB;
         return a.first_name.localeCompare(b.first_name);
       });
 
@@ -335,7 +337,7 @@ export function UsersTab({ orgId, currentUserRole }: UsersTabProps) {
                         ) : (
                           <div className={sty.emailRow}>
                             <span className={sty.email}>{user.email}</span>
-                            {(!user.is_operator || canEditOperatorEmail) && (
+                            {(!user.is_operator || canEditOperatorEmail) && !disabled && (
                               <IconButton
                                 size="small"
                                 onClick={() => handleEditClick(user.id, user.email, user.is_operator)}
@@ -361,7 +363,7 @@ export function UsersTab({ orgId, currentUserRole }: UsersTabProps) {
                         )}
                       </td>
                       <td className={sty.cellActions}>
-                        {!user.is_operator && (
+                        {!user.is_operator && !disabled && (
                           <IconButton
                             size="small"
                             onClick={() => handleDeleteUser(user.id, user.is_operator)}
@@ -379,26 +381,28 @@ export function UsersTab({ orgId, currentUserRole }: UsersTabProps) {
           </table>
         </div>
 
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => setAddUserModalOpen(true)}
-          sx={{
-            fontFamily,
-            fontSize: 13,
-            textTransform: 'none',
-            borderColor: '#31664a',
-            color: '#31664a',
-            marginTop: 2,
-            '&:hover': {
+        {!disabled && (
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => setAddUserModalOpen(true)}
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              textTransform: 'none',
               borderColor: '#31664a',
-              backgroundColor: 'rgba(49, 102, 74, 0.08)',
-            },
-          }}
-        >
-          Add User
-        </Button>
+              color: '#31664a',
+              marginTop: 2,
+              '&:hover': {
+                borderColor: '#31664a',
+                backgroundColor: 'rgba(49, 102, 74, 0.08)',
+              },
+            }}
+          >
+            Add User
+          </Button>
+        )}
       </div>
 
       {/* Admin-Only Users Section */}
@@ -463,13 +467,15 @@ export function UsersTab({ orgId, currentUserRole }: UsersTabProps) {
                       ) : (
                         <div className={sty.emailRow}>
                           <span className={sty.email}>{user.email}</span>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleEditClick(user.id, user.email, false)}
-                            className={sty.editButton}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
+                          {!disabled && (
+                            <IconButton
+                              size="small"
+                              onClick={() => handleEditClick(user.id, user.email, false)}
+                              className={sty.editButton}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          )}
                         </div>
                       )}
                     </td>
@@ -479,13 +485,15 @@ export function UsersTab({ orgId, currentUserRole }: UsersTabProps) {
                       </span>
                     </td>
                     <td className={sty.cellActions}>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeleteUser(user.id)}
-                        className={sty.deleteButton}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                      {!disabled && (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteUser(user.id)}
+                          className={sty.deleteButton}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -494,26 +502,28 @@ export function UsersTab({ orgId, currentUserRole }: UsersTabProps) {
           </table>
         </div>
 
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => setAddAdminModalOpen(true)}
-          sx={{
-            fontFamily,
-            fontSize: 13,
-            textTransform: 'none',
-            borderColor: '#31664a',
-            color: '#31664a',
-            marginTop: 2,
-            '&:hover': {
+        {!disabled && (
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => setAddAdminModalOpen(true)}
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              textTransform: 'none',
               borderColor: '#31664a',
-              backgroundColor: 'rgba(49, 102, 74, 0.08)',
-            },
-          }}
-        >
-          Add Administrator
-        </Button>
+              color: '#31664a',
+              marginTop: 2,
+              '&:hover': {
+                borderColor: '#31664a',
+                backgroundColor: 'rgba(49, 102, 74, 0.08)',
+              },
+            }}
+          >
+            Add Administrator
+          </Button>
+        )}
       </div>
 
       <AddUserModal

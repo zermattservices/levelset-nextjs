@@ -63,9 +63,10 @@ interface Criteria {
 
 interface RatingCriteriaTabProps {
   orgId: string | null;
+  disabled?: boolean;
 }
 
-export function RatingCriteriaTab({ orgId }: RatingCriteriaTabProps) {
+export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTabProps) {
   const [positions, setPositions] = React.useState<Position[]>([]);
   const [selectedPositionId, setSelectedPositionId] = React.useState<string>('');
   const [criteria, setCriteria] = React.useState<Criteria[]>([]);
@@ -305,6 +306,7 @@ export function RatingCriteriaTab({ orgId }: RatingCriteriaTabProps) {
                   placeholder="Criteria name"
                   size="small"
                   className={sty.criteriaNameField}
+                  disabled={disabled}
                 />
                 <textarea
                   ref={(el) => {
@@ -320,6 +322,7 @@ export function RatingCriteriaTab({ orgId }: RatingCriteriaTabProps) {
                   placeholder="Description (optional)"
                   className={sty.descriptionTextarea}
                   rows={1}
+                  disabled={disabled}
                 />
               </div>
             ))}
@@ -327,30 +330,32 @@ export function RatingCriteriaTab({ orgId }: RatingCriteriaTabProps) {
         </div>
       )}
 
-      <div className={sty.actions}>
-        <div></div>
-        <div className={sty.rightActions}>
-          {hasChanges && (
-            <Button
-              variant="outlined"
-              onClick={handleSave}
-              disabled={saving}
-              sx={{
-                fontFamily,
-                textTransform: 'none',
-                borderColor: '#31664a',
-                color: '#31664a',
-                '&:hover': {
+      {!disabled && (
+        <div className={sty.actions}>
+          <div></div>
+          <div className={sty.rightActions}>
+            {hasChanges && (
+              <Button
+                variant="outlined"
+                onClick={handleSave}
+                disabled={saving}
+                sx={{
+                  fontFamily,
+                  textTransform: 'none',
                   borderColor: '#31664a',
-                  backgroundColor: 'rgba(49, 102, 74, 0.08)',
-                },
-              }}
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          )}
+                  color: '#31664a',
+                  '&:hover': {
+                    borderColor: '#31664a',
+                    backgroundColor: 'rgba(49, 102, 74, 0.08)',
+                  },
+                }}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

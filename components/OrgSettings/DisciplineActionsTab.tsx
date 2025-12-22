@@ -33,9 +33,10 @@ interface DisciplineAction {
 
 interface DisciplineActionsTabProps {
   orgId: string | null;
+  disabled?: boolean;
 }
 
-export function DisciplineActionsTab({ orgId }: DisciplineActionsTabProps) {
+export function DisciplineActionsTab({ orgId, disabled = false }: DisciplineActionsTabProps) {
   const [actions, setActions] = React.useState<DisciplineAction[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
@@ -244,6 +245,7 @@ export function DisciplineActionsTab({ orgId }: DisciplineActionsTabProps) {
                 placeholder="Action name"
                 size="small"
                 className={sty.nameField}
+                disabled={disabled}
               />
               <StyledTextField
                 value={action.points_threshold ?? ''}
@@ -254,64 +256,71 @@ export function DisciplineActionsTab({ orgId }: DisciplineActionsTabProps) {
                 type="number"
                 className={sty.pointsField}
                 inputProps={{ step: 0.5 }}
+                disabled={disabled}
               />
-              <IconButton
-                size="small"
-                onClick={() => handleDeleteAction(action.id)}
-                className={sty.deleteButton}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
+              {!disabled && (
+                <IconButton
+                  size="small"
+                  onClick={() => handleDeleteAction(action.id)}
+                  className={sty.deleteButton}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              )}
             </div>
           ))
         )}
 
-        <Button
-          variant="text"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={handleAddAction}
-          sx={{
-            fontFamily,
-            fontSize: 12,
-            textTransform: 'none',
-            color: '#31664a',
-            alignSelf: 'flex-start',
-            marginTop: 2,
-            '&:hover': {
-              backgroundColor: 'rgba(49, 102, 74, 0.08)',
-            },
-          }}
-        >
-          Add Action
-        </Button>
+        {!disabled && (
+          <Button
+            variant="text"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={handleAddAction}
+            sx={{
+              fontFamily,
+              fontSize: 12,
+              textTransform: 'none',
+              color: '#31664a',
+              alignSelf: 'flex-start',
+              marginTop: 2,
+              '&:hover': {
+                backgroundColor: 'rgba(49, 102, 74, 0.08)',
+              },
+            }}
+          >
+            Add Action
+          </Button>
+        )}
       </div>
 
-      <div className={sty.actions}>
-        <div></div>
-        <div className={sty.rightActions}>
-          {hasChanges && (
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={saving}
-              sx={{
-                fontFamily,
-                textTransform: 'none',
-                backgroundColor: '#31664a',
-                '&:hover': {
-                  backgroundColor: '#264d38',
-                },
-                '&.Mui-disabled': {
-                  backgroundColor: '#e0e0e0',
-                },
-              }}
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          )}
+      {!disabled && (
+        <div className={sty.actions}>
+          <div></div>
+          <div className={sty.rightActions}>
+            {hasChanges && (
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={saving}
+                sx={{
+                  fontFamily,
+                  textTransform: 'none',
+                  backgroundColor: '#31664a',
+                  '&:hover': {
+                    backgroundColor: '#264d38',
+                  },
+                  '&.Mui-disabled': {
+                    backgroundColor: '#e0e0e0',
+                  },
+                }}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -42,9 +42,10 @@ interface Role {
 
 interface RolesTabProps {
   orgId: string | null;
+  disabled?: boolean;
 }
 
-export function RolesTab({ orgId }: RolesTabProps) {
+export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
   const [roles, setRoles] = React.useState<Role[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
@@ -73,27 +74,34 @@ export function RolesTab({ orgId }: RolesTabProps) {
 
         if (rolesError) throw rolesError;
 
-        // Fetch employee counts per role
+        // Fetch employee counts per role (with full_name for deduplication)
         const { data: employeeCounts, error: countError } = await supabase
           .from('employees')
-          .select('role')
+          .select('role, full_name')
           .eq('org_id', orgId)
           .eq('active', true);
 
         if (countError) throw countError;
 
-        // Count employees per role
-        const countMap = new Map<string, number>();
-        (employeeCounts || []).forEach((emp: { role: string | null }) => {
-          if (emp.role) {
-            countMap.set(emp.role, (countMap.get(emp.role) || 0) + 1);
+        // Count unique employees per role (deduplicate by full_name)
+        const countMap = new Map<string, Set<string>>();
+        (employeeCounts || []).forEach((emp: { role: string | null; full_name: string | null }) => {
+          if (emp.role && emp.full_name) {
+            if (!countMap.has(emp.role)) {
+              countMap.set(emp.role, new Set());
+            }
+            countMap.get(emp.role)!.add(emp.full_name);
           }
         });
+
+        // Convert Set sizes to counts
+        const roleCounts = new Map<string, number>();
+        countMap.forEach((names, role) => roleCounts.set(role, names.size));
 
         // Merge employee counts into roles
         const rolesWithCounts = (rolesData || []).map(role => ({
           ...role,
-          employee_count: countMap.get(role.role_name) || 0,
+          employee_count: roleCounts.get(role.role_name) || 0,
         }));
 
         setRoles(rolesWithCounts);
@@ -375,14 +383,14 @@ export function RolesTab({ orgId }: RolesTabProps) {
             <div
               key={role.id}
               className={`${sty.roleRow} ${draggedIndex === index ? sty.dragging : ''}`}
-              draggable={!isOperator}
-              onDragStart={() => handleDragStart(index)}
-              onDragOver={(e) => handleDragOver(e, index)}
-              onDrop={(e) => handleDrop(e, index)}
+              draggable={!isOperator && !disabled}
+              onDragStart={() => !disabled && handleDragStart(index)}
+              onDragOver={(e) => !disabled && handleDragOver(e, index)}
+              onDrop={(e) => !disabled && handleDrop(e, index)}
               onDragEnd={handleDragEnd}
             >
               <div className={sty.dragHandle}>
-                {!isOperator && (
+                {!isOperator && !disabled && (
                   <DragIndicatorIcon sx={{ color: '#9ca3af', cursor: 'grab' }} />
                 )}
               </div>
@@ -398,7 +406,7 @@ export function RolesTab({ orgId }: RolesTabProps) {
                   onBlur={() => handleRoleNameBlur(role.id)}
                   size="small"
                   fullWidth
-                  disabled={isOperator}
+                  disabled={isOperator || disabled}
                   placeholder="Role name"
                 />
               </div>
@@ -407,9 +415,10 @@ export function RolesTab({ orgId }: RolesTabProps) {
                 <button
                   className={sty.colorSwatch}
                   style={{ backgroundColor: colorStyle.bg, borderColor: colorStyle.text }}
-                  onClick={(e) => openColorPicker(e, role.id)}
-                  title="Click to change color"
+                  onClick={(e) => !disabled && openColorPicker(e, role.id)}
+                  title={disabled ? role.color : "Click to change color"}
                   aria-label={`Color: ${role.color}`}
+                  disabled={disabled}
                 />
               </div>
               
@@ -423,7 +432,7 @@ export function RolesTab({ orgId }: RolesTabProps) {
               </div>
               
               <div className={sty.actionsCell}>
-                {!isOperator && (
+                {!isOperator && !disabled && (
                   <IconButton
                     size="small"
                     onClick={() => handleDeleteRole(role.id)}
@@ -438,23 +447,25 @@ export function RolesTab({ orgId }: RolesTabProps) {
         })}
 
         {/* Add role button */}
-        <div className={sty.addRoleRow}>
-          <Button
-            startIcon={<AddIcon />}
-            onClick={handleAddRole}
-            disabled={saving}
-            sx={{
-              fontFamily,
-              textTransform: 'none',
-              color: '#31664a',
-              '&:hover': {
-                backgroundColor: 'rgba(49, 102, 74, 0.08)',
-              },
-            }}
-          >
-            Add Role
-          </Button>
-        </div>
+        {!disabled && (
+          <div className={sty.addRoleRow}>
+            <Button
+              startIcon={<AddIcon />}
+              onClick={handleAddRole}
+              disabled={saving}
+              sx={{
+                fontFamily,
+                textTransform: 'none',
+                color: '#31664a',
+                '&:hover': {
+                  backgroundColor: 'rgba(49, 102, 74, 0.08)',
+                },
+              }}
+            >
+              Add Role
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Color Picker Popover */}

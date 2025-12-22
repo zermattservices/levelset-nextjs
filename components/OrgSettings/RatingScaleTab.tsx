@@ -29,9 +29,10 @@ const ThresholdInput = styled(TextField)(() => ({
 
 interface RatingScaleTabProps {
   orgId: string | null;
+  disabled?: boolean;
 }
 
-export function RatingScaleTab({ orgId }: RatingScaleTabProps) {
+export function RatingScaleTab({ orgId, disabled = false }: RatingScaleTabProps) {
   const [yellowThreshold, setYellowThreshold] = React.useState<string>('1.75');
   const [greenThreshold, setGreenThreshold] = React.useState<string>('2.75');
   const [loading, setLoading] = React.useState(true);
@@ -179,7 +180,7 @@ export function RatingScaleTab({ orgId }: RatingScaleTabProps) {
                   max: 3, 
                   step: 0.01,
                 }}
-                disabled={saving}
+                disabled={saving || disabled}
               />
             </div>
             <div className={sty.yellowSection}>
@@ -196,7 +197,7 @@ export function RatingScaleTab({ orgId }: RatingScaleTabProps) {
                   max: 3, 
                   step: 0.01,
                 }}
-                disabled={saving}
+                disabled={saving || disabled}
               />
             </div>
             <div className={sty.greenSection}>
