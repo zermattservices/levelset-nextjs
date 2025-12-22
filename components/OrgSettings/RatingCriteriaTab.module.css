@@ -1,0 +1,169 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.introTitle {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 600;
+  color: #0d1b14;
+  margin: 0;
+}
+
+.introDescription {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+}
+
+.errorMessage {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.placeholder {
+  color: #9ca3af;
+}
+
+.dropdownRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.dropdownLabel {
+  font-family: "Satoshi";
+  font-size: 14px;
+  font-weight: 500;
+  color: #0d1b14;
+}
+
+.scrollContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.criteriaHeader {
+  display: grid;
+  grid-template-columns: 32px 200px 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e5e5;
+  align-items: center;
+}
+
+.headerNumber,
+.headerCriteriaName,
+.headerDescription {
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.headerNumber {
+  text-align: center;
+}
+
+.criteriaList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.criteriaRow {
+  display: grid;
+  grid-template-columns: 32px 200px 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: flex-start;
+}
+
+.criteriaNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #f6fffa;
+  color: #31664a;
+  font-family: "Satoshi";
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.criteriaNameField {
+  width: 100%;
+}
+
+.criteriaDescriptionField {
+  width: 100%;
+}
+
+.descriptionTextarea {
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 12px;
+  font-family: "Satoshi";
+  font-size: 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.descriptionTextarea:focus {
+  outline: none;
+  border-color: #31664a;
+}
+
+.descriptionTextarea::placeholder {
+  color: #9ca3af;
+}
+
+.actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.rightActions {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}

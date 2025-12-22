@@ -56,6 +56,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const supabase = createServerSupabaseClient();
 
+  // Fetch location details including password
+  const { data: locationData } = await supabase
+    .from('locations')
+    .select('discipline_password')
+    .eq('id', location.id)
+    .single();
+
+  const disciplinePassword = locationData?.discipline_password || location.location_number || '';
+
+  // Fetch discipline role access settings if org_id exists
+  let allowedRoles: Set<string> | null = null;
+  if (location.org_id) {
+    const { data: accessData } = await supabase
+      .from('discipline_role_access')
+      .select('role_name')
+      .eq('org_id', location.org_id)
+      .eq('can_submit', true);
+
+    if (accessData && accessData.length > 0) {
+      allowedRoles = new Set(accessData.map(a => a.role_name));
+    }
+  }
+
   // Try to load with Spanish columns, fallback to base columns if migration hasn't been run
   let rubricQuery = supabase
     .from('infractions_rubric')
@@ -105,8 +128,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     role: emp.role ?? null,
   }));
 
+  // Filter leaders based on:
+  // 1. If allowedRoles is configured, only include employees whose role is in allowedRoles
+  // 2. Otherwise, fallback to the isLeaderRole check
   const leaders = (employeesData ?? [])
-    .filter((emp) => isLeaderRole(emp.role, emp.is_leader))
+    .filter((emp) => {
+      if (allowedRoles) {
+        // If access rules are configured, only allow roles that have can_submit = true
+        return emp.role && allowedRoles.has(emp.role);
+      }
+      // Fallback to traditional leader check
+      return isLeaderRole(emp.role, emp.is_leader);
+    })
     .map((emp) => ({
       id: emp.id,
       name: normalizeName(emp.full_name, emp.first_name, emp.last_name),
@@ -125,6 +158,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     employees,
     leaders,
     infractions,
+    disciplinePassword,
   });
 }
 

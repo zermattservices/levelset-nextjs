@@ -4,5 +4,17 @@
       "path": "/api/cron/evaluate-certifications",
       "schedule": "0 8 * * *"
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "docs.levelset.io" }],
+      "destination": "https://levelset.mintlify.dev/"
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "docs.levelset.io" }],
+      "destination": "https://levelset.mintlify.dev/:path*"
+    }
   ]
 }

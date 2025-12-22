@@ -22,7 +22,6 @@ import SyncIcon from "@mui/icons-material/Sync";
 import { EmployeeTableSkeleton } from "./Skeletons/EmployeeTableSkeleton";
 import { EvaluationsTable } from "./EvaluationsTable";
 import { PIPTable } from "./PIPTable";
-import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import { RolePill } from "./shared/RolePill";
 import { DataGridPro, GridColDef, gridClasses } from "@mui/x-data-grid-pro";
 import { Button } from "@mui/material";
@@ -31,16 +30,18 @@ import { SyncEmployeesModal } from "./SyncEmployeesModal";
 import { SyncHireDateModal } from "./SyncHireDateModal";
 import { EmployeeModal } from "./EmployeeModal";
 import { useLocationContext } from "./LocationContext";
-import { useDataEnv } from '@plasmicapp/react-web/lib/host';
+import { createSupabaseClient } from "@/util/supabase/component";
+import type { OrgRole } from "@/lib/role-utils";
 
-export type Role =
-  | "New Hire"
-  | "Team Member"
-  | "Trainer"
-  | "Team Lead"
-  | "Director"
-  | "Executive"
-  | "Operator";
+// Feature toggles interface
+interface OrgFeatureToggles {
+  enable_certified_status: boolean;
+  enable_evaluations: boolean;
+  enable_pip_logic: boolean;
+}
+
+// Role type is now dynamic - this is a fallback type for backwards compatibility
+export type Role = string;
 
 export interface RosterEntry {
   id: string;
@@ -54,8 +55,8 @@ export interface RosterEntry {
 }
 
 export function RosterTable(props: RosterTableProps) {
-  const { locationId } = props;
-  const { selectedLocationOrgId } = useLocationContext();
+  const { locationId, currentUserRoleProp } = props;
+  const { selectedLocationOrgId, userHierarchyLevel } = useLocationContext();
   const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations' | 'pip'>('employees');
   const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
   const [addEmployeeModalOpen, setAddEmployeeModalOpen] = React.useState(false);
@@ -63,6 +64,44 @@ export function RosterTable(props: RosterTableProps) {
   const [syncHireDateModalOpen, setSyncHireDateModalOpen] = React.useState(false);
   const [syncMenuAnchor, setSyncMenuAnchor] = React.useState<null | HTMLElement>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
+  const [featureToggles, setFeatureToggles] = React.useState<OrgFeatureToggles>({
+    enable_certified_status: false,
+    enable_evaluations: false,
+    enable_pip_logic: false,
+  });
+  
+  // Determine if user can edit more than just FOH/BOH
+  // Level 0, 1, and Levelset Admin can edit everything
+  // Level 2+ can only edit FOH/BOH (and view evaluations/PIP read-only)
+  const canEditFullRoster = React.useMemo(() => {
+    if (currentUserRoleProp === 'Levelset Admin') return true;
+    if (userHierarchyLevel === null) return false;
+    return userHierarchyLevel <= 1;
+  }, [currentUserRoleProp, userHierarchyLevel]);
+
+  // Fetch feature toggles for the current organization
+  React.useEffect(() => {
+    const fetchFeatureToggles = async () => {
+      if (!selectedLocationOrgId) return;
+      
+      const supabase = createSupabaseClient();
+      const { data, error } = await supabase
+        .from('org_feature_toggles')
+        .select('enable_certified_status, enable_evaluations, enable_pip_logic')
+        .eq('org_id', selectedLocationOrgId)
+        .single();
+      
+      if (!error && data) {
+        setFeatureToggles({
+          enable_certified_status: data.enable_certified_status ?? false,
+          enable_evaluations: data.enable_evaluations ?? false,
+          enable_pip_logic: data.enable_pip_logic ?? false,
+        });
+      }
+    };
+    
+    fetchFeatureToggles();
+  }, [selectedLocationOrgId]);
 
   const handleTabChange = (_event: React.SyntheticEvent, value: string) => {
     setActiveTab((value as 'employees' | 'evaluations' | 'pip') ?? 'employees');
@@ -73,26 +112,30 @@ export function RosterTable(props: RosterTableProps) {
       <TabContainer>
         <StyledTabs value={activeTab} onChange={handleTabChange} sx={{ flex: 1 }}>
           <StyledTab label="Employees" value="employees" />
-          <StyledTab
-            value="evaluations"
-            label={
-              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
-                <span>Pending Evaluations</span>
-                {hasPlannedEvaluations && (
-                  <Box
-                    component="span"
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      backgroundColor: '#facc15',
-                    }}
-                  />
-                )}
-              </Box>
-            }
-          />
-          <StyledTab label="PIP" value="pip" />
+          {featureToggles.enable_evaluations && (
+            <StyledTab
+              value="evaluations"
+              label={
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                  <span>Pending Evaluations</span>
+                  {hasPlannedEvaluations && (
+                    <Box
+                      component="span"
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: '#facc15',
+                      }}
+                    />
+                  )}
+                </Box>
+              }
+            />
+          )}
+          {featureToggles.enable_pip_logic && (
+            <StyledTab label="PIP" value="pip" />
+          )}
         </StyledTabs>
         <ButtonContainer>
           <Button
@@ -187,12 +230,13 @@ export function RosterTable(props: RosterTableProps) {
 
       <Box sx={{ mt: 2 }}>
         {activeTab === 'employees' ? (
-          <EmployeesTableView {...props} key={refreshKey} />
+          <EmployeesTableView {...props} key={refreshKey} featureToggles={featureToggles} />
         ) : activeTab === 'evaluations' ? (
           <EvaluationsTable
             locationId={locationId}
             className={props.className}
             onPlannedStatusChange={setHasPlannedEvaluations}
+            readOnly={!canEditFullRoster}
           />
         ) : (
           <PIPTable
@@ -240,6 +284,10 @@ export function RosterTable(props: RosterTableProps) {
 export interface RosterTableProps {
   locationId: string;
   className?: string;
+  
+  // auth context props
+  currentUserRoleProp?: string;
+  currentUserEmployeeIdProp?: string;
 
   // style/density controls
   density?: "comfortable" | "compact";
@@ -453,6 +501,8 @@ const CertificationChip = styled(Box)(() => ({
 function EmployeesTableView({
   locationId,
   className = "",
+  currentUserRoleProp,
+  currentUserEmployeeIdProp,
   density = "comfortable",
   showActions = true,
 
@@ -477,11 +527,24 @@ function EmployeesTableView({
   onEmployeeCreate,
   onEmployeeUpdate,
   onEmployeeDelete,
-}: RosterTableProps) {
+  featureToggles,
+}: RosterTableProps & { featureToggles?: OrgFeatureToggles }) {
+  const { selectedLocationOrgId, userHierarchyLevel } = useLocationContext();
+  
+  // Determine if user can edit more than just FOH/BOH
+  // Level 0, 1, and Levelset Admin can edit everything
+  // Level 2+ can only edit FOH/BOH
+  const canEditFullRoster = React.useMemo(() => {
+    if (currentUserRoleProp === 'Levelset Admin') return true;
+    if (userHierarchyLevel === null) return false;
+    return userHierarchyLevel <= 1;
+  }, [currentUserRoleProp, userHierarchyLevel]);
   const [data, setData] = React.useState<RosterEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const inEditor = usePlasmicCanvasContext();
+  
+  // Dynamic roles from org_roles table
+  const [orgRoles, setOrgRoles] = React.useState<OrgRole[]>([]);
   
   // Role dropdown state
   const [roleMenuAnchor, setRoleMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
@@ -503,49 +566,95 @@ function EmployeesTableView({
   const [terminateConfirmOpen, setTerminateConfirmOpen] = React.useState(false);
   const [employeeToTerminate, setEmployeeToTerminate] = React.useState<{ id: string; name: string } | null>(null);
 
-  // Get current user's role and employee_id from auth context
-  const dataEnv = useDataEnv?.();
-  const currentUserRole = dataEnv?.auth?.role || '';
-  const currentUserEmployeeId = dataEnv?.auth?.employee_id || '';
+  // Get current user's role and employee_id from props (passed from parent component)
+  const currentUserRole = currentUserRoleProp || '';
+  const currentUserEmployeeId = currentUserEmployeeIdProp || '';
+
+  // Fetch org roles when org changes
+  React.useEffect(() => {
+    async function fetchOrgRoles() {
+      if (!selectedLocationOrgId) return;
+      
+      const supabase = createSupabaseClient();
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('org_roles')
+        .select('*')
+        .eq('org_id', selectedLocationOrgId)
+        .order('hierarchy_level', { ascending: true });
+      
+      if (!rolesError && rolesData) {
+        setOrgRoles(rolesData);
+      }
+    }
+    
+    fetchOrgRoles();
+  }, [selectedLocationOrgId]);
+
+  // Get all role names sorted by hierarchy level
+  const allDynamicRoles = React.useMemo(() => {
+    if (orgRoles.length === 0) {
+      // Fallback to default roles if none loaded
+      return ["Operator", "Executive", "Director", "Team Lead", "Trainer", "Team Member", "New Hire"];
+    }
+    return orgRoles.map(r => r.role_name);
+  }, [orgRoles]);
+
+  // Get color key for a role
+  const getRoleColorKey = React.useCallback((roleName: string): string | undefined => {
+    const role = orgRoles.find(r => r.role_name === roleName);
+    return role?.color;
+  }, [orgRoles]);
+
+  // Find user's hierarchy level based on their role
+  const getUserHierarchyLevel = React.useCallback((userRole: string): number => {
+    // Levelset Admin has highest permissions (treat as -1 to always be above Operator)
+    if (userRole === 'Levelset Admin') return -1;
+    // Owner/Operator maps to Operator
+    if (userRole === 'Owner/Operator') return 0;
+    
+    const role = orgRoles.find(r => r.role_name === userRole);
+    return role?.hierarchy_level ?? 999;
+  }, [orgRoles]);
 
   // Helper function to get available roles based on user permissions
   const getAvailableRoles = React.useCallback((employeeId: string, currentEmployeeRole: Role): Role[] => {
     const isEditingSelf = employeeId === currentUserEmployeeId;
-    const allRoles: Role[] = ["New Hire", "Team Member", "Trainer", "Team Lead", "Director", "Executive", "Operator"];
-
-    // Levelset Admin: Can change any employee's role to any role option, operator included
+    
+    // Get current user's hierarchy level
+    const userLevel = getUserHierarchyLevel(currentUserRole);
+    
+    // Cannot change own role
+    if (isEditingSelf) return [];
+    
+    // Levelset Admin: Can change any employee's role to any role option
     if (currentUserRole === 'Levelset Admin') {
-      return allRoles;
+      return allDynamicRoles;
     }
 
-    // Operator (Owner/Operator): Can change anyone else's role (not their own), including executive
-    if (currentUserRole === 'Owner/Operator') {
-      if (isEditingSelf) {
-        return []; // Cannot change own role
-      }
-      return allRoles; // Can change anyone else to any role
+    // Operator (level 0): Can change anyone else's role to any role
+    if (userLevel === 0) {
+      return allDynamicRoles;
     }
 
-    // Executive: Can change to any role except operator (same as operator)
-    if (currentUserRole === 'Executive') {
-      if (isEditingSelf) {
-        return []; // Cannot change own role
-      }
-      return allRoles.filter(role => role !== 'Operator'); // Can change to any role except Operator
+    // Level 1 (e.g., Executive): Can change to any role except Operator
+    if (userLevel === 1) {
+      return allDynamicRoles.filter(roleName => {
+        const role = orgRoles.find(r => r.role_name === roleName);
+        return role ? role.hierarchy_level > 0 : true;
+      });
     }
 
-    // Director: Can change anyone below them (new hire, team member, trainer, team lead) but not director
-    if (currentUserRole === 'Director') {
-      if (isEditingSelf) {
-        return []; // Cannot change own role
-      }
-      // Can only change to roles below Director
-      return ["New Hire", "Team Member", "Trainer", "Team Lead"];
+    // Level 2 (e.g., Director): Can change to roles below them
+    if (userLevel === 2) {
+      return allDynamicRoles.filter(roleName => {
+        const role = orgRoles.find(r => r.role_name === roleName);
+        return role ? role.hierarchy_level > userLevel : false;
+      });
     }
 
     // Default: No permissions to change roles
     return [];
-  }, [currentUserRole, currentUserEmployeeId]);
+  }, [currentUserRole, currentUserEmployeeId, allDynamicRoles, orgRoles, getUserHierarchyLevel]);
 
   // Helper function to check if a role can be changed
   const canChangeRole = React.useCallback((employeeId: string, currentEmployeeRole: Role): boolean => {
@@ -599,19 +708,14 @@ function EmployeesTableView({
   // Fetch employees on mount and when location changes
   React.useEffect(() => {
     if (!locationId) {
-      if (inEditor) {
-        setData(sampleData);
-        setError(null);
-      } else {
-        setData([]);
-        setError('Select a location to view the roster.');
-      }
+      setData([]);
+      setError('Select a location to view the roster.');
       setLoading(false);
       return;
     }
 
     fetchEmployees();
-  }, [locationId, fetchEmployees, inEditor]);
+  }, [locationId, fetchEmployees]);
 
   // Real-time subscription disabled - Realtime not enabled on employees table
   // If you need real-time updates, enable Realtime on the employees table in Supabase
@@ -1069,17 +1173,20 @@ function EmployeesTableView({
         renderCell: (params) => {
           const employeeId = params.row.id as string;
           const role = params.value as Role;
-          const canChange = canChangeRole(employeeId, role);
+          // Level 2+ users cannot change roles at all
+          const canChange = canEditFullRoster && canChangeRole(employeeId, role);
           const availableRoles = getAvailableRoles(employeeId, role);
           const anchor = roleMenuAnchor[employeeId] ?? null;
+          const roleColorKey = getRoleColorKey(role);
           return (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
               {!canChange ? (
-                <RolePill role={role} />
+                <RolePill role={role} colorKey={roleColorKey} />
               ) : (
                 <>
                   <RolePill
                     role={role}
+                    colorKey={roleColorKey}
                     endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
                     onClick={(event) => handleRoleMenuOpen(event, employeeId)}
                   />
@@ -1104,7 +1211,7 @@ function EmployeesTableView({
                         selected={role === roleOption}
                         onClick={() => handleRoleSelect(employeeId, roleOption)}
                       >
-                        <RolePill role={roleOption} />
+                        <RolePill role={roleOption} colorKey={getRoleColorKey(roleOption)} />
                       </RoleMenuItem>
                     ))}
                   </Menu>
@@ -1163,6 +1270,21 @@ function EmployeesTableView({
           const employeeId = params.row.id as string;
           const availability = params.value as AvailabilityType;
           const anchor = availabilityMenuAnchor[employeeId] ?? null;
+          
+          // Level 2+ users cannot change availability
+          if (!canEditFullRoster) {
+            return (
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+                <AvailabilityChip
+                  className={availability.toLowerCase()}
+                  sx={{ cursor: "default", '&:hover': { transform: 'none', opacity: 1 } }}
+                >
+                  {availability}
+                </AvailabilityChip>
+              </Box>
+            );
+          }
+          
           return (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
               <AvailabilityChip
@@ -1207,58 +1329,6 @@ function EmployeesTableView({
         },
       },
       {
-        field: "certifiedStatus",
-        headerName: "Certified",
-        width: 170,
-        align: "center",
-        headerAlign: "center",
-        sortable: false,
-        renderCell: (params) => {
-          const employeeId = params.row.id as string;
-          const status = params.value as CertificationStatus;
-          const anchor = certificationMenuAnchor[employeeId] ?? null;
-          return (
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
-              <CertificationChip
-                className={status.toLowerCase().replace(" ", "-")}
-                onClick={(event) =>
-                  setCertificationMenuAnchor((prev) => ({ ...prev, [employeeId]: event.currentTarget }))
-                }
-              >
-                {status}
-                <ExpandMoreIcon sx={{ fontSize: 16, ml: 0.5 }} />
-              </CertificationChip>
-              <Menu
-                anchorEl={anchor}
-                open={Boolean(anchor)}
-                onClose={() => setCertificationMenuAnchor((prev) => ({ ...prev, [employeeId]: null }))}
-                PaperProps={{
-                  sx: {
-                    mt: 0.5,
-                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    borderRadius: 2,
-                  },
-                }}
-              >
-                {(["Not Certified", "Pending", "Certified", "PIP"] as CertificationStatus[]).map((option) => (
-                  <RoleMenuItem
-                    key={option}
-                    selected={status === option}
-                    onClick={() => handleCertificationStatusChange(employeeId, option)}
-                  >
-                    <CertificationChip className={option.toLowerCase().replace(" ", "-")}
-                      sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
-                    >
-                      {option}
-                    </CertificationChip>
-                  </RoleMenuItem>
-                ))}
-              </Menu>
-            </Box>
-          );
-        },
-      },
-      {
         field: "calculatedPay",
         headerName: "Suggested Pay",
         width: 170,
@@ -1282,6 +1352,81 @@ function EmployeesTableView({
         },
       },
     ];
+
+    // Conditionally add certified status column based on feature toggles
+    if (featureToggles?.enable_certified_status) {
+      // Insert before calculatedPay column
+      const calculatedPayIndex = baseColumns.findIndex(col => col.field === 'calculatedPay');
+      if (calculatedPayIndex !== -1) {
+        baseColumns.splice(calculatedPayIndex, 0, {
+          field: "certifiedStatus",
+          headerName: "Certified",
+          width: 170,
+          align: "center",
+          headerAlign: "center",
+          sortable: false,
+          renderCell: (params) => {
+            const employeeId = params.row.id as string;
+            const status = params.value as CertificationStatus;
+            const anchor = certificationMenuAnchor[employeeId] ?? null;
+            
+            // Level 2+ users cannot change certification status
+            if (!canEditFullRoster) {
+              return (
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+                  <CertificationChip
+                    className={status.toLowerCase().replace(" ", "-")}
+                    sx={{ cursor: "default", '&:hover': { transform: 'none', opacity: 1 } }}
+                  >
+                    {status}
+                  </CertificationChip>
+                </Box>
+              );
+            }
+            
+            return (
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+                <CertificationChip
+                  className={status.toLowerCase().replace(" ", "-")}
+                  onClick={(event) =>
+                    setCertificationMenuAnchor((prev) => ({ ...prev, [employeeId]: event.currentTarget }))
+                  }
+                >
+                  {status}
+                  <ExpandMoreIcon sx={{ fontSize: 16, ml: 0.5 }} />
+                </CertificationChip>
+                <Menu
+                  anchorEl={anchor}
+                  open={Boolean(anchor)}
+                  onClose={() => setCertificationMenuAnchor((prev) => ({ ...prev, [employeeId]: null }))}
+                  PaperProps={{
+                    sx: {
+                      mt: 0.5,
+                      boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                      borderRadius: 2,
+                    },
+                  }}
+                >
+                  {(["Not Certified", "Pending", "Certified", "PIP"] as CertificationStatus[]).map((option) => (
+                    <RoleMenuItem
+                      key={option}
+                      selected={status === option}
+                      onClick={() => handleCertificationStatusChange(employeeId, option)}
+                    >
+                      <CertificationChip className={option.toLowerCase().replace(" ", "-")}
+                        sx={{ cursor: "default", transform: "none", '&:hover': { opacity: 1, transform: 'none' } }}
+                      >
+                        {option}
+                      </CertificationChip>
+                    </RoleMenuItem>
+                  ))}
+                </Menu>
+              </Box>
+            );
+          },
+        });
+      }
+    }
 
     if (showActions) {
       baseColumns.push({
@@ -1362,6 +1507,9 @@ function EmployeesTableView({
     handleTerminateEmployee,
     canChangeRole,
     getAvailableRoles,
+    getRoleColorKey,
+    featureToggles,
+    canEditFullRoster,
   ]);
 
   if (loading && data.length === 0) {

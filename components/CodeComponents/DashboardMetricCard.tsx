@@ -1,15 +1,41 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
-import { useDataEnv } from '@plasmicapp/react-web/lib/host';
 import { Skeleton } from '@mui/material';
 
 import { createSupabaseClient } from '@/util/supabase/component';
-
-import ArrowUpIcon from '@/components/plasmic/levelset_v_2/icons/PlasmicIcon__ArrowUp';
 import styles from './DashboardMetricCard.module.css';
 
-type MetricVariant = 'positional-excellence' | 'discipline-points';
+// Inline ArrowUp icon to avoid Plasmic dependency
+function ArrowUpIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 20 20"
+      height="1em"
+      className={className}
+    >
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.5"
+        d="M10 15.833V4.167m0 0L4.167 10M10 4.167 15.833 10"
+      />
+    </svg>
+  );
+}
+
+type MetricVariant = 
+  | 'positional-excellence' 
+  | 'discipline-points'
+  | 'pathway-completion'
+  | 'coaching-evaluations'
+  | 'caring-interactions'
+  | 'great-food'
+  | 'quick-accurate'
+  | 'creating-moments'
+  | 'inviting-atmosphere';
 
 interface DashboardMetricCardProps {
   variant: MetricVariant;
@@ -17,6 +43,7 @@ interface DashboardMetricCardProps {
   linkHref?: string;
   onClick?: () => void;
   className?: string;
+  isPlaceholder?: boolean; // For blurred/coming soon cards
 }
 
 interface MetricConfig {
@@ -52,6 +79,62 @@ const VARIANT_CONFIG: Record<MetricVariant, MetricConfig> = {
     dateColumn: 'infraction_date',
     invertTrend: true,
   },
+  'pathway-completion': {
+    title: 'Pathway Completion',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'coaching-evaluations': {
+    title: 'Coaching Evaluations',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'caring-interactions': {
+    title: 'Caring Interactions',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'great-food': {
+    title: 'Great Food',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'quick-accurate': {
+    title: 'Quick & Accurate',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'creating-moments': {
+    title: 'Creating Moments',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
+  'inviting-atmosphere': {
+    title: 'Inviting Atmosphere',
+    totalLabel: 'Total:',
+    deltaLabel: 'over prior 90 days',
+    table: '',
+    dateColumn: '',
+    invertTrend: false,
+  },
 };
 
 function formatNumber(value: number): string {
@@ -64,13 +147,15 @@ export function DashboardMetricCard({
   linkHref,
   onClick,
   className,
+  isPlaceholder = false,
 }: DashboardMetricCardProps) {
   const router = useRouter();
-  const inEditor = usePlasmicCanvasContext();
-  const dataEnv = useDataEnv?.();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
-  const effectiveLocationId = locationId || dataEnv?.auth?.location_id || undefined;
+  const effectiveLocationId = locationId || undefined;
+  
+  // Check if this is a placeholder variant (no table configured)
+  const isPlaceholderVariant = !VARIANT_CONFIG[variant]?.table;
 
   const [metricState, setMetricState] = React.useState<MetricState | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -79,18 +164,18 @@ export function DashboardMetricCard({
   const config = VARIANT_CONFIG[variant];
 
   const fetchMetrics = React.useCallback(async () => {
-    // Provide representative sample data in Plasmic Studio when IDs are absent
-    if (inEditor && !effectiveLocationId) {
-      const sample: MetricState =
-        variant === 'positional-excellence'
-          ? { total: 863, change: 27, percent: 11.1, timestamp: new Date() }
-          : { total: 55, change: 3, percent: 5.8, timestamp: new Date() };
-      setMetricState(sample);
-      setError(null);
+    // For placeholder variants, show static zero data
+    if (isPlaceholder || isPlaceholderVariant) {
+      setMetricState({
+        total: 0,
+        change: 0,
+        percent: 0,
+        timestamp: new Date(),
+      });
       setLoading(false);
       return;
     }
-
+    
     if (!effectiveLocationId) {
       setMetricState(null);
       setError(null);
@@ -163,7 +248,8 @@ export function DashboardMetricCard({
     config.dateColumn,
     config.table,
     effectiveLocationId,
-    inEditor,
+    isPlaceholder,
+    isPlaceholderVariant,
     supabase,
     variant,
   ]);

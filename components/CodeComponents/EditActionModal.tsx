@@ -170,14 +170,37 @@ export function EditActionModal({
           setLocationOrgId(locData.org_id ?? null);
         }
 
-        // Fetch disc_actions_rubric options
-        const { data: rubricData, error: rubricError } = await supabase
-          .from('disc_actions_rubric')
-          .select('*')
-          .eq('location_id', locationId)
-          .order('points_threshold', { ascending: true }); // Order by points, lowest to highest
+        // Fetch disc_actions_rubric options - first try org-level, then fallback to location-level
+        let rubricData: any[] | null = null;
         
-        if (!rubricError && rubricData) {
+        // First, try org-level actions (location_id IS NULL)
+        if (locData?.org_id) {
+          const { data: orgRubricData, error: orgRubricError } = await supabase
+            .from('disc_actions_rubric')
+            .select('*')
+            .eq('org_id', locData.org_id)
+            .is('location_id', null)
+            .order('points_threshold', { ascending: true });
+          
+          if (!orgRubricError && orgRubricData && orgRubricData.length > 0) {
+            rubricData = orgRubricData;
+          }
+        }
+        
+        // Fallback to location-specific actions
+        if (!rubricData || rubricData.length === 0) {
+          const { data: locRubricData, error: locRubricError } = await supabase
+            .from('disc_actions_rubric')
+            .select('*')
+            .eq('location_id', locationId)
+            .order('points_threshold', { ascending: true });
+          
+          if (!locRubricError && locRubricData) {
+            rubricData = locRubricData;
+          }
+        }
+        
+        if (rubricData) {
           setDiscActionsRubricOptions(rubricData);
         }
       } catch (err) {

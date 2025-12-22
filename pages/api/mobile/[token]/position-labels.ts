@@ -62,18 +62,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(404).json({ error: 'No labels found for position' });
   }
 
+  const labels = [data.label_1, data.label_2, data.label_3, data.label_4, data.label_5].filter(
+    (label): label is string => Boolean(label)
+  );
+  
+  const labels_es = (data as any).label_1_es ? [
+    (data as any).label_1_es,
+    (data as any).label_2_es,
+    (data as any).label_3_es,
+    (data as any).label_4_es,
+    (data as any).label_5_es,
+  ].filter((label): label is string => Boolean(label)) : [];
+
+  // Fetch criteria descriptions from org_positions / position_criteria if available
+  let descriptions: string[] = [];
+  if (location.org_id) {
+    // First find the org position ID
+    const { data: orgPosition } = await supabase
+      .from('org_positions')
+      .select('id')
+      .eq('org_id', location.org_id)
+      .ilike('name', position)
+      .maybeSingle();
+
+    if (orgPosition) {
+      // Fetch criteria with descriptions
+      const { data: criteriaData } = await supabase
+        .from('position_criteria')
+        .select('name, description, criteria_order')
+        .eq('position_id', orgPosition.id)
+        .order('criteria_order', { ascending: true });
+
+      if (criteriaData && criteriaData.length > 0) {
+        // Map descriptions to match the labels order
+        descriptions = labels.map(label => {
+          const matchingCriteria = criteriaData.find(
+            c => c.name?.toLowerCase() === label?.toLowerCase()
+          );
+          return matchingCriteria?.description ?? '';
+        });
+      }
+    }
+  }
+
   res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json({
-    labels: [data.label_1, data.label_2, data.label_3, data.label_4, data.label_5].filter(
-      (label): label is string => Boolean(label)
-    ),
-    labels_es: (data as any).label_1_es ? [
-      (data as any).label_1_es,
-      (data as any).label_2_es,
-      (data as any).label_3_es,
-      (data as any).label_4_es,
-      (data as any).label_5_es,
-    ].filter((label): label is string => Boolean(label)) : [],
+    labels,
+    labels_es,
+    descriptions,
   });
 }
 

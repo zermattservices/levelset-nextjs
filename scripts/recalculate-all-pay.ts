@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { calculatePay, shouldCalculatePay, CFA_BUDA_LOCATION_IDS } from '../lib/pay-calculator';
+import { calculatePayForLocation, shouldCalculatePay, CFA_BUDA_LOCATION_IDS, RILEY_EMTER_LOCATION_IDS } from '../lib/pay-calculator';
 import type { Employee } from '../lib/supabase.types';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
@@ -51,7 +51,7 @@ async function recalculateAllPay() {
   let errors = 0;
 
   for (const employee of employees) {
-    const calculatedPay = calculatePay(employee as Employee);
+    const calculatedPay = calculatePayForLocation(employee as Employee, employee.location_id);
     
     if (calculatedPay === null) {
       console.log(`⚠️  ${employee.full_name || employee.id}: Unable to calculate pay (role: ${employee.role})`);

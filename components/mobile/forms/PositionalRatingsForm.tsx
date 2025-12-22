@@ -33,17 +33,20 @@ interface PositionOption {
   name: string;
   name_es?: string | null;
   zone: 'FOH' | 'BOH';
+  description?: string | null;
 }
 
 interface PositionalDataResponse {
   employees: EmployeeOption[];
   leaders: EmployeeOption[];
   positions: PositionOption[];
+  rolePermissions?: Record<string, string[]>;
 }
 
 interface LabelsResponse {
   labels: string[];
   labels_es?: string[];
+  descriptions?: string[];
 }
 
 interface PositionalRatingsFormProps {
@@ -63,11 +66,13 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [leaders, setLeaders] = React.useState<EmployeeOption[]>([]);
   const [positions, setPositions] = React.useState<PositionOption[]>([]);
+  const [rolePermissions, setRolePermissions] = React.useState<Record<string, string[]>>({});
 
   const [selectedLeader, setSelectedLeader] = React.useState('');
   const [selectedEmployee, setSelectedEmployee] = React.useState('');
   const [selectedPosition, setSelectedPosition] = React.useState('');
   const [labels, setLabels] = React.useState<string[]>([]);
+  const [descriptions, setDescriptions] = React.useState<string[]>([]);
   const [ratings, setRatings] = React.useState<Array<RatingValue | null>>([]);
 
   const [dirty, setDirty] = React.useState(false);
@@ -107,6 +112,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             : payload.employees ?? [];
           setLeaders(leaderOptions);
           setPositions((payload.positions ?? []).map((item) => ({ ...item })));
+          setRolePermissions(payload.rolePermissions ?? {});
           setSelectedLeader('');
           setSelectedEmployee('');
           setSelectedPosition('');
@@ -139,6 +145,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
       controls.setSubmitDisabled(true);
       setLabelsError(null);
       setLabels([]);
+      setDescriptions([]);
       setRatings([]);
       try {
         const response = await fetch(
@@ -155,12 +162,14 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             ? payload.labels_es
             : payload.labels ?? [];
           setLabels(fetchedLabels);
+          setDescriptions(payload.descriptions ?? []);
           setRatings(Array.from({ length: fetchedLabels.length }, () => null));
         }
       } catch (err: any) {
         if (!cancelled) {
           setLabelsError(err?.message ?? 'Unable to load position details');
           setLabels([]);
+          setDescriptions([]);
           setRatings([]);
         }
       }
@@ -168,6 +177,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
 
     if (!selectedPosition) {
       setLabels([]);
+      setDescriptions([]);
       setRatings([]);
       setLabelsError(null);
       return;
@@ -253,9 +263,34 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
 
   const leaderOptions = leaders.length ? leaders : employees;
 
+  // Get selected leader's role
+  const selectedLeaderRole = React.useMemo(() => {
+    const leader = leaderOptions.find(l => l.id === selectedLeader);
+    return leader?.role ?? null;
+  }, [leaderOptions, selectedLeader]);
+
+  // Filter positions based on selected leader's role permissions
+  const filteredPositions = React.useMemo(() => {
+    // If no role permissions are configured, show all positions
+    const hasPermissions = Object.keys(rolePermissions).length > 0;
+    if (!hasPermissions || !selectedLeaderRole) {
+      return positions;
+    }
+
+    // Get allowed positions for this role
+    const allowedPositions = rolePermissions[selectedLeaderRole];
+    if (!allowedPositions || allowedPositions.length === 0) {
+      // If no permissions defined for this role, show all positions (fallback)
+      return positions;
+    }
+
+    // Filter positions to only those allowed for this role
+    return positions.filter(p => allowedPositions.includes(p.name));
+  }, [positions, rolePermissions, selectedLeaderRole]);
+
   const positionsByZone = React.useMemo(() => {
     const grouped = new Map<'FOH' | 'BOH', PositionOption[]>();
-    positions.forEach((option) => {
+    filteredPositions.forEach((option) => {
       const zone = option.zone ?? 'FOH';
       if (!grouped.has(zone)) {
         grouped.set(zone, []);
@@ -274,7 +309,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
         }),
       }))
       .filter((group) => group.options.length > 0);
-  }, [positions, language, translate]);
+  }, [filteredPositions, language, translate]);
 
   if (loading) {
     return (
@@ -301,6 +336,10 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           value={leaderOptions.find((option) => option.id === selectedLeader) ?? null}
           onChange={(_, option) => {
             setSelectedLeader(option?.id ?? '');
+            // Clear position selection when leader changes (positions may be filtered)
+            setSelectedPosition('');
+            setLabels([]);
+            setRatings([]);
             markDirty();
           }}
           getOptionLabel={(option) => option.name}
@@ -352,6 +391,30 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             </optgroup>
           ))}
         </TextField>
+
+        {/* Position description */}
+        {selectedPosition && (() => {
+          const selectedPos = filteredPositions.find(p => p.name === selectedPosition);
+          if (selectedPos?.description) {
+            return (
+              <Typography
+                sx={{
+                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: '#4b5563',
+                  backgroundColor: '#f9fafb',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  lineHeight: 1.5,
+                }}
+              >
+                {selectedPos.description}
+              </Typography>
+            );
+          }
+          return null;
+        })()}
       </Box>
 
       {labelsError && (
@@ -375,16 +438,31 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                 gap: 2,
               }}
             >
-              <Typography
-                sx={{
-                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: '#111827',
-                }}
-              >
-                {label}
-              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Typography
+                  sx={{
+                    fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: '#111827',
+                  }}
+                >
+                  {label}
+                </Typography>
+                {descriptions[index] && (
+                  <Typography
+                    sx={{
+                      fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: '#6b7280',
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {descriptions[index]}
+                  </Typography>
+                )}
+              </Box>
               <RadioGroup
                 row
                 value={ratings[index] ?? ''}

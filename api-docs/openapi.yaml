@@ -1,0 +1,430 @@
+openapi: 3.0.3
+info:
+  title: Levelset API
+  description: |
+    Internal API documentation for the Levelset platform.
+    
+    **This documentation is for internal use only.**
+    
+    ## Authentication
+    
+    Most endpoints require authentication via Supabase session cookies.
+    Mobile endpoints use token-based authentication via the URL path.
+    
+    ## Base URLs
+    
+    - Production: https://app.levelset.io
+    - Preview: https://preview.levelset.io
+    
+  version: 1.0.0
+  contact:
+    email: support@levelset.io
+
+servers:
+  - url: https://app.levelset.io
+    description: Production
+  - url: https://preview.levelset.io
+    description: Preview/Staging
+
+tags:
+  - name: Authentication
+    description: Auth-related endpoints
+  - name: Employees
+    description: Employee management
+  - name: Ratings
+    description: Positional ratings
+  - name: Discipline
+    description: Discipline and infractions
+  - name: Mobile
+    description: Mobile PWA endpoints (token-authenticated)
+  - name: Admin
+    description: Administrative operations
+
+paths:
+  /api/employees:
+    get:
+      tags:
+        - Employees
+      summary: List employees
+      description: Get employees for a location
+      parameters:
+        - name: locationId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Employee'
+    post:
+      tags:
+        - Employees
+      summary: Create employee
+      description: Add a new employee to a location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmployee'
+      responses:
+        '200':
+          description: Employee created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+  /api/ratings:
+    get:
+      tags:
+        - Ratings
+      summary: Get ratings
+      description: Retrieve positional ratings for a location
+      parameters:
+        - name: locationId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: position
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of ratings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rating'
+    post:
+      tags:
+        - Ratings
+      summary: Submit rating
+      description: Submit a positional rating for an employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRating'
+      responses:
+        '200':
+          description: Rating submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rating'
+
+  /api/mobile/{token}/ratings:
+    get:
+      tags:
+        - Mobile
+      summary: Get ratings (mobile)
+      description: Get ratings via mobile token authentication
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ratings data
+    post:
+      tags:
+        - Mobile
+      summary: Submit rating (mobile)
+      description: Submit a rating via mobile PWA
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRating'
+      responses:
+        '200':
+          description: Rating submitted
+
+  /api/mobile/{token}/infractions:
+    post:
+      tags:
+        - Mobile
+        - Discipline
+      summary: Submit infraction (mobile)
+      description: Submit a discipline infraction via mobile PWA
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInfraction'
+      responses:
+        '200':
+          description: Infraction submitted
+
+  /api/admin/create-user:
+    post:
+      tags:
+        - Admin
+      summary: Create dashboard user
+      description: Create a new user with dashboard access (linked to employee)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '200':
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  userId:
+                    type: string
+                  isGoogleEmail:
+                    type: boolean
+
+  /api/admin/create-admin-user:
+    post:
+      tags:
+        - Admin
+      summary: Create admin-only user
+      description: Create a user without employee linkage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdminUser'
+      responses:
+        '200':
+          description: User created
+
+components:
+  schemas:
+    Employee:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        first_name:
+          type: string
+        last_name:
+          type: string
+        full_name:
+          type: string
+        role:
+          type: string
+        location_id:
+          type: string
+          format: uuid
+        org_id:
+          type: string
+          format: uuid
+        active:
+          type: boolean
+        hire_date:
+          type: string
+          format: date
+        foh:
+          type: boolean
+        boh:
+          type: boolean
+
+    CreateEmployee:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - location_id
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        role:
+          type: string
+        location_id:
+          type: string
+          format: uuid
+        hire_date:
+          type: string
+          format: date
+        foh:
+          type: boolean
+        boh:
+          type: boolean
+
+    Rating:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        employee_id:
+          type: string
+          format: uuid
+        position:
+          type: string
+        rating_1:
+          type: integer
+          minimum: 1
+          maximum: 3
+        rating_2:
+          type: integer
+          minimum: 1
+          maximum: 3
+        rating_3:
+          type: integer
+          minimum: 1
+          maximum: 3
+        rating_4:
+          type: integer
+          minimum: 1
+          maximum: 3
+        rating_5:
+          type: integer
+          minimum: 1
+          maximum: 3
+        submitted_by:
+          type: string
+        submitted_at:
+          type: string
+          format: date-time
+
+    CreateRating:
+      type: object
+      required:
+        - employee_id
+        - position
+        - rating_1
+        - rating_2
+        - rating_3
+        - rating_4
+        - rating_5
+      properties:
+        employee_id:
+          type: string
+          format: uuid
+        position:
+          type: string
+        rating_1:
+          type: integer
+          minimum: 1
+          maximum: 3
+        rating_2:
+          type: integer
+          minimum: 1
+          maximum: 3
+        rating_3:
+          type: integer
+          minimum: 1
+          maximum: 3
+        rating_4:
+          type: integer
+          minimum: 1
+          maximum: 3
+        rating_5:
+          type: integer
+          minimum: 1
+          maximum: 3
+
+    CreateInfraction:
+      type: object
+      required:
+        - employee_id
+        - infraction_type
+        - date
+      properties:
+        employee_id:
+          type: string
+          format: uuid
+        infraction_type:
+          type: string
+        date:
+          type: string
+          format: date
+        notes:
+          type: string
+        password:
+          type: string
+
+    CreateUser:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - orgId
+        - employeeId
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+        orgId:
+          type: string
+          format: uuid
+        employeeId:
+          type: string
+          format: uuid
+
+    CreateAdminUser:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - orgId
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        orgId:
+          type: string
+          format: uuid

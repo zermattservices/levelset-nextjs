@@ -1,0 +1,181 @@
+---
+title: Managing Roles
+description: How to update employee roles and understand permissions
+---
+
+# Managing Roles
+
+Roles in Levelset determine what employees can access and do within the platform. This guide covers how to manage role assignments.
+
+## Understanding the Role Hierarchy
+
+Roles are organized in a hierarchy from highest to lowest permission level:
+
+```
+Operator (Level 0)
+    ↓
+Executive (Level 1)
+    ↓
+Director (Level 2)
+    ↓
+Team Lead (Level 3)
+    ↓
+Trainer (Level 4)
+    ↓
+Team Member (Level 5)
+    ↓
+New Hire (Level 6)
+```
+
+<Note>
+Your organization may have different role names. The hierarchy is what matters for permissions.
+</Note>
+
+## Changing an Employee's Role
+
+### From the Roster
+
+1. Navigate to **Roster**
+2. Find the employee in the table
+3. Click on their current role badge
+4. Select the new role from the dropdown
+5. The change saves automatically
+
+### Who Can Change Roles
+
+Role changes follow a hierarchy rule:
+
+- You can only change roles for employees below your level
+- You cannot promote someone to your level or above
+- Operators can change any role
+- Levelset Admins have full access
+
+## Role Permissions
+
+Each role level has different capabilities:
+
+<Tabs>
+  <Tab title="Operator">
+    - Full access to all features
+    - Can manage all settings
+    - Can change any employee's role
+    - Can access all locations in the organization
+  </Tab>
+  
+  <Tab title="Executive/Director">
+    - View and submit ratings
+    - Access discipline dashboard
+    - Manage team members below their level
+    - Access organization settings (limited)
+  </Tab>
+  
+  <Tab title="Team Lead">
+    - Submit ratings for assigned positions
+    - View team performance data
+    - Limited discipline access (if enabled)
+  </Tab>
+  
+  <Tab title="Trainer">
+    - Submit ratings for positions they train
+    - View relevant performance data
+  </Tab>
+  
+  <Tab title="Team Member/New Hire">
+    - Mobile app access (if enabled)
+    - View own performance data (if enabled)
+  </Tab>
+</Tabs>
+
+## Dashboard Access
+
+Not all roles have access to the Levelset dashboard:
+
+| Role Level | Dashboard Access |
+|------------|------------------|
+| 0-2 (Operator to Director) | Full dashboard access |
+| 3+ (Team Lead and below) | Limited or no dashboard access |
+
+To give someone dashboard access:
+1. Go to **Organization Settings** → **Users**
+2. Click **Add User**
+3. Select the employee and create their login
+
+## Role Colors
+
+Each role has an assigned color for visual identification:
+
+- Colors appear on role badges throughout the platform
+- Customize colors in **Organization Settings** → **Roles**
+- Drag rows to reorder the hierarchy
+- Click the color circle to change a role's color
+
+## Promoting Employees
+
+When promoting an employee:
+
+<Steps>
+  <Step title="Update their role">
+    Change their role in the roster to reflect their new position.
+  </Step>
+  
+  <Step title="Consider dashboard access">
+    If they need dashboard access, add them as a user in Organization Settings.
+  </Step>
+  
+  <Step title="Review position permissions">
+    Check Role Mapping in Organization Settings to ensure they can rate appropriate positions.
+  </Step>
+</Steps>
+
+## Creating New Roles
+
+If your organization needs additional roles:
+
+1. Go to **Organization Settings** → **Roles**
+2. Click **Add Role**
+3. Enter the role name
+4. Drag to position in the hierarchy
+5. Select a color
+
+<Warning>
+Adding new roles affects permissions across the platform. Coordinate with your team before making changes.
+</Warning>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Regular Reviews" icon="calendar-check">
+    Review role assignments periodically to ensure they reflect current responsibilities.
+  </Card>
+  
+  <Card title="Clear Criteria" icon="list-check">
+    Define what each role means in your organization so promotions are consistent.
+  </Card>
+  
+  <Card title="Document Changes" icon="file-lines">
+    Keep notes on why role changes were made, especially for promotions.
+  </Card>
+  
+  <Card title="Train on Access" icon="graduation-cap">
+    When someone is promoted, ensure they understand their new access and responsibilities.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="I can't change an employee's role">
+    Check that:
+    - The employee is at a lower level than you
+    - You're not trying to promote them to or above your level
+    - You have the appropriate permissions
+  </Accordion>
+  
+  <Accordion title="New role isn't showing the right permissions">
+    Role permissions may need to be configured. Check Organization Settings → Role Mapping for position access, and ensure dashboard users are set up correctly.
+  </Accordion>
+  
+  <Accordion title="Employee can't access the dashboard after promotion">
+    Changing someone's role doesn't automatically give dashboard access. You need to add them as a user in Organization Settings → Users.
+  </Accordion>
+</AccordionGroup>

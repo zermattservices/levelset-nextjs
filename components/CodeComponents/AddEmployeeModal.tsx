@@ -24,6 +24,7 @@ import { createSupabaseClient } from "@/util/supabase/component";
 import type { Employee, AvailabilityType } from "@/lib/supabase.types";
 import { RolePill } from "./shared/RolePill";
 import { Role } from "./RosterTable";
+import type { OrgRole } from "@/lib/role-utils";
 
 export interface AddEmployeeModalProps {
   open: boolean;
@@ -160,7 +161,58 @@ export function AddEmployeeModal({
   const [availabilityMenuAnchor, setAvailabilityMenuAnchor] = React.useState<HTMLElement | null>(null);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [orgRoles, setOrgRoles] = React.useState<OrgRole[]>([]);
   const supabase = createSupabaseClient();
+
+  // Fetch org roles when modal opens
+  React.useEffect(() => {
+    async function fetchOrgRoles() {
+      if (!open || !locationId) return;
+      
+      // First get the org_id for this location
+      const { data: locData } = await supabase
+        .from('locations')
+        .select('org_id')
+        .eq('id', locationId)
+        .single();
+      
+      if (!locData?.org_id) return;
+      
+      // Then fetch roles for that org
+      const { data: rolesData } = await supabase
+        .from('org_roles')
+        .select('*')
+        .eq('org_id', locData.org_id)
+        .order('hierarchy_level', { ascending: true });
+      
+      if (rolesData) {
+        setOrgRoles(rolesData);
+        // Set default role to highest hierarchy level (usually Team Member)
+        const defaultRole = rolesData.find(r => r.role_name === 'Team Member') || rolesData[rolesData.length - 1];
+        if (defaultRole) {
+          setRole(defaultRole.role_name);
+        }
+      }
+    }
+    
+    fetchOrgRoles();
+  }, [open, locationId, supabase]);
+
+  // Get available roles (exclude Operator for new employees)
+  const availableRoles = React.useMemo(() => {
+    if (orgRoles.length === 0) {
+      // Fallback
+      return ["New Hire", "Team Member", "Trainer", "Team Lead", "Director"];
+    }
+    // Exclude Operator (hierarchy level 0) for new employees
+    return orgRoles.filter(r => r.hierarchy_level > 0).map(r => r.role_name);
+  }, [orgRoles]);
+
+  // Get color key for a role
+  const getRoleColorKey = React.useCallback((roleName: string): string | undefined => {
+    const orgRole = orgRoles.find(r => r.role_name === roleName);
+    return orgRole?.color;
+  }, [orgRoles]);
 
   // Reset form when modal closes
   React.useEffect(() => {
@@ -410,6 +462,7 @@ export function AddEmployeeModal({
               <Box>
                 <RolePill
                   role={role}
+                  colorKey={getRoleColorKey(role)}
                   endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
                   onClick={handleRoleMenuOpen}
                 />
@@ -428,13 +481,13 @@ export function AddEmployeeModal({
                     },
                   }}
                 >
-                  {(["New Hire", "Team Member", "Trainer", "Team Lead", "Director"] as Role[]).map((roleOption) => (
+                  {availableRoles.map((roleOption) => (
                     <RoleMenuItem
                       key={roleOption}
                       selected={role === roleOption}
                       onClick={() => handleRoleSelect(roleOption)}
                     >
-                      <RolePill role={roleOption} />
+                      <RolePill role={roleOption} colorKey={getRoleColorKey(roleOption)} />
                     </RoleMenuItem>
                   ))}
                 </Menu>

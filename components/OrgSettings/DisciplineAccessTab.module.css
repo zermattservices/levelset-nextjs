@@ -1,0 +1,134 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.introTitle {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 600;
+  color: #0d1b14;
+  margin: 0;
+}
+
+.introDescription {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+}
+
+.errorMessage {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-family: "Satoshi";
+  font-size: 14px;
+  font-weight: 600;
+  color: #0d1b14;
+  margin: 0;
+}
+
+.sectionDescription {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.rolesList {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 8px 12px 8px 8px;
+}
+
+.roleRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.roleRow:hover {
+  background: #f0f0f0;
+}
+
+.roleName {
+  font-family: "Satoshi";
+  font-size: 14px;
+  font-weight: 500;
+  color: #0d1b14;
+}
+
+.emptyState {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #9ca3af;
+  text-align: center;
+  padding: 24px;
+}
+
+.passwordRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.helpText {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #666;
+  margin: 8px 0 0 0;
+}
+
+.helpLink {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #31664a;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.helpLink:hover {
+  color: #264d38;
+}

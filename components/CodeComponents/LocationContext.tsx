@@ -1,5 +1,4 @@
 import React from 'react';
-import { DataProvider, usePlasmicCanvasContext } from '@plasmicapp/loader-nextjs';
 import { createSupabaseClient } from '@/util/supabase/component';
 
 interface LocationRecord {
@@ -8,6 +7,7 @@ interface LocationRecord {
   name?: string | null;
   org_id?: string | null;
   location_mobile_token?: string | null;
+  image_url?: string | null;
 }
 
 interface LocationContextValue {
@@ -16,6 +16,8 @@ interface LocationContextValue {
   selectedLocationNumber: string | null;
   selectedLocationOrgId: string | null;
   selectedLocationMobileToken: string | null;
+  selectedLocationImageUrl: string | null;
+  userHierarchyLevel: number | null;
   loading: boolean;
   error: string | null;
   selectLocation: (locationId: string) => void;
@@ -35,7 +37,7 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
   const user = sessionData.session?.user;
 
   if (!user) {
-    return { userId: null, locations: [] as LocationRecord[] };
+    return { userId: null, userRole: null, locations: [] as LocationRecord[] };
   }
 
   const { data: appUser, error: appUserError } = await supabase
@@ -52,7 +54,7 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
   if (appUser?.location_id) {
     const { data: location, error: locationError } = await supabase
       .from('locations')
-      .select('id, location_number, name, org_id, location_mobile_token')
+      .select('id, location_number, name, org_id, location_mobile_token, image_url')
       .eq('id', appUser.location_id)
       .maybeSingle();
 
@@ -62,13 +64,14 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
 
     return {
       userId: user.id,
+      userRole: appUser?.role ?? null,
       locations: location ? [location] : [],
     };
   }
 
   const query = supabase
     .from('locations')
-    .select('id, location_number, name, org_id, location_mobile_token')
+    .select('id, location_number, name, org_id, location_mobile_token, image_url')
     .order('location_number', { ascending: true });
 
   if (appUser?.org_id) {
@@ -83,6 +86,7 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
 
   return {
     userId: user.id,
+    userRole: appUser?.role ?? null,
     locations: locations ?? [],
   };
 }
@@ -93,13 +97,15 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
   const [selectedLocationNumber, setSelectedLocationNumber] = React.useState<string | null>(null);
   const [selectedLocationOrgId, setSelectedLocationOrgId] = React.useState<string | null>(null);
   const [selectedLocationMobileToken, setSelectedLocationMobileToken] = React.useState<string | null>(null);
+  const [selectedLocationImageUrl, setSelectedLocationImageUrl] = React.useState<string | null>(null);
+  const [userHierarchyLevel, setUserHierarchyLevel] = React.useState<number | null>(null);
   const [userId, setUserId] = React.useState<string | null>(null);
+  const [userRole, setUserRole] = React.useState<string | null>(null);
   const userIdRef = React.useRef<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
-  const inEditor = usePlasmicCanvasContext();
   const isMountedRef = React.useRef(true);
 
   React.useEffect(() => {
@@ -116,6 +122,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
         setSelectedLocationNumber(null);
         setSelectedLocationOrgId(null);
         setSelectedLocationMobileToken(null);
+        setSelectedLocationImageUrl(null);
         return;
       }
 
@@ -126,6 +133,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
           setSelectedLocationNumber(match.location_number ?? null);
           setSelectedLocationOrgId(match.org_id ?? null);
           setSelectedLocationMobileToken(match.location_mobile_token ?? null);
+          setSelectedLocationImageUrl(match.image_url ?? null);
           return;
         }
       }
@@ -135,6 +143,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       setSelectedLocationNumber(null);
       setSelectedLocationOrgId(null);
       setSelectedLocationMobileToken(null);
+      setSelectedLocationImageUrl(null);
     },
     []
   );
@@ -144,31 +153,14 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     setError(null);
 
     try {
-      if (inEditor) {
-        const sampleLocations: LocationRecord[] = [
-          { id: '67e00fb2-29f5-41ce-9c1c-93e2f7f392dd', location_number: '04056', name: 'Buda', location_mobile_token: 'SAMPLETOKEN01' },
-          { id: 'c0d86fa1-0000-0000-0000-000000000000', location_number: '05508', name: 'Preview Location', location_mobile_token: 'SAMPLETOKEN02' },
-        ];
-        if (!isMountedRef.current) {
-          return;
-        }
-        setLocations(sampleLocations);
-        setUserId('plasmic-editor');
-        userIdRef.current = 'plasmic-editor';
-        setSelectedLocationId(sampleLocations[0].id);
-        setSelectedLocationNumber(sampleLocations[0].location_number ?? null);
-        setSelectedLocationMobileToken(sampleLocations[0].location_mobile_token ?? null);
-        setLoading(false);
-        return;
-      }
-
-      const { userId: fetchedUserId, locations: fetchedLocations } = await fetchAccessibleLocations(supabase);
+      const { userId: fetchedUserId, userRole: fetchedUserRole, locations: fetchedLocations } = await fetchAccessibleLocations(supabase);
 
       if (!isMountedRef.current) {
         return;
       }
 
       setUserId(fetchedUserId);
+      setUserRole(fetchedUserRole);
       userIdRef.current = fetchedUserId;
       setLocations(fetchedLocations);
 
@@ -188,7 +180,46 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       setError(loadError?.message ?? 'Failed to load locations');
       setLoading(false);
     }
-  }, [ensureSelectionConsistent, inEditor, supabase]);
+  }, [ensureSelectionConsistent, supabase]);
+
+  // Fetch user hierarchy level when location/org or role changes
+  React.useEffect(() => {
+    async function fetchHierarchyLevel() {
+      // Levelset Admin and Owner/Operator always have access (level 0)
+      if (userRole === 'Levelset Admin' || userRole === 'Owner/Operator') {
+        setUserHierarchyLevel(0);
+        return;
+      }
+
+      if (!selectedLocationOrgId || !userRole) {
+        setUserHierarchyLevel(null);
+        return;
+      }
+
+      try {
+        // Fetch hierarchy level from org_roles table (org level)
+        const { data: hierarchyData, error: hierarchyError } = await supabase
+          .from('org_roles')
+          .select('hierarchy_level')
+          .eq('org_id', selectedLocationOrgId)
+          .eq('role_name', userRole)
+          .maybeSingle();
+
+        if (hierarchyError) {
+          console.error('[LocationProvider] Failed to fetch hierarchy level', hierarchyError);
+          setUserHierarchyLevel(null);
+          return;
+        }
+
+        setUserHierarchyLevel(hierarchyData?.hierarchy_level ?? null);
+      } catch (err) {
+        console.error('[LocationProvider] Error fetching hierarchy level', err);
+        setUserHierarchyLevel(null);
+      }
+    }
+
+    fetchHierarchyLevel();
+  }, [selectedLocationOrgId, userRole, supabase]);
 
   React.useEffect(() => {
     loadLocations();
@@ -226,6 +257,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       setSelectedLocationNumber(match.location_number ?? null);
       setSelectedLocationOrgId(match.org_id ?? null);
       setSelectedLocationMobileToken(match.location_mobile_token ?? null);
+      setSelectedLocationImageUrl(match.image_url ?? null);
 
       if (typeof window !== 'undefined') {
         const key = buildStorageKey(userId);
@@ -240,6 +272,8 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     setSelectedLocationNumber(null);
     setSelectedLocationOrgId(null);
     setSelectedLocationMobileToken(null);
+    setSelectedLocationImageUrl(null);
+    setUserHierarchyLevel(null);
 
     if (typeof window !== 'undefined') {
       const key = buildStorageKey(userId);
@@ -254,33 +288,19 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       selectedLocationNumber,
       selectedLocationOrgId,
       selectedLocationMobileToken,
+      selectedLocationImageUrl,
+      userHierarchyLevel,
       loading,
       error,
       selectLocation,
       clearSelection,
     }),
-    [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken]
+    [clearSelection, error, loading, locations, selectLocation, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken, selectedLocationImageUrl, userHierarchyLevel]
   );
-
-  const plasmicData = React.useMemo(() => ({
-    locations,
-    selectedLocationId,
-    selectedLocationNumber,
-    selectedLocationOrgId,
-    selectedLocationMobileToken,
-    loading,
-    error,
-  }), [error, loading, locations, selectedLocationId, selectedLocationNumber, selectedLocationOrgId, selectedLocationMobileToken]);
-
-  if (typeof globalThis !== 'undefined') {
-    (globalThis as any).locationContext = plasmicData;
-  }
 
   return (
     <LocationContext.Provider value={value}>
-      <DataProvider name="locationContext" data={plasmicData}>
-        {children}
-      </DataProvider>
+      {children}
     </LocationContext.Provider>
   );
 }

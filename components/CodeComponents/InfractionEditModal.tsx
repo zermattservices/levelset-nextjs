@@ -232,17 +232,47 @@ export function InfractionEditModal({
       }
     };
 
-    // Fetch infractions_rubric options for infraction dropdown
+    // Fetch infractions_rubric options for infraction dropdown - org-level first, then location-level
     const fetchInfractionsRubric = async () => {
       try {
-        const { data, error } = await supabase
-          .from('infractions_rubric')
-          .select('*')
-          .eq('location_id', locationId)
-          .order('points', { ascending: true }); // Order by points, lowest to highest
+        // First get the org_id for this location
+        const { data: locData } = await supabase
+          .from('locations')
+          .select('org_id')
+          .eq('id', locationId)
+          .single();
         
-        if (!error && data) {
-          setDiscActionsRubricOptions(data);
+        let rubricData: any[] | null = null;
+        
+        // Try org-level infractions first (location_id IS NULL)
+        if (locData?.org_id) {
+          const { data: orgData, error: orgError } = await supabase
+            .from('infractions_rubric')
+            .select('*')
+            .eq('org_id', locData.org_id)
+            .is('location_id', null)
+            .order('points', { ascending: true });
+          
+          if (!orgError && orgData && orgData.length > 0) {
+            rubricData = orgData;
+          }
+        }
+        
+        // Fallback to location-specific infractions
+        if (!rubricData || rubricData.length === 0) {
+          const { data: locData2, error: locError } = await supabase
+            .from('infractions_rubric')
+            .select('*')
+            .eq('location_id', locationId)
+            .order('points', { ascending: true });
+          
+          if (!locError && locData2) {
+            rubricData = locData2;
+          }
+        }
+        
+        if (rubricData) {
+          setDiscActionsRubricOptions(rubricData);
         }
       } catch (err) {
         console.error('Error fetching infractions_rubric:', err);

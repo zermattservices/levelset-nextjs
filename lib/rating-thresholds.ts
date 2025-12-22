@@ -16,6 +16,7 @@ const DEFAULT_THRESHOLDS: RatingThresholds = {
 
 /**
  * Get rating thresholds for a location
+ * Checks in order: location-specific -> org-level -> defaults
  * Uses caching to avoid repeated database calls
  */
 export async function getRatingThresholds(
@@ -33,29 +34,65 @@ export async function getRatingThresholds(
 
   try {
     const supabase = createServerSupabaseClient();
-    const { data, error } = await supabase
+    
+    // First, try to get location-specific thresholds
+    const { data: locationData, error: locationError } = await supabase
       .from('rating_thresholds')
       .select('yellow_threshold, green_threshold')
       .eq('location_id', locationId)
+      .maybeSingle();
+
+    if (!locationError && locationData) {
+      const thresholds: RatingThresholds = {
+        yellow_threshold: Number(locationData.yellow_threshold) || DEFAULT_THRESHOLDS.yellow_threshold,
+        green_threshold: Number(locationData.green_threshold) || DEFAULT_THRESHOLDS.green_threshold,
+      };
+
+      // Update cache
+      thresholdsCache.set(locationId, {
+        thresholds,
+        timestamp: Date.now(),
+      });
+
+      return thresholds;
+    }
+
+    // If no location-specific thresholds, get the org_id for this location
+    const { data: locationInfo, error: locationInfoError } = await supabase
+      .from('locations')
+      .select('org_id')
+      .eq('id', locationId)
       .single();
 
-    if (error || !data) {
-      // If not found, return defaults
+    if (locationInfoError || !locationInfo?.org_id) {
       return DEFAULT_THRESHOLDS;
     }
 
-    const thresholds: RatingThresholds = {
-      yellow_threshold: Number(data.yellow_threshold) || DEFAULT_THRESHOLDS.yellow_threshold,
-      green_threshold: Number(data.green_threshold) || DEFAULT_THRESHOLDS.green_threshold,
-    };
+    // Try to get org-level thresholds (where location_id IS NULL)
+    const { data: orgData, error: orgError } = await supabase
+      .from('rating_thresholds')
+      .select('yellow_threshold, green_threshold')
+      .eq('org_id', locationInfo.org_id)
+      .is('location_id', null)
+      .maybeSingle();
 
-    // Update cache
-    thresholdsCache.set(locationId, {
-      thresholds,
-      timestamp: Date.now(),
-    });
+    if (!orgError && orgData) {
+      const thresholds: RatingThresholds = {
+        yellow_threshold: Number(orgData.yellow_threshold) || DEFAULT_THRESHOLDS.yellow_threshold,
+        green_threshold: Number(orgData.green_threshold) || DEFAULT_THRESHOLDS.green_threshold,
+      };
 
-    return thresholds;
+      // Update cache
+      thresholdsCache.set(locationId, {
+        thresholds,
+        timestamp: Date.now(),
+      });
+
+      return thresholds;
+    }
+
+    // If neither found, return defaults
+    return DEFAULT_THRESHOLDS;
   } catch (err) {
     console.error('[rating-thresholds] Error fetching thresholds:', err);
     return DEFAULT_THRESHOLDS;

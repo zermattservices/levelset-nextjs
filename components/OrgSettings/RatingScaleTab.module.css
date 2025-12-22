@@ -1,0 +1,156 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.introTitle {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 600;
+  color: #0d1b14;
+  margin: 0;
+}
+
+.introDescription {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+}
+
+.errorMessage {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.scaleContainer {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+}
+
+.scaleTitle {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 600;
+  color: #0d1b14;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.scaleGraphic {
+  position: relative;
+}
+
+.colorBar {
+  display: flex;
+  flex-direction: row;
+  border-radius: 8px;
+  overflow: visible;
+  position: relative;
+}
+
+.redSection,
+.yellowSection,
+.greenSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  flex: 1;
+}
+
+.redSection {
+  background: #c94a4a;
+  border-radius: 8px 0 0 8px;
+}
+
+.yellowSection {
+  background: #d4a847;
+}
+
+.greenSection {
+  background: #4a9c6d;
+  border-radius: 0 8px 8px 0;
+}
+
+.colorLabel {
+  font-family: "Satoshi";
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.thresholdDivider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+  margin: 0 -40px;
+}
+
+.scaleInfo {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.rangeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rangeItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rangeDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.rangeText {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #666;
+}
+
+.savingIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-family: "Satoshi";
+  font-size: 12px;
+  color: #31664a;
+}
