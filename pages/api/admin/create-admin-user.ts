@@ -79,31 +79,52 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Failed to check existing users' });
     }
 
-    const emailExists = (existingUsers?.users || []).some(
+    const existingAuthUser = (existingUsers?.users || []).find(
       (u: any) => u.email?.toLowerCase() === email.toLowerCase()
     );
-    if (emailExists) {
-      return res.status(400).json({ error: 'A user with this email already exists' });
-    }
 
-    // Create the auth user
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true, // Auto-confirm email
-      user_metadata: {
-        first_name: firstName,
-        last_name: lastName,
-      },
-    });
+    let authUserId: string;
 
-    if (authError) {
-      console.error('Error creating auth user:', authError);
-      return res.status(400).json({ error: authError.message || 'Failed to create auth user' });
-    }
+    if (existingAuthUser) {
+      // Auth user exists - check if they already have an app_users record in ANY org
+      const { data: existingAppUserByAuth } = await supabaseAdmin
+        .from('app_users')
+        .select('id, org_id')
+        .eq('auth_user_id', existingAuthUser.id)
+        .maybeSingle();
 
-    if (!authData.user) {
-      return res.status(500).json({ error: 'Failed to create auth user' });
+      if (existingAppUserByAuth) {
+        // User already has an app_users record somewhere
+        return res.status(400).json({ 
+          error: 'A user with this email already has dashboard access in another organization' 
+        });
+      }
+
+      // Auth user exists but no app_users record - we can link them
+      authUserId = existingAuthUser.id;
+      console.log(`Linking existing auth user ${authUserId} to new admin app_user`);
+    } else {
+      // Create new auth user
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true, // Auto-confirm email
+        user_metadata: {
+          first_name: firstName,
+          last_name: lastName,
+        },
+      });
+
+      if (authError) {
+        console.error('Error creating auth user:', authError);
+        return res.status(400).json({ error: authError.message || 'Failed to create auth user' });
+      }
+
+      if (!authData.user) {
+        return res.status(500).json({ error: 'Failed to create auth user' });
+      }
+
+      authUserId = authData.user.id;
     }
 
     // Create the app_user entry WITHOUT employee_id (admin-only user)
@@ -116,15 +137,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         role: 'Administrator',
         org_id: orgId,
         employee_id: null, // No employee linkage
-        auth_user_id: authData.user.id,
+        auth_user_id: authUserId,
         permissions: 'admin', // Admin permissions for backwards compatibility
-        temp_password: password, // Store temp password for admin reference
+        temp_password: existingAuthUser ? null : password, // Only store temp password for new users
       });
 
     if (appUserError) {
       console.error('Error creating app_user:', appUserError);
-      // Try to clean up the auth user we just created
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      // Only try to clean up if we created a new auth user
+      if (!existingAuthUser) {
+        await supabaseAdmin.auth.admin.deleteUser(authUserId);
+      }
       return res.status(500).json({ error: 'Failed to create user profile' });
     }
 
@@ -133,9 +156,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(200).json({
       success: true,
-      userId: authData.user.id,
+      userId: authUserId,
       isGoogleEmail: googleCheck.isGoogle,
       googleCheckFailed: !!googleCheck.error,
+      linkedExistingUser: !!existingAuthUser, // Let the client know if we linked an existing user
     });
 
   } catch (error) {

@@ -74,20 +74,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    // Check if email already exists in auth.users
-    const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    if (listError) {
-      console.error('Error checking existing users:', listError);
-      return res.status(500).json({ error: 'Failed to check existing users' });
-    }
-
-    const emailExists = (existingUsers?.users || []).some(
-      (u: any) => u.email?.toLowerCase() === email.toLowerCase()
-    );
-    if (emailExists) {
-      return res.status(400).json({ error: 'A user with this email already exists' });
-    }
-
     // Check if employee already has an app_user account
     const { data: existingAppUser } = await supabaseAdmin
       .from('app_users')
@@ -99,24 +85,59 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'This employee already has a dashboard account' });
     }
 
-    // Create the auth user
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true, // Auto-confirm email
-      user_metadata: {
-        first_name: firstName,
-        last_name: lastName,
-      },
-    });
-
-    if (authError) {
-      console.error('Error creating auth user:', authError);
-      return res.status(400).json({ error: authError.message || 'Failed to create auth user' });
+    // Check if email already exists in auth.users
+    const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    if (listError) {
+      console.error('Error checking existing users:', listError);
+      return res.status(500).json({ error: 'Failed to check existing users' });
     }
 
-    if (!authData.user) {
-      return res.status(500).json({ error: 'Failed to create auth user' });
+    const existingAuthUser = (existingUsers?.users || []).find(
+      (u: any) => u.email?.toLowerCase() === email.toLowerCase()
+    );
+
+    let authUserId: string;
+
+    if (existingAuthUser) {
+      // Auth user exists - check if they already have an app_users record in ANY org
+      const { data: existingAppUserByAuth } = await supabaseAdmin
+        .from('app_users')
+        .select('id, org_id')
+        .eq('auth_user_id', existingAuthUser.id)
+        .maybeSingle();
+
+      if (existingAppUserByAuth) {
+        // User already has an app_users record somewhere
+        return res.status(400).json({ 
+          error: 'A user with this email already has dashboard access in another organization' 
+        });
+      }
+
+      // Auth user exists but no app_users record - we can link them
+      authUserId = existingAuthUser.id;
+      console.log(`Linking existing auth user ${authUserId} to new app_user for employee ${employeeId}`);
+    } else {
+      // Create new auth user
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true, // Auto-confirm email
+        user_metadata: {
+          first_name: firstName,
+          last_name: lastName,
+        },
+      });
+
+      if (authError) {
+        console.error('Error creating auth user:', authError);
+        return res.status(400).json({ error: authError.message || 'Failed to create auth user' });
+      }
+
+      if (!authData.user) {
+        return res.status(500).json({ error: 'Failed to create auth user' });
+      }
+
+      authUserId = authData.user.id;
     }
 
     // Determine permissions based on role
@@ -143,15 +164,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         role,
         org_id: orgId,
         employee_id: employeeId,
-        auth_user_id: authData.user.id,
+        auth_user_id: authUserId,
         permissions,
-        temp_password: password, // Store temp password for admin reference
+        temp_password: existingAuthUser ? null : password, // Only store temp password for new users
       });
 
     if (appUserError) {
       console.error('Error creating app_user:', appUserError);
-      // Try to clean up the auth user we just created
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      // Only try to clean up if we created a new auth user
+      if (!existingAuthUser) {
+        await supabaseAdmin.auth.admin.deleteUser(authUserId);
+      }
       return res.status(500).json({ error: 'Failed to create user profile' });
     }
 
@@ -160,9 +183,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(200).json({
       success: true,
-      userId: authData.user.id,
+      userId: authUserId,
       isGoogleEmail: googleCheck.isGoogle,
       googleCheckFailed: !!googleCheck.error,
+      linkedExistingUser: !!existingAuthUser, // Let the client know if we linked an existing user
     });
 
   } catch (error) {
