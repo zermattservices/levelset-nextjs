@@ -32,7 +32,6 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const displayFirstName = firstName || auth.first_name || '';
   const displayRole = userRole || auth.role || '';
 
-  const isAdmin = displayRole === 'Levelset Admin' || displayRole === 'Operator' || displayRole === 'Owner/Operator';
   const isLevelsetAdmin = displayRole === 'Levelset Admin';
   
   // All authenticated users can access org settings (read-only for level 2+)
@@ -93,15 +92,14 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               <span className={sty.navButtonText}>Dashboards</span>
             </LevelsetButton>
 
-            {isAdmin && (
-              <LevelsetButton
-                color="clear"
-                size="compact"
-                link="/roster"
-              >
-                <span className={sty.navButtonText}>Roster</span>
-              </LevelsetButton>
-            )}
+            {/* Roster is visible to all authenticated users */}
+            <LevelsetButton
+              color="clear"
+              size="compact"
+              link="/roster"
+            >
+              <span className={sty.navButtonText}>Roster</span>
+            </LevelsetButton>
           </div>
 
           {/* Right side - Admin Mode, Location selector, user info, logout, profile icon */}
