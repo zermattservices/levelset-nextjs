@@ -1,0 +1,187 @@
+---
+title: Roles
+description: Configure the role hierarchy for your organization
+---
+
+# Roles
+
+Roles define the permission hierarchy in your organization. Configure role names, order, and colors in this settings area.
+
+## Accessing Roles
+
+1. Go to **Organization Settings**
+2. Select **Roles** in the **Users and Security** section
+
+## Understanding the Role Hierarchy
+
+Roles are organized from highest to lowest permission level:
+
+| Level | Default Role | Purpose |
+|-------|-------------|---------|
+| 0 | Operator | Owner/operator with full access |
+| 1 | Executive | Senior leadership |
+| 2 | Director | Department leadership |
+| 3 | Team Lead | Shift supervision |
+| 4 | Trainer | Training responsibilities |
+| 5 | Team Member | Standard team member |
+| 6 | New Hire | Recently hired, in training |
+
+<Note>
+You can rename roles to match your organization's terminology. The hierarchy level is what determines permissions.
+</Note>
+
+## Managing Roles
+
+### Renaming a Role
+
+1. Click on the role name field
+2. Type the new name
+3. Click away to save
+
+### Reordering Roles
+
+Drag and drop roles to change their position in the hierarchy:
+
+1. Hover over the drag handle (≡) on the left side of a role
+2. Drag the role up or down
+3. Release to set the new position
+
+<Warning>
+The Operator role (level 0) cannot be moved. It's always at the top of the hierarchy.
+</Warning>
+
+### Changing Role Colors
+
+Each role has an assigned color:
+
+1. Click the color circle next to a role
+2. Select a new color from the palette
+3. The color updates immediately
+
+Colors appear on role badges throughout Levelset for quick visual identification.
+
+### Adding a New Role
+
+1. Click **Add Role** at the bottom of the list
+2. Enter the role name
+3. Drag it to the appropriate position in the hierarchy
+4. Select a color
+
+### Deleting a Role
+
+1. Click the delete icon (trash) next to a role
+2. Confirm the deletion
+
+<Warning>
+You cannot delete the Operator role or any role that has employees assigned to it. Reassign employees first if needed.
+</Warning>
+
+## Role Permissions
+
+Higher-level roles have more permissions:
+
+<Tabs>
+  <Tab title="Level 0 (Operator)">
+    - Full access to all features
+    - Can manage all settings
+    - Can access all locations
+    - Cannot be deleted or demoted
+  </Tab>
+  
+  <Tab title="Level 1-2 (Executive/Director)">
+    - Dashboard access
+    - Can submit ratings and discipline
+    - Can manage team members below their level
+    - Limited settings access
+  </Tab>
+  
+  <Tab title="Level 3+ (Team Lead and below)">
+    - Limited dashboard access (if any)
+    - Mobile app access
+    - Can submit ratings for assigned positions
+    - Cannot change roles or settings
+  </Tab>
+</Tabs>
+
+## Role Colors
+
+The 10 available colors are:
+
+| Color | Hex | Best For |
+|-------|-----|----------|
+| Green | #dcfce7 | Positive roles, new hires |
+| Blue | #dbeafe | Standard roles |
+| Red | #fee2e2 | Alert or special roles |
+| Amber | #fef3c7 | Mid-level leadership |
+| Purple | #f3e8ff | Senior leadership |
+| Teal | #ccfbf1 | Support roles |
+| Pink | #fce7f3 | Unique designations |
+| Grey | #f3f4f6 | Neutral roles |
+| Black | #374151 | High contrast |
+| Indigo | #e0e7ff | Alternative leadership |
+
+When adding a new role, a unique color is automatically assigned (avoiding duplicates when possible).
+
+## How Roles Affect the System
+
+Roles control access throughout Levelset:
+
+### Roster Management
+- Higher roles can change roles of those below them
+- You cannot promote someone to your level or above
+
+### Ratings
+- Role Mapping determines which roles can rate which positions
+- Higher roles typically can rate more positions
+
+### Discipline
+- Discipline Access controls which roles can submit infractions
+- View access may also be role-dependent
+
+### Dashboard Access
+- Typically only levels 0-2 have automatic dashboard access
+- Others need to be added as Users explicitly
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Keep It Simple" icon="minimize">
+    Don't create too many roles. 5-7 is usually sufficient.
+  </Card>
+  
+  <Card title="Match Reality" icon="building">
+    Role names should match what you call positions in your organization.
+  </Card>
+  
+  <Card title="Clear Distinctions" icon="arrows-left-right">
+    Each role should have a clear purpose and distinct permissions.
+  </Card>
+  
+  <Card title="Consistent Colors" icon="palette">
+    Use colors consistently so they become meaningful at a glance.
+  </Card>
+</CardGroup>
+
+## Employee Counts
+
+The Roles page shows how many employees are assigned to each role. Use this to:
+
+- Verify your team structure is accurate
+- Identify roles that might need review
+- Plan for promotions and development
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Can't delete a role">
+    Roles with employees assigned cannot be deleted. First, reassign all employees to different roles.
+  </Accordion>
+  
+  <Accordion title="New role not appearing in roster">
+    After adding a role, refresh the page if it doesn't immediately appear in other areas of the app.
+  </Accordion>
+  
+  <Accordion title="Role colors not updating">
+    Color changes should be immediate. If colors aren't updating, try refreshing the page.
+  </Accordion>
+</AccordionGroup>

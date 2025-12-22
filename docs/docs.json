@@ -1,0 +1,79 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "almond",
+  "name": "Levelset",
+  "colors": {
+    "primary": "#31664a",
+    "light": "#4a9d6e",
+    "dark": "#264d38"
+  },
+  "logo": {
+    "light": "/images/logo.png",
+    "dark": "/images/logo-dark.png",
+    "href": "https://app.levelset.io"
+  },
+  "favicon": "/images/favicon.ico",
+  "fonts": {
+    "heading": {
+      "family": "Mont",
+      "weight": 700,
+      "source": "/fonts/Mont-Bold.woff2",
+      "format": "woff2"
+    },
+    "body": {
+      "family": "Satoshi",
+      "source": "/fonts/Satoshi-Variable.ttf",
+      "format": "truetype"
+    }
+  },
+  "seo": {
+    "metatags": {
+      "canonical": "https://docs.levelset.io"
+    }
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": ["overview", "getting-started/introduction", "getting-started/first-login"]
+      },
+      {
+        "group": "Positional Excellence",
+        "pages": [
+          "positional-excellence/overview",
+          "positional-excellence/submitting-ratings",
+          "positional-excellence/pea-classic"
+        ]
+      },
+      {
+        "group": "Discipline",
+        "pages": [
+          "discipline/overview",
+          "discipline/submitting-infractions",
+          "discipline/viewing-history"
+        ]
+      },
+      {
+        "group": "Roster Management",
+        "pages": [
+          "roster-management/overview",
+          "roster-management/adding-employees",
+          "roster-management/managing-roles"
+        ]
+      },
+      {
+        "group": "Organization Settings",
+        "pages": [
+          "organization-settings/overview",
+          "organization-settings/positions",
+          "organization-settings/rating-criteria",
+          "organization-settings/roles",
+          "organization-settings/users"
+        ]
+      }
+    ]
+  },
+  "footerSocials": {
+    "website": "https://levelset.io"
+  }
+}

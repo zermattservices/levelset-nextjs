@@ -1,0 +1,94 @@
+---
+title: PEA Classic View
+description: Access the classic Positional Excellence Assessment view
+---
+
+# PEA Classic View
+
+The PEA Classic view provides a traditional spreadsheet-style view of positional ratings, similar to the original Google Sheets implementation.
+
+## Accessing PEA Classic
+
+### From the Dashboard
+
+Navigate to **Positional Excellence** and look for the "PEA Classic" option or link.
+
+### From the Mobile PWA
+
+The mobile app includes a link to view the PEA Classic page for your location.
+
+### Direct URL
+
+Access directly at `/positional-excellence-classic` on your Levelset domain.
+
+## What You'll See
+
+The PEA Classic view displays:
+
+### Rating Grid
+
+A spreadsheet-style grid showing:
+
+- **Rows** - Each team member
+- **Columns** - Rating criteria for the selected position
+- **Cells** - Individual ratings with color coding
+
+### Color Scale
+
+Ratings are displayed with a color gradient based on your organization's thresholds:
+
+| Color | Rating Range | Status |
+|-------|-------------|--------|
+| Green | Above upper threshold | Crushing It |
+| Yellow | Between thresholds | On the Rise |
+| Red | Below lower threshold | Not Yet |
+
+The specific threshold values are configured in Organization Settings under Rating Scale.
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Position Selector" icon="list">
+    Switch between different positions to see ratings for each role.
+  </Card>
+  
+  <Card title="FOH/BOH Toggle" icon="arrows-left-right">
+    Filter to show only Front of House or Back of House positions.
+  </Card>
+  
+  <Card title="Print/Export" icon="print">
+    Print the view or export for sharing with your team.
+  </Card>
+  
+  <Card title="Real-time Data" icon="rotate">
+    Data is pulled directly from the database, always showing current ratings.
+  </Card>
+</CardGroup>
+
+## Use Cases
+
+The PEA Classic view is helpful for:
+
+- **Team Meetings** - Display on a screen during shift meetings
+- **Performance Reviews** - Print for one-on-one discussions
+- **Training Planning** - Identify areas where the team needs development
+- **Recognition** - Spot top performers across positions
+
+## Differences from Dashboard
+
+| Feature | PEA Classic | Dashboard |
+|---------|-------------|-----------|
+| Layout | Spreadsheet grid | Card/table based |
+| Detail Level | Single position at a time | Multiple views available |
+| Interactivity | View only | Expandable rows, filtering |
+| Best For | Printing, display | Analysis, navigation |
+
+## Tips
+
+<Tip>
+Use PEA Classic for quick visual overviews and printing. Use the main dashboard for detailed analysis and tracking history.
+</Tip>
+
+<Note>
+The rating scale thresholds in PEA Classic are pulled from your organization's Rating Scale settings. If the colors don't match what you expect, check the threshold configuration.
+</Note>
