@@ -182,7 +182,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     }
   }, [ensureSelectionConsistent, supabase]);
 
-  // Fetch user hierarchy level when location or role changes
+  // Fetch user hierarchy level when location/org or role changes
   React.useEffect(() => {
     async function fetchHierarchyLevel() {
       // Levelset Admin and Owner/Operator always have access (level 0)
@@ -191,16 +191,17 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
         return;
       }
 
-      if (!selectedLocationId || !userRole) {
+      if (!selectedLocationOrgId || !userRole) {
         setUserHierarchyLevel(null);
         return;
       }
 
       try {
+        // Fetch hierarchy level from org_roles table (org level)
         const { data: hierarchyData, error: hierarchyError } = await supabase
-          .from('location_role_hierarchy')
+          .from('org_roles')
           .select('hierarchy_level')
-          .eq('location_id', selectedLocationId)
+          .eq('org_id', selectedLocationOrgId)
           .eq('role_name', userRole)
           .maybeSingle();
 
@@ -218,7 +219,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     }
 
     fetchHierarchyLevel();
-  }, [selectedLocationId, userRole, supabase]);
+  }, [selectedLocationOrgId, userRole, supabase]);
 
   React.useEffect(() => {
     loadLocations();

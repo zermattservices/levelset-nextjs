@@ -2,21 +2,26 @@
 
 import * as React from "react";
 import { Box } from "@mui/material";
+import { getRoleColor, type RoleColorKey } from "@/lib/role-utils";
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
-const ROLE_STYLES: Record<string, { bg: string; color: string }> = {
-  "New Hire": { bg: "#f0fdf4", color: "#166534" },
-  "Team Member": { bg: "#eff6ff", color: "#1d4ed8" },
-  Trainer: { bg: "#fef2f2", color: "#dc2626" },
-  "Team Lead": { bg: "#fef3c7", color: "#d97706" },
-  Director: { bg: "#f3e8ff", color: "#7c3aed" },
-  Executive: { bg: "#F0F0FF", color: "#483D8B" },
-  Operator: { bg: "#F0F0FF", color: "#483D8B" },
+// Legacy role styles for backward compatibility when colorKey is not provided
+const LEGACY_ROLE_STYLES: Record<string, { bg: string; text: string }> = {
+  "New Hire": { bg: "#dcfce7", text: "#166534" },
+  "Team Member": { bg: "#dbeafe", text: "#1d4ed8" },
+  Trainer: { bg: "#fee2e2", text: "#dc2626" },
+  "Team Lead": { bg: "#fef3c7", text: "#d97706" },
+  "Team Leader": { bg: "#fef3c7", text: "#d97706" },
+  Director: { bg: "#f3e8ff", text: "#7c3aed" },
+  Executive: { bg: "#e0e7ff", text: "#4f46e5" },
+  Operator: { bg: "#e0e7ff", text: "#4f46e5" },
+  "Area Coordinator": { bg: "#fef3c7", text: "#d97706" },
 };
 
 export interface RolePillProps {
   role?: string | null;
+  colorKey?: RoleColorKey | string | null;
   onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
   className?: string;
   tabIndex?: number;
@@ -26,13 +31,18 @@ export interface RolePillProps {
 
 export function RolePill({
   role = "Team Member",
+  colorKey,
   onClick,
   className,
   tabIndex,
   "data-testid": dataTestId,
   endIcon,
 }: RolePillProps) {
-  const style = ROLE_STYLES[role] || ROLE_STYLES["Team Member"];
+  // If colorKey is provided, use the new color system
+  // Otherwise fall back to legacy role-based styles
+  const style = colorKey 
+    ? getRoleColor(colorKey) 
+    : (LEGACY_ROLE_STYLES[role || "Team Member"] || getRoleColor('blue'));
 
   return (
     <Box
@@ -53,7 +63,7 @@ export function RolePill({
         px: 1.5,
         borderRadius: 14,
         backgroundColor: style.bg,
-        color: style.color,
+        color: style.text,
         cursor: onClick ? "pointer" : "default",
         transition: "all 0.15s ease-in-out",
         whiteSpace: "nowrap",
@@ -86,5 +96,3 @@ export function RolePill({
     </Box>
   );
 }
-
-

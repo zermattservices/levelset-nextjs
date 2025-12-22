@@ -14,6 +14,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { getRoleColor, type OrgRole } from '@/lib/role-utils';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -45,6 +46,7 @@ interface Employee {
 interface RoleHierarchy {
   role_name: string;
   hierarchy_level: number;
+  color?: string;
 }
 
 interface AddUserModalProps {
@@ -151,11 +153,11 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
 
       setLoading(true);
       try {
-        // Fetch role hierarchy for this location
+        // Fetch role hierarchy from org_roles table
         const { data: rolesData, error: rolesError } = await supabase
-          .from('location_role_hierarchy')
-          .select('role_name, hierarchy_level')
-          .eq('location_id', locationId)
+          .from('org_roles')
+          .select('role_name, hierarchy_level, color')
+          .eq('org_id', orgId)
           .lte('hierarchy_level', 2) // Only levels 0, 1, 2
           .order('hierarchy_level');
 
@@ -312,6 +314,12 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
     return role?.hierarchy_level ?? null;
   };
 
+  const getRoleColorKey = (roleName: string | null): string | undefined => {
+    if (!roleName) return undefined;
+    const role = roles.find(r => r.role_name === roleName);
+    return role?.color;
+  };
+
   return (
     <Dialog
       open={open}
@@ -348,13 +356,15 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
                   value={selectedEmployeeId}
                   onChange={(e) => setSelectedEmployeeId(e.target.value)}
                   fullWidth
-                  helperText="Only employees with leadership roles (Level 0, 1, or 2) are shown"
+                  helperText="Only the Operator and the next 2 levels of leadership can have access to the Levelset dashboard at this time"
+                  InputLabelProps={{ shrink: true }}
                 >
                   <MenuItem value="" disabled>
                     <em>Select an employee...</em>
                   </MenuItem>
                   {availableEmployees.map((emp) => {
-                    const level = getRoleHierarchyLevel(emp.role);
+                    const colorKey = getRoleColorKey(emp.role);
+                    const roleColor = getRoleColor(colorKey);
                     return (
                       <MenuItem key={emp.id} value={emp.id}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
@@ -368,8 +378,8 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
                                 py: 0.25,
                                 fontSize: 11,
                                 fontWeight: 600,
-                                color: level === 0 ? '#31664a' : level === 1 ? '#0369a1' : '#7c3aed',
-                                backgroundColor: level === 0 ? '#d1fae5' : level === 1 ? '#e0f2fe' : '#ede9fe',
+                                color: roleColor.text,
+                                backgroundColor: roleColor.bg,
                                 borderRadius: 1,
                               }}
                             >

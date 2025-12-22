@@ -15,6 +15,7 @@ import { MobileAppAccess } from '@/components/OrgSettings/MobileAppAccess';
 import { LocationDetails } from '@/components/OrgSettings/LocationDetails';
 import { OrganizationDetails } from '@/components/OrgSettings/OrganizationDetails';
 import { UsersTab } from '@/components/OrgSettings/UsersTab';
+import { RolesTab } from '@/components/OrgSettings/RolesTab';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -54,6 +55,7 @@ export function OrgSettingsPage() {
       group: 'Users and Security',
       items: [
         { id: 'users', label: 'Users', status: 'active' },
+        { id: 'roles', label: 'Roles', status: 'active' },
         { id: 'permissions', label: 'Permissions', status: 'coming-soon' },
       ],
     },
@@ -85,6 +87,8 @@ export function OrgSettingsPage() {
         return <ComingSoonPlaceholder title="Evaluations" description="Performance evaluation scheduling and tracking coming soon." />;
       case 'users':
         return <UsersTab orgId={selectedLocationOrgId} />;
+      case 'roles':
+        return <RolesTab orgId={selectedLocationOrgId} />;
       case 'permissions':
         return <ComingSoonPlaceholder title="Permissions" description="Configure role-based permissions for your organization coming soon." />;
       case 'mobile-access':

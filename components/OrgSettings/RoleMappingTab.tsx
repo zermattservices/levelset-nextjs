@@ -100,28 +100,26 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
 
         setPositions(positionsData || []);
 
-        // Fetch roles from location_role_hierarchy
-        if (selectedLocationId) {
-          const { data: rolesData, error: rolesError } = await supabase
-            .from('location_role_hierarchy')
-            .select('role_name, hierarchy_level')
-            .eq('location_id', selectedLocationId)
-            .order('hierarchy_level', { ascending: true });
+        // Fetch roles from org_roles table
+        const { data: rolesData, error: rolesError } = await supabase
+          .from('org_roles')
+          .select('role_name, hierarchy_level')
+          .eq('org_id', orgId)
+          .order('hierarchy_level', { ascending: true });
 
-          if (rolesError) throw rolesError;
+        if (rolesError) throw rolesError;
 
-          if (rolesData && rolesData.length > 0) {
-            setRoles(rolesData);
-          } else {
-            // Fallback to default roles if no hierarchy defined
-            setRoles([
-              { role_name: 'Operator', hierarchy_level: 0 },
-              { role_name: 'Director', hierarchy_level: 1 },
-              { role_name: 'Team Lead', hierarchy_level: 2 },
-              { role_name: 'Trainer', hierarchy_level: 3 },
-              { role_name: 'Team Member', hierarchy_level: 4 },
-            ]);
-          }
+        if (rolesData && rolesData.length > 0) {
+          setRoles(rolesData);
+        } else {
+          // Fallback to default roles if no hierarchy defined
+          setRoles([
+            { role_name: 'Operator', hierarchy_level: 0 },
+            { role_name: 'Director', hierarchy_level: 1 },
+            { role_name: 'Team Lead', hierarchy_level: 2 },
+            { role_name: 'Trainer', hierarchy_level: 3 },
+            { role_name: 'Team Member', hierarchy_level: 4 },
+          ]);
         }
 
         // Fetch existing mappings
@@ -158,7 +156,7 @@ export function RoleMappingTab({ orgId }: RoleMappingTabProps) {
     }
 
     fetchData();
-  }, [orgId, selectedLocationId, supabase]);
+  }, [orgId, supabase]);
 
   // Initialize mappings with defaults for positions that have no mappings
   // Also ensure locked roles are always present

@@ -41,10 +41,14 @@ interface AppUser {
 
 interface UsersTabProps {
   orgId: string | null;
+  currentUserRole?: string | null;
 }
 
-export function UsersTab({ orgId }: UsersTabProps) {
+export function UsersTab({ orgId, currentUserRole }: UsersTabProps) {
   const { selectedLocationId } = useLocationContext();
+  
+  // Check if current user can edit operator emails (only Operator or Levelset Admin)
+  const canEditOperatorEmail = currentUserRole === 'Operator' || currentUserRole === 'Levelset Admin';
   const [users, setUsers] = React.useState<AppUser[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -86,6 +90,10 @@ export function UsersTab({ orgId }: UsersTabProps) {
   }, [fetchUsers]);
 
   const handleEditClick = (user: AppUser) => {
+    // Don't allow editing operator email unless current user is Operator or Levelset Admin
+    if (user.permissions === 'operator' && !canEditOperatorEmail) {
+      return;
+    }
     setEditingId(user.id);
     setEditEmail(user.email);
   };
@@ -234,13 +242,16 @@ export function UsersTab({ orgId }: UsersTabProps) {
                     ) : (
                       <div className={sty.emailRow}>
                         <span className={sty.email}>{user.email}</span>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEditClick(user)}
-                          className={sty.editButton}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
+                        {/* Only show edit button if user is not operator, or if current user can edit operator emails */}
+                        {(user.permissions !== 'operator' || canEditOperatorEmail) && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditClick(user)}
+                            className={sty.editButton}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        )}
                       </div>
                     )}
                   </td>

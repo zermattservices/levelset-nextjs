@@ -91,17 +91,17 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
   // Fetch roles and their discipline access settings
   React.useEffect(() => {
     async function fetchRolesAndAccess() {
-      if (!orgId || !effectiveLocationId) {
+      if (!orgId) {
         setLoading(false);
         return;
       }
 
       try {
-        // Fetch roles from location_role_hierarchy
+        // Fetch roles from org_roles table
         const { data: rolesData, error: rolesError } = await supabase
-          .from('location_role_hierarchy')
+          .from('org_roles')
           .select('role_name, hierarchy_level')
-          .eq('location_id', effectiveLocationId)
+          .eq('org_id', orgId)
           .order('hierarchy_level', { ascending: true });
 
         if (rolesError) throw rolesError;
@@ -150,7 +150,7 @@ export function DisciplineAccessTab({ orgId, locationId }: DisciplineAccessTabPr
     }
 
     fetchRolesAndAccess();
-  }, [orgId, effectiveLocationId, supabase]);
+  }, [orgId, supabase]);
 
   // Fetch password
   React.useEffect(() => {

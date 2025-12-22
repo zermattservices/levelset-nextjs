@@ -31,6 +31,7 @@ import { SyncHireDateModal } from "./SyncHireDateModal";
 import { EmployeeModal } from "./EmployeeModal";
 import { useLocationContext } from "./LocationContext";
 import { createSupabaseClient } from "@/util/supabase/component";
+import type { OrgRole } from "@/lib/role-utils";
 
 // Feature toggles interface
 interface OrgFeatureToggles {
@@ -39,14 +40,8 @@ interface OrgFeatureToggles {
   enable_pip_logic: boolean;
 }
 
-export type Role =
-  | "New Hire"
-  | "Team Member"
-  | "Trainer"
-  | "Team Lead"
-  | "Director"
-  | "Executive"
-  | "Operator";
+// Role type is now dynamic - this is a fallback type for backwards compatibility
+export type Role = string;
 
 export interface RosterEntry {
   id: string;
@@ -524,9 +519,13 @@ function EmployeesTableView({
   onEmployeeDelete,
   featureToggles,
 }: RosterTableProps & { featureToggles?: OrgFeatureToggles }) {
+  const { selectedLocationOrgId } = useLocationContext();
   const [data, setData] = React.useState<RosterEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  
+  // Dynamic roles from org_roles table
+  const [orgRoles, setOrgRoles] = React.useState<OrgRole[]>([]);
   
   // Role dropdown state
   const [roleMenuAnchor, setRoleMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
@@ -552,44 +551,91 @@ function EmployeesTableView({
   const currentUserRole = currentUserRoleProp || '';
   const currentUserEmployeeId = currentUserEmployeeIdProp || '';
 
+  // Fetch org roles when org changes
+  React.useEffect(() => {
+    async function fetchOrgRoles() {
+      if (!selectedLocationOrgId) return;
+      
+      const supabase = createSupabaseClient();
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('org_roles')
+        .select('*')
+        .eq('org_id', selectedLocationOrgId)
+        .order('hierarchy_level', { ascending: true });
+      
+      if (!rolesError && rolesData) {
+        setOrgRoles(rolesData);
+      }
+    }
+    
+    fetchOrgRoles();
+  }, [selectedLocationOrgId]);
+
+  // Get all role names sorted by hierarchy level
+  const allDynamicRoles = React.useMemo(() => {
+    if (orgRoles.length === 0) {
+      // Fallback to default roles if none loaded
+      return ["Operator", "Executive", "Director", "Team Lead", "Trainer", "Team Member", "New Hire"];
+    }
+    return orgRoles.map(r => r.role_name);
+  }, [orgRoles]);
+
+  // Get color key for a role
+  const getRoleColorKey = React.useCallback((roleName: string): string | undefined => {
+    const role = orgRoles.find(r => r.role_name === roleName);
+    return role?.color;
+  }, [orgRoles]);
+
+  // Find user's hierarchy level based on their role
+  const getUserHierarchyLevel = React.useCallback((userRole: string): number => {
+    // Levelset Admin has highest permissions (treat as -1 to always be above Operator)
+    if (userRole === 'Levelset Admin') return -1;
+    // Owner/Operator maps to Operator
+    if (userRole === 'Owner/Operator') return 0;
+    
+    const role = orgRoles.find(r => r.role_name === userRole);
+    return role?.hierarchy_level ?? 999;
+  }, [orgRoles]);
+
   // Helper function to get available roles based on user permissions
   const getAvailableRoles = React.useCallback((employeeId: string, currentEmployeeRole: Role): Role[] => {
     const isEditingSelf = employeeId === currentUserEmployeeId;
-    const allRoles: Role[] = ["New Hire", "Team Member", "Trainer", "Team Lead", "Director", "Executive", "Operator"];
-
-    // Levelset Admin: Can change any employee's role to any role option, operator included
+    
+    // Get current user's hierarchy level
+    const userLevel = getUserHierarchyLevel(currentUserRole);
+    
+    // Cannot change own role
+    if (isEditingSelf) return [];
+    
+    // Levelset Admin: Can change any employee's role to any role option
     if (currentUserRole === 'Levelset Admin') {
-      return allRoles;
+      return allDynamicRoles;
     }
 
-    // Operator (Owner/Operator): Can change anyone else's role (not their own), including executive
-    if (currentUserRole === 'Owner/Operator') {
-      if (isEditingSelf) {
-        return []; // Cannot change own role
-      }
-      return allRoles; // Can change anyone else to any role
+    // Operator (level 0): Can change anyone else's role to any role
+    if (userLevel === 0) {
+      return allDynamicRoles;
     }
 
-    // Executive: Can change to any role except operator (same as operator)
-    if (currentUserRole === 'Executive') {
-      if (isEditingSelf) {
-        return []; // Cannot change own role
-      }
-      return allRoles.filter(role => role !== 'Operator'); // Can change to any role except Operator
+    // Level 1 (e.g., Executive): Can change to any role except Operator
+    if (userLevel === 1) {
+      return allDynamicRoles.filter(roleName => {
+        const role = orgRoles.find(r => r.role_name === roleName);
+        return role ? role.hierarchy_level > 0 : true;
+      });
     }
 
-    // Director: Can change anyone below them (new hire, team member, trainer, team lead) but not director
-    if (currentUserRole === 'Director') {
-      if (isEditingSelf) {
-        return []; // Cannot change own role
-      }
-      // Can only change to roles below Director
-      return ["New Hire", "Team Member", "Trainer", "Team Lead"];
+    // Level 2 (e.g., Director): Can change to roles below them
+    if (userLevel === 2) {
+      return allDynamicRoles.filter(roleName => {
+        const role = orgRoles.find(r => r.role_name === roleName);
+        return role ? role.hierarchy_level > userLevel : false;
+      });
     }
 
     // Default: No permissions to change roles
     return [];
-  }, [currentUserRole, currentUserEmployeeId]);
+  }, [currentUserRole, currentUserEmployeeId, allDynamicRoles, orgRoles, getUserHierarchyLevel]);
 
   // Helper function to check if a role can be changed
   const canChangeRole = React.useCallback((employeeId: string, currentEmployeeRole: Role): boolean => {
@@ -1111,14 +1157,16 @@ function EmployeesTableView({
           const canChange = canChangeRole(employeeId, role);
           const availableRoles = getAvailableRoles(employeeId, role);
           const anchor = roleMenuAnchor[employeeId] ?? null;
+          const roleColorKey = getRoleColorKey(role);
           return (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
               {!canChange ? (
-                <RolePill role={role} />
+                <RolePill role={role} colorKey={roleColorKey} />
               ) : (
                 <>
                   <RolePill
                     role={role}
+                    colorKey={roleColorKey}
                     endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
                     onClick={(event) => handleRoleMenuOpen(event, employeeId)}
                   />
@@ -1143,7 +1191,7 @@ function EmployeesTableView({
                         selected={role === roleOption}
                         onClick={() => handleRoleSelect(employeeId, roleOption)}
                       >
-                        <RolePill role={roleOption} />
+                        <RolePill role={roleOption} colorKey={getRoleColorKey(roleOption)} />
                       </RoleMenuItem>
                     ))}
                   </Menu>
@@ -1409,6 +1457,7 @@ function EmployeesTableView({
     handleTerminateEmployee,
     canChangeRole,
     getAvailableRoles,
+    getRoleColorKey,
     featureToggles,
   ]);
 

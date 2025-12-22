@@ -1,3 +1,18 @@
+/* Force light mode across the entire app */
+:root {
+  color-scheme: light only;
+}
+
+html {
+  color-scheme: light only;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light only;
+  }
+}
+
 @font-face {
   font-family: 'ApercuMedium';
   src: url('/fonts/ApercuMedium.woff2') format('woff2');
