@@ -17,7 +17,8 @@ import { LocationDetails } from '@/components/OrgSettings/LocationDetails';
 import { OrganizationDetails } from '@/components/OrgSettings/OrganizationDetails';
 import { UsersTab } from '@/components/OrgSettings/UsersTab';
 import { RolesTab } from '@/components/OrgSettings/RolesTab';
-import { PaySettingsTab } from '@/components/OrgSettings/PaySettingsTab';
+// PaySettingsTab import kept for when Roster settings is enabled
+// import { PaySettingsTab } from '@/components/OrgSettings/PaySettingsTab';
 import { createSupabaseClient } from '@/util/supabase/component';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
@@ -79,7 +80,7 @@ export function OrgSettingsPage() {
       items: [
         { id: 'positional-excellence', label: 'Positional Excellence', status: 'active' },
         { id: 'discipline', label: 'Discipline', status: 'active' },
-        { id: 'roster-settings', label: 'Roster', status: 'active' },
+        { id: 'roster-settings', label: 'Roster', status: 'coming-soon' },
         { id: 'pathway', label: 'Pathway', status: 'coming-soon' },
         { id: 'evaluations', label: 'Evaluations', status: 'coming-soon' },
       ],
@@ -114,7 +115,7 @@ export function OrgSettingsPage() {
       case 'discipline':
         return <DisciplineSettings orgId={selectedLocationOrgId} locationId={selectedLocationId} onNavigate={setActiveSection} disabled={!canEdit} />;
       case 'roster-settings':
-        return <PaySettingsTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
+        return <ComingSoonPlaceholder title="Roster Settings" description="Configure pay settings and roster management options for your organization." />;
       case 'pathway':
         return <ComingSoonPlaceholder title="Pathway" description="Career pathway and development tracking coming soon." />;
       case 'evaluations':
