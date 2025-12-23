@@ -3,13 +3,30 @@ import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import BusinessIcon from '@mui/icons-material/Business';
 import sty from './DisciplineSettings.module.css';
 import { InfractionsTab } from './InfractionsTab';
 import { DisciplineActionsTab } from './DisciplineActionsTab';
 import { DisciplineAccessTab } from './DisciplineAccessTab';
 import { ComingSoonPlaceholder } from './ComingSoonPlaceholder';
+import { createSupabaseClient } from '@/util/supabase/component';
 
 const fontFamily = '"Satoshi", sans-serif';
+
+const OrgLevelTag = styled(Chip)(() => ({
+  fontFamily,
+  fontSize: 11,
+  fontWeight: 500,
+  height: 22,
+  backgroundColor: '#f0fdf4',
+  color: '#166534',
+  border: '1px solid #bbf7d0',
+  '& .MuiChip-icon': {
+    fontSize: 14,
+    color: '#166534',
+  },
+}));
 
 const StyledTabs = styled(Tabs)(() => ({
   marginBottom: 24,
@@ -42,10 +59,33 @@ type TabValue = 'infractions' | 'actions' | 'access' | 'notifications';
 
 export function DisciplineSettings({ orgId, locationId, onNavigate, disabled = false }: DisciplineSettingsProps) {
   const [activeTab, setActiveTab] = React.useState<TabValue>('infractions');
+  const [locationCount, setLocationCount] = React.useState<number>(0);
+  
+  const supabase = React.useMemo(() => createSupabaseClient(), []);
+
+  // Fetch location count for the organization
+  React.useEffect(() => {
+    async function fetchLocationCount() {
+      if (!orgId) return;
+      
+      const { count } = await supabase
+        .from('locations')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId);
+      
+      setLocationCount(count || 0);
+    }
+    
+    fetchLocationCount();
+  }, [orgId, supabase]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
     setActiveTab(newValue);
   };
+
+  // Org-level tabs: infractions, actions, notifications (access is location-specific)
+  // Only show tag if org has more than one location
+  const isOrgLevel = (activeTab === 'infractions' || activeTab === 'actions' || activeTab === 'notifications') && locationCount > 1;
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -65,7 +105,16 @@ export function DisciplineSettings({ orgId, locationId, onNavigate, disabled = f
   return (
     <div className={sty.container}>
       <div className={sty.header}>
-        <h2 className={sty.title}>Discipline</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h2 className={sty.title}>Discipline</h2>
+          {isOrgLevel && (
+            <OrgLevelTag
+              icon={<BusinessIcon />}
+              label="Applies to all locations"
+              size="small"
+            />
+          )}
+        </div>
         <p className={sty.description}>
           Configure infractions, disciplinary actions, access controls, and notifications for your organization.
         </p>

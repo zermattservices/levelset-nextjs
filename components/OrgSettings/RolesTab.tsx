@@ -5,15 +5,31 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import Popover from '@mui/material/Popover';
+import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import BusinessIcon from '@mui/icons-material/Business';
 import CircularProgress from '@mui/material/CircularProgress';
 import sty from './RolesTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { DEFAULT_ROLE_COLORS, ROLE_COLOR_KEYS, getUniqueRoleColor, type RoleColorKey } from '@/lib/role-utils';
 
 const fontFamily = '"Satoshi", sans-serif';
+
+const OrgLevelTag = styled(Chip)(() => ({
+  fontFamily,
+  fontSize: 11,
+  fontWeight: 500,
+  height: 22,
+  backgroundColor: '#f0fdf4',
+  color: '#166534',
+  border: '1px solid #bbf7d0',
+  '& .MuiChip-icon': {
+    fontSize: 14,
+    color: '#166534',
+  },
+}));
 
 const StyledTextField = styled(TextField)(() => ({
   '& .MuiOutlinedInput-root': {
@@ -53,8 +69,25 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
   const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
   const [colorPickerAnchor, setColorPickerAnchor] = React.useState<HTMLElement | null>(null);
   const [colorPickerRoleId, setColorPickerRoleId] = React.useState<string | null>(null);
+  const [locationCount, setLocationCount] = React.useState<number>(0);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+
+  // Fetch location count for the organization
+  React.useEffect(() => {
+    async function fetchLocationCount() {
+      if (!orgId) return;
+      
+      const { count } = await supabase
+        .from('locations')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId);
+      
+      setLocationCount(count || 0);
+    }
+    
+    fetchLocationCount();
+  }, [orgId, supabase]);
 
   // Fetch roles and employee counts
   React.useEffect(() => {
@@ -354,7 +387,16 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
   return (
     <div className={sty.container}>
       <div className={sty.intro}>
-        <h3 className={sty.introTitle}>Roles</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h3 className={sty.introTitle}>Roles</h3>
+          {locationCount > 1 && (
+            <OrgLevelTag
+              icon={<BusinessIcon />}
+              label="Applies to all locations"
+              size="small"
+            />
+          )}
+        </div>
         <p className={sty.introDescription}>
           Define the roles in your organization. Drag to reorder the hierarchy (except Operator, which is always at the top).
           Click on a color to change it.

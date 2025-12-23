@@ -3,10 +3,26 @@ import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
+import Chip from '@mui/material/Chip';
+import BusinessIcon from '@mui/icons-material/Business';
 import sty from './OrganizationDetails.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 
 const fontFamily = '"Satoshi", sans-serif';
+
+const OrgLevelTag = styled(Chip)(() => ({
+  fontFamily,
+  fontSize: 11,
+  fontWeight: 500,
+  height: 22,
+  backgroundColor: '#f0fdf4',
+  color: '#166534',
+  border: '1px solid #bbf7d0',
+  '& .MuiChip-icon': {
+    fontSize: 14,
+    color: '#166534',
+  },
+}));
 
 const StyledTextField = styled(TextField)(() => ({
   '& .MuiOutlinedInput-root': {
@@ -38,6 +54,7 @@ export function OrganizationDetails({ orgId, disabled = false }: OrganizationDet
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
+  const [locationCount, setLocationCount] = React.useState<number>(0);
   
   // Refs for autosave on unmount
   const teamMemberWebsiteRef = React.useRef<string>('');
@@ -45,6 +62,22 @@ export function OrganizationDetails({ orgId, disabled = false }: OrganizationDet
   const orgIdRef = React.useRef(orgId);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+
+  // Fetch location count for the organization
+  React.useEffect(() => {
+    async function fetchLocationCount() {
+      if (!orgId) return;
+      
+      const { count } = await supabase
+        .from('locations')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId);
+      
+      setLocationCount(count || 0);
+    }
+    
+    fetchLocationCount();
+  }, [orgId, supabase]);
 
   const hasChanges = teamMemberWebsite !== originalValue;
   
@@ -152,7 +185,16 @@ export function OrganizationDetails({ orgId, disabled = false }: OrganizationDet
   return (
     <div className={sty.container}>
       <div className={sty.intro}>
-        <h3 className={sty.introTitle}>Organization Details</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h3 className={sty.introTitle}>Organization Details</h3>
+          {locationCount > 1 && (
+            <OrgLevelTag
+              icon={<BusinessIcon />}
+              label="Applies to all locations"
+              size="small"
+            />
+          )}
+        </div>
         <p className={sty.introDescription}>
           Configure organization-wide settings that apply to all locations in {orgName}.
         </p>

@@ -4,11 +4,13 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
+import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import BusinessIcon from '@mui/icons-material/Business';
 import sty from './UsersTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
@@ -17,6 +19,20 @@ import { AddAdminModal } from './AddAdminModal';
 import { getRoleColor, type OrgRole } from '@/lib/role-utils';
 
 const fontFamily = '"Satoshi", sans-serif';
+
+const OrgLevelTag = styled(Chip)(() => ({
+  fontFamily,
+  fontSize: 11,
+  fontWeight: 500,
+  height: 22,
+  backgroundColor: '#f0fdf4',
+  color: '#166534',
+  border: '1px solid #bbf7d0',
+  '& .MuiChip-icon': {
+    fontSize: 14,
+    color: '#166534',
+  },
+}));
 
 const StyledTextField = styled(TextField)(() => ({
   '& .MuiOutlinedInput-root': {
@@ -70,8 +86,25 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
   const [saving, setSaving] = React.useState(false);
   const [addUserModalOpen, setAddUserModalOpen] = React.useState(false);
   const [addAdminModalOpen, setAddAdminModalOpen] = React.useState(false);
+  const [locationCount, setLocationCount] = React.useState<number>(0);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+
+  // Fetch location count for the organization
+  React.useEffect(() => {
+    async function fetchLocationCount() {
+      if (!orgId) return;
+      
+      const { count } = await supabase
+        .from('locations')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId);
+      
+      setLocationCount(count || 0);
+    }
+    
+    fetchLocationCount();
+  }, [orgId, supabase]);
 
   // Get role color from org_roles
   const getRoleColorKey = React.useCallback((roleName: string | null): string | undefined => {
@@ -260,7 +293,16 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
   return (
     <div className={sty.container}>
       <div className={sty.intro}>
-        <h3 className={sty.introTitle}>Users</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h3 className={sty.introTitle}>Users</h3>
+          {locationCount > 1 && (
+            <OrgLevelTag
+              icon={<BusinessIcon />}
+              label="Applies to all locations"
+              size="small"
+            />
+          )}
+        </div>
         <p className={sty.introDescription}>
           Manage users who have access to the Levelset dashboard for this organization.
           Users can sign in to view reports, submit ratings, and manage team members.
