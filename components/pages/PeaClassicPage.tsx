@@ -2,7 +2,7 @@ import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Button } from '@mui/material';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import CodeIcon from '@mui/icons-material/Code';
 import ArrowLeftIcon from '@mui/icons-material/ArrowBack';
 import sty from './PeaClassicPage.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
@@ -92,18 +92,19 @@ export function PeaClassicPage() {
                   <div className={classNames(projectcss.all, sty.freeBox__qFcI)} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                     <Button
                       variant="outlined"
-                      size="small"
-                      startIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
+                      startIcon={<CodeIcon sx={{ fontSize: 18 }} />}
                       onClick={() => setEmbedModalOpen(true)}
                       sx={{
                         fontFamily,
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: 600,
                         textTransform: 'none',
                         borderColor: '#d1d5db',
                         color: '#4b5563',
                         borderRadius: '8px',
                         px: 2,
+                        py: 1,
+                        height: 40,
                         whiteSpace: 'nowrap',
                         '&:hover': {
                           borderColor: '#9ca3af',
