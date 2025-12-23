@@ -89,9 +89,9 @@ export function LoginPageForm({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '100vh',
         backgroundColor: '#ffffff',
-        fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif'
+        fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
+        padding: '40px 0',
       }}>
         {/* Logo */}
         <div style={{ marginBottom: '40px', textAlign: 'center' }} data-plasmic-name="logo">

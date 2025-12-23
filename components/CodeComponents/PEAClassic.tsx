@@ -584,11 +584,11 @@ export function PEAClassic({
 
       {/* Controls */}
       <ControlsContainer compact={compactControls}>
-        <Box sx={{ display: 'flex', gap: compactControls ? 1 : 2, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: compactControls ? 1 : 2, alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
           <FohBohSlider value={area} onChange={handleAreaChange} />
           
           {activeTab === 'employees' && (
-            <FormControl size="small" sx={{ minWidth: compactControls ? 150 : 200 }}>
+            <FormControl size="small" sx={{ minWidth: compactControls ? 150 : 200, flex: { xs: 1, sm: 'none' } }}>
               <InputLabel sx={{ fontFamily }}>Position</InputLabel>
               <Select
                 value={selectedPosition || ''}
@@ -606,27 +606,29 @@ export function PEAClassic({
           )}
         </Box>
         
-        {/* Show Rating Scale Button */}
-        <Button
-          onClick={() => setShowRatingScale(true)}
-          sx={{
-            fontFamily,
-            fontSize: compactControls ? 12 : 14,
-            fontWeight: 600,
-            backgroundColor: '#31664a',
-            color: '#ffffff',
-            borderRadius: '6px',
-            textTransform: 'none',
-            padding: compactControls ? '6px 12px' : '8px 16px',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-            '&:hover': {
-              backgroundColor: '#27533d',
-            }
-          }}
-        >
-          Rating Scale
-        </Button>
+        {/* Show Rating Scale Button - only on Overview tab */}
+        {activeTab === 'overview' && (
+          <Button
+            onClick={() => setShowRatingScale(true)}
+            sx={{
+              fontFamily,
+              fontSize: compactControls ? 12 : 14,
+              fontWeight: 600,
+              backgroundColor: '#31664a',
+              color: '#ffffff',
+              borderRadius: '6px',
+              textTransform: 'none',
+              padding: compactControls ? '6px 12px' : '8px 16px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              '&:hover': {
+                backgroundColor: '#27533d',
+              }
+            }}
+          >
+            Rating Scale
+          </Button>
+        )}
       </ControlsContainer>
 
       {/* Table Content - Render based on active tab with loading overlay */}
@@ -790,7 +792,7 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thres
                 {isExpanded && (
                   <ExpandedContentRow>
                     <TableCell colSpan={positions.length + 5} sx={{ p: 2 }}>
-                      <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 12, mb: 1 }}>
+                      <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 11, mb: 1 }}>
                         Last 4 Ratings
                       </Typography>
                       <ExpandedTableContainer>
@@ -934,7 +936,7 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
                 {isExpanded && (
                   <ExpandedContentRow>
                     <TableCell colSpan={10} sx={{ p: 2 }}>
-                      <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 12, mb: 1 }}>
+                      <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 11, mb: 1 }}>
                         Last 4 Ratings for {position}
                       </Typography>
                       <ExpandedTableContainer>
@@ -1068,7 +1070,7 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding, thr
                 {isExpanded && (
                   <ExpandedContentRow>
                     <TableCell colSpan={positions.length + 5} sx={{ p: 2 }}>
-                      <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 12, mb: 1 }}>
+                      <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 11, mb: 1 }}>
                         Last 10 Ratings Given
                       </Typography>
                       <ExpandedTableContainer>

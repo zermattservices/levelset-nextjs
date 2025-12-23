@@ -6,7 +6,6 @@ import sty from './HomePage.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { RedirectIf } from '@/components/CodeComponents/RedirectIf';
-import { LocationSelectModal } from '@/components/CodeComponents/LocationSelectModal';
 import { DashboardMetricCard } from '@/components/CodeComponents/DashboardMetricCard';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
@@ -77,9 +76,6 @@ export function HomePage() {
           condition={!!(auth.authUser && auth.authUser.email)}
           onFalse={() => router.push('/auth/login')}
         >
-          {/* Location Select Modal */}
-          <LocationSelectModal className={classNames("__wab_instance", sty.locationSelectModal)} />
-
           {/* Welcome Section */}
           <div className={classNames(projectcss.all, sty.freeBox__dtJkS)}>
             <div className={classNames(projectcss.all, sty.freeBox__sheik)}>

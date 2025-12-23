@@ -7,7 +7,7 @@
   max-width: 100vw;
   background-color: #f9fafb;
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 .header {
@@ -54,21 +54,23 @@
   align-items: center;
   flex: 1;
   width: 100%;
-  padding: 16px;
+  padding: 16px 16px 8px 16px;
   overflow: visible;
   box-sizing: border-box;
+  min-height: 0;
 }
 
 .tableContainer {
   width: 100%;
   max-width: 1200px;
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   /* Allow visible overflow for table border */
   overflow: visible;
   padding: 0 1px;
+  min-height: 0;
 }
 
 .footer {
@@ -101,7 +103,7 @@
   }
 
   .main {
-    padding: 6px;
+    padding: 6px 6px 4px 6px;
   }
 
   .tableContainer {
@@ -109,7 +111,7 @@
   }
 
   .footer {
-    padding: 6px;
+    padding: 8px 6px;
   }
 }
 

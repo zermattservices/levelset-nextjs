@@ -1,6 +1,7 @@
 import React from 'react';
 import { AuthProvider } from './AuthProvider';
 import { LocationProvider } from '@/components/CodeComponents/LocationContext';
+import { LocationSelectModal } from '@/components/CodeComponents/LocationSelectModal';
 
 // Import Plasmic CSS for design tokens and base styles
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
@@ -19,6 +20,8 @@ export function AppProviders({ children }: AppProvidersProps) {
       <AuthProvider>
         <LocationProvider>
           {children}
+          {/* Global Location Select Modal - shows when no location is selected */}
+          <LocationSelectModal />
         </LocationProvider>
       </AuthProvider>
     </div>
