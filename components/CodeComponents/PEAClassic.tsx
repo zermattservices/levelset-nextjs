@@ -285,27 +285,32 @@ const ExpandedTable = styled(Table)(() => ({
     fontWeight: 600,
     borderBottom: '1px solid #d1d5db',
     textTransform: 'none',
-    whiteSpace: 'nowrap',
   },
   '& td': {
     padding: '4px 6px',
     fontSize: 11,
     borderBottom: '1px solid #e5e7eb',
   },
-  // Only make first column (name) sticky, not date
+  // First column (Leader/Employee name) - sticky with proper width
   '& th:first-of-type, & td:first-of-type': {
     position: 'sticky',
     left: 0,
     backgroundColor: '#f3f4f6',
     zIndex: 1,
+    minWidth: 80,
+    maxWidth: 120,
+    whiteSpace: 'normal',
+    wordBreak: 'break-word',
   },
   '& td:first-of-type': {
     backgroundColor: '#fafafa',
   },
-  // Date column - fit content width
+  // Date column - compact width
   '& th:nth-of-type(2), & td:nth-of-type(2)': {
     whiteSpace: 'nowrap',
-    width: 'auto',
+    width: 70,
+    minWidth: 70,
+    maxWidth: 80,
   },
 }));
 

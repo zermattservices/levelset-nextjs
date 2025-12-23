@@ -32,7 +32,7 @@ export function PublicPeaClassicPage({ location }: PublicPeaClassicPageProps) {
             className={sty.locationName}
             sx={{
               fontFamily,
-              fontSize: { xs: 16, sm: 20, md: 24 },
+              fontSize: { xs: 16, sm: 18, md: 18 },
               fontWeight: 700,
               color: '#111827',
             }}

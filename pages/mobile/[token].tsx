@@ -529,35 +529,49 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                 ))}
               </Box>
               
-              {/* Ratings Scorecard link - opens in new browser tab */}
-              <Box sx={{ flex: 1, display: 'flex', alignItems: 'flex-end', mt: 4, mb: 2 }}>
-                <Button
-                  component="a"
-                  href={`/public/positional-excellence/${token}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    textTransform: 'none',
-                    padding: '14px 20px',
-                    borderRadius: '12px',
-                    backgroundColor: '#ffffff',
-                    color: '#31664a',
-                    border: '4px solid #31664a',
-                    fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                    fontSize: 16,
-                    fontWeight: 600,
-                    '&:hover': {
-                      backgroundColor: '#f0fdf4',
-                      border: '4px solid #31664a',
-                    },
-                  }}
-                >
-                  View Ratings Scorecard
-                </Button>
-              </Box>
             </>
+          )}
+          
+          {/* Ratings Scorecard link - fixed at bottom of page */}
+          {!summary && (
+            <Box 
+              sx={{ 
+                position: 'fixed',
+                bottom: 32,
+                left: 16,
+                right: 16,
+                maxWidth: 480 - 32,
+                mx: 'auto',
+                zIndex: 100,
+              }}
+            >
+              <Button
+                component="a"
+                href={`/public/positional-excellence/${token}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="outlined"
+                fullWidth
+                sx={{
+                  textTransform: 'none',
+                  padding: '14px 20px',
+                  borderRadius: '12px',
+                  backgroundColor: '#ffffff',
+                  color: '#31664a',
+                  border: '4px solid #31664a',
+                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  '&:hover': {
+                    backgroundColor: '#f0fdf4',
+                    border: '4px solid #31664a',
+                  },
+                }}
+              >
+                View Ratings Scorecard
+              </Button>
+            </Box>
           )}
         </Box>
       </Box>

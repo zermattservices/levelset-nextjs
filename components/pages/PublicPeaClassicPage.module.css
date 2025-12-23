@@ -28,6 +28,7 @@
   justify-content: space-between;
   width: 100%;
   max-width: 1200px;
+  padding: 0 2px;
 }
 
 .logoContainer {
@@ -64,6 +65,9 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  /* Add small padding to prevent border cutoff */
+  padding: 0 2px;
+  box-sizing: border-box;
 }
 
 .footer {
@@ -79,23 +83,28 @@
 /* Mobile-specific styles */
 @media (max-width: 768px) {
   .header {
-    padding: 10px 8px;
+    padding: 10px 6px;
   }
 
   .headerContent {
-    gap: 8px;
+    gap: 6px;
+    padding: 0;
   }
 
   .logoContainer {
-    width: 80px;
+    width: 70px;
   }
 
   .headerSpacer {
-    width: 80px;
+    width: 70px;
   }
 
   .main {
-    padding: 8px;
+    padding: 6px;
+  }
+
+  .tableContainer {
+    padding: 0 1px;
   }
 
   .footer {
