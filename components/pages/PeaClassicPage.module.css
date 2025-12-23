@@ -2,11 +2,13 @@
   display: grid;
   position: relative;
   width: 100%;
+  max-width: 100vw;
   height: 100vh;
   align-content: flex-start;
   justify-items: center;
   background: #ffffff;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   min-width: 0;
   grid-template-columns:
     var(--plsmc-viewport-gap) 1fr minmax(0, var(--plsmc-wide-chunk))

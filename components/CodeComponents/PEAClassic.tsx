@@ -78,18 +78,24 @@ const StyledContainer = styled(TableContainer)<{ componentwidth?: string | numbe
   overflow: "auto",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
-  maxHeight: 650
+  maxHeight: 650,
+  // Mobile responsive
+  '@media (max-width: 768px)': {
+    borderRadius: 8,
+    maxHeight: 'none',
+  }
 }));
 
 const StyledTable = styled(Table)(() => ({
   fontFamily,
+  tableLayout: 'auto',
   "& th": {
     borderBottom: "1px solid #e5e7eb",
     backgroundColor: "#f9fafb",
     fontWeight: 600,
     fontSize: 12,
     letterSpacing: "0.05em",
-    textTransform: "none", // Changed from uppercase to none
+    textTransform: "none",
     color: "#111827",
     lineHeight: 1.2,
     fontFamily,
@@ -106,6 +112,40 @@ const StyledTable = styled(Table)(() => ({
   },
   "& tbody tr:hover": {
     backgroundColor: "#f9fafb",
+  },
+  // Sticky first column (expand icon) - only on mobile
+  '@media (max-width: 768px)': {
+    "& th:first-of-type, & td:first-of-type": {
+      position: 'sticky',
+      left: 0,
+      zIndex: 11,
+      backgroundColor: '#f9fafb',
+    },
+    "& td:first-of-type": {
+      backgroundColor: '#ffffff',
+    },
+    "& tbody tr:hover td:first-of-type": {
+      backgroundColor: '#f9fafb',
+    },
+    // Sticky second column (name)
+    "& th:nth-of-type(2), & td:nth-of-type(2)": {
+      position: 'sticky',
+      left: 40,
+      zIndex: 11,
+      backgroundColor: '#f9fafb',
+      boxShadow: '2px 0 4px rgba(0,0,0,0.08)',
+      minWidth: 120,
+    },
+    "& td:nth-of-type(2)": {
+      backgroundColor: '#ffffff',
+    },
+    "& tbody tr:hover td:nth-of-type(2)": {
+      backgroundColor: '#f9fafb',
+    },
+    // Top sticky header with left sticky columns needs higher z-index
+    "& th:first-of-type, & th:nth-of-type(2)": {
+      zIndex: 12,
+    },
   },
 }));
 
@@ -162,6 +202,11 @@ const StyledTabs = styled(Tabs)(() => ({
   '& .MuiTabs-indicator': {
     backgroundColor: '#31664a',
     height: 3
+  },
+  '@media (max-width: 768px)': {
+    '& .MuiTabs-flexContainer': {
+      justifyContent: 'space-between',
+    }
   }
 }));
 
@@ -174,6 +219,11 @@ const StyledTab = styled(Tab)(() => ({
   '&.Mui-selected': {
     color: '#31664a',
     fontWeight: 600
+  },
+  '@media (max-width: 768px)': {
+    fontSize: 12,
+    minWidth: 'auto',
+    padding: '8px 12px',
   }
 }));
 
@@ -182,7 +232,12 @@ const ControlsContainer = styled(Box)(() => ({
   gap: 16,
   alignItems: 'center',
   marginBottom: 16,
-  flexWrap: 'wrap'
+  flexWrap: 'wrap',
+  '@media (max-width: 768px)': {
+    gap: 12,
+    flexDirection: 'column',
+    alignItems: 'stretch',
+  }
 }));
 
 const ExpandedContentRow = styled(TableRow)(() => ({
