@@ -369,6 +369,7 @@ export async function fetchPositionData(
 /**
  * Fetch Leadership data - leaders who give ratings
  * Shows averages across positions they've rated (last 10 ratings)
+ * Only shows leaders whose role is configured in position_role_permissions
  */
 export async function fetchLeadershipData(
   supabase: SupabaseClient,
@@ -377,13 +378,43 @@ export async function fetchLeadershipData(
 ): Promise<LeaderRatingAggregate[]> {
   const positions = getPositionsByArea(area);
 
-  // Get all ratings for this area with leader names
+  // Get location's org_id
+  const { data: locationData } = await supabase
+    .from('locations')
+    .select('org_id')
+    .eq('id', locationId)
+    .single();
+
+  const orgId = locationData?.org_id;
+
+  // Fetch position_role_permissions to get allowed rater roles
+  let allowedRaterRoles: Set<string> | null = null;
+  if (orgId) {
+    const { data: permissionsData } = await supabase
+      .from('position_role_permissions')
+      .select('role_name, org_positions!inner(name, zone)')
+      .eq('org_positions.org_id', orgId);
+
+    if (permissionsData && permissionsData.length > 0) {
+      // Get roles that can rate positions in the current area
+      allowedRaterRoles = new Set<string>();
+      permissionsData.forEach((p: any) => {
+        const positionZone = p.org_positions?.zone;
+        // Include role if it can rate any position in this area
+        if (positionZone === area) {
+          allowedRaterRoles!.add(p.role_name);
+        }
+      });
+    }
+  }
+
+  // Get all ratings for this area with leader names and roles
   const { data: ratings, error } = await supabase
     .from('ratings')
     .select(`
       *,
       employee:employees!ratings_employee_id_fkey(full_name, first_name, last_name),
-      rater:employees!ratings_rater_user_id_fkey(full_name, first_name, last_name)
+      rater:employees!ratings_rater_user_id_fkey(id, full_name, first_name, last_name, role)
     `)
     .eq('location_id', locationId)
     .in('position', positions)
@@ -394,10 +425,18 @@ export async function fetchLeadershipData(
     return [];
   }
 
-  // Group by rater_user_id
+  // Group by rater_user_id, filtering by allowed roles if configured
   const leaderMap = new Map<string, Rating[]>();
   
   ratings.forEach((rating: any) => {
+    // Filter by allowed rater roles if configured
+    const raterRole = rating.rater?.role;
+    if (allowedRaterRoles && allowedRaterRoles.size > 0) {
+      if (!raterRole || !allowedRaterRoles.has(raterRole)) {
+        return; // Skip this rating - rater's role is not configured for rating
+      }
+    }
+
     const employeeName = rating.employee?.full_name || 
                         `${rating.employee?.first_name || ''} ${rating.employee?.last_name || ''}`.trim();
     const raterName = rating.rater?.full_name || 

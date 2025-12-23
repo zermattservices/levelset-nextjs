@@ -8,6 +8,7 @@ import ListSubheader from '@mui/material/ListSubheader';
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
+import TranslateIcon from '@mui/icons-material/Translate';
 import sty from './RatingCriteriaTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 
@@ -46,6 +47,21 @@ const StyledSelect = styled(Select)(() => ({
   },
 }));
 
+const LanguageSelect = styled(Select)(() => ({
+  fontFamily,
+  fontSize: 13,
+  height: 32,
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#d1d5db',
+  },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#31664a',
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#31664a',
+  },
+}));
+
 interface Position {
   id: string;
   name: string;
@@ -57,7 +73,9 @@ interface Criteria {
   position_id: string;
   criteria_order: number;
   name: string;
+  name_es: string;
   description: string;
+  description_es: string;
   isNew?: boolean;
 }
 
@@ -72,9 +90,11 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
   const [criteria, setCriteria] = React.useState<Criteria[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  const [translating, setTranslating] = React.useState(false);
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const textareaRefs = React.useRef<Map<number, HTMLTextAreaElement>>(new Map());
+  const [language, setLanguage] = React.useState<'en' | 'es'>('en');
+  const textareaRefs = React.useRef<Map<string, HTMLTextAreaElement>>(new Map());
   
   // Refs for autosave on unmount
   const criteriaRef = React.useRef<Criteria[]>([]);
@@ -152,7 +172,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
       try {
         const { data, error: fetchError } = await supabase
           .from('position_criteria')
-          .select('*')
+          .select('id, position_id, criteria_order, name, name_es, description, description_es')
           .eq('position_id', selectedPositionId)
           .order('criteria_order', { ascending: true });
 
@@ -165,14 +185,20 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
         for (let i = 1; i <= 5; i++) {
           const existing = existingCriteria.find(c => c.criteria_order === i);
           if (existing) {
-            fullCriteria.push(existing);
+            fullCriteria.push({
+              ...existing,
+              name_es: existing.name_es || '',
+              description_es: existing.description_es || '',
+            });
           } else {
             fullCriteria.push({
               id: `new-${selectedPositionId}-${i}`,
               position_id: selectedPositionId,
               criteria_order: i,
               name: '',
+              name_es: '',
               description: '',
+              description_es: '',
               isNew: true,
             });
           }
@@ -197,7 +223,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
     setHasChanges(false);
   };
 
-  const handleCriteriaChange = (criteriaOrder: number, field: 'name' | 'description', value: string) => {
+  const handleCriteriaChange = (criteriaOrder: number, field: 'name' | 'name_es' | 'description' | 'description_es', value: string) => {
     setCriteria(criteria.map(c =>
       c.criteria_order === criteriaOrder ? { ...c, [field]: value } : c
     ));
@@ -226,7 +252,9 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
           position_id: selectedPositionId,
           criteria_order: c.criteria_order,
           name: c.name,
+          name_es: c.name_es || null,
           description: c.description,
+          description_es: c.description_es || null,
         }));
 
       if (criteriaToInsert.length > 0) {
@@ -270,7 +298,9 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                 position_id: positionId,
                 criteria_order: c.criteria_order,
                 name: c.name,
+                name_es: c.name_es || null,
                 description: c.description,
+                description_es: c.description_es || null,
               }));
 
             if (criteriaToInsert.length > 0) {
@@ -286,6 +316,53 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
     };
   }, [disabled, supabase]);
 
+  const handleAutoTranslate = async () => {
+    if (!criteria.length) return;
+    
+    setTranslating(true);
+    setError(null);
+    
+    try {
+      // Collect all texts to translate
+      const textsToTranslate: string[] = [];
+      criteria.forEach(c => {
+        textsToTranslate.push(c.name || '');
+        textsToTranslate.push(c.description || '');
+      });
+      
+      // Call translation API
+      const response = await fetch('/api/admin/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          texts: textsToTranslate,
+          targetLang: 'ES',
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Translation failed');
+      }
+      
+      const { translations } = await response.json();
+      
+      // Apply translations to criteria
+      setCriteria(prev => prev.map((c, idx) => ({
+        ...c,
+        name_es: translations[idx * 2] || c.name_es,
+        description_es: translations[idx * 2 + 1] || c.description_es,
+      })));
+      
+      setHasChanges(true);
+    } catch (err: any) {
+      console.error('Translation error:', err);
+      setError(err.message || 'Failed to auto-translate');
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
@@ -300,10 +377,45 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
   return (
     <div className={sty.container}>
       <div className={sty.intro}>
-        <h3 className={sty.introTitle}>Rating Criteria</h3>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+          <h3 className={sty.introTitle} style={{ margin: 0 }}>Rating Criteria</h3>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {language === 'es' && !disabled && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={translating ? <CircularProgress size={14} /> : <TranslateIcon sx={{ fontSize: 16 }} />}
+                onClick={handleAutoTranslate}
+                disabled={translating || !criteria.length || !selectedPositionId}
+                sx={{
+                  fontFamily,
+                  fontSize: 12,
+                  textTransform: 'none',
+                  borderColor: '#d1d5db',
+                  color: '#4b5563',
+                  '&:hover': {
+                    borderColor: '#31664a',
+                    backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                  },
+                }}
+              >
+                {translating ? 'Translating...' : 'Auto-translate'}
+              </Button>
+            )}
+            <LanguageSelect
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as 'en' | 'es')}
+              size="small"
+            >
+              <MenuItem value="en" sx={{ fontFamily, fontSize: 13 }}>English</MenuItem>
+              <MenuItem value="es" sx={{ fontFamily, fontSize: 13 }}>Español</MenuItem>
+            </LanguageSelect>
+          </Box>
+        </Box>
         <p className={sty.introDescription}>
           Define the 5 rating criteria for each position. These criteria will be used when 
           submitting positional ratings.
+          {language === 'es' && ' You are editing Spanish translations.'}
         </p>
       </div>
 
@@ -359,25 +471,25 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
               <div key={c.criteria_order} className={sty.criteriaRow}>
                 <span className={sty.criteriaNumber}>{index + 1}</span>
                 <StyledTextField
-                  value={c.name}
-                  onChange={(e) => handleCriteriaChange(c.criteria_order, 'name', e.target.value)}
-                  placeholder="Criteria name"
+                  value={language === 'es' ? c.name_es : c.name}
+                  onChange={(e) => handleCriteriaChange(c.criteria_order, language === 'es' ? 'name_es' : 'name', e.target.value)}
+                  placeholder={language === 'es' ? 'Nombre del criterio' : 'Criteria name'}
                   size="small"
                   className={sty.criteriaNameField}
                   disabled={disabled}
                 />
                 <textarea
                   ref={(el) => {
-                    if (el) textareaRefs.current.set(c.criteria_order, el);
+                    if (el) textareaRefs.current.set(`${c.criteria_order}-${language}`, el);
                   }}
-                  value={c.description}
+                  value={language === 'es' ? c.description_es : c.description}
                   onChange={(e) => {
-                    handleCriteriaChange(c.criteria_order, 'description', e.target.value);
+                    handleCriteriaChange(c.criteria_order, language === 'es' ? 'description_es' : 'description', e.target.value);
                     // Auto-grow
                     e.target.style.height = 'auto';
                     e.target.style.height = e.target.scrollHeight + 'px';
                   }}
-                  placeholder="Description (optional)"
+                  placeholder={language === 'es' ? 'Descripción (opcional)' : 'Description (optional)'}
                   className={sty.descriptionTextarea}
                   rows={1}
                   disabled={disabled}

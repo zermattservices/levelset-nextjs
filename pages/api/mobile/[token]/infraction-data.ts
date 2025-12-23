@@ -66,16 +66,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const disciplinePassword = locationData?.discipline_password || location.location_number || '';
 
   // Fetch discipline role access settings if org_id exists
+  // Apply default logic: levels 0-2 are allowed by default unless explicitly disabled
   let allowedRoles: Set<string> | null = null;
   if (location.org_id) {
+    // Fetch org_roles to get hierarchy levels
+    const { data: orgRolesData } = await supabase
+      .from('org_roles')
+      .select('role_name, hierarchy_level')
+      .eq('org_id', location.org_id);
+
+    // Fetch explicit discipline access settings
     const { data: accessData } = await supabase
       .from('discipline_role_access')
-      .select('role_name')
-      .eq('org_id', location.org_id)
-      .eq('can_submit', true);
+      .select('role_name, can_submit')
+      .eq('org_id', location.org_id);
 
-    if (accessData && accessData.length > 0) {
-      allowedRoles = new Set(accessData.map(a => a.role_name));
+    if (orgRolesData && orgRolesData.length > 0) {
+      // Build access map from explicit settings
+      const accessMap = new Map<string, boolean>();
+      (accessData || []).forEach(a => accessMap.set(a.role_name, a.can_submit));
+
+      // Build allowed roles with defaults:
+      // - Level 0-1: always allowed (forced)
+      // - Level 2: allowed by default unless explicitly disabled
+      // - Level 3+: only if explicitly enabled
+      allowedRoles = new Set<string>();
+      
+      orgRolesData.forEach(role => {
+        const explicitSetting = accessMap.get(role.role_name);
+        if (explicitSetting !== undefined) {
+          // Use explicit setting if it exists
+          if (explicitSetting) {
+            allowedRoles!.add(role.role_name);
+          }
+        } else {
+          // Apply defaults: levels 0-2 are allowed by default
+          if (role.hierarchy_level <= 2) {
+            allowedRoles!.add(role.role_name);
+          }
+        }
+      });
     }
   }
 

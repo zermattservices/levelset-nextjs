@@ -5,8 +5,11 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import TranslateIcon from '@mui/icons-material/Translate';
 import CircularProgress from '@mui/material/CircularProgress';
 import sty from './PositionsTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
@@ -37,11 +40,28 @@ const StyledTextField = styled(TextField)(() => ({
   },
 }));
 
+const LanguageSelect = styled(Select)(() => ({
+  fontFamily,
+  fontSize: 13,
+  height: 32,
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#d1d5db',
+  },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#31664a',
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#31664a',
+  },
+}));
+
 interface Position {
   id: string;
   name: string;
+  name_es: string;
   zone: 'FOH' | 'BOH';
   description: string;
+  description_es: string;
   display_order: number;
   is_active: boolean;
   isNew?: boolean;
@@ -56,8 +76,10 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
   const [positions, setPositions] = React.useState<Position[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  const [translating, setTranslating] = React.useState(false);
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [language, setLanguage] = React.useState<'en' | 'es'>('en');
   const textareaRefs = React.useRef<Map<string, HTMLTextAreaElement>>(new Map());
   
   // Refs to track current state for autosave on unmount
@@ -101,14 +123,18 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
       try {
         const { data, error: fetchError } = await supabase
           .from('org_positions')
-          .select('*')
+          .select('id, name, name_es, zone, description, description_es, display_order, is_active')
           .eq('org_id', orgId)
           .eq('is_active', true)
           .order('display_order', { ascending: true });
 
         if (fetchError) throw fetchError;
 
-        setPositions(data || []);
+        setPositions((data || []).map(p => ({
+          ...p,
+          name_es: p.name_es || '',
+          description_es: p.description_es || '',
+        })));
       } catch (err) {
         console.error('Error fetching positions:', err);
         setError('Failed to load positions');
@@ -124,8 +150,10 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
     const newPosition: Position = {
       id: `new-${Date.now()}`,
       name: '',
+      name_es: '',
       zone,
       description: '',
+      description_es: '',
       display_order: positions.length,
       is_active: true,
       isNew: true,
@@ -169,8 +197,10 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
           .from('org_positions')
           .update({
             name: pos.name,
+            name_es: pos.name_es || null,
             zone: pos.zone,
             description: pos.description,
+            description_es: pos.description_es || null,
             display_order: pos.display_order,
           })
           .eq('id', pos.id);
@@ -185,8 +215,10 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
           .insert(newPositions.map(pos => ({
             org_id: orgId,
             name: pos.name,
+            name_es: pos.name_es || null,
             zone: pos.zone,
             description: pos.description,
+            description_es: pos.description_es || null,
             display_order: pos.display_order,
             is_active: true,
           })))
@@ -234,8 +266,10 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
                 .from('org_positions')
                 .update({
                   name: pos.name,
+                  name_es: pos.name_es || null,
                   zone: pos.zone,
                   description: pos.description,
+                  description_es: pos.description_es || null,
                   display_order: pos.display_order,
                 })
                 .eq('id', pos.id);
@@ -248,8 +282,10 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
                 .insert(newPositions.map(pos => ({
                   org_id: currentOrgId,
                   name: pos.name,
+                  name_es: pos.name_es || null,
                   zone: pos.zone,
                   description: pos.description,
+                  description_es: pos.description_es || null,
                   display_order: pos.display_order,
                   is_active: true,
                 })));
@@ -262,11 +298,58 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
     };
   }, [disabled, supabase]);
 
-  const handleTextareaChange = (id: string, value: string, textarea: HTMLTextAreaElement) => {
-    handlePositionChange(id, 'description', value);
+  const handleTextareaChange = (id: string, field: 'description' | 'description_es', value: string, textarea: HTMLTextAreaElement) => {
+    handlePositionChange(id, field, value);
     // Auto-grow
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
+  };
+
+  const handleAutoTranslate = async () => {
+    if (!positions.length) return;
+    
+    setTranslating(true);
+    setError(null);
+    
+    try {
+      // Collect all texts to translate
+      const textsToTranslate: string[] = [];
+      positions.forEach(pos => {
+        textsToTranslate.push(pos.name || '');
+        textsToTranslate.push(pos.description || '');
+      });
+      
+      // Call translation API
+      const response = await fetch('/api/admin/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          texts: textsToTranslate,
+          targetLang: 'ES',
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Translation failed');
+      }
+      
+      const { translations } = await response.json();
+      
+      // Apply translations to positions
+      setPositions(prev => prev.map((pos, idx) => ({
+        ...pos,
+        name_es: translations[idx * 2] || pos.name_es,
+        description_es: translations[idx * 2 + 1] || pos.description_es,
+      })));
+      
+      setHasChanges(true);
+    } catch (err: any) {
+      console.error('Translation error:', err);
+      setError(err.message || 'Failed to auto-translate');
+    } finally {
+      setTranslating(false);
+    }
   };
 
   if (loading) {
@@ -317,25 +400,25 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
         sectionPositions.map((position) => (
           <div key={position.id} className={sty.positionRow}>
             <StyledTextField
-              value={position.name}
-              onChange={(e) => handlePositionChange(position.id, 'name', e.target.value)}
-              placeholder="Position name"
+              value={language === 'es' ? position.name_es : position.name}
+              onChange={(e) => handlePositionChange(position.id, language === 'es' ? 'name_es' : 'name', e.target.value)}
+              placeholder={language === 'es' ? 'Nombre de la posición' : 'Position name'}
               size="small"
               className={sty.nameField}
               disabled={disabled}
             />
             <textarea
               ref={(el) => {
-                if (el) textareaRefs.current.set(position.id, el);
+                if (el) textareaRefs.current.set(`${position.id}-${language}`, el);
               }}
-              value={position.description}
-              onChange={(e) => handleTextareaChange(position.id, e.target.value, e.target)}
-              placeholder="Position description..."
+              value={language === 'es' ? position.description_es : position.description}
+              onChange={(e) => handleTextareaChange(position.id, language === 'es' ? 'description_es' : 'description', e.target.value, e.target)}
+              placeholder={language === 'es' ? 'Descripción de la posición...' : 'Position description...'}
               className={sty.descriptionField}
               rows={1}
               disabled={disabled}
             />
-            {!disabled && (
+            {!disabled && language === 'en' && (
               <IconButton
                 size="small"
                 onClick={() => handleDeletePosition(position.id)}
@@ -353,10 +436,45 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
   return (
     <div className={sty.container}>
       <div className={sty.intro}>
-        <h3 className={sty.introTitle}>Manage Positions</h3>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+          <h3 className={sty.introTitle} style={{ margin: 0 }}>Manage Positions</h3>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {language === 'es' && !disabled && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={translating ? <CircularProgress size={14} /> : <TranslateIcon sx={{ fontSize: 16 }} />}
+                onClick={handleAutoTranslate}
+                disabled={translating || !positions.length}
+                sx={{
+                  fontFamily,
+                  fontSize: 12,
+                  textTransform: 'none',
+                  borderColor: '#d1d5db',
+                  color: '#4b5563',
+                  '&:hover': {
+                    borderColor: '#31664a',
+                    backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                  },
+                }}
+              >
+                {translating ? 'Translating...' : 'Auto-translate'}
+              </Button>
+            )}
+            <LanguageSelect
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as 'en' | 'es')}
+              size="small"
+            >
+              <MenuItem value="en" sx={{ fontFamily, fontSize: 13 }}>English</MenuItem>
+              <MenuItem value="es" sx={{ fontFamily, fontSize: 13 }}>Español</MenuItem>
+            </LanguageSelect>
+          </Box>
+        </Box>
         <p className={sty.introDescription}>
           Define the positions available for positional ratings in your organization. 
           Each position needs a name and an optional description.
+          {language === 'es' && ' You are editing Spanish translations.'}
         </p>
       </div>
 

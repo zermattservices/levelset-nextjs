@@ -15,6 +15,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { format } from 'date-fns';
 import { useMobilePortal } from '../MobilePortalContext';
 import { PasswordModal } from '../PasswordModal';
+import { SignatureCanvas } from '../SignatureCanvas';
 import { useTranslation } from 'react-i18next';
 import { useTranslatedContent } from '@/hooks/useTranslatedContent';
 import type { FormControlCallbacks } from '../types';
@@ -266,8 +267,8 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
       infractionId: selectedInfraction,
       infractionDate: infractionDate ? format(infractionDate, 'yyyy-MM-dd') : null,
       acknowledged,
-      teamMemberSignature: teamSignature.trim() || null,
-      leaderSignature: leaderSignature.trim(),
+      teamMemberSignature: teamSignature || null,
+      leaderSignature: leaderSignature,
     };
 
     const response = await fetch(`/api/mobile/${encodeURIComponent(token)}/infractions`, {
@@ -562,27 +563,23 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           }}
         />
 
-        <TextField
+        <SignatureCanvas
           label={t('infraction.teamSignature')}
           value={teamSignature}
-          onChange={(event) => {
-            setTeamSignature(event.target.value);
+          onSignatureChange={(dataUrl) => {
+            setTeamSignature(dataUrl);
             markDirty();
           }}
-          placeholder={selectedEmployeeOption?.name ?? 'Full name'}
-          fullWidth
           helperText={acknowledged ? t('infraction.teamSignatureHelperPresent') : t('infraction.teamSignatureHelperAbsent')}
         />
 
-        <TextField
+        <SignatureCanvas
           label={t('infraction.leaderSignature')}
           value={leaderSignature}
-          onChange={(event) => {
-            setLeaderSignature(event.target.value);
+          onSignatureChange={(dataUrl) => {
+            setLeaderSignature(dataUrl);
             markDirty();
           }}
-          placeholder={selectedLeaderOption?.name ?? 'Full name'}
-          fullWidth
           helperText={t('infraction.leaderSignatureHelper')}
         />
       </Box>

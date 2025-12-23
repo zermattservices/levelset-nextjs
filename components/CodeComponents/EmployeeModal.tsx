@@ -290,6 +290,7 @@ export function EmployeeModal({
   const [dismissConfirmationOpen, setDismissConfirmationOpen] = React.useState(false);
   const [recommendationToDismiss, setRecommendationToDismiss] = React.useState<any>(null);
   const [peViewMode, setPeViewMode] = React.useState<'employee' | 'rater'>('employee');
+  const [canBeRater, setCanBeRater] = React.useState(false);
   const supabase = createSupabaseClient();
 
   // Reset to discipline tab when modal opens
@@ -299,6 +300,63 @@ export function EmployeeModal({
       setPeViewMode('employee'); // Reset view mode when modal opens
     }
   }, [open, employee, initialTab]);
+
+  // Check if employee's role is configured as a rater in position_role_permissions
+  React.useEffect(() => {
+    async function checkRaterPermissions() {
+      if (!open || !employee?.role || !locationId) {
+        setCanBeRater(false);
+        return;
+      }
+
+      try {
+        // Get org_id from location
+        const { data: locationData } = await supabase
+          .from('locations')
+          .select('org_id')
+          .eq('id', locationId)
+          .single();
+
+        if (!locationData?.org_id) {
+          setCanBeRater(false);
+          return;
+        }
+
+        // Check if the employee's role is in position_role_permissions
+        const { data: permissions } = await supabase
+          .from('position_role_permissions')
+          .select('role_name')
+          .eq('role_name', employee.role);
+
+        // Filter permissions to only include those for this org's positions
+        const { data: orgPositionIds } = await supabase
+          .from('org_positions')
+          .select('id')
+          .eq('org_id', locationData.org_id);
+
+        if (!orgPositionIds || orgPositionIds.length === 0) {
+          setCanBeRater(false);
+          return;
+        }
+
+        const positionIdSet = new Set(orgPositionIds.map(p => p.id));
+        
+        // Check if the employee's role has any permissions for this org's positions
+        const { data: rolePermissions } = await supabase
+          .from('position_role_permissions')
+          .select('role_name, position_id')
+          .eq('role_name', employee.role);
+
+        const hasPermissions = rolePermissions?.some(p => positionIdSet.has(p.position_id)) ?? false;
+        setCanBeRater(hasPermissions);
+      } catch (err) {
+        console.error('Error checking rater permissions:', err);
+        setCanBeRater(false);
+      }
+    }
+
+    checkRaterPermissions();
+  }, [open, employee?.role, locationId, supabase]);
 
   // Fetch infractions and disciplinary actions for the selected employee
   const fetchEmployeeData = React.useCallback(async () => {
@@ -815,13 +873,9 @@ export function EmployeeModal({
       );
     }
 
-    // Check if employee role qualifies for the toggle (trainer, team lead, director, executive, or operator)
-    const qualifiedRoles = ['Trainer', 'Team Lead', 'Director', 'Executive', 'Operator'];
-    const showToggle = qualifiedRoles.includes(employee.role || '');
-
     return (
       <Box sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {showToggle && (
+        {canBeRater && (
           <Box
             sx={{
               px: 3,
