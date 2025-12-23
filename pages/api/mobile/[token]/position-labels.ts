@@ -33,6 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let labels_es: string[] = [];
   let descriptions: string[] = [];
 
+  let descriptions_es: string[] = [];
+
   // Primary source: position_criteria from org_positions (new org-level settings)
   if (location.org_id) {
     // First find the org position ID
@@ -44,16 +46,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .maybeSingle();
 
     if (orgPosition) {
-      // Fetch criteria with names and descriptions
+      // Fetch criteria with names, descriptions, and Spanish translations
       const { data: criteriaData } = await supabase
         .from('position_criteria')
-        .select('name, description, criteria_order')
+        .select('name, name_es, description, description_es, criteria_order')
         .eq('position_id', orgPosition.id)
         .order('criteria_order', { ascending: true });
 
       if (criteriaData && criteriaData.length > 0) {
         labels = criteriaData.map(c => c.name).filter((n): n is string => Boolean(n));
+        labels_es = criteriaData.map(c => (c as any).name_es ?? '').filter((n): n is string => Boolean(n));
         descriptions = criteriaData.map(c => c.description ?? '');
+        descriptions_es = criteriaData.map(c => (c as any).description_es ?? '');
       }
     }
   }
@@ -119,6 +123,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     labels,
     labels_es,
     descriptions,
+    descriptions_es,
   });
 }
 

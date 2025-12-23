@@ -59,12 +59,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Primary source: org_positions (new org-level settings)
-  let positions: Array<{ name: string; name_es: string | null; zone: 'FOH' | 'BOH'; description: string | null }> = [];
+  let positions: Array<{ name: string; name_es: string | null; zone: 'FOH' | 'BOH'; description: string | null; description_es: string | null }> = [];
   
   if (location.org_id) {
     const { data: orgPositionsData, error: orgPositionsError } = await supabase
       .from('org_positions')
-      .select('name, description, zone, display_order')
+      .select('name, name_es, description, description_es, zone, display_order')
       .eq('org_id', location.org_id)
       .eq('is_active', true)
       .order('display_order', { ascending: true });
@@ -72,9 +72,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!orgPositionsError && orgPositionsData && orgPositionsData.length > 0) {
       positions = orgPositionsData.map((item: any) => ({
         name: item.name,
-        name_es: null, // org_positions doesn't have Spanish translations yet
+        name_es: item.name_es ?? null,
         zone: (item.zone === 'BOH' ? 'BOH' : 'FOH') as 'FOH' | 'BOH',
         description: item.description ?? null,
+        description_es: item.description_es ?? null,
       }));
     }
   }
@@ -117,7 +118,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Build positions from legacy table
-    const positionsMap = new Map<string, { name: string; name_es: string | null; zone: 'FOH' | 'BOH'; description: string | null }>();
+    const positionsMap = new Map<string, { name: string; name_es: string | null; zone: 'FOH' | 'BOH'; description: string | null; description_es: string | null }>();
     (positionsData ?? []).forEach((item: any) => {
       const name = item.position?.trim();
       if (!name) return;
@@ -128,6 +129,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           name_es: item.position_es ?? null,
           zone,
           description: null,
+          description_es: null,
         });
       }
     });

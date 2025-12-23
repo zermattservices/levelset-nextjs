@@ -34,6 +34,7 @@ interface PositionOption {
   name_es?: string | null;
   zone: 'FOH' | 'BOH';
   description?: string | null;
+  description_es?: string | null;
 }
 
 interface PositionalDataResponse {
@@ -47,6 +48,7 @@ interface LabelsResponse {
   labels: string[];
   labels_es?: string[];
   descriptions?: string[];
+  descriptions_es?: string[];
 }
 
 interface PositionalRatingsFormProps {
@@ -162,7 +164,11 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             ? payload.labels_es
             : payload.labels ?? [];
           setLabels(fetchedLabels);
-          setDescriptions(payload.descriptions ?? []);
+          // Use translated descriptions based on current language
+          const fetchedDescriptions = language === 'es' && payload.descriptions_es && payload.descriptions_es.length > 0
+            ? payload.descriptions_es
+            : payload.descriptions ?? [];
+          setDescriptions(fetchedDescriptions);
           setRatings(Array.from({ length: fetchedLabels.length }, () => null));
         }
       } catch (err: any) {
@@ -396,6 +402,8 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
         {selectedPosition && (() => {
           const selectedPos = filteredPositions.find(p => p.name === selectedPosition);
           if (selectedPos?.description) {
+            // Use translate function to get Spanish description if available
+            const translatedDescription = translate(selectedPos, 'description', selectedPos.description);
             return (
               <Typography
                 sx={{
@@ -409,7 +417,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                   lineHeight: 1.5,
                 }}
               >
-                {selectedPos.description}
+                {translatedDescription}
               </Typography>
             );
           }
