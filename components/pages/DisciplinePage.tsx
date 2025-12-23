@@ -1,6 +1,9 @@
 import * as React from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { Button } from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
 import sty from './DisciplinePage.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
@@ -124,6 +127,29 @@ export function DisciplinePage() {
                       locationId={selectedLocationId || ''}
                       showActions={false}
                     />
+                    <Link href="/org-settings?section=discipline-actions" passHref legacyBehavior>
+                      <Button
+                        component="a"
+                        variant="text"
+                        size="small"
+                        startIcon={<SettingsIcon sx={{ fontSize: 14 }} />}
+                        sx={{
+                          fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
+                          fontSize: 12,
+                          fontWeight: 500,
+                          color: '#9ca3af',
+                          textTransform: 'none',
+                          padding: '4px 12px',
+                          marginTop: '8px',
+                          '&:hover': {
+                            color: '#6b7280',
+                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          },
+                        }}
+                      >
+                        Configure Actions
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>

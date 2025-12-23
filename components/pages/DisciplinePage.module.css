@@ -208,8 +208,8 @@
   height: auto;
   max-width: 100%;
   justify-content: flex-start;
-  align-items: center;
-  row-gap: var(--token-rX_8jNE36opk);
+  align-items: flex-start;
+  row-gap: 16px;
   padding: 0px;
 }
 .text__oSxFd {
@@ -220,7 +220,7 @@
   font-family: "Satoshi";
   font-weight: 700;
   font-size: var(--token-B10hUni6jzpI);
-  text-align: center;
+  text-align: left;
   min-width: 0;
 }
 .disciplineActionsTable:global(.__wab_instance) {

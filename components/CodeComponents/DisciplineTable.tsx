@@ -50,40 +50,59 @@ export interface DisciplineTableProps {
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = '#31664a';
 
-// Points Badge Component - color based on discipline actions
+// Color gradient from lightest to darkest red (5 levels)
+const redGradient = [
+  { bg: '#fee2e2', color: '#991b1b' }, // Lightest - level 1
+  { bg: '#fecaca', color: '#991b1b' }, // Light - level 2
+  { bg: '#fca5a5', color: '#7f1d1d' }, // Medium - level 3
+  { bg: '#f87171', color: '#7f1d1d' }, // Dark - level 4
+  { bg: '#dc2626', color: '#ffffff' }, // Darkest - level 5
+];
+
+// Points Badge Component - color based on relative position in org's action hierarchy
 const PointsBadge = ({ points, disciplineActions }: { points: number; disciplineActions: any[] }) => {
   const getBadgeColor = () => {
-  if (points === 0) {
+    if (points === 0) {
       return { bg: '#f3f4f6', color: '#111827' }; // Light grey with black text for 0 points
     }
     
-    // Find the highest threshold that the points exceed
-    const applicableAction = disciplineActions
-      .filter(action => points >= action.points_threshold)
-      .sort((a, b) => b.points_threshold - a.points_threshold)[0];
+    // If no actions defined, use fallback
+    if (!disciplineActions || disciplineActions.length === 0) {
+      return redGradient[0];
+    }
     
-    if (applicableAction) {
-      // Map action names to colors
-      const actionName = applicableAction.action.toLowerCase();
-      if (actionName.includes('documented warning')) {
-        return { bg: '#fee2e2', color: '#991b1b' }; // Light red/pink
-      } else if (actionName.includes('write up 1')) {
-        return { bg: '#fecaca', color: '#991b1b' }; // Medium red/pink
-      } else if (actionName.includes('write up 2')) {
-        return { bg: '#fca5a5', color: '#7f1d1d' }; // Medium red
-      } else if (actionName.includes('write up 3')) {
-        return { bg: '#f87171', color: '#7f1d1d' }; // Darker red
-      } else if (actionName.includes('termination')) {
-        return { bg: '#dc2626', color: '#ffffff' }; // Darkest red
+    // Sort actions by threshold ascending
+    const sortedActions = [...disciplineActions].sort((a, b) => a.points_threshold - b.points_threshold);
+    const maxThreshold = sortedActions[sortedActions.length - 1]?.points_threshold || 100;
+    
+    // Find which action level the points correspond to
+    let actionIndex = -1;
+    for (let i = sortedActions.length - 1; i >= 0; i--) {
+      if (points >= sortedActions[i].points_threshold) {
+        actionIndex = i;
+        break;
       }
     }
     
-    // Fallback based on points
-    if (points <= 10) return { bg: '#fee2e2', color: '#991b1b' };
-    else if (points <= 30) return { bg: '#fecaca', color: '#991b1b' };
-    else if (points <= 50) return { bg: '#fca5a5', color: '#7f1d1d' };
-    else if (points <= 75) return { bg: '#f87171', color: '#7f1d1d' };
-    else return { bg: '#dc2626', color: '#ffffff' };
+    // If points are below any threshold, use lightest color
+    if (actionIndex === -1) {
+      // Calculate how close to first threshold (as a ratio)
+      const firstThreshold = sortedActions[0]?.points_threshold || 10;
+      const ratio = Math.min(points / firstThreshold, 1);
+      // Use first level color but could add more nuance here
+      return redGradient[0];
+    }
+    
+    // Map action index to color gradient
+    // actionIndex ranges from 0 to (numActions - 1)
+    // We want to map this to the gradient (0 = lightest, length-1 = darkest)
+    const numActions = sortedActions.length;
+    const gradientIndex = Math.min(
+      Math.round((actionIndex / Math.max(numActions - 1, 1)) * (redGradient.length - 1)),
+      redGradient.length - 1
+    );
+    
+    return redGradient[gradientIndex];
   };
   
   const colors = getBadgeColor();
@@ -406,7 +425,7 @@ export function DisciplineTable({
     {
       field: 'last_infraction',
       headerName: 'Last Infraction',
-      width: 160,
+      width: 130,
       sortable: true,
       resizable: false,
       headerAlign: 'center',
@@ -429,7 +448,7 @@ export function DisciplineTable({
     {
       field: 'current_points',
       headerName: 'Current Points',
-      width: 160,
+      width: 140,
       sortable: true,
       resizable: false,
       headerAlign: 'center',
@@ -538,7 +557,7 @@ export function DisciplineTable({
         sx={{
           fontFamily,
           border: '1px solid #e5e7eb',
-          borderRadius: 2,
+          borderRadius: '16px',
           
           // Column headers
           [`& .${gridClasses.columnHeaders}`]: {
