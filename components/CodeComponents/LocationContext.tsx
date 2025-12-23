@@ -69,6 +69,36 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
     };
   }
 
+  // Check for user_location_access records to filter locations
+  if (appUser?.id) {
+    const { data: accessRecords, error: accessError } = await supabase
+      .from('user_location_access')
+      .select('location_id')
+      .eq('user_id', appUser.id);
+
+    // If user has location access records, filter by those
+    if (!accessError && accessRecords && accessRecords.length > 0) {
+      const accessibleLocationIds = accessRecords.map(r => r.location_id);
+      
+      const { data: locations, error: locationsError } = await supabase
+        .from('locations')
+        .select('id, location_number, name, org_id, location_mobile_token, image_url')
+        .in('id', accessibleLocationIds)
+        .order('location_number', { ascending: true });
+
+      if (locationsError) {
+        throw locationsError;
+      }
+
+      return {
+        userId: user.id,
+        userRole: appUser?.role ?? null,
+        locations: locations ?? [],
+      };
+    }
+  }
+
+  // Fallback: fetch all locations for the org (for users without location_access records)
   const query = supabase
     .from('locations')
     .select('id, location_number, name, org_id, location_mobile_token, image_url')
