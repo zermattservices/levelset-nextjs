@@ -104,13 +104,14 @@ export function PeaClassicPage() {
                         color: '#4b5563',
                         borderRadius: '8px',
                         px: 2,
+                        whiteSpace: 'nowrap',
                         '&:hover': {
                           borderColor: '#9ca3af',
                           backgroundColor: '#f9fafb',
                         },
                       }}
                     >
-                      Embed this page
+                      Embed
                     </Button>
                     <LevelsetButton
                       className={classNames("__wab_instance", sty.levelsetButton)}
