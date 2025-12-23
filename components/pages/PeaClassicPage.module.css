@@ -334,6 +334,9 @@
   align-items: center;
   min-width: 0;
   padding: 8px;
+  box-sizing: border-box;
+  /* Allow slight overflow for table border visibility */
+  overflow: visible;
 }
 .peaClassic:global(.__wab_instance) {
   max-width: 100%;

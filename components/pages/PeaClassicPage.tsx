@@ -1,31 +1,43 @@
 import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { Button } from '@mui/material';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import ArrowLeftIcon from '@mui/icons-material/ArrowBack';
 import sty from './PeaClassicPage.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { RedirectIf } from '@/components/CodeComponents/RedirectIf';
 import { LevelsetButton } from '@/components/ui/LevelsetButton/LevelsetButton';
 import { PEAClassic } from '@/components/CodeComponents/PEAClassic';
+import { EmbedModal } from '@/components/CodeComponents/EmbedModal';
+import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import ArrowLeftIcon from '@mui/icons-material/ArrowBack';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
+const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
 export function PeaClassicPage() {
   const router = useRouter();
   const auth = useAuth();
-  const { selectedLocationId } = useLocationContext();
+  const { selectedLocationId, selectedLocationMobileToken } = useLocationContext();
+  const [embedModalOpen, setEmbedModalOpen] = React.useState(false);
 
   // Redirect unauthenticated users
   React.useEffect(() => {
     if (auth.isLoaded && !auth.authUser) {
-      router.push('/auth/login');
+      router.push(`/auth/login?redirect=${encodeURIComponent(router.asPath)}`);
     }
   }, [auth.isLoaded, auth.authUser, router]);
+
+  // Show loading screen while auth is loading or redirecting
+  if (!auth.isLoaded || !auth.authUser) {
+    return <AuthLoadingScreen />;
+  }
 
   const handleBackToSmartView = () => {
     router.push('/positional-excellence');
@@ -77,7 +89,29 @@ export function PeaClassicPage() {
                       PEA Dashboard - Classic View
                     </div>
                   </div>
-                  <div className={classNames(projectcss.all, sty.freeBox__qFcI)}>
+                  <div className={classNames(projectcss.all, sty.freeBox__qFcI)} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
+                      onClick={() => setEmbedModalOpen(true)}
+                      sx={{
+                        fontFamily,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        borderColor: '#d1d5db',
+                        color: '#4b5563',
+                        borderRadius: '8px',
+                        px: 2,
+                        '&:hover': {
+                          borderColor: '#9ca3af',
+                          backgroundColor: '#f9fafb',
+                        },
+                      }}
+                    >
+                      Embed this page
+                    </Button>
                     <LevelsetButton
                       className={classNames("__wab_instance", sty.levelsetButton)}
                       color="brand"
@@ -119,6 +153,13 @@ export function PeaClassicPage() {
           </div>
         </RedirectIf>
       </div>
+
+      {/* Embed Modal */}
+      <EmbedModal
+        open={embedModalOpen}
+        onClose={() => setEmbedModalOpen(false)}
+        mobileToken={selectedLocationMobileToken}
+      />
     </>
   );
 }

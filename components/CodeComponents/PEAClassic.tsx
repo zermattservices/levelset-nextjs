@@ -79,15 +79,16 @@ const StyledContainer = styled(TableContainer)<{ componentwidth?: string | numbe
   borderRadius: 16,
   border: "1px solid #e5e7eb",
   backgroundColor: "#ffffff",
-  overflow: "auto",
+  overflowX: "auto",
+  overflowY: "auto",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
   maxHeight: 650,
+  boxSizing: 'border-box',
   // Mobile responsive
   '@media (max-width: 768px)': {
     borderRadius: 8,
     maxHeight: 450,
-    overflow: 'auto',
   },
   // iPad/Tablet styles
   '@media (min-width: 769px) and (max-width: 1024px)': {
@@ -720,16 +721,16 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thres
       <StyledTable>
         <TableHead>
           <TableRow>
-            <TableCell sx={{ width: 40 }}></TableCell>
-            <TableCell sx={{ pl: 1 }}>Name</TableCell>
-            <TableCell align="center">Last Rating</TableCell>
+            <TableCell sx={{ width: 32, minWidth: 32, p: '8px 4px' }}></TableCell>
+            <TableCell sx={{ pl: 1, minWidth: 100 }}>Name</TableCell>
+            <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 80 }}>Last Rating</TableCell>
             {positions.map(pos => (
-              <TableCell key={pos} align="center" sx={{ whiteSpace: 'nowrap' }}>
+              <TableCell key={pos} align="center" sx={{ whiteSpace: 'nowrap', minWidth: 50, px: 1 }}>
                 {cleanPositionName(pos)}
               </TableCell>
             ))}
-            <TableCell align="center">Overall Avg</TableCell>
-            <TableCell align="center"># Ratings</TableCell>
+            <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 70 }}>Overall Avg</TableCell>
+            <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 60 }}># Ratings</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -740,7 +741,7 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thres
               <React.Fragment key={employee.employee_id}>
                 {/* Main Row */}
                 <TableRow hover>
-                  <TableCell sx={{ py: cellPadding }}>
+                  <TableCell sx={{ py: cellPadding, px: '4px' }}>
                     <ExpandIcon 
                       $expanded={isExpanded}
                       onClick={() => toggleRow(employee.employee_id)}
@@ -766,7 +767,7 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thres
                         $rating={rating} 
                         $greenThreshold={thresholds?.green_threshold}
                         $yellowThreshold={thresholds?.yellow_threshold}
-                        sx={{ py: cellPadding }}
+                        sx={{ py: cellPadding, px: 1 }}
                       >
                         {formatRating(rating)}
                       </RatingCell>

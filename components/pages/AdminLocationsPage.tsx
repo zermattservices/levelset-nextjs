@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { LevelsetButton } from '@/components/ui/LevelsetButton/LevelsetButton';
+import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import styles from './AdminLocationsPage.module.css';
 
@@ -20,12 +21,17 @@ export function AdminLocationsPage() {
   // Redirect unauthenticated users
   React.useEffect(() => {
     if (auth.isLoaded && !auth.authUser) {
-      router.push('/auth/login');
+      router.push(`/auth/login?redirect=${encodeURIComponent(router.asPath)}`);
     }
   }, [auth.isLoaded, auth.authUser, router]);
 
+  // Show loading screen while auth is loading or redirecting
+  if (!auth.isLoaded || !auth.authUser) {
+    return <AuthLoadingScreen />;
+  }
+
   // Show access denied for non-Levelset Admin users
-  if (auth.isLoaded && auth.authUser && !isLevelsetAdmin) {
+  if (!isLevelsetAdmin) {
     return (
       <>
         <Head>

@@ -6,6 +6,7 @@ import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.mod
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { OrgSettingsSidebar, type MenuItem } from '@/components/OrgSettings/OrgSettingsSidebar';
 import { PositionalExcellenceSettings } from '@/components/OrgSettings/PositionalExcellenceSettings';
 import { DisciplineSettings } from '@/components/OrgSettings/DisciplineSettings';
@@ -62,9 +63,14 @@ export function OrgSettingsPage() {
   // Redirect unauthenticated users
   React.useEffect(() => {
     if (auth.isLoaded && !auth.authUser) {
-      router.push('/auth/login');
+      router.push(`/auth/login?redirect=${encodeURIComponent(router.asPath)}`);
     }
   }, [auth.isLoaded, auth.authUser, router]);
+
+  // Show loading screen while auth is loading or redirecting
+  if (!auth.isLoaded || !auth.authUser) {
+    return <AuthLoadingScreen />;
+  }
 
   const menuItems: MenuItem[] = [
     {

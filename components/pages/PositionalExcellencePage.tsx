@@ -7,6 +7,7 @@ import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { RedirectIf } from '@/components/CodeComponents/RedirectIf';
 import { LevelsetButton } from '@/components/ui/LevelsetButton/LevelsetButton';
 import { PositionalRatings } from '@/components/CodeComponents/PositionalRatings';
+import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
 
@@ -22,9 +23,14 @@ export function PositionalExcellencePage() {
   // Redirect unauthenticated users
   React.useEffect(() => {
     if (auth.isLoaded && !auth.authUser) {
-      router.push('/auth/login');
+      router.push(`/auth/login?redirect=${encodeURIComponent(router.asPath)}`);
     }
   }, [auth.isLoaded, auth.authUser, router]);
+
+  // Show loading screen while auth is loading or redirecting
+  if (!auth.isLoaded || !auth.authUser) {
+    return <AuthLoadingScreen />;
+  }
 
   const handleGoToClassic = () => {
     router.push('/positional-excellence-classic');
