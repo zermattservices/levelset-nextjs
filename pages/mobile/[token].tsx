@@ -517,61 +517,47 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           {summary ? (
             summaryCard
           ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {cards.map((card) => (
-                <HomeCard
-                  key={card.key}
-                  title={t(card.titleKey)}
-                  description={t(card.descriptionKey)}
-                  onClick={() => handleOpenForm(card.key)}
-                />
-              ))}
+            <>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {cards.map((card) => (
+                  <HomeCard
+                    key={card.key}
+                    title={t(card.titleKey)}
+                    description={t(card.descriptionKey)}
+                    onClick={() => handleOpenForm(card.key)}
+                  />
+                ))}
+              </Box>
               
-              {/* Ratings Summary link - opens in new browser tab */}
-              <Button
-                component="a"
-                href={`/public/positional-excellence/${token}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  textTransform: 'none',
-                  padding: '16px 20px',
-                  borderRadius: '16px',
-                  backgroundColor: '#f3f4f6',
-                  color: '#111827',
-                  border: '1px solid #e5e7eb',
-                  boxShadow: '0 8px 16px rgba(17, 24, 39, 0.04)',
-                  marginTop: 1,
-                  '&:hover': {
-                    backgroundColor: '#e5e7eb',
-                    boxShadow: '0 10px 20px rgba(17, 24, 39, 0.08)',
-                  },
-                }}
-              >
-                <Typography
+              {/* Ratings Scorecard link - opens in new browser tab */}
+              <Box sx={{ flex: 1, display: 'flex', alignItems: 'flex-end', mt: 4, mb: 2 }}>
+                <Button
+                  component="a"
+                  href={`/public/positional-excellence/${token}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="outlined"
+                  fullWidth
                   sx={{
+                    textTransform: 'none',
+                    padding: '14px 20px',
+                    borderRadius: '12px',
+                    backgroundColor: '#ffffff',
+                    color: '#31664a',
+                    border: '4px solid #31664a',
                     fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                     fontSize: 16,
                     fontWeight: 600,
-                    color: '#31664a',
+                    '&:hover': {
+                      backgroundColor: '#f0fdf4',
+                      border: '4px solid #31664a',
+                    },
                   }}
                 >
-                  View Ratings Summary
-                </Typography>
-                <Typography
-                  sx={{
-                    fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                    fontSize: 13,
-                    color: '#6b7280',
-                  }}
-                >
-                  Opens team ratings in your browser
-                </Typography>
-              </Button>
-            </Box>
+                  View Ratings Scorecard
+                </Button>
+              </Box>
+            </>
           )}
         </Box>
       </Box>
