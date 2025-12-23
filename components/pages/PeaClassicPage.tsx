@@ -92,23 +92,25 @@ export function PeaClassicPage() {
                   <div className={classNames(projectcss.all, sty.freeBox__qFcI)} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                     <Button
                       variant="outlined"
-                      startIcon={<CodeIcon sx={{ fontSize: 18 }} />}
+                      startIcon={<CodeIcon sx={{ fontSize: '1em' }} />}
                       onClick={() => setEmbedModalOpen(true)}
                       sx={{
                         fontFamily,
-                        fontSize: 14,
+                        fontSize: 'inherit',
                         fontWeight: 600,
                         textTransform: 'none',
-                        borderColor: '#d1d5db',
-                        color: '#4b5563',
-                        borderRadius: '8px',
-                        px: 2,
-                        py: 1,
-                        height: 40,
+                        borderColor: '#31664a',
+                        borderWidth: '2px',
+                        color: '#31664a',
+                        borderRadius: '6px',
+                        padding: '6px 12px 6px 16px',
                         whiteSpace: 'nowrap',
+                        minWidth: 'auto',
+                        lineHeight: 1,
                         '&:hover': {
-                          borderColor: '#9ca3af',
-                          backgroundColor: '#f9fafb',
+                          borderColor: '#28543d',
+                          borderWidth: '2px',
+                          backgroundColor: 'rgba(49, 102, 74, 0.04)',
                         },
                       }}
                     >
