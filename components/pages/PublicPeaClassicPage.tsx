@@ -21,39 +21,24 @@ export function PublicPeaClassicPage({ location }: PublicPeaClassicPageProps) {
             <Image
               src="/logos/Levelset no margin.png"
               alt="Levelset"
-              width={140}
-              height={40}
-              style={{ objectFit: 'contain', width: 'auto', height: 'auto', maxWidth: 140 }}
+              width={100}
+              height={28}
+              style={{ objectFit: 'contain', width: 'auto', height: 'auto', maxWidth: 100 }}
               priority
             />
           </div>
-          <div className={sty.locationInfo}>
-            <Typography
-              component="h1"
-              sx={{
-                fontFamily,
-                fontSize: { xs: 18, sm: 24 },
-                fontWeight: 700,
-                color: '#111827',
-                textAlign: 'center',
-              }}
-            >
-              {location.name ?? 'Ratings Summary'}
-            </Typography>
-            {location.location_number && (
-              <Typography
-                sx={{
-                  fontFamily,
-                  fontSize: { xs: 12, sm: 14 },
-                  fontWeight: 500,
-                  color: '#6b7280',
-                  textAlign: 'center',
-                }}
-              >
-                #{location.location_number}
-              </Typography>
-            )}
-          </div>
+          <Typography
+            component="h1"
+            sx={{
+              fontFamily,
+              fontSize: { xs: 16, sm: 20, md: 24 },
+              fontWeight: 700,
+              color: '#111827',
+              textAlign: 'center',
+            }}
+          >
+            {location.name ?? 'Ratings Summary'}
+          </Typography>
         </div>
       </header>
 
@@ -63,7 +48,8 @@ export function PublicPeaClassicPage({ location }: PublicPeaClassicPageProps) {
           sx={{
             width: '100%',
             maxWidth: 1200,
-            px: { xs: 1, sm: 2 },
+            px: { xs: '12px', sm: 2 },
+            boxSizing: 'border-box',
           }}
         >
           <PEAClassic
@@ -71,6 +57,7 @@ export function PublicPeaClassicPage({ location }: PublicPeaClassicPageProps) {
             density="comfortable"
             defaultTab="overview"
             defaultArea="FOH"
+            compactControls
           />
         </Box>
       </main>
@@ -80,7 +67,7 @@ export function PublicPeaClassicPage({ location }: PublicPeaClassicPageProps) {
         <Typography
           sx={{
             fontFamily,
-            fontSize: 12,
+            fontSize: 11,
             color: '#9ca3af',
             textAlign: 'center',
           }}

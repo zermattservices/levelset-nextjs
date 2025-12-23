@@ -63,6 +63,8 @@ export interface PEAClassicProps {
   logoUrl?: string;
   width?: string | number;
   maxWidth?: string | number;
+  /** Show compact controls on a single row for mobile */
+  compactControls?: boolean;
 }
 
 const fontFamily = `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
@@ -82,7 +84,13 @@ const StyledContainer = styled(TableContainer)<{ componentwidth?: string | numbe
   // Mobile responsive
   '@media (max-width: 768px)': {
     borderRadius: 8,
-    maxHeight: 'none',
+    maxHeight: 450,
+    overflow: 'auto',
+  },
+  // iPad/Tablet styles
+  '@media (min-width: 769px) and (max-width: 1024px)': {
+    borderRadius: 12,
+    maxHeight: 550,
   }
 }));
 
@@ -113,28 +121,27 @@ const StyledTable = styled(Table)(() => ({
   "& tbody tr:hover": {
     backgroundColor: "#f9fafb",
   },
-  // Sticky first column (expand icon) - only on mobile
+  // Mobile responsive styles
   '@media (max-width: 768px)': {
+    "& th, & td": {
+      fontSize: 11,
+      padding: '6px 4px',
+    },
+    // Keep first column (expand icon) non-sticky for better tap interaction
     "& th:first-of-type, & td:first-of-type": {
-      position: 'sticky',
-      left: 0,
-      zIndex: 11,
-      backgroundColor: '#f9fafb',
+      padding: '4px 2px',
+      width: 32,
+      minWidth: 32,
     },
-    "& td:first-of-type": {
-      backgroundColor: '#ffffff',
-    },
-    "& tbody tr:hover td:first-of-type": {
-      backgroundColor: '#f9fafb',
-    },
-    // Sticky second column (name)
+    // Sticky second column (name) only
     "& th:nth-of-type(2), & td:nth-of-type(2)": {
       position: 'sticky',
-      left: 40,
-      zIndex: 11,
+      left: 0,
+      zIndex: 5,
       backgroundColor: '#f9fafb',
       boxShadow: '2px 0 4px rgba(0,0,0,0.08)',
-      minWidth: 120,
+      minWidth: 100,
+      maxWidth: 140,
     },
     "& td:nth-of-type(2)": {
       backgroundColor: '#ffffff',
@@ -142,9 +149,16 @@ const StyledTable = styled(Table)(() => ({
     "& tbody tr:hover td:nth-of-type(2)": {
       backgroundColor: '#f9fafb',
     },
-    // Top sticky header with left sticky columns needs higher z-index
-    "& th:first-of-type, & th:nth-of-type(2)": {
-      zIndex: 12,
+    // Top sticky header needs higher z-index
+    "& th:nth-of-type(2)": {
+      zIndex: 11,
+    },
+  },
+  // iPad/Tablet styles
+  '@media (min-width: 769px) and (max-width: 1024px)': {
+    "& th, & td": {
+      fontSize: 12,
+      padding: '8px 6px',
     },
   },
 }));
@@ -191,19 +205,28 @@ const ExpandIcon = styled(IconButton)<{ $expanded: boolean }>(({ $expanded }) =>
   padding: 4,
   transition: 'transform 0.15s ease',
   transform: $expanded ? 'rotate(90deg)' : 'rotate(0deg)',
+  color: '#6b7280',
   '& svg': {
     fontSize: 18
+  },
+  '@media (max-width: 768px)': {
+    padding: 2,
+    '& svg': {
+      fontSize: 16
+    }
   }
 }));
 
 const StyledTabs = styled(Tabs)(() => ({
   borderBottom: '1px solid #e5e7eb',
-  marginBottom: 16,
+  marginBottom: 12,
   '& .MuiTabs-indicator': {
     backgroundColor: '#31664a',
     height: 3
   },
   '@media (max-width: 768px)': {
+    marginBottom: 8,
+    minHeight: 36,
     '& .MuiTabs-flexContainer': {
       justifyContent: 'space-between',
     }
@@ -227,16 +250,17 @@ const StyledTab = styled(Tab)(() => ({
   }
 }));
 
-const ControlsContainer = styled(Box)(() => ({
+const ControlsContainer = styled(Box)<{ compact?: boolean }>(({ compact }) => ({
   display: 'flex',
-  gap: 16,
+  gap: compact ? 8 : 16,
   alignItems: 'center',
-  marginBottom: 16,
+  marginBottom: compact ? 8 : 16,
   flexWrap: 'wrap',
   '@media (max-width: 768px)': {
-    gap: 12,
-    flexDirection: 'column',
-    alignItems: 'stretch',
+    gap: compact ? 8 : 12,
+    flexDirection: compact ? 'row' : 'column',
+    alignItems: compact ? 'center' : 'stretch',
+    justifyContent: compact ? 'flex-start' : 'flex-start',
   }
 }));
 
@@ -289,7 +313,8 @@ export function PEAClassic({
   defaultArea = "FOH",
   logoUrl,
   width,
-  maxWidth
+  maxWidth,
+  compactControls = false
 }: PEAClassicProps) {
   const [activeTab, setActiveTab] = React.useState<"overview" | "employees" | "leadership">(defaultTab);
   const [area, setArea] = React.useState<"FOH" | "BOH">(defaultArea);
@@ -515,11 +540,11 @@ export function PEAClassic({
       </StyledTabs>
 
       {/* Controls */}
-      <ControlsContainer>
+      <ControlsContainer compact={compactControls}>
         <FohBohSlider value={area} onChange={handleAreaChange} />
         
         {activeTab === 'employees' && (
-          <FormControl size="small" sx={{ minWidth: 200 }}>
+          <FormControl size="small" sx={{ minWidth: compactControls ? 150 : 200 }}>
             <InputLabel sx={{ fontFamily }}>Position</InputLabel>
             <Select
               value={selectedPosition || ''}
@@ -541,19 +566,21 @@ export function PEAClassic({
           onClick={() => setShowRatingScale(true)}
           sx={{
             fontFamily,
-            fontSize: 14,
+            fontSize: compactControls ? 12 : 14,
             fontWeight: 600,
             backgroundColor: '#31664a',
             color: '#ffffff',
             borderRadius: '6px',
             textTransform: 'none',
-            padding: '8px 16px',
+            padding: compactControls ? '6px 12px' : '8px 16px',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
             '&:hover': {
               backgroundColor: '#27533d',
             }
           }}
         >
-          Show Rating Scale
+          {compactControls ? 'Scale' : 'Show Rating Scale'}
         </Button>
       </ControlsContainer>
 
