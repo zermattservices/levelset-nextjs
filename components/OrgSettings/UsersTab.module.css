@@ -207,6 +207,24 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  align-items: center;
+}
+
+.locationPillsClickable {
+  cursor: pointer;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.locationPillsClickable:hover {
+  background-color: #f3f4f6;
+}
+
+.locationPillsClickable:focus {
+  outline: 2px solid rgba(49, 102, 74, 0.5);
+  outline-offset: 2px;
 }
 
 .locationPill {
@@ -221,4 +239,27 @@
   background-color: #f3f4f6;
   color: #374151;
   white-space: nowrap;
+}
+
+.locationPillsClickable .locationPill {
+  background-color: #e5e7eb;
+}
+
+.locationEditIcon {
+  color: #9ca3af;
+  margin-left: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  font-size: 16px !important;
+}
+
+.locationPillsClickable:hover .locationEditIcon {
+  opacity: 1;
+}
+
+.noAccessText {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  color: #9ca3af;
+  font-style: italic;
 }

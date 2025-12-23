@@ -16,6 +16,7 @@ import { createSupabaseClient } from '@/util/supabase/component';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { AddUserModal } from './AddUserModal';
 import { AddAdminModal } from './AddAdminModal';
+import { EditLocationAccessModal } from './EditLocationAccessModal';
 import { getRoleColor, type OrgRole } from '@/lib/role-utils';
 
 const fontFamily = '"Satoshi", sans-serif';
@@ -95,6 +96,12 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
   const [saving, setSaving] = React.useState(false);
   const [addUserModalOpen, setAddUserModalOpen] = React.useState(false);
   const [addAdminModalOpen, setAddAdminModalOpen] = React.useState(false);
+  const [editLocationModalOpen, setEditLocationModalOpen] = React.useState(false);
+  const [editingLocationUser, setEditingLocationUser] = React.useState<{
+    id: string;
+    name: string;
+    locationAccess: string[];
+  } | null>(null);
   const [locationCount, setLocationCount] = React.useState<number>(0);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
@@ -128,9 +135,23 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
     return loc?.location_number || '';
   }, [orgLocations]);
 
+  // Handle opening the edit location access modal
+  const handleEditLocationAccess = (userId: string, userName: string, locationAccess: string[]) => {
+    if (disabled) return;
+    setEditingLocationUser({ id: userId, name: userName, locationAccess });
+    setEditLocationModalOpen(true);
+  };
+
+  // Handle location access saved
+  const handleLocationAccessSaved = () => {
+    fetchUsers();
+    setEditLocationModalOpen(false);
+    setEditingLocationUser(null);
+  };
+
   // Render location access pills
-  const renderLocationPills = (locationIds: string[]) => {
-    if (locationCount <= 1 || locationIds.length === 0) return null;
+  const renderLocationPills = (locationIds: string[], userId: string, userName: string) => {
+    if (locationCount <= 1) return null;
     
     // Sort location IDs by their location number
     const sortedIds = [...locationIds].sort((a, b) => {
@@ -139,17 +160,38 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
       return numA.localeCompare(numB);
     });
 
+    const content = sortedIds.length === 0 ? (
+      <span className={sty.noAccessText}>No locations</span>
+    ) : (
+      sortedIds.map(locId => {
+        const locNum = getLocationNumber(locId);
+        if (!locNum) return null;
+        return (
+          <span key={locId} className={sty.locationPill}>
+            {locNum}
+          </span>
+        );
+      })
+    );
+
     return (
-      <div className={sty.locationPillsContainer}>
-        {sortedIds.map(locId => {
-          const locNum = getLocationNumber(locId);
-          if (!locNum) return null;
-          return (
-            <span key={locId} className={sty.locationPill}>
-              {locNum}
-            </span>
-          );
-        })}
+      <div 
+        className={`${sty.locationPillsContainer} ${!disabled ? sty.locationPillsClickable : ''}`}
+        onClick={() => handleEditLocationAccess(userId, userName, locationIds)}
+        role={disabled ? undefined : "button"}
+        tabIndex={disabled ? undefined : 0}
+        onKeyDown={(e) => {
+          if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            handleEditLocationAccess(userId, userName, locationIds);
+          }
+        }}
+        title={disabled ? undefined : "Click to edit location access"}
+      >
+        {content}
+        {!disabled && (
+          <EditIcon className={sty.locationEditIcon} fontSize="small" />
+        )}
       </div>
     );
   };
@@ -485,7 +527,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                       </td>
                       {locationCount > 1 && (
                         <td className={sty.cell}>
-                          {renderLocationPills(user.location_access)}
+                          {renderLocationPills(user.location_access, user.id, `${user.first_name} ${user.last_name}`)}
                         </td>
                       )}
                       <td className={sty.cellActions}>
@@ -615,7 +657,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                     </td>
                     {locationCount > 1 && (
                       <td className={sty.cell}>
-                        {renderLocationPills(user.location_access)}
+                        {renderLocationPills(user.location_access, user.id, `${user.first_name} ${user.last_name}`)}
                       </td>
                     )}
                     <td className={sty.cellActions}>
@@ -673,6 +715,20 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
         onClose={() => setAddAdminModalOpen(false)}
         onUserCreated={handleUserCreated}
         orgId={orgId}
+      />
+
+      <EditLocationAccessModal
+        open={editLocationModalOpen}
+        onClose={() => {
+          setEditLocationModalOpen(false);
+          setEditingLocationUser(null);
+        }}
+        onSaved={handleLocationAccessSaved}
+        userId={editingLocationUser?.id || null}
+        userName={editingLocationUser?.name || ''}
+        currentLocationAccess={editingLocationUser?.locationAccess || []}
+        orgLocations={orgLocations}
+        disabled={disabled}
       />
     </div>
   );
