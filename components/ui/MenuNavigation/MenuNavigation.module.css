@@ -17,6 +17,7 @@
   justify-content: center;
   width: 100%;
   height: auto;
+  min-height: 56px;
   border-bottom: 1px solid #e5e5e5;
   padding: 8px 16px;
 }
@@ -154,9 +155,10 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  min-height: 56px;
   background: #ffffff;
   border-bottom: 1px solid #e5e5e5;
-  padding: 8px 16px;
+  padding: 4px 16px;
 }
 
 .dashboardSubmenu {
