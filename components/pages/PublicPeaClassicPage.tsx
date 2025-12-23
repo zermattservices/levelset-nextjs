@@ -29,37 +29,33 @@ export function PublicPeaClassicPage({ location }: PublicPeaClassicPageProps) {
           </div>
           <Typography
             component="h1"
+            className={sty.locationName}
             sx={{
               fontFamily,
               fontSize: { xs: 16, sm: 20, md: 24 },
               fontWeight: 700,
               color: '#111827',
-              textAlign: 'center',
             }}
           >
             {location.name ?? 'Ratings Summary'}
           </Typography>
+          {/* Empty spacer to balance the logo */}
+          <div className={sty.headerSpacer} />
         </div>
       </header>
 
       {/* Main content - PEA Classic table */}
       <main className={sty.main}>
-        <Box
-          sx={{
-            width: '100%',
-            maxWidth: 1200,
-            px: { xs: '12px', sm: 2 },
-            boxSizing: 'border-box',
-          }}
-        >
+        <div className={sty.tableContainer}>
           <PEAClassic
             locationId={location.id}
             density="comfortable"
             defaultTab="overview"
             defaultArea="FOH"
             compactControls
+            fillHeight
           />
-        </Box>
+        </div>
       </main>
 
       {/* Footer */}

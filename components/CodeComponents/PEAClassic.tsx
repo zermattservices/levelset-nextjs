@@ -65,6 +65,8 @@ export interface PEAClassicProps {
   maxWidth?: string | number;
   /** Show compact controls on a single row for mobile */
   compactControls?: boolean;
+  /** Fill available height (for use in full-page layouts) */
+  fillHeight?: boolean;
 }
 
 const fontFamily = `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
@@ -256,11 +258,12 @@ const ControlsContainer = styled(Box)<{ compact?: boolean }>(({ compact }) => ({
   alignItems: 'center',
   marginBottom: compact ? 8 : 16,
   flexWrap: 'wrap',
+  justifyContent: 'space-between',
   '@media (max-width: 768px)': {
     gap: compact ? 8 : 12,
     flexDirection: compact ? 'row' : 'column',
     alignItems: compact ? 'center' : 'stretch',
-    justifyContent: compact ? 'flex-start' : 'flex-start',
+    justifyContent: compact ? 'space-between' : 'flex-start',
   }
 }));
 
@@ -274,19 +277,36 @@ const ExpandedContentRow = styled(TableRow)(() => ({
 }));
 
 const ExpandedTable = styled(Table)(() => ({
+  tableLayout: 'auto',
   '& th': {
     backgroundColor: '#f3f4f6',
-    padding: '6px 8px',
-    fontSize: 11,
+    padding: '4px 6px',
+    fontSize: 10,
     fontWeight: 600,
     borderBottom: '1px solid #d1d5db',
-    textTransform: 'none'
+    textTransform: 'none',
+    whiteSpace: 'nowrap',
   },
   '& td': {
-    padding: '6px 8px',
-    fontSize: 12,
-    borderBottom: '1px solid #e5e7eb'
-  }
+    padding: '4px 6px',
+    fontSize: 11,
+    borderBottom: '1px solid #e5e7eb',
+  },
+  // Only make first column (name) sticky, not date
+  '& th:first-of-type, & td:first-of-type': {
+    position: 'sticky',
+    left: 0,
+    backgroundColor: '#f3f4f6',
+    zIndex: 1,
+  },
+  '& td:first-of-type': {
+    backgroundColor: '#fafafa',
+  },
+  // Date column - fit content width
+  '& th:nth-of-type(2), & td:nth-of-type(2)': {
+    whiteSpace: 'nowrap',
+    width: 'auto',
+  },
 }));
 
 const LoadingOverlay = styled(Box)(() => ({
@@ -314,7 +334,8 @@ export function PEAClassic({
   logoUrl,
   width,
   maxWidth,
-  compactControls = false
+  compactControls = false,
+  fillHeight = false
 }: PEAClassicProps) {
   const [activeTab, setActiveTab] = React.useState<"overview" | "employees" | "leadership">(defaultTab);
   const [area, setArea] = React.useState<"FOH" | "BOH">(defaultArea);
@@ -522,7 +543,10 @@ export function PEAClassic({
       className={`pea-classic ${className}`}
       sx={{
         width: width || '100%',
-        maxWidth: maxWidth || '100%'
+        maxWidth: maxWidth || '100%',
+        height: fillHeight ? '100%' : 'auto',
+        display: fillHeight ? 'flex' : 'block',
+        flexDirection: 'column',
       }}
     >
       {/* Header with Logo only */}
@@ -541,25 +565,27 @@ export function PEAClassic({
 
       {/* Controls */}
       <ControlsContainer compact={compactControls}>
-        <FohBohSlider value={area} onChange={handleAreaChange} />
-        
-        {activeTab === 'employees' && (
-          <FormControl size="small" sx={{ minWidth: compactControls ? 150 : 200 }}>
-            <InputLabel sx={{ fontFamily }}>Position</InputLabel>
-            <Select
-              value={selectedPosition || ''}
-              onChange={handlePositionChange}
-              label="Position"
-              sx={{ fontFamily }}
-            >
-              {positions.map(pos => (
-                <MenuItem key={pos} value={pos} sx={{ fontFamily }}>
-                  {cleanPositionName(pos)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+        <Box sx={{ display: 'flex', gap: compactControls ? 1 : 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <FohBohSlider value={area} onChange={handleAreaChange} />
+          
+          {activeTab === 'employees' && (
+            <FormControl size="small" sx={{ minWidth: compactControls ? 150 : 200 }}>
+              <InputLabel sx={{ fontFamily }}>Position</InputLabel>
+              <Select
+                value={selectedPosition || ''}
+                onChange={handlePositionChange}
+                label="Position"
+                sx={{ fontFamily }}
+              >
+                {positions.map(pos => (
+                  <MenuItem key={pos} value={pos} sx={{ fontFamily }}>
+                    {cleanPositionName(pos)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </Box>
         
         {/* Show Rating Scale Button */}
         <Button
@@ -580,12 +606,12 @@ export function PEAClassic({
             }
           }}
         >
-          {compactControls ? 'Scale' : 'Show Rating Scale'}
+          Rating Scale
         </Button>
       </ControlsContainer>
 
       {/* Table Content - Render based on active tab with loading overlay */}
-      <Box sx={{ position: 'relative', minHeight: 400 }}>
+      <Box sx={{ position: 'relative', minHeight: 400, flex: fillHeight ? 1 : 'none', overflow: 'hidden' }}>
         {loading && (
           <LoadingOverlay>
             <CircularProgress sx={{ color: '#31664a' }} />
@@ -600,6 +626,7 @@ export function PEAClassic({
             toggleRow={toggleRow}
             cellPadding={cellPadding}
             thresholds={thresholds}
+            fillHeight={fillHeight}
           />
         )}
 
@@ -612,6 +639,7 @@ export function PEAClassic({
             toggleRow={toggleRow}
             cellPadding={cellPadding}
             thresholds={thresholds}
+            fillHeight={fillHeight}
           />
         )}
 
@@ -623,6 +651,7 @@ export function PEAClassic({
             toggleRow={toggleRow}
             cellPadding={cellPadding}
             thresholds={thresholds}
+            fillHeight={fillHeight}
           />
         )}
       </Box>
@@ -662,13 +691,14 @@ interface OverviewTableProps {
   toggleRow: (id: string) => void;
   cellPadding: number;
   thresholds?: { yellow_threshold: number; green_threshold: number } | null;
+  fillHeight?: boolean;
 }
 
-function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thresholds }: OverviewTableProps) {
+function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thresholds, fillHeight }: OverviewTableProps) {
   const positions = getPositionsByArea(area);
 
   return (
-    <StyledContainer>
+    <StyledContainer sx={{ height: fillHeight ? '100%' : 'auto', maxHeight: fillHeight ? 'none' : undefined }}>
       <StyledTable>
         <TableHead>
           <TableRow>
@@ -701,7 +731,10 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thres
                       <ExpandMoreIcon />
                     </ExpandIcon>
                   </TableCell>
-                  <TableCell sx={{ py: cellPadding, pl: 1, fontWeight: 500 }}>
+                  <TableCell 
+                    sx={{ py: cellPadding, pl: 1, fontWeight: 500, cursor: 'pointer' }}
+                    onClick={() => toggleRow(employee.employee_id)}
+                  >
                     {employee.employee_name}
                   </TableCell>
                   <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: '#6b7280' }}>
@@ -738,7 +771,7 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thres
                 {isExpanded && (
                   <ExpandedContentRow>
                     <TableCell colSpan={positions.length + 5} sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" sx={{ fontFamily, fontWeight: 600, mb: 1 }}>
+                      <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 12, mb: 1 }}>
                         Last 4 Ratings
                       </Typography>
                       <ExpandedTable size="small">
@@ -793,11 +826,12 @@ interface PositionTableProps {
   toggleRow: (id: string) => void;
   cellPadding: number;
   thresholds?: { yellow_threshold: number; green_threshold: number } | null;
+  fillHeight?: boolean;
 }
 
-function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, cellPadding, thresholds }: PositionTableProps) {
+function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, cellPadding, thresholds, fillHeight }: PositionTableProps) {
   return (
-    <StyledContainer>
+    <StyledContainer sx={{ height: fillHeight ? '100%' : 'auto', maxHeight: fillHeight ? 'none' : undefined }}>
       <StyledTable>
         <TableHead>
           {/* First Header Row - Big 5 Labels */}
@@ -834,7 +868,10 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
                       <ExpandMoreIcon />
                     </ExpandIcon>
                   </TableCell>
-                  <TableCell sx={{ py: cellPadding, pl: 1, fontWeight: 500 }}>
+                  <TableCell 
+                    sx={{ py: cellPadding, pl: 1, fontWeight: 500, cursor: 'pointer' }}
+                    onClick={() => toggleRow(employee.employee_id)}
+                  >
                     {employee.employee_name}
                   </TableCell>
                   <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: '#6b7280' }}>
@@ -876,7 +913,7 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
                 {isExpanded && (
                   <ExpandedContentRow>
                     <TableCell colSpan={10} sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" sx={{ fontFamily, fontWeight: 600, mb: 1 }}>
+                      <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 12, mb: 1 }}>
                         Last 4 Ratings for {position}
                       </Typography>
                       <ExpandedTable size="small">
@@ -928,13 +965,14 @@ interface LeadershipTableProps {
   toggleRow: (id: string) => void;
   cellPadding: number;
   thresholds?: { yellow_threshold: number; green_threshold: number } | null;
+  fillHeight?: boolean;
 }
 
-function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding, thresholds }: LeadershipTableProps) {
+function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding, thresholds, fillHeight }: LeadershipTableProps) {
   const positions = getPositionsByArea(area);
 
   return (
-    <StyledContainer>
+    <StyledContainer sx={{ height: fillHeight ? '100%' : 'auto', maxHeight: fillHeight ? 'none' : undefined }}>
       <StyledTable>
         <TableHead>
           <TableRow>
@@ -967,7 +1005,10 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding, thr
                       <ExpandMoreIcon />
                     </ExpandIcon>
                   </TableCell>
-                  <TableCell sx={{ py: cellPadding, pl: 1, fontWeight: 500 }}>
+                  <TableCell 
+                    sx={{ py: cellPadding, pl: 1, fontWeight: 500, cursor: 'pointer' }}
+                    onClick={() => toggleRow(leader.leader_id)}
+                  >
                     {leader.leader_name}
                   </TableCell>
                   <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: '#6b7280' }}>
@@ -1004,7 +1045,7 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding, thr
                 {isExpanded && (
                   <ExpandedContentRow>
                     <TableCell colSpan={positions.length + 5} sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" sx={{ fontFamily, fontWeight: 600, mb: 1 }}>
+                      <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 12, mb: 1 }}>
                         Last 10 Ratings Given
                       </Typography>
                       <ExpandedTable size="small">
