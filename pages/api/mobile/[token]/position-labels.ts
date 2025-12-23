@@ -54,10 +54,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .order('criteria_order', { ascending: true });
 
       if (criteriaData && criteriaData.length > 0) {
-        labels = criteriaData.map(c => c.name).filter((n): n is string => Boolean(n));
-        labels_es = criteriaData.map(c => (c as any).name_es ?? '').filter((n): n is string => Boolean(n));
+        labels = criteriaData.map(c => c.name ?? '');
+        // Keep Spanish arrays aligned - use English as fallback if Spanish is empty
+        labels_es = criteriaData.map((c, i) => (c as any).name_es || labels[i] || '');
         descriptions = criteriaData.map(c => c.description ?? '');
-        descriptions_es = criteriaData.map(c => (c as any).description_es ?? '');
+        descriptions_es = criteriaData.map((c, i) => (c as any).description_es || descriptions[i] || '');
       }
     }
   }
@@ -97,20 +98,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'No labels found for position' });
     }
 
-    labels = [data.label_1, data.label_2, data.label_3, data.label_4, data.label_5].filter(
-      (label): label is string => Boolean(label)
-    );
-
-    labels_es = (data as any).label_1_es ? [
+    // Build labels array, filtering out nulls but keeping track of indices
+    const rawLabels = [data.label_1, data.label_2, data.label_3, data.label_4, data.label_5];
+    const rawLabelsEs = [
       (data as any).label_1_es,
       (data as any).label_2_es,
       (data as any).label_3_es,
       (data as any).label_4_es,
       (data as any).label_5_es,
-    ].filter((label): label is string => Boolean(label)) : [];
+    ];
+    
+    labels = [];
+    labels_es = [];
+    for (let i = 0; i < rawLabels.length; i++) {
+      if (rawLabels[i]) {
+        labels.push(rawLabels[i]);
+        // Use Spanish if available, otherwise fall back to English
+        labels_es.push(rawLabelsEs[i] || rawLabels[i]);
+      }
+    }
 
     // Descriptions are empty for legacy positions
     descriptions = labels.map(() => '');
+    descriptions_es = labels.map(() => '');
   }
 
   // If we still have no labels, return 404

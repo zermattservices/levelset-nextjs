@@ -72,10 +72,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!orgPositionsError && orgPositionsData && orgPositionsData.length > 0) {
       positions = orgPositionsData.map((item: any) => ({
         name: item.name,
-        name_es: item.name_es ?? null,
+        // Use Spanish if available, otherwise fall back to English
+        name_es: item.name_es || item.name || null,
         zone: (item.zone === 'BOH' ? 'BOH' : 'FOH') as 'FOH' | 'BOH',
         description: item.description ?? null,
-        description_es: item.description_es ?? null,
+        // Use Spanish if available, otherwise fall back to English
+        description_es: item.description_es || item.description || null,
       }));
     }
   }
@@ -126,7 +128,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!positionsMap.has(name)) {
         positionsMap.set(name, {
           name,
-          name_es: item.position_es ?? null,
+          // Use Spanish if available, otherwise fall back to English
+          name_es: item.position_es || name,
           zone,
           description: null,
           description_es: null,
