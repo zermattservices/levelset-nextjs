@@ -39,9 +39,9 @@ export function HomePage() {
     <>
       <Head>
         <meta name="twitter:card" content="summary" />
-        <title key="title">Home | Levelset</title>
-        <meta key="og:title" property="og:title" content="Home | Levelset" />
-        <meta key="twitter:title" name="twitter:title" content="Home | Levelset" />
+        <title key="title">Levelset | Home</title>
+        <meta key="og:title" property="og:title" content="Levelset | Home" />
+        <meta key="twitter:title" name="twitter:title" content="Levelset | Home" />
       </Head>
 
       <style>{`

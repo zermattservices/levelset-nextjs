@@ -55,7 +55,7 @@
   flex: 1;
   width: 100%;
   padding: 16px;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
 }
 
@@ -65,9 +65,10 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  /* Add small padding to prevent border cutoff */
-  padding: 0 2px;
   box-sizing: border-box;
+  /* Allow visible overflow for table border */
+  overflow: visible;
+  padding: 0 1px;
 }
 
 .footer {

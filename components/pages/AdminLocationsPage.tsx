@@ -29,7 +29,7 @@ export function AdminLocationsPage() {
     return (
       <>
         <Head>
-          <title key="title">Access Denied | Levelset</title>
+          <title key="title">Levelset | Access Denied</title>
         </Head>
 
         <style>{`
@@ -76,9 +76,9 @@ export function AdminLocationsPage() {
     <>
       <Head>
         <meta name="twitter:card" content="summary" />
-        <title key="title">Admin - Locations | Levelset</title>
-        <meta key="og:title" property="og:title" content="Admin - Locations | Levelset" />
-        <meta key="twitter:title" name="twitter:title" content="Admin - Locations | Levelset" />
+        <title key="title">Levelset | Admin Mode</title>
+        <meta key="og:title" property="og:title" content="Levelset | Admin Mode" />
+        <meta key="twitter:title" name="twitter:title" content="Levelset | Admin Mode" />
       </Head>
 
       <style>{`

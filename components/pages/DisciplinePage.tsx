@@ -35,9 +35,9 @@ export function DisciplinePage() {
     <>
       <Head>
         <meta name="twitter:card" content="summary" />
-        <title key="title">Discipline | Levelset</title>
-        <meta key="og:title" property="og:title" content="Discipline | Levelset" />
-        <meta key="twitter:title" name="twitter:title" content="Discipline | Levelset" />
+        <title key="title">Levelset | Discipline</title>
+        <meta key="og:title" property="og:title" content="Levelset | Discipline" />
+        <meta key="twitter:title" name="twitter:title" content="Levelset | Discipline" />
       </Head>
 
       <style>{`

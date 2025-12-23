@@ -276,41 +276,54 @@ const ExpandedContentRow = styled(TableRow)(() => ({
   }
 }));
 
+const ExpandedTableContainer = styled(Box)(() => ({
+  overflowX: 'auto',
+  width: '100%',
+  borderRadius: 8,
+  border: '1px solid #e5e7eb',
+}));
+
 const ExpandedTable = styled(Table)(() => ({
   tableLayout: 'auto',
+  minWidth: 500,
   '& th': {
     backgroundColor: '#f3f4f6',
-    padding: '4px 6px',
+    padding: '4px 8px',
     fontSize: 10,
     fontWeight: 600,
     borderBottom: '1px solid #d1d5db',
     textTransform: 'none',
+    whiteSpace: 'nowrap',
   },
   '& td': {
-    padding: '4px 6px',
+    padding: '4px 8px',
     fontSize: 11,
     borderBottom: '1px solid #e5e7eb',
   },
   // First column (Leader/Employee name) - sticky with proper width
-  '& th:first-of-type, & td:first-of-type': {
+  '& thead th:first-of-type, & tbody td:first-of-type': {
     position: 'sticky',
     left: 0,
-    backgroundColor: '#f3f4f6',
-    zIndex: 1,
-    minWidth: 80,
-    maxWidth: 120,
+    zIndex: 2,
+    minWidth: 90,
+    width: 90,
+    maxWidth: 110,
     whiteSpace: 'normal',
     wordBreak: 'break-word',
   },
-  '& td:first-of-type': {
-    backgroundColor: '#fafafa',
+  '& thead th:first-of-type': {
+    backgroundColor: '#f3f4f6',
   },
-  // Date column - compact width
-  '& th:nth-of-type(2), & td:nth-of-type(2)': {
+  '& tbody td:first-of-type': {
+    backgroundColor: '#fafafa',
+    boxShadow: '2px 0 4px rgba(0,0,0,0.05)',
+  },
+  // Date column - compact, NOT sticky
+  '& thead th:nth-of-type(2), & tbody td:nth-of-type(2)': {
     whiteSpace: 'nowrap',
-    width: 70,
-    minWidth: 70,
-    maxWidth: 80,
+    width: 75,
+    minWidth: 75,
+    position: 'static',
   },
 }));
 
@@ -779,36 +792,38 @@ function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thres
                       <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 12, mb: 1 }}>
                         Last 4 Ratings
                       </Typography>
-                      <ExpandedTable size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Leader</TableCell>
-                            <TableCell>Date</TableCell>
-                            <TableCell>Position</TableCell>
-                            <TableCell align="center">Criteria 1</TableCell>
-                            <TableCell align="center">Criteria 2</TableCell>
-                            <TableCell align="center">Criteria 3</TableCell>
-                            <TableCell align="center">Criteria 4</TableCell>
-                            <TableCell align="center">Criteria 5</TableCell>
-                            <TableCell align="center">Avg</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {employee.recent_ratings.map((rating, idx) => (
-                            <TableRow key={idx}>
-                              <TableCell>{rating.rater_name}</TableCell>
-                              <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
-                              <TableCell>{cleanPositionName(rating.position)}</TableCell>
-                              <RatingCell $rating={rating.rating_1} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_1)}</RatingCell>
-                              <RatingCell $rating={rating.rating_2} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_2)}</RatingCell>
-                              <RatingCell $rating={rating.rating_3} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_3)}</RatingCell>
-                              <RatingCell $rating={rating.rating_4} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_4)}</RatingCell>
-                              <RatingCell $rating={rating.rating_5} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_5)}</RatingCell>
-                              <RatingCell $rating={rating.rating_avg} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_avg)}</RatingCell>
+                      <ExpandedTableContainer>
+                        <ExpandedTable size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Leader</TableCell>
+                              <TableCell>Date</TableCell>
+                              <TableCell>Position</TableCell>
+                              <TableCell align="center">Criteria 1</TableCell>
+                              <TableCell align="center">Criteria 2</TableCell>
+                              <TableCell align="center">Criteria 3</TableCell>
+                              <TableCell align="center">Criteria 4</TableCell>
+                              <TableCell align="center">Criteria 5</TableCell>
+                              <TableCell align="center">Avg</TableCell>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </ExpandedTable>
+                          </TableHead>
+                          <TableBody>
+                            {employee.recent_ratings.map((rating, idx) => (
+                              <TableRow key={idx}>
+                                <TableCell>{rating.rater_name}</TableCell>
+                                <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
+                                <TableCell>{cleanPositionName(rating.position)}</TableCell>
+                                <RatingCell $rating={rating.rating_1} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_1)}</RatingCell>
+                                <RatingCell $rating={rating.rating_2} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_2)}</RatingCell>
+                                <RatingCell $rating={rating.rating_3} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_3)}</RatingCell>
+                                <RatingCell $rating={rating.rating_4} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_4)}</RatingCell>
+                                <RatingCell $rating={rating.rating_5} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_5)}</RatingCell>
+                                <RatingCell $rating={rating.rating_avg} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_avg)}</RatingCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </ExpandedTable>
+                      </ExpandedTableContainer>
                     </TableCell>
                   </ExpandedContentRow>
                 )}
@@ -921,34 +936,36 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
                       <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 12, mb: 1 }}>
                         Last 4 Ratings for {position}
                       </Typography>
-                      <ExpandedTable size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Leader</TableCell>
-                            <TableCell>Date</TableCell>
-                            <TableCell align="center">{big5Labels?.label_1 || 'Rating 1'}</TableCell>
-                            <TableCell align="center">{big5Labels?.label_2 || 'Rating 2'}</TableCell>
-                            <TableCell align="center">{big5Labels?.label_3 || 'Rating 3'}</TableCell>
-                            <TableCell align="center">{big5Labels?.label_4 || 'Rating 4'}</TableCell>
-                            <TableCell align="center">{big5Labels?.label_5 || 'Rating 5'}</TableCell>
-                            <TableCell align="center">Avg</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {employee.recent_ratings.map((rating, idx) => (
-                            <TableRow key={idx}>
-                              <TableCell>{rating.rater_name}</TableCell>
-                              <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
-                              <RatingCell $rating={rating.rating_1} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_1)}</RatingCell>
-                              <RatingCell $rating={rating.rating_2} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_2)}</RatingCell>
-                              <RatingCell $rating={rating.rating_3} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_3)}</RatingCell>
-                              <RatingCell $rating={rating.rating_4} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_4)}</RatingCell>
-                              <RatingCell $rating={rating.rating_5} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_5)}</RatingCell>
-                              <RatingCell $rating={rating.rating_avg} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_avg)}</RatingCell>
+                      <ExpandedTableContainer>
+                        <ExpandedTable size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Leader</TableCell>
+                              <TableCell>Date</TableCell>
+                              <TableCell align="center">{big5Labels?.label_1 || 'Rating 1'}</TableCell>
+                              <TableCell align="center">{big5Labels?.label_2 || 'Rating 2'}</TableCell>
+                              <TableCell align="center">{big5Labels?.label_3 || 'Rating 3'}</TableCell>
+                              <TableCell align="center">{big5Labels?.label_4 || 'Rating 4'}</TableCell>
+                              <TableCell align="center">{big5Labels?.label_5 || 'Rating 5'}</TableCell>
+                              <TableCell align="center">Avg</TableCell>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </ExpandedTable>
+                          </TableHead>
+                          <TableBody>
+                            {employee.recent_ratings.map((rating, idx) => (
+                              <TableRow key={idx}>
+                                <TableCell>{rating.rater_name}</TableCell>
+                                <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
+                                <RatingCell $rating={rating.rating_1} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_1)}</RatingCell>
+                                <RatingCell $rating={rating.rating_2} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_2)}</RatingCell>
+                                <RatingCell $rating={rating.rating_3} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_3)}</RatingCell>
+                                <RatingCell $rating={rating.rating_4} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_4)}</RatingCell>
+                                <RatingCell $rating={rating.rating_5} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_5)}</RatingCell>
+                                <RatingCell $rating={rating.rating_avg} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_avg)}</RatingCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </ExpandedTable>
+                      </ExpandedTableContainer>
                     </TableCell>
                   </ExpandedContentRow>
                 )}
@@ -1053,36 +1070,38 @@ function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding, thr
                       <Typography sx={{ fontFamily, fontWeight: 600, fontSize: 12, mb: 1 }}>
                         Last 10 Ratings Given
                       </Typography>
-                      <ExpandedTable size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Employee</TableCell>
-                            <TableCell>Date</TableCell>
-                            <TableCell>Position</TableCell>
-                            <TableCell align="center">Criteria 1</TableCell>
-                            <TableCell align="center">Criteria 2</TableCell>
-                            <TableCell align="center">Criteria 3</TableCell>
-                            <TableCell align="center">Criteria 4</TableCell>
-                            <TableCell align="center">Criteria 5</TableCell>
-                            <TableCell align="center">Avg</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {leader.recent_ratings.map((rating, idx) => (
-                            <TableRow key={idx}>
-                              <TableCell>{rating.employee_name}</TableCell>
-                              <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
-                              <TableCell>{cleanPositionName(rating.position)}</TableCell>
-                              <RatingCell $rating={rating.rating_1} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_1)}</RatingCell>
-                              <RatingCell $rating={rating.rating_2} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_2)}</RatingCell>
-                              <RatingCell $rating={rating.rating_3} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_3)}</RatingCell>
-                              <RatingCell $rating={rating.rating_4} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_4)}</RatingCell>
-                              <RatingCell $rating={rating.rating_5} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_5)}</RatingCell>
-                              <RatingCell $rating={rating.rating_avg} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_avg)}</RatingCell>
+                      <ExpandedTableContainer>
+                        <ExpandedTable size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Employee</TableCell>
+                              <TableCell>Date</TableCell>
+                              <TableCell>Position</TableCell>
+                              <TableCell align="center">Criteria 1</TableCell>
+                              <TableCell align="center">Criteria 2</TableCell>
+                              <TableCell align="center">Criteria 3</TableCell>
+                              <TableCell align="center">Criteria 4</TableCell>
+                              <TableCell align="center">Criteria 5</TableCell>
+                              <TableCell align="center">Avg</TableCell>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </ExpandedTable>
+                          </TableHead>
+                          <TableBody>
+                            {leader.recent_ratings.map((rating, idx) => (
+                              <TableRow key={idx}>
+                                <TableCell>{rating.employee_name}</TableCell>
+                                <TableCell>{formatRatingDate(rating.created_at)}</TableCell>
+                                <TableCell>{cleanPositionName(rating.position)}</TableCell>
+                                <RatingCell $rating={rating.rating_1} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_1)}</RatingCell>
+                                <RatingCell $rating={rating.rating_2} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_2)}</RatingCell>
+                                <RatingCell $rating={rating.rating_3} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_3)}</RatingCell>
+                                <RatingCell $rating={rating.rating_4} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_4)}</RatingCell>
+                                <RatingCell $rating={rating.rating_5} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_5)}</RatingCell>
+                                <RatingCell $rating={rating.rating_avg} $greenThreshold={thresholds?.green_threshold} $yellowThreshold={thresholds?.yellow_threshold}>{formatRating(rating.rating_avg)}</RatingCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </ExpandedTable>
+                      </ExpandedTableContainer>
                     </TableCell>
                   </ExpandedContentRow>
                 )}

@@ -35,9 +35,9 @@ export function PeaClassicPage() {
     <>
       <Head>
         <meta name="twitter:card" content="summary" />
-        <title key="title">PEA Classic | Levelset</title>
-        <meta key="og:title" property="og:title" content="PEA Classic | Levelset" />
-        <meta key="twitter:title" name="twitter:title" content="PEA Classic | Levelset" />
+        <title key="title">Levelset | Ratings Scorecard</title>
+        <meta key="og:title" property="og:title" content="Levelset | Ratings Scorecard" />
+        <meta key="twitter:title" name="twitter:title" content="Levelset | Ratings Scorecard" />
       </Head>
 
       <style>{`

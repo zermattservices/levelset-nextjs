@@ -29,9 +29,9 @@ export function RosterPage() {
     <>
       <Head>
         <meta name="twitter:card" content="summary" />
-        <title key="title">Roster | Levelset</title>
-        <meta key="og:title" property="og:title" content="Roster | Levelset" />
-        <meta key="twitter:title" name="twitter:title" content="Roster | Levelset" />
+        <title key="title">Levelset | Roster</title>
+        <meta key="og:title" property="og:title" content="Levelset | Roster" />
+        <meta key="twitter:title" name="twitter:title" content="Levelset | Roster" />
       </Head>
 
       <style>{`

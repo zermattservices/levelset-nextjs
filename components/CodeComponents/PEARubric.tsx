@@ -15,11 +15,6 @@ export function PEARubric({ className = "", yellowThreshold = 1.75, greenThresho
   return (
     <div className={`pea-rubric ${className}`} data-plasmic-name="pea-rubric">
       <table className="rubric-table" data-plasmic-name="rubric-table">
-        <thead>
-          <tr>
-            <th className="rubric-title">Rating Scale</th>
-          </tr>
-        </thead>
         <tbody>
           <tr>
             <td className="rubric-red">Not Yet = 1.0 – {notYetEnd}</td>

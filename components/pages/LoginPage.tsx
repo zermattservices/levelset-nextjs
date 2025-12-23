@@ -20,9 +20,9 @@ export function LoginPage() {
     <>
       <Head>
         <meta name="twitter:card" content="summary" />
-        <title key="title">Levelset Login</title>
-        <meta key="og:title" property="og:title" content="Levelset Login" />
-        <meta key="twitter:title" name="twitter:title" content="Levelset Login" />
+        <title key="title">Levelset | Login</title>
+        <meta key="og:title" property="og:title" content="Levelset | Login" />
+        <meta key="twitter:title" name="twitter:title" content="Levelset | Login" />
       </Head>
 
       <style>{`

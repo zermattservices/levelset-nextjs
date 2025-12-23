@@ -13,10 +13,10 @@ function PublicPeaPage({ location, token }: PublicPeaPageProps) {
   return (
     <>
       <Head>
-        <title>{`Ratings Summary • ${location.name ?? 'Levelset'}`}</title>
+        <title>{`Ratings Scorecard | ${location.name ?? 'Levelset'}`}</title>
         <meta
           name="description"
-          content={`Positional Excellence ratings summary for ${location.name ?? 'this location'}`}
+          content={`Positional Excellence ratings scorecard for ${location.name ?? 'this location'}`}
         />
         <link rel="icon" href="/Levelset Icon Non Trans.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />

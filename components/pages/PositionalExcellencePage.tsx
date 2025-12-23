@@ -34,9 +34,9 @@ export function PositionalExcellencePage() {
     <>
       <Head>
         <meta name="twitter:card" content="summary" />
-        <title key="title">Positional Excellence | Levelset</title>
-        <meta key="og:title" property="og:title" content="Positional Excellence | Levelset" />
-        <meta key="twitter:title" name="twitter:title" content="Positional Excellence | Levelset" />
+        <title key="title">Levelset | Positional Excellence</title>
+        <meta key="og:title" property="og:title" content="Levelset | Positional Excellence" />
+        <meta key="twitter:title" name="twitter:title" content="Levelset | Positional Excellence" />
       </Head>
 
       <style>{`

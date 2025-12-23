@@ -142,9 +142,9 @@ export function OrgSettingsPage() {
     <>
       <Head>
         <meta name="twitter:card" content="summary" />
-        <title key="title">Organization Settings | Levelset</title>
-        <meta key="og:title" property="og:title" content="Organization Settings | Levelset" />
-        <meta key="twitter:title" name="twitter:title" content="Organization Settings | Levelset" />
+        <title key="title">Levelset | Organization Settings</title>
+        <meta key="og:title" property="og:title" content="Levelset | Organization Settings" />
+        <meta key="twitter:title" name="twitter:title" content="Levelset | Organization Settings" />
       </Head>
 
       <style>{`
