@@ -526,6 +526,51 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                   onClick={() => handleOpenForm(card.key)}
                 />
               ))}
+              
+              {/* Ratings Summary link - opens in new browser tab */}
+              <Button
+                component="a"
+                href={`/public/positional-excellence/${token}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  textTransform: 'none',
+                  padding: '16px 20px',
+                  borderRadius: '16px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#111827',
+                  border: '1px solid #e5e7eb',
+                  boxShadow: '0 8px 16px rgba(17, 24, 39, 0.04)',
+                  marginTop: 1,
+                  '&:hover': {
+                    backgroundColor: '#e5e7eb',
+                    boxShadow: '0 10px 20px rgba(17, 24, 39, 0.08)',
+                  },
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: '#31664a',
+                  }}
+                >
+                  View Ratings Summary
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                    fontSize: 13,
+                    color: '#6b7280',
+                  }}
+                >
+                  Opens team ratings in your browser
+                </Typography>
+              </Button>
             </Box>
           )}
         </Box>
