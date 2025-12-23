@@ -33,7 +33,7 @@ interface MobilePortalPageProps {
 }
 
 // Form config will be translated in component using useTranslation
-const allCards: Array<{ key: MobileFormKey; titleKey: string; descriptionKey: string }> = [
+const cards: Array<{ key: MobileFormKey; titleKey: string; descriptionKey: string }> = [
   {
     key: 'ratings',
     titleKey: 'forms:ratings.title',
@@ -45,9 +45,6 @@ const allCards: Array<{ key: MobileFormKey; titleKey: string; descriptionKey: st
     descriptionKey: 'forms:infraction.description',
   },
 ];
-
-// Location numbers for which discipline (infractions) should be hidden
-const DISCIPLINE_DISABLED_LOCATIONS = ['05467'];
 
 type Language = 'en' | 'es';
 
@@ -521,15 +518,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
             summaryCard
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {allCards
-                .filter((card) => {
-                  // Hide discipline/infractions for disabled locations
-                  if (card.key === 'infractions' && DISCIPLINE_DISABLED_LOCATIONS.includes(location.location_number ?? '')) {
-                    return false;
-                  }
-                  return true;
-                })
-                .map((card) => (
+              {cards.map((card) => (
                 <HomeCard
                   key={card.key}
                   title={t(card.titleKey)}
