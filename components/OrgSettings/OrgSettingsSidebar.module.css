@@ -3,7 +3,7 @@
   flex-direction: column;
   width: 220px;
   flex-shrink: 0;
-  gap: 24px;
+  gap: 16px;
   height: 100%;
   max-height: calc(100vh - 200px);
   overflow-y: auto;
@@ -31,7 +31,23 @@
 .menuGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+}
+
+.groupHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.groupHeader:hover {
+  background-color: #f6f6f6;
 }
 
 .groupTitle {
@@ -42,7 +58,46 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0;
-  padding: 0 12px;
+  padding: 0;
+}
+
+.chevron {
+  width: 16px;
+  height: 16px;
+  color: #999;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chevronExpanded {
+  transform: rotate(180deg);
+}
+
+.menuListWrapper {
+  overflow: hidden;
+  transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.menuListCollapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.menuListExpanded {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.divider {
+  height: 1px;
+  background-color: #e5e5e5;
+  margin: 8px 12px;
+}
+
+.standaloneSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .menuList {

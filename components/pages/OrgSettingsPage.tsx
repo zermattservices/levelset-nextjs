@@ -7,7 +7,7 @@ import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
-import { OrgSettingsSidebar, type MenuItem } from '@/components/OrgSettings/OrgSettingsSidebar';
+import { OrgSettingsSidebar, type MenuItem, type StandaloneItem } from '@/components/OrgSettings/OrgSettingsSidebar';
 import { PositionalExcellenceSettings } from '@/components/OrgSettings/PositionalExcellenceSettings';
 import { DisciplineSettings } from '@/components/OrgSettings/DisciplineSettings';
 import { ComingSoonPlaceholder } from '@/components/OrgSettings/ComingSoonPlaceholder';
@@ -17,6 +17,7 @@ import { LocationDetails } from '@/components/OrgSettings/LocationDetails';
 import { OrganizationDetails } from '@/components/OrgSettings/OrganizationDetails';
 import { UsersTab } from '@/components/OrgSettings/UsersTab';
 import { RolesTab } from '@/components/OrgSettings/RolesTab';
+import { PaySettingsTab } from '@/components/OrgSettings/PaySettingsTab';
 import { createSupabaseClient } from '@/util/supabase/component';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
@@ -78,6 +79,7 @@ export function OrgSettingsPage() {
       items: [
         { id: 'positional-excellence', label: 'Positional Excellence', status: 'active' },
         { id: 'discipline', label: 'Discipline', status: 'active' },
+        { id: 'roster-settings', label: 'Roster', status: 'active' },
         { id: 'pathway', label: 'Pathway', status: 'coming-soon' },
         { id: 'evaluations', label: 'Evaluations', status: 'coming-soon' },
       ],
@@ -97,13 +99,12 @@ export function OrgSettingsPage() {
         { id: 'mobile-config', label: 'Configuration', status: 'coming-soon' },
       ],
     },
-    {
-      group: 'General',
-      items: [
-        { id: 'location-details', label: 'Location Details', status: 'active' },
-        { id: 'org-details', label: 'Organization Details', status: 'active' },
-      ],
-    },
+  ];
+
+  // Standalone items appear below the groups with a divider
+  const standaloneItems: StandaloneItem[] = [
+    { id: 'location-details', label: 'Location Details', status: 'active' },
+    { id: 'org-details', label: 'Organization Details', status: 'active' },
   ];
 
   const renderContent = () => {
@@ -112,6 +113,8 @@ export function OrgSettingsPage() {
         return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'discipline':
         return <DisciplineSettings orgId={selectedLocationOrgId} locationId={selectedLocationId} onNavigate={setActiveSection} disabled={!canEdit} />;
+      case 'roster-settings':
+        return <PaySettingsTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'pathway':
         return <ComingSoonPlaceholder title="Pathway" description="Career pathway and development tracking coming soon." />;
       case 'evaluations':
@@ -199,6 +202,7 @@ export function OrgSettingsPage() {
               menuItems={menuItems}
               activeSection={activeSection}
               onSectionChange={setActiveSection}
+              standaloneItems={standaloneItems}
             />
             <div className={sty.contentArea}>
               {renderContent()}

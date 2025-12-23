@@ -663,7 +663,7 @@ function EmployeesTableView({
   }, [getAvailableRoles]);
 
   // Fetch employees from Supabase - memoized to avoid recreating on every render
-  const fetchEmployees = React.useCallback(async () => {
+  const fetchEmployees = React.useCallback(async (bustCache = false) => {
     if (!locationId) {
       setData([]);
       setError('Select a location to view the roster.');
@@ -672,10 +672,14 @@ function EmployeesTableView({
     }
     try {
       setLoading(true);
-      const response = await fetch(`/api/employees?location_id=${locationId}`, {
+      // Add cache-busting parameter when needed (after mutations)
+      const url = bustCache 
+        ? `/api/employees?location_id=${locationId}&_t=${Date.now()}`
+        : `/api/employees?location_id=${locationId}`;
+      const response = await fetch(url, {
         // Add cache headers for better performance
         headers: {
-          'Cache-Control': 'max-age=60', // Cache for 60 seconds
+          'Cache-Control': bustCache ? 'no-cache' : 'max-age=60',
         }
       });
       
@@ -814,7 +818,7 @@ function EmployeesTableView({
           )
         );
       } else {
-        fetchEmployees();
+        fetchEmployees(true);
       }
     }
   };
@@ -1116,8 +1120,8 @@ function EmployeesTableView({
       setTerminateConfirmOpen(false);
       setEmployeeToTerminate(null);
       
-      // Refresh data
-      fetchEmployees();
+      // Refresh data with cache busting to get fresh data after mutation
+      fetchEmployees(true);
     } catch (err) {
       console.error('Error terminating employee:', err);
       alert('Failed to terminate employee. Please try again.');

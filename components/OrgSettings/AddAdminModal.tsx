@@ -10,8 +10,18 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
+import { createSupabaseClient } from '@/util/supabase/component';
+
+interface LocationInfo {
+  id: string;
+  location_number: string;
+  name: string;
+}
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -97,6 +107,11 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
   const [lastName, setLastName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [emailError, setEmailError] = React.useState<string | null>(null);
+  
+  // Location state
+  const [orgLocations, setOrgLocations] = React.useState<LocationInfo[]>([]);
+  const [selectedLocationIds, setSelectedLocationIds] = React.useState<Set<string>>(new Set());
+  const [loadingLocations, setLoadingLocations] = React.useState(true);
 
   // Credentials display state
   const [createdEmail, setCreatedEmail] = React.useState('');
@@ -104,6 +119,44 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
   const [copiedEmail, setCopiedEmail] = React.useState(false);
   const [copiedPassword, setCopiedPassword] = React.useState(false);
   const [isGoogleEmail, setIsGoogleEmail] = React.useState(false);
+
+  const supabase = React.useMemo(() => createSupabaseClient(), []);
+
+  // Check if this is a multi-location org
+  const isMultiLocation = orgLocations.length > 1;
+
+  // Fetch locations when modal opens
+  React.useEffect(() => {
+    async function fetchLocations() {
+      if (!open || !orgId) {
+        setLoadingLocations(false);
+        return;
+      }
+
+      setLoadingLocations(true);
+      try {
+        const { data, error } = await supabase
+          .from('locations')
+          .select('id, location_number, name')
+          .eq('org_id', orgId)
+          .order('location_number');
+
+        if (error) throw error;
+        setOrgLocations(data || []);
+        
+        // Default: select all locations
+        if (data && data.length > 0) {
+          setSelectedLocationIds(new Set(data.map(l => l.id)));
+        }
+      } catch (err) {
+        console.error('Error fetching locations:', err);
+      } finally {
+        setLoadingLocations(false);
+      }
+    }
+
+    fetchLocations();
+  }, [open, orgId, supabase]);
 
   // Reset state when modal opens/closes
   React.useEffect(() => {
@@ -116,6 +169,7 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
       setError(null);
       setCreatedEmail('');
       setCreatedPassword('');
+      setSelectedLocationIds(new Set());
     }
   }, [open]);
 
@@ -139,8 +193,27 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
     if (value) validateEmail(value);
   };
 
+  // Handle location checkbox toggle
+  const handleLocationToggle = (locationId: string) => {
+    setSelectedLocationIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(locationId)) {
+        newSet.delete(locationId);
+      } else {
+        newSet.add(locationId);
+      }
+      return newSet;
+    });
+  };
+
   const handleCreateUser = async () => {
     if (!firstName.trim() || !lastName.trim() || !validateEmail(email) || !orgId) return;
+
+    // For multi-location orgs, at least one location must be selected
+    if (isMultiLocation && selectedLocationIds.size === 0) {
+      setError('Please select at least one location');
+      return;
+    }
 
     setCreating(true);
     setError(null);
@@ -165,6 +238,23 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
 
       if (!response.ok) {
         throw new Error(result.error || 'Failed to create user');
+      }
+
+      // Save location access for multi-location orgs
+      if (isMultiLocation && result.userId) {
+        const locationAccessRecords = Array.from(selectedLocationIds).map(locId => ({
+          user_id: result.userId,
+          location_id: locId,
+        }));
+
+        const { error: accessError } = await supabase
+          .from('user_location_access')
+          .insert(locationAccessRecords);
+
+        if (accessError) {
+          console.error('Error saving location access:', accessError);
+          // Don't fail the whole operation, user was created successfully
+        }
       }
 
       // Success - show credentials
@@ -261,6 +351,45 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
               helperText={emailError || 'This email will be used for login credentials'}
               required
             />
+
+            {/* Location access checkboxes - only for multi-location orgs */}
+            {isMultiLocation && !loadingLocations && (
+              <Box>
+                <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: '#111827', mb: 1 }}>
+                  Location Access
+                </Typography>
+                <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', mb: 1.5 }}>
+                  Select which locations this user can access
+                </Typography>
+                <FormGroup sx={{ 
+                  backgroundColor: '#f9fafb', 
+                  borderRadius: 2, 
+                  p: 2,
+                  border: '1px solid #e5e7eb',
+                }}>
+                  {orgLocations.map(loc => (
+                    <FormControlLabel
+                      key={loc.id}
+                      control={
+                        <Checkbox
+                          checked={selectedLocationIds.has(loc.id)}
+                          onChange={() => handleLocationToggle(loc.id)}
+                          sx={{
+                            color: '#31664a',
+                            '&.Mui-checked': { color: '#31664a' },
+                          }}
+                        />
+                      }
+                      label={
+                        <Typography sx={{ fontFamily, fontSize: 14 }}>
+                          {loc.name} ({loc.location_number})
+                        </Typography>
+                      }
+                    />
+                  ))}
+                </FormGroup>
+              </Box>
+            )}
           </Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 1 }}>

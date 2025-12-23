@@ -1,9 +1,32 @@
 /**
  * Pay Calculator for multiple organizations
  * Each organization can have its own pay structure
+ * Supports both hardcoded legacy pay structures and dynamic org-level configurations
  */
 
 import type { Employee, AvailabilityType, CertificationStatus } from './supabase.types';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+// Type definitions for org-level pay configuration
+interface OrgPayConfig {
+  id: string;
+  org_id: string;
+  role_name: string;
+  has_availability_rules: boolean;
+  has_zone_rules: boolean;
+  has_certification_rules: boolean;
+  availability_description: string | null;
+}
+
+interface OrgPayRate {
+  id: string;
+  org_id: string;
+  role_name: string;
+  zone: 'FOH' | 'BOH' | null;
+  availability: 'Limited' | 'Available' | null;
+  is_certified: boolean;
+  hourly_rate: number;
+}
 
 // CFA Buda and CFA West Buda location IDs (Reece Howard organization)
 // These locations use the special pay calculation logic with certification
@@ -345,5 +368,151 @@ export function getPayCalculationSummary(employee: Employee): string {
   parts.push(`Pay: $${calculatePay(employee)?.toFixed(2) || 'N/A'}`);
 
   return parts.join(' | ');
+}
+
+/**
+ * Calculate pay using org-level configuration from the database
+ * This is the preferred method for organizations with custom pay settings
+ */
+export async function calculatePayFromOrgConfig(
+  employee: Employee,
+  orgId: string,
+  supabase: SupabaseClient
+): Promise<number | null> {
+  const role = employee.role?.trim();
+  if (!role) return null;
+
+  try {
+    // Fetch the pay configuration for this role
+    const { data: config, error: configError } = await supabase
+      .from('org_pay_config')
+      .select('*')
+      .eq('org_id', orgId)
+      .eq('role_name', role)
+      .single();
+
+    if (configError || !config) {
+      // No config for this role, fall back to null
+      return null;
+    }
+
+    // Determine the criteria for finding the right pay rate
+    const isCertified = config.has_certification_rules 
+      ? isCertifiedForPay(employee.certified_status)
+      : false;
+    
+    const availability = config.has_availability_rules
+      ? (employee.availability || 'Available')
+      : null;
+    
+    // Determine zone (FOH/BOH)
+    let zone: 'FOH' | 'BOH' | null = null;
+    if (config.has_zone_rules) {
+      const isFoh = employee.is_foh === true;
+      const isBoh = employee.is_boh === true;
+      
+      // If both, prefer BOH (typically higher pay)
+      if (isBoh) {
+        zone = 'BOH';
+      } else if (isFoh) {
+        zone = 'FOH';
+      }
+    }
+
+    // Build query to find matching pay rate
+    let query = supabase
+      .from('org_pay_rates')
+      .select('hourly_rate')
+      .eq('org_id', orgId)
+      .eq('role_name', role)
+      .eq('is_certified', isCertified);
+
+    if (zone !== null) {
+      query = query.eq('zone', zone);
+    } else {
+      query = query.is('zone', null);
+    }
+
+    if (availability !== null) {
+      query = query.eq('availability', availability);
+    } else {
+      query = query.is('availability', null);
+    }
+
+    const { data: rateData, error: rateError } = await query.single();
+
+    if (rateError || !rateData) {
+      // Try a fallback - maybe there's a rate without the specific criteria
+      // First try without certification requirement
+      if (isCertified) {
+        let fallbackQuery = supabase
+          .from('org_pay_rates')
+          .select('hourly_rate')
+          .eq('org_id', orgId)
+          .eq('role_name', role)
+          .eq('is_certified', false);
+
+        if (zone !== null) {
+          fallbackQuery = fallbackQuery.eq('zone', zone);
+        } else {
+          fallbackQuery = fallbackQuery.is('zone', null);
+        }
+
+        if (availability !== null) {
+          fallbackQuery = fallbackQuery.eq('availability', availability);
+        } else {
+          fallbackQuery = fallbackQuery.is('availability', null);
+        }
+
+        const { data: fallbackData } = await fallbackQuery.single();
+        if (fallbackData) {
+          return fallbackData.hourly_rate;
+        }
+      }
+      
+      return null;
+    }
+
+    return rateData.hourly_rate;
+  } catch (err) {
+    console.error('Error calculating pay from org config:', err);
+    return null;
+  }
+}
+
+/**
+ * Check if an organization has pay settings configured
+ */
+export async function hasOrgPayConfig(orgId: string, supabase: SupabaseClient): Promise<boolean> {
+  const { count, error } = await supabase
+    .from('org_pay_config')
+    .select('*', { count: 'exact', head: true })
+    .eq('org_id', orgId);
+
+  return !error && (count || 0) > 0;
+}
+
+/**
+ * Calculate pay for an employee using org config with fallback to hardcoded values
+ */
+export async function calculatePayForLocationAsync(
+  employee: Employee,
+  locationId: string,
+  orgId: string | null,
+  supabase: SupabaseClient
+): Promise<number | null> {
+  // First try org-level configuration if org_id is provided
+  if (orgId) {
+    const hasConfig = await hasOrgPayConfig(orgId, supabase);
+    if (hasConfig) {
+      const orgPay = await calculatePayFromOrgConfig(employee, orgId, supabase);
+      if (orgPay !== null) {
+        return orgPay;
+      }
+    }
+  }
+
+  // Fall back to hardcoded location-specific pay calculation
+  return calculatePayForLocation(employee, locationId);
 }
 

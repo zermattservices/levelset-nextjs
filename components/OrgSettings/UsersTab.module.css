@@ -202,3 +202,23 @@
   color: #6b7280;
   margin: 0;
 }
+
+.locationPillsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.locationPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background-color: #f3f4f6;
+  color: #374151;
+  white-space: nowrap;
+}

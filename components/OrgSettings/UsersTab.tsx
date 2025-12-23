@@ -47,6 +47,12 @@ const StyledTextField = styled(TextField)(() => ({
   },
 }));
 
+interface LocationInfo {
+  id: string;
+  location_number: string;
+  name: string;
+}
+
 interface EmployeeLinkedUser {
   id: string;
   first_name: string;
@@ -55,6 +61,7 @@ interface EmployeeLinkedUser {
   employee_id: string;
   employee_role: string | null;
   is_operator: boolean;
+  location_access: string[]; // Array of location IDs the user has access to
 }
 
 interface AdminOnlyUser {
@@ -62,6 +69,7 @@ interface AdminOnlyUser {
   first_name: string;
   last_name: string;
   email: string;
+  location_access: string[]; // Array of location IDs the user has access to
 }
 
 interface UsersTabProps {
@@ -79,6 +87,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
   const [employeeLinkedUsers, setEmployeeLinkedUsers] = React.useState<EmployeeLinkedUser[]>([]);
   const [adminOnlyUsers, setAdminOnlyUsers] = React.useState<AdminOnlyUser[]>([]);
   const [orgRoles, setOrgRoles] = React.useState<OrgRole[]>([]);
+  const [orgLocations, setOrgLocations] = React.useState<LocationInfo[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [editingId, setEditingId] = React.useState<string | null>(null);
@@ -113,6 +122,38 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
     return role?.color;
   }, [orgRoles]);
 
+  // Helper to get location number by ID
+  const getLocationNumber = React.useCallback((locationId: string): string => {
+    const loc = orgLocations.find(l => l.id === locationId);
+    return loc?.location_number || '';
+  }, [orgLocations]);
+
+  // Render location access pills
+  const renderLocationPills = (locationIds: string[]) => {
+    if (locationCount <= 1 || locationIds.length === 0) return null;
+    
+    // Sort location IDs by their location number
+    const sortedIds = [...locationIds].sort((a, b) => {
+      const numA = getLocationNumber(a);
+      const numB = getLocationNumber(b);
+      return numA.localeCompare(numB);
+    });
+
+    return (
+      <div className={sty.locationPillsContainer}>
+        {sortedIds.map(locId => {
+          const locNum = getLocationNumber(locId);
+          if (!locNum) return null;
+          return (
+            <span key={locId} className={sty.locationPill}>
+              {locNum}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
   // Fetch users for this organization
   const fetchUsers = React.useCallback(async () => {
     if (!orgId) {
@@ -132,6 +173,31 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
 
       if (rolesError) throw rolesError;
       setOrgRoles(rolesData || []);
+
+      // Fetch all locations for this org
+      const { data: locationsData, error: locationsError } = await supabase
+        .from('locations')
+        .select('id, location_number, name')
+        .eq('org_id', orgId)
+        .order('location_number');
+
+      if (locationsError) throw locationsError;
+      setOrgLocations(locationsData || []);
+
+      // Fetch all location access records for this org's users
+      const { data: allLocationAccess, error: accessError } = await supabase
+        .from('user_location_access')
+        .select('user_id, location_id');
+
+      // Create a map of user_id -> array of location_ids
+      const locationAccessMap = new Map<string, string[]>();
+      if (!accessError && allLocationAccess) {
+        for (const access of allLocationAccess) {
+          const existing = locationAccessMap.get(access.user_id) || [];
+          existing.push(access.location_id);
+          locationAccessMap.set(access.user_id, existing);
+        }
+      }
 
       // Fetch employee-linked users with their employee's role
       const { data: linkedData, error: linkedError } = await supabase
@@ -161,6 +227,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
         employee_id: user.employee_id,
         employee_role: user.employees?.role || null,
         is_operator: user.permissions === 'operator',
+        location_access: locationAccessMap.get(user.id) || [],
       }));
 
       // Sort by hierarchy level (0 first), then alphabetically within each level
@@ -182,7 +249,16 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
         .order('first_name');
 
       if (adminError) throw adminError;
-      setAdminOnlyUsers(adminData || []);
+      
+      const adminUsers: AdminOnlyUser[] = (adminData || []).map((user: any) => ({
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        location_access: locationAccessMap.get(user.id) || [],
+      }));
+      
+      setAdminOnlyUsers(adminUsers);
 
     } catch (err) {
       console.error('Error fetching users:', err);
@@ -325,13 +401,16 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                 <th className={sty.headerCell}>Name</th>
                 <th className={sty.headerCell}>Email</th>
                 <th className={sty.headerCell}>Role</th>
+                {locationCount > 1 && (
+                  <th className={sty.headerCell}>Location Access</th>
+                )}
                 <th className={sty.headerCellActions}></th>
               </tr>
             </thead>
             <tbody>
               {employeeLinkedUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className={sty.emptyState}>
+                  <td colSpan={locationCount > 1 ? 5 : 4} className={sty.emptyState}>
                     No leadership users configured yet. Click "Add User" to get started.
                   </td>
                 </tr>
@@ -404,6 +483,11 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                           </span>
                         )}
                       </td>
+                      {locationCount > 1 && (
+                        <td className={sty.cell}>
+                          {renderLocationPills(user.location_access)}
+                        </td>
+                      )}
                       <td className={sty.cellActions}>
                         {!user.is_operator && !disabled && (
                           <IconButton
@@ -461,13 +545,16 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                 <th className={sty.headerCell}>Name</th>
                 <th className={sty.headerCell}>Email</th>
                 <th className={sty.headerCell}>Role</th>
+                {locationCount > 1 && (
+                  <th className={sty.headerCell}>Location Access</th>
+                )}
                 <th className={sty.headerCellActions}></th>
               </tr>
             </thead>
             <tbody>
               {adminOnlyUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className={sty.emptyState}>
+                  <td colSpan={locationCount > 1 ? 5 : 4} className={sty.emptyState}>
                     No administrative users configured yet.
                   </td>
                 </tr>
@@ -526,6 +613,11 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                         Administrator
                       </span>
                     </td>
+                    {locationCount > 1 && (
+                      <td className={sty.cell}>
+                        {renderLocationPills(user.location_access)}
+                      </td>
+                    )}
                     <td className={sty.cellActions}>
                       {!disabled && (
                         <IconButton

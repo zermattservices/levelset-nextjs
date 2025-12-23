@@ -11,6 +11,9 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
 import { createSupabaseClient } from '@/util/supabase/component';
@@ -47,6 +50,12 @@ interface RoleHierarchy {
   role_name: string;
   hierarchy_level: number;
   color?: string;
+}
+
+interface LocationInfo {
+  id: string;
+  location_number: string;
+  name: string;
 }
 
 interface AddUserModalProps {
@@ -111,6 +120,8 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
   const [step, setStep] = React.useState<'select' | 'credentials'>('select');
   const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [roles, setRoles] = React.useState<RoleHierarchy[]>([]);
+  const [orgLocations, setOrgLocations] = React.useState<LocationInfo[]>([]);
+  const [selectedLocationIds, setSelectedLocationIds] = React.useState<Set<string>>(new Set());
   const [existingUserEmployeeIds, setExistingUserEmployeeIds] = React.useState<Set<string>>(new Set());
   const [loading, setLoading] = React.useState(true);
   const [creating, setCreating] = React.useState(false);
@@ -130,6 +141,9 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
+  // Check if this is a multi-location org
+  const isMultiLocation = orgLocations.length > 1;
+
   // Reset state when modal opens/closes
   React.useEffect(() => {
     if (open) {
@@ -140,10 +154,12 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
       setError(null);
       setCreatedEmail('');
       setCreatedPassword('');
+      // Reset location selection - will be populated with all locations on data fetch
+      setSelectedLocationIds(new Set());
     }
   }, [open]);
 
-  // Fetch employees and existing users
+  // Fetch employees, locations, and existing users
   React.useEffect(() => {
     async function fetchData() {
       if (!open || !locationId || !orgId) {
@@ -153,6 +169,21 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
 
       setLoading(true);
       try {
+        // Fetch all locations for this org
+        const { data: locationsData, error: locationsError } = await supabase
+          .from('locations')
+          .select('id, location_number, name')
+          .eq('org_id', orgId)
+          .order('location_number');
+
+        if (locationsError) throw locationsError;
+        setOrgLocations(locationsData || []);
+        
+        // Default: select all locations
+        if (locationsData && locationsData.length > 0) {
+          setSelectedLocationIds(new Set(locationsData.map(l => l.id)));
+        }
+
         // Fetch role hierarchy from org_roles table
         const { data: rolesData, error: rolesError } = await supabase
           .from('org_roles')
@@ -241,8 +272,27 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
     if (value) validateEmail(value);
   };
 
+  // Handle location checkbox toggle
+  const handleLocationToggle = (locationId: string) => {
+    setSelectedLocationIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(locationId)) {
+        newSet.delete(locationId);
+      } else {
+        newSet.add(locationId);
+      }
+      return newSet;
+    });
+  };
+
   const handleCreateUser = async () => {
     if (!selectedEmployee || !validateEmail(email)) return;
+
+    // For multi-location orgs, at least one location must be selected
+    if (isMultiLocation && selectedLocationIds.size === 0) {
+      setError('Please select at least one location');
+      return;
+    }
 
     setCreating(true);
     setError(null);
@@ -269,6 +319,23 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
 
       if (!response.ok) {
         throw new Error(result.error || 'Failed to create user');
+      }
+
+      // Save location access for multi-location orgs
+      if (isMultiLocation && result.userId) {
+        const locationAccessRecords = Array.from(selectedLocationIds).map(locId => ({
+          user_id: result.userId,
+          location_id: locId,
+        }));
+
+        const { error: accessError } = await supabase
+          .from('user_location_access')
+          .insert(locationAccessRecords);
+
+        if (accessError) {
+          console.error('Error saving location access:', accessError);
+          // Don't fail the whole operation, user was created successfully
+        }
       }
 
       // Success - show credentials
@@ -398,16 +465,57 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
                 </StyledTextField>
 
                 {selectedEmployee && (
-                  <StyledTextField
-                    label="Email Address"
-                    type="email"
-                    value={email}
-                    onChange={handleEmailChange}
-                    fullWidth
-                    error={!!emailError}
-                    helperText={emailError || 'This email will be used for login credentials'}
-                    required
-                  />
+                  <>
+                    <StyledTextField
+                      label="Email Address"
+                      type="email"
+                      value={email}
+                      onChange={handleEmailChange}
+                      fullWidth
+                      error={!!emailError}
+                      helperText={emailError || 'This email will be used for login credentials'}
+                      required
+                    />
+
+                    {/* Location access checkboxes - only for multi-location orgs */}
+                    {isMultiLocation && (
+                      <Box>
+                        <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: '#111827', mb: 1 }}>
+                          Location Access
+                        </Typography>
+                        <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', mb: 1.5 }}>
+                          Select which locations this user can access
+                        </Typography>
+                        <FormGroup sx={{ 
+                          backgroundColor: '#f9fafb', 
+                          borderRadius: 2, 
+                          p: 2,
+                          border: '1px solid #e5e7eb',
+                        }}>
+                          {orgLocations.map(loc => (
+                            <FormControlLabel
+                              key={loc.id}
+                              control={
+                                <Checkbox
+                                  checked={selectedLocationIds.has(loc.id)}
+                                  onChange={() => handleLocationToggle(loc.id)}
+                                  sx={{
+                                    color: '#31664a',
+                                    '&.Mui-checked': { color: '#31664a' },
+                                  }}
+                                />
+                              }
+                              label={
+                                <Typography sx={{ fontFamily, fontSize: 14 }}>
+                                  {loc.name} ({loc.location_number})
+                                </Typography>
+                              }
+                            />
+                          ))}
+                        </FormGroup>
+                      </Box>
+                    )}
+                  </>
                 )}
               </>
             )}

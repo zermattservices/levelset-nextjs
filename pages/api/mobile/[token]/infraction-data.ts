@@ -3,7 +3,7 @@ import { fetchLocationByToken } from '@/lib/mobile-location';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 
 // Location numbers for which discipline (infractions) should be disabled
-const DISCIPLINE_DISABLED_LOCATIONS = ['05467'];
+const DISCIPLINE_DISABLED_LOCATIONS: string[] = [];
 
 function normalizeName(fullName?: string | null, firstName?: string | null, lastName?: string | null) {
   if (fullName && fullName.trim().length > 0) {
