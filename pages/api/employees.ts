@@ -130,7 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Handle update employee
       if (intent === 'update') {
-        const { id, role, is_certified, certified_status, is_foh, is_boh, availability } = req.body;
+        const { id, role, is_certified, certified_status, is_foh, is_boh, availability, active } = req.body;
 
         if (!id) {
           return res.status(400).json({ error: 'Invalid request parameters' });
@@ -178,6 +178,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (availability !== undefined) {
         updateData.availability = availability;
         payFieldsChanged = true;
+      }
+      if (active !== undefined) {
+        updateData.active = active === 'true' || active === true;
       }
 
       if (Object.keys(updateData).length === 0) {

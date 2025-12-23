@@ -136,12 +136,22 @@ interface EmployeeEdit {
   availability?: AvailabilityType;
 }
 
+interface ExistingEmployee {
+  id: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email: string | null;
+  role: string | null;
+}
+
 
 // Column creation function moved outside component to avoid closure issues
 // This prevents React from seeing hooks called conditionally
 function createEmployeeColumns(
   editable: boolean,
   showKeepButton: boolean,
+  showMatchColumn: boolean,
   dependencies: {
     roleMenuAnchor: Record<string, HTMLElement | null>;
     handleRoleMenuOpen: (e: React.MouseEvent<HTMLElement>, employeeId: string) => void;
@@ -161,6 +171,9 @@ function createEmployeeColumns(
     fontFamily: string;
     levelsetGreen: string;
     destructiveColor: string;
+    existingEmployees?: ExistingEmployee[];
+    manualMatches?: Map<string, string>;
+    setManualMatches?: (fn: (prev: Map<string, string>) => Map<string, string>) => void;
   }
 ): GridColDef[] {
   const {
@@ -182,10 +195,67 @@ function createEmployeeColumns(
     fontFamily,
     levelsetGreen,
     destructiveColor,
+    existingEmployees = [],
+    manualMatches = new Map(),
+    setManualMatches,
   } = dependencies;
 
-  const columns: GridColDef[] = [
-    {
+  const columns: GridColDef[] = [];
+
+  // Add "Match to Existing" column for new employees
+  if (showMatchColumn && setManualMatches) {
+    columns.push({
+      field: 'match_existing',
+      headerName: 'Match to Existing',
+      width: 220,
+      align: "left",
+      headerAlign: "center",
+      renderCell: (params) => {
+        const rowKey = params.row.id;
+        const matchedId = manualMatches.get(rowKey);
+        const matchedEmployee = matchedId ? existingEmployees.find(e => e.id === matchedId) : null;
+
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', width: '100%', pr: 1 }}>
+            <select
+              value={matchedId || ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                setManualMatches(prev => {
+                  const newMatches = new Map(prev);
+                  if (value) {
+                    newMatches.set(rowKey, value);
+                  } else {
+                    newMatches.delete(rowKey);
+                  }
+                  return newMatches;
+                });
+              }}
+              style={{
+                width: '100%',
+                padding: '6px 8px',
+                fontFamily,
+                fontSize: 12,
+                borderRadius: 6,
+                border: matchedEmployee ? '2px solid #31664a' : '1px solid #d1d5db',
+                backgroundColor: matchedEmployee ? '#f0fdf4' : '#ffffff',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="">Create new...</option>
+              {existingEmployees.map(emp => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.full_name || `${emp.first_name} ${emp.last_name}`}
+                </option>
+              ))}
+            </select>
+          </Box>
+        );
+      },
+    });
+  }
+
+  columns.push({
       field: 'name',
       headerName: 'Name',
       width: 200,
@@ -199,8 +269,8 @@ function createEmployeeColumns(
           </Typography>
         </Box>
       ),
-    },
-    {
+    });
+    columns.push({
       field: 'role',
       headerName: 'Current Role',
       width: 180,
@@ -252,8 +322,8 @@ function createEmployeeColumns(
           </Box>
         );
       },
-    },
-    {
+    });
+    columns.push({
       field: 'is_foh',
       headerName: 'FOH',
       width: 100,
@@ -288,8 +358,8 @@ function createEmployeeColumns(
           </Box>
         );
       },
-    },
-    {
+    });
+    columns.push({
       field: 'is_boh',
       headerName: 'BOH',
       width: 100,
@@ -324,8 +394,8 @@ function createEmployeeColumns(
           </Box>
         );
       },
-    },
-    {
+    });
+    columns.push({
       field: 'availability',
       headerName: 'Availability',
       width: 160,
@@ -387,8 +457,8 @@ function createEmployeeColumns(
           </Box>
         );
       },
-    },
-    {
+    });
+    columns.push({
       field: 'hire_date',
       headerName: 'Hire Date',
       width: 120,
@@ -401,8 +471,7 @@ function createEmployeeColumns(
           </Typography>
         </Box>
       ),
-    },
-  ];
+    });
 
   if (showKeepButton) {
     columns.push({
@@ -546,6 +615,10 @@ export function SyncEmployeesModal({
   // Track when modal opened to only accept notifications created after this time
   const [modalOpenTime, setModalOpenTime] = React.useState<Date | null>(null);
 
+  // State for existing employees and manual match selections
+  const [existingEmployees, setExistingEmployees] = React.useState<ExistingEmployee[]>([]);
+  const [manualMatches, setManualMatches] = React.useState<Map<string, string>>(new Map()); // newEmpKey -> existingEmpId
+
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   console.log('[SyncEmployeesModal] baseUrl =', baseUrl);
   
@@ -646,8 +719,38 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       setConfirmationStats(null);
       setExitConfirmOpen(false);
       setModalOpenTime(null);
+      setExistingEmployees([]);
+      setManualMatches(new Map());
     }
   }, [open]);
+
+  // Fetch existing employees when we receive a notification
+  React.useEffect(() => {
+    if (!notification || !locationId) return;
+
+    const fetchExistingEmployees = async () => {
+      try {
+        const supabase = createSupabaseClient();
+        const { data, error } = await supabase
+          .from('employees')
+          .select('id, first_name, last_name, full_name, email, role')
+          .eq('location_id', locationId)
+          .eq('active', true)
+          .order('full_name');
+
+        if (error) {
+          console.error('Error fetching existing employees:', error);
+          return;
+        }
+
+        setExistingEmployees(data || []);
+      } catch (err) {
+        console.error('Error fetching existing employees:', err);
+      }
+    };
+
+    fetchExistingEmployees();
+  }, [notification, locationId]);
 
   const handleClose = () => {
     if (currentPage === 'instructions') {
@@ -671,6 +774,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       const newEmployeesUpdates = (notification.sync_data.new_employees || []).map(emp => {
         const key = emp.email || `hs_${emp.hs_id}`;
         const edit = employeeEdits.get(key);
+        const matchedExistingId = manualMatches.get(key);
         return {
           email: emp.email,
           hs_id: emp.hs_id,
@@ -678,8 +782,9 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
           is_foh: edit?.is_foh,
           is_boh: edit?.is_boh,
           availability: edit?.availability,
+          match_existing_id: matchedExistingId || null, // ID of existing employee to merge with
         };
-      }).filter(emp => emp.role || emp.is_foh !== undefined || emp.is_boh !== undefined || emp.availability);
+      });
 
       const response = await fetch('/api/employees/confirm-sync', {
         method: 'POST',
@@ -935,7 +1040,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
   
   const editableColumns = React.useMemo<GridColDef[]>(() => {
     console.log('[SyncEmployeesModal] useMemo: editableColumns called - ALWAYS creating columns');
-    return createEmployeeColumns(true, false, {
+    return createEmployeeColumns(true, false, true, {
       roleMenuAnchor,
       handleRoleMenuOpen,
       handleRoleMenuClose,
@@ -954,6 +1059,9 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       fontFamily,
       levelsetGreen,
       destructiveColor,
+      existingEmployees,
+      manualMatches,
+      setManualMatches,
     });
   }, [
     editTrigger,
@@ -970,11 +1078,13 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     handleAvailabilityMenuClose,
     handleAvailabilitySelect,
     setKeptEmployees,
+    existingEmployees,
+    manualMatches,
   ]);
 
   const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
     console.log('[SyncEmployeesModal] useMemo: readOnlyColumns called - ALWAYS creating columns');
-    return createEmployeeColumns(false, true, {
+    return createEmployeeColumns(false, true, false, {
       roleMenuAnchor,
       handleRoleMenuOpen,
       handleRoleMenuClose,

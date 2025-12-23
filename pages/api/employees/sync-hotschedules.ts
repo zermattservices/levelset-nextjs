@@ -151,15 +151,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Failed to fetch existing employees', details: existingError.message });
     }
 
-    // Create maps for matching: by hs_id (primary) and by email (fallback)
+    // Create maps for matching: by hs_id (primary), email (secondary), and name (fallback)
     const existingEmployeesByHsId = new Map<number, Employee>();
     const existingEmployeesByEmail = new Map<string, Employee>();
+    const existingEmployeesByName = new Map<string, Employee>();
     (existingEmployees || []).forEach(emp => {
       if (emp.hs_id) {
         existingEmployeesByHsId.set(Number(emp.hs_id), emp);
       }
       if (emp.email) {
         existingEmployeesByEmail.set(emp.email.toLowerCase(), emp);
+      }
+      // Create name key for fallback matching (normalize: lowercase, no extra spaces)
+      const firstName = (emp.first_name || '').toLowerCase().trim();
+      const lastName = (emp.last_name || '').toLowerCase().trim();
+      if (firstName && lastName) {
+        // Store by "firstname lastname" format
+        const nameKey = `${firstName} ${lastName}`;
+        if (!existingEmployeesByName.has(nameKey)) {
+          existingEmployeesByName.set(nameKey, emp);
+        }
       }
     });
 
@@ -186,14 +197,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const birthDate = decodeDate(hsEmployee.birthDate);
       const hireDate = decodeDate(hsEmployee.hireDate);
       
-      // Match by hs_id first, then email
+      // Match by hs_id first, then email, then name
       let existingEmployee: Employee | undefined;
+      let matchedBy: 'hs_id' | 'email' | 'name' | null = null;
+      
       if (hsId) {
         existingEmployee = existingEmployeesByHsId.get(hsId);
+        if (existingEmployee) matchedBy = 'hs_id';
         hsIdsInSync.add(hsId);
       }
       if (!existingEmployee) {
         existingEmployee = existingEmployeesByEmail.get(emailLower);
+        if (existingEmployee) matchedBy = 'email';
+      }
+      // Fallback to name matching if no hs_id or email match
+      if (!existingEmployee && hsEmployee.firstname && hsEmployee.lastname) {
+        const firstName = hsEmployee.firstname.toLowerCase().trim();
+        const lastName = hsEmployee.lastname.toLowerCase().trim();
+        const nameKey = `${firstName} ${lastName}`;
+        existingEmployee = existingEmployeesByName.get(nameKey);
+        if (existingEmployee) {
+          matchedBy = 'name';
+          console.log(`[Sync] Matched by name: ${nameKey} -> ${existingEmployee.id}`);
+        }
       }
 
       const phoneNumber = hsEmployee.phone || hsEmployee.contactNumber?.formatted || null;

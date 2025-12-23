@@ -11,6 +11,7 @@ interface NewEmployeeUpdate {
   is_foh?: boolean;
   is_boh?: boolean;
   availability?: 'Available' | 'Limited';
+  match_existing_id?: string | null; // ID of existing employee to merge with (manual match)
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -49,30 +50,82 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let updatedCount = 0;
     let deactivatedCount = 0;
 
-    // Process new employees - CREATE them first, then apply user overrides
+    // Determine default role based on has_synced_before
+    const { data: location } = await supabase
+      .from('locations')
+      .select('has_synced_before')
+      .eq('id', locationId)
+      .single();
+    
+    const defaultRole = location?.has_synced_before ? 'New Hire' : 'Team Member';
+
+    // Create a map of user edits for quick lookup
+    const userEditsMap = new Map<string, NewEmployeeUpdate>();
     if (new_employees && Array.isArray(new_employees)) {
-      // Create new employees from sync data
-      for (const newEmpData of syncData.new_employees || []) {
-        // Find user edits for this employee (match by email or hs_id)
-        let userEdit: NewEmployeeUpdate | undefined;
-        for (const edit of new_employees as any[]) {
-          if ((edit.email && edit.email === newEmpData.email) || 
-              (edit.hs_id && edit.hs_id === newEmpData.hs_id)) {
-            userEdit = edit;
-            break;
+      for (const edit of new_employees as NewEmployeeUpdate[]) {
+        const key = edit.email || (edit.hs_id ? `hs_${edit.hs_id}` : '');
+        if (key) {
+          userEditsMap.set(key, edit);
+        }
+      }
+    }
+
+    // Process new employees - CREATE them or MERGE with existing based on manual match
+    for (const newEmpData of syncData.new_employees || []) {
+      const key = newEmpData.email || (newEmpData.hs_id ? `hs_${newEmpData.hs_id}` : '');
+      const userEdit = userEditsMap.get(key);
+
+      // Check if user manually matched this to an existing employee
+      if (userEdit?.match_existing_id) {
+        // UPDATE existing employee with HotSchedules data
+        const updateData: Partial<Employee> = {
+          email: newEmpData.email || undefined,
+          hs_id: newEmpData.hs_id || undefined,
+          phone: newEmpData.phone || undefined,
+          birth_date: newEmpData.birth_date || undefined,
+          hire_date: newEmpData.hire_date || undefined,
+        };
+
+        // Apply user overrides if provided
+        if (userEdit.role) updateData.role = userEdit.role;
+        if (userEdit.is_foh !== undefined) updateData.is_foh = userEdit.is_foh;
+        if (userEdit.is_boh !== undefined) updateData.is_boh = userEdit.is_boh;
+        if (userEdit.availability) updateData.availability = userEdit.availability;
+
+        // Remove undefined values
+        Object.keys(updateData).forEach(key => {
+          if (updateData[key as keyof typeof updateData] === undefined) {
+            delete updateData[key as keyof typeof updateData];
           }
+        });
+
+        const { data: updatedEmployee, error: updateError } = await supabase
+          .from('employees')
+          .update(updateData)
+          .eq('id', userEdit.match_existing_id)
+          .select()
+          .single();
+
+        if (updateError) {
+          console.error(`Error updating matched employee ${userEdit.match_existing_id}:`, updateError);
+          continue;
         }
 
-        // Determine default role based on has_synced_before (we'll need to check this)
-        const { data: location } = await supabase
-          .from('locations')
-          .select('has_synced_before')
-          .eq('id', locationId)
-          .single();
-        
-        const defaultRole = location?.has_synced_before ? 'New Hire' : 'Team Member';
+        updatedCount++;
+        console.log(`Merged HotSchedules data into existing employee: ${updatedEmployee?.full_name}`);
 
-        // Create the employee with defaults
+        // Recalculate pay if needed
+        if (updatedEmployee && shouldCalculatePay(locationId)) {
+          const calculatedPay = calculatePayForLocation(updatedEmployee as Employee, locationId);
+          if (calculatedPay !== null) {
+            await supabase
+              .from('employees')
+              .update({ calculated_pay: calculatedPay })
+              .eq('id', updatedEmployee.id);
+          }
+        }
+      } else {
+        // CREATE new employee
         const employeeData: Partial<Employee> = {
           first_name: newEmpData.first_name || '',
           last_name: newEmpData.last_name || '',
@@ -105,58 +158,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         createdCount++;
 
         // Calculate pay if needed
-        if (createdEmployee && shouldCalculatePay(locationId)) {
-          const calculatedPay = calculatePayForLocation(createdEmployee as Employee, locationId);
-          if (calculatedPay !== null) {
-            await supabase
-              .from('employees')
-              .update({ calculated_pay: calculatedPay })
-              .eq('id', createdEmployee.id);
-          }
-        }
-      }
-    } else {
-      // No user edits, create all new employees with defaults
-      for (const newEmpData of syncData.new_employees || []) {
-        const { data: location } = await supabase
-          .from('locations')
-          .select('has_synced_before')
-          .eq('id', locationId)
-          .single();
-        
-        const defaultRole = location?.has_synced_before ? 'New Hire' : 'Team Member';
-
-        const employeeData: Partial<Employee> = {
-          first_name: newEmpData.first_name || '',
-          last_name: newEmpData.last_name || '',
-          email: newEmpData.email,
-          phone: newEmpData.phone || null,
-          hs_id: newEmpData.hs_id || null,
-          birth_date: newEmpData.birth_date || null,
-          hire_date: newEmpData.hire_date || null,
-          role: defaultRole,
-          is_foh: false,
-          is_boh: false,
-          availability: 'Available',
-          certified_status: 'Not Certified',
-          active: true,
-          location_id: locationId,
-          org_id: orgId,
-        };
-
-        const { data: createdEmployee, error: createError } = await supabase
-          .from('employees')
-          .insert(employeeData)
-          .select()
-          .single();
-
-        if (createError) {
-          console.error(`Error creating new employee ${newEmpData.email}:`, createError);
-          continue;
-        }
-
-        createdCount++;
-
         if (createdEmployee && shouldCalculatePay(locationId)) {
           const calculatedPay = calculatePayForLocation(createdEmployee as Employee, locationId);
           if (calculatedPay !== null) {

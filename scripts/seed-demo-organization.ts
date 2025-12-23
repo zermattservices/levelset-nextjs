@@ -454,57 +454,72 @@ async function createRoles(orgId: string) {
 }
 
 async function createPositions(orgId: string) {
-  let displayOrder = 0;
+  // Copy positions and criteria from Reece Howard (BUDA_ORG_ID)
+  const { data: reecePositions, error: posError } = await supabase
+    .from('org_positions')
+    .select('name, zone, description, display_order, is_active')
+    .eq('org_id', BUDA_ORG_ID)
+    .eq('is_active', true)
+    .order('display_order');
 
-  // Create FOH positions
-  for (const pos of FOH_POSITIONS) {
-    const positionId = randomUUID();
-    const { error: posError } = await supabase.from('org_positions').insert({
-      id: positionId,
+  if (posError) throw posError;
+
+  if (!reecePositions || reecePositions.length === 0) {
+    console.log('   ⚠️ No positions found in Reece Howard org, skipping');
+    return;
+  }
+
+  // Map old position IDs to new position IDs for criteria copying
+  const positionIdMap = new Map<string, string>();
+
+  // Get Reece Howard position IDs for criteria lookup
+  const { data: reecePositionIds } = await supabase
+    .from('org_positions')
+    .select('id, name')
+    .eq('org_id', BUDA_ORG_ID)
+    .eq('is_active', true);
+
+  const reeceIdByName = new Map<string, string>();
+  (reecePositionIds || []).forEach(p => reeceIdByName.set(p.name, p.id));
+
+  for (const pos of reecePositions) {
+    const newPositionId = randomUUID();
+    const { error: insertError } = await supabase.from('org_positions').insert({
+      id: newPositionId,
       org_id: orgId,
       name: pos.name,
-      zone: 'FOH',
+      zone: pos.zone,
       description: pos.description,
-      display_order: displayOrder++,
-      is_active: true,
+      display_order: pos.display_order,
+      is_active: pos.is_active,
     });
-    if (posError && !posError.message.includes('duplicate')) throw posError;
+    if (insertError && !insertError.message.includes('duplicate')) throw insertError;
 
-    // Create criteria for this position
-    for (let i = 0; i < DEFAULT_CRITERIA.FOH.length; i++) {
-      await supabase.from('position_criteria').insert({
-        id: randomUUID(),
-        position_id: positionId,
-        criteria_order: i + 1,
-        name: DEFAULT_CRITERIA.FOH[i],
-        description: '',
-      });
+    // Store mapping for criteria
+    const oldPositionId = reeceIdByName.get(pos.name);
+    if (oldPositionId) {
+      positionIdMap.set(oldPositionId, newPositionId);
     }
   }
 
-  // Create BOH positions
-  for (const pos of BOH_POSITIONS) {
-    const positionId = randomUUID();
-    const { error: posError } = await supabase.from('org_positions').insert({
-      id: positionId,
-      org_id: orgId,
-      name: pos.name,
-      zone: 'BOH',
-      description: pos.description,
-      display_order: displayOrder++,
-      is_active: true,
-    });
-    if (posError && !posError.message.includes('duplicate')) throw posError;
+  // Copy criteria for each position
+  for (const [oldPosId, newPosId] of Array.from(positionIdMap.entries())) {
+    const { data: criteria } = await supabase
+      .from('position_criteria')
+      .select('name, description, criteria_order')
+      .eq('position_id', oldPosId)
+      .order('criteria_order');
 
-    // Create criteria for this position
-    for (let i = 0; i < DEFAULT_CRITERIA.BOH.length; i++) {
-      await supabase.from('position_criteria').insert({
-        id: randomUUID(),
-        position_id: positionId,
-        criteria_order: i + 1,
-        name: DEFAULT_CRITERIA.BOH[i],
-        description: '',
-      });
+    if (criteria && criteria.length > 0) {
+      for (const crit of criteria) {
+        await supabase.from('position_criteria').insert({
+          id: randomUUID(),
+          position_id: newPosId,
+          criteria_order: crit.criteria_order,
+          name: crit.name,
+          description: crit.description || '',
+        });
+      }
     }
   }
 
@@ -515,88 +530,110 @@ async function createPositions(orgId: string) {
     yellow_threshold: 1.75,
     green_threshold: 2.75,
   });
+
+  console.log(`   ✅ Copied ${reecePositions.length} positions with criteria from Reece Howard`);
 }
 
 async function copyInfractionsRubric(orgId: string) {
-  // Fetch Buda's infractions rubric
-  const { data: budaInfractions, error } = await supabase
+  // First try org-level infractions from Reece Howard
+  let { data: infractions, error } = await supabase
     .from('infractions_rubric')
     .select('action, points')
     .eq('org_id', BUDA_ORG_ID)
-    .is('location_id', null);
+    .is('location_id', null)
+    .order('points');
 
   if (error) throw error;
 
-  if (!budaInfractions || budaInfractions.length === 0) {
-    // Create default infractions if Buda doesn't have any
-    const defaultInfractions = [
-      { action: 'Late to Shift', points: 1 },
-      { action: 'Uniform Violation', points: 1 },
-      { action: 'Cell Phone Use', points: 2 },
-      { action: 'No Call No Show', points: 3 },
-      { action: 'Insubordination', points: 3 },
-      { action: 'Safety Violation', points: 4 },
-    ];
+  // If no org-level infractions, get location-specific ones (Reece Howard uses location-specific)
+  if (!infractions || infractions.length === 0) {
+    const { data: locationInfractions, error: locError } = await supabase
+      .from('infractions_rubric')
+      .select('action, points')
+      .eq('org_id', BUDA_ORG_ID)
+      .not('location_id', 'is', null)
+      .order('points');
 
-    for (const inf of defaultInfractions) {
-      await supabase.from('infractions_rubric').insert({
-        id: randomUUID(),
-        org_id: orgId,
-        action: inf.action,
-        points: inf.points,
-      });
-    }
+    if (locError) throw locError;
+
+    // Deduplicate by action name (in case multiple locations have same infractions)
+    const uniqueInfractions = new Map<string, { action: string; points: number }>();
+    (locationInfractions || []).forEach(inf => {
+      if (!uniqueInfractions.has(inf.action)) {
+        uniqueInfractions.set(inf.action, inf);
+      }
+    });
+    infractions = Array.from(uniqueInfractions.values());
+  }
+
+  if (!infractions || infractions.length === 0) {
+    console.log('   ⚠️ No infractions found in Reece Howard org');
     return;
   }
 
-  for (const inf of budaInfractions) {
+  // Insert as org-level infractions (no location_id)
+  for (const inf of infractions) {
     await supabase.from('infractions_rubric').insert({
       id: randomUUID(),
       org_id: orgId,
+      location_id: null,
       action: inf.action,
       points: inf.points,
     });
   }
+
+  console.log(`   ✅ Copied ${infractions.length} infractions from Reece Howard`);
 }
 
 async function copyActionsRubric(orgId: string) {
-  // Fetch Buda's actions rubric
-  const { data: budaActions, error } = await supabase
+  // First try org-level actions from Reece Howard
+  let { data: actions, error } = await supabase
     .from('disc_actions_rubric')
     .select('action, points_threshold')
     .eq('org_id', BUDA_ORG_ID)
-    .is('location_id', null);
+    .is('location_id', null)
+    .order('points_threshold');
 
   if (error) throw error;
 
-  if (!budaActions || budaActions.length === 0) {
-    // Create default actions if Buda doesn't have any
-    const defaultActions = [
-      { action: 'Verbal Warning', points_threshold: 3 },
-      { action: 'Written Warning', points_threshold: 6 },
-      { action: 'Final Written Warning', points_threshold: 9 },
-      { action: 'Termination', points_threshold: 12 },
-    ];
+  // If no org-level actions, get location-specific ones (Reece Howard uses location-specific)
+  if (!actions || actions.length === 0) {
+    const { data: locationActions, error: locError } = await supabase
+      .from('disc_actions_rubric')
+      .select('action, points_threshold')
+      .eq('org_id', BUDA_ORG_ID)
+      .not('location_id', 'is', null)
+      .order('points_threshold');
 
-    for (const act of defaultActions) {
-      await supabase.from('disc_actions_rubric').insert({
-        id: randomUUID(),
-        org_id: orgId,
-        action: act.action,
-        points_threshold: act.points_threshold,
-      });
-    }
+    if (locError) throw locError;
+
+    // Deduplicate by action name
+    const uniqueActions = new Map<string, { action: string; points_threshold: number }>();
+    (locationActions || []).forEach(act => {
+      if (!uniqueActions.has(act.action)) {
+        uniqueActions.set(act.action, act);
+      }
+    });
+    actions = Array.from(uniqueActions.values());
+  }
+
+  if (!actions || actions.length === 0) {
+    console.log('   ⚠️ No disciplinary actions found in Reece Howard org');
     return;
   }
 
-  for (const act of budaActions) {
+  // Insert as org-level actions (no location_id)
+  for (const act of actions) {
     await supabase.from('disc_actions_rubric').insert({
       id: randomUUID(),
       org_id: orgId,
+      location_id: null,
       action: act.action,
       points_threshold: act.points_threshold,
     });
   }
+
+  console.log(`   ✅ Copied ${actions.length} disciplinary actions from Reece Howard`);
 }
 
 interface EmployeeRecord {
@@ -838,9 +875,10 @@ async function createOperatorAppUser(orgId: string, locationId: string, employee
         org_id: orgId,
         location_id: locationId,
         employee_id: employeeId,
-        role: 'Operator',
+        role: 'Owner/Operator',
         first_name: OPERATOR.first,
         last_name: OPERATOR.last,
+        permissions: 'operator',
       })
       .eq('id', existingAppUser.id);
   } else {
@@ -851,9 +889,10 @@ async function createOperatorAppUser(orgId: string, locationId: string, employee
       org_id: orgId,
       location_id: locationId,
       employee_id: employeeId,
-      role: 'Operator',
+      role: 'Owner/Operator',
       first_name: OPERATOR.first,
       last_name: OPERATOR.last,
+      permissions: 'operator',
     });
   }
 }
@@ -864,10 +903,16 @@ async function generateRatings(
   westId: string,
   employees: EmployeeRecord[]
 ) {
-  // Get positions
-  const allPositions = [...FOH_POSITIONS.map(p => p.name), ...BOH_POSITIONS.map(p => p.name)];
-  const fohPositions = FOH_POSITIONS.map(p => p.name);
-  const bohPositions = BOH_POSITIONS.map(p => p.name);
+  // Get positions from the database (positions were copied from Reece Howard)
+  const { data: positionsData } = await supabase
+    .from('org_positions')
+    .select('name, zone')
+    .eq('org_id', orgId)
+    .eq('is_active', true);
+
+  const fohPositions = (positionsData || []).filter(p => p.zone === 'FOH').map(p => p.name);
+  const bohPositions = (positionsData || []).filter(p => p.zone === 'BOH').map(p => p.name);
+  const allPositions = [...fohPositions, ...bohPositions];
 
   // Separate employees by location and role
   const eastEmployees = employees.filter(e => e.location_id === eastId);
