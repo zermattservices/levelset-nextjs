@@ -71,47 +71,66 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  // Try to load with Spanish columns, fallback to base columns if migration hasn't been run
-  let rubricQuery = supabase
-    .from('infractions_rubric')
-    .select('id, action, action_es, points')
+  // Fetch employees
+  const { data: employeesData, error: employeesError } = await supabase
+    .from('employees')
+    .select('id, full_name, first_name, last_name, role, is_leader, active')
     .eq('location_id', location.id)
-    .order('points');
-
-  const [{ data: employeesData, error: employeesError }, { data: rubricData, error: rubricError }] = await Promise.all([
-    supabase
-      .from('employees')
-      .select('id, full_name, first_name, last_name, role, is_leader, active')
-      .eq('location_id', location.id)
-      .eq('active', true)
-      .order('full_name'),
-    rubricQuery,
-  ]);
+    .eq('active', true)
+    .order('full_name');
 
   if (employeesError) {
     console.error('[mobile] Failed to load employees for infractions form', token, employeesError);
     return res.status(500).json({ error: 'Failed to load employees' });
   }
 
-  // If rubric query failed, try without action_es column (migration may not be run)
-  let finalRubricData: any[] | null = rubricData;
-  
-  if (rubricError && rubricError.message?.includes('action_es')) {
-    console.warn('[mobile] action_es column not found, falling back to base columns', token);
-    const fallbackResult = await supabase
+  // Try to load infractions - first check org-level (location_id IS NULL), then location-specific
+  let finalRubricData: any[] | null = null;
+
+  // First, try org-level infractions if org_id exists
+  if (location.org_id) {
+    const { data: orgRubricData, error: orgRubricError } = await supabase
       .from('infractions_rubric')
-      .select('id, action, points')
+      .select('id, action, action_es, points')
+      .eq('org_id', location.org_id)
+      .is('location_id', null)
+      .order('points');
+
+    if (!orgRubricError && orgRubricData && orgRubricData.length > 0) {
+      finalRubricData = orgRubricData;
+    }
+  }
+
+  // If no org-level infractions found, try location-specific
+  if (!finalRubricData || finalRubricData.length === 0) {
+    const { data: locationRubricData, error: locationRubricError } = await supabase
+      .from('infractions_rubric')
+      .select('id, action, action_es, points')
       .eq('location_id', location.id)
       .order('points');
-    
-    if (fallbackResult.error) {
-      console.error('[mobile] Failed to load infractions rubric', token, fallbackResult.error);
-      return res.status(500).json({ error: 'Failed to load infractions rubric' });
+
+    if (locationRubricError) {
+      // If error is about action_es column, try without it
+      if (locationRubricError.message?.includes('action_es')) {
+        console.warn('[mobile] action_es column not found, falling back to base columns', token);
+        const fallbackResult = await supabase
+          .from('infractions_rubric')
+          .select('id, action, points')
+          .eq('location_id', location.id)
+          .order('points');
+
+        if (fallbackResult.error) {
+          console.error('[mobile] Failed to load infractions rubric', token, fallbackResult.error);
+          return res.status(500).json({ error: 'Failed to load infractions rubric' });
+        }
+        finalRubricData = fallbackResult.data;
+      } else {
+        console.error('[mobile] Failed to load infractions rubric', token, locationRubricError);
+        return res.status(500).json({ error: 'Failed to load infractions rubric' });
+      }
+    } else {
+      finalRubricData = locationRubricData;
     }
-    finalRubricData = fallbackResult.data;
-  } else if (rubricError) {
-    console.error('[mobile] Failed to load infractions rubric', token, rubricError);
-    return res.status(500).json({ error: 'Failed to load infractions rubric' });
   }
 
   const employees = (employeesData ?? []).map((emp) => ({
