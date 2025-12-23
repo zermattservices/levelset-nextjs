@@ -42,8 +42,26 @@ export function DisciplineActionsTab({ orgId, disabled = false }: DisciplineActi
   const [saving, setSaving] = React.useState(false);
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  
+  // Refs for autosave on unmount
+  const actionsRef = React.useRef<DisciplineAction[]>([]);
+  const hasChangesRef = React.useRef(false);
+  const orgIdRef = React.useRef(orgId);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  
+  // Keep refs in sync
+  React.useEffect(() => {
+    actionsRef.current = actions;
+  }, [actions]);
+  
+  React.useEffect(() => {
+    hasChangesRef.current = hasChanges;
+  }, [hasChanges]);
+  
+  React.useEffect(() => {
+    orgIdRef.current = orgId;
+  }, [orgId]);
 
   // Fetch actions - first try org-level, then fallback to location-level
   React.useEffect(() => {
@@ -197,6 +215,7 @@ export function DisciplineActionsTab({ orgId, disabled = false }: DisciplineActi
       }
 
       setHasChanges(false);
+      hasChangesRef.current = false;
     } catch (err) {
       console.error('Error saving actions:', err);
       setError('Failed to save actions');
@@ -204,6 +223,48 @@ export function DisciplineActionsTab({ orgId, disabled = false }: DisciplineActi
       setSaving(false);
     }
   };
+
+  // Autosave on unmount (when switching tabs)
+  React.useEffect(() => {
+    return () => {
+      if (hasChangesRef.current && orgIdRef.current && !disabled) {
+        const actionsToSave = actionsRef.current;
+        const currentOrgId = orgIdRef.current;
+        
+        // Fire and forget save
+        (async () => {
+          try {
+            const newActions = actionsToSave.filter(a => a.isNew && a.action.trim() !== '');
+            const existingActions = actionsToSave.filter(a => !a.isNew);
+
+            // Update existing
+            for (const act of existingActions) {
+              await supabase
+                .from('disc_actions_rubric')
+                .update({
+                  action: act.action,
+                  points_threshold: act.points_threshold,
+                })
+                .eq('id', act.id);
+            }
+
+            // Insert new
+            if (newActions.length > 0) {
+              await supabase
+                .from('disc_actions_rubric')
+                .insert(newActions.map(act => ({
+                  org_id: currentOrgId,
+                  action: act.action,
+                  points_threshold: act.points_threshold,
+                })));
+            }
+          } catch (err) {
+            console.error('Error autosaving actions:', err);
+          }
+        })();
+      }
+    };
+  }, [disabled, supabase]);
 
   if (loading) {
     return (

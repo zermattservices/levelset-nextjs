@@ -42,8 +42,26 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
   const [saving, setSaving] = React.useState(false);
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  
+  // Refs for autosave on unmount
+  const infractionsRef = React.useRef<Infraction[]>([]);
+  const hasChangesRef = React.useRef(false);
+  const orgIdRef = React.useRef(orgId);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  
+  // Keep refs in sync
+  React.useEffect(() => {
+    infractionsRef.current = infractions;
+  }, [infractions]);
+  
+  React.useEffect(() => {
+    hasChangesRef.current = hasChanges;
+  }, [hasChanges]);
+  
+  React.useEffect(() => {
+    orgIdRef.current = orgId;
+  }, [orgId]);
 
   // Fetch infractions - first try org-level, then fallback to location-level
   React.useEffect(() => {
@@ -197,6 +215,7 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
       }
 
       setHasChanges(false);
+      hasChangesRef.current = false;
     } catch (err) {
       console.error('Error saving infractions:', err);
       setError('Failed to save infractions');
@@ -204,6 +223,48 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
       setSaving(false);
     }
   };
+
+  // Autosave on unmount (when switching tabs)
+  React.useEffect(() => {
+    return () => {
+      if (hasChangesRef.current && orgIdRef.current && !disabled) {
+        const infractionsToSave = infractionsRef.current;
+        const currentOrgId = orgIdRef.current;
+        
+        // Fire and forget save
+        (async () => {
+          try {
+            const newInfractions = infractionsToSave.filter(i => i.isNew && i.action.trim() !== '');
+            const existingInfractions = infractionsToSave.filter(i => !i.isNew);
+
+            // Update existing
+            for (const inf of existingInfractions) {
+              await supabase
+                .from('infractions_rubric')
+                .update({
+                  action: inf.action,
+                  points: inf.points,
+                })
+                .eq('id', inf.id);
+            }
+
+            // Insert new
+            if (newInfractions.length > 0) {
+              await supabase
+                .from('infractions_rubric')
+                .insert(newInfractions.map(inf => ({
+                  org_id: currentOrgId,
+                  action: inf.action,
+                  points: inf.points,
+                })));
+            }
+          } catch (err) {
+            console.error('Error autosaving infractions:', err);
+          }
+        })();
+      }
+    };
+  }, [disabled, supabase]);
 
   if (loading) {
     return (

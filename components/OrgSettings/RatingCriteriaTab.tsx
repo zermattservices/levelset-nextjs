@@ -75,8 +75,26 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const textareaRefs = React.useRef<Map<number, HTMLTextAreaElement>>(new Map());
+  
+  // Refs for autosave on unmount
+  const criteriaRef = React.useRef<Criteria[]>([]);
+  const selectedPositionIdRef = React.useRef<string>('');
+  const hasChangesRef = React.useRef(false);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  
+  // Keep refs in sync
+  React.useEffect(() => {
+    criteriaRef.current = criteria;
+  }, [criteria]);
+  
+  React.useEffect(() => {
+    selectedPositionIdRef.current = selectedPositionId;
+  }, [selectedPositionId]);
+  
+  React.useEffect(() => {
+    hasChangesRef.current = hasChanges;
+  }, [hasChanges]);
 
   // Auto-resize all textareas on criteria load
   React.useEffect(() => {
@@ -220,6 +238,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
       }
 
       setHasChanges(false);
+      hasChangesRef.current = false;
     } catch (err) {
       console.error('Error saving criteria:', err);
       setError('Failed to save criteria');
@@ -227,6 +246,45 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
       setSaving(false);
     }
   };
+
+  // Autosave on unmount (when switching tabs)
+  React.useEffect(() => {
+    return () => {
+      if (hasChangesRef.current && selectedPositionIdRef.current && !disabled) {
+        const criteriaToSave = criteriaRef.current;
+        const positionId = selectedPositionIdRef.current;
+        
+        // Fire and forget save
+        (async () => {
+          try {
+            // Delete existing criteria for this position
+            await supabase
+              .from('position_criteria')
+              .delete()
+              .eq('position_id', positionId);
+
+            // Insert new criteria (only non-empty ones)
+            const criteriaToInsert = criteriaToSave
+              .filter(c => c.name.trim() !== '')
+              .map(c => ({
+                position_id: positionId,
+                criteria_order: c.criteria_order,
+                name: c.name,
+                description: c.description,
+              }));
+
+            if (criteriaToInsert.length > 0) {
+              await supabase
+                .from('position_criteria')
+                .insert(criteriaToInsert);
+            }
+          } catch (err) {
+            console.error('Error autosaving criteria:', err);
+          }
+        })();
+      }
+    };
+  }, [disabled, supabase]);
 
   if (loading) {
     return (

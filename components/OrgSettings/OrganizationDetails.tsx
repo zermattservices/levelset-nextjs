@@ -38,10 +38,28 @@ export function OrganizationDetails({ orgId, disabled = false }: OrganizationDet
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
+  
+  // Refs for autosave on unmount
+  const teamMemberWebsiteRef = React.useRef<string>('');
+  const originalValueRef = React.useRef<string>('');
+  const orgIdRef = React.useRef(orgId);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
   const hasChanges = teamMemberWebsite !== originalValue;
+  
+  // Keep refs in sync
+  React.useEffect(() => {
+    teamMemberWebsiteRef.current = teamMemberWebsite;
+  }, [teamMemberWebsite]);
+  
+  React.useEffect(() => {
+    originalValueRef.current = originalValue;
+  }, [originalValue]);
+  
+  React.useEffect(() => {
+    orgIdRef.current = orgId;
+  }, [orgId]);
 
   // Fetch organization details
   React.useEffect(() => {
@@ -90,6 +108,7 @@ export function OrganizationDetails({ orgId, disabled = false }: OrganizationDet
       if (updateError) throw updateError;
 
       setOriginalValue(teamMemberWebsite);
+      originalValueRef.current = teamMemberWebsite;
       setSuccess('Settings saved successfully');
     } catch (err) {
       console.error('Error saving organization:', err);
@@ -98,6 +117,29 @@ export function OrganizationDetails({ orgId, disabled = false }: OrganizationDet
       setSaving(false);
     }
   };
+
+  // Autosave on unmount (when switching tabs)
+  React.useEffect(() => {
+    return () => {
+      const hasUnsavedChanges = teamMemberWebsiteRef.current !== originalValueRef.current;
+      if (hasUnsavedChanges && orgIdRef.current && !disabled) {
+        const websiteValue = teamMemberWebsiteRef.current;
+        const currentOrgId = orgIdRef.current;
+        
+        // Fire and forget save
+        (async () => {
+          try {
+            await supabase
+              .from('orgs')
+              .update({ team_member_website: websiteValue || null })
+              .eq('id', currentOrgId);
+          } catch (err) {
+            console.error('Error autosaving organization details:', err);
+          }
+        })();
+      }
+    };
+  }, [disabled, supabase]);
 
   if (loading) {
     return (

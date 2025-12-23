@@ -59,8 +59,26 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const textareaRefs = React.useRef<Map<string, HTMLTextAreaElement>>(new Map());
+  
+  // Refs to track current state for autosave on unmount
+  const positionsRef = React.useRef<Position[]>([]);
+  const hasChangesRef = React.useRef(false);
+  const orgIdRef = React.useRef(orgId);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  
+  // Keep refs in sync with state
+  React.useEffect(() => {
+    positionsRef.current = positions;
+  }, [positions]);
+  
+  React.useEffect(() => {
+    hasChangesRef.current = hasChanges;
+  }, [hasChanges]);
+  
+  React.useEffect(() => {
+    orgIdRef.current = orgId;
+  }, [orgId]);
 
   // Auto-resize all textareas on initial load
   React.useEffect(() => {
@@ -187,6 +205,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
       }
 
       setHasChanges(false);
+      hasChangesRef.current = false;
     } catch (err) {
       console.error('Error saving positions:', err);
       setError('Failed to save positions');
@@ -194,6 +213,54 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
       setSaving(false);
     }
   };
+
+  // Autosave on unmount (when switching tabs)
+  React.useEffect(() => {
+    return () => {
+      // Save if there are unsaved changes when unmounting
+      if (hasChangesRef.current && orgIdRef.current && !disabled) {
+        const positionsToSave = positionsRef.current;
+        const currentOrgId = orgIdRef.current;
+        
+        // Fire and forget save
+        (async () => {
+          try {
+            const newPositions = positionsToSave.filter(p => p.isNew);
+            const existingPositions = positionsToSave.filter(p => !p.isNew);
+
+            // Update existing positions
+            for (const pos of existingPositions) {
+              await supabase
+                .from('org_positions')
+                .update({
+                  name: pos.name,
+                  zone: pos.zone,
+                  description: pos.description,
+                  display_order: pos.display_order,
+                })
+                .eq('id', pos.id);
+            }
+
+            // Insert new positions
+            if (newPositions.length > 0) {
+              await supabase
+                .from('org_positions')
+                .insert(newPositions.map(pos => ({
+                  org_id: currentOrgId,
+                  name: pos.name,
+                  zone: pos.zone,
+                  description: pos.description,
+                  display_order: pos.display_order,
+                  is_active: true,
+                })));
+            }
+          } catch (err) {
+            console.error('Error autosaving positions:', err);
+          }
+        })();
+      }
+    };
+  }, [disabled, supabase]);
 
   const handleTextareaChange = (id: string, value: string, textarea: HTMLTextAreaElement) => {
     handlePositionChange(id, 'description', value);
