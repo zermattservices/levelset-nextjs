@@ -45,64 +45,105 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const supabase = createServerSupabaseClient();
 
-  // Try to load with Spanish columns, fallback to base columns if migration hasn't been run
-  let positionsQuery = supabase
-    .from('position_big5_labels')
-    .select('position, position_es, zone')
+  // Fetch employees
+  const { data: employeesData, error: employeesError } = await supabase
+    .from('employees')
+    .select('id, full_name, first_name, last_name, role, active')
     .eq('location_id', location.id)
-    .order('zone', { ascending: true })
-    .order('position', { ascending: true });
-
-  // Also fetch org-level positions with descriptions
-  const orgPositionsQuery = location.org_id 
-    ? supabase
-        .from('org_positions')
-        .select('name, description, zone')
-        .eq('org_id', location.org_id)
-        .eq('is_active', true)
-    : Promise.resolve({ data: null, error: null });
-
-  const [{ data: employeesData, error: employeesError }, { data: positionsData, error: positionsError }, { data: orgPositionsData }] =
-    await Promise.all([
-      supabase
-        .from('employees')
-        .select('id, full_name, first_name, last_name, role, active')
-        .eq('location_id', location.id)
-        .eq('active', true)
-        .order('full_name'),
-      positionsQuery,
-      orgPositionsQuery,
-    ]);
+    .eq('active', true)
+    .order('full_name');
 
   if (employeesError) {
     console.error('[mobile] Failed to fetch employees for token', token, employeesError);
     return res.status(500).json({ error: 'Failed to load employees' });
   }
 
-  // If positions query failed, try without position_es column (migration may not be run)
-  let finalPositionsData: any[] | null = positionsData;
+  // Primary source: org_positions (new org-level settings)
+  let positions: Array<{ name: string; name_es: string | null; zone: 'FOH' | 'BOH'; description: string | null }> = [];
   
-  if (positionsError && positionsError.message?.includes('position_es')) {
-    console.warn('[mobile] position_es column not found, falling back to base columns', token);
-    const fallbackResult = await supabase
+  if (location.org_id) {
+    const { data: orgPositionsData, error: orgPositionsError } = await supabase
+      .from('org_positions')
+      .select('name, description, zone, display_order')
+      .eq('org_id', location.org_id)
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+
+    if (!orgPositionsError && orgPositionsData && orgPositionsData.length > 0) {
+      positions = orgPositionsData.map((item: any) => ({
+        name: item.name,
+        name_es: null, // org_positions doesn't have Spanish translations yet
+        zone: (item.zone === 'BOH' ? 'BOH' : 'FOH') as 'FOH' | 'BOH',
+        description: item.description ?? null,
+      }));
+    }
+  }
+
+  // Fallback: position_big5_labels (legacy location-based positions)
+  if (positions.length === 0) {
+    // Try to load with Spanish columns, fallback to base columns if migration hasn't been run
+    let positionsData: any[] | null = null;
+    
+    const { data: positionsDataWithEs, error: positionsError } = await supabase
       .from('position_big5_labels')
-      .select('position, zone')
+      .select('position, position_es, zone')
       .eq('location_id', location.id)
       .order('zone', { ascending: true })
       .order('position', { ascending: true });
-    
-    if (fallbackResult.error) {
-      console.error('[mobile] Failed to fetch positions for token', token, fallbackResult.error);
-      return res.status(500).json({ error: 'Failed to load positions' });
+
+    // If positions query failed due to missing Spanish column, retry without it
+    if (positionsError && positionsError.message?.includes('position_es')) {
+      console.warn('[mobile] position_es column not found, falling back to base columns', token);
+      const fallbackResult = await supabase
+        .from('position_big5_labels')
+        .select('position, zone')
+        .eq('location_id', location.id)
+        .order('zone', { ascending: true })
+        .order('position', { ascending: true });
+
+      if (fallbackResult.error) {
+        console.error('[mobile] Failed to fetch positions for token', token, fallbackResult.error);
+        // Don't fail - just return empty positions
+        positionsData = [];
+      } else {
+        positionsData = fallbackResult.data;
+      }
+    } else if (positionsError) {
+      console.error('[mobile] Failed to fetch positions for token', token, positionsError);
+      // Don't fail - just return empty positions
+      positionsData = [];
+    } else {
+      positionsData = positionsDataWithEs;
     }
-    finalPositionsData = fallbackResult.data;
-  } else if (positionsError) {
-    console.error('[mobile] Failed to fetch positions for token', token, positionsError);
-    return res.status(500).json({ error: 'Failed to load positions' });
+
+    // Build positions from legacy table
+    const positionsMap = new Map<string, { name: string; name_es: string | null; zone: 'FOH' | 'BOH'; description: string | null }>();
+    (positionsData ?? []).forEach((item: any) => {
+      const name = item.position?.trim();
+      if (!name) return;
+      const zone = (item.zone === 'BOH' ? 'BOH' : 'FOH') as 'FOH' | 'BOH';
+      if (!positionsMap.has(name)) {
+        positionsMap.set(name, {
+          name,
+          name_es: item.position_es ?? null,
+          zone,
+          description: null,
+        });
+      }
+    });
+
+    positions = Array.from(positionsMap.values());
   }
 
+  // Sort positions by zone then name
+  const zoneOrder: Array<'FOH' | 'BOH'> = ['FOH', 'BOH'];
+  positions.sort((a, b) => {
+    const zoneDiff = zoneOrder.indexOf(a.zone) - zoneOrder.indexOf(b.zone);
+    if (zoneDiff !== 0) return zoneDiff;
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+  });
+
   // Fetch role permissions for filtering positions by leader role
-  // Map role -> position names they can rate
   let rolePermissions: Record<string, string[]> = {};
   if (location.org_id) {
     const { data: permissionsData } = await supabase
@@ -133,44 +174,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }));
 
   const leaders = employees.filter((emp) => isLeaderRole(emp.role));
-
-  const zoneOrder: Array<'FOH' | 'BOH'> = ['FOH', 'BOH'];
-  const positionsMap = new Map<string, { name: string; name_es: string | null; zone: 'FOH' | 'BOH'; description: string | null }>();
-
-  // Build a map of position descriptions from org_positions
-  const orgPositionDescriptions = new Map<string, string>();
-  (orgPositionsData ?? []).forEach((item: any) => {
-    if (item.name && item.description) {
-      orgPositionDescriptions.set(item.name.toLowerCase(), item.description);
-    }
-  });
-
-  (finalPositionsData ?? []).forEach((item: any) => {
-    const name = item.position?.trim();
-    if (!name) return;
-    const zone = (item.zone === 'BOH' ? 'BOH' : 'FOH') as 'FOH' | 'BOH';
-    if (!positionsMap.has(name)) {
-      // Look up description from org_positions
-      const description = orgPositionDescriptions.get(name.toLowerCase()) ?? null;
-      positionsMap.set(name, { 
-        name, 
-        name_es: item.position_es ?? null,
-        zone,
-        description,
-      });
-    }
-  });
-
-  const positions = Array.from(positionsMap.values()).map(p => ({
-    name: p.name,
-    name_es: p.name_es,
-    zone: p.zone,
-    description: p.description,
-  })).sort((a, b) => {
-    const zoneDiff = zoneOrder.indexOf(a.zone) - zoneOrder.indexOf(b.zone);
-    if (zoneDiff !== 0) return zoneDiff;
-    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-  });
 
   res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json({

@@ -29,53 +29,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const supabase = createServerSupabaseClient();
   
-  // Try to load with Spanish columns, fallback to base columns if migration hasn't been run
-  let { data, error } = await supabase
-    .from('position_big5_labels')
-    .select('label_1, label_2, label_3, label_4, label_5, label_1_es, label_2_es, label_3_es, label_4_es, label_5_es')
-    .eq('location_id', location.id)
-    .eq('position', position)
-    .maybeSingle();
-
-  // If query failed due to missing Spanish columns, try without them
-  if (error && error.message?.includes('label_1_es')) {
-    console.warn('[mobile] Spanish label columns not found, falling back to base columns', token, position);
-    const fallbackResult = await supabase
-      .from('position_big5_labels')
-      .select('label_1, label_2, label_3, label_4, label_5')
-      .eq('location_id', location.id)
-      .eq('position', position)
-      .maybeSingle();
-    
-    if (fallbackResult.error) {
-      console.error('[mobile] Failed to fetch labels for token', token, 'position', position, fallbackResult.error);
-      return res.status(500).json({ error: 'Failed to load labels' });
-    }
-    data = fallbackResult.data as any;
-    error = null;
-  } else if (error) {
-    console.error('[mobile] Failed to fetch labels for token', token, 'position', position, error);
-    return res.status(500).json({ error: 'Failed to load labels' });
-  }
-
-  if (!data) {
-    return res.status(404).json({ error: 'No labels found for position' });
-  }
-
-  const labels = [data.label_1, data.label_2, data.label_3, data.label_4, data.label_5].filter(
-    (label): label is string => Boolean(label)
-  );
-  
-  const labels_es = (data as any).label_1_es ? [
-    (data as any).label_1_es,
-    (data as any).label_2_es,
-    (data as any).label_3_es,
-    (data as any).label_4_es,
-    (data as any).label_5_es,
-  ].filter((label): label is string => Boolean(label)) : [];
-
-  // Fetch criteria descriptions from org_positions / position_criteria if available
+  let labels: string[] = [];
+  let labels_es: string[] = [];
   let descriptions: string[] = [];
+
+  // Primary source: position_criteria from org_positions (new org-level settings)
   if (location.org_id) {
     // First find the org position ID
     const { data: orgPosition } = await supabase
@@ -86,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .maybeSingle();
 
     if (orgPosition) {
-      // Fetch criteria with descriptions
+      // Fetch criteria with names and descriptions
       const { data: criteriaData } = await supabase
         .from('position_criteria')
         .select('name, description, criteria_order')
@@ -94,15 +52,66 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .order('criteria_order', { ascending: true });
 
       if (criteriaData && criteriaData.length > 0) {
-        // Map descriptions to match the labels order
-        descriptions = labels.map(label => {
-          const matchingCriteria = criteriaData.find(
-            c => c.name?.toLowerCase() === label?.toLowerCase()
-          );
-          return matchingCriteria?.description ?? '';
-        });
+        labels = criteriaData.map(c => c.name).filter((n): n is string => Boolean(n));
+        descriptions = criteriaData.map(c => c.description ?? '');
       }
     }
+  }
+
+  // Fallback: position_big5_labels (legacy location-based labels)
+  if (labels.length === 0) {
+    // Try to load with Spanish columns, fallback to base columns if migration hasn't been run
+    let { data, error } = await supabase
+      .from('position_big5_labels')
+      .select('label_1, label_2, label_3, label_4, label_5, label_1_es, label_2_es, label_3_es, label_4_es, label_5_es')
+      .eq('location_id', location.id)
+      .eq('position', position)
+      .maybeSingle();
+
+    // If query failed due to missing Spanish columns, try without them
+    if (error && error.message?.includes('label_1_es')) {
+      console.warn('[mobile] Spanish label columns not found, falling back to base columns', token, position);
+      const fallbackResult = await supabase
+        .from('position_big5_labels')
+        .select('label_1, label_2, label_3, label_4, label_5')
+        .eq('location_id', location.id)
+        .eq('position', position)
+        .maybeSingle();
+
+      if (fallbackResult.error) {
+        console.error('[mobile] Failed to fetch labels for token', token, 'position', position, fallbackResult.error);
+        return res.status(500).json({ error: 'Failed to load labels' });
+      }
+      data = fallbackResult.data as any;
+      error = null;
+    } else if (error) {
+      console.error('[mobile] Failed to fetch labels for token', token, 'position', position, error);
+      return res.status(500).json({ error: 'Failed to load labels' });
+    }
+
+    if (!data) {
+      return res.status(404).json({ error: 'No labels found for position' });
+    }
+
+    labels = [data.label_1, data.label_2, data.label_3, data.label_4, data.label_5].filter(
+      (label): label is string => Boolean(label)
+    );
+
+    labels_es = (data as any).label_1_es ? [
+      (data as any).label_1_es,
+      (data as any).label_2_es,
+      (data as any).label_3_es,
+      (data as any).label_4_es,
+      (data as any).label_5_es,
+    ].filter((label): label is string => Boolean(label)) : [];
+
+    // Descriptions are empty for legacy positions
+    descriptions = labels.map(() => '');
+  }
+
+  // If we still have no labels, return 404
+  if (labels.length === 0) {
+    return res.status(404).json({ error: 'No labels found for position' });
   }
 
   res.setHeader('Cache-Control', 'no-store');
