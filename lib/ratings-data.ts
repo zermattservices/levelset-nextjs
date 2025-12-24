@@ -581,6 +581,51 @@ export async function fetchBig5Labels(
   locationId: string,
   position: string
 ): Promise<PositionBig5Labels | null> {
+  // First, try to get labels from org-level position_criteria
+  const { data: locationData } = await supabase
+    .from('locations')
+    .select('org_id')
+    .eq('id', locationId)
+    .single();
+
+  if (locationData?.org_id) {
+    // Try org-level positions first
+    const { data: orgPosition } = await supabase
+      .from('org_positions')
+      .select('id')
+      .eq('org_id', locationData.org_id)
+      .ilike('name', position)
+      .maybeSingle();
+
+    if (orgPosition) {
+      const { data: criteriaData } = await supabase
+        .from('position_criteria')
+        .select('name, criteria_order')
+        .eq('position_id', orgPosition.id)
+        .order('criteria_order', { ascending: true });
+
+      if (criteriaData && criteriaData.length > 0) {
+        // Map criteria to label_1 through label_5 format
+        const labels: PositionBig5Labels = {
+          id: orgPosition.id,
+          org_id: locationData.org_id,
+          location_id: locationId,
+          position: position,
+          zone: 'FOH', // This will be set correctly from org_positions if needed
+          label_1: criteriaData.find(c => c.criteria_order === 1)?.name || null,
+          label_2: criteriaData.find(c => c.criteria_order === 2)?.name || null,
+          label_3: criteriaData.find(c => c.criteria_order === 3)?.name || null,
+          label_4: criteriaData.find(c => c.criteria_order === 4)?.name || null,
+          label_5: criteriaData.find(c => c.criteria_order === 5)?.name || null,
+          created_at: null,
+          updated_at: null,
+        };
+        return labels;
+      }
+    }
+  }
+
+  // Fallback: legacy position_big5_labels table
   const { data, error } = await supabase
     .from('position_big5_labels')
     .select('*')
@@ -589,7 +634,10 @@ export async function fetchBig5Labels(
     .single();
 
   if (error || !data) {
-    console.error('Error fetching Big 5 labels:', error);
+    // Only log if it's not a "no rows" error
+    if (error && !error.message?.includes('No rows')) {
+      console.error('Error fetching Big 5 labels:', error);
+    }
     return null;
   }
 

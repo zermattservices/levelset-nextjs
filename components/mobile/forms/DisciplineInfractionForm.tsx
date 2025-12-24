@@ -92,6 +92,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
   const [infractionDate, setInfractionDate] = React.useState<Date | null>(new Date());
   const [points, setPoints] = React.useState<number | null>(null);
   const [acknowledged, setAcknowledged] = React.useState(false);
+  const [notes, setNotes] = React.useState('');
   const [teamSignature, setTeamSignature] = React.useState('');
   const [leaderSignature, setLeaderSignature] = React.useState('');
 
@@ -267,6 +268,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
       infractionId: selectedInfraction,
       infractionDate: infractionDate ? format(infractionDate, 'yyyy-MM-dd') : null,
       acknowledged,
+      notes: notes.trim() || null,
       teamMemberSignature: teamSignature || null,
       leaderSignature: leaderSignature,
     };
@@ -304,7 +306,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           ? result.points
           : selectedInfractionOption?.points ?? 0,
     });
-  }, [acknowledged, controls, infractionDate, leaderSignature, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedInfraction, selectedInfractionOption?.action, selectedInfractionOption?.points, selectedLeader, teamSignature, token]);
+  }, [acknowledged, controls, infractionDate, leaderSignature, notes, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedInfraction, selectedInfractionOption?.action, selectedInfractionOption?.points, selectedLeader, teamSignature, token]);
 
   React.useEffect(() => {
     controls.setSubmitHandler(() => submit());
@@ -559,6 +561,32 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           sx={{
             '& .MuiFormControlLabel-label': {
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            },
+          }}
+        />
+
+        <TextField
+          label={t('infraction.notes', 'Notes')}
+          value={notes}
+          onChange={(event) => {
+            setNotes(event.target.value);
+            markDirty();
+          }}
+          placeholder={t('infraction.notesPlaceholder', 'Additional details about the infraction (optional)')}
+          fullWidth
+          multiline
+          minRows={2}
+          maxRows={4}
+          helperText={t('infraction.notesHelper', 'Optional: Add any relevant context or details')}
+          sx={{
+            '& .MuiInputBase-root': {
+              fontFamily,
+            },
+            '& .MuiInputLabel-root': {
+              fontFamily,
+            },
+            '& .MuiFormHelperText-root': {
+              fontFamily,
             },
           }}
         />

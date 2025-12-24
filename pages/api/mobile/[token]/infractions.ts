@@ -11,6 +11,7 @@ interface InfractionsRequestBody {
   infractionId?: string;
   infractionDate?: string | null;
   acknowledged?: boolean;
+  notes?: string | null;
   teamMemberSignature?: string | null;
   leaderSignature?: string | null;
 }
@@ -29,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const body: InfractionsRequestBody = req.body ?? {};
-  const { leaderId, employeeId, infractionId, infractionDate, acknowledged, teamMemberSignature, leaderSignature } = body;
+  const { leaderId, employeeId, infractionId, infractionDate, acknowledged, notes, teamMemberSignature, leaderSignature } = body;
 
   if (!leaderId || !employeeId || !infractionId) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -110,6 +111,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       infraction_date: dateToUse,
       org_id: location.org_id,
       location_id: location.id,
+      notes: notes ?? null,
       team_member_signature: teamMemberSignature ?? null,
       leader_signature: leaderSignature,
     })
