@@ -50,15 +50,28 @@ const StyledSelect = styled(Select)(() => ({
 const LanguageSelect = styled(Select)(() => ({
   fontFamily,
   fontSize: 13,
-  height: 32,
+  height: 36,
+  minWidth: 110,
+  borderRadius: 8,
+  backgroundColor: '#ffffff',
+  '& .MuiSelect-select': {
+    padding: '8px 12px',
+    paddingRight: '32px !important',
+  },
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#d1d5db',
+    borderColor: '#e5e7eb',
+    borderRadius: 8,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
     borderColor: '#31664a',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
     borderColor: '#31664a',
+    borderWidth: 1,
+  },
+  '& .MuiSvgIcon-root': {
+    color: '#6b7280',
+    right: 8,
   },
 }));
 
