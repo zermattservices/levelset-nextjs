@@ -60,7 +60,8 @@ export async function fetchOverviewData(
   locationId: string,
   area: 'FOH' | 'BOH'
 ): Promise<EmployeeRatingAggregate[]> {
-  const positions = getPositionsByArea(area);
+  // Get dynamic positions for this location
+  const positions = await fetchPositionsList(supabase, locationId, area);
   const fohBohField = area === 'FOH' ? 'is_foh' : 'is_boh';
 
   // First, get ALL employees from roster who are marked as FOH or BOH
@@ -240,10 +241,34 @@ export async function fetchPositionData(
   position: string
 ): Promise<EmployeeRatingAggregate[]> {
   // Determine filtering rules based on position
-  const isTrainerPosition = position.includes('Trainer');
-  const isLeaderPosition = position.includes('Leadership') || position.includes('3H Week');
-  const isFOH = FOH_POSITIONS.includes(position);
-  const isBOH = BOH_POSITIONS.includes(position);
+  const isTrainerPosition = position.toLowerCase().includes('trainer');
+  const isLeaderPosition = position.toLowerCase().includes('leadership') || position.toLowerCase().includes('3h week') || position.toLowerCase().includes('hope');
+  
+  // Determine FOH/BOH - first try org_positions, then fallback to hardcoded lists
+  let isFOH = FOH_POSITIONS.includes(position);
+  let isBOH = BOH_POSITIONS.includes(position);
+  
+  // Try to get zone from org_positions
+  const { data: locationData } = await supabase
+    .from('locations')
+    .select('org_id')
+    .eq('id', locationId)
+    .single();
+
+  if (locationData?.org_id) {
+    const { data: orgPosition } = await supabase
+      .from('org_positions')
+      .select('zone')
+      .eq('org_id', locationData.org_id)
+      .ilike('name', position)
+      .maybeSingle();
+
+    if (orgPosition?.zone) {
+      isFOH = orgPosition.zone === 'FOH';
+      isBOH = orgPosition.zone === 'BOH';
+    }
+  }
+  
   const fohBohField = isFOH ? 'is_foh' : 'is_boh';
 
   // Build employee filter
@@ -376,7 +401,8 @@ export async function fetchLeadershipData(
   locationId: string,
   area: 'FOH' | 'BOH'
 ): Promise<LeaderRatingAggregate[]> {
-  const positions = getPositionsByArea(area);
+  // Get dynamic positions for this location
+  const positions = await fetchPositionsList(supabase, locationId, area);
 
   // Get location's org_id
   const { data: locationData } = await supabase
@@ -544,14 +570,37 @@ export async function fetchLeadershipData(
 }
 
 /**
- * Fetch distinct positions from ratings table
- * Dynamically gets positions that have actual data
+ * Fetch positions from org_positions table for an organization
+ * Falls back to hardcoded list if no org-level positions are configured
  */
 export async function fetchPositionsList(
   supabase: SupabaseClient,
   locationId: string,
   area: 'FOH' | 'BOH'
 ): Promise<string[]> {
+  // First, get the org_id for this location
+  const { data: locationData } = await supabase
+    .from('locations')
+    .select('org_id')
+    .eq('id', locationId)
+    .single();
+
+  if (locationData?.org_id) {
+    // Fetch positions from org_positions table
+    const { data: orgPositions, error: orgError } = await supabase
+      .from('org_positions')
+      .select('name, zone')
+      .eq('org_id', locationData.org_id)
+      .eq('zone', area)
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+
+    if (!orgError && orgPositions && orgPositions.length > 0) {
+      return orgPositions.map(p => p.name);
+    }
+  }
+
+  // Fallback: use hardcoded positions filtered by those that have ratings
   const expectedPositions = getPositionsByArea(area);
 
   const { data, error } = await supabase

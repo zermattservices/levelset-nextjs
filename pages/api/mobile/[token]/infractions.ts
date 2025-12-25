@@ -76,16 +76,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Leader or employee is not valid for this location' });
   }
 
-  const { data: rubric, error: rubricError } = await supabase
-    .from('infractions_rubric')
-    .select('action, points')
-    .eq('location_id', location.id)
-    .eq('id', infractionId)
-    .maybeSingle();
+  // First try org-level infractions (location_id IS NULL)
+  let rubric: { action: string; points: number | null } | null = null;
 
-  if (rubricError) {
-    console.error('[mobile] Failed to fetch infractions rubric for token', token, rubricError);
-    return res.status(500).json({ error: 'Failed to load infraction details' });
+  if (location.org_id) {
+    const { data: orgRubric, error: orgRubricError } = await supabase
+      .from('infractions_rubric')
+      .select('action, points')
+      .eq('org_id', location.org_id)
+      .is('location_id', null)
+      .eq('id', infractionId)
+      .maybeSingle();
+
+    if (orgRubricError) {
+      console.error('[mobile] Failed to fetch org-level infractions rubric for token', token, orgRubricError);
+    } else if (orgRubric) {
+      rubric = orgRubric;
+    }
+  }
+
+  // If not found at org level, try location-specific
+  if (!rubric) {
+    const { data: locationRubric, error: locationRubricError } = await supabase
+      .from('infractions_rubric')
+      .select('action, points')
+      .eq('location_id', location.id)
+      .eq('id', infractionId)
+      .maybeSingle();
+
+    if (locationRubricError) {
+      console.error('[mobile] Failed to fetch infractions rubric for token', token, locationRubricError);
+      return res.status(500).json({ error: 'Failed to load infraction details' });
+    }
+
+    rubric = locationRubric;
   }
 
   if (!rubric) {

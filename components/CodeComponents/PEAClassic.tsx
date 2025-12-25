@@ -408,17 +408,28 @@ export function PEAClassic({
         );
         const result = await response.json();
         
-        if (result.success) {
-          setPositions(result.positions || []);
-          // Set first position as default
-          if (result.positions && result.positions.length > 0 && !selectedPosition) {
+        if (result.success && result.positions && result.positions.length > 0) {
+          setPositions(result.positions);
+          // Set first position as default for position view
+          if (!selectedPosition || !result.positions.includes(selectedPosition)) {
             setSelectedPosition(result.positions[0]);
+          }
+        } else {
+          // Fallback to hard-coded list
+          const fallbackPositions = getPositionsByArea(area);
+          setPositions(fallbackPositions);
+          if (!selectedPosition || !fallbackPositions.includes(selectedPosition)) {
+            setSelectedPosition(fallbackPositions[0]);
           }
         }
       } catch (err) {
         console.error('Error fetching positions:', err);
         // Fallback to hard-coded list
-        setPositions(getPositionsByArea(area));
+        const fallbackPositions = getPositionsByArea(area);
+        setPositions(fallbackPositions);
+        if (!selectedPosition || !fallbackPositions.includes(selectedPosition)) {
+          setSelectedPosition(fallbackPositions[0]);
+        }
       }
     }
 
@@ -643,6 +654,7 @@ export function PEAClassic({
           <OverviewTable 
             data={overviewData}
             area={area}
+            positions={positions}
             expandedRows={expandedRows}
             toggleRow={toggleRow}
             cellPadding={cellPadding}
@@ -668,6 +680,7 @@ export function PEAClassic({
           <LeadershipTable
             data={leadershipData}
             area={area}
+            positions={positions}
             expandedRows={expandedRows}
             toggleRow={toggleRow}
             cellPadding={cellPadding}
@@ -708,6 +721,7 @@ export function PEAClassic({
 interface OverviewTableProps {
   data: EmployeeRatingAggregate[];
   area: 'FOH' | 'BOH';
+  positions: string[];
   expandedRows: Set<string>;
   toggleRow: (id: string) => void;
   cellPadding: number;
@@ -715,8 +729,7 @@ interface OverviewTableProps {
   fillHeight?: boolean;
 }
 
-function OverviewTable({ data, area, expandedRows, toggleRow, cellPadding, thresholds, fillHeight }: OverviewTableProps) {
-  const positions = getPositionsByArea(area);
+function OverviewTable({ data, area, positions, expandedRows, toggleRow, cellPadding, thresholds, fillHeight }: OverviewTableProps) {
 
   return (
     <StyledContainer sx={{ height: fillHeight ? '100%' : 'auto', maxHeight: fillHeight ? 'none' : undefined }}>
@@ -986,6 +999,7 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
 interface LeadershipTableProps {
   data: LeaderRatingAggregate[];
   area: 'FOH' | 'BOH';
+  positions: string[];
   expandedRows: Set<string>;
   toggleRow: (id: string) => void;
   cellPadding: number;
@@ -993,8 +1007,7 @@ interface LeadershipTableProps {
   fillHeight?: boolean;
 }
 
-function LeadershipTable({ data, area, expandedRows, toggleRow, cellPadding, thresholds, fillHeight }: LeadershipTableProps) {
-  const positions = getPositionsByArea(area);
+function LeadershipTable({ data, area, positions, expandedRows, toggleRow, cellPadding, thresholds, fillHeight }: LeadershipTableProps) {
 
   return (
     <StyledContainer sx={{ height: fillHeight ? '100%' : 'auto', maxHeight: fillHeight ? 'none' : undefined }}>
