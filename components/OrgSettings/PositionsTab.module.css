@@ -72,13 +72,14 @@
 
 .positionsHeader {
   display: grid;
-  grid-template-columns: 180px 1fr 40px;
+  grid-template-columns: 28px 180px 1fr 60px;
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid #e5e5e5;
   align-items: center;
 }
 
+.headerDrag,
 .headerName,
 .headerDescription,
 .headerActions {
@@ -87,6 +88,10 @@
   font-weight: 600;
   color: #666;
   text-transform: uppercase;
+}
+
+.headerDrag {
+  width: 28px;
 }
 
 .emptySection {
@@ -101,11 +106,35 @@
 
 .positionRow {
   display: grid;
-  grid-template-columns: 180px 1fr 40px;
+  grid-template-columns: 28px 180px 1fr 60px;
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid #f0f0f0;
   align-items: flex-start;
+}
+
+.positionRow.dragging {
+  opacity: 0.5;
+  background-color: #f0f0f0;
+}
+
+.dragHandle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  padding-top: 6px;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.rowActions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .nameField {

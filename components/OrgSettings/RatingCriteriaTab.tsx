@@ -7,8 +7,11 @@ import MenuItem from '@mui/material/MenuItem';
 import ListSubheader from '@mui/material/ListSubheader';
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
+import Menu from '@mui/material/Menu';
+import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
 import TranslateIcon from '@mui/icons-material/Translate';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import sty from './RatingCriteriaTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 
@@ -107,6 +110,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [language, setLanguage] = React.useState<'en' | 'es'>('en');
+  const [translateMenuAnchor, setTranslateMenuAnchor] = React.useState<HTMLElement | null>(null);
   const textareaRefs = React.useRef<Map<string, HTMLTextAreaElement>>(new Map());
   
   // Refs for autosave on unmount
@@ -329,16 +333,22 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
     };
   }, [disabled, supabase]);
 
-  const handleAutoTranslate = async () => {
-    if (!criteria.length) return;
+  const handleAutoTranslate = async (translateAll: boolean, criteriaOrder?: number) => {
+    setTranslateMenuAnchor(null);
+    
+    const criteriaToTranslate = translateAll 
+      ? criteria 
+      : criteria.filter(c => c.criteria_order === criteriaOrder);
+    
+    if (!criteriaToTranslate.length) return;
     
     setTranslating(true);
     setError(null);
     
     try {
-      // Collect all texts to translate
+      // Collect texts to translate
       const textsToTranslate: string[] = [];
-      criteria.forEach(c => {
+      criteriaToTranslate.forEach(c => {
         textsToTranslate.push(c.name || '');
         textsToTranslate.push(c.description || '');
       });
@@ -361,11 +371,23 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
       const { translations } = await response.json();
       
       // Apply translations to criteria
-      setCriteria(prev => prev.map((c, idx) => ({
-        ...c,
-        name_es: translations[idx * 2] || c.name_es,
-        description_es: translations[idx * 2 + 1] || c.description_es,
-      })));
+      if (translateAll) {
+        setCriteria(prev => prev.map((c, idx) => ({
+          ...c,
+          name_es: translations[idx * 2] || c.name_es,
+          description_es: translations[idx * 2 + 1] || c.description_es,
+        })));
+      } else if (criteriaOrder !== undefined) {
+        setCriteria(prev => prev.map(c => 
+          c.criteria_order === criteriaOrder
+            ? {
+                ...c,
+                name_es: translations[0] || c.name_es,
+                description_es: translations[1] || c.description_es,
+              }
+            : c
+        ));
+      }
       
       setHasChanges(true);
     } catch (err: any) {
@@ -394,26 +416,48 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
           <h3 className={sty.introTitle} style={{ margin: 0 }}>Rating Criteria</h3>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             {language === 'es' && !disabled && (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={translating ? <CircularProgress size={14} /> : <TranslateIcon sx={{ fontSize: 16 }} />}
-                onClick={handleAutoTranslate}
-                disabled={translating || !criteria.length || !selectedPositionId}
-                sx={{
-                  fontFamily,
-                  fontSize: 12,
-                  textTransform: 'none',
-                  borderColor: '#d1d5db',
-                  color: '#4b5563',
-                  '&:hover': {
-                    borderColor: '#31664a',
-                    backgroundColor: 'rgba(49, 102, 74, 0.04)',
-                  },
-                }}
-              >
-                {translating ? 'Translating...' : 'Auto-translate'}
-              </Button>
+              <>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={translating ? <CircularProgress size={14} /> : <TranslateIcon sx={{ fontSize: 16 }} />}
+                  endIcon={<ArrowDropDownIcon sx={{ fontSize: 18, marginLeft: -0.5 }} />}
+                  onClick={(e) => setTranslateMenuAnchor(e.currentTarget)}
+                  disabled={translating || !criteria.length || !selectedPositionId}
+                  sx={{
+                    fontFamily,
+                    fontSize: 13,
+                    textTransform: 'none',
+                    height: 36,
+                    minWidth: 110,
+                    borderRadius: '8px',
+                    borderColor: '#e5e7eb',
+                    color: '#4b5563',
+                    backgroundColor: '#ffffff',
+                    padding: '8px 12px',
+                    '&:hover': {
+                      borderColor: '#31664a',
+                      backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                    },
+                  }}
+                >
+                  {translating ? 'Translating...' : 'Translate'}
+                </Button>
+                <Menu
+                  anchorEl={translateMenuAnchor}
+                  open={Boolean(translateMenuAnchor)}
+                  onClose={() => setTranslateMenuAnchor(null)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
+                  <MenuItem 
+                    onClick={() => handleAutoTranslate(true)}
+                    sx={{ fontFamily, fontSize: 13 }}
+                  >
+                    All criteria
+                  </MenuItem>
+                </Menu>
+              </>
             )}
             <LanguageSelect
               value={language}
@@ -428,7 +472,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
         <p className={sty.introDescription}>
           Define the 5 rating criteria for each position. These criteria will be used when 
           submitting positional ratings.
-          {language === 'es' && ' You are editing Spanish translations.'}
+          {language === 'es' && ' You are editing Spanish translations. Click the translate icon on each row to translate individually, or use the dropdown to translate all.'}
         </p>
       </div>
 
@@ -507,6 +551,17 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                   rows={1}
                   disabled={disabled}
                 />
+                {!disabled && language === 'es' && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleAutoTranslate(false, c.criteria_order)}
+                    disabled={translating}
+                    title="Translate this criteria"
+                    sx={{ color: '#6b7280', '&:hover': { color: '#31664a' } }}
+                  >
+                    <TranslateIcon fontSize="small" />
+                  </IconButton>
+                )}
               </div>
             ))}
           </div>

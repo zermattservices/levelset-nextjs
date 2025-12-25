@@ -7,9 +7,12 @@ import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import TranslateIcon from '@mui/icons-material/Translate';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CircularProgress from '@mui/material/CircularProgress';
 import sty from './PositionsTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
@@ -93,6 +96,9 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
   const [hasChanges, setHasChanges] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [language, setLanguage] = React.useState<'en' | 'es'>('en');
+  const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
+  const [draggedZone, setDraggedZone] = React.useState<'FOH' | 'BOH' | null>(null);
+  const [translateMenuAnchor, setTranslateMenuAnchor] = React.useState<HTMLElement | null>(null);
   const textareaRefs = React.useRef<Map<string, HTMLTextAreaElement>>(new Map());
   
   // Refs to track current state for autosave on unmount
@@ -191,6 +197,47 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
   const handleDeletePosition = (id: string) => {
     setPositions(positions.filter(pos => pos.id !== id));
     setHasChanges(true);
+  };
+
+  // Drag and drop handlers for reordering
+  const handleDragStart = (index: number, zone: 'FOH' | 'BOH') => {
+    setDraggedIndex(index);
+    setDraggedZone(zone);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (dropIndex: number, zone: 'FOH' | 'BOH') => {
+    if (draggedIndex === null || draggedZone !== zone) return;
+    
+    // Get positions for this zone
+    const zonePositions = positions.filter(p => p.zone === zone);
+    const otherPositions = positions.filter(p => p.zone !== zone);
+    
+    // Reorder within the zone
+    const draggedItem = zonePositions[draggedIndex];
+    const newZonePositions = [...zonePositions];
+    newZonePositions.splice(draggedIndex, 1);
+    newZonePositions.splice(dropIndex, 0, draggedItem);
+    
+    // Update display_order for all positions in this zone
+    const updatedZonePositions = newZonePositions.map((pos, idx) => ({
+      ...pos,
+      display_order: idx,
+    }));
+    
+    // Merge back with other zone positions
+    setPositions([...otherPositions, ...updatedZonePositions]);
+    setHasChanges(true);
+    setDraggedIndex(null);
+    setDraggedZone(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDraggedZone(null);
   };
 
   const handleSave = async () => {
@@ -318,16 +365,24 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
     textarea.style.height = textarea.scrollHeight + 'px';
   };
 
-  const handleAutoTranslate = async () => {
-    if (!positions.length) return;
+  const [selectedPositionForTranslate, setSelectedPositionForTranslate] = React.useState<string | null>(null);
+
+  const handleAutoTranslate = async (translateAll: boolean, positionId?: string) => {
+    setTranslateMenuAnchor(null);
+    
+    const positionsToTranslate = translateAll 
+      ? positions 
+      : positions.filter(p => p.id === positionId);
+    
+    if (!positionsToTranslate.length) return;
     
     setTranslating(true);
     setError(null);
     
     try {
-      // Collect all texts to translate
+      // Collect texts to translate
       const textsToTranslate: string[] = [];
-      positions.forEach(pos => {
+      positionsToTranslate.forEach(pos => {
         textsToTranslate.push(pos.name || '');
         textsToTranslate.push(pos.description || '');
       });
@@ -350,11 +405,23 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
       const { translations } = await response.json();
       
       // Apply translations to positions
-      setPositions(prev => prev.map((pos, idx) => ({
-        ...pos,
-        name_es: translations[idx * 2] || pos.name_es,
-        description_es: translations[idx * 2 + 1] || pos.description_es,
-      })));
+      if (translateAll) {
+        setPositions(prev => prev.map((pos, idx) => ({
+          ...pos,
+          name_es: translations[idx * 2] || pos.name_es,
+          description_es: translations[idx * 2 + 1] || pos.description_es,
+        })));
+      } else if (positionId) {
+        setPositions(prev => prev.map(pos => 
+          pos.id === positionId 
+            ? {
+                ...pos,
+                name_es: translations[0] || pos.name_es,
+                description_es: translations[1] || pos.description_es,
+              }
+            : pos
+        ));
+      }
       
       setHasChanges(true);
     } catch (err: any) {
@@ -402,6 +469,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
       </div>
 
       <div className={sty.positionsHeader}>
+        {!disabled && <span className={sty.headerDrag}></span>}
         <span className={sty.headerName}>Position Name</span>
         <span className={sty.headerDescription}>Description</span>
         <span className={sty.headerActions}></span>
@@ -410,8 +478,21 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
       {sectionPositions.length === 0 ? (
         <div className={sty.emptySection}>No {zone} positions yet</div>
       ) : (
-        sectionPositions.map((position) => (
-          <div key={position.id} className={sty.positionRow}>
+        sectionPositions.map((position, index) => (
+          <div 
+            key={position.id} 
+            className={`${sty.positionRow} ${draggedIndex === index && draggedZone === zone ? sty.dragging : ''}`}
+            draggable={!disabled}
+            onDragStart={() => handleDragStart(index, zone)}
+            onDragOver={handleDragOver}
+            onDrop={() => handleDrop(index, zone)}
+            onDragEnd={handleDragEnd}
+          >
+            {!disabled && (
+              <div className={sty.dragHandle}>
+                <DragIndicatorIcon sx={{ color: '#9ca3af', cursor: 'grab', fontSize: 20 }} />
+              </div>
+            )}
             <StyledTextField
               value={language === 'es' ? position.name_es : position.name}
               onChange={(e) => handlePositionChange(position.id, language === 'es' ? 'name_es' : 'name', e.target.value)}
@@ -431,15 +512,28 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
               rows={1}
               disabled={disabled}
             />
-            {!disabled && language === 'en' && (
-              <IconButton
-                size="small"
-                onClick={() => handleDeletePosition(position.id)}
-                className={sty.deleteButton}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            )}
+            <div className={sty.rowActions}>
+              {!disabled && language === 'es' && (
+                <IconButton
+                  size="small"
+                  onClick={() => handleAutoTranslate(false, position.id)}
+                  disabled={translating}
+                  title="Translate this position"
+                  sx={{ color: '#6b7280', '&:hover': { color: '#31664a' } }}
+                >
+                  <TranslateIcon fontSize="small" />
+                </IconButton>
+              )}
+              {!disabled && language === 'en' && (
+                <IconButton
+                  size="small"
+                  onClick={() => handleDeletePosition(position.id)}
+                  className={sty.deleteButton}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              )}
+            </div>
           </div>
         ))
       )}
@@ -453,26 +547,48 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
           <h3 className={sty.introTitle} style={{ margin: 0 }}>Manage Positions</h3>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             {language === 'es' && !disabled && (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={translating ? <CircularProgress size={14} /> : <TranslateIcon sx={{ fontSize: 16 }} />}
-                onClick={handleAutoTranslate}
-                disabled={translating || !positions.length}
-                sx={{
-                  fontFamily,
-                  fontSize: 12,
-                  textTransform: 'none',
-                  borderColor: '#d1d5db',
-                  color: '#4b5563',
-                  '&:hover': {
-                    borderColor: '#31664a',
-                    backgroundColor: 'rgba(49, 102, 74, 0.04)',
-                  },
-                }}
-              >
-                {translating ? 'Translating...' : 'Auto-translate'}
-              </Button>
+              <>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={translating ? <CircularProgress size={14} /> : <TranslateIcon sx={{ fontSize: 16 }} />}
+                  endIcon={<ArrowDropDownIcon sx={{ fontSize: 18, marginLeft: -0.5 }} />}
+                  onClick={(e) => setTranslateMenuAnchor(e.currentTarget)}
+                  disabled={translating || !positions.length}
+                  sx={{
+                    fontFamily,
+                    fontSize: 13,
+                    textTransform: 'none',
+                    height: 36,
+                    minWidth: 110,
+                    borderRadius: '8px',
+                    borderColor: '#e5e7eb',
+                    color: '#4b5563',
+                    backgroundColor: '#ffffff',
+                    padding: '8px 12px',
+                    '&:hover': {
+                      borderColor: '#31664a',
+                      backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                    },
+                  }}
+                >
+                  {translating ? 'Translating...' : 'Translate'}
+                </Button>
+                <Menu
+                  anchorEl={translateMenuAnchor}
+                  open={Boolean(translateMenuAnchor)}
+                  onClose={() => setTranslateMenuAnchor(null)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
+                  <MenuItem 
+                    onClick={() => handleAutoTranslate(true)}
+                    sx={{ fontFamily, fontSize: 13 }}
+                  >
+                    All positions
+                  </MenuItem>
+                </Menu>
+              </>
             )}
             <LanguageSelect
               value={language}
@@ -486,8 +602,8 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
         </Box>
         <p className={sty.introDescription}>
           Define the positions available for positional ratings in your organization. 
-          Each position needs a name and an optional description.
-          {language === 'es' && ' You are editing Spanish translations.'}
+          Each position needs a name and an optional description. Drag positions to reorder them.
+          {language === 'es' && ' You are editing Spanish translations. Click the translate icon on each row to translate individually, or use the dropdown to translate all.'}
         </p>
       </div>
 

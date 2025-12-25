@@ -70,7 +70,7 @@
 
 .criteriaHeader {
   display: grid;
-  grid-template-columns: 32px 200px 1fr;
+  grid-template-columns: 32px 200px 1fr 40px;
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid #e5e5e5;
@@ -79,7 +79,8 @@
 
 .headerNumber,
 .headerCriteriaName,
-.headerDescription {
+.headerDescription,
+.headerActions {
   font-family: "Satoshi";
   font-size: 12px;
   font-weight: 600;
@@ -99,7 +100,7 @@
 
 .criteriaRow {
   display: grid;
-  grid-template-columns: 32px 200px 1fr;
+  grid-template-columns: 32px 200px 1fr 40px;
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid #f0f0f0;
