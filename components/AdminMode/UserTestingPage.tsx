@@ -18,7 +18,6 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import LoginIcon from '@mui/icons-material/Login';
-import { createSupabaseClient } from '@/util/supabase/component';
 import { useImpersonation } from '@/lib/providers/ImpersonationProvider';
 import styles from './UserTestingPage.module.css';
 
@@ -59,24 +58,6 @@ const StyledFormControl = styled(FormControl)(() => ({
   },
 }));
 
-// Supabase returns joined tables as arrays
-interface SupabaseAppUser {
-  id: string;
-  auth_user_id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  full_name: string;
-  role: string;
-  org_id: string;
-  location_id: string;
-  employee_id?: string;
-  hire_date?: string;
-  active: boolean;
-  orgs: { id: string; name: string }[] | null;
-  locations: { id: string; location_number: string }[] | null;
-}
-
 interface AppUser {
   id: string;
   auth_user_id: string;
@@ -108,7 +89,6 @@ interface Location {
 const PAGE_SIZE = 15;
 
 export function UserTestingPage() {
-  const supabase = React.useMemo(() => createSupabaseClient(), []);
   const { isImpersonating, impersonatedUser, startImpersonation } = useImpersonation();
 
   // State
@@ -124,36 +104,40 @@ export function UserTestingPage() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [impersonationLoading, setImpersonationLoading] = React.useState<string | null>(null);
 
-  // Fetch organizations
+  // Fetch all data from admin API (bypasses RLS)
   React.useEffect(() => {
-    async function fetchOrgs() {
-      const { data } = await supabase
-        .from('orgs')
-        .select('id, name')
-        .order('name');
+    async function fetchData() {
+      setLoading(true);
       
-      if (data) {
-        setOrgs(data);
+      try {
+        // Build query params
+        const params = new URLSearchParams();
+        if (selectedOrg) params.append('org_id', selectedOrg);
+        if (selectedLocation) params.append('location_id', selectedLocation);
+        
+        const response = await fetch(`/api/admin/users?${params.toString()}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          setUsers(data.users || []);
+          // Only set orgs/locations on first load (no filters)
+          if (!selectedOrg && !selectedLocation) {
+            setOrgs(data.orgs || []);
+            setLocations(data.locations || []);
+            setFilteredLocations(data.locations || []);
+          }
+        } else {
+          console.error('Error fetching users:', data.error);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
       }
+      
+      setLoading(false);
     }
-    fetchOrgs();
-  }, [supabase]);
 
-  // Fetch locations
-  React.useEffect(() => {
-    async function fetchLocations() {
-      const { data } = await supabase
-        .from('locations')
-        .select('id, location_number, org_id')
-        .order('location_number');
-      
-      if (data) {
-        setLocations(data);
-        setFilteredLocations(data);
-      }
-    }
-    fetchLocations();
-  }, [supabase]);
+    fetchData();
+  }, [selectedOrg, selectedLocation]);
 
   // Filter locations when org changes
   React.useEffect(() => {
@@ -164,61 +148,6 @@ export function UserTestingPage() {
       setFilteredLocations(locations);
     }
   }, [selectedOrg, locations]);
-
-  // Fetch users
-  React.useEffect(() => {
-    async function fetchUsers() {
-      setLoading(true);
-      
-      let query = supabase
-        .from('app_users')
-        .select(`
-          id,
-          auth_user_id,
-          email,
-          first_name,
-          last_name,
-          full_name,
-          role,
-          org_id,
-          location_id,
-          employee_id,
-          hire_date,
-          active,
-          orgs (id, name),
-          locations (id, location_number)
-        `)
-        .order('full_name');
-
-      // Apply org filter
-      if (selectedOrg) {
-        query = query.eq('org_id', selectedOrg);
-      }
-
-      // Apply location filter
-      if (selectedLocation) {
-        query = query.eq('location_id', selectedLocation);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching users:', error);
-      } else {
-        // Transform Supabase data (arrays for joins) to AppUser format (single objects)
-        const transformedUsers: AppUser[] = ((data as unknown as SupabaseAppUser[]) || []).map(user => ({
-          ...user,
-          orgs: user.orgs?.[0] || null,
-          locations: user.locations?.[0] || null,
-        }));
-        setUsers(transformedUsers);
-      }
-      
-      setLoading(false);
-    }
-
-    fetchUsers();
-  }, [supabase, selectedOrg, selectedLocation]);
 
   // Filter users by search query
   const filteredUsers = React.useMemo(() => {
@@ -301,7 +230,7 @@ export function UserTestingPage() {
           }}
         />
         
-        <StyledFormControl size="small" className={styles.filterField}>
+        <StyledFormControl size="small" sx={{ minWidth: 200 }}>
           <InputLabel>Organization</InputLabel>
           <Select
             value={selectedOrg}
@@ -317,7 +246,7 @@ export function UserTestingPage() {
           </Select>
         </StyledFormControl>
 
-        <StyledFormControl size="small" className={styles.filterField}>
+        <StyledFormControl size="small" sx={{ minWidth: 180 }}>
           <InputLabel>Location</InputLabel>
           <Select
             value={selectedLocation}
