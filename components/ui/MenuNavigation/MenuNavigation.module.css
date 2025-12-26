@@ -106,6 +106,24 @@
   font-weight: 600;
 }
 
+.helpLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+
+.helpLink:hover {
+  background-color: #f3f4f6;
+}
+
+.helpLink:hover svg {
+  color: #31664a !important;
+}
+
 .profileDropdownContainer {
   position: relative;
   display: flex;

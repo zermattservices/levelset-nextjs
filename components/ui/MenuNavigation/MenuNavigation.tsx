@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SettingsIcon from '@mui/icons-material/Settings';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import sty from './MenuNavigation.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 import { LevelsetButton } from '../LevelsetButton/LevelsetButton';
@@ -118,6 +119,17 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
                 <span className={sty.adminModeButton}>Admin Mode</span>
               </LevelsetButton>
             )}
+
+            {/* Help/Documentation link */}
+            <a 
+              href="https://docs.levelset.io" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={sty.helpLink}
+              title="Documentation"
+            >
+              <HelpOutlineIcon sx={{ fontSize: 24, color: '#6b7280' }} />
+            </a>
 
             {/* Location dropdown */}
             <LocationSelectDropdown className={sty.locationDropdown} />
