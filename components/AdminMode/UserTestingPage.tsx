@@ -59,7 +59,8 @@ const StyledFormControl = styled(FormControl)(() => ({
   },
 }));
 
-interface AppUserRaw {
+// Supabase returns joined tables as arrays
+interface SupabaseAppUser {
   id: string;
   auth_user_id: string;
   email: string;
@@ -72,8 +73,8 @@ interface AppUserRaw {
   employee_id?: string;
   hire_date?: string;
   active: boolean;
-  orgs: { id: string; name: string } | null;
-  locations: { id: string; location_number: string } | null;
+  orgs: { id: string; name: string }[] | null;
+  locations: { id: string; location_number: string }[] | null;
 }
 
 interface AppUser {
@@ -204,8 +205,13 @@ export function UserTestingPage() {
       if (error) {
         console.error('Error fetching users:', error);
       } else {
-        // Cast the data to handle Supabase's type inference for joins
-        setUsers((data as AppUserRaw[] | null) || []);
+        // Transform Supabase data (arrays for joins) to AppUser format (single objects)
+        const transformedUsers: AppUser[] = ((data as unknown as SupabaseAppUser[]) || []).map(user => ({
+          ...user,
+          orgs: user.orgs?.[0] || null,
+          locations: user.locations?.[0] || null,
+        }));
+        setUsers(transformedUsers);
       }
       
       setLoading(false);
