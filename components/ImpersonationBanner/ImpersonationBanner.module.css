@@ -146,11 +146,6 @@
   transform: translateY(0);
 }
 
-/* Adjust main content when banner is visible */
-:global(body.impersonating) {
-  padding-top: 52px;
-}
-
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .banner {

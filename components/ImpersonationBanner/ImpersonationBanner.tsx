@@ -20,16 +20,16 @@ export function ImpersonationBanner() {
     setNetworkLoggingEnabled,
   } = useImpersonation();
 
-  // Add/remove body class for padding adjustment
+  // Add/remove body padding for banner space
   React.useEffect(() => {
     if (isImpersonating) {
-      document.body.classList.add('impersonating');
+      document.body.style.paddingTop = '52px';
     } else {
-      document.body.classList.remove('impersonating');
+      document.body.style.paddingTop = '';
     }
     
     return () => {
-      document.body.classList.remove('impersonating');
+      document.body.style.paddingTop = '';
     };
   }, [isImpersonating]);
 
