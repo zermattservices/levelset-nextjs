@@ -27,6 +27,7 @@ interface PermissionProfile {
   hierarchy_level: number;
   linked_role_name: string | null;
   is_system_default: boolean;
+  is_admin_profile?: boolean;
 }
 
 interface AssignedUser {
@@ -65,13 +66,25 @@ export function PermissionLevelsTab({
   // Levelset Admin can see all tiers
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
   
-  // Filter profiles to only show those the user can see
+  // Split profiles into role-based and admin profiles
+  const roleProfiles = React.useMemo(() => {
+    return profiles.filter(p => !p.is_admin_profile);
+  }, [profiles]);
+  
+  const adminProfiles = React.useMemo(() => {
+    return profiles.filter(p => p.is_admin_profile);
+  }, [profiles]);
+  
+  // Filter role profiles to only show those the user can see
   // Users can only see permission tiers below their own (e.g., tier 0 sees tier 1+, tier 1 sees tier 2+)
   // Levelset Admin sees all
-  const visibleProfiles = React.useMemo(() => {
-    if (isLevelsetAdmin) return profiles;
-    return profiles.filter(p => p.hierarchy_level > userHierarchyLevel);
-  }, [profiles, userHierarchyLevel, isLevelsetAdmin]);
+  const visibleRoleProfiles = React.useMemo(() => {
+    if (isLevelsetAdmin) return roleProfiles;
+    return roleProfiles.filter(p => p.hierarchy_level > userHierarchyLevel);
+  }, [roleProfiles, userHierarchyLevel, isLevelsetAdmin]);
+  
+  // Admin profiles are visible and editable by level 0 and level 1 users
+  const canEditAdminProfiles = isLevelsetAdmin || userHierarchyLevel <= 1;
 
   // Fetch permission profiles
   const fetchProfiles = React.useCallback(async () => {
@@ -83,7 +96,7 @@ export function PermissionLevelsTab({
     try {
       const { data, error: fetchError } = await supabase
         .from('permission_profiles')
-        .select('id, name, hierarchy_level, linked_role_name, is_system_default')
+        .select('id, name, hierarchy_level, linked_role_name, is_system_default, is_admin_profile')
         .eq('org_id', orgId)
         .order('hierarchy_level', { ascending: true })
         .order('is_system_default', { ascending: false });
@@ -287,6 +300,7 @@ export function PermissionLevelsTab({
         </div>
 
         <div className={sty.tableContainer}>
+          {/* Role-Based Permission Levels */}
           <table className={sty.table}>
             <thead>
               <tr>
@@ -297,7 +311,7 @@ export function PermissionLevelsTab({
               </tr>
             </thead>
             <tbody>
-              {visibleProfiles.map((profile) => {
+              {visibleRoleProfiles.map((profile) => {
                 const canEdit = canEditLevel(profile.hierarchy_level);
                 const isSelected = selectedProfileId === profile.id;
 
@@ -396,6 +410,76 @@ export function PermissionLevelsTab({
               })}
             </tbody>
           </table>
+
+          {/* Administrator Permission Levels */}
+          {adminProfiles.length > 0 && canEditAdminProfiles && (
+            <>
+              <h4 className={sty.sectionTitle}>Administrator Levels</h4>
+              <table className={sty.table}>
+                <thead>
+                  <tr>
+                    <th className={sty.th} style={{ width: '200px' }}>Permission Level</th>
+                    <th className={sty.thActions}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminProfiles.map((profile) => {
+                    const isSelected = selectedProfileId === profile.id;
+
+                    return (
+                      <tr
+                        key={profile.id}
+                        className={`${sty.tr} ${isSelected ? sty.trSelected : ''}`}
+                      >
+                        <td className={sty.td}>
+                          <span className={sty.profileName}>{profile.name}</span>
+                          <Chip
+                            label="Admin"
+                            size="small"
+                            sx={{
+                              fontFamily,
+                              fontSize: 10,
+                              fontWeight: 500,
+                              backgroundColor: '#fef3c7',
+                              color: '#92400e',
+                              height: 18,
+                              marginLeft: 1,
+                            }}
+                          />
+                        </td>
+                        <td className={sty.tdActions}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleViewAssignments(profile.id)}
+                            title="View Assignments"
+                            sx={{
+                              color: isSelected ? '#31664a' : '#6b7280',
+                              '&:hover': { color: '#31664a' },
+                            }}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                          {!disabled && (
+                            <IconButton
+                              size="small"
+                              onClick={() => onEditProfile(profile.id)}
+                              title="Edit Permissions"
+                              sx={{
+                                color: '#6b7280',
+                                '&:hover': { color: '#31664a' },
+                              }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </>
+          )}
         </div>
       </div>
 

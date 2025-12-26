@@ -77,6 +77,7 @@ interface PermissionProfile {
   name: string;
   hierarchy_level: number;
   is_system_default: boolean;
+  is_admin_profile?: boolean;
 }
 
 interface AccessRecord {
@@ -124,12 +125,32 @@ export function ModifyAccessTab({
   // Levelset Admin can see all tiers
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
   
-  // Filter profiles to only show those the user can see
+  // Admin profiles can be edited by tier 0 and tier 1 users
+  const canEditAdminProfiles = isLevelsetAdmin || userHierarchyLevel <= 1;
+  
+  // Split profiles into role-based and admin profiles
+  const roleProfiles = React.useMemo(() => {
+    return profiles.filter(p => !p.is_admin_profile);
+  }, [profiles]);
+  
+  const adminProfiles = React.useMemo(() => {
+    return profiles.filter(p => p.is_admin_profile);
+  }, [profiles]);
+  
+  // Filter role profiles to only show those the user can see
   // Users can only see permission tiers below their own
+  const visibleRoleProfiles = React.useMemo(() => {
+    if (isLevelsetAdmin) return roleProfiles;
+    return roleProfiles.filter(p => p.hierarchy_level > userHierarchyLevel);
+  }, [roleProfiles, userHierarchyLevel, isLevelsetAdmin]);
+  
+  // Combined visible profiles (role profiles + admin profiles if user can see them)
   const visibleProfiles = React.useMemo(() => {
-    if (isLevelsetAdmin) return profiles;
-    return profiles.filter(p => p.hierarchy_level > userHierarchyLevel);
-  }, [profiles, userHierarchyLevel, isLevelsetAdmin]);
+    if (canEditAdminProfiles) {
+      return [...visibleRoleProfiles, ...adminProfiles];
+    }
+    return visibleRoleProfiles;
+  }, [visibleRoleProfiles, adminProfiles, canEditAdminProfiles]);
 
   // Update selected profile when initial profile changes
   React.useEffect(() => {
@@ -149,7 +170,7 @@ export function ModifyAccessTab({
         // Fetch profiles
         const { data: profilesData } = await supabase
           .from('permission_profiles')
-          .select('id, name, hierarchy_level, is_system_default')
+          .select('id, name, hierarchy_level, is_system_default, is_admin_profile')
           .eq('org_id', orgId)
           .order('hierarchy_level', { ascending: true })
           .order('is_system_default', { ascending: false });
@@ -362,7 +383,12 @@ export function ModifyAccessTab({
   };
 
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
-  const canEdit = selectedProfile ? canEditLevel(selectedProfile.hierarchy_level) && !disabled : false;
+  // Admin profiles can be edited by tier 0 and 1 users, role profiles use canEditLevel
+  const canEdit = selectedProfile 
+    ? selectedProfile.is_admin_profile 
+      ? canEditAdminProfiles && !disabled 
+      : canEditLevel(selectedProfile.hierarchy_level) && !disabled 
+    : false;
 
   // Get module order and filter by search
   const moduleKeys = Object.values(PERMISSION_MODULES);
@@ -431,7 +457,7 @@ export function ModifyAccessTab({
                   value={profile.id}
                   sx={{ fontFamily, fontSize: 14 }}
                 >
-                  {profile.name} - Tier {profile.hierarchy_level}
+                  {profile.name}{profile.is_admin_profile ? ' (Admin)' : ` - Tier ${profile.hierarchy_level}`}
                 </MenuItem>
               ))}
             </StyledSelect>

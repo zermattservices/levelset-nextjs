@@ -82,6 +82,7 @@ interface PermissionProfile {
   name: string;
   hierarchy_level: number;
   is_system_default: boolean;
+  is_admin_profile?: boolean;
 }
 
 interface EmployeeLinkedUser {
@@ -128,13 +129,33 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
   const [orgLocations, setOrgLocations] = React.useState<LocationInfo[]>([]);
   const [permissionProfiles, setPermissionProfiles] = React.useState<PermissionProfile[]>([]);
   
+  // Admin profiles can be edited by tier 0 and tier 1 users
+  const canEditAdminProfiles = isLevelsetAdmin || (userHierarchyLevel !== null && userHierarchyLevel <= 1);
+  
+  // Split profiles into role-based and admin profiles
+  const roleProfiles = React.useMemo(() => {
+    return permissionProfiles.filter(p => !p.is_admin_profile);
+  }, [permissionProfiles]);
+  
+  const adminProfiles = React.useMemo(() => {
+    return permissionProfiles.filter(p => p.is_admin_profile);
+  }, [permissionProfiles]);
+  
   // Filter profiles to only show those the user can see
   // Users can only see permission tiers below their own
-  const visibleProfiles = React.useMemo(() => {
-    if (isLevelsetAdmin) return permissionProfiles;
+  const visibleRoleProfiles = React.useMemo(() => {
+    if (isLevelsetAdmin) return roleProfiles;
     if (userHierarchyLevel === null) return [];
-    return permissionProfiles.filter(p => p.hierarchy_level > userHierarchyLevel);
-  }, [permissionProfiles, userHierarchyLevel, isLevelsetAdmin]);
+    return roleProfiles.filter(p => p.hierarchy_level > userHierarchyLevel);
+  }, [roleProfiles, userHierarchyLevel, isLevelsetAdmin]);
+  
+  // Combined visible profiles (role profiles + admin profiles if user can see them)
+  const visibleProfiles = React.useMemo(() => {
+    if (canEditAdminProfiles) {
+      return [...visibleRoleProfiles, ...adminProfiles];
+    }
+    return visibleRoleProfiles;
+  }, [visibleRoleProfiles, adminProfiles, canEditAdminProfiles]);
   
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -267,7 +288,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
       // Fetch permission profiles for this org
       const { data: profilesData, error: profilesError } = await supabase
         .from('permission_profiles')
-        .select('id, name, hierarchy_level, is_system_default')
+        .select('id, name, hierarchy_level, is_system_default, is_admin_profile')
         .eq('org_id', orgId)
         .order('hierarchy_level')
         .order('is_system_default', { ascending: false });
