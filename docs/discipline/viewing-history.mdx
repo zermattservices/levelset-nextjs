@@ -1,100 +1,119 @@
 ---
 title: Viewing Discipline History
-description: How to view infraction history and discipline records
+description: How to review infraction records and discipline history
 ---
 
 # Viewing Discipline History
 
-The Discipline Dashboard provides complete visibility into infraction history and disciplinary actions for your team.
+This guide shows you how to access and interpret discipline records in Levelset.
 
-## Accessing History
+## Viewing Team Overview
 
-### Team Overview
+### Access the Dashboard
 
-1. Navigate to **Discipline** in the main navigation
-2. You'll see a list of all team members with their current status
-3. Each row shows:
-   - Employee name and role
-   - Current point total
-   - Most recent infraction (if any)
-   - Recommended action (if applicable)
+1. Click **Discipline** in the navigation menu
+2. You'll see all employees with their current status
 
-### Individual History
+### What the Overview Shows
 
-Click on any employee to view their complete discipline record:
+| Column | What It Means |
+|--------|---------------|
+| Employee Name | Who the record is for |
+| Role | Their current role |
+| Points | Total accumulated points |
+| Last Infraction | Most recent documented incident |
+| Status | Whether action is recommended |
 
-- All infractions with dates and types
-- Point values for each infraction
-- Notes from each incident
-- Actions that have been taken
+### Finding Employees
 
-## Understanding the Display
+- **Scroll** through the list
+- **Search** by name using the search box
+- **Filter** by status (e.g., only those needing action)
 
-### Point Totals
+## Viewing Individual History
 
-The point total represents the sum of all infraction points. Points may have expiration rules depending on your organization's policy.
+### Open an Employee's Record
 
-### Recommended Actions
+Click on any employee row to expand their full discipline history.
 
-Based on point thresholds, the system displays recommended actions:
+### What You'll See
+
+**Summary Section**
+- Total current points
+- Number of infractions
+- Recommended action (if any)
+
+**Infraction List**
+Each infraction shows:
+- Date of the incident
+- Type of infraction
+- Point value
+- Who submitted it
+- Notes/details
+
+**Actions Taken**
+- Warnings delivered
+- Conversations documented
+- Other actions recorded
+
+## Understanding Point Totals
+
+### How Points Work
+
+- Each infraction type has an assigned point value
+- Points are added when infractions are documented
+- Points may expire after a period (if configured)
+
+### Point Expiration
+
+Some organizations set points to expire over time. For example:
+- Points might expire after 6 months
+- This rewards sustained good behavior
+- Check with your administrator about your organization's policy
+
+### Thresholds
+
+When points reach certain levels, actions are recommended:
 
 | Status | Meaning |
 |--------|---------|
-| No Action | Below first threshold |
-| Verbal Warning | First threshold reached |
-| Written Warning | Second threshold reached |
-| Final Warning | Third threshold reached |
+| No action | Below first threshold |
+| Verbal warning | First threshold reached |
+| Written warning | Second threshold reached |
+| Final warning | Third threshold reached |
 | Termination | Maximum threshold reached |
 
 <Note>
-These thresholds are configured in Organization Settings under Discipline Actions. Your organization may have different action names or thresholds.
+Threshold names and values are configured by your organization. The above are examples.
 </Note>
-
-### Infraction Details
-
-Each infraction record shows:
-
-- **Type** - The category of infraction
-- **Date** - When the incident occurred
-- **Points** - How many points this infraction is worth
-- **Submitted By** - Who documented the infraction
-- **Notes** - Details about the incident
-
-## Filtering and Sorting
-
-### By Status
-
-Filter to see only employees with:
-- Active infractions
-- Pending actions
-- Recent incidents
-
-### By Date
-
-View infractions within a specific time period to identify patterns or trends.
 
 ## Using History for Decisions
 
-### Performance Reviews
+### Before Taking Action
 
-Use discipline history during reviews to:
-- Identify patterns of behavior
-- Recognize improvement
-- Document ongoing issues
+When considering disciplinary action:
 
-### Progressive Discipline
+1. **Review the full history** - Don't just look at recent incidents
+2. **Look for patterns** - Are infractions isolated or repeated?
+3. **Check dates** - How recent are the incidents?
+4. **Read the notes** - Understand the context of each incident
+5. **Verify prior actions** - Were previous warnings given?
 
-Before taking action, review history to:
-- Confirm the appropriate next step
-- Verify prior actions were taken
-- Ensure consistency with other cases
+### During One-on-Ones
 
-### Coaching Opportunities
+Use discipline history in development conversations:
 
-Use history to:
-- Identify common issues across the team
-- Spot employees who need additional support
-- Recognize improvement after coaching
+- Acknowledge improvement if infractions have stopped
+- Discuss patterns if issues are recurring
+- Set clear expectations for the future
+
+### For Performance Reviews
+
+Discipline history provides objective documentation:
+
+- Reference specific incidents with dates
+- Note improvement over time
+- Document ongoing concerns if applicable
 
 ## Privacy and Access
 
@@ -102,33 +121,40 @@ Use history to:
 Discipline records contain sensitive employee information. Only access records for legitimate business purposes.
 </Warning>
 
-Access to discipline history is controlled by role. Not all leadership levels can view full history. Contact your administrator if you need access you don't currently have.
+### Who Can See What
 
-## Exporting Records
+| Role Level | Access |
+|------------|--------|
+| Operators | All employee records |
+| Leadership | Usually all records (depends on settings) |
+| Others | Varies by organization |
 
-If you need discipline records for:
-- HR documentation
-- Legal purposes
-- Performance reviews
+### Confidentiality
 
-Contact your administrator about exporting options.
+- Don't share discipline information with unauthorized people
+- Don't discuss one employee's record with other employees
+- Keep screens private when viewing sensitive data
 
-## Frequently Asked Questions
+## Common Questions
 
 <AccordionGroup>
-  <Accordion title="How long are infractions kept?">
-    Infractions remain in the system permanently for record-keeping. However, your organization may have policies about how long points remain active.
+  <Accordion title="How long are records kept?">
+    Infraction records are kept permanently for documentation purposes. However, points may expire based on your organization's settings, even though the record remains visible.
   </Accordion>
   
   <Accordion title="Can infractions be removed?">
-    Infractions can be corrected or removed by administrators if they were entered in error. Contact your Levelset admin.
+    Infractions entered in error can be corrected by administrators. Legitimate infractions remain in the record permanently.
   </Accordion>
   
-  <Accordion title="Who can see discipline history?">
-    Access is based on your role. Typically Operators and Executives can view all history, while other roles may have limited access.
+  <Accordion title="Who can see that I viewed a record?">
+    Viewing discipline records does not notify the employee or create a visible log to other users.
   </Accordion>
   
-  <Accordion title="Are employees notified when I view their record?">
-    No, viewing history does not generate notifications to the employee.
+  <Accordion title="Can I export discipline records?">
+    Export functionality depends on your organization's setup. Contact your administrator for records needed for HR or legal purposes.
+  </Accordion>
+  
+  <Accordion title="Why does the employee show fewer points than their infractions add up to?">
+    Points may have expired. The point total reflects only active (non-expired) points, while the infraction list shows all documented incidents.
   </Accordion>
 </AccordionGroup>

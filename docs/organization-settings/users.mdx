@@ -1,200 +1,187 @@
 ---
-title: Users
-description: Manage dashboard access for your organization
+title: Users Settings
+description: How to manage who can log into Levelset
 ---
 
-# Users
+# Users Settings
 
-The Users settings page controls who can log into the Levelset dashboard. This is separate from the employee roster - users are people with login credentials.
+Users settings controls who can log into the Levelset dashboard. This is separate from the employee roster—users are people with login credentials.
 
-## Accessing Users
+## Accessing Users Settings
 
 1. Go to **Organization Settings**
-2. Select **Users** in the **Users and Security** section
+2. Click **Users** under Users and Security
 
-![Users settings page showing Leadership Team and Administrative Users sections](/images/screenshots/org-settings-users.png)
+## Users vs Employees
 
-## Understanding Users vs Employees
+It's important to understand the difference:
 
 | Concept | Description |
 |---------|-------------|
-| **Employee** | Someone on your roster, may or may not have login access |
-| **User** | Someone with a login to the Levelset dashboard |
+| **Employee** | Someone on your roster. May or may not have login access. |
+| **User** | Someone with login credentials for the dashboard. |
 
-Most employees don't need dashboard access. Typically, only leadership roles need to log in.
+Most employees don't need dashboard access. Typically only leadership and management log into Levelset.
 
-## User Sections
-
-The Users page has two sections:
+## The Two User Sections
 
 ### Leadership Team
 
-Users who are linked to employee records. These are team members who need dashboard access:
+Users who are linked to an employee record:
 
-- Connected to an employee in the roster
-- Role is pulled from their employee record
-- Typically leadership positions
+- They're on your roster AND have login access
+- Their role comes from their employee record
+- Use this for your managers, supervisors, and leaders
 
 ### Administrative Users
 
-Users who are **not** linked to an employee record:
+Users who are NOT linked to an employee:
 
-- Not on the employee roster
-- Have the "Administrator" role
-- Useful for corporate staff, consultants, or others who need access
+- They're not on the employee roster
+- They have the "Administrator" role
+- Use this for corporate staff, consultants, or others who need access but aren't location employees
 
-## Adding a User
+## How to Add a User
 
-### Adding Leadership Team Member
+### Adding a Leadership User
 
 <Steps>
   <Step title="Click Add User">
     In the Leadership Team section, click **Add User**.
   </Step>
   
-  <Step title="Select Employee">
-    Choose the employee from the dropdown. Only employees with leadership roles (typically level 0-2) appear.
+  <Step title="Select the Employee">
+    Choose from the dropdown. Only employees with leadership roles appear.
   </Step>
   
-  <Step title="Enter Email">
-    Provide the email address they'll use to log in. This can be pre-filled if the employee has an email on file.
+  <Step title="Enter Their Email">
+    Provide the email they'll use to log in. This may be pre-filled if they have an email on file.
   </Step>
   
-  <Step title="Create">
+  <Step title="Create the User">
     Click **Create User**. A temporary password will be generated.
   </Step>
   
-  <Step title="Share Credentials">
-    Copy the email and temporary password to share with the new user. They'll use these to log in for the first time.
+  <Step title="Share the Credentials">
+    **Important:** Copy the email and temporary password immediately. Share them securely with the new user.
   </Step>
 </Steps>
 
-### Adding Administrative User
+### Adding an Administrative User
 
 <Steps>
   <Step title="Click Add Administrator">
     In the Administrative Users section, click **Add Administrator**.
   </Step>
   
-  <Step title="Enter Details">
-    Provide:
+  <Step title="Enter Their Information">
     - First name
     - Last name
     - Email address
   </Step>
   
-  <Step title="Create">
-    Click **Create User**. A temporary password will be generated.
-  </Step>
-  
-  <Step title="Share Credentials">
-    Copy and share the login credentials with the new user.
+  <Step title="Create and Share">
+    Click Create, then copy and share the login credentials.
   </Step>
 </Steps>
 
-## Managing Existing Users
+## Managing Users
 
-### Editing Email
+### Change Someone's Email
 
-1. Click the edit icon (pencil) next to the user's email
+1. Click the **edit icon** (pencil) next to their email
 2. Enter the new email address
 3. Click the checkmark to save
 
 <Note>
-Changing a user's email changes their login credential. Make sure they know the new email to use when signing in.
+Changing the email changes their login credential. Make sure they know to use the new email.
 </Note>
 
-### Removing Access
+### Remove User Access
 
-1. Click the delete icon (trash) next to the user
+1. Click the **delete icon** (trash) next to the user
 2. Confirm the removal
 
-This removes their ability to log in but does not affect:
-- Their employee record (if linked)
-- Historical data they created
-- Ratings they submitted
-
-## User Roles
-
-### Leadership Team Roles
-
-Role is determined by the linked employee's role in the roster:
-
-| Employee Role | User Access |
-|--------------|-------------|
-| Operator | Full admin access |
-| Executive | Full access, limited settings |
-| Director | Standard leadership access |
-
-### Administrative Users
-
-All administrative users have the "Administrator" role:
-- Full dashboard access
-- Can view all data
-- Limited settings access (varies by implementation)
-
-## Google Sign-In
-
-Users with Google or Google Workspace email addresses can also sign in using the **Sign in with Google** button on the login page. This is optional - they can still use email/password.
-
-## Operator Email Protection
-
-The Operator's email can only be changed by:
-- The Operator themselves
-- A Levelset Admin
-
-This prevents accidental lockout of the primary account.
+This removes their ability to log in but does NOT:
+- Delete their employee record (if they have one)
+- Remove historical data they created
+- Delete ratings or infractions they submitted
 
 ## Temporary Passwords
 
-When a user is created:
+When you create a user:
 
 1. A random temporary password is generated
-2. It's shown once in the modal - copy it immediately
-3. Share securely with the new user
-4. They should change it after first login (when available)
+2. It displays **only once** in the modal
+3. You must copy it before closing
 
 <Warning>
-Temporary passwords are shown only once. If lost, contact your administrator to reset.
+If you close the modal without copying the password, you'll need to contact an administrator to reset it.
 </Warning>
+
+### Sharing Credentials Securely
+
+- Don't send passwords in plain text email
+- Use a secure messaging app
+- Tell them verbally if possible
+- Have them change it after first login (when available)
+
+## Google Sign-In
+
+Users with Google or Google Workspace accounts can sign in with the **Sign in with Google** button. This is:
+
+- More secure (no password to remember)
+- Faster for users
+- Optional (they can still use email/password)
+
+The user's Google email must match the email in their Levelset user account.
+
+## Who Can Manage Users
+
+- **Operators** can add/remove any users
+- **Some leadership roles** may have limited user management
+- **Levelset administrators** have full access
+
+The Operator's email can only be changed by themselves or a Levelset admin (to prevent lockouts).
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Employee doesn't appear in the dropdown">
+    Only employees with leadership roles (typically Level 0-2) appear. Check that:
+    - The person has a leadership role in the roster
+    - They don't already have a user account
+  </Accordion>
+  
+  <Accordion title="User can't log in">
+    Verify:
+    - They're using the exact email from their user account
+    - They're entering the password correctly
+    - Their user account exists in the Users list
+  </Accordion>
+  
+  <Accordion title="Need to reset a password">
+    Password reset functionality is limited. Contact a Levelset administrator for help with password issues.
+  </Accordion>
+  
+  <Accordion title="Google Sign-In isn't working">
+    The user's Google email must exactly match the email in their Levelset user account. Check for typos or different email addresses.
+  </Accordion>
+</AccordionGroup>
 
 ## Best Practices
 
 <CardGroup cols={2}>
   <Card title="Minimal Access" icon="lock">
-    Only create users for people who truly need dashboard access.
+    Only create users for people who truly need dashboard access
   </Card>
-  
+  <Card title="Regular Reviews" icon="magnifying-glass">
+    Periodically check the user list and remove people who no longer need access
+  </Card>
   <Card title="Secure Sharing" icon="shield">
-    Share credentials securely, not via unencrypted email or chat.
+    Share credentials securely, not via unencrypted email
   </Card>
-  
-  <Card title="Regular Review" icon="magnifying-glass">
-    Periodically review user list and remove former employees.
-  </Card>
-  
-  <Card title="Use Google SSO" icon="google">
-    Encourage Google sign-in for better security (no password to remember).
+  <Card title="Use Google SSO" icon="key">
+    Encourage Google sign-in for better security
   </Card>
 </CardGroup>
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="User can't log in">
-    Check that:
-    - They're using the correct email
-    - They're entering the password correctly
-    - Their user account exists in this list
-  </Accordion>
-  
-  <Accordion title="Employee not appearing in dropdown">
-    Only employees with eligible roles appear. Check that:
-    - The employee has a leadership role (level 0-2)
-    - They don't already have a user account
-  </Accordion>
-  
-  <Accordion title="Need to reset a password">
-    Password reset functionality is limited. Contact a Levelset admin to assist with password issues.
-  </Accordion>
-</AccordionGroup>

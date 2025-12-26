@@ -1,138 +1,123 @@
 ---
 title: Organization Settings Overview
-description: Configure Levelset for your organization
+description: How to configure Levelset for your organization
 ---
 
 # Organization Settings
 
-Organization Settings is where you configure how Levelset works for your organization. Changes here apply to all locations within your organization.
+Organization Settings is where you configure how Levelset works. Changes here apply to all locations in your organization.
 
-## Accessing Settings
+## How to Access Settings
 
-1. Click the profile icon in the top-right corner of the navigation
-2. Select **Organization Settings** from the dropdown
-
-![Organization Settings page showing sidebar navigation and Positional Excellence configuration](/images/screenshots/org-settings.png)
+1. Click your **profile icon** in the top-right corner
+2. Select **Organization Settings**
 
 ## Settings Sections
 
-Organization Settings is organized into groups:
+The settings page has a sidebar with different sections:
 
 ### Modules
 
 Configure the main features of Levelset:
 
-<CardGroup cols={2}>
-  <Card title="Positional Excellence" href="/organization-settings/positions" icon="star">
-    Set up positions, rating criteria, role mappings, and rating scale
-  </Card>
-  
-  <Card title="Discipline" icon="scale-balanced">
-    Configure infractions, actions, notifications, and access
-  </Card>
-  
-  <Card title="Pathway" icon="road">
-    Training pathway configuration (coming soon)
-  </Card>
-  
-  <Card title="Evaluations" icon="clipboard-check">
-    Performance evaluation settings (coming soon)
-  </Card>
-</CardGroup>
+| Section | What You Configure |
+|---------|-------------------|
+| **Positional Excellence** | Positions, rating criteria, role mapping, rating scale |
+| **Discipline** | Infraction types, actions, access, notifications |
+| **Roster** | Pay settings (coming soon) |
+| **Pathway** | Training pathways (coming soon) |
+| **Evaluations** | Performance evaluations (coming soon) |
 
 ### Users and Security
 
-Manage who can access Levelset:
+Control who can access Levelset:
 
-- **Users** - Add and manage dashboard users
-- **Roles** - Define and customize the role hierarchy
-- **Permissions** - Configure role-based access (coming soon)
+| Section | What You Configure |
+|---------|-------------------|
+| **Users** | Who can log into the dashboard |
+| **Roles** | The role hierarchy and colors |
+| **Permissions** | Role-based access controls |
 
 ### Mobile App
 
-Configure the mobile PWA experience:
+Configure mobile access:
 
-- **Access** - QR codes and links for mobile access
-- **Configuration** - Mobile app settings (coming soon)
+| Section | What You Configure |
+|---------|-------------------|
+| **Access** | QR codes and links for mobile app |
+| **Configuration** | Mobile app settings (coming soon) |
 
-### General
+### Location & Organization
 
-Organization and location details:
+General information:
 
-- **Location Details** - Logo and location-specific information
-- **Organization Details** - Organization-wide settings
+| Section | What You Configure |
+|---------|-------------------|
+| **Location Details** | Location-specific settings and images |
+| **Organization Details** | Organization-wide settings |
 
 ## Who Can Access Settings
 
-Organization Settings requires appropriate permissions:
+Access depends on your role:
 
-| Setting Area | Minimum Role |
-|--------------|--------------|
-| Positional Excellence | Executive/Director |
-| Discipline | Executive/Director |
-| Users | Operator |
-| Roles | Operator |
-| General | Executive/Director |
+| Role Level | Access |
+|------------|--------|
+| Operator | Full access to all settings |
+| Leadership | Access to most settings (except Users in some cases) |
+| Others | Typically no access to settings |
 
 <Note>
-Levelset Admins have full access to all settings regardless of role.
+Levelset administrators always have full access regardless of role.
 </Note>
 
-## Making Changes
+## How Changes Work
 
-Most settings auto-save as you make changes:
+### Auto-Save
 
+Most settings save automatically:
 - Text fields save when you click away
-- Toggles save immediately
-- Dropdowns save when you select an option
+- Dropdowns save immediately when you select
+- Toggles save on click
 
-Some settings require explicit save actions - look for **Save Changes** buttons.
+Some sections have a **Save Changes** button for explicit saving.
 
-## Impact of Changes
+### What Changes Affect
+
+| Change Type | Effect |
+|-------------|--------|
+| Position changes | Affects what can be rated going forward |
+| Role changes | Affects permissions immediately |
+| User changes | Affects login access immediately |
+| Criteria changes | Affects future ratings (not historical) |
+| Threshold changes | Affects how ratings are categorized |
+
+## Before Making Changes
 
 <Warning>
-Changes to Organization Settings affect all locations and users in your organization. Make changes carefully and communicate with your team.
+Changes affect all users and locations in your organization. Make changes carefully.
 </Warning>
 
-### Immediate Effects
-
-These changes take effect right away:
-- Role hierarchy changes
-- User additions/removals
-- Rating criteria updates
-
-### Gradual Effects
-
-These changes affect new data but not historical data:
-- Position additions
-- Infraction type changes
-- Threshold adjustments
-
-## Best Practices
-
-<Steps>
-  <Step title="Plan Changes">
-    Before making significant changes, discuss with your leadership team.
-  </Step>
-  
-  <Step title="Test First">
-    If possible, test changes with a small group before rolling out organization-wide.
-  </Step>
-  
-  <Step title="Communicate">
-    Let your team know about changes that affect how they use Levelset.
-  </Step>
-  
-  <Step title="Document">
-    Keep notes on what you changed and why for future reference.
-  </Step>
-</Steps>
+Best practices:
+1. **Understand the impact** - Know what the change will affect
+2. **Communicate** - Tell your team about changes that affect them
+3. **Test if possible** - Try changes with a small group first
+4. **Document** - Keep notes on what you changed and why
 
 ## Detailed Guides
 
-Explore specific settings areas:
+Learn about specific settings:
 
-- [Positions](/organization-settings/positions) - Set up positions and descriptions
-- [Rating Criteria](/organization-settings/rating-criteria) - Define the Big 5 for each position
-- [Roles](/organization-settings/roles) - Customize the role hierarchy
-- [Users](/organization-settings/users) - Manage dashboard access
+<CardGroup cols={2}>
+  <Card title="Positions" icon="briefcase" href="/organization-settings/positions">
+    Set up and manage positions
+  </Card>
+  <Card title="Rating Criteria" icon="list-ol" href="/organization-settings/rating-criteria">
+    Define the criteria for each position
+  </Card>
+  <Card title="Roles" icon="users" href="/organization-settings/roles">
+    Configure the role hierarchy
+  </Card>
+  <Card title="Users" icon="user-plus" href="/organization-settings/users">
+    Manage dashboard access
+  </Card>
+</CardGroup>

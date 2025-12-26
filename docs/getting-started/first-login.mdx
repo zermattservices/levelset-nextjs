@@ -1,111 +1,117 @@
 ---
 title: First Login
-description: Set up your Levelset account and explore the dashboard
+description: How to log in to Levelset for the first time
 ---
 
 # First Login
 
-This guide walks you through your first login to Levelset and helps you get oriented with the platform.
+This guide walks you through logging in to Levelset and getting oriented.
 
-## Accessing Levelset
+## How to Log In
 
-### Web Dashboard
+### Step 1: Go to Levelset
 
-Access the Levelset dashboard at:
-- **Production:** [app.levelset.io](https://app.levelset.io)
-- **Preview/Testing:** [preview.levelset.io](https://preview.levelset.io)
+Open your web browser and go to **[app.levelset.io](https://app.levelset.io)**
 
-### Mobile App (PWA)
+### Step 2: Enter Your Credentials
 
-Leaders can also access certain features through the mobile Progressive Web App. Ask your administrator for the QR code or direct link to install the app on your device.
+You have two options:
 
-## Signing In
-
-### Email and Password
-
-1. Navigate to the login page
-2. Enter your email address
-3. Enter your temporary password (provided by your administrator)
-4. Click **Sign In**
-
-![Levelset login page showing email and password fields with Sign In button](/images/screenshots/login-page.png)
+<Tabs>
+  <Tab title="Email & Password">
+    1. Enter your email address
+    2. Enter your password (your administrator should have provided this)
+    3. Click **Sign In**
+  </Tab>
+  
+  <Tab title="Google Sign-In">
+    1. Click **Sign in with Google**
+    2. Select your Google account
+    3. You'll be logged in automatically
+  </Tab>
+</Tabs>
 
 <Note>
-  If you received a temporary password, you'll want to change it after your first login for security.
+If you don't have login credentials, contact your administrator to have an account created for you.
 </Note>
 
-### Google Sign-In
-
-If your email is a Google or Google Workspace account, you can also sign in using the **Sign in with Google** button for a faster login experience.
-
-## Exploring the Dashboard
-
-After signing in, you'll land on the home dashboard. Here's what you'll see:
-
-### Home Page
-
-The home page provides an overview of key metrics:
-
-- **360 Overview** - High-level performance indicators
-- **Operational Excellence** - Metrics for guest experience areas
-
-![Levelset home dashboard showing 360 Overview with Positional Excellence and Discipline Points](/images/screenshots/dashboard-home.png)
-
-### Selecting a Location
+### Step 3: Select Your Location
 
 If you have access to multiple locations:
 
-1. Look for the location dropdown in the top navigation
-2. Click to see available locations
-3. Select the location you want to view
+1. A modal will appear asking you to select a location
+2. Choose the location you want to work with
+3. Click to confirm
 
-Your selection will persist as you navigate through the platform.
+You can change locations later using the dropdown in the navigation bar.
 
-## Key Areas to Explore
+## What You'll See After Logging In
 
-<Steps>
-  <Step title="Positional Excellence">
-    View team member ratings across different positions. See the Overview tab for a summary, or dive into Employee Ratings for detailed breakdowns.
-  </Step>
+### Home Page
+
+The home page shows an overview of your team's performance:
+
+- **Positional Excellence metrics** - Average ratings and trends
+- **Discipline metrics** - Current points and recommended actions
+
+Click on any metric card to go to that section for more details.
+
+### Navigation
+
+Use the menu at the top to access different sections:
+
+| Menu Item | What It Shows |
+|-----------|---------------|
+| **Home** | Performance overview dashboard |
+| **Positional Excellence** | Team ratings by position |
+| **Discipline** | Infraction records and actions |
+| **Roster** | Employee list and details |
+
+### Your Profile
+
+Click your profile icon (top right) to:
+
+- View your name and role
+- Access **Organization Settings** (if you have permission)
+- **Log out** when you're done
+
+## Troubleshooting Login Issues
+
+<AccordionGroup>
+  <Accordion title="I forgot my password">
+    Contact your organization's administrator. They can reset your password or create a new one.
+  </Accordion>
   
-  <Step title="Discipline Dashboard">
-    If enabled for your organization, view and manage discipline records. Track infractions and see recommended actions.
-  </Step>
+  <Accordion title="My email isn't recognized">
+    Make sure you're using the exact email address that was set up for your account. Check with your administrator if you're unsure.
+  </Accordion>
   
-  <Step title="Roster">
-    View and manage your team roster. Update employee information, roles, and status.
-  </Step>
+  <Accordion title="Google Sign-In isn't working">
+    - Make sure you're selecting the correct Google account
+    - Your Google account email must match the email in your Levelset user account
+    - Try signing in with email/password instead
+  </Accordion>
   
-  <Step title="Organization Settings">
-    Configure positions, rating criteria, and other organizational settings (requires appropriate permissions).
-  </Step>
-</Steps>
+  <Accordion title="I can log in but can't see any data">
+    You may need to select a location. Look for a modal or dropdown prompting you to choose a location.
+  </Accordion>
+</AccordionGroup>
 
-## Mobile Features
+## What to Do Next
 
-The mobile PWA provides quick access to commonly-used features for leaders:
+Now that you're logged in, explore the sections you'll use most:
 
-- **Submit Ratings** - Rate team members on positional criteria
-- **Document Infractions** - Record discipline incidents
-- **View PEA Classic** - See the classic positional excellence view
-
-<Tip>
-  Add the PWA to your home screen for quick access. Look for the "Add to Home Screen" option in your mobile browser.
-</Tip>
-
-## Need Help?
-
-If you're having trouble logging in or navigating the platform:
-
-1. Check that you're using the correct email address
-2. Try the "Forgot Password" link if available
-3. Contact your organization's Levelset administrator
-4. Reach out to [support@levelset.io](mailto:support@levelset.io)
-
-## Next Steps
-
-Now that you're logged in, explore the specific feature guides:
-
-- [Positional Excellence Overview](/positional-excellence/overview)
-- [Discipline Dashboard](/discipline/overview)
-- [Roster Management](/roster-management/overview)
+<CardGroup cols={2}>
+  <Card title="View Team Ratings" icon="star" href="/positional-excellence/overview">
+    See how your team is performing across positions
+  </Card>
+  <Card title="Check Discipline" icon="clipboard-list" href="/discipline/overview">
+    Review infractions and recommended actions
+  </Card>
+  <Card title="Manage Roster" icon="users" href="/roster-management/overview">
+    View and update employee information
+  </Card>
+  <Card title="Explore Settings" icon="gear" href="/organization-settings/overview">
+    Configure positions, roles, and more
+  </Card>
+</CardGroup>

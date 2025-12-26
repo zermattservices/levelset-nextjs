@@ -1,95 +1,113 @@
 ---
 title: Positional Excellence Overview
-description: Understand how positional ratings work in Levelset
+description: How to track team performance with positional ratings
 ---
 
 # Positional Excellence
 
-Positional Excellence is at the heart of Levelset. It provides a structured way to rate team members on their performance in specific positions, track progress over time, and identify development opportunities.
+Positional Excellence lets you rate team members on how well they perform in specific positions. Use it to identify strengths, track progress, and guide development.
 
 ## How It Works
 
 ### Positions
 
-Each location has a set of positions that team members can work (e.g., iPOS, Host, Breading, Fries). Positions are typically divided into:
+A position is a specific job someone does, like:
 
-- **FOH (Front of House)** - Customer-facing roles like iPOS, Host, Drinks, Bagging
-- **BOH (Back of House)** - Kitchen roles like Primary, Secondary, Machines, Breading, Fries
+- **Front of House (FOH)**: Register, Drive-Thru, Dining Room, Drinks
+- **Back of House (BOH)**: Grill, Prep, Fries, Expeditor
+
+Your organization defines which positions exist and what they're called.
 
 ### Rating Criteria
 
-Each position has 5 rating criteria (sometimes called "Big 5") that define what excellence looks like in that role. For example, an iPOS position might be rated on:
+Each position has **5 criteria** that define what good performance looks like. For example, a Register position might be rated on:
 
 1. Speed
 2. Accuracy
 3. Guest Interaction
-4. Order Knowledge
+4. Menu Knowledge
 5. Payment Handling
-
-Your organization can customize these criteria in Organization Settings.
 
 ### Rating Scale
 
-Team members are rated on a 1-3 scale for each criterion:
+When you rate someone, you score each criterion from 1-3:
 
-| Rating | Label | Meaning |
-|--------|-------|---------|
-| 1 | Not Yet | Still developing in this area |
-| 2 | On the Rise | Making progress, approaching proficiency |
-| 3 | Crushing It | Consistently excellent performance |
+| Score | Label | What It Means |
+|-------|-------|---------------|
+| **1** | Not Yet | Still learning, needs improvement |
+| **2** | On the Rise | Making progress, getting better |
+| **3** | Crushing It | Consistently excellent |
 
-The thresholds for these labels can be customized by your organization.
+## Viewing Ratings
 
-## Dashboard Views
+### How to Access
 
-The Positional Excellence dashboard offers three main views:
+1. Click **Positional Excellence** in the navigation menu
+2. The dashboard shows all employees with their ratings
 
-![Positional Excellence Dashboard showing ratings overview with FOH/BOH toggle and employee ratings](/images/screenshots/pea-overview.png)
+### What You'll See
 
-<Tabs>
-  <Tab title="Overview">
-    Shows all employees with their average ratings across positions. 
-    
-    - See at-a-glance performance across your team
-    - Expand rows to see the last 4 individual ratings
-    - Toggle between FOH and BOH views
-  </Tab>
-  
-  <Tab title="Employee Ratings">
-    Provides detailed ratings for a specific position.
-    
-    - Select a position from the dropdown
-    - See the Big 5 breakdown for each team member
-    - Expand rows to see rating history
-    - Identify top performers and development needs
-  </Tab>
-  
-  <Tab title="Leadership View">
-    Shows ratings submitted by each leader.
-    
-    - Track rating activity across leadership
-    - See patterns in how leaders rate
-    - Expand to see individual rating entries
-  </Tab>
-</Tabs>
+The main table shows:
 
-## Rating Averages
+- **Employee name and role**
+- **Average rating** across all criteria
+- **Color indicator** (red/yellow/green based on performance)
 
-Levelset calculates rolling averages based on the last 4 ratings for each position. This provides a balanced view that:
+Click the arrow next to any employee to expand and see their detailed ratings.
 
-- Reflects recent performance
-- Smooths out one-off variations
-- Shows meaningful trends over time
+### Switching Views
 
-## Color Coding
+Use the tabs at the top to change what you see:
 
-Ratings are color-coded for quick visual reference:
+| Tab | What It Shows |
+|-----|---------------|
+| **Overview** | All employees with summary ratings |
+| **Employee Ratings** | Detailed breakdown by position |
+| **Leadership View** | Ratings organized by who submitted them |
 
-- 🟢 **Green** - Crushing It (meeting threshold)
-- 🟡 **Yellow** - On the Rise (approaching threshold)
-- 🔴 **Red** - Not Yet (below threshold)
+### Filtering
+
+- Use the **FOH/BOH toggle** to show only front or back of house positions
+- Use the **search box** to find specific employees
+- Use **position dropdowns** to focus on one position
+
+## Understanding the Colors
+
+Ratings are color-coded to make it easy to spot performance levels at a glance:
+
+- 🟢 **Green** - Crushing It (high performer)
+- 🟡 **Yellow** - On the Rise (developing)
+- 🔴 **Red** - Not Yet (needs attention)
+
+The specific score thresholds for each color are configured in your organization settings.
+
+## Rolling Averages
+
+Levelset calculates averages based on the **last 4 ratings** for each position. This means:
+
+- Recent performance is weighted more heavily
+- One bad day doesn't ruin someone's score
+- Improvement shows up quickly in the numbers
+
+## Classic View
+
+For a spreadsheet-style view of ratings:
+
+1. Click **Go to Classic View** on the Positional Excellence page
+2. Or navigate directly to `/positional-excellence-classic`
+
+The classic view is great for:
+- Printing for meetings
+- Displaying on a screen
+- Quick visual comparison across the team
 
 ## Next Steps
 
-- [Submit Ratings](/positional-excellence/submitting-ratings) - Learn how to rate team members
-- [PEA Classic View](/positional-excellence/pea-classic) - Access the classic positional excellence view
+<CardGroup cols={2}>
+  <Card title="Submit Ratings" icon="pen" href="/positional-excellence/submitting-ratings">
+    Learn how to rate team members
+  </Card>
+  <Card title="Classic View" icon="table" href="/positional-excellence/pea-classic">
+    Use the spreadsheet-style view
+  </Card>
+</CardGroup>

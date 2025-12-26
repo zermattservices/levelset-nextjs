@@ -1,96 +1,111 @@
 ---
-title: PEA Classic View
-description: Access the classic Positional Excellence Assessment view
+title: Classic View
+description: How to use the spreadsheet-style ratings view
 ---
 
-# PEA Classic View
+# Classic View
 
-The PEA Classic view provides a traditional spreadsheet-style view of positional ratings, similar to the original Google Sheets implementation.
+The Classic View shows positional ratings in a spreadsheet-style format. It's great for printing, displaying on screens, and quick visual comparisons.
 
-## Accessing PEA Classic
+## How to Access Classic View
 
-### From the Dashboard
+**Option 1: From the Dashboard**
+1. Go to **Positional Excellence**
+2. Click **Go to Classic View**
 
-Navigate to **Positional Excellence** and look for the "PEA Classic" option or link.
-
-### From the Mobile PWA
-
-The mobile app includes a link to view the PEA Classic page for your location.
-
-### Direct URL
-
-Access directly at `/positional-excellence-classic` on your Levelset domain.
+**Option 2: Direct URL**
+Navigate to `/positional-excellence-classic` in your browser.
 
 ## What You'll See
 
-The PEA Classic view displays:
+The Classic View displays a grid with:
 
-![PEA Classic view showing spreadsheet-style grid with employee names, positions, and color-coded ratings](/images/screenshots/pea-classic.png)
+- **Rows** = Team members
+- **Columns** = The 5 rating criteria for the selected position
+- **Cells** = Average rating for each criterion (color-coded)
 
-### Rating Grid
+### Color Coding
 
-A spreadsheet-style grid showing:
+Each cell is colored based on the rating:
 
-- **Rows** - Each team member
-- **Columns** - Rating criteria for the selected position
-- **Cells** - Individual ratings with color coding
+| Color | Meaning | Score Range |
+|-------|---------|-------------|
+| 🟢 Green | Crushing It | High scores |
+| 🟡 Yellow | On the Rise | Middle scores |
+| 🔴 Red | Not Yet | Low scores |
 
-### Color Scale
+The exact thresholds are configured in your organization's Rating Scale settings.
 
-Ratings are displayed with a color gradient based on your organization's thresholds:
+## Using the Controls
 
-| Color | Rating Range | Status |
-|-------|-------------|--------|
-| Green | Above upper threshold | Crushing It |
-| Yellow | Between thresholds | On the Rise |
-| Red | Below lower threshold | Not Yet |
+### Select a Position
 
-The specific threshold values are configured in Organization Settings under Rating Scale.
+Use the dropdown at the top to choose which position to view. The grid updates to show ratings for that position.
 
-## Features
+### Toggle FOH/BOH
 
-<CardGroup cols={2}>
-  <Card title="Position Selector" icon="list">
-    Switch between different positions to see ratings for each role.
-  </Card>
-  
-  <Card title="FOH/BOH Toggle" icon="arrows-left-right">
-    Filter to show only Front of House or Back of House positions.
-  </Card>
-  
-  <Card title="Print/Export" icon="print">
-    Print the view or export for sharing with your team.
-  </Card>
-  
-  <Card title="Real-time Data" icon="rotate">
-    Data is pulled directly from the database, always showing current ratings.
-  </Card>
-</CardGroup>
+Use the toggle to switch between:
+- **FOH** - Front of House positions only
+- **BOH** - Back of House positions only
 
-## Use Cases
+### View Options
 
-The PEA Classic view is helpful for:
+- **Expand/collapse rows** to see more or less detail
+- **Scroll horizontally** if there are many criteria columns
 
-- **Team Meetings** - Display on a screen during shift meetings
-- **Performance Reviews** - Print for one-on-one discussions
-- **Training Planning** - Identify areas where the team needs development
-- **Recognition** - Spot top performers across positions
+## Best Uses for Classic View
 
-## Differences from Dashboard
+### Team Meetings
 
-| Feature | PEA Classic | Dashboard |
-|---------|-------------|-----------|
-| Layout | Spreadsheet grid | Card/table based |
-| Detail Level | Single position at a time | Multiple views available |
-| Interactivity | View only | Expandable rows, filtering |
-| Best For | Printing, display | Analysis, navigation |
+1. Display the Classic View on a screen
+2. Walk through team performance by position
+3. Recognize top performers
+4. Identify areas for group training
 
-## Tips
+### One-on-One Reviews
+
+1. Open the Classic View filtered to one person
+2. Print or share the screen
+3. Discuss specific criteria scores
+4. Set development goals
+
+### Training Planning
+
+1. Look for columns (criteria) with lots of red/yellow
+2. These indicate skills the team needs to develop
+3. Plan training sessions around common gaps
+
+### Recognition
+
+1. Find employees with mostly green scores
+2. Recognize their excellence publicly
+3. Ask them to help train others
+
+## Classic View vs. Dashboard
+
+| Feature | Classic View | Main Dashboard |
+|---------|-------------|----------------|
+| **Best for** | Printing, display | Analysis, navigation |
+| **Layout** | Spreadsheet grid | Tables with expandable rows |
+| **Interaction** | View only | Click to expand, filter, sort |
+| **Detail level** | One position at a time | Multiple views available |
 
 <Tip>
-Use PEA Classic for quick visual overviews and printing. Use the main dashboard for detailed analysis and tracking history.
+Use Classic View for quick visual overviews and printing. Use the main dashboard when you need to dig into details or track history.
 </Tip>
 
-<Note>
-The rating scale thresholds in PEA Classic are pulled from your organization's Rating Scale settings. If the colors don't match what you expect, check the threshold configuration.
-</Note>
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Colors don't match what I expected">
+    The color thresholds are configured in Organization Settings → Positional Excellence → Rating Scale. Check those settings or contact your administrator.
+  </Accordion>
+  
+  <Accordion title="Some employees are missing">
+    The Classic View shows employees who have been rated in the selected position. If someone hasn't been rated yet, they won't appear.
+  </Accordion>
+  
+  <Accordion title="Data looks outdated">
+    Refresh the page to get the latest data. Ratings update in real-time, but the view may cache briefly.
+  </Accordion>
+</AccordionGroup>

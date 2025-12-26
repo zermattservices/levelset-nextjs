@@ -1,90 +1,109 @@
 ---
 title: Roster Management Overview
-description: Manage your team roster in Levelset
+description: How to manage your team roster in Levelset
 ---
 
 # Roster Management
 
-The Roster page is your central hub for managing employee information, roles, and status across your organization.
+The Roster page is where you manage employee information, roles, and status. Keep your roster up to date so ratings and other features work correctly.
 
 ## Accessing the Roster
 
-Navigate to **Roster** in the main navigation to view and manage your team.
+Click **Roster** in the navigation menu to view your team.
 
 ## What You'll See
 
-![Roster Management page showing employee table with roles, FOH/BOH assignments, and availability](/images/screenshots/roster.png)
+The roster displays all employees in a table with key information:
 
-### Employee Table
-
-The roster displays all employees in a sortable, filterable table:
-
-| Column | Description |
-|--------|-------------|
+| Column | What It Shows |
+|--------|---------------|
 | Name | Employee's full name |
-| Role | Current role (Team Member, Trainer, Team Lead, etc.) |
-| FOH/BOH | Front of House or Back of House assignment |
+| Role | Their position in the organization hierarchy |
+| FOH/BOH | Whether they work Front of House, Back of House, or both |
 | Hire Date | When they started |
-| Status | Active, inactive, or other status |
-| Availability | Full-time, part-time, limited |
+| Status | Active or inactive |
 
-### Tabs
+## Key Actions
 
-The roster is organized into tabs:
+### From the Roster Page
 
-- **Active** - Currently employed team members
-- **Pending Evaluations** - Employees awaiting certification or review (if enabled)
-- **PIP** - Employees on performance improvement plans (if enabled)
+You can:
+- **View** all employees at your location
+- **Search** for specific people
+- **Filter** by FOH/BOH
+- **Edit** employee details
+- **Change roles** for employees below your level
 
-<Note>
-Some tabs may not be visible depending on your organization's feature configuration.
-</Note>
+### Quick Edits
 
-## Key Features
+Click on an employee row to:
+- Update their information
+- Change their role
+- Modify their FOH/BOH assignment
+- View their details
 
-<CardGroup cols={2}>
-  <Card title="Role Management" icon="user-tag">
-    Assign and update employee roles with appropriate permissions.
-  </Card>
-  
-  <Card title="FOH/BOH Assignment" icon="arrows-left-right">
-    Track which area each employee is assigned to.
-  </Card>
-  
-  <Card title="Status Tracking" icon="circle-check">
-    Manage active/inactive status and availability.
-  </Card>
-  
-  <Card title="Quick Actions" icon="bolt">
-    Edit employee details, update roles, and more directly from the table.
-  </Card>
-</CardGroup>
+## Understanding the Table
 
-## Understanding Roles
+### Sorting
 
-Roles in Levelset define permissions and hierarchy:
+Click column headers to sort by:
+- Name (alphabetical)
+- Role (by hierarchy level)
+- Hire date (newest or oldest first)
 
-| Role | Typical Responsibilities |
-|------|-------------------------|
-| Operator | Business owner/operator with full access |
-| Executive | Senior leadership |
-| Director | Department or area leadership |
-| Team Lead | Shift or team supervision |
-| Trainer | Training responsibilities |
-| Team Member | Standard team member |
-| New Hire | Recently hired, in training |
+### Role Badges
 
-Your organization can customize role names and hierarchy in Organization Settings.
+Each employee shows their role with a colored badge. Colors are assigned by your organization to make roles easy to identify at a glance.
 
-## Role Colors
+### FOH/BOH Indicators
 
-Each role has an assigned color that appears throughout the platform:
+- **FOH** = Front of House (customer-facing positions)
+- **BOH** = Back of House (kitchen/production positions)
+- **Both** = Works in both areas
 
-- Color-coded badges make it easy to identify roles at a glance
-- Colors are configured in Organization Settings under Roles
-- Consistent coloring across all dashboards and views
+This assignment affects which positions they appear in for ratings.
+
+## Who Can Manage the Roster
+
+Your ability to edit the roster depends on your role:
+
+| Your Role | What You Can Do |
+|-----------|----------------|
+| Operator | Full access to all employees |
+| Leadership | Edit employees below your level |
+| Supervisor | Limited editing for your team |
+
+### The Hierarchy Rule
+
+You can only change roles for people **below your level** in the hierarchy. You cannot:
+- Promote someone to your same level
+- Promote someone above your level
+- Change roles for people at or above your level
+
+## Keeping the Roster Updated
+
+### Why It Matters
+
+An accurate roster ensures:
+- Ratings go to the right people
+- Discipline records are for current employees
+- Reports and metrics are accurate
+- Role-based permissions work correctly
+
+### Regular Maintenance
+
+- **Add** new hires when they start
+- **Update** roles when people are promoted
+- **Change status** when people leave
+- **Correct** FOH/BOH assignments as needed
 
 ## Next Steps
 
-- [Adding Employees](/roster-management/adding-employees) - Learn how to add new team members
-- [Managing Roles](/roster-management/managing-roles) - Understand role assignments and permissions
+<CardGroup cols={2}>
+  <Card title="Add Employees" icon="user-plus" href="/roster-management/adding-employees">
+    Learn how to add new team members
+  </Card>
+  <Card title="Manage Roles" icon="user-tag" href="/roster-management/managing-roles">
+    How to change employee roles
+  </Card>
+</CardGroup>

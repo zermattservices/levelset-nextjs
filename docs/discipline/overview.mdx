@@ -1,107 +1,124 @@
 ---
 title: Discipline Dashboard Overview
-description: Understand the discipline tracking system in Levelset
+description: How to use the discipline tracking system
 ---
 
 # Discipline Dashboard
 
-The Discipline Dashboard provides a structured system for documenting infractions, tracking progressive discipline, and ensuring consistent accountability across your team.
+The Discipline Dashboard helps you document infractions, track points, and follow a consistent progressive discipline process.
 
-## How It Works
+## How Discipline Tracking Works
 
-### Infractions
+### The Point System
 
-Infractions are documented incidents where a team member violated a policy or expectation. Each infraction has:
+When you document an infraction, it adds points to the employee's record:
 
-- **Type** - The category of infraction (e.g., Tardiness, No Call No Show)
-- **Point Value** - A numerical value that contributes to the total
-- **Date** - When the incident occurred
-- **Notes** - Details about the specific situation
-
-### Point System
-
-Infractions accumulate points over time. Your organization defines:
-
-- **Infraction Types** - What infractions can be documented
-- **Point Values** - How many points each type is worth
-- **Action Thresholds** - What actions are triggered at certain point totals
+1. Each infraction type has a **point value** (set by your organization)
+2. Points **accumulate** over time
+3. When points reach certain **thresholds**, the system recommends actions
 
 ### Progressive Discipline
 
-As points accumulate, the system recommends progressive actions:
+As points build up, recommended actions become more serious:
 
-| Points | Typical Action |
-|--------|----------------|
-| 3 | Verbal Warning |
-| 6 | Written Warning |
-| 9 | Final Warning |
-| 12 | Termination |
+| Point Level | Typical Action |
+|-------------|----------------|
+| Low | Verbal coaching |
+| Medium | Written warning |
+| High | Final warning |
+| Maximum | Termination review |
 
 <Note>
-Your organization may have different thresholds and actions configured. Check Organization Settings for your specific policy.
+Your organization configures the specific point thresholds and action names. The levels above are examples.
 </Note>
 
-## Dashboard Views
+## Viewing the Discipline Dashboard
 
-The Discipline Dashboard shows:
+### How to Access
 
-![Discipline Dashboard showing employee infractions, points, and recommended disciplinary actions](/images/screenshots/discipline-dashboard.png)
+Click **Discipline** in the navigation menu.
 
-### Employee List
+### What You'll See
 
-All team members with their current discipline status:
+The dashboard shows two main sections:
 
-- Total points
+**Recommended Actions**
+- Employees who have reached a threshold
+- The recommended action for each person
+- Quick access to take action
+
+**All Employees**
+- Everyone on your roster
+- Their current point totals
 - Recent infractions
-- Recommended action (if any)
 
-### Infraction History
+### Employee Details
 
-Click on an employee to see their complete infraction history:
+Click on any employee to see:
+- Complete infraction history
+- Dates and details of each incident
+- Actions that have been taken
+- Current point total
 
-- All documented infractions
-- Dates and point values
-- Notes from each incident
+## Understanding the Display
 
-### Actions Taken
+### Point Totals
 
-Track what disciplinary actions have been administered:
+The number shown is the sum of all infraction points. Some things to know:
 
-- Verbal warnings given
-- Written warnings issued
-- Other actions taken
+- Points may expire after a certain period (if configured)
+- Different infraction types are worth different points
+- The total determines recommended actions
 
-## Who Can Access
+### Status Indicators
 
-Discipline access is controlled by role:
+Look for visual indicators showing:
 
-- **Operator** - Full access to view and submit
-- **Executive/Director** - Can view and submit infractions
-- **Team Lead** - May have view or submit access (configurable)
+- **No action needed** - Below the first threshold
+- **Action recommended** - At or above a threshold
+- **Recent activity** - Has new infractions
 
-Access can be further controlled in Organization Settings under Discipline Access.
+### Infraction Details
 
-## Key Features
+Each infraction record includes:
+- Type of infraction
+- Date it occurred
+- Point value
+- Who documented it
+- Notes about what happened
 
-<CardGroup cols={2}>
-  <Card title="Point Tracking" icon="calculator">
-    Automatic calculation of total points based on documented infractions.
-  </Card>
-  
-  <Card title="Action Recommendations" icon="lightbulb">
-    System suggests appropriate actions based on point thresholds.
-  </Card>
-  
-  <Card title="History" icon="clock">
-    Complete record of all infractions and actions for each employee.
-  </Card>
-  
-  <Card title="Consistency" icon="scale-balanced">
-    Structured process ensures fair and consistent discipline across the team.
-  </Card>
-</CardGroup>
+## Taking Action
+
+When an employee reaches a threshold:
+
+1. Review their complete infraction history
+2. Verify the recommended action is appropriate
+3. Have a conversation with the employee
+4. Document the action you took
+
+<Warning>
+Always review the full context before taking disciplinary action. The system provides recommendations, but you make the final decision.
+</Warning>
+
+## Who Can Access Discipline
+
+Access to the Discipline Dashboard depends on your role:
+
+| Permission | Who Has It |
+|------------|------------|
+| View all records | Operators, Leadership |
+| Submit infractions | Roles with discipline access |
+| Configure settings | Operators, Admins |
+
+Your organization configures exactly who can see and submit discipline records in the Discipline Access settings.
 
 ## Next Steps
 
-- [Submitting Infractions](/discipline/submitting-infractions) - Learn how to document an infraction
-- [Viewing History](/discipline/viewing-history) - See past infractions and actions
+<CardGroup cols={2}>
+  <Card title="Submit an Infraction" icon="pen" href="/discipline/submitting-infractions">
+    Learn how to document infractions
+  </Card>
+  <Card title="View History" icon="clock" href="/discipline/viewing-history">
+    How to review discipline records
+  </Card>
+</CardGroup>
