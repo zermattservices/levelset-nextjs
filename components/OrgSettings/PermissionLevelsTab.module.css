@@ -1,8 +1,10 @@
 .container {
   display: grid;
-  grid-template-columns: 60% 40%;
+  grid-template-columns: minmax(0, 60%) minmax(0, 40%);
   gap: 24px;
   min-height: 400px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .leftPanel,
@@ -56,6 +58,11 @@
   letter-spacing: 0.05em;
 }
 
+.thTier {
+  text-align: center;
+  width: 70px;
+}
+
 .thActions {
   font-family: "Satoshi", sans-serif;
   font-size: 12px;
@@ -92,6 +99,10 @@
   padding: 12px 16px;
   border-bottom: 1px solid #f3f4f6;
   vertical-align: middle;
+}
+
+.tdTier {
+  text-align: center;
 }
 
 .tdActions {

@@ -415,7 +415,7 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
         {/* Header */}
         <div className={sty.rolesHeader}>
           <div className={sty.headerDrag}></div>
-          <div className={sty.headerLevel}>Level</div>
+          <div className={sty.headerLevel}>Tier</div>
           <div className={sty.headerName}>Role Name</div>
           <div className={sty.headerColor}>Color</div>
           <div className={sty.headerCount}>Employees</div>

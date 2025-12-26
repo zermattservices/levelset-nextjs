@@ -80,7 +80,8 @@ async function createProfileWithAccess(
   isSystemDefault: boolean,
   subItemMap: Map<string, string>
 ): Promise<string | null> {
-  const profileName = getDefaultProfileName(hierarchyLevel);
+  // Use the role name as the profile name (permission levels should match role names)
+  const profileName = roleName || getDefaultProfileName(hierarchyLevel);
   
   // Check if profile already exists
   const { data: existing } = await supabase

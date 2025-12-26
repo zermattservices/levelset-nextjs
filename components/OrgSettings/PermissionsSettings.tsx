@@ -9,13 +9,31 @@ import * as React from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import { styled } from '@mui/material/styles';
+import BusinessIcon from '@mui/icons-material/Business';
 import sty from './PermissionsSettings.module.css';
 import { PermissionLevelsTab } from './PermissionLevelsTab';
 import { ModifyAccessTab } from './ModifyAccessTab';
 import { usePermissions } from '@/lib/providers/PermissionsProvider';
 import { P } from '@/lib/permissions/constants';
+import { createSupabaseClient } from '@/util/supabase/component';
 
 const fontFamily = '"Satoshi", sans-serif';
+
+const OrgLevelTag = styled(Chip)(() => ({
+  fontFamily,
+  fontSize: 11,
+  fontWeight: 500,
+  height: 22,
+  backgroundColor: '#f0fdf4',
+  color: '#166534',
+  border: '1px solid #bbf7d0',
+  '& .MuiChip-icon': {
+    fontSize: 14,
+    color: '#166534',
+  },
+}));
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -48,11 +66,29 @@ interface PermissionsSettingsProps {
 export function PermissionsSettings({ orgId, disabled = false }: PermissionsSettingsProps) {
   const [activeTab, setActiveTab] = React.useState(0);
   const [selectedProfileId, setSelectedProfileId] = React.useState<string | null>(null);
+  const [locationCount, setLocationCount] = React.useState<number>(0);
   const { has, canEditLevel, hierarchyLevel, loading: permissionsLoading } = usePermissions();
+  const supabase = React.useMemo(() => createSupabaseClient(), []);
 
   // Check permissions
   const canViewPermissions = has(P.PERMS_VIEW);
   const canManagePermissions = has(P.PERMS_MANAGE);
+
+  // Fetch location count for the organization
+  React.useEffect(() => {
+    async function fetchLocationCount() {
+      if (!orgId) return;
+      
+      const { count } = await supabase
+        .from('locations')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId);
+      
+      setLocationCount(count || 0);
+    }
+    
+    fetchLocationCount();
+  }, [orgId, supabase]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -85,7 +121,16 @@ export function PermissionsSettings({ orgId, disabled = false }: PermissionsSett
   return (
     <div className={sty.container}>
       <div className={sty.header}>
-        <h2 className={sty.title}>Permissions</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h2 className={sty.title}>Permissions</h2>
+          {locationCount > 1 && (
+            <OrgLevelTag
+              icon={<BusinessIcon />}
+              label="Applies to all locations"
+              size="small"
+            />
+          )}
+        </div>
         <p className={sty.description}>
           Configure permission levels and access controls for your organization.
         </p>

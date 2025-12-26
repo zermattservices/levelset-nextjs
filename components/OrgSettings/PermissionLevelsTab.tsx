@@ -17,6 +17,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import sty from './PermissionLevelsTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { AddPermissionLevelModal } from './AddPermissionLevelModal';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -59,6 +60,18 @@ export function PermissionLevelsTab({
   const [deleting, setDeleting] = React.useState<string | null>(null);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  const auth = useAuth();
+  
+  // Levelset Admin can see all tiers
+  const isLevelsetAdmin = auth.role === 'Levelset Admin';
+  
+  // Filter profiles to only show those the user can see
+  // Users can only see permission tiers below their own (e.g., tier 0 sees tier 1+, tier 1 sees tier 2+)
+  // Levelset Admin sees all
+  const visibleProfiles = React.useMemo(() => {
+    if (isLevelsetAdmin) return profiles;
+    return profiles.filter(p => p.hierarchy_level > userHierarchyLevel);
+  }, [profiles, userHierarchyLevel, isLevelsetAdmin]);
 
   // Fetch permission profiles
   const fetchProfiles = React.useCallback(async () => {
@@ -277,14 +290,14 @@ export function PermissionLevelsTab({
           <table className={sty.table}>
             <thead>
               <tr>
-                <th className={sty.th}>Level</th>
+                <th className={`${sty.th} ${sty.thTier}`}>Tier</th>
                 <th className={sty.th}>Role</th>
                 <th className={sty.th}>Permission Level</th>
                 <th className={sty.thActions}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {profiles.map((profile) => {
+              {visibleProfiles.map((profile) => {
                 const canEdit = canEditLevel(profile.hierarchy_level);
                 const isSelected = selectedProfileId === profile.id;
 
@@ -293,7 +306,7 @@ export function PermissionLevelsTab({
                     key={profile.id}
                     className={`${sty.tr} ${isSelected ? sty.trSelected : ''}`}
                   >
-                    <td className={sty.td}>
+                    <td className={`${sty.td} ${sty.tdTier}`}>
                       <Chip
                         label={profile.hierarchy_level}
                         size="small"

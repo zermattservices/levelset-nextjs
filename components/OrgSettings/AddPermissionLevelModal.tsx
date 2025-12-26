@@ -79,11 +79,11 @@ export function AddPermissionLevelModal({
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
-  // Available base levels (1, 2, 3)
-  const availableLevels = [
-    { value: 1, label: `Level 1 - ${getDefaultProfileName(1)}` },
-    { value: 2, label: `Level 2 - ${getDefaultProfileName(2)}` },
-    { value: 3, label: `Level 3 - ${getDefaultProfileName(3)}` },
+  // Available base tiers (1, 2, 3)
+  const availableTiers = [
+    { value: 1, label: `Tier 1 - ${getDefaultProfileName(1)}` },
+    { value: 2, label: `Tier 2 - ${getDefaultProfileName(2)}` },
+    { value: 3, label: `Tier 3 - ${getDefaultProfileName(3)}` },
   ];
 
   // Reset form when modal opens
@@ -219,13 +219,13 @@ export function AddPermissionLevelModal({
               onChange={(e) => setBaseLevel(e.target.value as number)}
               label="Base Permissions"
             >
-              {availableLevels.map((level) => (
+              {availableTiers.map((tier) => (
                 <MenuItem
-                  key={level.value}
-                  value={level.value}
+                  key={tier.value}
+                  value={tier.value}
                   sx={{ fontFamily, fontSize: 14 }}
                 >
-                  {level.label}
+                  {tier.label}
                 </MenuItem>
               ))}
             </StyledSelect>
@@ -239,7 +239,7 @@ export function AddPermissionLevelModal({
               margin: 0,
             }}
           >
-            The base permissions will be copied from the selected level. You can customize
+            The base permissions will be copied from the selected tier. You can customize
             them after creating the permission level.
           </p>
         </div>

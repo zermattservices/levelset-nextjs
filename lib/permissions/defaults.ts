@@ -108,18 +108,11 @@ export function getDefaultPermissionsArray(level: number): PermissionKey[] {
   return Array.from(getDefaultPermissions(level));
 }
 
-// Profile name mapping by hierarchy level
-export const DEFAULT_PROFILE_NAMES: Record<number, string> = {
-  0: 'Full Access',
-  1: 'Manager Access',
-  2: 'Supervisor Access',
-  3: 'Standard Access',
-};
-
-// Get profile name for a hierarchy level
-export function getDefaultProfileName(level: number): string {
-  if (level <= 0) return DEFAULT_PROFILE_NAMES[0];
-  if (level === 1) return DEFAULT_PROFILE_NAMES[1];
-  if (level === 2) return DEFAULT_PROFILE_NAMES[2];
-  return DEFAULT_PROFILE_NAMES[3];
+// Default profile name is just the role name itself
+// This function generates a fallback name if role name is not available
+export function getDefaultProfileName(level: number, roleName?: string): string {
+  // If we have a role name, use it directly
+  if (roleName) return roleName;
+  // Fallback for when no role name is provided (should rarely happen)
+  return `Tier ${level} Access`;
 }

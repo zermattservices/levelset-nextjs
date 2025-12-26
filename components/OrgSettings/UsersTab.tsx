@@ -113,17 +113,29 @@ interface UsersTabProps {
 }
 
 export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabProps) {
-  const { selectedLocationId } = useLocationContext();
+  const { selectedLocationId, userHierarchyLevel } = useLocationContext();
   const { refresh: refreshPermissions } = usePermissions();
   
   // Check if current user can edit operator emails (only Operator or Levelset Admin)
   const canEditOperatorEmail = currentUserRole === 'Operator' || currentUserRole === 'Levelset Admin';
+  
+  // Levelset Admin can see all tiers
+  const isLevelsetAdmin = currentUserRole === 'Levelset Admin';
   
   const [employeeLinkedUsers, setEmployeeLinkedUsers] = React.useState<EmployeeLinkedUser[]>([]);
   const [adminOnlyUsers, setAdminOnlyUsers] = React.useState<AdminOnlyUser[]>([]);
   const [orgRoles, setOrgRoles] = React.useState<OrgRole[]>([]);
   const [orgLocations, setOrgLocations] = React.useState<LocationInfo[]>([]);
   const [permissionProfiles, setPermissionProfiles] = React.useState<PermissionProfile[]>([]);
+  
+  // Filter profiles to only show those the user can see
+  // Users can only see permission tiers below their own
+  const visibleProfiles = React.useMemo(() => {
+    if (isLevelsetAdmin) return permissionProfiles;
+    if (userHierarchyLevel === null) return [];
+    return permissionProfiles.filter(p => p.hierarchy_level > userHierarchyLevel);
+  }, [permissionProfiles, userHierarchyLevel, isLevelsetAdmin]);
+  
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [editingId, setEditingId] = React.useState<string | null>(null);
@@ -681,7 +693,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                               <MenuItem value="default" sx={{ fontFamily, fontSize: 13 }}>
                                 Default (from role)
                               </MenuItem>
-                              {permissionProfiles.map((profile) => (
+                              {visibleProfiles.map((profile) => (
                                 <MenuItem key={profile.id} value={profile.id} sx={{ fontFamily, fontSize: 13 }}>
                                   {profile.name}
                                 </MenuItem>
@@ -837,7 +849,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                             <MenuItem value="" disabled sx={{ fontFamily, fontSize: 13 }}>
                               Select level...
                             </MenuItem>
-                            {permissionProfiles.map((profile) => (
+                            {visibleProfiles.map((profile) => (
                               <MenuItem key={profile.id} value={profile.id} sx={{ fontFamily, fontSize: 13 }}>
                                 {profile.name}
                               </MenuItem>

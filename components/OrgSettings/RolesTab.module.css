@@ -61,7 +61,6 @@
 }
 
 .headerDrag,
-.headerLevel,
 .headerName,
 .headerActions {
   font-family: "Satoshi";
@@ -69,6 +68,15 @@
   font-weight: 600;
   color: #666;
   text-transform: uppercase;
+}
+
+.headerLevel {
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .headerColor,

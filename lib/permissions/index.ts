@@ -20,7 +20,6 @@ export type { PermissionKey, ModuleMetadata, SubItemMetadata } from './constants
 // Defaults
 export {
   DEFAULT_PERMISSIONS,
-  DEFAULT_PROFILE_NAMES,
   getDefaultPermissions,
   getDefaultPermissionsArray,
   getDefaultProfileName,

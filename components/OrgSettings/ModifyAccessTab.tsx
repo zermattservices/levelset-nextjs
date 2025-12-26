@@ -40,6 +40,7 @@ import {
   getModulePermissions,
 } from '@/lib/permissions/constants';
 import { resolveDependencies, getDependentPermissions } from '@/lib/permissions/service';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -118,6 +119,17 @@ export function ModifyAccessTab({
   const [loadingEmployees, setLoadingEmployees] = React.useState(false);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  const auth = useAuth();
+  
+  // Levelset Admin can see all tiers
+  const isLevelsetAdmin = auth.role === 'Levelset Admin';
+  
+  // Filter profiles to only show those the user can see
+  // Users can only see permission tiers below their own
+  const visibleProfiles = React.useMemo(() => {
+    if (isLevelsetAdmin) return profiles;
+    return profiles.filter(p => p.hierarchy_level > userHierarchyLevel);
+  }, [profiles, userHierarchyLevel, isLevelsetAdmin]);
 
   // Update selected profile when initial profile changes
   React.useEffect(() => {
@@ -413,13 +425,13 @@ export function ModifyAccessTab({
               <MenuItem value="" disabled sx={{ fontFamily, fontSize: 14 }}>
                 Select a permission level
               </MenuItem>
-              {profiles.map((profile) => (
+              {visibleProfiles.map((profile) => (
                 <MenuItem
                   key={profile.id}
                   value={profile.id}
                   sx={{ fontFamily, fontSize: 14 }}
                 >
-                  {profile.name} - Level {profile.hierarchy_level}
+                  {profile.name} - Tier {profile.hierarchy_level}
                 </MenuItem>
               ))}
             </StyledSelect>
