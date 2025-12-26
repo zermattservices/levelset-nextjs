@@ -2,6 +2,9 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "almond",
   "name": "Levelset",
+  "ai": {
+    "enabled": true
+  },
   "colors": {
     "primary": "#31664a",
     "light": "#4a9d6e",
