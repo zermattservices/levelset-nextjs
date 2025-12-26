@@ -59,6 +59,23 @@ const StyledFormControl = styled(FormControl)(() => ({
   },
 }));
 
+interface AppUserRaw {
+  id: string;
+  auth_user_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  role: string;
+  org_id: string;
+  location_id: string;
+  employee_id?: string;
+  hire_date?: string;
+  active: boolean;
+  orgs: { id: string; name: string } | null;
+  locations: { id: string; location_number: string } | null;
+}
+
 interface AppUser {
   id: string;
   auth_user_id: string;
@@ -187,7 +204,8 @@ export function UserTestingPage() {
       if (error) {
         console.error('Error fetching users:', error);
       } else {
-        setUsers(data || []);
+        // Cast the data to handle Supabase's type inference for joins
+        setUsers((data as AppUserRaw[] | null) || []);
       }
       
       setLoading(false);

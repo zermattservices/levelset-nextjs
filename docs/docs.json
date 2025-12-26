@@ -19,11 +19,6 @@
       "weight": 700,
       "source": "/fonts/Mont-Bold.woff2",
       "format": "woff2"
-    },
-    "body": {
-      "family": "Satoshi",
-      "source": "/fonts/Satoshi-Variable.ttf",
-      "format": "truetype"
     }
   },
   "seo": {
