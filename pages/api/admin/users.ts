@@ -1,23 +1,28 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 
-// Create admin client with service role key to bypass RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-);
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Check for required env vars
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.error('Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+
+  // Create admin client inside handler to avoid module-level errors
+  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 
   try {
     const { org_id, location_id } = req.query;
@@ -57,13 +62,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Fetch orgs and locations separately for display names
-    const { data: orgs } = await supabaseAdmin
+    const { data: orgs, error: orgsError } = await supabaseAdmin
       .from('orgs')
-      .select('id, name');
+      .select('id, name')
+      .order('name');
 
-    const { data: locations } = await supabaseAdmin
+    if (orgsError) {
+      console.error('Error fetching orgs:', orgsError);
+    }
+
+    const { data: locations, error: locationsError } = await supabaseAdmin
       .from('locations')
-      .select('id, location_number, org_id');
+      .select('id, location_number, org_id')
+      .order('location_number');
+
+    if (locationsError) {
+      console.error('Error fetching locations:', locationsError);
+    }
 
     // Create lookup maps
     const orgMap = new Map((orgs || []).map(o => [o.id, o]));

@@ -1,0 +1,240 @@
+---
+title: Discipline Settings
+description: How to configure infractions, actions, and discipline access
+---
+
+# Discipline Settings
+
+Configure how the discipline system works for your organization, including infraction types, point values, actions, and who can access discipline features.
+
+## Accessing Discipline Settings
+
+1. Go to **Organization Settings**
+2. Click **Discipline** in the sidebar
+
+## Infractions Tab
+
+### What Are Infractions?
+
+Infractions are the types of policy violations you can document. Each infraction has:
+
+- **Name** - What you call this infraction type
+- **Point Value** - How many points it adds to an employee's total
+- **Description** - Details about when to use this type
+
+### Default Infraction Types
+
+Common infractions include:
+
+| Infraction | Typical Points | When to Use |
+|------------|----------------|-------------|
+| Tardiness | 1 | Arriving late for a shift |
+| No Call No Show | 3 | Missing a shift without notification |
+| Uniform Violation | 1 | Not following dress code |
+| Policy Violation | 2 | Breaking a workplace policy |
+| Insubordination | 3 | Refusing to follow instructions |
+
+### Adding an Infraction Type
+
+<Steps>
+  <Step title="Click Add Infraction">
+    Look for the **Add Infraction** button below the existing types.
+  </Step>
+  
+  <Step title="Enter the Name">
+    Give the infraction a clear, descriptive name.
+  </Step>
+  
+  <Step title="Set the Point Value">
+    Enter how many points this infraction should add. Higher values for more serious violations.
+  </Step>
+  
+  <Step title="Add a Description">
+    Explain when this infraction type should be used. This helps ensure consistent documentation.
+  </Step>
+  
+  <Step title="Save">
+    Click away or click Save to store the new infraction type.
+  </Step>
+</Steps>
+
+### Editing Infraction Types
+
+1. Click on any field (name, points, or description)
+2. Make your changes
+3. Click away to auto-save
+
+### Removing Infraction Types
+
+1. Click the **delete icon** next to the infraction
+2. Confirm the deletion
+
+<Warning>
+Deleting an infraction type doesn't remove historical records that used it. Those records remain in employee histories with the original type name.
+</Warning>
+
+## Actions Tab
+
+### What Are Actions?
+
+Actions are the progressive discipline steps triggered when employees reach point thresholds. Each action has:
+
+- **Name** - What you call this action (e.g., "Verbal Warning")
+- **Point Threshold** - When this action is triggered
+- **Description** - What this action means
+
+### Default Actions
+
+A typical progressive discipline setup:
+
+| Action | Points | Meaning |
+|--------|--------|---------|
+| Verbal Warning | 3 | First threshold reached |
+| Written Warning | 6 | Second threshold reached |
+| Final Warning | 9 | Third threshold reached |
+| Termination | 12 | Maximum threshold reached |
+
+### Setting Up Actions
+
+<Steps>
+  <Step title="Click Add Action">
+    Add a new action to your progression.
+  </Step>
+  
+  <Step title="Enter the Action Name">
+    Use clear names like "Verbal Warning" or "Written Warning".
+  </Step>
+  
+  <Step title="Set the Point Threshold">
+    Enter the point total that triggers this action. Actions should have progressively higher thresholds.
+  </Step>
+  
+  <Step title="Add a Description">
+    Explain what happens at this step and any documentation requirements.
+  </Step>
+</Steps>
+
+### How Actions Work
+
+When an employee's point total reaches or exceeds a threshold:
+
+1. The system displays the recommended action on the Discipline Dashboard
+2. Leadership sees which employees need attention
+3. After delivering the action, you can mark it as completed
+
+## Access Tab
+
+### Controlling Who Can Use Discipline
+
+The Access tab controls:
+
+- Who can **view** discipline records
+- Who can **submit** infractions
+- Whether a **password** is required to submit
+
+### Discipline Access Settings
+
+| Setting | What It Controls |
+|---------|-----------------|
+| **View Access** | Which role levels can see discipline records |
+| **Submit Access** | Which role levels can document infractions |
+| **Password Required** | Whether submitting requires a password |
+| **Password** | The password required to submit (if enabled) |
+
+### Setting Up Access
+
+<Steps>
+  <Step title="Configure View Access">
+    Select which roles can view discipline records. Typically all leadership roles.
+  </Step>
+  
+  <Step title="Configure Submit Access">
+    Select which roles can submit infractions. Usually managers and above.
+  </Step>
+  
+  <Step title="Enable/Disable Password">
+    Toggle whether a password is required to submit infractions.
+  </Step>
+  
+  <Step title="Set the Password">
+    If enabled, enter the password that will be required. Share this only with authorized personnel.
+  </Step>
+</Steps>
+
+### Why Use a Password?
+
+A submission password adds accountability:
+
+- Ensures only authorized people submit infractions
+- Creates a small barrier to prevent accidental submissions
+- Allows you to change access without changing roles
+
+## Notifications Tab
+
+### Discipline Notifications
+
+Configure who gets notified when discipline events occur:
+
+- **Email notifications** when employees reach thresholds
+- **Dashboard alerts** for pending actions
+- **Summary reports** on discipline activity
+
+### Notification Settings
+
+| Setting | What It Does |
+|---------|--------------|
+| **Threshold Alerts** | Notify when an employee reaches an action threshold |
+| **Weekly Summary** | Send a summary of discipline activity |
+| **Recipients** | Who receives these notifications |
+
+## Best Practices
+
+### Point Values
+
+<CardGroup cols={2}>
+  <Card title="Keep It Simple" icon="minimize">
+    Use small numbers (1-3) for most infractions. It's easier to understand.
+  </Card>
+  <Card title="Scale by Severity" icon="scale-balanced">
+    More serious violations should have higher point values.
+  </Card>
+  <Card title="Be Consistent" icon="equals">
+    Similar infractions should have similar point values.
+  </Card>
+  <Card title="Consider Accumulation" icon="calculator">
+    Think about how quickly points accumulate to thresholds.
+  </Card>
+</CardGroup>
+
+### Action Thresholds
+
+- **Space them appropriately** - Give employees room to improve between actions
+- **Progressive severity** - Each threshold should be more serious
+- **Clear expectations** - Document what happens at each level
+
+### Password Security
+
+- Use a unique password (not a common word or date)
+- Change it periodically
+- Only share with authorized leadership
+- Don't write it where others can see
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Infraction type not appearing in submission form">
+    Make sure the infraction type is saved and active. Try refreshing the page.
+  </Accordion>
+  
+  <Accordion title="Wrong action showing as recommended">
+    Check that your action thresholds are set correctly in order. Each threshold should be higher than the previous.
+  </Accordion>
+  
+  <Accordion title="Password not working">
+    Verify you're entering the exact password set in Access settings. Passwords are case-sensitive.
+  </Accordion>
+  
+  <Accordion title="Someone can't submit infractions">
+    Check their role level against the Submit Access settings. They may need a higher role.
+  </Accordion>
+</AccordionGroup>

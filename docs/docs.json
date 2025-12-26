@@ -26,8 +26,15 @@
       "canonical": "https://docs.levelset.io"
     }
   },
+  "search": {
+    "placeholder": "Search or ask a question..."
+  },
   "navigation": {
     "groups": [
+      {
+        "group": "",
+        "pages": ["index"]
+      },
       {
         "group": "Get Started",
         "pages": ["overview", "getting-started/getting-started"]
@@ -63,7 +70,8 @@
           "organization-settings/positions",
           "organization-settings/rating-criteria",
           "organization-settings/roles",
-          "organization-settings/users"
+          "organization-settings/users",
+          "organization-settings/discipline"
         ]
       }
     ]
