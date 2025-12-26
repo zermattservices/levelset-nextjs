@@ -1,11 +1,11 @@
 ---
-title: Roles Settings
-description: How to configure the role hierarchy for your organization
+title: "Roles Settings"
+description: "How to configure the role hierarchy for your organization"
 ---
 
 # Roles Settings
 
-Roles define the permission hierarchy in your organization. This guide shows you how to configure them.
+Roles define the hierarchy in your organization. This guide shows you how to configure them.
 
 ## Accessing Roles Settings
 
@@ -23,17 +23,17 @@ Roles are organized in order of permission level:
 ### Example Hierarchy
 
 ```
-Level 0: Operator (full access)
-Level 1: Director (leadership access)
-Level 2: Manager (management access)
-Level 3: Supervisor (team access)
-Level 4: Trainer (training access)
-Level 5: Team Member (basic access)
-Level 6: New Hire (minimal access)
+Level 0: Operator
+Level 1: Executive
+Level 2: Director
+Level 3: Area Lead
+Level 4: Team Lead
+Level 5: Trainer
+Level 6: Team Member
 ```
 
 <Note>
-You can name roles whatever makes sense for your organization. The hierarchy level is what determines permissions.
+  You can name roles whatever makes sense for your organization. The hierarchy level is what determines access and permissions.
 </Note>
 
 ## What You'll See
@@ -42,7 +42,7 @@ The Roles page shows:
 
 - **Role name** - What you call this role
 - **Color** - Visual identifier for the role
-- **Employee count** - How many people have this role
+- **Employee count** - How many people in the organization have this role
 - **Hierarchy position** - Where it sits in the order
 
 ## Managing Roles
@@ -68,7 +68,7 @@ Colors help visually identify roles throughout Levelset.
 3. Release to set the new position
 
 <Warning>
-The top role (Operator) cannot be moved. It's always at the highest permission level.
+  The top role (Operator) cannot be moved. It's always at the highest permission level.
 </Warning>
 
 ### Add a New Role
@@ -84,18 +84,18 @@ The top role (Operator) cannot be moved. It's always at the highest permission l
 2. Confirm the deletion
 
 <Warning>
-You cannot delete a role that has employees assigned to it. Reassign those employees first.
+  You cannot delete a role that has employees assigned to it. Reassign those employees first.
 </Warning>
 
 ## How Roles Affect Permissions
 
 ### Dashboard Access
 
-| Level | Typical Access |
-|-------|---------------|
-| 0 | Full access to everything |
-| 1-2 | Full dashboard, most settings |
-| 3+ | Limited or no dashboard access |
+| Level | Typical Access                 |
+| ----- | ------------------------------ |
+| 0     | Full access to everything      |
+| 1-2   | Full dashboard, most settings  |
+| 3+    | Limited or no dashboard access |
 
 ### Roster Management
 
@@ -115,15 +115,15 @@ Discipline Access settings control which roles can view and submit infractions.
 
 Available colors include:
 
-| Color | Best Used For |
-|-------|---------------|
-| Green | Entry-level, new hires |
-| Blue | Standard team members |
-| Purple | Leadership, management |
-| Red | Alerts or special designations |
-| Yellow/Amber | Mid-level roles |
-| Teal | Support roles |
-| Gray | Neutral designations |
+| Color        | Best Used For                  |
+| ------------ | ------------------------------ |
+| Green        | Entry-level, new hires         |
+| Blue         | Standard team members          |
+| Purple       | Leadership, management         |
+| Red          | Alerts or special designations |
+| Yellow/Amber | Mid-level roles                |
+| Teal         | Support roles                  |
+| Gray         | Neutral designations           |
 
 Using consistent colors helps people recognize roles at a glance throughout the app.
 
@@ -150,11 +150,9 @@ Using consistent colors helps people recognize roles at a glance throughout the 
   <Accordion title="Can't delete a role">
     Roles with employees assigned cannot be deleted. First, change those employees to a different role in the Roster.
   </Accordion>
-  
   <Accordion title="New role isn't showing in the roster">
     Refresh the page. New roles should appear immediately, but occasionally need a page refresh to show everywhere.
   </Accordion>
-  
   <Accordion title="Permissions aren't working as expected">
     Check Role Mapping settings for ratings, and Discipline Access settings for discipline. The role hierarchy determines the baseline, but these settings can further customize access.
   </Accordion>
