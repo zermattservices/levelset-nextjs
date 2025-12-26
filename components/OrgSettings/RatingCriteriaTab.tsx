@@ -12,6 +12,9 @@ import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
 import TranslateIcon from '@mui/icons-material/Translate';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import CropSquareIcon from '@mui/icons-material/CropSquare';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import sty from './RatingCriteriaTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 
@@ -333,63 +336,136 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
     };
   }, [disabled, supabase]);
 
-  const handleAutoTranslate = async (translateAll: boolean, criteriaOrder?: number) => {
+  const handleAutoTranslate = async (scope: 'row' | 'position' | 'all', criteriaOrder?: number) => {
     setTranslateMenuAnchor(null);
-    
-    const criteriaToTranslate = translateAll 
-      ? criteria 
-      : criteria.filter(c => c.criteria_order === criteriaOrder);
-    
-    if (!criteriaToTranslate.length) return;
     
     setTranslating(true);
     setError(null);
     
     try {
-      // Collect texts to translate
-      const textsToTranslate: string[] = [];
-      criteriaToTranslate.forEach(c => {
-        textsToTranslate.push(c.name || '');
-        textsToTranslate.push(c.description || '');
-      });
-      
-      // Call translation API
-      const response = await fetch('/api/admin/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          texts: textsToTranslate,
-          targetLang: 'ES',
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Translation failed');
-      }
-      
-      const { translations } = await response.json();
-      
-      // Apply translations to criteria
-      if (translateAll) {
-        setCriteria(prev => prev.map((c, idx) => ({
-          ...c,
-          name_es: translations[idx * 2] || c.name_es,
-          description_es: translations[idx * 2 + 1] || c.description_es,
-        })));
-      } else if (criteriaOrder !== undefined) {
-        setCriteria(prev => prev.map(c => 
-          c.criteria_order === criteriaOrder
-            ? {
+      if (scope === 'all') {
+        // Translate criteria for ALL positions
+        const { data: allCriteria, error: fetchError } = await supabase
+          .from('position_criteria')
+          .select('id, position_id, name, description')
+          .in('position_id', positions.map(p => p.id));
+        
+        if (fetchError) throw fetchError;
+        if (!allCriteria?.length) {
+          setTranslating(false);
+          return;
+        }
+        
+        // Collect texts to translate
+        const textsToTranslate: string[] = [];
+        allCriteria.forEach(c => {
+          textsToTranslate.push(c.name || '');
+          textsToTranslate.push(c.description || '');
+        });
+        
+        // Call translation API
+        const response = await fetch('/api/admin/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            texts: textsToTranslate,
+            targetLang: 'ES',
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Translation failed');
+        }
+        
+        const { translations } = await response.json();
+        
+        // Update all criteria in DB
+        const updates = allCriteria.map((c, idx) => ({
+          id: c.id,
+          name_es: translations[idx * 2] || null,
+          description_es: translations[idx * 2 + 1] || null,
+        }));
+        
+        for (const update of updates) {
+          await supabase
+            .from('position_criteria')
+            .update({ name_es: update.name_es, description_es: update.description_es })
+            .eq('id', update.id);
+        }
+        
+        // Refresh current position's criteria if currently viewing
+        if (selectedPositionId) {
+          const currentPosCriteria = allCriteria.filter(c => c.position_id === selectedPositionId);
+          setCriteria(prev => prev.map(c => {
+            const updated = currentPosCriteria.find(u => u.id === c.id);
+            if (updated) {
+              const idx = allCriteria.findIndex(ac => ac.id === c.id);
+              return {
                 ...c,
-                name_es: translations[0] || c.name_es,
-                description_es: translations[1] || c.description_es,
-              }
-            : c
-        ));
+                name_es: translations[idx * 2] || c.name_es,
+                description_es: translations[idx * 2 + 1] || c.description_es,
+              };
+            }
+            return c;
+          }));
+        }
+      } else {
+        // Translate criteria for current position only (or single row)
+        const criteriaToTranslate = scope === 'row' && criteriaOrder !== undefined
+          ? criteria.filter(c => c.criteria_order === criteriaOrder)
+          : criteria;
+        
+        if (!criteriaToTranslate.length) {
+          setTranslating(false);
+          return;
+        }
+        
+        // Collect texts to translate
+        const textsToTranslate: string[] = [];
+        criteriaToTranslate.forEach(c => {
+          textsToTranslate.push(c.name || '');
+          textsToTranslate.push(c.description || '');
+        });
+        
+        // Call translation API
+        const response = await fetch('/api/admin/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            texts: textsToTranslate,
+            targetLang: 'ES',
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Translation failed');
+        }
+        
+        const { translations } = await response.json();
+        
+        // Apply translations to criteria
+        if (scope === 'position') {
+          setCriteria(prev => prev.map((c, idx) => ({
+            ...c,
+            name_es: translations[idx * 2] || c.name_es,
+            description_es: translations[idx * 2 + 1] || c.description_es,
+          })));
+        } else if (scope === 'row' && criteriaOrder !== undefined) {
+          setCriteria(prev => prev.map(c => 
+            c.criteria_order === criteriaOrder
+              ? {
+                  ...c,
+                  name_es: translations[0] || c.name_es,
+                  description_es: translations[1] || c.description_es,
+                }
+              : c
+          ));
+        }
+        
+        setHasChanges(true);
       }
-      
-      setHasChanges(true);
     } catch (err: any) {
       console.error('Translation error:', err);
       setError(err.message || 'Failed to auto-translate');
@@ -420,8 +496,9 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                 <Button
                   variant="outlined"
                   size="small"
+                  disableRipple
                   startIcon={translating ? <CircularProgress size={14} /> : <TranslateIcon sx={{ fontSize: 16 }} />}
-                  endIcon={<ArrowDropDownIcon sx={{ fontSize: 18, marginLeft: -0.5 }} />}
+                  endIcon={<ArrowDropDownIcon sx={{ fontSize: 18, marginLeft: -0.5, transform: translateMenuAnchor ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />}
                   onClick={(e) => setTranslateMenuAnchor(e.currentTarget)}
                   disabled={translating || !criteria.length || !selectedPositionId}
                   sx={{
@@ -431,13 +508,16 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                     height: 36,
                     minWidth: 110,
                     borderRadius: '8px',
-                    borderColor: '#e5e7eb',
+                    borderColor: translateMenuAnchor ? '#31664a' : '#e5e7eb',
                     color: '#4b5563',
                     backgroundColor: '#ffffff',
                     padding: '8px 12px',
                     '&:hover': {
                       borderColor: '#31664a',
-                      backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                      backgroundColor: '#ffffff',
+                    },
+                    '&:active': {
+                      backgroundColor: '#ffffff',
                     },
                   }}
                 >
@@ -449,12 +529,35 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                   onClose={() => setTranslateMenuAnchor(null)}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  transitionDuration={200}
+                  slotProps={{
+                    paper: {
+                      sx: {
+                        minWidth: translateMenuAnchor?.offsetWidth || 110,
+                        marginTop: '4px',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                      }
+                    }
+                  }}
                 >
                   <MenuItem 
-                    onClick={() => handleAutoTranslate(true)}
-                    sx={{ fontFamily, fontSize: 13 }}
+                    onClick={() => handleAutoTranslate('position')}
+                    sx={{ fontFamily, fontSize: 13, py: 1 }}
                   >
-                    All criteria
+                    <ListItemIcon sx={{ minWidth: 32 }}>
+                      <CropSquareIcon sx={{ fontSize: 18, color: '#6b7280' }} />
+                    </ListItemIcon>
+                    This position
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleAutoTranslate('all')}
+                    sx={{ fontFamily, fontSize: 13, py: 1 }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 32 }}>
+                      <ViewModuleIcon sx={{ fontSize: 18, color: '#6b7280' }} />
+                    </ListItemIcon>
+                    All positions
                   </MenuItem>
                 </Menu>
               </>
@@ -472,7 +575,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
         <p className={sty.introDescription}>
           Define the 5 rating criteria for each position. These criteria will be used when 
           submitting positional ratings.
-          {language === 'es' && ' You are editing Spanish translations. Click the translate icon on each row to translate individually, or use the dropdown to translate all.'}
+          {language === 'es' && ' You are editing Spanish translations. Use the Translate dropdown to translate this position or all positions at once.'}
         </p>
       </div>
 
@@ -554,7 +657,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                 {!disabled && language === 'es' && (
                   <IconButton
                     size="small"
-                    onClick={() => handleAutoTranslate(false, c.criteria_order)}
+                    onClick={() => handleAutoTranslate('row', c.criteria_order)}
                     disabled={translating}
                     title="Translate this criteria"
                     sx={{ color: '#6b7280', '&:hover': { color: '#31664a' } }}

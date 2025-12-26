@@ -7,12 +7,10 @@ import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import TranslateIcon from '@mui/icons-material/Translate';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CircularProgress from '@mui/material/CircularProgress';
 import sty from './PositionsTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
@@ -98,7 +96,6 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
   const [language, setLanguage] = React.useState<'en' | 'es'>('en');
   const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
   const [draggedZone, setDraggedZone] = React.useState<'FOH' | 'BOH' | null>(null);
-  const [translateMenuAnchor, setTranslateMenuAnchor] = React.useState<HTMLElement | null>(null);
   const textareaRefs = React.useRef<Map<string, HTMLTextAreaElement>>(new Map());
   
   // Refs to track current state for autosave on unmount
@@ -365,11 +362,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
     textarea.style.height = textarea.scrollHeight + 'px';
   };
 
-  const [selectedPositionForTranslate, setSelectedPositionForTranslate] = React.useState<string | null>(null);
-
   const handleAutoTranslate = async (translateAll: boolean, positionId?: string) => {
-    setTranslateMenuAnchor(null);
-    
     const positionsToTranslate = translateAll 
       ? positions 
       : positions.filter(p => p.id === positionId);
@@ -547,48 +540,31 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
           <h3 className={sty.introTitle} style={{ margin: 0 }}>Manage Positions</h3>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             {language === 'es' && !disabled && (
-              <>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={translating ? <CircularProgress size={14} /> : <TranslateIcon sx={{ fontSize: 16 }} />}
-                  endIcon={<ArrowDropDownIcon sx={{ fontSize: 18, marginLeft: -0.5 }} />}
-                  onClick={(e) => setTranslateMenuAnchor(e.currentTarget)}
-                  disabled={translating || !positions.length}
-                  sx={{
-                    fontFamily,
-                    fontSize: 13,
-                    textTransform: 'none',
-                    height: 36,
-                    minWidth: 110,
-                    borderRadius: '8px',
-                    borderColor: '#e5e7eb',
-                    color: '#4b5563',
-                    backgroundColor: '#ffffff',
-                    padding: '8px 12px',
-                    '&:hover': {
-                      borderColor: '#31664a',
-                      backgroundColor: 'rgba(49, 102, 74, 0.04)',
-                    },
-                  }}
-                >
-                  {translating ? 'Translating...' : 'Translate'}
-                </Button>
-                <Menu
-                  anchorEl={translateMenuAnchor}
-                  open={Boolean(translateMenuAnchor)}
-                  onClose={() => setTranslateMenuAnchor(null)}
-                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                >
-                  <MenuItem 
-                    onClick={() => handleAutoTranslate(true)}
-                    sx={{ fontFamily, fontSize: 13 }}
-                  >
-                    All positions
-                  </MenuItem>
-                </Menu>
-              </>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={translating ? <CircularProgress size={14} /> : <TranslateIcon sx={{ fontSize: 16 }} />}
+                onClick={() => handleAutoTranslate(true)}
+                disabled={translating || !positions.length}
+                sx={{
+                  fontFamily,
+                  fontSize: 13,
+                  textTransform: 'none',
+                  height: 36,
+                  minWidth: 110,
+                  borderRadius: '8px',
+                  borderColor: '#e5e7eb',
+                  color: '#4b5563',
+                  backgroundColor: '#ffffff',
+                  padding: '8px 12px',
+                  '&:hover': {
+                    borderColor: '#31664a',
+                    backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                  },
+                }}
+              >
+                {translating ? 'Translating...' : 'Auto-translate'}
+              </Button>
             )}
             <LanguageSelect
               value={language}
