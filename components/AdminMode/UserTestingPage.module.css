@@ -1,0 +1,281 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.title {
+  font-family: "Satoshi";
+  font-size: 18px;
+  font-weight: 600;
+  color: #0d1b14;
+  margin: 0;
+}
+
+.description {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Filter bar */
+.filterBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.searchField {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filterField {
+  min-width: 180px;
+}
+
+/* Table styles */
+.tableContainer {
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeader {
+  background-color: #fafafa;
+}
+
+.tableHeaderCell {
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.tableRow {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.tableRow:hover {
+  background-color: #fafafa;
+}
+
+.tableRow:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tableRowExpanded {
+  background-color: #f6fffa;
+}
+
+.tableCell {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #0d1b14;
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+
+.tableCellName {
+  font-weight: 500;
+}
+
+.tableCellEmail {
+  color: #666;
+}
+
+.tableCellOrg {
+  font-weight: 500;
+}
+
+.tableCellLocation {
+  color: #666;
+}
+
+.tableCellRole {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background-color: #f0f0f0;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+}
+
+.tableCellActions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.expandIcon {
+  color: #999;
+  transition: transform 0.2s ease;
+}
+
+.expandIconRotated {
+  transform: rotate(180deg);
+}
+
+/* Expanded row details */
+.expandedContent {
+  background-color: #fafafa;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.expandedInner {
+  padding: 20px 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailLabel {
+  font-family: "Satoshi";
+  font-size: 11px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #0d1b14;
+}
+
+/* Log in as button */
+.loginAsButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: #31664a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-family: "Satoshi";
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.loginAsButton:hover {
+  background-color: #254e38;
+  transform: translateY(-1px);
+}
+
+.loginAsButton:active {
+  transform: translateY(0);
+}
+
+.loginAsButton:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading state */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+}
+
+/* Empty state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+}
+
+.emptyStateIcon {
+  color: #d1d5db;
+  margin-bottom: 12px;
+}
+
+.emptyStateText {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #999;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-top: 1px solid #e5e5e5;
+}
+
+.paginationInfo {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #666;
+}
+
+.paginationButtons {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.paginationButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.15s ease;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background-color: #f0f0f0;
+  border-color: #d1d5db;
+}
+
+.paginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

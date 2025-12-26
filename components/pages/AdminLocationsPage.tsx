@@ -6,6 +6,9 @@ import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { LevelsetButton } from '@/components/ui/LevelsetButton/LevelsetButton';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { AdminModeSidebar } from '@/components/AdminMode/AdminModeSidebar';
+import { UserTestingPage } from '@/components/AdminMode/UserTestingPage';
+import { ComingSoonPlaceholder } from '@/components/OrgSettings/ComingSoonPlaceholder';
 import styles from './AdminLocationsPage.module.css';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
@@ -15,8 +18,23 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
 export function AdminLocationsPage() {
   const router = useRouter();
   const auth = useAuth();
+  const [activeSection, setActiveSection] = React.useState<string>('user-testing');
 
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
+
+  // Render content based on active section
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'user-testing':
+        return <UserTestingPage />;
+      case 'locations':
+        return <ComingSoonPlaceholder title="Location Management" description="View and manage all locations across the Levelset platform." />;
+      case 'clients':
+        return <ComingSoonPlaceholder title="Client Management" description="Manage organizations and their access to the platform." />;
+      default:
+        return <UserTestingPage />;
+    }
+  };
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -114,35 +132,21 @@ export function AdminLocationsPage() {
             <div className={styles.headerTextContainer}>
               <h1 className={styles.pageTitle}>Admin Mode</h1>
               <p className={styles.pageSubtitle}>
-                Manage locations and clients across the Levelset platform.
+                Test as users, manage locations, and configure clients across the Levelset platform.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Main content */}
+        {/* Main content with sidebar */}
         <div className={styles.mainContent}>
           <div className={styles.contentContainer}>
-            <div className={styles.sectionCard}>
-              <h2 className={styles.sectionTitle}>Locations Management</h2>
-              <p className={styles.sectionDescription}>
-                This is where you can view and manage all locations and their associated clients.
-              </p>
-              {/* TODO: Add location management table/components here */}
-              <div className={styles.placeholder}>
-                Location management features coming soon.
-              </div>
-            </div>
-
-            <div className={styles.sectionCard}>
-              <h2 className={styles.sectionTitle}>Client Management</h2>
-              <p className={styles.sectionDescription}>
-                Manage organizations and their access to the platform.
-              </p>
-              {/* TODO: Add client management table/components here */}
-              <div className={styles.placeholder}>
-                Client management features coming soon.
-              </div>
+            <AdminModeSidebar
+              activeSection={activeSection}
+              onSectionChange={setActiveSection}
+            />
+            <div className={styles.contentArea}>
+              {renderContent()}
             </div>
           </div>
         </div>

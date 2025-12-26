@@ -461,11 +461,11 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
         )}
       </div>
 
-      <div className={sty.positionsHeader}>
+      <div className={disabled ? sty.positionsHeaderReadOnly : sty.positionsHeader}>
         {!disabled && <span className={sty.headerDrag}></span>}
         <span className={sty.headerName}>Position Name</span>
         <span className={sty.headerDescription}>Description</span>
-        <span className={sty.headerActions}></span>
+        {!disabled && <span className={sty.headerActions}></span>}
       </div>
 
       {sectionPositions.length === 0 ? (
@@ -474,7 +474,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
         sectionPositions.map((position, index) => (
           <div 
             key={position.id} 
-            className={`${sty.positionRow} ${draggedIndex === index && draggedZone === zone ? sty.dragging : ''}`}
+            className={`${disabled ? sty.positionRowReadOnly : sty.positionRow} ${draggedIndex === index && draggedZone === zone ? sty.dragging : ''}`}
             draggable={!disabled}
             onDragStart={() => handleDragStart(index, zone)}
             onDragOver={handleDragOver}
@@ -505,28 +505,30 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
               rows={1}
               disabled={disabled}
             />
-            <div className={sty.rowActions}>
-              {!disabled && language === 'es' && (
-                <IconButton
-                  size="small"
-                  onClick={() => handleAutoTranslate(false, position.id)}
-                  disabled={translating}
-                  title="Translate this position"
-                  sx={{ color: '#6b7280', '&:hover': { color: '#31664a' } }}
-                >
-                  <TranslateIcon fontSize="small" />
-                </IconButton>
-              )}
-              {!disabled && language === 'en' && (
-                <IconButton
-                  size="small"
-                  onClick={() => handleDeletePosition(position.id)}
-                  className={sty.deleteButton}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              )}
-            </div>
+            {!disabled && (
+              <div className={sty.rowActions}>
+                {language === 'es' && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleAutoTranslate(false, position.id)}
+                    disabled={translating}
+                    title="Translate this position"
+                    sx={{ color: '#6b7280', '&:hover': { color: '#31664a' } }}
+                  >
+                    <TranslateIcon fontSize="small" />
+                  </IconButton>
+                )}
+                {language === 'en' && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDeletePosition(position.id)}
+                    className={sty.deleteButton}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </div>
+            )}
           </div>
         ))
       )}

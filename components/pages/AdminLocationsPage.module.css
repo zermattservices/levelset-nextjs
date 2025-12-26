@@ -59,10 +59,15 @@
 
 .contentContainer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   width: 100%;
   max-width: var(--token-eC7sN0TdrMwT);
-  gap: 24px;
+  gap: 32px;
+}
+
+.contentArea {
+  flex: 1;
+  min-width: 0;
 }
 
 .sectionCard {

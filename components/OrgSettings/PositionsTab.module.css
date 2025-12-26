@@ -79,6 +79,15 @@
   align-items: center;
 }
 
+.positionsHeaderReadOnly {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e5e5;
+  align-items: center;
+}
+
 .headerDrag,
 .headerName,
 .headerDescription,
@@ -107,6 +116,15 @@
 .positionRow {
   display: grid;
   grid-template-columns: 28px 180px 1fr 60px;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: flex-start;
+}
+
+.positionRowReadOnly {
+  display: grid;
+  grid-template-columns: 180px 1fr;
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid #f0f0f0;
