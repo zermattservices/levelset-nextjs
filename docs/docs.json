@@ -30,7 +30,7 @@
     "groups": [
       {
         "group": "Get Started",
-        "pages": ["overview", "getting-started/introduction", "getting-started/first-login"]
+        "pages": ["overview", "getting-started/getting-started"]
       },
       {
         "group": "Positional Excellence",

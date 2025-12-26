@@ -1,0 +1,348 @@
+---
+title: Getting Started
+description: Understand how Levelset is organized and the key concepts you need to know
+---
+
+# Getting Started
+
+Before you dive in, it helps to understand how Levelset is organized. This guide explains the key concepts and how they work together.
+
+## Organizations and Locations
+
+Levelset uses a two-level structure:
+
+```
+Organization (your company)
+    ├── Location 1
+    ├── Location 2
+    └── Location 3
+```
+
+### Organization
+
+An **organization** is your company or franchise group. It's the top level of Levelset.
+
+- All your locations belong to one organization
+- Settings like positions, rating criteria, and roles are configured at the organization level
+- These settings apply to all locations
+
+### Location
+
+A **location** is an individual site (restaurant, store, etc.) within your organization.
+
+- Each location has its own employees
+- Ratings and discipline are tracked per location
+- When you log in, you select which location you want to work with
+
+<Note>
+If you only have one location, you won't need to select anything—you'll go straight to the dashboard.
+</Note>
+
+### Switching Locations
+
+If you have access to multiple locations:
+
+1. Look for the **location dropdown** in the navigation bar
+2. Click it to see your available locations
+3. Select a different location
+4. All data on the page updates to show that location
+
+Your selection stays as you navigate between pages until you change it.
+
+---
+
+## Employees vs Users
+
+These two concepts are different in Levelset:
+
+| Concept | What It Means |
+|---------|---------------|
+| **Employee** | Someone on your roster who works at your location |
+| **User** | Someone who can log into the Levelset dashboard |
+
+### Employees
+
+Every team member at your location should be in the roster as an **employee**. This allows them to:
+
+- Receive positional ratings
+- Have discipline records (if applicable)
+- Appear in reports and analytics
+
+Most employees don't need to log into Levelset—they're just tracked in the system.
+
+### Users
+
+A **user** is someone with login credentials for the dashboard. Users are typically:
+
+- Operators and owners
+- Directors and managers
+- Supervisors who need to view reports
+
+To become a user, someone must be added in **Organization Settings → Users**. Simply being an employee doesn't grant dashboard access.
+
+<Tip>
+Think of it this way: All users are usually employees, but most employees are not users.
+</Tip>
+
+---
+
+## Roles and Permission Levels
+
+Roles control what people can see and do in Levelset. They're organized in a hierarchy.
+
+### The Role Hierarchy
+
+Roles go from highest permissions (top) to lowest (bottom):
+
+```
+Level 0: Operator/Owner (full access)
+    ↓
+Level 1: Director/Executive
+    ↓
+Level 2: Manager
+    ↓
+Level 3: Supervisor/Team Lead
+    ↓
+Level 4: Trainer
+    ↓
+Level 5: Team Member
+    ↓
+Level 6: New Hire
+```
+
+<Note>
+Your organization can rename these roles to match your terminology. What matters is the level number, not the name.
+</Note>
+
+### What Roles Control
+
+| Permission | Determined By |
+|------------|---------------|
+| **Dashboard access** | Typically levels 0-2 (must also be added as a User) |
+| **What you can see** | Your role level |
+| **Who you can manage** | You can only manage people below your level |
+| **What positions you can rate** | Role Mapping settings |
+| **Discipline access** | Discipline Access settings |
+
+### The Hierarchy Rule
+
+A key rule in Levelset: **You can only manage people below your level.**
+
+- A Manager (Level 2) can change roles for Team Leads (Level 3) and below
+- A Manager cannot change roles for other Managers or Directors
+- Only Operators have unrestricted access
+
+### Role Colors
+
+Each role has a color assigned for quick visual identification. You'll see these color-coded badges throughout Levelset—on the roster, in reports, and in rating views.
+
+---
+
+## FOH and BOH
+
+Employees and positions are categorized as:
+
+- **FOH (Front of House)** - Customer-facing roles
+- **BOH (Back of House)** - Kitchen/production roles
+
+### Why This Matters
+
+| What | How FOH/BOH Affects It |
+|------|------------------------|
+| **Employees** | Determines which positions they can be rated on |
+| **Positions** | Categorizes where the position belongs |
+| **Filtering** | You can filter views to show only FOH or BOH |
+
+### Examples
+
+**FOH Positions:** Register, Drive-Thru, Host, Dining Room, Drinks
+
+**BOH Positions:** Grill, Prep, Fries, Breading, Expeditor
+
+Some employees may be marked as **Both** if they work in both areas.
+
+---
+
+## Positions and Rating Criteria
+
+### Positions
+
+A **position** is a specific job someone does. Your organization defines what positions exist.
+
+Each position has:
+- A name (e.g., "Drive-Thru", "Grill")
+- A description of what the job involves
+- An FOH or BOH designation
+- 5 rating criteria
+
+### Rating Criteria
+
+Each position has exactly **5 criteria** that define what you're evaluating. These are sometimes called the "Big 5."
+
+For example, a **Register** position might have:
+1. Speed
+2. Accuracy
+3. Guest Interaction
+4. Menu Knowledge
+5. Payment Handling
+
+When you rate someone in a position, you score each of these 5 criteria.
+
+### The 1-3 Scale
+
+Ratings use a simple scale:
+
+| Score | Label | Meaning |
+|-------|-------|---------|
+| **1** | Not Yet | Still developing, needs improvement |
+| **2** | On the Rise | Making progress, getting better |
+| **3** | Crushing It | Consistently excellent |
+
+---
+
+## The Dashboard
+
+The **dashboard** is the main web interface at [app.levelset.io](https://app.levelset.io).
+
+### Main Sections
+
+| Section | What It Shows |
+|---------|---------------|
+| **Home** | Overview metrics for your location |
+| **Positional Excellence** | Ratings for all employees, multiple views |
+| **Discipline** | Infractions, points, and recommended actions |
+| **Roster** | All employees at your location |
+
+### Navigation
+
+The top navigation bar includes:
+
+- **Levelset logo** - Click to go home
+- **Section links** - Home, Positional Excellence, Discipline, Roster
+- **Location selector** - Switch between locations
+- **Help icon** - Opens this documentation
+- **Profile menu** - Settings and log out
+
+### Settings Access
+
+Click your **profile icon** (top right) and select **Organization Settings** to configure:
+
+- Positions and rating criteria
+- Roles
+- Users
+- Discipline settings
+
+<Note>
+You need appropriate permissions to access settings. Most settings require an Operator or Director role.
+</Note>
+
+---
+
+## The Mobile App
+
+Levelset has a mobile-friendly web app for on-the-floor use.
+
+### What You Can Do on Mobile
+
+- **Submit ratings** - Rate team members from your phone
+- **Submit infractions** - Document discipline on the spot
+- **View data** - Check ratings and records
+
+### How to Access
+
+1. Open your phone's browser
+2. Go to [app.levelset.io](https://app.levelset.io)
+3. Log in with your credentials
+
+### Add to Home Screen
+
+For quick access, add Levelset to your home screen:
+
+**iPhone:**
+1. Tap the Share button
+2. Tap "Add to Home Screen"
+3. Tap "Add"
+
+**Android:**
+1. Tap the menu (three dots)
+2. Tap "Add to Home Screen"
+3. Tap "Add"
+
+Now you can open Levelset like a regular app.
+
+---
+
+## Logging In
+
+### First Time Login
+
+1. Go to **[app.levelset.io](https://app.levelset.io)**
+2. Enter your **email** and **password** (provided by your administrator)
+3. Click **Sign In**
+
+Or use **Sign in with Google** if your email is a Google account.
+
+### Selecting a Location
+
+If you have access to multiple locations, you'll be prompted to select one after logging in. Choose the location you want to work with.
+
+### Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Don't have credentials | Contact your administrator |
+| Password not working | Contact your administrator to reset it |
+| Can't see any data | Make sure you've selected a location |
+| Google Sign-In failing | Your Google email must match your Levelset user email |
+
+---
+
+## How It All Connects
+
+Here's how the key concepts work together:
+
+```
+Organization
+    │
+    ├── Defines: Positions, Criteria, Roles
+    │
+    └── Contains: Locations
+                      │
+                      ├── Contains: Employees
+                      │                 │
+                      │                 ├── Have a Role (determines permissions)
+                      │                 ├── Are FOH/BOH (determines rateable positions)
+                      │                 └── Can be rated and have discipline
+                      │
+                      └── Data: Ratings, Infractions, Reports
+```
+
+**Example flow:**
+
+1. Your organization defines a "Register" position with 5 criteria
+2. At Location #123, Sarah is an employee marked as FOH
+3. A Manager at Location #123 logs into the dashboard
+4. The Manager rates Sarah on the "Register" position
+5. Sarah's rating appears in the Positional Excellence dashboard
+6. Over time, her rolling average updates as she receives more ratings
+
+---
+
+## Next Steps
+
+Now that you understand how Levelset is organized, explore the features:
+
+<CardGroup cols={2}>
+  <Card title="Positional Excellence" icon="star" href="/positional-excellence/overview">
+    Learn how ratings work and how to view them
+  </Card>
+  <Card title="Discipline" icon="clipboard-list" href="/discipline/overview">
+    Understand the discipline tracking system
+  </Card>
+  <Card title="Roster Management" icon="users" href="/roster-management/overview">
+    Learn how to manage employees
+  </Card>
+  <Card title="Organization Settings" icon="gear" href="/organization-settings/overview">
+    Configure Levelset for your organization
+  </Card>
+</CardGroup>
