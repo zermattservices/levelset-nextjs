@@ -32,12 +32,8 @@
   "navigation": {
     "groups": [
       {
-        "group": "",
-        "pages": ["index"]
-      },
-      {
         "group": "Get Started",
-        "pages": ["overview", "getting-started/getting-started"]
+        "pages": ["index", "overview", "getting-started/getting-started"]
       },
       {
         "group": "Positional Excellence",
