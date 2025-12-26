@@ -20,9 +20,11 @@
       "source": "/fonts/Mont-Bold.woff2",
       "format": "woff2"
     },
-    "family": "Satoshi",
-    "source": "https://fonts.cdnfonts.com/css/satoshi",
-    "format": "woff2"
+    "body": {
+      "source": "https://fonts.cdnfonts.com/css/satoshi",
+      "format": "woff2",
+      "family": "Satoshi"
+    }
   },
   "seo": {
     "metatags": {
@@ -80,5 +82,18 @@
   },
   "background": {
     "decoration": "grid"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Dashboard",
+        "href": "https://app.levelset.io/auth/login"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "website": "https://levelset.io"
+    }
   }
 }
