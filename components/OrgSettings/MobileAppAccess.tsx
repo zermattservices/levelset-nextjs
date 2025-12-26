@@ -18,6 +18,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import sty from './MobileAppAccess.module.css';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
 const STORAGE_DOMAIN = 'https://files.levelset.io';
@@ -75,6 +76,12 @@ export function MobileAppAccess({ disabled = false }: MobileAppAccessProps) {
   const [error, setError] = React.useState<string | null>(null);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  const { has } = usePermissions();
+  
+  // Permission checks
+  const canViewPassword = has(P.MOBILE_VIEW_PASSWORD) && !disabled;
+  const canChangePassword = has(P.MOBILE_CHANGE_PASSWORD) && !disabled;
+  const canManageConfig = has(P.MOBILE_MANAGE_CONFIG) && !disabled;
 
   const pwaUrl = selectedLocationMobileToken 
     ? `https://app.levelset.io/mobile/${selectedLocationMobileToken}`

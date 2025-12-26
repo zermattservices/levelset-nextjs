@@ -263,3 +263,10 @@
   color: #9ca3af;
   font-style: italic;
 }
+
+
+.permissionLevelText {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: #6b7280;
+}

@@ -11,6 +11,7 @@ import { DisciplineActionsTab } from './DisciplineActionsTab';
 import { DisciplineAccessTab } from './DisciplineAccessTab';
 import { ComingSoonPlaceholder } from './ComingSoonPlaceholder';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -62,6 +63,13 @@ export function DisciplineSettings({ orgId, locationId, onNavigate, disabled = f
   const [locationCount, setLocationCount] = React.useState<number>(0);
   
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  const { has } = usePermissions();
+  
+  // Granular permission checks for each tab
+  const canManageInfractions = has(P.DISC_MANAGE_INFRACTIONS) && !disabled;
+  const canManageActions = has(P.DISC_MANAGE_ACTIONS) && !disabled;
+  const canManageAccess = has(P.DISC_MANAGE_ACCESS) && !disabled;
+  const canManageNotifications = has(P.DISC_MANAGE_NOTIFICATIONS) && !disabled;
 
   // Fetch location count for the organization
   React.useEffect(() => {
@@ -90,11 +98,11 @@ export function DisciplineSettings({ orgId, locationId, onNavigate, disabled = f
   const renderTabContent = () => {
     switch (activeTab) {
       case 'infractions':
-        return <InfractionsTab orgId={orgId} disabled={disabled} />;
+        return <InfractionsTab orgId={orgId} disabled={!canManageInfractions} />;
       case 'actions':
-        return <DisciplineActionsTab orgId={orgId} disabled={disabled} />;
+        return <DisciplineActionsTab orgId={orgId} disabled={!canManageActions} />;
       case 'access':
-        return <DisciplineAccessTab orgId={orgId} locationId={locationId} onNavigate={onNavigate} disabled={disabled} />;
+        return <DisciplineAccessTab orgId={orgId} locationId={locationId} onNavigate={onNavigate} disabled={!canManageAccess} />;
       case 'notifications':
         return <ComingSoonPlaceholder title="Notifications" description="Configure automated discipline notifications coming soon." />;
       default:

@@ -17,9 +17,11 @@ import { LocationDetails } from '@/components/OrgSettings/LocationDetails';
 import { OrganizationDetails } from '@/components/OrgSettings/OrganizationDetails';
 import { UsersTab } from '@/components/OrgSettings/UsersTab';
 import { RolesTab } from '@/components/OrgSettings/RolesTab';
+import { PermissionsSettings } from '@/components/OrgSettings/PermissionsSettings';
 // PaySettingsTab import kept for when Roster settings is enabled
 // import { PaySettingsTab } from '@/components/OrgSettings/PaySettingsTab';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -33,9 +35,13 @@ export function OrgSettingsPage() {
   const [level1RoleName, setLevel1RoleName] = React.useState<string>('');
   
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  const { has, loading: permissionsLoading } = usePermissions();
+  
+  // Check if user can view organization settings
+  const canViewOrgSettings = has(P.ORG_VIEW_SETTINGS);
   
   // Determine if user can edit settings
-  // Only Level 0, Level 1, and Levelset Admin can edit
+  // Uses permissions system - specific permissions are checked in child components
   const canEdit = React.useMemo(() => {
     if (auth.role === 'Levelset Admin') return true;
     if (userHierarchyLevel === null) return false;
@@ -90,7 +96,7 @@ export function OrgSettingsPage() {
       items: [
         { id: 'users', label: 'Users', status: 'active' },
         { id: 'roles', label: 'Roles', status: 'active' },
-        { id: 'permissions', label: 'Permissions', status: 'coming-soon' },
+        { id: 'permissions', label: 'Permissions', status: 'active' },
       ],
     },
     {
@@ -125,7 +131,7 @@ export function OrgSettingsPage() {
       case 'roles':
         return <RolesTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'permissions':
-        return <ComingSoonPlaceholder title="Permissions" description="Configure role-based permissions for your organization coming soon." />;
+        return <PermissionsSettings orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'mobile-access':
         return <MobileAppAccess disabled={!canEdit} />;
       case 'mobile-config':

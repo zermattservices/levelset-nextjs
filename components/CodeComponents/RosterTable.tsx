@@ -32,6 +32,7 @@ import { EmployeeModal } from "./EmployeeModal";
 import { useLocationContext } from "./LocationContext";
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { OrgRole } from "@/lib/role-utils";
+import { usePermissions, P } from "@/lib/providers/PermissionsProvider";
 
 // Feature toggles interface
 interface OrgFeatureToggles {
@@ -57,6 +58,7 @@ export interface RosterEntry {
 export function RosterTable(props: RosterTableProps) {
   const { locationId, currentUserRoleProp } = props;
   const { selectedLocationOrgId, userHierarchyLevel } = useLocationContext();
+  const { has } = usePermissions();
   const [activeTab, setActiveTab] = React.useState<'employees' | 'evaluations' | 'pip'>('employees');
   const [hasPlannedEvaluations, setHasPlannedEvaluations] = React.useState(false);
   const [addEmployeeModalOpen, setAddEmployeeModalOpen] = React.useState(false);
@@ -70,9 +72,20 @@ export function RosterTable(props: RosterTableProps) {
     enable_pip_logic: false,
   });
   
+  // Permission-based access control for roster operations
+  const canViewRoster = has(P.ROSTER_VIEW);
+  const canEditFohBoh = has(P.ROSTER_EDIT_FOH_BOH);
+  const canEditAvailability = has(P.ROSTER_EDIT_AVAILABILITY);
+  const canEditRoles = has(P.ROSTER_EDIT_ROLES);
+  const canEditEmployee = has(P.ROSTER_EDIT_EMPLOYEE);
+  const canSyncEmployees = has(P.ROSTER_SYNC);
+  const canManagePaySettings = has(P.ROSTER_MANAGE_PAY);
+  const canTerminate = has(P.ROSTER_TERMINATE);
+  
   // Determine if user can edit more than just FOH/BOH
   // Level 0, 1, and Levelset Admin can edit everything
   // Level 2+ can only edit FOH/BOH (and view evaluations/PIP read-only)
+  // Replaced with permission-based checks above
   const canEditFullRoster = React.useMemo(() => {
     if (currentUserRoleProp === 'Levelset Admin') return true;
     if (userHierarchyLevel === null) return false;

@@ -7,6 +7,7 @@ import Chip from '@mui/material/Chip';
 import BusinessIcon from '@mui/icons-material/Business';
 import sty from './OrganizationDetails.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -62,6 +63,11 @@ export function OrganizationDetails({ orgId, disabled = false }: OrganizationDet
   const orgIdRef = React.useRef(orgId);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  const { has } = usePermissions();
+  
+  // Permission check
+  const canManageOrg = has(P.ORG_MANAGE_ORG) && !disabled;
+  const isDisabled = disabled || !canManageOrg;
 
   // Fetch location count for the organization
   React.useEffect(() => {

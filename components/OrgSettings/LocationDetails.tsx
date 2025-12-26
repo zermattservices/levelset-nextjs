@@ -5,6 +5,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import sty from './LocationDetails.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
 interface LocationDetailsProps {
   locationId: string | null;
@@ -12,6 +13,11 @@ interface LocationDetailsProps {
 }
 
 export function LocationDetails({ locationId, disabled = false }: LocationDetailsProps) {
+  const { has } = usePermissions();
+  
+  // Permission check
+  const canManageLocation = has(P.ORG_MANAGE_LOCATION) && !disabled;
+  const isDisabled = disabled || !canManageLocation;
   const [logoUrl, setLogoUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [uploading, setUploading] = React.useState(false);

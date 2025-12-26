@@ -11,6 +11,7 @@ import { DashboardSubmenu } from '../DashboardSubmenu/DashboardSubmenu';
 import { LocationSelectDropdown } from '@/components/CodeComponents/LocationSelectDropdown';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
+import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -25,6 +26,7 @@ export interface MenuNavigationProps {
 export function MenuNavigation({ className, firstName, userRole }: MenuNavigationProps) {
   const auth = useAuth();
   const { userHierarchyLevel } = useLocationContext();
+  const { has } = usePermissions();
   const [dashboardOpen, setDashboardOpen] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
   const profileDropdownRef = React.useRef<HTMLDivElement>(null);
@@ -34,8 +36,10 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
 
   const isLevelsetAdmin = displayRole === 'Levelset Admin';
   
-  // All authenticated users can access org settings (read-only for level 2+)
-  const canAccessOrgSettings = userHierarchyLevel !== null;
+  // Permission-based navigation access
+  const canViewDashboard = has(P.PE_VIEW_DASHBOARD);
+  const canViewRoster = has(P.ROSTER_VIEW);
+  const canAccessOrgSettings = has(P.ORG_VIEW_SETTINGS) || userHierarchyLevel !== null;
 
   // Close profile dropdown when clicking outside
   React.useEffect(() => {

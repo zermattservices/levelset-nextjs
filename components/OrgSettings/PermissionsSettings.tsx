@@ -1,0 +1,143 @@
+/**
+ * Permissions Settings
+ * Main container for permission configuration with two tabs:
+ * - Permission Levels: View and manage permission profiles
+ * - Modify Access: Configure granular permissions for each profile
+ */
+
+import * as React from 'react';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import sty from './PermissionsSettings.module.css';
+import { PermissionLevelsTab } from './PermissionLevelsTab';
+import { ModifyAccessTab } from './ModifyAccessTab';
+import { usePermissions } from '@/lib/providers/PermissionsProvider';
+import { P } from '@/lib/permissions/constants';
+
+const fontFamily = '"Satoshi", sans-serif';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`permissions-tabpanel-${index}`}
+      aria-labelledby={`permissions-tab-${index}`}
+      className={sty.tabPanel}
+      {...other}
+    >
+      {value === index && children}
+    </div>
+  );
+}
+
+interface PermissionsSettingsProps {
+  orgId: string | null;
+  disabled?: boolean;
+}
+
+export function PermissionsSettings({ orgId, disabled = false }: PermissionsSettingsProps) {
+  const [activeTab, setActiveTab] = React.useState(0);
+  const [selectedProfileId, setSelectedProfileId] = React.useState<string | null>(null);
+  const { has, canEditLevel, hierarchyLevel, loading: permissionsLoading } = usePermissions();
+
+  // Check permissions
+  const canViewPermissions = has(P.PERMS_VIEW);
+  const canManagePermissions = has(P.PERMS_MANAGE);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
+
+  // When a profile is selected in the levels tab, switch to modify access tab
+  const handleEditProfile = (profileId: string) => {
+    setSelectedProfileId(profileId);
+    setActiveTab(1);
+  };
+
+  if (permissionsLoading) {
+    return (
+      <div className={sty.loadingContainer}>
+        <div className={sty.loadingSpinner} />
+      </div>
+    );
+  }
+
+  if (!canViewPermissions) {
+    return (
+      <div className={sty.container}>
+        <div className={sty.noAccessMessage}>
+          You do not have permission to view this page.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={sty.container}>
+      <div className={sty.header}>
+        <h2 className={sty.title}>Permissions</h2>
+        <p className={sty.description}>
+          Configure permission levels and access controls for your organization.
+        </p>
+      </div>
+
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          aria-label="permissions settings tabs"
+          sx={{
+            '& .MuiTab-root': {
+              fontFamily,
+              fontSize: 14,
+              fontWeight: 500,
+              textTransform: 'none',
+              color: '#6b7280',
+              '&.Mui-selected': {
+                color: '#31664a',
+              },
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: '#31664a',
+            },
+          }}
+        >
+          <Tab label="Permission Levels" />
+          <Tab label="Modify Access" />
+        </Tabs>
+      </Box>
+
+      <TabPanel value={activeTab} index={0}>
+        <PermissionLevelsTab
+          orgId={orgId}
+          disabled={disabled || !canManagePermissions}
+          userHierarchyLevel={hierarchyLevel}
+          canEditLevel={canEditLevel}
+          onEditProfile={handleEditProfile}
+        />
+      </TabPanel>
+
+      <TabPanel value={activeTab} index={1}>
+        <ModifyAccessTab
+          orgId={orgId}
+          disabled={disabled || !canManagePermissions}
+          userHierarchyLevel={hierarchyLevel}
+          canEditLevel={canEditLevel}
+          initialProfileId={selectedProfileId}
+        />
+      </TabPanel>
+    </div>
+  );
+}
+
+export default PermissionsSettings;

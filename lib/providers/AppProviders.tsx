@@ -1,5 +1,6 @@
 import React from 'react';
 import { AuthProvider } from './AuthProvider';
+import { PermissionsProvider } from './PermissionsProvider';
 import { LocationProvider } from '@/components/CodeComponents/LocationContext';
 import { LocationSelectModal } from '@/components/CodeComponents/LocationSelectModal';
 
@@ -12,16 +13,18 @@ interface AppProvidersProps {
 
 /**
  * AppProviders - Replaces GlobalContextsProvider from Plasmic
- * Provides auth and location context to the application
+ * Provides auth, location, and permissions context to the application
  */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <div className={projectcss.plasmic_tokens}>
       <AuthProvider>
         <LocationProvider>
-          {children}
-          {/* Global Location Select Modal - shows when no location is selected */}
-          <LocationSelectModal />
+          <PermissionsProvider>
+            {children}
+            {/* Global Location Select Modal - shows when no location is selected */}
+            <LocationSelectModal />
+          </PermissionsProvider>
         </LocationProvider>
       </AuthProvider>
     </div>

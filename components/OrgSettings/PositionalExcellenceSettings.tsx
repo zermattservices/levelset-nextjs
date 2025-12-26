@@ -12,6 +12,7 @@ import { RatingCriteriaTab } from './RatingCriteriaTab';
 import { RoleMappingTab } from './RoleMappingTab';
 import { RatingScaleTab } from './RatingScaleTab';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -61,6 +62,13 @@ export function PositionalExcellenceSettings({ orgId, disabled = false }: Positi
   const [locationCount, setLocationCount] = React.useState<number>(0);
   
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  const { has } = usePermissions();
+  
+  // Granular permission checks for each tab
+  const canManagePositions = has(P.PE_MANAGE_POSITIONS) && !disabled;
+  const canManageCriteria = has(P.PE_MANAGE_RATING_CRITERIA) && !disabled;
+  const canManageRoleMappings = has(P.PE_MANAGE_ROLE_MAPPINGS) && !disabled;
+  const canManageRatingScale = has(P.PE_MANAGE_RATING_SCALE) && !disabled;
 
   // Fetch location count for the organization
   React.useEffect(() => {
@@ -89,13 +97,13 @@ export function PositionalExcellenceSettings({ orgId, disabled = false }: Positi
   const renderTabContent = () => {
     switch (activeTab) {
       case 'positions':
-        return <PositionsTab orgId={orgId} disabled={disabled} />;
+        return <PositionsTab orgId={orgId} disabled={!canManagePositions} />;
       case 'criteria':
-        return <RatingCriteriaTab orgId={orgId} disabled={disabled} />;
+        return <RatingCriteriaTab orgId={orgId} disabled={!canManageCriteria} />;
       case 'role-mapping':
-        return <RoleMappingTab orgId={orgId} disabled={disabled} />;
+        return <RoleMappingTab orgId={orgId} disabled={!canManageRoleMappings} />;
       case 'rating-scale':
-        return <RatingScaleTab orgId={orgId} disabled={disabled} />;
+        return <RatingScaleTab orgId={orgId} disabled={!canManageRatingScale} />;
       default:
         return null;
     }

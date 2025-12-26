@@ -14,6 +14,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import sty from './RolesTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { DEFAULT_ROLE_COLORS, ROLE_COLOR_KEYS, getUniqueRoleColor, type RoleColorKey } from '@/lib/role-utils';
+import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -72,6 +73,11 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
   const [locationCount, setLocationCount] = React.useState<number>(0);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  const { has } = usePermissions();
+  
+  // Permission checks
+  const canManageRoles = has(P.ROLES_MANAGE) && !disabled;
+  const isDisabled = disabled || !canManageRoles;
 
   // Fetch location count for the organization
   React.useEffect(() => {
