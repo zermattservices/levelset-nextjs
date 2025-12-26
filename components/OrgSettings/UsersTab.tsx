@@ -386,13 +386,24 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
     if (isEmployeeLinked) {
       const linkedUser = user as EmployeeLinkedUser;
       if (linkedUser.use_role_default || !linkedUser.permission_profile_id) {
-        return 'Default (from role)';
+        // Find the system default profile based on the user's role
+        const role = orgRoles.find(r => r.role_name === linkedUser.employee_role);
+        if (role) {
+          const systemProfile = permissionProfiles.find(
+            p => p.hierarchy_level === role.hierarchy_level && p.is_system_default
+          );
+          if (systemProfile) {
+            return systemProfile.name;
+          }
+        }
+        // Fallback to role name if no profile found
+        return linkedUser.employee_role || 'Not assigned';
       }
     }
     
     const profile = permissionProfiles.find(p => p.id === user.permission_profile_id);
     return profile?.name || 'Not assigned';
-  }, [permissionProfiles]);
+  }, [permissionProfiles, orgRoles]);
 
   // Get the system default profile for a user based on their role hierarchy
   const getSystemProfileForRole = React.useCallback((roleName: string | null): PermissionProfile | undefined => {
