@@ -41,7 +41,11 @@
     "groups": [
       {
         "group": "Get Started",
-        "pages": ["index", "overview", "getting-started/getting-started"]
+        "pages": [
+          "index",
+          "overview",
+          "getting-started/getting-started"
+        ]
       },
       {
         "group": "Positional Excellence",
@@ -70,12 +74,27 @@
       {
         "group": "Organization Settings",
         "pages": [
+          {
+            "group": "Users and Security",
+            "pages": [
+              "organization-settings/roles"
+            ]
+          },
+          {
+            "group": "Discipline",
+            "pages": [
+              "organization-settings/discipline"
+            ]
+          },
+          {
+            "group": "Positional Excellence",
+            "pages": [
+              "organization-settings/positions",
+              "organization-settings/rating-criteria"
+            ]
+          },
           "organization-settings/overview",
-          "organization-settings/positions",
-          "organization-settings/rating-criteria",
-          "organization-settings/roles",
-          "organization-settings/users",
-          "organization-settings/discipline"
+          "organization-settings/users"
         ]
       }
     ]

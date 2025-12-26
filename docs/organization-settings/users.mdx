@@ -1,9 +1,7 @@
 ---
-title: Users Settings
-description: How to manage who can log into Levelset
+title: "Users Settings"
+description: "How to manage who can log into Levelset"
 ---
-
-# Users Settings
 
 Users settings controls who can log into the Levelset dashboard. This is separate from the employee roster—users are people with login credentials.
 
@@ -16,10 +14,10 @@ Users settings controls who can log into the Levelset dashboard. This is separat
 
 It's important to understand the difference:
 
-| Concept | Description |
-|---------|-------------|
+| Concept      | Description                                               |
+| ------------ | --------------------------------------------------------- |
 | **Employee** | Someone on your roster. May or may not have login access. |
-| **User** | Someone with login credentials for the dashboard. |
+| **User**     | Someone with login credentials for the dashboard.         |
 
 Most employees don't need dashboard access. Typically only leadership and management log into Levelset.
 
@@ -49,19 +47,15 @@ Users who are NOT linked to an employee:
   <Step title="Click Add User">
     In the Leadership Team section, click **Add User**.
   </Step>
-  
   <Step title="Select the Employee">
     Choose from the dropdown. Only employees with leadership roles appear.
   </Step>
-  
   <Step title="Enter Their Email">
     Provide the email they'll use to log in. This may be pre-filled if they have an email on file.
   </Step>
-  
   <Step title="Create the User">
     Click **Create User**. A temporary password will be generated.
   </Step>
-  
   <Step title="Share the Credentials">
     **Important:** Copy the email and temporary password immediately. Share them securely with the new user.
   </Step>
@@ -73,17 +67,22 @@ Users who are NOT linked to an employee:
   <Step title="Click Add Administrator">
     In the Administrative Users section, click **Add Administrator**.
   </Step>
-  
   <Step title="Enter Their Information">
     - First name
     - Last name
     - Email address
   </Step>
-  
+  <Step title="Select a Permission Level">
+    Levelset has two default Administrative User permission levels. Select one of these or create your own and select that.
+  </Step>
   <Step title="Create and Share">
     Click Create, then copy and share the login credentials.
   </Step>
 </Steps>
+
+<Info>
+  Manage permission levels in the Permissions tab.
+</Info>
 
 ## Managing Users
 
@@ -94,7 +93,7 @@ Users who are NOT linked to an employee:
 3. Click the checkmark to save
 
 <Note>
-Changing the email changes their login credential. Make sure they know to use the new email.
+  Changing the email changes their login credential. Make sure they know to use the new email.
 </Note>
 
 ### Remove User Access
@@ -103,6 +102,7 @@ Changing the email changes their login credential. Make sure they know to use th
 2. Confirm the removal
 
 This removes their ability to log in but does NOT:
+
 - Delete their employee record (if they have one)
 - Remove historical data they created
 - Delete ratings or infractions they submitted
@@ -116,15 +116,12 @@ When you create a user:
 3. You must copy it before closing
 
 <Warning>
-If you close the modal without copying the password, you'll need to contact an administrator to reset it.
+  If you close the modal without copying the password, you'll need to contact an administrator to reset it.
 </Warning>
 
-### Sharing Credentials Securely
-
-- Don't send passwords in plain text email
-- Use a secure messaging app
-- Tell them verbally if possible
-- Have them change it after first login (when available)
+<Note>
+  We are actively working on creating password reset functionality. We encourage you to use Google Sign-In when possible.
+</Note>
 
 ## Google Sign-In
 
@@ -139,49 +136,30 @@ The user's Google email must match the email in their Levelset user account.
 ## Who Can Manage Users
 
 - **Operators** can add/remove any users
-- **Some leadership roles** may have limited user management
-- **Levelset administrators** have full access
+- **Some leadership roles** may have limited user management permissions
 
-The Operator's email can only be changed by themselves or a Levelset admin (to prevent lockouts).
+User management is a permission that can be controlled in Permissions. Each organization may have different settings.
 
 ## Troubleshooting
 
 <AccordionGroup>
   <Accordion title="Employee doesn't appear in the dropdown">
     Only employees with leadership roles (typically Level 0-2) appear. Check that:
+
     - The person has a leadership role in the roster
     - They don't already have a user account
   </Accordion>
-  
   <Accordion title="User can't log in">
     Verify:
+
     - They're using the exact email from their user account
     - They're entering the password correctly
     - Their user account exists in the Users list
   </Accordion>
-  
   <Accordion title="Need to reset a password">
     Password reset functionality is limited. Contact a Levelset administrator for help with password issues.
   </Accordion>
-  
   <Accordion title="Google Sign-In isn't working">
     The user's Google email must exactly match the email in their Levelset user account. Check for typos or different email addresses.
   </Accordion>
 </AccordionGroup>
-
-## Best Practices
-
-<CardGroup cols={2}>
-  <Card title="Minimal Access" icon="lock">
-    Only create users for people who truly need dashboard access
-  </Card>
-  <Card title="Regular Reviews" icon="magnifying-glass">
-    Periodically check the user list and remove people who no longer need access
-  </Card>
-  <Card title="Secure Sharing" icon="shield">
-    Share credentials securely, not via unencrypted email
-  </Card>
-  <Card title="Use Google SSO" icon="key">
-    Encourage Google sign-in for better security
-  </Card>
-</CardGroup>
