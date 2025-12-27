@@ -125,6 +125,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
           <div className={sty.navButtons}>
             <div
               ref={dashboardHoverRef}
+              className={sty.dashboardHoverContainer}
               onMouseEnter={handleDashboardMouseEnter}
               onMouseLeave={handleDashboardMouseLeave}
             >
@@ -134,6 +135,13 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               >
                 <span className={sty.navButtonText}>Dashboards</span>
               </LevelsetButton>
+              
+              {/* Submenu inside hover container to prevent flashing */}
+              {dashboardOpen && (
+                <div className={sty.submenuOverlay}>
+                  <DashboardSubmenu className={sty.dashboardSubmenu} />
+                </div>
+              )}
             </div>
           </div>
 
@@ -194,18 +202,9 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
         </div>
       </div>
 
-      {/* Dashboard submenu overlay - shown when dashboardOpen is true */}
+      {/* Backdrop blur when submenu is open */}
       {dashboardOpen && (
-        <>
-          <div className={sty.submenuBackdrop} onClick={() => setDashboardOpen(false)} />
-          <div 
-            className={sty.submenuOverlay}
-            onMouseEnter={handleDashboardMouseEnter}
-            onMouseLeave={handleDashboardMouseLeave}
-          >
-            <DashboardSubmenu className={sty.dashboardSubmenu} />
-          </div>
-        </>
+        <div className={sty.submenuBackdrop} onClick={() => setDashboardOpen(false)} />
       )}
     </div>
   );
