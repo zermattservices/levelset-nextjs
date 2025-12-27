@@ -105,15 +105,6 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
             >
               <span className={sty.navButtonText}>Dashboards</span>
             </LevelsetButton>
-
-            {/* Roster is visible to all authenticated users */}
-            <LevelsetButton
-              color="clear"
-              size="compact"
-              link="/roster"
-            >
-              <span className={sty.navButtonText}>Roster</span>
-            </LevelsetButton>
           </div>
 
           {/* Right side - Admin Mode, Location selector, user info, logout, profile icon */}
@@ -134,10 +125,10 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               href="https://docs.levelset.io" 
               target="_blank" 
               rel="noopener noreferrer"
-              className={sty.helpLink}
-              title="Documentation"
+              className={sty.helpButton}
             >
-              <HelpOutlineIcon sx={{ fontSize: 24, color: '#6b7280' }} />
+              <HelpOutlineIcon sx={{ fontSize: 18 }} />
+              <span>Need Help?</span>
             </a>
 
             {/* Location dropdown */}

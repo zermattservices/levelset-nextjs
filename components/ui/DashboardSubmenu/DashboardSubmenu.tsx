@@ -2,11 +2,102 @@ import * as React from 'react';
 import Link from 'next/link';
 import sty from './DashboardSubmenu.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
-import { LevelsetButton } from '../LevelsetButton/LevelsetButton';
+
+// MUI Icons
+import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
+import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
+import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
+import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
+import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
+import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
+
+interface MenuItem {
+  label: string;
+  href?: string;
+  icon: React.ReactNode;
+  disabled?: boolean;
+}
+
+interface MenuGroup {
+  title: string;
+  items: MenuItem[];
+}
+
+const menuGroups: MenuGroup[] = [
+  {
+    title: 'Operations',
+    items: [
+      {
+        label: 'Positional Excellence',
+        href: '/positional-excellence',
+        icon: <RocketLaunchOutlinedIcon sx={{ fontSize: 18 }} />,
+      },
+      {
+        label: 'Discipline',
+        href: '/discipline',
+        icon: <GavelOutlinedIcon sx={{ fontSize: 18 }} />,
+      },
+      {
+        label: 'Pathway',
+        icon: <SchoolOutlinedIcon sx={{ fontSize: 18 }} />,
+        disabled: true,
+      },
+      {
+        label: 'Evaluations',
+        icon: <EventNoteOutlinedIcon sx={{ fontSize: 18 }} />,
+        disabled: true,
+      },
+      {
+        label: 'Form Management',
+        icon: <DescriptionOutlinedIcon sx={{ fontSize: 18 }} />,
+        disabled: true,
+      },
+    ],
+  },
+  {
+    title: 'Analytics',
+    items: [
+      {
+        label: 'WHED',
+        icon: <StarOutlinedIcon sx={{ fontSize: 18 }} />,
+        disabled: true,
+      },
+      {
+        label: 'Retention',
+        icon: <TrendingUpOutlinedIcon sx={{ fontSize: 18 }} />,
+        disabled: true,
+      },
+    ],
+  },
+  {
+    title: 'HR',
+    items: [
+      {
+        label: 'Roster',
+        href: '/roster',
+        icon: <GroupOutlinedIcon sx={{ fontSize: 18 }} />,
+      },
+      {
+        label: '360 Overview',
+        icon: <AllInclusiveOutlinedIcon sx={{ fontSize: 18 }} />,
+        disabled: true,
+      },
+      {
+        label: 'Org Chart',
+        icon: <AccountTreeOutlinedIcon sx={{ fontSize: 18 }} />,
+        disabled: true,
+      },
+    ],
+  },
+];
 
 export interface DashboardSubmenuProps {
   className?: string;
@@ -25,80 +116,27 @@ export function DashboardSubmenu({ className }: DashboardSubmenuProps) {
         className
       )}
     >
-      <div className={classNames(projectcss.all, sty.freeBox__lx5Gj)}>
-        <div className={classNames(projectcss.all, sty.freeBox___5Vowa)}>
-          {/* Pathway - disabled */}
-          <LevelsetButton
-            className={sty.levelsetButton__ouwyl}
-            color="softSand"
-            isDisabled={true}
-            size="compact"
-          >
-            <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__akSkk)}>
-              Pathway
+      <div className={sty.submenuContent}>
+        {menuGroups.map((group) => (
+          <div key={group.title} className={sty.menuGroup}>
+            <div className={sty.groupTitle}>{group.title}</div>
+            <div className={sty.groupItems}>
+              {group.items.map((item) => (
+                item.disabled ? (
+                  <div key={item.label} className={classNames(sty.menuItem, sty.menuItemDisabled)}>
+                    <span className={sty.menuItemIcon}>{item.icon}</span>
+                    <span className={sty.menuItemLabel}>{item.label}</span>
+                  </div>
+                ) : (
+                  <Link key={item.label} href={item.href!} className={sty.menuItem}>
+                    <span className={sty.menuItemIcon}>{item.icon}</span>
+                    <span className={sty.menuItemLabel}>{item.label}</span>
+                  </Link>
+                )
+              ))}
             </div>
-          </LevelsetButton>
-
-          {/* Positional Excellence - active link */}
-          <LevelsetButton
-            className={sty.levelsetButton__fzAcG}
-            color="clear"
-            link="/positional-excellence"
-            size="compact"
-          >
-            <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__i5EJo)}>
-              Positional Excellence
-            </div>
-          </LevelsetButton>
-
-          {/* Evaluations - disabled */}
-          <LevelsetButton
-            className={sty.levelsetButton__elre}
-            color="softSand"
-            isDisabled={true}
-            size="compact"
-          >
-            <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__vkIxh)}>
-              Evaluations
-            </div>
-          </LevelsetButton>
-
-          {/* Discipline - active link */}
-          <LevelsetButton
-            className={sty.levelsetButton__tGzU}
-            color="clear"
-            link="/discipline"
-            size="compact"
-          >
-            <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__tyFVx)}>
-              Discipline
-            </div>
-          </LevelsetButton>
-
-          {/* WHED - disabled */}
-          <LevelsetButton
-            className={sty.levelsetButton___3Cma9}
-            color="softSand"
-            isDisabled={true}
-            size="compact"
-          >
-            <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__b1N0E)}>
-              WHED
-            </div>
-          </LevelsetButton>
-
-          {/* 360° Overview - disabled */}
-          <LevelsetButton
-            className={sty.levelsetButton__flfMl}
-            color="softSand"
-            isDisabled={true}
-            size="compact"
-          >
-            <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__rin15)}>
-              360°&nbsp;Overview
-            </div>
-          </LevelsetButton>
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

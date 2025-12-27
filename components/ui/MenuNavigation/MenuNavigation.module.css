@@ -106,21 +106,29 @@
   font-weight: 600;
 }
 
-.helpLink {
+.helpButton {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 6px;
-  border-radius: 50%;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
   transition: background-color 0.15s ease;
   cursor: pointer;
+  font-family: "Satoshi";
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
 }
 
-.helpLink:hover {
+.helpButton:hover {
   background-color: #f3f4f6;
+  color: #31664a;
 }
 
-.helpLink:hover svg {
+.helpButton:hover svg {
   color: #31664a !important;
 }
 

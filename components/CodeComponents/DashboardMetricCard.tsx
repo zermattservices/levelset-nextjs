@@ -153,6 +153,11 @@ export function DashboardMetricCard({
 }: DashboardMetricCardProps) {
   const router = useRouter();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  
+  // Debug: Log every render
+  const renderCount = React.useRef(0);
+  renderCount.current += 1;
+  console.log(`[DashboardMetricCard] RENDER #${renderCount.current} for variant:`, variant);
 
   // Support both single locationId and multiple locationIds for aggregation
   const effectiveLocationId = locationId || undefined;
@@ -187,6 +192,8 @@ export function DashboardMetricCard({
   const [metricState, setMetricState] = React.useState<MetricState | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+
+  console.log(`[DashboardMetricCard] State for ${variant}:`, { loading, metricState: metricState?.total, error });
 
   const config = VARIANT_CONFIG[variant];
 
@@ -277,17 +284,20 @@ export function DashboardMetricCard({
         percentChange = (change / safePrevious) * 100;
       }
 
-      setMetricState({
+      const newState = {
         total: safeCurrent,
         change,
         percent: percentChange,
         timestamp: now,
-      });
+      };
+      console.log('[DashboardMetricCard] Setting metric state:', newState, 'for variant:', variant);
+      setMetricState(newState);
     } catch (err) {
       console.error('[DashboardMetricCard] Failed to load metrics:', err);
       setMetricState(null);
       setError('Unable to load metrics right now.');
     } finally {
+      console.log('[DashboardMetricCard] Setting loading to false for variant:', variant);
       setLoading(false);
     }
   }, [
