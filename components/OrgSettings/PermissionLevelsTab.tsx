@@ -77,11 +77,18 @@ export function PermissionLevelsTab({
   
   // Filter role profiles to only show those the user can see
   // Users can only see permission tiers below their own (e.g., tier 0 sees tier 1+, tier 1 sees tier 2+)
-  // Levelset Admin sees all
+  // Levelset Admin sees all (tier -1 means see everything including tier 0)
   // If userHierarchyLevel is null/undefined, show all profiles (fallback for admin mode)
   const visibleRoleProfiles = React.useMemo(() => {
+    console.log('[PermissionLevelsTab] Computing visibleRoleProfiles:', { 
+      isLevelsetAdmin, 
+      userHierarchyLevel, 
+      roleProfilesCount: roleProfiles.length 
+    });
     if (isLevelsetAdmin) return roleProfiles;
     if (userHierarchyLevel === null || userHierarchyLevel === undefined) return roleProfiles;
+    // Tier -1 means Levelset Admin, can see all
+    if (userHierarchyLevel < 0) return roleProfiles;
     return roleProfiles.filter(p => p.hierarchy_level > userHierarchyLevel);
   }, [roleProfiles, userHierarchyLevel, isLevelsetAdmin]);
   
@@ -90,7 +97,12 @@ export function PermissionLevelsTab({
 
   // Fetch permission profiles
   const fetchProfiles = React.useCallback(async () => {
-    if (!orgId) return;
+    console.log('[PermissionLevelsTab] fetchProfiles called, orgId:', orgId);
+    if (!orgId) {
+      console.log('[PermissionLevelsTab] No orgId, returning early');
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -103,6 +115,8 @@ export function PermissionLevelsTab({
         .order('hierarchy_level', { ascending: true })
         .order('is_system_default', { ascending: false });
 
+      console.log('[PermissionLevelsTab] Fetch result:', { data, error: fetchError });
+      
       if (fetchError) throw fetchError;
 
       setProfiles(data || []);

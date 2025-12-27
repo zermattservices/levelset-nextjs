@@ -235,6 +235,9 @@ export function DashboardMetricCard({
     };
 
     try {
+      console.log('[DashboardMetricCard] Building queries for table:', config.table);
+      console.log('[DashboardMetricCard] Date range:', currentStartIso, 'to', nowIso);
+      
       const currentQuery = applyBaseFilters(
         supabase
           .from(config.table)
@@ -250,12 +253,18 @@ export function DashboardMetricCard({
         .gte(config.dateColumn, previousStartIso)
         .lt(config.dateColumn, currentStartIso);
 
-      const [{ count: currentCount, error: currentError }, { count: previousCount, error: previousError }]
-        = await Promise.all([currentQuery, previousQuery]);
+      console.log('[DashboardMetricCard] Executing queries...');
+      const results = await Promise.all([currentQuery, previousQuery]);
+      console.log('[DashboardMetricCard] Query results:', results);
+      
+      const [{ count: currentCount, error: currentError }, { count: previousCount, error: previousError }] = results;
 
       if (currentError || previousError) {
+        console.error('[DashboardMetricCard] Query error:', currentError || previousError);
         throw currentError || previousError;
       }
+      
+      console.log('[DashboardMetricCard] Counts - current:', currentCount, 'previous:', previousCount);
 
       const safeCurrent = currentCount ?? 0;
       const safePrevious = previousCount ?? 0;
@@ -288,6 +297,7 @@ export function DashboardMetricCard({
     effectiveLocationIds,
     isPlaceholder,
     isPlaceholderVariant,
+    locationIdsKey,
     supabase,
     variant,
   ]);

@@ -169,8 +169,8 @@ export function PermissionsSettings({ orgId, disabled = false }: PermissionsSett
         <PermissionLevelsTab
           orgId={orgId}
           disabled={disabled || !canManagePermissions}
-          userHierarchyLevel={hierarchyLevel}
-          canEditLevel={canEditLevel}
+          userHierarchyLevel={isLevelsetAdmin ? -1 : hierarchyLevel}
+          canEditLevel={isLevelsetAdmin ? () => true : canEditLevel}
           onEditProfile={handleEditProfile}
         />
       </TabPanel>
@@ -179,8 +179,8 @@ export function PermissionsSettings({ orgId, disabled = false }: PermissionsSett
         <ModifyAccessTab
           orgId={orgId}
           disabled={disabled || !canManagePermissions}
-          userHierarchyLevel={hierarchyLevel}
-          canEditLevel={canEditLevel}
+          userHierarchyLevel={isLevelsetAdmin ? -1 : hierarchyLevel}
+          canEditLevel={isLevelsetAdmin ? () => true : canEditLevel}
           initialProfileId={selectedProfileId}
         />
       </TabPanel>
