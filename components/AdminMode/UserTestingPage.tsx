@@ -8,8 +8,6 @@ import { styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
 import SearchIcon from '@mui/icons-material/Search';
@@ -37,24 +35,19 @@ const StyledTextField = styled(TextField)(() => ({
   },
 }));
 
-const StyledFormControl = styled(FormControl)(() => ({
-  '& .MuiOutlinedInput-root': {
-    fontFamily,
-    fontSize: 14,
-    backgroundColor: '#ffffff',
-    '&:hover fieldset': {
-      borderColor: '#31664a',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
-    },
+const StyledSelect = styled(Select)(() => ({
+  fontFamily,
+  fontSize: 14,
+  backgroundColor: '#ffffff',
+  '& .MuiSelect-select': {
+    display: 'flex',
+    alignItems: 'center',
   },
-  '& .MuiInputLabel-root': {
-    fontFamily,
-    fontSize: 14,
-    '&.Mui-focused': {
-      color: '#31664a',
-    },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#31664a',
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#31664a',
   },
 }));
 
@@ -230,37 +223,49 @@ export function UserTestingPage() {
           }}
         />
         
-        <StyledFormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel>Organization</InputLabel>
-          <Select
-            value={selectedOrg}
-            label="Organization"
-            onChange={(e) => setSelectedOrg(e.target.value)}
-          >
-            <MenuItem value="">
-              <em>All Organizations</em>
-            </MenuItem>
-            {orgs.map(org => (
-              <MenuItem key={org.id} value={org.id}>{org.name}</MenuItem>
-            ))}
-          </Select>
-        </StyledFormControl>
+        <StyledSelect
+          size="small"
+          value={selectedOrg}
+          onChange={(e) => setSelectedOrg(e.target.value as string)}
+          displayEmpty
+          sx={{ minWidth: 200 }}
+          renderValue={(value) => {
+            if (!value) {
+              return <span style={{ color: '#9ca3af' }}>Organization</span>;
+            }
+            const org = orgs.find(o => o.id === value);
+            return org?.name || value;
+          }}
+        >
+          <MenuItem value="">
+            <em>All Organizations</em>
+          </MenuItem>
+          {orgs.map(org => (
+            <MenuItem key={org.id} value={org.id}>{org.name}</MenuItem>
+          ))}
+        </StyledSelect>
 
-        <StyledFormControl size="small" sx={{ minWidth: 180 }}>
-          <InputLabel>Location</InputLabel>
-          <Select
-            value={selectedLocation}
-            label="Location"
-            onChange={(e) => setSelectedLocation(e.target.value)}
-          >
-            <MenuItem value="">
-              <em>All Locations</em>
-            </MenuItem>
-            {filteredLocations.map(loc => (
-              <MenuItem key={loc.id} value={loc.id}>#{loc.location_number}</MenuItem>
-            ))}
-          </Select>
-        </StyledFormControl>
+        <StyledSelect
+          size="small"
+          value={selectedLocation}
+          onChange={(e) => setSelectedLocation(e.target.value as string)}
+          displayEmpty
+          sx={{ minWidth: 180 }}
+          renderValue={(value) => {
+            if (!value) {
+              return <span style={{ color: '#9ca3af' }}>Location</span>;
+            }
+            const loc = filteredLocations.find(l => l.id === value);
+            return loc ? `#${loc.location_number}` : value;
+          }}
+        >
+          <MenuItem value="">
+            <em>All Locations</em>
+          </MenuItem>
+          {filteredLocations.map(loc => (
+            <MenuItem key={loc.id} value={loc.id}>#{loc.location_number}</MenuItem>
+          ))}
+        </StyledSelect>
       </div>
 
       {/* Users table */}

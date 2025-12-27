@@ -11,9 +11,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+  console.log('[admin/users] Starting request');
+  console.log('[admin/users] SUPABASE_URL exists:', !!supabaseUrl);
+  console.log('[admin/users] SERVICE_ROLE_KEY exists:', !!serviceRoleKey);
+  console.log('[admin/users] SERVICE_ROLE_KEY length:', serviceRoleKey?.length || 0);
+
   if (!supabaseUrl || !serviceRoleKey) {
-    console.error('Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
-    return res.status(500).json({ error: 'Server configuration error' });
+    console.error('[admin/users] Missing required environment variables');
+    return res.status(500).json({ error: 'Server configuration error', details: 'Missing environment variables' });
   }
 
   // Create admin client inside handler to avoid module-level errors
@@ -23,9 +28,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       persistSession: false,
     },
   });
+  
+  console.log('[admin/users] Supabase admin client created');
 
   try {
     const { org_id, location_id } = req.query;
+    console.log('[admin/users] Query params:', { org_id, location_id });
 
     // Build query for app_users
     let query = supabaseAdmin
@@ -56,9 +64,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { data: users, error: usersError } = await query;
 
+    console.log('[admin/users] Users query result:', { 
+      count: users?.length || 0, 
+      error: usersError?.message || null 
+    });
+
     if (usersError) {
-      console.error('Error fetching users:', usersError);
-      return res.status(500).json({ error: 'Failed to fetch users' });
+      console.error('[admin/users] Error fetching users:', usersError);
+      return res.status(500).json({ error: 'Failed to fetch users', details: usersError.message });
     }
 
     // Fetch orgs and locations separately for display names
@@ -67,8 +80,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .select('id, name')
       .order('name');
 
+    console.log('[admin/users] Orgs query result:', { 
+      count: orgs?.length || 0, 
+      error: orgsError?.message || null 
+    });
+
     if (orgsError) {
-      console.error('Error fetching orgs:', orgsError);
+      console.error('[admin/users] Error fetching orgs:', orgsError);
     }
 
     const { data: locations, error: locationsError } = await supabaseAdmin
@@ -76,8 +94,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .select('id, location_number, org_id')
       .order('location_number');
 
+    console.log('[admin/users] Locations query result:', { 
+      count: locations?.length || 0, 
+      error: locationsError?.message || null 
+    });
+
     if (locationsError) {
-      console.error('Error fetching locations:', locationsError);
+      console.error('[admin/users] Error fetching locations:', locationsError);
     }
 
     // Create lookup maps
@@ -91,14 +114,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       locations: user.location_id ? locationMap.get(user.location_id) || null : null,
     }));
 
+    console.log('[admin/users] Returning:', {
+      users: enrichedUsers.length,
+      orgs: orgs?.length || 0,
+      locations: locations?.length || 0
+    });
+
     return res.status(200).json({
       users: enrichedUsers,
       orgs: orgs || [],
       locations: locations || [],
     });
 
-  } catch (error) {
-    console.error('Unexpected error fetching users:', error);
-    return res.status(500).json({ error: 'An unexpected error occurred' });
+  } catch (error: any) {
+    console.error('[admin/users] Unexpected error:', error);
+    return res.status(500).json({ error: 'An unexpected error occurred', details: error?.message || 'Unknown error' });
   }
 }
