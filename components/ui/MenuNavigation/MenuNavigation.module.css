@@ -16,10 +16,9 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: auto;
-  min-height: 56px;
+  height: 56px;
   border-bottom: 1px solid #e5e5e5;
-  padding: 8px 16px;
+  padding: 0 16px;
 }
 
 .navContent {
@@ -181,7 +180,7 @@
 
 .submenuBackdrop {
   position: fixed;
-  top: 56px; /* Below the nav bar */
+  top: 57px; /* Below the nav bar (56px height + 1px border) */
   left: 0;
   right: 0;
   bottom: 0;
@@ -203,34 +202,38 @@
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    max-height: 0;
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    max-height: 300px;
   }
 }
 
 .submenuOverlay {
   position: fixed;
-  top: 56px; /* Height of nav bar */
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 32px); /* Account for padding */
-  max-width: var(--token-eC7sN0TdrMwT);
+  top: 57px; /* Below nav bar (56px height + 1px border) */
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   background: #ffffff;
-  border: 1px solid #e5e5e5;
-  border-top: none;
+  border-bottom: 1px solid #e5e5e5;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border-radius: 0 0 12px 12px;
   z-index: 100;
-  animation: slideDown 0.15s ease-out;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+.submenuOverlay .dashboardSubmenu {
+  width: 100%;
+  max-width: var(--token-eC7sN0TdrMwT);
+  padding: 0 16px;
 }
 
 .dashboardSubmenu {
   width: 100%;
+  max-width: var(--token-eC7sN0TdrMwT);
 }
