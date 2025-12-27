@@ -44,15 +44,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         email,
         first_name,
         last_name,
-        full_name,
         role,
         org_id,
         location_id,
         employee_id,
-        hire_date,
-        active
+        created_at
       `)
-      .order('full_name');
+      .order('first_name');
 
     // Apply filters if provided
     if (org_id && typeof org_id === 'string') {
@@ -107,9 +105,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const orgMap = new Map((orgs || []).map(o => [o.id, o]));
     const locationMap = new Map((locations || []).map(l => [l.id, l]));
 
-    // Enrich users with org and location data
+    // Enrich users with org and location data, and construct full_name
     const enrichedUsers = (users || []).map(user => ({
       ...user,
+      full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
+      active: true, // Default to active since column doesn't exist
+      hire_date: user.created_at, // Use created_at as fallback for hire_date
       orgs: user.org_id ? orgMap.get(user.org_id) || null : null,
       locations: user.location_id ? locationMap.get(user.location_id) || null : null,
     }));
