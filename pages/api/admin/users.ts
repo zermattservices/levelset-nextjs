@@ -115,14 +115,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       error: accessError?.message || null 
     });
 
-    // Fetch employees to get consolidated_employee_id
+    // Fetch employees to get consolidated_employee_id and updated_at (last HS sync)
     const employeeIds = (users || []).map(u => u.employee_id).filter(Boolean);
     let employeesMap = new Map<string, any>();
     
     if (employeeIds.length > 0) {
       const { data: employees, error: employeesError } = await supabaseAdmin
         .from('employees')
-        .select('id, consolidated_employee_id, hs_id')
+        .select('id, consolidated_employee_id, hs_id, updated_at')
         .in('id', employeeIds);
 
       if (employeesError) {
@@ -131,6 +131,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         employeesMap = new Map((employees || []).map(e => [e.id, e]));
       }
     }
+
+    // Fetch last_sign_in_at from auth.users for all app users
+    const authUserIds = (users || []).map(u => u.auth_user_id).filter(Boolean);
+    let authUsersMap = new Map<string, any>();
+    
+    if (authUserIds.length > 0) {
+      // Use admin API to get auth users
+      const { data: authUsersData, error: authError } = await supabaseAdmin.auth.admin.listUsers({
+        perPage: 1000, // Adjust if needed
+      });
+
+      if (authError) {
+        console.error('[admin/users] Error fetching auth users:', authError);
+      } else {
+        // Filter to only the users we care about and create a map
+        const relevantAuthUsers = (authUsersData?.users || []).filter(
+          au => authUserIds.includes(au.id)
+        );
+        authUsersMap = new Map(relevantAuthUsers.map(au => [au.id, au]));
+      }
+    }
+
+    console.log('[admin/users] Auth users fetched:', authUsersMap.size);
 
     // Create lookup maps
     const orgMap = new Map((orgs || []).map(o => [o.id, o]));
@@ -156,6 +179,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Get employee data if available
       const employee = user.employee_id ? employeesMap.get(user.employee_id) : null;
       
+      // Get auth user data for last_sign_in_at
+      const authUser = user.auth_user_id ? authUsersMap.get(user.auth_user_id) : null;
+      
       return {
         ...user,
         full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
@@ -167,9 +193,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Use consolidated_employee_id for display, fall back to employee_id
         display_employee_id: employee?.consolidated_employee_id || user.employee_id || null,
         hs_id: employee?.hs_id || null,
-        // These fields don't exist in DB yet, but prepared for future
-        last_login: null,
-        last_hs_sync: null,
+        // Last login from auth.users.last_sign_in_at
+        last_login: authUser?.last_sign_in_at || null,
+        // Last HS sync from employees.updated_at (when their employee data was last synced)
+        last_hs_sync: employee?.updated_at || null,
       };
     });
 
