@@ -47,12 +47,6 @@ const menuGroups: MenuGroup[] = [
         icon: <BusinessIcon sx={{ fontSize: 18 }} />,
         status: 'active',
       },
-      {
-        id: 'locations',
-        label: 'Locations',
-        icon: <LocationOnIcon sx={{ fontSize: 18 }} />,
-        status: 'coming-soon',
-      },
     ],
   },
 ];

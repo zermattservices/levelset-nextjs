@@ -384,10 +384,11 @@ export function ModifyAccessTab({
 
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
   // Admin profiles can be edited by tier 0 and 1 users, role profiles use canEditLevel
+  // Levelset Admin can edit everything including operator (level 0)
   const canEdit = selectedProfile 
     ? selectedProfile.is_admin_profile 
       ? canEditAdminProfiles && !disabled 
-      : canEditLevel(selectedProfile.hierarchy_level) && !disabled 
+      : (isLevelsetAdmin || canEditLevel(selectedProfile.hierarchy_level)) && !disabled 
     : false;
 
   // Get module order and filter by search

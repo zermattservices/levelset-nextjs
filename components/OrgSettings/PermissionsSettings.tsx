@@ -18,6 +18,7 @@ import { ModifyAccessTab } from './ModifyAccessTab';
 import { usePermissions } from '@/lib/providers/PermissionsProvider';
 import { P } from '@/lib/permissions/constants';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -68,11 +69,13 @@ export function PermissionsSettings({ orgId, disabled = false }: PermissionsSett
   const [selectedProfileId, setSelectedProfileId] = React.useState<string | null>(null);
   const [locationCount, setLocationCount] = React.useState<number>(0);
   const { has, canEditLevel, hierarchyLevel, loading: permissionsLoading } = usePermissions();
+  const auth = useAuth();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
-  // Check permissions
-  const canViewPermissions = has(P.PERMS_VIEW);
-  const canManagePermissions = has(P.PERMS_MANAGE);
+  // Check permissions - Levelset Admin always has access
+  const isLevelsetAdmin = auth.role === 'Levelset Admin';
+  const canViewPermissions = isLevelsetAdmin || has(P.PERMS_VIEW);
+  const canManagePermissions = isLevelsetAdmin || has(P.PERMS_MANAGE);
 
   // Fetch location count for the organization
   React.useEffect(() => {

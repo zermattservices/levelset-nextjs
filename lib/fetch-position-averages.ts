@@ -31,7 +31,7 @@ export async function fetchEmployeePositionAverages(
     // Fetch all ratings for this employee with pagination to bypass PostgREST limit
     let ratings: Rating[] = [];
     let offset = 0;
-    const limit = 1000;
+    const limit = 25000;
     let hasMore = true;
 
     while (hasMore) {

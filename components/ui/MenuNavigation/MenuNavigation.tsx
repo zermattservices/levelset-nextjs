@@ -114,7 +114,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               <LevelsetButton
                 color="softGreen"
                 size="compact"
-                link="/admin/locations"
+                link="/admin/organizations"
               >
                 <span className={sty.adminModeButton}>Admin Mode</span>
               </LevelsetButton>

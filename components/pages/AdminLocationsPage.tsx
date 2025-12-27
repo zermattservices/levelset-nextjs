@@ -30,8 +30,6 @@ export function AdminLocationsPage() {
         return <UserTestingPage />;
       case 'organizations':
         return <OrganizationsPage />;
-      case 'locations':
-        return <ComingSoonPlaceholder title="Location Management" description="View and manage all locations across the Levelset platform." />;
       default:
         return <UserTestingPage />;
     }

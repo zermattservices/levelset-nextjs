@@ -314,7 +314,8 @@ export function PermissionLevelsTab({
             </thead>
             <tbody>
               {visibleRoleProfiles.map((profile) => {
-                const canEdit = canEditLevel(profile.hierarchy_level);
+                // Levelset Admin can edit all levels including operator (level 0)
+                const canEdit = isLevelsetAdmin || canEditLevel(profile.hierarchy_level);
                 const isSelected = selectedProfileId === profile.id;
 
                 return (

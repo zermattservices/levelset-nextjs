@@ -45,7 +45,7 @@ export default async function handler(
     // Fetch ALL ratings for ALL employees with pagination to bypass PostgREST limit
     let allRatings: any[] = [];
     let offset = 0;
-    const limit = 1000;
+    const limit = 25000;
     let hasMore = true;
 
     while (hasMore) {

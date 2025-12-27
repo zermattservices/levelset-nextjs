@@ -9,7 +9,12 @@ import {
   Typography,
   Checkbox,
   CircularProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Chip,
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { createSupabaseClient } from '@/util/supabase/component';
 import styles from './OrgFeaturesTab.module.css';
 
@@ -62,10 +67,13 @@ const FEATURE_GROUPS: FeatureGroup[] = [
 
 const ALL_FEATURE_KEYS = FEATURE_GROUPS.flatMap(g => g.features.map(f => f.key));
 
+const fontFamily = '"Satoshi", sans-serif';
+
 export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
   const [features, setFeatures] = React.useState<Map<string, boolean>>(new Map());
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set());
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
@@ -205,6 +213,19 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
     }
   };
 
+  // Calculate enabled count for a group
+  const getGroupEnabledCount = (group: FeatureGroup) => {
+    const enabled = group.features.filter(f => features.get(f.key) === true).length;
+    return { enabled, total: group.features.length };
+  };
+
+  // Get pill color based on count
+  const getPillColor = (enabled: number, total: number) => {
+    if (enabled === total) return { bg: '#dcfce7', color: '#166534' }; // Green
+    if (enabled === 0) return { bg: '#f3f4f6', color: '#6b7280' }; // Grey
+    return { bg: '#fef3c7', color: '#92400e' }; // Yellow
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -218,7 +239,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
       <div className={styles.header}>
         <Typography
           sx={{
-            fontFamily: '"Satoshi", sans-serif',
+            fontFamily,
             fontSize: '14px',
             color: '#666',
           }}
@@ -230,21 +251,55 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
         )}
       </div>
 
-      {FEATURE_GROUPS.map(group => {
-        const tierColor = getTierColor(group.tier);
-        const isFullyEnabled = isGroupFullyEnabled(group);
-        const isPartiallyEnabled = isGroupPartiallyEnabled(group);
+      <div className={styles.modulesContainer}>
+        {FEATURE_GROUPS.map(group => {
+          const tierColor = getTierColor(group.tier);
+          const isFullyEnabled = isGroupFullyEnabled(group);
+          const isPartiallyEnabled = isGroupPartiallyEnabled(group);
+          const { enabled, total } = getGroupEnabledCount(group);
+          const pillColor = getPillColor(enabled, total);
+          const isExpanded = expandedGroups.has(group.name);
 
-        return (
-          <div key={group.name} className={styles.featureGroup}>
-            {/* Group header */}
-            <div className={styles.groupHeader}>
-              <div className={styles.groupHeaderLeft}>
+          return (
+            <Accordion
+              key={group.name}
+              expanded={isExpanded}
+              onChange={() => {
+                const next = new Set(expandedGroups);
+                if (isExpanded) {
+                  next.delete(group.name);
+                } else {
+                  next.add(group.name);
+                }
+                setExpandedGroups(next);
+              }}
+              sx={{
+                '&:before': { display: 'none' },
+                boxShadow: 'none',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px !important',
+                marginBottom: 1,
+                '&.Mui-expanded': {
+                  margin: '0 0 8px 0',
+                },
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                sx={{
+                  '& .MuiAccordionSummary-content': {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                  },
+                }}
+              >
                 <Checkbox
                   checked={isFullyEnabled}
                   indeterminate={isPartiallyEnabled}
                   onChange={(e) => toggleGroup(group, e.target.checked)}
                   disabled={group.features.length === 0}
+                  onClick={(e) => e.stopPropagation()}
                   sx={{
                     padding: '4px',
                     color: '#31664a',
@@ -252,98 +307,81 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
                     '&.MuiCheckbox-indeterminate': { color: '#31664a' },
                   }}
                 />
-                <Typography
+                <Chip
+                  label={`${enabled}/${total}`}
+                  size="small"
                   sx={{
-                    fontFamily: '"Satoshi", sans-serif',
-                    fontSize: '15px',
+                    fontFamily,
+                    fontSize: 12,
                     fontWeight: 600,
-                    color: '#0d1b14',
+                    backgroundColor: pillColor.bg,
+                    color: pillColor.color,
+                    height: 24,
+                    minWidth: 50,
                   }}
-                >
-                  {group.name}
-                </Typography>
-                <span 
-                  className={styles.tierBadge}
-                  style={{
+                />
+                <div>
+                  <div className={styles.moduleName}>{group.name}</div>
+                </div>
+                <Chip
+                  label={group.tier.toUpperCase()}
+                  size="small"
+                  sx={{
+                    fontFamily,
+                    fontSize: 11,
+                    fontWeight: 500,
+                    height: 22,
                     backgroundColor: tierColor.bg,
                     color: tierColor.text,
-                    borderColor: tierColor.border,
+                    border: `1px solid ${tierColor.border}`,
+                    marginLeft: 'auto',
                   }}
-                >
-                  {group.tier.toUpperCase()}
-                </span>
-              </div>
-              <Typography
-                sx={{
-                  fontFamily: '"Satoshi", sans-serif',
-                  fontSize: '12px',
-                  color: '#999',
-                }}
-              >
-                {group.features.filter(f => features.get(f.key)).length} / {group.features.length} enabled
-              </Typography>
-            </div>
-
-            {/* Features list */}
-            {group.features.length > 0 ? (
-              <div className={styles.featureList}>
-                {group.features.map(feature => (
-                  <div key={feature.key} className={styles.featureRow}>
-                    <div className={styles.featureRowLeft}>
-                      <Checkbox
-                        checked={features.get(feature.key) || false}
-                        onChange={(e) => toggleFeature(feature.key, e.target.checked)}
-                        sx={{
-                          padding: '4px',
-                          color: '#d1d5db',
-                          '&.Mui-checked': { color: '#31664a' },
-                        }}
-                      />
-                      <div className={styles.featureInfo}>
-                        <Typography
+                />
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                {group.features.length > 0 ? (
+                  <div className={styles.permissionsList}>
+                    {group.features.map(feature => (
+                      <div key={feature.key} className={styles.permissionItem}>
+                        <Checkbox
+                          checked={features.get(feature.key) || false}
+                          onChange={(e) => toggleFeature(feature.key, e.target.checked)}
                           sx={{
-                            fontFamily: '"Satoshi", sans-serif',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            color: '#0d1b14',
+                            padding: '4px',
+                            color: '#d1d5db',
+                            '&.Mui-checked': { color: '#31664a' },
                           }}
-                        >
-                          {feature.label}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            fontFamily: '"Satoshi", sans-serif',
-                            fontSize: '12px',
-                            color: '#999',
-                          }}
-                        >
-                          {feature.description}
-                        </Typography>
+                        />
+                        <div className={styles.permissionContent}>
+                          <div className={styles.permissionName}>
+                            {feature.label}
+                          </div>
+                          <div className={styles.permissionDescription}>
+                            {feature.description}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <span className={`${styles.statusBadge} ${features.get(feature.key) ? styles.statusEnabled : styles.statusDisabled}`}>
-                      {features.get(feature.key) ? 'Enabled' : 'Disabled'}
-                    </span>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className={styles.emptyGroup}>
-                <Typography
-                  sx={{
-                    fontFamily: '"Satoshi", sans-serif',
-                    fontSize: '13px',
-                    color: '#999',
-                    fontStyle: 'italic',
-                  }}
-                >
-                  No features available in this tier yet.
-                </Typography>
-              </div>
-            )}
-          </div>
-        );
-      })}
+                ) : (
+                  <div className={styles.emptyGroup}>
+                    <Typography
+                      sx={{
+                        fontFamily,
+                        fontSize: '13px',
+                        color: '#999',
+                        fontStyle: 'italic',
+                      }}
+                    >
+                      No features available in this tier yet.
+                    </Typography>
+                  </div>
+                )}
+              </AccordionDetails>
+            </Accordion>
+          );
+        })}
+      </div>
     </div>
   );
 }

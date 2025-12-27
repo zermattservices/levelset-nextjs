@@ -230,3 +230,5 @@ export function OrganizationModal({ open, organization, onClose }: OrganizationM
 }
 
 export default OrganizationModal;
+
+

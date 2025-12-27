@@ -234,7 +234,7 @@ export function DisciplineTable({
               // Fetch all infractions in date range with pagination to bypass PostgREST limit
               let allInfractions: any[] = [];
               let offset = 0;
-              const limit = 1000;
+              const limit = 25000;
               let hasMore = true;
               let infError: any = null;
 

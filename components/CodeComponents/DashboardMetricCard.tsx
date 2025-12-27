@@ -40,6 +40,7 @@ type MetricVariant =
 interface DashboardMetricCardProps {
   variant: MetricVariant;
   locationId?: string;
+  locationIds?: string[]; // For organization-level aggregation
   linkHref?: string;
   onClick?: () => void;
   className?: string;
@@ -144,6 +145,7 @@ function formatNumber(value: number): string {
 export function DashboardMetricCard({
   variant,
   locationId,
+  locationIds,
   linkHref,
   onClick,
   className,
@@ -152,7 +154,9 @@ export function DashboardMetricCard({
   const router = useRouter();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
+  // Support both single locationId and multiple locationIds for aggregation
   const effectiveLocationId = locationId || undefined;
+  const effectiveLocationIds = locationIds || (locationId ? [locationId] : undefined);
   
   // Check if this is a placeholder variant (no table configured)
   const isPlaceholderVariant = !VARIANT_CONFIG[variant]?.table;
@@ -176,7 +180,7 @@ export function DashboardMetricCard({
       return;
     }
     
-    if (!effectiveLocationId) {
+    if (!effectiveLocationId && !effectiveLocationIds) {
       setMetricState(null);
       setError(null);
       setLoading(false);
@@ -194,8 +198,12 @@ export function DashboardMetricCard({
     const previousStartIso = previousPeriodStart.toISOString();
     const nowIso = now.toISOString();
 
-    const applyBaseFilters = (query: any) =>
-      effectiveLocationId ? query.eq('location_id', effectiveLocationId) : query;
+    const applyBaseFilters = (query: any) => {
+      if (effectiveLocationIds && effectiveLocationIds.length > 0) {
+        return query.in('location_id', effectiveLocationIds);
+      }
+      return effectiveLocationId ? query.eq('location_id', effectiveLocationId) : query;
+    };
 
     try {
       const currentQuery = applyBaseFilters(
@@ -248,6 +256,7 @@ export function DashboardMetricCard({
     config.dateColumn,
     config.table,
     effectiveLocationId,
+    effectiveLocationIds,
     isPlaceholder,
     isPlaceholderVariant,
     supabase,
