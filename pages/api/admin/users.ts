@@ -115,6 +115,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       error: accessError?.message || null 
     });
 
+    // Fetch employees to get consolidated_employee_id
+    const employeeIds = (users || []).map(u => u.employee_id).filter(Boolean);
+    let employeesMap = new Map<string, any>();
+    
+    if (employeeIds.length > 0) {
+      const { data: employees, error: employeesError } = await supabaseAdmin
+        .from('employees')
+        .select('id, consolidated_employee_id, hs_id')
+        .in('id', employeeIds);
+
+      if (employeesError) {
+        console.error('[admin/users] Error fetching employees:', employeesError);
+      } else {
+        employeesMap = new Map((employees || []).map(e => [e.id, e]));
+      }
+    }
+
     // Create lookup maps
     const orgMap = new Map((orgs || []).map(o => [o.id, o]));
     const locationMap = new Map((locations || []).map(l => [l.id, l]));
@@ -136,6 +153,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .filter(Boolean)
         .sort((a, b) => (a?.location_number || '').localeCompare(b?.location_number || ''));
       
+      // Get employee data if available
+      const employee = user.employee_id ? employeesMap.get(user.employee_id) : null;
+      
       return {
         ...user,
         full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
@@ -144,6 +164,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         orgs: user.org_id ? orgMap.get(user.org_id) || null : null,
         locations: locationObjects.length > 0 ? locationObjects : (user.location_id ? [locationMap.get(user.location_id)] : []).filter(Boolean),
         location_access: locationIds,
+        // Use consolidated_employee_id for display, fall back to employee_id
+        display_employee_id: employee?.consolidated_employee_id || user.employee_id || null,
+        hs_id: employee?.hs_id || null,
+        // These fields don't exist in DB yet, but prepared for future
+        last_login: null,
+        last_hs_sync: null,
       };
     });
 

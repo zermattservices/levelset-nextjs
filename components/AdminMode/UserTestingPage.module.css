@@ -2,8 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  height: 100%;
-  overflow: hidden;
 }
 
 .intro {
@@ -106,6 +104,10 @@
 
 .tableCellEmail {
   color: #666;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tableCellOrg {
@@ -282,17 +284,10 @@
   cursor: not-allowed;
 }
 
-/* Scrollable content area */
-.scrollableContent {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-}
-
 /* Location pills */
 .locationPillsContainer {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 4px;
   align-items: center;
 }
@@ -343,15 +338,3 @@
   font-size: 12px;
 }
 
-/* You badge */
-.youBadge {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 8px;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #31664a;
-  background-color: #d1fae5;
-  border-radius: 12px;
-}

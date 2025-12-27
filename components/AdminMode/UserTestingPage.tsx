@@ -70,6 +70,7 @@ interface AppUser {
   org_id: string;
   location_id: string;
   employee_id?: string;
+  display_employee_id?: string | null;
   hire_date?: string;
   active: boolean;
   orgs?: { id: string; name: string } | null;
@@ -77,6 +78,7 @@ interface AppUser {
   location_access?: string[];
   last_login?: string | null;
   last_hs_sync?: string | null;
+  hs_id?: string | null;
 }
 
 interface Org {
@@ -248,7 +250,7 @@ export function UserTestingPage() {
       <div className={styles.locationPillsContainer}>
         {visibleLocs.map(loc => (
           <span key={loc.id} className={styles.locationPill}>
-            #{loc.location_number}
+            {loc.location_number}
           </span>
         ))}
         {hiddenCount > 0 && (
@@ -256,7 +258,7 @@ export function UserTestingPage() {
             title={
               <div className={styles.tooltipContent}>
                 {hiddenLocs.map(loc => (
-                  <span key={loc.id}>#{loc.location_number}</span>
+                  <span key={loc.id}>{loc.location_number}</span>
                 ))}
               </div>
             }
@@ -349,10 +351,8 @@ export function UserTestingPage() {
         </StyledSelect>
       </div>
 
-      {/* Scrollable content area */}
-      <div className={styles.scrollableContent}>
-        {/* Users table */}
-        {loading ? (
+      {/* Users table */}
+      {loading ? (
           <div className={styles.loadingContainer}>
             <CircularProgress size={32} sx={{ color: '#31664a' }} />
           </div>
@@ -392,9 +392,6 @@ export function UserTestingPage() {
                             sx={{ fontSize: 18, marginRight: 1, verticalAlign: 'middle' }}
                           />
                           {user.full_name || `${user.first_name} ${user.last_name}`}
-                          {isCurrentUser(user) && (
-                            <span className={styles.youBadge}>You</span>
-                          )}
                         </td>
                         <td className={`${styles.tableCell} ${styles.tableCellEmail}`}>{user.email}</td>
                         <td className={`${styles.tableCell} ${styles.tableCellOrg}`}>
@@ -446,7 +443,7 @@ export function UserTestingPage() {
                               </div>
                               <div className={styles.detailItem}>
                                 <span className={styles.detailLabel}>Employee ID</span>
-                                <span className={styles.detailValue}>{user.employee_id || 'N/A'}</span>
+                                <span className={styles.detailValue}>{user.display_employee_id || 'N/A'}</span>
                               </div>
                               <div className={styles.detailItem}>
                                 <span className={styles.detailLabel}>Created</span>
@@ -480,33 +477,32 @@ export function UserTestingPage() {
               </table>
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className={styles.pagination}>
-                <span className={styles.paginationInfo}>
-                  Showing {((currentPage - 1) * PAGE_SIZE) + 1}–{Math.min(currentPage * PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length} users
-                </span>
-                <div className={styles.paginationButtons}>
-                  <button
-                    className={styles.paginationButton}
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    <KeyboardArrowLeftIcon sx={{ fontSize: 20 }} />
-                  </button>
-                  <button
-                    className={styles.paginationButton}
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    <KeyboardArrowRightIcon sx={{ fontSize: 20 }} />
-                  </button>
-                </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className={styles.pagination}>
+              <span className={styles.paginationInfo}>
+                Showing {((currentPage - 1) * PAGE_SIZE) + 1}–{Math.min(currentPage * PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length} users
+              </span>
+              <div className={styles.paginationButtons}>
+                <button
+                  className={styles.paginationButton}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <KeyboardArrowLeftIcon sx={{ fontSize: 20 }} />
+                </button>
+                <button
+                  className={styles.paginationButton}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  <KeyboardArrowRightIcon sx={{ fontSize: 20 }} />
+                </button>
               </div>
-            )}
-          </>
-        )}
-      </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
