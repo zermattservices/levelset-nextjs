@@ -229,12 +229,12 @@ export function UserTestingPage() {
           onChange={(e) => setSelectedOrg(e.target.value as string)}
           displayEmpty
           sx={{ minWidth: 200 }}
-          renderValue={(value) => {
+          renderValue={(value): React.ReactNode => {
             if (!value) {
               return <span style={{ color: '#9ca3af' }}>Organization</span>;
             }
             const org = orgs.find(o => o.id === value);
-            return org?.name || value;
+            return org?.name || String(value);
           }}
         >
           <MenuItem value="">
@@ -251,12 +251,12 @@ export function UserTestingPage() {
           onChange={(e) => setSelectedLocation(e.target.value as string)}
           displayEmpty
           sx={{ minWidth: 180 }}
-          renderValue={(value) => {
+          renderValue={(value): React.ReactNode => {
             if (!value) {
               return <span style={{ color: '#9ca3af' }}>Location</span>;
             }
             const loc = filteredLocations.find(l => l.id === value);
-            return loc ? `#${loc.location_number}` : value;
+            return loc ? `#${loc.location_number}` : String(value);
           }}
         >
           <MenuItem value="">
