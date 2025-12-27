@@ -215,13 +215,18 @@
   top: 57px; /* Below nav bar (56px height + 1px border) */
   left: 0;
   right: 0;
+  width: calc(100% - 32px); /* Account for page padding */
+  max-width: var(--token-eC7sN0TdrMwT);
+  margin: 0 auto;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   background: #ffffff;
-  border-bottom: 1px solid #e5e5e5;
+  border: 1px solid #e5e5e5;
+  border-top: none;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: 0 0 12px 12px;
   z-index: 100;
   overflow: hidden;
   animation: slideDown 0.2s ease-out forwards;
@@ -229,8 +234,6 @@
 
 .submenuOverlay .dashboardSubmenu {
   width: 100%;
-  max-width: var(--token-eC7sN0TdrMwT);
-  padding: 0 16px;
 }
 
 .dashboardSubmenu {
