@@ -10,6 +10,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
+import Tooltip from '@mui/material/Tooltip';
 import SearchIcon from '@mui/icons-material/Search';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
@@ -17,6 +18,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import LoginIcon from '@mui/icons-material/Login';
 import { useImpersonation } from '@/lib/providers/ImpersonationProvider';
+import { useAuth } from '@/lib/providers/AuthProvider';
 import styles from './UserTestingPage.module.css';
 
 const fontFamily = '"Satoshi", sans-serif';
@@ -51,6 +53,12 @@ const StyledSelect = styled(Select)(() => ({
   },
 }));
 
+interface LocationObj {
+  id: string;
+  location_number: string;
+  org_id?: string;
+}
+
 interface AppUser {
   id: string;
   auth_user_id: string;
@@ -65,7 +73,10 @@ interface AppUser {
   hire_date?: string;
   active: boolean;
   orgs?: { id: string; name: string } | null;
-  locations?: { id: string; location_number: string } | null;
+  locations?: LocationObj[];
+  location_access?: string[];
+  last_login?: string | null;
+  last_hs_sync?: string | null;
 }
 
 interface Org {
@@ -83,6 +94,7 @@ const PAGE_SIZE = 15;
 
 export function UserTestingPage() {
   const { isImpersonating, impersonatedUser, startImpersonation } = useImpersonation();
+  const auth = useAuth();
 
   // State
   const [users, setUsers] = React.useState<AppUser[]>([]);
@@ -96,6 +108,9 @@ export function UserTestingPage() {
   const [expandedUserId, setExpandedUserId] = React.useState<string | null>(null);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [impersonationLoading, setImpersonationLoading] = React.useState<string | null>(null);
+
+  // Get current user's auth_user_id
+  const currentAuthUserId = auth.authUser?.id;
 
   // Fetch all data from admin API (bypasses RLS)
   React.useEffect(() => {
@@ -187,13 +202,79 @@ export function UserTestingPage() {
   };
 
   // Format date for display
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '—';
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  // Format datetime for display
+  const formatDateTime = (dateString?: string | null) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  };
+
+  // Get organization display name
+  const getOrgDisplayName = (user: AppUser): string => {
+    if (user.role === 'Levelset Admin') {
+      return 'Levelset';
+    }
+    return user.orgs?.name || '—';
+  };
+
+  // Render location pills with +X for overflow
+  const renderLocationPills = (user: AppUser) => {
+    const locs = user.locations || [];
+    
+    if (locs.length === 0) {
+      return <span className={styles.noLocations}>—</span>;
+    }
+
+    const maxVisible = 2;
+    const visibleLocs = locs.slice(0, maxVisible);
+    const hiddenLocs = locs.slice(maxVisible);
+    const hiddenCount = hiddenLocs.length;
+
+    return (
+      <div className={styles.locationPillsContainer}>
+        {visibleLocs.map(loc => (
+          <span key={loc.id} className={styles.locationPill}>
+            #{loc.location_number}
+          </span>
+        ))}
+        {hiddenCount > 0 && (
+          <Tooltip
+            title={
+              <div className={styles.tooltipContent}>
+                {hiddenLocs.map(loc => (
+                  <span key={loc.id}>#{loc.location_number}</span>
+                ))}
+              </div>
+            }
+            arrow
+            placement="top"
+          >
+            <span className={styles.locationPillMore}>
+              +{hiddenCount}
+            </span>
+          </Tooltip>
+        )}
+      </div>
+    );
+  };
+
+  // Check if this is the current user
+  const isCurrentUser = (user: AppUser): boolean => {
+    return user.auth_user_id === currentAuthUserId;
   };
 
   return (
@@ -268,149 +349,164 @@ export function UserTestingPage() {
         </StyledSelect>
       </div>
 
-      {/* Users table */}
-      {loading ? (
-        <div className={styles.loadingContainer}>
-          <CircularProgress size={32} sx={{ color: '#31664a' }} />
-        </div>
-      ) : filteredUsers.length === 0 ? (
-        <div className={styles.emptyState}>
-          <PersonSearchIcon className={styles.emptyStateIcon} sx={{ fontSize: 48 }} />
-          <p className={styles.emptyStateText}>
-            {searchQuery || selectedOrg || selectedLocation
-              ? 'No users found matching your filters.'
-              : 'No users found.'}
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead className={styles.tableHeader}>
-                <tr>
-                  <th className={styles.tableHeaderCell}>Name</th>
-                  <th className={styles.tableHeaderCell}>Email</th>
-                  <th className={styles.tableHeaderCell}>Organization</th>
-                  <th className={styles.tableHeaderCell}>Location</th>
-                  <th className={styles.tableHeaderCell}>Role</th>
-                  <th className={styles.tableHeaderCell}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedUsers.map(user => (
-                  <React.Fragment key={user.id}>
-                    <tr 
-                      className={`${styles.tableRow} ${expandedUserId === user.id ? styles.tableRowExpanded : ''}`}
-                      onClick={() => handleRowClick(user.id)}
-                    >
-                      <td className={`${styles.tableCell} ${styles.tableCellName}`}>
-                        <KeyboardArrowDownIcon 
-                          className={`${styles.expandIcon} ${expandedUserId === user.id ? styles.expandIconRotated : ''}`}
-                          sx={{ fontSize: 18, marginRight: 1, verticalAlign: 'middle' }}
-                        />
-                        {user.full_name || `${user.first_name} ${user.last_name}`}
-                      </td>
-                      <td className={`${styles.tableCell} ${styles.tableCellEmail}`}>{user.email}</td>
-                      <td className={`${styles.tableCell} ${styles.tableCellOrg}`}>
-                        {user.orgs?.name || '—'}
-                      </td>
-                      <td className={`${styles.tableCell} ${styles.tableCellLocation}`}>
-                        {user.locations?.location_number ? `#${user.locations.location_number}` : '—'}
-                      </td>
-                      <td className={styles.tableCell}>
-                        <span className={styles.tableCellRole}>{user.role || '—'}</span>
-                      </td>
-                      <td className={`${styles.tableCell} ${styles.tableCellActions}`}>
-                        <button
-                          className={styles.loginAsButton}
-                          onClick={(e) => handleLoginAs(user.id, e)}
-                          disabled={impersonationLoading === user.id || (isImpersonating && impersonatedUser?.id !== user.id)}
-                        >
-                          {impersonationLoading === user.id ? (
-                            <CircularProgress size={14} sx={{ color: '#ffffff' }} />
-                          ) : (
-                            <>
-                              <LoginIcon sx={{ fontSize: 16 }} />
-                              Log In As
-                            </>
+      {/* Scrollable content area */}
+      <div className={styles.scrollableContent}>
+        {/* Users table */}
+        {loading ? (
+          <div className={styles.loadingContainer}>
+            <CircularProgress size={32} sx={{ color: '#31664a' }} />
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className={styles.emptyState}>
+            <PersonSearchIcon className={styles.emptyStateIcon} sx={{ fontSize: 48 }} />
+            <p className={styles.emptyStateText}>
+              {searchQuery || selectedOrg || selectedLocation
+                ? 'No users found matching your filters.'
+                : 'No users found.'}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead className={styles.tableHeader}>
+                  <tr>
+                    <th className={styles.tableHeaderCell}>Name</th>
+                    <th className={styles.tableHeaderCell}>Email</th>
+                    <th className={styles.tableHeaderCell}>Organization</th>
+                    <th className={styles.tableHeaderCell}>Locations</th>
+                    <th className={styles.tableHeaderCell}>Role</th>
+                    <th className={styles.tableHeaderCell}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedUsers.map(user => (
+                    <React.Fragment key={user.id}>
+                      <tr 
+                        className={`${styles.tableRow} ${expandedUserId === user.id ? styles.tableRowExpanded : ''}`}
+                        onClick={() => handleRowClick(user.id)}
+                      >
+                        <td className={`${styles.tableCell} ${styles.tableCellName}`}>
+                          <KeyboardArrowDownIcon 
+                            className={`${styles.expandIcon} ${expandedUserId === user.id ? styles.expandIconRotated : ''}`}
+                            sx={{ fontSize: 18, marginRight: 1, verticalAlign: 'middle' }}
+                          />
+                          {user.full_name || `${user.first_name} ${user.last_name}`}
+                          {isCurrentUser(user) && (
+                            <span className={styles.youBadge}>You</span>
                           )}
-                        </button>
-                      </td>
-                    </tr>
-                    {expandedUserId === user.id && (
-                      <tr className={styles.expandedContent}>
-                        <td colSpan={6}>
-                          <div className={styles.expandedInner}>
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>First Name</span>
-                              <span className={styles.detailValue}>{user.first_name || '—'}</span>
-                            </div>
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>Last Name</span>
-                              <span className={styles.detailValue}>{user.last_name || '—'}</span>
-                            </div>
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>Email</span>
-                              <span className={styles.detailValue}>{user.email || '—'}</span>
-                            </div>
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>Employee ID</span>
-                              <span className={styles.detailValue}>{user.employee_id || '—'}</span>
-                            </div>
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>Start Date</span>
-                              <span className={styles.detailValue}>{formatDate(user.hire_date)}</span>
-                            </div>
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>Role</span>
-                              <span className={styles.detailValue}>{user.role || '—'}</span>
-                            </div>
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>Active</span>
-                              <span className={styles.detailValue}>{user.active ? 'Yes' : 'No'}</span>
-                            </div>
-                            <div className={styles.detailItem}>
-                              <span className={styles.detailLabel}>User ID</span>
-                              <span className={styles.detailValue} style={{ fontSize: 12, fontFamily: 'monospace' }}>
-                                {user.id}
-                              </span>
-                            </div>
-                          </div>
+                        </td>
+                        <td className={`${styles.tableCell} ${styles.tableCellEmail}`}>{user.email}</td>
+                        <td className={`${styles.tableCell} ${styles.tableCellOrg}`}>
+                          {getOrgDisplayName(user)}
+                        </td>
+                        <td className={`${styles.tableCell} ${styles.tableCellLocation}`}>
+                          {renderLocationPills(user)}
+                        </td>
+                        <td className={styles.tableCell}>
+                          <span className={styles.tableCellRole}>{user.role || '—'}</span>
+                        </td>
+                        <td className={`${styles.tableCell} ${styles.tableCellActions}`}>
+                          <button
+                            className={styles.loginAsButton}
+                            onClick={(e) => handleLoginAs(user.id, e)}
+                            disabled={
+                              impersonationLoading === user.id || 
+                              (isImpersonating && impersonatedUser?.id !== user.id) ||
+                              isCurrentUser(user)
+                            }
+                            title={isCurrentUser(user) ? "You cannot log in as yourself" : undefined}
+                          >
+                            {impersonationLoading === user.id ? (
+                              <CircularProgress size={14} sx={{ color: '#ffffff' }} />
+                            ) : (
+                              <>
+                                <LoginIcon sx={{ fontSize: 16 }} />
+                                Log In As
+                              </>
+                            )}
+                          </button>
                         </td>
                       </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className={styles.pagination}>
-              <span className={styles.paginationInfo}>
-                Showing {((currentPage - 1) * PAGE_SIZE) + 1}–{Math.min(currentPage * PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length} users
-              </span>
-              <div className={styles.paginationButtons}>
-                <button
-                  className={styles.paginationButton}
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <KeyboardArrowLeftIcon sx={{ fontSize: 20 }} />
-                </button>
-                <button
-                  className={styles.paginationButton}
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  <KeyboardArrowRightIcon sx={{ fontSize: 20 }} />
-                </button>
-              </div>
+                      {expandedUserId === user.id && (
+                        <tr className={styles.expandedContent}>
+                          <td colSpan={6}>
+                            <div className={styles.expandedInner}>
+                              <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>First Name</span>
+                                <span className={styles.detailValue}>{user.first_name || 'N/A'}</span>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Last Name</span>
+                                <span className={styles.detailValue}>{user.last_name || 'N/A'}</span>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Email</span>
+                                <span className={styles.detailValue}>{user.email || 'N/A'}</span>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Employee ID</span>
+                                <span className={styles.detailValue}>{user.employee_id || 'N/A'}</span>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Created</span>
+                                <span className={styles.detailValue}>{formatDate(user.hire_date)}</span>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Role</span>
+                                <span className={styles.detailValue}>{user.role || 'N/A'}</span>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Last Logged In</span>
+                                <span className={styles.detailValue}>{formatDateTime(user.last_login)}</span>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Last HS Synced</span>
+                                <span className={styles.detailValue}>{formatDateTime(user.last_hs_sync)}</span>
+                              </div>
+                              <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>User ID</span>
+                                <span className={styles.detailValue} style={{ fontSize: 12, fontFamily: 'monospace' }}>
+                                  {user.id}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-        </>
-      )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className={styles.pagination}>
+                <span className={styles.paginationInfo}>
+                  Showing {((currentPage - 1) * PAGE_SIZE) + 1}–{Math.min(currentPage * PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length} users
+                </span>
+                <div className={styles.paginationButtons}>
+                  <button
+                    className={styles.paginationButton}
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <KeyboardArrowLeftIcon sx={{ fontSize: 20 }} />
+                  </button>
+                  <button
+                    className={styles.paginationButton}
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <KeyboardArrowRightIcon sx={{ fontSize: 20 }} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

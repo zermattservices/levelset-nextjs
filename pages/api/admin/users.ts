@@ -101,19 +101,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('[admin/users] Error fetching locations:', locationsError);
     }
 
+    // Fetch user_location_access for all users
+    const { data: locationAccess, error: accessError } = await supabaseAdmin
+      .from('user_location_access')
+      .select('user_id, location_id');
+
+    if (accessError) {
+      console.error('[admin/users] Error fetching location access:', accessError);
+    }
+
+    console.log('[admin/users] Location access query result:', { 
+      count: locationAccess?.length || 0, 
+      error: accessError?.message || null 
+    });
+
     // Create lookup maps
     const orgMap = new Map((orgs || []).map(o => [o.id, o]));
     const locationMap = new Map((locations || []).map(l => [l.id, l]));
 
+    // Create a map of user_id to array of location_ids
+    const userLocationsMap = new Map<string, string[]>();
+    for (const access of locationAccess || []) {
+      const existing = userLocationsMap.get(access.user_id) || [];
+      existing.push(access.location_id);
+      userLocationsMap.set(access.user_id, existing);
+    }
+
     // Enrich users with org and location data, and construct full_name
-    const enrichedUsers = (users || []).map(user => ({
-      ...user,
-      full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
-      active: true, // Default to active since column doesn't exist
-      hire_date: user.created_at, // Use created_at as fallback for hire_date
-      orgs: user.org_id ? orgMap.get(user.org_id) || null : null,
-      locations: user.location_id ? locationMap.get(user.location_id) || null : null,
-    }));
+    const enrichedUsers = (users || []).map(user => {
+      const locationIds = userLocationsMap.get(user.id) || [];
+      // Map location IDs to location objects with their numbers
+      const locationObjects = locationIds
+        .map(locId => locationMap.get(locId))
+        .filter(Boolean)
+        .sort((a, b) => (a?.location_number || '').localeCompare(b?.location_number || ''));
+      
+      return {
+        ...user,
+        full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
+        active: true,
+        hire_date: user.created_at,
+        orgs: user.org_id ? orgMap.get(user.org_id) || null : null,
+        locations: locationObjects.length > 0 ? locationObjects : (user.location_id ? [locationMap.get(user.location_id)] : []).filter(Boolean),
+        location_access: locationIds,
+      };
+    });
 
     console.log('[admin/users] Returning:', {
       users: enrichedUsers.length,
