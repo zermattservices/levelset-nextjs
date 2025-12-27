@@ -33,6 +33,8 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const [dashboardOpen, setDashboardOpen] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
   const profileDropdownRef = React.useRef<HTMLDivElement>(null);
+  const dashboardHoverRef = React.useRef<HTMLDivElement>(null);
+  const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // When impersonating, show impersonated user's name; otherwise use props or auth
   const displayFirstName = isImpersonating && impersonatedUser
@@ -68,6 +70,29 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
     };
   }, [profileDropdownOpen]);
 
+  // Cleanup hover timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleDashboardMouseEnter = React.useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    setDashboardOpen(true);
+  }, []);
+
+  const handleDashboardMouseLeave = React.useCallback(() => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setDashboardOpen(false);
+    }, 150); // Small delay to allow moving to submenu
+  }, []);
+
   return (
     <div
       className={classNames(
@@ -98,13 +123,18 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
 
           {/* Navigation buttons */}
           <div className={sty.navButtons}>
-            <LevelsetButton
-              color="clear"
-              size="compact"
-              onClick={() => setDashboardOpen(!dashboardOpen)}
+            <div
+              ref={dashboardHoverRef}
+              onMouseEnter={handleDashboardMouseEnter}
+              onMouseLeave={handleDashboardMouseLeave}
             >
-              <span className={sty.navButtonText}>Dashboards</span>
-            </LevelsetButton>
+              <LevelsetButton
+                color="clear"
+                size="compact"
+              >
+                <span className={sty.navButtonText}>Dashboards</span>
+              </LevelsetButton>
+            </div>
           </div>
 
           {/* Right side - Admin Mode, Location selector, user info, logout, profile icon */}
@@ -164,11 +194,18 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
         </div>
       </div>
 
-      {/* Dashboard submenu - shown when dashboardOpen is true */}
+      {/* Dashboard submenu overlay - shown when dashboardOpen is true */}
       {dashboardOpen && (
-        <div className={sty.submenuContainer}>
-          <DashboardSubmenu className={sty.dashboardSubmenu} />
-        </div>
+        <>
+          <div className={sty.submenuBackdrop} onClick={() => setDashboardOpen(false)} />
+          <div 
+            className={sty.submenuOverlay}
+            onMouseEnter={handleDashboardMouseEnter}
+            onMouseLeave={handleDashboardMouseLeave}
+          >
+            <DashboardSubmenu className={sty.dashboardSubmenu} />
+          </div>
+        </>
       )}
     </div>
   );

@@ -352,8 +352,18 @@ export function DashboardMetricCard({
     .filter(Boolean)
     .join(' ');
 
-  const missingContext = !effectiveLocationId;
+  // Context is missing only if NEITHER single location nor multiple locations are provided
+  const hasLocationContext = effectiveLocationId || (effectiveLocationIds && effectiveLocationIds.length > 0);
+  const missingContext = !hasLocationContext;
   const shouldShowSkeleton = loading || missingContext || (!metricState && !error);
+  
+  console.log(`[DashboardMetricCard] Render decision for ${variant}:`, { 
+    hasLocationContext, 
+    missingContext, 
+    loading, 
+    hasMetricState: !!metricState,
+    shouldShowSkeleton 
+  });
 
   if (error && !shouldShowSkeleton) {
     return (
