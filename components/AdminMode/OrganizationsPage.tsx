@@ -37,15 +37,16 @@ export function OrganizationsPage() {
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
-  // Fetch organizations with locations, employee counts, and state from CFA locations
+  // Fetch organizations with locations and employee counts
+  // State and operator_name are stored directly on orgs table
   React.useEffect(() => {
     async function fetchOrganizations() {
       setLoading(true);
       try {
-        // Fetch all organizations
+        // Fetch all organizations (state and operator_name are now columns on orgs)
         const { data: orgsData, error: orgsError } = await supabase
           .from('orgs')
-          .select('id, name, created_at, start_date, subscription_plan')
+          .select('id, name, created_at, start_date, subscription_plan, state, operator_name')
           .order('name');
 
         if (orgsError) throw orgsError;
@@ -66,15 +67,6 @@ export function OrganizationsPage() {
 
         if (employeesError) throw employeesError;
 
-        // Fetch CFA location data for state lookup
-        const { data: cfaLocationsData, error: cfaError } = await supabase
-          .from('cfa_locations')
-          .select('location_num, operator, state');
-
-        if (cfaError) {
-          console.error('Error fetching CFA locations:', cfaError);
-        }
-
         // Create lookup maps
         const locationsByOrg = new Map<string, Location[]>();
         for (const loc of locationsData || []) {
@@ -90,31 +82,10 @@ export function OrganizationsPage() {
           }
         }
 
-        // Create CFA location lookup by location_num
-        const cfaLocationMap = new Map<string, { operator: string; state: string }>();
-        for (const cfa of cfaLocationsData || []) {
-          if (cfa.location_num) {
-            cfaLocationMap.set(cfa.location_num, { operator: cfa.operator, state: cfa.state });
-          }
-        }
-
-        // Build organization data with enriched info
+        // Build organization data
         const enrichedOrgs: Organization[] = (orgsData || []).map(org => {
           const locations = locationsByOrg.get(org.id) || [];
           const employeeCount = employeeCountByOrg.get(org.id) || 0;
-          
-          // Look up state and operator from CFA locations using first location number
-          let state: string | null = null;
-          let operatorName: string | null = null;
-          
-          if (locations.length > 0) {
-            const firstLocationNum = locations[0].location_number;
-            const cfaData = cfaLocationMap.get(firstLocationNum);
-            if (cfaData) {
-              state = cfaData.state;
-              operatorName = cfaData.operator;
-            }
-          }
 
           return {
             id: org.id,
@@ -124,8 +95,8 @@ export function OrganizationsPage() {
             subscription_plan: org.subscription_plan,
             locations,
             employee_count: employeeCount,
-            state,
-            operator_name: operatorName,
+            state: org.state,
+            operator_name: org.operator_name,
           };
         });
 

@@ -45,12 +45,21 @@ export function OrgOverviewTab({ organization, locationNames }: OrgOverviewTabPr
 
   // Get the location ID(s) to pass to DashboardMetricCard
   // For organization view, pass all location IDs for aggregation
-  const selectedLocationIds = selectedLocation === 'organization' 
+  // Only pass locationIds if we have locations, otherwise metrics card will show nothing
+  const selectedLocationIds = selectedLocation === 'organization' && allLocationIds.length > 0
     ? allLocationIds
     : undefined;
   const selectedLocationId = selectedLocation === 'organization' 
-    ? undefined
+    ? (allLocationIds.length === 1 ? allLocationIds[0] : undefined) // If only one location, use single ID
     : selectedLocation;
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('[OrgOverviewTab] selectedLocation:', selectedLocation);
+    console.log('[OrgOverviewTab] allLocationIds:', allLocationIds);
+    console.log('[OrgOverviewTab] selectedLocationId:', selectedLocationId);
+    console.log('[OrgOverviewTab] selectedLocationIds:', selectedLocationIds);
+  }, [selectedLocation, allLocationIds, selectedLocationId, selectedLocationIds]);
 
   // Get display name for selected location
   const getLocationDisplayName = (locId: string): string => {

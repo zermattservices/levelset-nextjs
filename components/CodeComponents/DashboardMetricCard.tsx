@@ -158,14 +158,25 @@ export function DashboardMetricCard({
   const effectiveLocationId = locationId || undefined;
   
   // Memoize locationIds to prevent infinite loops from array reference changes
-  // Convert to a stable string key for comparison
+  // Create a stable string key WITHOUT mutating the original array (spread before sort)
   const locationIdsKey = React.useMemo(
-    () => locationIds ? locationIds.sort().join(',') : (locationId || ''),
+    () => locationIds && locationIds.length > 0 
+      ? [...locationIds].sort().join(',') 
+      : (locationId || 'none'),
     [locationIds, locationId]
   );
   
+  // Store the actual array, only update when the key changes
   const effectiveLocationIds = React.useMemo(
-    () => locationIds || (locationId ? [locationId] : undefined),
+    () => {
+      if (locationIds && locationIds.length > 0) {
+        return locationIds;
+      }
+      if (locationId) {
+        return [locationId];
+      }
+      return undefined;
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locationIdsKey] // Use the stable key instead of the array directly
   );
@@ -180,6 +191,11 @@ export function DashboardMetricCard({
   const config = VARIANT_CONFIG[variant];
 
   const fetchMetrics = React.useCallback(async () => {
+    console.log('[DashboardMetricCard] fetchMetrics called for variant:', variant);
+    console.log('[DashboardMetricCard] effectiveLocationId:', effectiveLocationId);
+    console.log('[DashboardMetricCard] effectiveLocationIds:', effectiveLocationIds);
+    console.log('[DashboardMetricCard] locationIdsKey:', locationIdsKey);
+    
     // For placeholder variants, show static zero data
     if (isPlaceholder || isPlaceholderVariant) {
       setMetricState({
@@ -193,6 +209,7 @@ export function DashboardMetricCard({
     }
     
     if (!effectiveLocationId && !effectiveLocationIds) {
+      console.log('[DashboardMetricCard] No location IDs, returning early');
       setMetricState(null);
       setError(null);
       setLoading(false);
