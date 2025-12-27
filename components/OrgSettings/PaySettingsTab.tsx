@@ -125,13 +125,13 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
       }
 
       try {
-        // Fetch roles (excluding Operator)
+        // Fetch roles (excluding Operator), ordered from lowest to highest (highest hierarchy_level first)
         const { data: rolesData, error: rolesError } = await supabase
           .from('org_roles')
           .select('id, role_name, hierarchy_level, color')
           .eq('org_id', orgId)
           .neq('hierarchy_level', 0)
-          .order('hierarchy_level', { ascending: true });
+          .order('hierarchy_level', { ascending: false });
 
         if (rolesError) throw rolesError;
         setRoles(rolesData || []);
@@ -462,311 +462,178 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
           Set hourly pay rates based on the rules configured above.
         </p>
         
-        <div className={sty.ratesTableContainer}>
-          <table className={sty.ratesTable}>
-            <thead>
-              <tr>
-                <th className={sty.rateHeaderCell}></th>
-                {roles.map(role => {
-                  const config = getConfig(role.role_name);
-                  const colSpan = config?.has_availability_rules ? 2 : 1;
-                  return (
-                    <th 
-                      key={role.id} 
-                      className={sty.rateHeaderCell}
-                      colSpan={colSpan}
-                    >
-                      <RolePill role={role.role_name} colorKey={role.color} />
-                    </th>
-                  );
-                })}
-              </tr>
-              {/* Sub-header for availability */}
-              <tr>
-                <th className={sty.rateSubHeaderCell}></th>
-                {roles.map(role => {
-                  const config = getConfig(role.role_name);
-                  if (config?.has_availability_rules) {
-                    return (
-                      <React.Fragment key={role.id}>
-                        <th className={sty.rateSubHeaderCell}>Limited</th>
-                        <th className={sty.rateSubHeaderCell}>Full</th>
-                      </React.Fragment>
-                    );
-                  }
-                  return <th key={role.id} className={sty.rateSubHeaderCell}>-</th>;
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {/* FOH Section */}
-              <tr className={sty.zoneSectionRow}>
-                <td colSpan={100} className={sty.zoneSectionCell}>Service (FOH)</td>
-              </tr>
-              {/* FOH Starting Wage */}
-              <tr>
-                <td className={sty.rateLabelCell}>Starting</td>
-                {roles.map(role => {
-                  const config = getConfig(role.role_name);
-                  if (!config?.has_zone_rules) {
-                    if (config?.has_availability_rules) {
+        {(() => {
+          // Check if any role has zone rules enabled
+          const hasAnyZoneRules = payConfigs.some(c => c.has_zone_rules);
+          const hasAnyCertificationRules = payConfigs.some(c => c.has_certification_rules);
+          
+          // Helper to render rate input cell
+          const renderRateCell = (role: OrgRole, zone: 'FOH' | 'BOH' | null, isCertified: boolean) => {
+            const config = getConfig(role.role_name);
+            
+            // If certification is required but role doesn't have it enabled, show dash
+            if (isCertified && !config?.has_certification_rules) {
+              if (config?.has_availability_rules) {
+                return (
+                  <React.Fragment key={`${role.id}-${zone}-${isCertified}`}>
+                    <td className={sty.rateInputCell}>-</td>
+                    <td className={sty.rateInputCell}>-</td>
+                  </React.Fragment>
+                );
+              }
+              return <td key={`${role.id}-${zone}-${isCertified}`} className={sty.rateInputCell}>-</td>;
+            }
+            
+            // If zone is required but role doesn't have it enabled, show dash
+            if (zone && !config?.has_zone_rules) {
+              if (config?.has_availability_rules) {
+                return (
+                  <React.Fragment key={`${role.id}-${zone}-${isCertified}`}>
+                    <td className={sty.rateInputCell}>-</td>
+                    <td className={sty.rateInputCell}>-</td>
+                  </React.Fragment>
+                );
+              }
+              return <td key={`${role.id}-${zone}-${isCertified}`} className={sty.rateInputCell}>-</td>;
+            }
+            
+            if (config?.has_availability_rules) {
+              return (
+                <React.Fragment key={`${role.id}-${zone}-${isCertified}`}>
+                  <td className={sty.rateInputCell}>
+                    <StyledTextField
+                      type="number"
+                      size="small"
+                      value={getPayRate(role.role_name, zone, 'Limited', isCertified) || ''}
+                      onChange={(e) => handlePayRateChange(role.role_name, zone, 'Limited', isCertified, e.target.value)}
+                      onBlur={() => handlePayRateBlur(role.role_name, zone, 'Limited', isCertified)}
+                      disabled={disabled}
+                      inputProps={{ min: 0, step: 0.25 }}
+                      sx={{ width: 80 }}
+                    />
+                  </td>
+                  <td className={sty.rateInputCell}>
+                    <StyledTextField
+                      type="number"
+                      size="small"
+                      value={getPayRate(role.role_name, zone, 'Available', isCertified) || ''}
+                      onChange={(e) => handlePayRateChange(role.role_name, zone, 'Available', isCertified, e.target.value)}
+                      onBlur={() => handlePayRateBlur(role.role_name, zone, 'Available', isCertified)}
+                      disabled={disabled}
+                      inputProps={{ min: 0, step: 0.25 }}
+                      sx={{ width: 80 }}
+                    />
+                  </td>
+                </React.Fragment>
+              );
+            }
+            
+            return (
+              <td key={`${role.id}-${zone}-${isCertified}`} className={sty.rateInputCell}>
+                <StyledTextField
+                  type="number"
+                  size="small"
+                  value={getPayRate(role.role_name, zone, null, isCertified) || ''}
+                  onChange={(e) => handlePayRateChange(role.role_name, zone, null, isCertified, e.target.value)}
+                  onBlur={() => handlePayRateBlur(role.role_name, zone, null, isCertified)}
+                  disabled={disabled}
+                  inputProps={{ min: 0, step: 0.25 }}
+                  sx={{ width: 80 }}
+                />
+              </td>
+            );
+          };
+          
+          return (
+            <div className={sty.ratesTableContainer}>
+              <table className={sty.ratesTable}>
+                <thead>
+                  <tr>
+                    <th className={sty.rateHeaderCell}></th>
+                    {roles.map(role => {
+                      const config = getConfig(role.role_name);
+                      const colSpan = config?.has_availability_rules ? 2 : 1;
                       return (
-                        <React.Fragment key={role.id}>
-                          <td className={sty.rateInputCell}>-</td>
-                          <td className={sty.rateInputCell}>-</td>
-                        </React.Fragment>
+                        <th 
+                          key={role.id} 
+                          className={sty.rateHeaderCell}
+                          colSpan={colSpan}
+                        >
+                          <RolePill role={role.role_name} colorKey={role.color} />
+                        </th>
                       );
-                    }
-                    return <td key={role.id} className={sty.rateInputCell}>-</td>;
-                  }
-                  
-                  if (config?.has_availability_rules) {
-                    return (
-                      <React.Fragment key={role.id}>
-                        <td className={sty.rateInputCell}>
-                          <StyledTextField
-                            type="number"
-                            size="small"
-                            value={getPayRate(role.role_name, 'FOH', 'Limited', false) || ''}
-                            onChange={(e) => handlePayRateChange(role.role_name, 'FOH', 'Limited', false, e.target.value)}
-                            onBlur={() => handlePayRateBlur(role.role_name, 'FOH', 'Limited', false)}
-                            disabled={disabled}
-                            inputProps={{ min: 0, step: 0.25 }}
-                            sx={{ width: 80 }}
-                          />
-                        </td>
-                        <td className={sty.rateInputCell}>
-                          <StyledTextField
-                            type="number"
-                            size="small"
-                            value={getPayRate(role.role_name, 'FOH', 'Available', false) || ''}
-                            onChange={(e) => handlePayRateChange(role.role_name, 'FOH', 'Available', false, e.target.value)}
-                            onBlur={() => handlePayRateBlur(role.role_name, 'FOH', 'Available', false)}
-                            disabled={disabled}
-                            inputProps={{ min: 0, step: 0.25 }}
-                            sx={{ width: 80 }}
-                          />
-                        </td>
-                      </React.Fragment>
-                    );
-                  }
-                  
-                  return (
-                    <td key={role.id} className={sty.rateInputCell}>
-                      <StyledTextField
-                        type="number"
-                        size="small"
-                        value={getPayRate(role.role_name, 'FOH', null, false) || ''}
-                        onChange={(e) => handlePayRateChange(role.role_name, 'FOH', null, false, e.target.value)}
-                        onBlur={() => handlePayRateBlur(role.role_name, 'FOH', null, false)}
-                        disabled={disabled}
-                        inputProps={{ min: 0, step: 0.25 }}
-                        sx={{ width: 80 }}
-                      />
-                    </td>
-                  );
-                })}
-              </tr>
-              {/* FOH Certified Wage */}
-              <tr>
-                <td className={sty.rateLabelCell}>Certified</td>
-                {roles.map(role => {
-                  const config = getConfig(role.role_name);
-                  if (!config?.has_zone_rules || !config?.has_certification_rules) {
-                    if (config?.has_availability_rules) {
-                      return (
-                        <React.Fragment key={role.id}>
-                          <td className={sty.rateInputCell}>-</td>
-                          <td className={sty.rateInputCell}>-</td>
-                        </React.Fragment>
-                      );
-                    }
-                    return <td key={role.id} className={sty.rateInputCell}>-</td>;
-                  }
-                  
-                  if (config?.has_availability_rules) {
-                    return (
-                      <React.Fragment key={role.id}>
-                        <td className={sty.rateInputCell}>
-                          <StyledTextField
-                            type="number"
-                            size="small"
-                            value={getPayRate(role.role_name, 'FOH', 'Limited', true) || ''}
-                            onChange={(e) => handlePayRateChange(role.role_name, 'FOH', 'Limited', true, e.target.value)}
-                            onBlur={() => handlePayRateBlur(role.role_name, 'FOH', 'Limited', true)}
-                            disabled={disabled}
-                            inputProps={{ min: 0, step: 0.25 }}
-                            sx={{ width: 80 }}
-                          />
-                        </td>
-                        <td className={sty.rateInputCell}>
-                          <StyledTextField
-                            type="number"
-                            size="small"
-                            value={getPayRate(role.role_name, 'FOH', 'Available', true) || ''}
-                            onChange={(e) => handlePayRateChange(role.role_name, 'FOH', 'Available', true, e.target.value)}
-                            onBlur={() => handlePayRateBlur(role.role_name, 'FOH', 'Available', true)}
-                            disabled={disabled}
-                            inputProps={{ min: 0, step: 0.25 }}
-                            sx={{ width: 80 }}
-                          />
-                        </td>
-                      </React.Fragment>
-                    );
-                  }
-                  
-                  return (
-                    <td key={role.id} className={sty.rateInputCell}>
-                      <StyledTextField
-                        type="number"
-                        size="small"
-                        value={getPayRate(role.role_name, 'FOH', null, true) || ''}
-                        onChange={(e) => handlePayRateChange(role.role_name, 'FOH', null, true, e.target.value)}
-                        onBlur={() => handlePayRateBlur(role.role_name, 'FOH', null, true)}
-                        disabled={disabled}
-                        inputProps={{ min: 0, step: 0.25 }}
-                        sx={{ width: 80 }}
-                      />
-                    </td>
-                  );
-                })}
-              </tr>
+                    })}
+                  </tr>
+                  {/* Sub-header for availability */}
+                  <tr>
+                    <th className={sty.rateSubHeaderCell}></th>
+                    {roles.map(role => {
+                      const config = getConfig(role.role_name);
+                      if (config?.has_availability_rules) {
+                        return (
+                          <React.Fragment key={role.id}>
+                            <th className={sty.rateSubHeaderCell}>Limited</th>
+                            <th className={sty.rateSubHeaderCell}>Full</th>
+                          </React.Fragment>
+                        );
+                      }
+                      return <th key={role.id} className={sty.rateSubHeaderCell}>-</th>;
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {hasAnyZoneRules ? (
+                    <>
+                      {/* FOH Section */}
+                      <tr className={sty.zoneSectionRow}>
+                        <td colSpan={100} className={sty.zoneSectionCell}>FOH</td>
+                      </tr>
+                      <tr>
+                        <td className={sty.rateLabelCell}>Starting</td>
+                        {roles.map(role => renderRateCell(role, 'FOH', false))}
+                      </tr>
+                      {hasAnyCertificationRules && (
+                        <tr>
+                          <td className={sty.rateLabelCell}>Certified</td>
+                          {roles.map(role => renderRateCell(role, 'FOH', true))}
+                        </tr>
+                      )}
 
-              {/* BOH Section */}
-              <tr className={sty.zoneSectionRow}>
-                <td colSpan={100} className={sty.zoneSectionCell}>Production (BOH)</td>
-              </tr>
-              {/* BOH Starting Wage */}
-              <tr>
-                <td className={sty.rateLabelCell}>Starting</td>
-                {roles.map(role => {
-                  const config = getConfig(role.role_name);
-                  if (!config?.has_zone_rules) {
-                    if (config?.has_availability_rules) {
-                      return (
-                        <React.Fragment key={role.id}>
-                          <td className={sty.rateInputCell}>-</td>
-                          <td className={sty.rateInputCell}>-</td>
-                        </React.Fragment>
-                      );
-                    }
-                    return <td key={role.id} className={sty.rateInputCell}>-</td>;
-                  }
-                  
-                  if (config?.has_availability_rules) {
-                    return (
-                      <React.Fragment key={role.id}>
-                        <td className={sty.rateInputCell}>
-                          <StyledTextField
-                            type="number"
-                            size="small"
-                            value={getPayRate(role.role_name, 'BOH', 'Limited', false) || ''}
-                            onChange={(e) => handlePayRateChange(role.role_name, 'BOH', 'Limited', false, e.target.value)}
-                            onBlur={() => handlePayRateBlur(role.role_name, 'BOH', 'Limited', false)}
-                            disabled={disabled}
-                            inputProps={{ min: 0, step: 0.25 }}
-                            sx={{ width: 80 }}
-                          />
-                        </td>
-                        <td className={sty.rateInputCell}>
-                          <StyledTextField
-                            type="number"
-                            size="small"
-                            value={getPayRate(role.role_name, 'BOH', 'Available', false) || ''}
-                            onChange={(e) => handlePayRateChange(role.role_name, 'BOH', 'Available', false, e.target.value)}
-                            onBlur={() => handlePayRateBlur(role.role_name, 'BOH', 'Available', false)}
-                            disabled={disabled}
-                            inputProps={{ min: 0, step: 0.25 }}
-                            sx={{ width: 80 }}
-                          />
-                        </td>
-                      </React.Fragment>
-                    );
-                  }
-                  
-                  return (
-                    <td key={role.id} className={sty.rateInputCell}>
-                      <StyledTextField
-                        type="number"
-                        size="small"
-                        value={getPayRate(role.role_name, 'BOH', null, false) || ''}
-                        onChange={(e) => handlePayRateChange(role.role_name, 'BOH', null, false, e.target.value)}
-                        onBlur={() => handlePayRateBlur(role.role_name, 'BOH', null, false)}
-                        disabled={disabled}
-                        inputProps={{ min: 0, step: 0.25 }}
-                        sx={{ width: 80 }}
-                      />
-                    </td>
-                  );
-                })}
-              </tr>
-              {/* BOH Certified Wage */}
-              <tr>
-                <td className={sty.rateLabelCell}>Certified</td>
-                {roles.map(role => {
-                  const config = getConfig(role.role_name);
-                  if (!config?.has_zone_rules || !config?.has_certification_rules) {
-                    if (config?.has_availability_rules) {
-                      return (
-                        <React.Fragment key={role.id}>
-                          <td className={sty.rateInputCell}>-</td>
-                          <td className={sty.rateInputCell}>-</td>
-                        </React.Fragment>
-                      );
-                    }
-                    return <td key={role.id} className={sty.rateInputCell}>-</td>;
-                  }
-                  
-                  if (config?.has_availability_rules) {
-                    return (
-                      <React.Fragment key={role.id}>
-                        <td className={sty.rateInputCell}>
-                          <StyledTextField
-                            type="number"
-                            size="small"
-                            value={getPayRate(role.role_name, 'BOH', 'Limited', true) || ''}
-                            onChange={(e) => handlePayRateChange(role.role_name, 'BOH', 'Limited', true, e.target.value)}
-                            onBlur={() => handlePayRateBlur(role.role_name, 'BOH', 'Limited', true)}
-                            disabled={disabled}
-                            inputProps={{ min: 0, step: 0.25 }}
-                            sx={{ width: 80 }}
-                          />
-                        </td>
-                        <td className={sty.rateInputCell}>
-                          <StyledTextField
-                            type="number"
-                            size="small"
-                            value={getPayRate(role.role_name, 'BOH', 'Available', true) || ''}
-                            onChange={(e) => handlePayRateChange(role.role_name, 'BOH', 'Available', true, e.target.value)}
-                            onBlur={() => handlePayRateBlur(role.role_name, 'BOH', 'Available', true)}
-                            disabled={disabled}
-                            inputProps={{ min: 0, step: 0.25 }}
-                            sx={{ width: 80 }}
-                          />
-                        </td>
-                      </React.Fragment>
-                    );
-                  }
-                  
-                  return (
-                    <td key={role.id} className={sty.rateInputCell}>
-                      <StyledTextField
-                        type="number"
-                        size="small"
-                        value={getPayRate(role.role_name, 'BOH', null, true) || ''}
-                        onChange={(e) => handlePayRateChange(role.role_name, 'BOH', null, true, e.target.value)}
-                        onBlur={() => handlePayRateBlur(role.role_name, 'BOH', null, true)}
-                        disabled={disabled}
-                        inputProps={{ min: 0, step: 0.25 }}
-                        sx={{ width: 80 }}
-                      />
-                    </td>
-                  );
-                })}
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                      {/* BOH Section */}
+                      <tr className={sty.zoneSectionRow}>
+                        <td colSpan={100} className={sty.zoneSectionCell}>BOH</td>
+                      </tr>
+                      <tr>
+                        <td className={sty.rateLabelCell}>Starting</td>
+                        {roles.map(role => renderRateCell(role, 'BOH', false))}
+                      </tr>
+                      {hasAnyCertificationRules && (
+                        <tr>
+                          <td className={sty.rateLabelCell}>Certified</td>
+                          {roles.map(role => renderRateCell(role, 'BOH', true))}
+                        </tr>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {/* No zone rules - simple table */}
+                      <tr>
+                        <td className={sty.rateLabelCell}>Starting</td>
+                        {roles.map(role => renderRateCell(role, null, false))}
+                      </tr>
+                      {hasAnyCertificationRules && (
+                        <tr>
+                          <td className={sty.rateLabelCell}>Certified</td>
+                          {roles.map(role => renderRateCell(role, null, true))}
+                        </tr>
+                      )}
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Section 3: Availability Descriptions */}
