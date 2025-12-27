@@ -40,84 +40,86 @@ export function ImpersonationBanner() {
 
   const handleExit = () => {
     endImpersonation();
-    // Optionally redirect to admin mode page
-    window.location.href = '/admin-mode';
+    // Redirect to admin mode page
+    window.location.href = '/admin/organizations';
   };
 
   return (
     <div className={styles.banner}>
-      {/* User info section */}
-      <div className={styles.userInfo}>
-        <div className={styles.icon}>
-          <PersonIcon sx={{ fontSize: 18, color: '#ffffff' }} />
-        </div>
-        <div>
-          <div className={styles.testingLabel}>Testing As</div>
-          <div className={styles.userName}>{impersonatedUser.full_name}</div>
-          <div className={styles.userDetails}>
-            <span>{impersonatedUser.email}</span>
-            <span className={styles.detailDivider} />
-            <span>{impersonatedUser.org_name}</span>
-            {impersonatedUser.location_number && (
-              <>
-                <span className={styles.detailDivider} />
-                <span>Location #{impersonatedUser.location_number}</span>
-              </>
-            )}
-            <span className={styles.detailDivider} />
-            <span>{impersonatedUser.role}</span>
+      <div className={styles.bannerContent}>
+        {/* User info section */}
+        <div className={styles.userInfo}>
+          <div className={styles.icon}>
+            <PersonIcon sx={{ fontSize: 18, color: '#ffffff' }} />
           </div>
-        </div>
-      </div>
-
-      {/* Controls section */}
-      <div className={styles.controls}>
-        {/* Debug toggles */}
-        <div className={styles.toggleGroup}>
-          <div className={styles.toggle}>
-            <span className={styles.toggleLabel}>Console Log</span>
-            <div 
-              className={`${styles.switch} ${consoleLoggingEnabled ? styles.active : ''}`}
-              onClick={() => setConsoleLoggingEnabled(!consoleLoggingEnabled)}
-              role="switch"
-              aria-checked={consoleLoggingEnabled}
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setConsoleLoggingEnabled(!consoleLoggingEnabled);
-                }
-              }}
-            >
-              <div className={styles.switchThumb} />
-            </div>
-          </div>
-          
-          <div className={styles.toggle}>
-            <span className={styles.toggleLabel}>Network Log</span>
-            <div 
-              className={`${styles.switch} ${networkLoggingEnabled ? styles.active : ''}`}
-              onClick={() => setNetworkLoggingEnabled(!networkLoggingEnabled)}
-              role="switch"
-              aria-checked={networkLoggingEnabled}
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setNetworkLoggingEnabled(!networkLoggingEnabled);
-                }
-              }}
-            >
-              <div className={styles.switchThumb} />
+          <div>
+            <div className={styles.testingLabel}>Testing As</div>
+            <div className={styles.userName}>{impersonatedUser.full_name}</div>
+            <div className={styles.userDetails}>
+              <span>{impersonatedUser.email}</span>
+              <span className={styles.detailDivider} />
+              <span>{impersonatedUser.org_name}</span>
+              {impersonatedUser.location_number && (
+                <>
+                  <span className={styles.detailDivider} />
+                  <span>Location #{impersonatedUser.location_number}</span>
+                </>
+              )}
+              <span className={styles.detailDivider} />
+              <span>{impersonatedUser.role}</span>
             </div>
           </div>
         </div>
 
-        {/* Exit button */}
-        <button className={styles.exitButton} onClick={handleExit}>
-          <LogoutIcon sx={{ fontSize: 16 }} />
-          Exit Session
-        </button>
+        {/* Controls section */}
+        <div className={styles.controls}>
+          {/* Debug toggles */}
+          <div className={styles.toggleGroup}>
+            <div className={styles.toggle}>
+              <span className={styles.toggleLabel}>Console Log</span>
+              <div 
+                className={`${styles.switch} ${consoleLoggingEnabled ? styles.active : ''}`}
+                onClick={() => setConsoleLoggingEnabled(!consoleLoggingEnabled)}
+                role="switch"
+                aria-checked={consoleLoggingEnabled}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setConsoleLoggingEnabled(!consoleLoggingEnabled);
+                  }
+                }}
+              >
+                <div className={styles.switchThumb} />
+              </div>
+            </div>
+            
+            <div className={styles.toggle}>
+              <span className={styles.toggleLabel}>Network Log</span>
+              <div 
+                className={`${styles.switch} ${networkLoggingEnabled ? styles.active : ''}`}
+                onClick={() => setNetworkLoggingEnabled(!networkLoggingEnabled)}
+                role="switch"
+                aria-checked={networkLoggingEnabled}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setNetworkLoggingEnabled(!networkLoggingEnabled);
+                  }
+                }}
+              >
+                <div className={styles.switchThumb} />
+              </div>
+            </div>
+          </div>
+
+          {/* Exit button */}
+          <button className={styles.exitButton} onClick={handleExit}>
+            <LogoutIcon sx={{ fontSize: 16 }} />
+            Exit Session
+          </button>
+        </div>
       </div>
     </div>
   );

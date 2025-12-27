@@ -13,6 +13,7 @@ import { LocationSelectDropdown } from '@/components/CodeComponents/LocationSele
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
+import { useEffectiveUser } from '@/lib/hooks/useEffectiveUser';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -26,16 +27,21 @@ export interface MenuNavigationProps {
 
 export function MenuNavigation({ className, firstName, userRole }: MenuNavigationProps) {
   const auth = useAuth();
+  const effectiveUser = useEffectiveUser();
   const { userHierarchyLevel } = useLocationContext();
   const { has } = usePermissions();
   const [dashboardOpen, setDashboardOpen] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
   const profileDropdownRef = React.useRef<HTMLDivElement>(null);
 
-  const displayFirstName = firstName || auth.first_name || '';
-  const displayRole = userRole || auth.role || '';
+  // Use effective user (impersonated user when impersonating) for display
+  const displayFirstName = effectiveUser.first_name || '';
+  const displayRole = effectiveUser.role || '';
 
-  const isLevelsetAdmin = displayRole === 'Levelset Admin';
+  // Check if the ORIGINAL user (not impersonated) is a Levelset Admin for Admin Mode access
+  // Admin Mode should only be visible to actual admins, not when impersonating
+  const isActualLevelsetAdmin = auth.role === 'Levelset Admin';
+  const isEffectiveLevelsetAdmin = displayRole === 'Levelset Admin';
   
   // Permission-based navigation access
   const canViewDashboard = has(P.PE_VIEW_DASHBOARD);
@@ -109,8 +115,8 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
 
           {/* Right side - Admin Mode, Location selector, user info, logout, profile icon */}
           <div className={sty.rightSection}>
-            {/* Admin Mode - only for Levelset Admin */}
-            {isLevelsetAdmin && (
+            {/* Admin Mode - only for actual Levelset Admin (not impersonated role) */}
+            {isActualLevelsetAdmin && (
               <LevelsetButton
                 color="softGreen"
                 size="compact"
