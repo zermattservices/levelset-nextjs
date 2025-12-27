@@ -1,0 +1,14 @@
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background-color: #fafafa;
+  border-radius: 12px;
+  border: 2px dashed #e5e5e5;
+}
+
+.placeholderContent {
+  text-align: center;
+  padding: 24px;
+}

@@ -8,6 +8,7 @@ import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { AdminModeSidebar } from '@/components/AdminMode/AdminModeSidebar';
 import { UserTestingPage } from '@/components/AdminMode/UserTestingPage';
+import { OrganizationsPage } from '@/components/AdminMode/OrganizationsPage';
 import { ComingSoonPlaceholder } from '@/components/OrgSettings/ComingSoonPlaceholder';
 import styles from './AdminLocationsPage.module.css';
 
@@ -27,10 +28,10 @@ export function AdminLocationsPage() {
     switch (activeSection) {
       case 'user-testing':
         return <UserTestingPage />;
+      case 'organizations':
+        return <OrganizationsPage />;
       case 'locations':
         return <ComingSoonPlaceholder title="Location Management" description="View and manage all locations across the Levelset platform." />;
-      case 'clients':
-        return <ComingSoonPlaceholder title="Client Management" description="Manage organizations and their access to the platform." />;
       default:
         return <UserTestingPage />;
     }
