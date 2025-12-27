@@ -130,13 +130,11 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
           email,
           first_name,
           last_name,
-          full_name,
           role,
           org_id,
           location_id,
           employee_id,
-          hire_date,
-          active
+          created_at
         `)
         .eq('id', userId)
         .single();
@@ -166,15 +164,15 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
         email: userData.email || '',
         first_name: userData.first_name || '',
         last_name: userData.last_name || '',
-        full_name: userData.full_name || `${userData.first_name || ''} ${userData.last_name || ''}`.trim(),
+        full_name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || userData.email || '',
         role: userData.role || '',
         org_id: userData.org_id || '',
         org_name: orgData?.name || '',
         location_id: userData.location_id || '',
         location_number: locationData?.location_number || '',
         employee_id: userData.employee_id,
-        hire_date: userData.hire_date,
-        active: userData.active,
+        hire_date: userData.created_at,
+        active: true,
       };
       
       // Store original user ID and set impersonated user

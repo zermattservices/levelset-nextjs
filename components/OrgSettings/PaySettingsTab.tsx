@@ -5,6 +5,7 @@ import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Chip from '@mui/material/Chip';
+import InputAdornment from '@mui/material/InputAdornment';
 import BusinessIcon from '@mui/icons-material/Business';
 import CircularProgress from '@mui/material/CircularProgress';
 import { createSupabaseClient } from '@/util/supabase/component';
@@ -41,7 +42,10 @@ const StyledTextField = styled(TextField)(() => ({
   },
   '& .MuiInputBase-input': {
     textAlign: 'center',
-    padding: '8px 12px',
+    padding: '8px 8px 8px 0',
+  },
+  '& .MuiInputAdornment-root': {
+    marginRight: 0,
   },
 }));
 
@@ -312,37 +316,58 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
     }
   }, [orgId, disabled, supabase, payRates]);
 
-  // Handle pay rate change
-  const handlePayRateChange = (roleName: string, zone: 'FOH' | 'BOH' | null, availability: 'Limited' | 'Available' | null, isCertified: boolean, value: string) => {
+  // Handle pay rate change - with optional linking for roles without zone rules
+  const handlePayRateChange = (roleName: string, zone: 'FOH' | 'BOH' | null, availability: 'Limited' | 'Available' | null, isCertified: boolean, value: string, linkZones: boolean = false) => {
     const rate = parseFloat(value) || 0;
+    
     setPayRates(prev => {
-      const existingIndex = prev.findIndex(r => 
-        r.role_name === roleName && 
-        r.zone === zone && 
-        r.availability === availability && 
-        r.is_certified === isCertified
-      );
-
-      if (existingIndex >= 0) {
-        const updated = [...prev];
-        updated[existingIndex] = { ...updated[existingIndex], hourly_rate: rate };
-        return updated;
+      let updated = [...prev];
+      
+      // Helper to update or add a rate
+      const updateRate = (z: 'FOH' | 'BOH' | null, avail: 'Limited' | 'Available' | null) => {
+        const existingIndex = updated.findIndex(r => 
+          r.role_name === roleName && 
+          r.zone === z && 
+          r.availability === avail && 
+          r.is_certified === isCertified
+        );
+        
+        if (existingIndex >= 0) {
+          updated[existingIndex] = { ...updated[existingIndex], hourly_rate: rate };
+        } else {
+          updated.push({
+            org_id: orgId!,
+            role_name: roleName,
+            zone: z,
+            availability: avail,
+            is_certified: isCertified,
+            hourly_rate: rate,
+          });
+        }
+      };
+      
+      // If linking zones, update both FOH and BOH
+      if (linkZones) {
+        updateRate('FOH', availability);
+        updateRate('BOH', availability);
       } else {
-        return [...prev, {
-          org_id: orgId!,
-          role_name: roleName,
-          zone,
-          availability,
-          is_certified: isCertified,
-          hourly_rate: rate,
-        }];
+        updateRate(zone, availability);
       }
+      
+      return updated;
     });
   };
 
-  const handlePayRateBlur = (roleName: string, zone: 'FOH' | 'BOH' | null, availability: 'Limited' | 'Available' | null, isCertified: boolean) => {
+  const handlePayRateBlur = async (roleName: string, zone: 'FOH' | 'BOH' | null, availability: 'Limited' | 'Available' | null, isCertified: boolean, linkZones: boolean = false) => {
     const rate = getPayRate(roleName, zone, availability, isCertified);
-    savePayRate(roleName, zone, availability, isCertified, rate);
+    
+    if (linkZones) {
+      // Save to both zones
+      await savePayRate(roleName, 'FOH', availability, isCertified, rate);
+      await savePayRate(roleName, 'BOH', availability, isCertified, rate);
+    } else {
+      await savePayRate(roleName, zone, availability, isCertified, rate);
+    }
   };
 
   // Get config for a role
@@ -467,13 +492,45 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
           const hasAnyZoneRules = payConfigs.some(c => c.has_zone_rules);
           const hasAnyCertificationRules = payConfigs.some(c => c.has_certification_rules);
           
+          // Helper to render a $ input field
+          const renderDollarInput = (
+            role: OrgRole, 
+            zone: 'FOH' | 'BOH' | null, 
+            availability: 'Limited' | 'Available' | null, 
+            isCertified: boolean,
+            linkZones: boolean = false
+          ) => {
+            // When zones are linked, use FOH as the source of truth
+            const effectiveZone = linkZones ? 'FOH' : zone;
+            const rate = getPayRate(role.role_name, effectiveZone, availability, isCertified);
+            
+            return (
+              <StyledTextField
+                type="number"
+                size="small"
+                value={rate || ''}
+                onChange={(e) => handlePayRateChange(role.role_name, effectiveZone, availability, isCertified, e.target.value, linkZones)}
+                onBlur={() => handlePayRateBlur(role.role_name, effectiveZone, availability, isCertified, linkZones)}
+                disabled={disabled}
+                inputProps={{ min: 0, step: 0.25, style: { textAlign: 'center' } }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                }}
+                sx={{ width: 90 }}
+              />
+            );
+          };
+          
           // Helper to render rate input cell
-          const renderRateCell = (role: OrgRole, zone: 'FOH' | 'BOH' | null, isCertified: boolean) => {
+          const renderRateCell = (role: OrgRole, zone: 'FOH' | 'BOH' | null, isCertified: boolean, isSecondZoneRow: boolean = false) => {
             const config = getConfig(role.role_name);
+            const hasZoneRules = config?.has_zone_rules || false;
+            const hasAvailRules = config?.has_availability_rules || false;
+            const hasCertRules = config?.has_certification_rules || false;
             
-            // If certification is required but role doesn't have it enabled, show dash
-            if (isCertified && !config?.has_certification_rules) {
-              if (config?.has_availability_rules) {
+            // If certification row but role doesn't have cert rules, show dash
+            if (isCertified && !hasCertRules) {
+              if (hasAvailRules) {
                 return (
                   <React.Fragment key={`${role.id}-${zone}-${isCertified}`}>
                     <td className={sty.rateInputCell}>-</td>
@@ -484,45 +541,19 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
               return <td key={`${role.id}-${zone}-${isCertified}`} className={sty.rateInputCell}>-</td>;
             }
             
-            // If zone is required but role doesn't have it enabled, show dash
-            if (zone && !config?.has_zone_rules) {
-              if (config?.has_availability_rules) {
-                return (
-                  <React.Fragment key={`${role.id}-${zone}-${isCertified}`}>
-                    <td className={sty.rateInputCell}>-</td>
-                    <td className={sty.rateInputCell}>-</td>
-                  </React.Fragment>
-                );
-              }
-              return <td key={`${role.id}-${zone}-${isCertified}`} className={sty.rateInputCell}>-</td>;
-            }
+            // When we're in a zone table but role doesn't have zone rules:
+            // Show the same input for both FOH and BOH (linked)
+            // But for the second zone row (BOH), we still show the same input
+            const shouldLinkZones = zone !== null && !hasZoneRules;
             
-            if (config?.has_availability_rules) {
+            if (hasAvailRules) {
               return (
                 <React.Fragment key={`${role.id}-${zone}-${isCertified}`}>
                   <td className={sty.rateInputCell}>
-                    <StyledTextField
-                      type="number"
-                      size="small"
-                      value={getPayRate(role.role_name, zone, 'Limited', isCertified) || ''}
-                      onChange={(e) => handlePayRateChange(role.role_name, zone, 'Limited', isCertified, e.target.value)}
-                      onBlur={() => handlePayRateBlur(role.role_name, zone, 'Limited', isCertified)}
-                      disabled={disabled}
-                      inputProps={{ min: 0, step: 0.25 }}
-                      sx={{ width: 80 }}
-                    />
+                    {renderDollarInput(role, zone, 'Limited', isCertified, shouldLinkZones)}
                   </td>
                   <td className={sty.rateInputCell}>
-                    <StyledTextField
-                      type="number"
-                      size="small"
-                      value={getPayRate(role.role_name, zone, 'Available', isCertified) || ''}
-                      onChange={(e) => handlePayRateChange(role.role_name, zone, 'Available', isCertified, e.target.value)}
-                      onBlur={() => handlePayRateBlur(role.role_name, zone, 'Available', isCertified)}
-                      disabled={disabled}
-                      inputProps={{ min: 0, step: 0.25 }}
-                      sx={{ width: 80 }}
-                    />
+                    {renderDollarInput(role, zone, 'Available', isCertified, shouldLinkZones)}
                   </td>
                 </React.Fragment>
               );
@@ -530,16 +561,7 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
             
             return (
               <td key={`${role.id}-${zone}-${isCertified}`} className={sty.rateInputCell}>
-                <StyledTextField
-                  type="number"
-                  size="small"
-                  value={getPayRate(role.role_name, zone, null, isCertified) || ''}
-                  onChange={(e) => handlePayRateChange(role.role_name, zone, null, isCertified, e.target.value)}
-                  onBlur={() => handlePayRateBlur(role.role_name, zone, null, isCertified)}
-                  disabled={disabled}
-                  inputProps={{ min: 0, step: 0.25 }}
-                  sx={{ width: 80 }}
-                />
+                {renderDollarInput(role, zone, null, isCertified, shouldLinkZones)}
               </td>
             );
           };
@@ -605,12 +627,12 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
                       </tr>
                       <tr>
                         <td className={sty.rateLabelCell}>Starting</td>
-                        {roles.map(role => renderRateCell(role, 'BOH', false))}
+                        {roles.map(role => renderRateCell(role, 'BOH', false, true))}
                       </tr>
                       {hasAnyCertificationRules && (
                         <tr>
                           <td className={sty.rateLabelCell}>Certified</td>
-                          {roles.map(role => renderRateCell(role, 'BOH', true))}
+                          {roles.map(role => renderRateCell(role, 'BOH', true, true))}
                         </tr>
                       )}
                     </>

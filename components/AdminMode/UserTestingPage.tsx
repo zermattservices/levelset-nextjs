@@ -389,9 +389,11 @@ export function UserTestingPage() {
                         <td className={`${styles.tableCell} ${styles.tableCellName}`}>
                           <KeyboardArrowDownIcon 
                             className={`${styles.expandIcon} ${expandedUserId === user.id ? styles.expandIconRotated : ''}`}
-                            sx={{ fontSize: 18, marginRight: 1, verticalAlign: 'middle' }}
+                            sx={{ fontSize: 18, flexShrink: 0 }}
                           />
-                          {user.full_name || `${user.first_name} ${user.last_name}`}
+                          <span className={styles.nameText}>
+                            {user.full_name || `${user.first_name} ${user.last_name}`}
+                          </span>
                         </td>
                         <td className={`${styles.tableCell} ${styles.tableCellEmail}`}>{user.email}</td>
                         <td className={`${styles.tableCell} ${styles.tableCellOrg}`}>
