@@ -78,8 +78,10 @@ export function PermissionLevelsTab({
   // Filter role profiles to only show those the user can see
   // Users can only see permission tiers below their own (e.g., tier 0 sees tier 1+, tier 1 sees tier 2+)
   // Levelset Admin sees all
+  // If userHierarchyLevel is null/undefined, show all profiles (fallback for admin mode)
   const visibleRoleProfiles = React.useMemo(() => {
     if (isLevelsetAdmin) return roleProfiles;
+    if (userHierarchyLevel === null || userHierarchyLevel === undefined) return roleProfiles;
     return roleProfiles.filter(p => p.hierarchy_level > userHierarchyLevel);
   }, [roleProfiles, userHierarchyLevel, isLevelsetAdmin]);
   
