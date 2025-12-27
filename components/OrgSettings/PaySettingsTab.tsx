@@ -146,16 +146,13 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
         
         // Initialize configs for roles without existing config
         const existingConfigs = configData || [];
-        console.log('[PaySettingsTab] Fetched pay configs for org:', orgId, existingConfigs);
         const configMap = new Map(existingConfigs.map(c => [c.role_name, c]));
         
         const allConfigs = (rolesData || []).map(role => {
           const existing = configMap.get(role.role_name);
           if (existing) {
-            console.log('[PaySettingsTab] Found existing config for role:', role.role_name, existing);
             return existing;
           }
-          console.log('[PaySettingsTab] No config found for role:', role.role_name);
           return {
             org_id: orgId,
             role_name: role.role_name,
