@@ -13,7 +13,7 @@ import { LocationSelectDropdown } from '@/components/CodeComponents/LocationSele
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
-import { useEffectiveUser } from '@/lib/hooks/useEffectiveUser';
+import { useImpersonation } from '@/lib/providers/ImpersonationProvider';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -27,21 +27,24 @@ export interface MenuNavigationProps {
 
 export function MenuNavigation({ className, firstName, userRole }: MenuNavigationProps) {
   const auth = useAuth();
-  const effectiveUser = useEffectiveUser();
+  const { isImpersonating, impersonatedUser } = useImpersonation();
   const { userHierarchyLevel } = useLocationContext();
   const { has } = usePermissions();
   const [dashboardOpen, setDashboardOpen] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
   const profileDropdownRef = React.useRef<HTMLDivElement>(null);
 
-  // Use effective user (impersonated user when impersonating) for display
-  const displayFirstName = effectiveUser.first_name || '';
-  const displayRole = effectiveUser.role || '';
+  // When impersonating, show impersonated user's name; otherwise use props or auth
+  const displayFirstName = isImpersonating && impersonatedUser
+    ? impersonatedUser.first_name
+    : (firstName || auth.first_name || '');
+  const displayRole = isImpersonating && impersonatedUser
+    ? impersonatedUser.role
+    : (userRole || auth.role || '');
 
   // Check if the ORIGINAL user (not impersonated) is a Levelset Admin for Admin Mode access
   // Admin Mode should only be visible to actual admins, not when impersonating
   const isActualLevelsetAdmin = auth.role === 'Levelset Admin';
-  const isEffectiveLevelsetAdmin = displayRole === 'Levelset Admin';
   
   // Permission-based navigation access
   const canViewDashboard = has(P.PE_VIEW_DASHBOARD);

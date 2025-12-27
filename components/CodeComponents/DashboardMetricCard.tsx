@@ -156,7 +156,19 @@ export function DashboardMetricCard({
 
   // Support both single locationId and multiple locationIds for aggregation
   const effectiveLocationId = locationId || undefined;
-  const effectiveLocationIds = locationIds || (locationId ? [locationId] : undefined);
+  
+  // Memoize locationIds to prevent infinite loops from array reference changes
+  // Convert to a stable string key for comparison
+  const locationIdsKey = React.useMemo(
+    () => locationIds ? locationIds.sort().join(',') : (locationId || ''),
+    [locationIds, locationId]
+  );
+  
+  const effectiveLocationIds = React.useMemo(
+    () => locationIds || (locationId ? [locationId] : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locationIdsKey] // Use the stable key instead of the array directly
+  );
   
   // Check if this is a placeholder variant (no table configured)
   const isPlaceholderVariant = !VARIANT_CONFIG[variant]?.table;

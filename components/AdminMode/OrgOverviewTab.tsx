@@ -36,10 +36,17 @@ interface OrgOverviewTabProps {
 export function OrgOverviewTab({ organization, locationNames }: OrgOverviewTabProps) {
   const [selectedLocation, setSelectedLocation] = React.useState<string>('organization');
 
+  // Memoize the location IDs array to prevent infinite re-renders
+  // Arrays must be memoized because they're compared by reference in useEffect dependencies
+  const allLocationIds = React.useMemo(
+    () => organization.locations.map(l => l.id),
+    [organization.locations]
+  );
+
   // Get the location ID(s) to pass to DashboardMetricCard
   // For organization view, pass all location IDs for aggregation
   const selectedLocationIds = selectedLocation === 'organization' 
-    ? organization.locations.map(l => l.id)
+    ? allLocationIds
     : undefined;
   const selectedLocationId = selectedLocation === 'organization' 
     ? undefined
