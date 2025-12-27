@@ -316,58 +316,38 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
     }
   }, [orgId, disabled, supabase, payRates]);
 
-  // Handle pay rate change - with optional linking for roles without zone rules
-  const handlePayRateChange = (roleName: string, zone: 'FOH' | 'BOH' | null, availability: 'Limited' | 'Available' | null, isCertified: boolean, value: string, linkZones: boolean = false) => {
+  // Handle pay rate change
+  const handlePayRateChange = (roleName: string, zone: 'FOH' | 'BOH' | null, availability: 'Limited' | 'Available' | null, isCertified: boolean, value: string, _unused: boolean = false) => {
     const rate = parseFloat(value) || 0;
     
     setPayRates(prev => {
-      let updated = [...prev];
-      
-      // Helper to update or add a rate
-      const updateRate = (z: 'FOH' | 'BOH' | null, avail: 'Limited' | 'Available' | null) => {
-        const existingIndex = updated.findIndex(r => 
-          r.role_name === roleName && 
-          r.zone === z && 
-          r.availability === avail && 
-          r.is_certified === isCertified
-        );
-        
-        if (existingIndex >= 0) {
-          updated[existingIndex] = { ...updated[existingIndex], hourly_rate: rate };
-        } else {
-          updated.push({
-            org_id: orgId!,
-            role_name: roleName,
-            zone: z,
-            availability: avail,
-            is_certified: isCertified,
-            hourly_rate: rate,
-          });
-        }
-      };
-      
-      // If linking zones, update both FOH and BOH
-      if (linkZones) {
-        updateRate('FOH', availability);
-        updateRate('BOH', availability);
+      const existingIndex = prev.findIndex(r => 
+        r.role_name === roleName && 
+        r.zone === zone && 
+        r.availability === availability && 
+        r.is_certified === isCertified
+      );
+
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = { ...updated[existingIndex], hourly_rate: rate };
+        return updated;
       } else {
-        updateRate(zone, availability);
+        return [...prev, {
+          org_id: orgId!,
+          role_name: roleName,
+          zone,
+          availability,
+          is_certified: isCertified,
+          hourly_rate: rate,
+        }];
       }
-      
-      return updated;
     });
   };
 
-  const handlePayRateBlur = async (roleName: string, zone: 'FOH' | 'BOH' | null, availability: 'Limited' | 'Available' | null, isCertified: boolean, linkZones: boolean = false) => {
+  const handlePayRateBlur = async (roleName: string, zone: 'FOH' | 'BOH' | null, availability: 'Limited' | 'Available' | null, isCertified: boolean, _unused: boolean = false) => {
     const rate = getPayRate(roleName, zone, availability, isCertified);
-    
-    if (linkZones) {
-      // Save to both zones
-      await savePayRate(roleName, 'FOH', availability, isCertified, rate);
-      await savePayRate(roleName, 'BOH', availability, isCertified, rate);
-    } else {
-      await savePayRate(roleName, zone, availability, isCertified, rate);
-    }
+    await savePayRate(roleName, zone, availability, isCertified, rate);
   };
 
   // Get config for a role
@@ -498,19 +478,25 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
             zone: 'FOH' | 'BOH' | null, 
             availability: 'Limited' | 'Available' | null, 
             isCertified: boolean,
-            linkZones: boolean = false
+            roleHasNoZoneRules: boolean = false
           ) => {
-            // When zones are linked, use FOH as the source of truth
-            const effectiveZone = linkZones ? 'FOH' : zone;
-            const rate = getPayRate(role.role_name, effectiveZone, availability, isCertified);
+            const config = getConfig(role.role_name);
+            const hasAvailRules = config?.has_availability_rules || false;
+            
+            // For roles without zone rules, always query/save with zone=null
+            // For roles without availability rules, always query/save with availability=null
+            const effectiveZone = roleHasNoZoneRules ? null : zone;
+            const effectiveAvailability = hasAvailRules ? availability : null;
+            
+            const rate = getPayRate(role.role_name, effectiveZone, effectiveAvailability, isCertified);
             
             return (
               <StyledTextField
                 type="number"
                 size="small"
                 value={rate || ''}
-                onChange={(e) => handlePayRateChange(role.role_name, effectiveZone, availability, isCertified, e.target.value, linkZones)}
-                onBlur={() => handlePayRateBlur(role.role_name, effectiveZone, availability, isCertified, linkZones)}
+                onChange={(e) => handlePayRateChange(role.role_name, effectiveZone, effectiveAvailability, isCertified, e.target.value, false)}
+                onBlur={() => handlePayRateBlur(role.role_name, effectiveZone, effectiveAvailability, isCertified, false)}
                 disabled={disabled}
                 inputProps={{ min: 0, step: 0.25, style: { textAlign: 'center' } }}
                 InputProps={{
@@ -541,19 +527,17 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
               return <td key={`${role.id}-${zone}-${isCertified}`} className={sty.rateInputCell}>-</td>;
             }
             
-            // When we're in a zone table but role doesn't have zone rules:
-            // Show the same input for both FOH and BOH (linked)
-            // But for the second zone row (BOH), we still show the same input
-            const shouldLinkZones = zone !== null && !hasZoneRules;
+            // Role doesn't have zone rules - use null zone and show single input
+            const roleHasNoZoneRules = !hasZoneRules;
             
             if (hasAvailRules) {
               return (
                 <React.Fragment key={`${role.id}-${zone}-${isCertified}`}>
                   <td className={sty.rateInputCell}>
-                    {renderDollarInput(role, zone, 'Limited', isCertified, shouldLinkZones)}
+                    {renderDollarInput(role, zone, 'Limited', isCertified, roleHasNoZoneRules)}
                   </td>
                   <td className={sty.rateInputCell}>
-                    {renderDollarInput(role, zone, 'Available', isCertified, shouldLinkZones)}
+                    {renderDollarInput(role, zone, 'Available', isCertified, roleHasNoZoneRules)}
                   </td>
                 </React.Fragment>
               );
@@ -561,7 +545,7 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
             
             return (
               <td key={`${role.id}-${zone}-${isCertified}`} className={sty.rateInputCell}>
-                {renderDollarInput(role, zone, null, isCertified, shouldLinkZones)}
+                {renderDollarInput(role, zone, null, isCertified, roleHasNoZoneRules)}
               </td>
             );
           };
@@ -659,39 +643,33 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
       </div>
 
       {/* Section 3: Availability Descriptions */}
-      <div className={sty.section}>
-        <h3 className={sty.sectionTitle}>Availability Requirements</h3>
-        <p className={sty.sectionDescription}>
-          Define what full availability means for each role.
-        </p>
-        
-        <div className={sty.descriptionList}>
-          {roles.filter(role => {
-            const config = getConfig(role.role_name);
-            return config?.has_availability_rules;
-          }).map(role => (
-            <div key={role.id} className={sty.descriptionRow}>
-              <div className={sty.descriptionLabel}>
-                <RolePill role={role.role_name} colorKey={role.color} />
+      {payConfigs.some(c => c.has_availability_rules) && (
+        <div className={sty.section}>
+          <h3 className={sty.sectionTitle}>Availability Requirements</h3>
+          <p className={sty.sectionDescription}>
+            Define what full availability means for each role.
+          </p>
+          
+          <div className={sty.descriptionList}>
+            {roles.map(role => (
+              <div key={role.id} className={sty.descriptionRow}>
+                <div className={sty.descriptionLabel}>
+                  <RolePill role={role.role_name} colorKey={role.color} />
+                </div>
+                <DescriptionTextField
+                  fullWidth
+                  size="small"
+                  placeholder="e.g., Must be available 5 days per week including weekends"
+                  value={getConfig(role.role_name)?.availability_description || ''}
+                  onChange={(e) => handleDescriptionChange(role.role_name, e.target.value)}
+                  onBlur={() => handleDescriptionBlur(role.role_name)}
+                  disabled={disabled}
+                />
               </div>
-              <DescriptionTextField
-                fullWidth
-                size="small"
-                placeholder="e.g., Must be available 5 days per week including weekends"
-                value={getConfig(role.role_name)?.availability_description || ''}
-                onChange={(e) => handleDescriptionChange(role.role_name, e.target.value)}
-                onBlur={() => handleDescriptionBlur(role.role_name)}
-                disabled={disabled}
-              />
-            </div>
-          ))}
-          {roles.filter(role => getConfig(role.role_name)?.has_availability_rules).length === 0 && (
-            <p className={sty.noDataText}>
-              Enable availability rules for roles above to set requirements.
-            </p>
-          )}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
