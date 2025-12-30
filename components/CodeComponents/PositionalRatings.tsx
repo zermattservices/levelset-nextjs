@@ -583,6 +583,9 @@ export function PositionalRatings({
   const [endDate, setEndDate] = React.useState<Date | null>(null);
   const [searchText, setSearchText] = React.useState('');
   const [filterModel, setFilterModel] = React.useState<any>(undefined);
+  const [sortModel, setSortModel] = React.useState<Array<{ field: string; sort: 'asc' | 'desc' }>>([
+    { field: 'formatted_date', sort: 'desc' }
+  ]);
   
   // Metrics data for PDF export
   const [metricsData, setMetricsData] = React.useState<any>(null);
@@ -780,8 +783,41 @@ export function PositionalRatings({
         ratingsPerDay: { value: 0, change: 0, percentChange: 0, priorPeriod: 'period', hasPriorData: false },
       };
 
-      // Prepare table data from filteredRows
-      const tableData = filteredRows.map((row: any) => ({
+      // Apply current sorting to filteredRows before mapping to PDF data
+      let sortedRows = [...filteredRows];
+      if (sortModel && sortModel.length > 0) {
+        const { field, sort } = sortModel[0];
+        sortedRows.sort((a: any, b: any) => {
+          let aVal = a[field];
+          let bVal = b[field];
+          
+          // Handle null/undefined
+          if (aVal == null && bVal == null) return 0;
+          if (aVal == null) return sort === 'asc' ? -1 : 1;
+          if (bVal == null) return sort === 'asc' ? 1 : -1;
+          
+          // Handle date fields
+          if (field === 'formatted_date' || field === 'created_at') {
+            aVal = new Date(a.created_at || a.formatted_date).getTime();
+            bVal = new Date(b.created_at || b.formatted_date).getTime();
+          }
+          
+          // Handle numeric fields
+          if (typeof aVal === 'number' && typeof bVal === 'number') {
+            return sort === 'asc' ? aVal - bVal : bVal - aVal;
+          }
+          
+          // Handle string fields
+          const aStr = String(aVal).toLowerCase();
+          const bStr = String(bVal).toLowerCase();
+          if (aStr < bStr) return sort === 'asc' ? -1 : 1;
+          if (aStr > bStr) return sort === 'asc' ? 1 : -1;
+          return 0;
+        });
+      }
+
+      // Prepare table data from sorted rows
+      const tableData = sortedRows.map((row: any) => ({
         date: row.formatted_date,
         employeeName: row.employee_name,
         employeeRole: row.employee_role,
@@ -2245,6 +2281,9 @@ export function PositionalRatings({
             loading={loading}
             onFilterModelChange={(newModel) => {
               setFilterModel(newModel);
+            }}
+            onSortModelChange={(newModel) => {
+              setSortModel(newModel as Array<{ field: string; sort: 'asc' | 'desc' }>);
             }}
             pagination
             pageSizeOptions={[25, 50, 100, 250]}
