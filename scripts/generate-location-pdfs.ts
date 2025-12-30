@@ -193,13 +193,13 @@ async function generatePDF(
     doc.fontSize(24)
       .fillColor('#0d1b14')
       .font(fontBold)
-      .text('Mobile App Access', 0, 130, { align: 'center' });
+      .text('Mobile App Access', 0, 130, { align: 'center', width: pageWidth });
 
     // Location name
     doc.fontSize(18)
       .fillColor('#666666')
       .font(fontRegular)
-      .text(locationName, 0, 165, { align: 'center' });
+      .text(locationName, 0, 165, { align: 'center', width: pageWidth });
 
     // Add QR code centered - make it larger to fill space
     // The QR code already has the logo composited in the center
