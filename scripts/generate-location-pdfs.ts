@@ -220,15 +220,27 @@ async function generatePDF(
       .font(fontRegular)
       .text('Use this QR code to give leaders quick access to:', 0, instructionsY + 35, { align: 'center', width: pageWidth });
 
-    // Bullet points - centered
+    // Bullet points - manually centered as a block
     const bulletY = instructionsY + 65;
+    const bulletItems = [
+      '• Submit positional ratings',
+      '• Document discipline infractions',
+      '• View the PEA Classic page',
+    ];
+    
     doc.fontSize(12)
       .fillColor('#0d1b14')
       .font(fontMedium);
     
-    doc.text('• Submit positional ratings', 0, bulletY, { align: 'center', width: pageWidth });
-    doc.text('• Document discipline infractions', 0, bulletY + 20, { align: 'center', width: pageWidth });
-    doc.text('• View the PEA Classic page', 0, bulletY + 40, { align: 'center', width: pageWidth });
+    // Find the widest bullet item to calculate block width
+    const bulletWidths = bulletItems.map(item => doc.widthOfString(item));
+    const maxBulletWidth = Math.max(...bulletWidths);
+    const bulletBlockX = (pageWidth - maxBulletWidth) / 2;
+    
+    // Draw each bullet item left-aligned within the centered block
+    bulletItems.forEach((item, index) => {
+      doc.text(item, bulletBlockX, bulletY + (index * 20), { align: 'left' });
+    });
 
     // Tip
     doc.fontSize(11)
