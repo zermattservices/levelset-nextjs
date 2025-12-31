@@ -29,21 +29,21 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <link rel="apple-touch-icon" href="/favicon.ico" />
 
         {/* Social Sharing Meta Tags */}
-        <meta property="og:title" content="Levelset App" />
-        <meta property="og:description" content="Employee management and discipline tracking system for restaurant operations." />
-        <meta property="og:image" content="/levelset-social-cover.png" />
-        <meta property="og:url" content="https://app.levelset.io" />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Levelset App" />
+        <meta key="og:title" property="og:title" content="Levelset App" />
+        <meta key="og:description" property="og:description" content="Employee management and discipline tracking system for restaurant operations." />
+        <meta key="og:image" property="og:image" content="/levelset-social-cover.png" />
+        <meta key="og:url" property="og:url" content="https://app.levelset.io" />
+        <meta key="og:type" property="og:type" content="website" />
+        <meta key="og:site_name" property="og:site_name" content="Levelset App" />
 
         {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Levelset App" />
-        <meta name="twitter:description" content="Employee management and discipline tracking system for restaurant operations." />
-        <meta name="twitter:image" content="/levelset-social-cover.png" />
+        <meta key="twitter:card" name="twitter:card" content="summary_large_image" />
+        <meta key="twitter:title" name="twitter:title" content="Levelset App" />
+        <meta key="twitter:description" name="twitter:description" content="Employee management and discipline tracking system for restaurant operations." />
+        <meta key="twitter:image" name="twitter:image" content="/levelset-social-cover.png" />
 
         {/* Additional Meta Tags */}
-        <meta name="description" content="Employee management and discipline tracking system for restaurant operations." />
+        <meta key="description" name="description" content="Employee management and discipline tracking system for restaurant operations." />
         <meta name="keywords" content="employee management, discipline tracking, restaurant operations, levelset" />
         <meta name="author" content="Levelset" />
       </Head>

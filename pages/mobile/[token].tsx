@@ -383,23 +383,24 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
       <Head>
         <title>{`Levelset Mobile Portal - ${location.name ?? 'Location'}`}</title>
         <meta
+          key="description"
           name="description"
           content="Capture positional ratings and discipline infractions quickly from any device."
         />
         
         {/* Open Graph / Social Sharing */}
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content={`Levelset Mobile Portal - ${location.name ?? 'Location'}`} />
-        <meta property="og:description" content="Capture positional ratings and discipline infractions quickly from any device." />
-        <meta property="og:image" content="https://app.levelset.io/Levelset App Opengraph.png" />
-        <meta property="og:url" content={`https://app.levelset.io/mobile/${token}`} />
-        <meta property="og:site_name" content="Levelset" />
+        <meta key="og:type" property="og:type" content="website" />
+        <meta key="og:title" property="og:title" content={`Levelset Mobile Portal - ${location.name ?? 'Location'}`} />
+        <meta key="og:description" property="og:description" content="Capture positional ratings and discipline infractions quickly from any device." />
+        <meta key="og:image" property="og:image" content="https://app.levelset.io/Levelset App Opengraph.png" />
+        <meta key="og:url" property="og:url" content={`https://app.levelset.io/mobile/${token}`} />
+        <meta key="og:site_name" property="og:site_name" content="Levelset" />
         
         {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`Levelset Mobile Portal - ${location.name ?? 'Location'}`} />
-        <meta name="twitter:description" content="Capture positional ratings and discipline infractions quickly from any device." />
-        <meta name="twitter:image" content="https://app.levelset.io/Levelset App Opengraph.png" />
+        <meta key="twitter:card" name="twitter:card" content="summary_large_image" />
+        <meta key="twitter:title" name="twitter:title" content={`Levelset Mobile Portal - ${location.name ?? 'Location'}`} />
+        <meta key="twitter:description" name="twitter:description" content="Capture positional ratings and discipline infractions quickly from any device." />
+        <meta key="twitter:image" name="twitter:image" content="https://app.levelset.io/Levelset App Opengraph.png" />
         
         <link rel="manifest" href={`/api/mobile/manifest/${token}`} />
         <link rel="icon" href="/Levelset Icon Non Trans.png" />
