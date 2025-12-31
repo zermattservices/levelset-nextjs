@@ -31,10 +31,12 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const { userHierarchyLevel } = useLocationContext();
   const { has } = usePermissions();
   const [dashboardOpen, setDashboardOpen] = React.useState(false);
+  const [isClosing, setIsClosing] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
   const profileDropdownRef = React.useRef<HTMLDivElement>(null);
   const dashboardHoverRef = React.useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const closeAnimationTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // When impersonating, show impersonated user's name; otherwise use props or auth
   const displayFirstName = isImpersonating && impersonatedUser
@@ -70,11 +72,14 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
     };
   }, [profileDropdownOpen]);
 
-  // Cleanup hover timeout on unmount
+  // Cleanup timeouts on unmount
   React.useEffect(() => {
     return () => {
       if (hoverTimeoutRef.current) {
         clearTimeout(hoverTimeoutRef.current);
+      }
+      if (closeAnimationTimeoutRef.current) {
+        clearTimeout(closeAnimationTimeoutRef.current);
       }
     };
   }, []);
@@ -84,12 +89,23 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
       clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
     }
+    if (closeAnimationTimeoutRef.current) {
+      clearTimeout(closeAnimationTimeoutRef.current);
+      closeAnimationTimeoutRef.current = null;
+    }
+    setIsClosing(false);
     setDashboardOpen(true);
   }, []);
 
   const handleDashboardMouseLeave = React.useCallback(() => {
     hoverTimeoutRef.current = setTimeout(() => {
-      setDashboardOpen(false);
+      // Start closing animation
+      setIsClosing(true);
+      // After animation completes, actually close
+      closeAnimationTimeoutRef.current = setTimeout(() => {
+        setDashboardOpen(false);
+        setIsClosing(false);
+      }, 200); // Match animation duration
     }, 150); // Small delay to allow moving to submenu
   }, []);
 
@@ -138,7 +154,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               
               {/* Submenu inside hover container to prevent flashing */}
               {dashboardOpen && (
-                <div className={sty.submenuOverlay}>
+                <div className={classNames(sty.submenuOverlay, isClosing && sty.submenuClosing)}>
                   <DashboardSubmenu className={sty.dashboardSubmenu} />
                 </div>
               )}
@@ -204,7 +220,16 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
 
       {/* Backdrop blur when submenu is open */}
       {dashboardOpen && (
-        <div className={sty.submenuBackdrop} onClick={() => setDashboardOpen(false)} />
+        <div 
+          className={classNames(sty.submenuBackdrop, isClosing && sty.submenuBackdropClosing)} 
+          onClick={() => {
+            setIsClosing(true);
+            closeAnimationTimeoutRef.current = setTimeout(() => {
+              setDashboardOpen(false);
+              setIsClosing(false);
+            }, 200);
+          }} 
+        />
       )}
     </div>
   );

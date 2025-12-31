@@ -133,7 +133,7 @@ export function DisciplinePage() {
                       locationId={selectedLocationId || ''}
                       showActions={false}
                     />
-                    <Link href="/org-settings?section=discipline-actions" passHref legacyBehavior>
+                    <Link href="/org-settings?tab=discipline&subtab=actions" passHref legacyBehavior>
                       <Button
                         component="a"
                         variant="text"
