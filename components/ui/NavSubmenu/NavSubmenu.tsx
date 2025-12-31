@@ -1,6 +1,5 @@
 import * as React from 'react';
 import Link from 'next/link';
-import Tooltip from '@mui/material/Tooltip';
 import sty from './NavSubmenu.module.css';
 
 // MUI Icons
@@ -120,8 +119,23 @@ export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) 
     >
       <div className={classNames(sty.itemsGrid, isTwoColumn && sty.twoColumnGrid)}>
         {items.map((item) => {
-          const cardContent = (
-            <>
+          if (item.disabled) {
+            return (
+              <div key={item.label} className={classNames(sty.menuCard, sty.menuCardDisabled)}>
+                <div className={sty.iconContainer}>
+                  {item.icon}
+                </div>
+                <div className={sty.textContainer}>
+                  <span className={sty.itemLabel}>{item.label}</span>
+                  <span className={sty.itemDescription}>{item.description}</span>
+                </div>
+                <span className={sty.comingSoonText}>Coming soon!</span>
+              </div>
+            );
+          }
+
+          return (
+            <Link key={item.label} href={item.href!} className={sty.menuCard}>
               <div className={sty.iconContainer}>
                 {item.icon}
               </div>
@@ -129,40 +143,6 @@ export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) 
                 <span className={sty.itemLabel}>{item.label}</span>
                 <span className={sty.itemDescription}>{item.description}</span>
               </div>
-            </>
-          );
-
-          if (item.disabled) {
-            return (
-              <Tooltip 
-                key={item.label} 
-                title="Coming Soon" 
-                placement="top"
-                arrow
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      fontFamily: '"Satoshi", sans-serif',
-                      fontSize: 12,
-                      fontWeight: 500,
-                      backgroundColor: '#1f2937',
-                      '& .MuiTooltip-arrow': {
-                        color: '#1f2937',
-                      },
-                    },
-                  },
-                }}
-              >
-                <div className={classNames(sty.menuCard, sty.menuCardDisabled)}>
-                  {cardContent}
-                </div>
-              </Tooltip>
-            );
-          }
-
-          return (
-            <Link key={item.label} href={item.href!} className={sty.menuCard}>
-              {cardContent}
             </Link>
           );
         })}
