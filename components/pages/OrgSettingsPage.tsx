@@ -26,15 +26,72 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
+// Valid section IDs for URL routing
+const VALID_SECTIONS = [
+  'positional-excellence',
+  'discipline',
+  'roster-settings',
+  'pathway',
+  'evaluations',
+  'users',
+  'roles',
+  'permissions',
+  'mobile-access',
+  'mobile-config',
+  'location-details',
+  'org-details',
+];
+
 export function OrgSettingsPage() {
   const router = useRouter();
   const auth = useAuth();
   const { selectedLocationId, selectedLocationOrgId, userHierarchyLevel } = useLocationContext();
-  const [activeSection, setActiveSection] = React.useState<string>('positional-excellence');
   const [level1RoleName, setLevel1RoleName] = React.useState<string>('');
   
   const supabase = React.useMemo(() => createSupabaseClient(), []);
   const { has, loading: permissionsLoading } = usePermissions();
+
+  // Get active section from URL query parameter, default to 'positional-excellence'
+  const activeSection = React.useMemo(() => {
+    const tabParam = router.query.tab;
+    if (typeof tabParam === 'string' && VALID_SECTIONS.includes(tabParam)) {
+      return tabParam;
+    }
+    return 'positional-excellence';
+  }, [router.query.tab]);
+
+  // Get active sub-tab from URL query parameter (for nested tabs like discipline)
+  const activeSubTab = React.useMemo(() => {
+    const subtabParam = router.query.subtab;
+    if (typeof subtabParam === 'string') {
+      return subtabParam;
+    }
+    return undefined;
+  }, [router.query.subtab]);
+
+  // Update URL when section changes
+  const setActiveSection = React.useCallback((section: string) => {
+    const query: { tab: string; subtab?: string } = { tab: section };
+    // Clear subtab when changing main section
+    router.push(
+      { pathname: router.pathname, query },
+      undefined,
+      { shallow: true }
+    );
+  }, [router]);
+
+  // Update URL when sub-tab changes (used by child components)
+  const setActiveSubTab = React.useCallback((subtab: string | undefined) => {
+    const query: { tab: string; subtab?: string } = { tab: activeSection };
+    if (subtab) {
+      query.subtab = subtab;
+    }
+    router.push(
+      { pathname: router.pathname, query },
+      undefined,
+      { shallow: true }
+    );
+  }, [router, activeSection]);
   
   // Check if user can view organization settings
   const canViewOrgSettings = has(P.ORG_VIEW_SETTINGS);
@@ -116,9 +173,9 @@ export function OrgSettingsPage() {
   const renderContent = () => {
     switch (activeSection) {
       case 'positional-excellence':
-        return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} />;
+        return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
       case 'discipline':
-        return <DisciplineSettings orgId={selectedLocationOrgId} locationId={selectedLocationId} onNavigate={setActiveSection} disabled={!canEdit} />;
+        return <DisciplineSettings orgId={selectedLocationOrgId} locationId={selectedLocationId} onNavigate={setActiveSection} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
       case 'roster-settings':
         return <PaySettingsTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'pathway':
@@ -130,7 +187,7 @@ export function OrgSettingsPage() {
       case 'roles':
         return <RolesTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'permissions':
-        return <PermissionsSettings orgId={selectedLocationOrgId} disabled={!canEdit} />;
+        return <PermissionsSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
       case 'mobile-access':
         return <MobileAppAccess disabled={!canEdit} />;
       case 'mobile-config':
@@ -140,7 +197,7 @@ export function OrgSettingsPage() {
       case 'org-details':
         return <OrganizationDetails orgId={selectedLocationOrgId} disabled={!canEdit} />;
       default:
-        return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} />;
+        return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
     }
   };
 

@@ -54,17 +54,28 @@ interface DisciplineSettingsProps {
   locationId: string | null;
   onNavigate?: (section: string) => void;
   disabled?: boolean;
+  activeSubTab?: string;
+  onSubTabChange?: (subtab: string | undefined) => void;
 }
 
 type TabValue = 'infractions' | 'actions' | 'access' | 'notifications';
 
-export function DisciplineSettings({ orgId, locationId, onNavigate, disabled = false }: DisciplineSettingsProps) {
-  const [activeTab, setActiveTab] = React.useState<TabValue>('infractions');
+const VALID_TABS: TabValue[] = ['infractions', 'actions', 'access', 'notifications'];
+
+export function DisciplineSettings({ orgId, locationId, onNavigate, disabled = false, activeSubTab, onSubTabChange }: DisciplineSettingsProps) {
   const [locationCount, setLocationCount] = React.useState<number>(0);
   
   const supabase = React.useMemo(() => createSupabaseClient(), []);
   const { has } = usePermissions();
   
+  // Derive active tab from URL subtab prop, default to 'infractions'
+  const activeTab: TabValue = React.useMemo(() => {
+    if (activeSubTab && VALID_TABS.includes(activeSubTab as TabValue)) {
+      return activeSubTab as TabValue;
+    }
+    return 'infractions';
+  }, [activeSubTab]);
+
   // Granular permission checks for each tab
   const canManageInfractions = has(P.DISC_MANAGE_INFRACTIONS) && !disabled;
   const canManageActions = has(P.DISC_MANAGE_ACTIONS) && !disabled;
@@ -88,7 +99,9 @@ export function DisciplineSettings({ orgId, locationId, onNavigate, disabled = f
   }, [orgId, supabase]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
-    setActiveTab(newValue);
+    if (onSubTabChange) {
+      onSubTabChange(newValue);
+    }
   };
 
   // Org-level tabs: infractions, actions, notifications (access is location-specific)

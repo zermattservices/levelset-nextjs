@@ -62,15 +62,30 @@ function TabPanel(props: TabPanelProps) {
 interface PermissionsSettingsProps {
   orgId: string | null;
   disabled?: boolean;
+  activeSubTab?: string;
+  onSubTabChange?: (subtab: string | undefined) => void;
 }
 
-export function PermissionsSettings({ orgId, disabled = false }: PermissionsSettingsProps) {
-  const [activeTab, setActiveTab] = React.useState(0);
+type TabValue = 'levels' | 'access';
+const VALID_TABS: TabValue[] = ['levels', 'access'];
+
+export function PermissionsSettings({ orgId, disabled = false, activeSubTab, onSubTabChange }: PermissionsSettingsProps) {
   const [selectedProfileId, setSelectedProfileId] = React.useState<string | null>(null);
   const [locationCount, setLocationCount] = React.useState<number>(0);
   const { has, canEditLevel, hierarchyLevel, loading: permissionsLoading } = usePermissions();
   const auth = useAuth();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  
+  // Derive active tab from URL subtab prop
+  const activeTabValue: TabValue = React.useMemo(() => {
+    if (activeSubTab && VALID_TABS.includes(activeSubTab as TabValue)) {
+      return activeSubTab as TabValue;
+    }
+    return 'levels';
+  }, [activeSubTab]);
+  
+  // Convert to numeric index for MUI Tabs
+  const activeTab = activeTabValue === 'levels' ? 0 : 1;
 
   // Check permissions - Levelset Admin always has access
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
@@ -94,13 +109,17 @@ export function PermissionsSettings({ orgId, disabled = false }: PermissionsSett
   }, [orgId, supabase]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+    if (onSubTabChange) {
+      onSubTabChange(newValue === 0 ? 'levels' : 'access');
+    }
   };
 
   // When a profile is selected in the levels tab, switch to modify access tab
   const handleEditProfile = (profileId: string) => {
     setSelectedProfileId(profileId);
-    setActiveTab(1);
+    if (onSubTabChange) {
+      onSubTabChange('access');
+    }
   };
 
   if (permissionsLoading) {

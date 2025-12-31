@@ -53,17 +53,28 @@ const StyledTab = styled(Tab)(() => ({
 interface PositionalExcellenceSettingsProps {
   orgId: string | null;
   disabled?: boolean;
+  activeSubTab?: string;
+  onSubTabChange?: (subtab: string | undefined) => void;
 }
 
 type TabValue = 'positions' | 'criteria' | 'role-mapping' | 'rating-scale';
 
-export function PositionalExcellenceSettings({ orgId, disabled = false }: PositionalExcellenceSettingsProps) {
-  const [activeTab, setActiveTab] = React.useState<TabValue>('positions');
+const VALID_TABS: TabValue[] = ['positions', 'criteria', 'role-mapping', 'rating-scale'];
+
+export function PositionalExcellenceSettings({ orgId, disabled = false, activeSubTab, onSubTabChange }: PositionalExcellenceSettingsProps) {
   const [locationCount, setLocationCount] = React.useState<number>(0);
   
   const supabase = React.useMemo(() => createSupabaseClient(), []);
   const { has } = usePermissions();
   
+  // Derive active tab from URL subtab prop, default to 'positions'
+  const activeTab: TabValue = React.useMemo(() => {
+    if (activeSubTab && VALID_TABS.includes(activeSubTab as TabValue)) {
+      return activeSubTab as TabValue;
+    }
+    return 'positions';
+  }, [activeSubTab]);
+
   // Granular permission checks for each tab
   const canManagePositions = has(P.PE_MANAGE_POSITIONS) && !disabled;
   const canManageCriteria = has(P.PE_MANAGE_RATING_CRITERIA) && !disabled;
@@ -87,7 +98,9 @@ export function PositionalExcellenceSettings({ orgId, disabled = false }: Positi
   }, [orgId, supabase]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabValue) => {
-    setActiveTab(newValue);
+    if (onSubTabChange) {
+      onSubTabChange(newValue);
+    }
   };
 
   // Org-level tabs: rating-scale, role-mapping
