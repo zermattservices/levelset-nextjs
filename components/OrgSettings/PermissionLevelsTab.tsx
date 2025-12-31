@@ -36,12 +36,19 @@ interface AssignedUser {
   email: string;
 }
 
+interface OrgRole {
+  role_name: string;
+  hierarchy_level: number;
+}
+
 interface PermissionLevelsTabProps {
   orgId: string | null;
   disabled?: boolean;
   userHierarchyLevel: number;
   canEditLevel: (targetLevel: number) => boolean;
   onEditProfile: (profileId: string) => void;
+  openAddModalWithTier?: number | null;
+  onAddModalClosed?: () => void;
 }
 
 export function PermissionLevelsTab({
@@ -50,6 +57,8 @@ export function PermissionLevelsTab({
   userHierarchyLevel,
   canEditLevel,
   onEditProfile,
+  openAddModalWithTier,
+  onAddModalClosed,
 }: PermissionLevelsTabProps) {
   const [profiles, setProfiles] = React.useState<PermissionProfile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = React.useState<string | null>(null);
@@ -58,9 +67,19 @@ export function PermissionLevelsTab({
   const [loadingUsers, setLoadingUsers] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [addModalOpen, setAddModalOpen] = React.useState(false);
+  const [addModalInitialTier, setAddModalInitialTier] = React.useState<number | undefined>(undefined);
   const [deleting, setDeleting] = React.useState<string | null>(null);
+  const [orgRoles, setOrgRoles] = React.useState<OrgRole[]>([]);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+  
+  // Open modal when triggered externally
+  React.useEffect(() => {
+    if (openAddModalWithTier !== undefined && openAddModalWithTier !== null) {
+      setAddModalInitialTier(openAddModalWithTier);
+      setAddModalOpen(true);
+    }
+  }, [openAddModalWithTier]);
   const auth = useAuth();
   
   // Levelset Admin can see all tiers
@@ -95,7 +114,7 @@ export function PermissionLevelsTab({
   // Admin profiles are visible and editable by level 0 and level 1 users
   const canEditAdminProfiles = isLevelsetAdmin || userHierarchyLevel <= 1;
 
-  // Fetch permission profiles
+  // Fetch permission profiles and org roles
   const fetchProfiles = React.useCallback(async () => {
     console.log('[PermissionLevelsTab] fetchProfiles called, orgId:', orgId);
     if (!orgId) {
@@ -108,18 +127,27 @@ export function PermissionLevelsTab({
     setError(null);
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('permission_profiles')
-        .select('id, name, hierarchy_level, linked_role_name, is_system_default, is_admin_profile')
-        .eq('org_id', orgId)
-        .order('hierarchy_level', { ascending: true })
-        .order('is_system_default', { ascending: false });
+      // Fetch profiles and roles in parallel
+      const [profilesResult, rolesResult] = await Promise.all([
+        supabase
+          .from('permission_profiles')
+          .select('id, name, hierarchy_level, linked_role_name, is_system_default, is_admin_profile')
+          .eq('org_id', orgId)
+          .order('hierarchy_level', { ascending: true })
+          .order('is_system_default', { ascending: false }),
+        supabase
+          .from('org_roles')
+          .select('role_name, hierarchy_level')
+          .eq('org_id', orgId)
+          .order('hierarchy_level'),
+      ]);
 
-      console.log('[PermissionLevelsTab] Fetch result:', { data, error: fetchError });
+      console.log('[PermissionLevelsTab] Fetch result:', { profiles: profilesResult.data, roles: rolesResult.data });
       
-      if (fetchError) throw fetchError;
+      if (profilesResult.error) throw profilesResult.error;
 
-      setProfiles(data || []);
+      setProfiles(profilesResult.data || []);
+      setOrgRoles(rolesResult.data || []);
     } catch (err: any) {
       console.error('Error fetching permission profiles:', err);
       setError(err.message || 'Failed to load permission profiles');
@@ -262,7 +290,16 @@ export function PermissionLevelsTab({
   // Handle profile creation
   const handleProfileCreated = () => {
     setAddModalOpen(false);
+    setAddModalInitialTier(undefined);
+    if (onAddModalClosed) onAddModalClosed();
     fetchProfiles();
+  };
+  
+  // Handle modal close
+  const handleAddModalClose = () => {
+    setAddModalOpen(false);
+    setAddModalInitialTier(undefined);
+    if (onAddModalClosed) onAddModalClosed();
   };
 
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
@@ -549,10 +586,12 @@ export function PermissionLevelsTab({
       {/* Add Permission Level Modal */}
       <AddPermissionLevelModal
         open={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
+        onClose={handleAddModalClose}
         onCreated={handleProfileCreated}
         orgId={orgId}
         existingLevels={profiles.map(p => p.hierarchy_level)}
+        orgRoles={orgRoles}
+        initialTier={addModalInitialTier}
       />
     </div>
   );

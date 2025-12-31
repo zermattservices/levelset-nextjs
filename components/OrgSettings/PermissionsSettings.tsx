@@ -64,12 +64,14 @@ interface PermissionsSettingsProps {
   disabled?: boolean;
   activeSubTab?: string;
   onSubTabChange?: (subtab: string | undefined) => void;
+  openAddModalWithTier?: number | null;
+  onAddModalClosed?: () => void;
 }
 
 type TabValue = 'levels' | 'access';
 const VALID_TABS: TabValue[] = ['levels', 'access'];
 
-export function PermissionsSettings({ orgId, disabled = false, activeSubTab, onSubTabChange }: PermissionsSettingsProps) {
+export function PermissionsSettings({ orgId, disabled = false, activeSubTab, onSubTabChange, openAddModalWithTier, onAddModalClosed }: PermissionsSettingsProps) {
   const [selectedProfileId, setSelectedProfileId] = React.useState<string | null>(null);
   const [locationCount, setLocationCount] = React.useState<number>(0);
   const { has, canEditLevel, hierarchyLevel, loading: permissionsLoading } = usePermissions();
@@ -191,6 +193,8 @@ export function PermissionsSettings({ orgId, disabled = false, activeSubTab, onS
           userHierarchyLevel={isLevelsetAdmin ? -1 : hierarchyLevel}
           canEditLevel={isLevelsetAdmin ? () => true : canEditLevel}
           onEditProfile={handleEditProfile}
+          openAddModalWithTier={openAddModalWithTier}
+          onAddModalClosed={onAddModalClosed}
         />
       </TabPanel>
 

@@ -57,12 +57,19 @@ const StyledSelect = styled(Select)(() => ({
   },
 }));
 
+interface OrgRole {
+  role_name: string;
+  hierarchy_level: number;
+}
+
 interface AddPermissionLevelModalProps {
   open: boolean;
   onClose: () => void;
   onCreated: () => void;
   orgId: string | null;
   existingLevels: number[];
+  orgRoles?: OrgRole[];
+  initialTier?: number;
 }
 
 export function AddPermissionLevelModal({
@@ -71,29 +78,37 @@ export function AddPermissionLevelModal({
   onCreated,
   orgId,
   existingLevels,
+  orgRoles = [],
+  initialTier,
 }: AddPermissionLevelModalProps) {
   const [name, setName] = React.useState('');
-  const [baseLevel, setBaseLevel] = React.useState<number>(1);
+  const [baseLevel, setBaseLevel] = React.useState<number>(initialTier ?? 1);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
-  // Available base tiers (1, 2, 3)
-  const availableTiers = [
-    { value: 1, label: `Tier 1 - ${getDefaultProfileName(1)}` },
-    { value: 2, label: `Tier 2 - ${getDefaultProfileName(2)}` },
-    { value: 3, label: `Tier 3 - ${getDefaultProfileName(3)}` },
-  ];
+  // Get role name for a tier level
+  const getRoleNameForTier = React.useCallback((tier: number): string => {
+    const role = orgRoles.find(r => r.hierarchy_level === tier);
+    return role?.role_name || getDefaultProfileName(tier);
+  }, [orgRoles]);
+
+  // Available base tiers (1, 2, 3) with actual role names
+  const availableTiers = React.useMemo(() => [
+    { value: 1, label: `Tier 1 - ${getRoleNameForTier(1)}` },
+    { value: 2, label: `Tier 2 - ${getRoleNameForTier(2)}` },
+    { value: 3, label: `Tier 3 - ${getRoleNameForTier(3)}` },
+  ], [getRoleNameForTier]);
 
   // Reset form when modal opens
   React.useEffect(() => {
     if (open) {
       setName('');
-      setBaseLevel(1);
+      setBaseLevel(initialTier ?? 1);
       setError(null);
     }
-  }, [open]);
+  }, [open, initialTier]);
 
   const handleSubmit = async () => {
     if (!orgId || !name.trim()) {
@@ -185,7 +200,7 @@ export function AddPermissionLevelModal({
         Add Custom Permission Level
       </DialogTitle>
 
-      <DialogContent sx={{ pt: 3 }}>
+      <DialogContent sx={{ pt: 3, mt: 1 }}>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
@@ -207,17 +222,19 @@ export function AddPermissionLevelModal({
               sx={{
                 fontFamily,
                 fontSize: 14,
+                backgroundColor: '#fff',
+                px: 0.5,
                 '&.Mui-focused': {
                   color: '#31664a',
                 },
               }}
             >
-              Base Permissions
+              Permission Tier
             </InputLabel>
             <StyledSelect
               value={baseLevel}
               onChange={(e) => setBaseLevel(e.target.value as number)}
-              label="Base Permissions"
+              label="Permission Tier"
             >
               {availableTiers.map((tier) => (
                 <MenuItem
@@ -239,7 +256,7 @@ export function AddPermissionLevelModal({
               margin: 0,
             }}
           >
-            The base permissions will be copied from the selected tier. You can customize
+            The permissions will be copied from the selected tier. You can customize
             them after creating the permission level.
           </p>
         </div>

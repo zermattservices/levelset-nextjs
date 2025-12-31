@@ -69,6 +69,30 @@ export function OrgSettingsPage() {
     return undefined;
   }, [router.query.subtab]);
 
+  // Get custom permissions tier from URL query parameter
+  const customPermissionsTier = React.useMemo(() => {
+    const tierParam = router.query.customTier;
+    if (typeof tierParam === 'string') {
+      const tier = parseInt(tierParam, 10);
+      if (!isNaN(tier) && tier >= 1 && tier <= 5) {
+        return tier;
+      }
+    }
+    return null;
+  }, [router.query.customTier]);
+
+  // Clear the customTier query param when modal closes
+  const handleAddModalClosed = React.useCallback(() => {
+    if (router.query.customTier) {
+      const { customTier, ...restQuery } = router.query;
+      router.push(
+        { pathname: router.pathname, query: restQuery },
+        undefined,
+        { shallow: true }
+      );
+    }
+  }, [router]);
+
   // Update URL when section changes
   const setActiveSection = React.useCallback((section: string) => {
     const query: { tab: string; subtab?: string } = { tab: section };
@@ -187,7 +211,7 @@ export function OrgSettingsPage() {
       case 'roles':
         return <RolesTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'permissions':
-        return <PermissionsSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
+        return <PermissionsSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} openAddModalWithTier={customPermissionsTier} onAddModalClosed={handleAddModalClosed} />;
       case 'mobile-access':
         return <MobileAppAccess disabled={!canEdit} />;
       case 'mobile-config':

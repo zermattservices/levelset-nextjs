@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useRouter } from 'next/router';
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -8,6 +9,7 @@ import Chip from '@mui/material/Chip';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
+import Divider from '@mui/material/Divider';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -118,6 +120,7 @@ interface UsersTabProps {
 }
 
 export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabProps) {
+  const router = useRouter();
   const { selectedLocationId, userHierarchyLevel } = useLocationContext();
   const { refresh: refreshPermissions } = usePermissions();
   
@@ -743,11 +746,20 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                             );
                           }
                           
+                          const handleDropdownChange = (value: string) => {
+                            if (value === '__custom__') {
+                              // Navigate to permissions tab with modal open for this tier
+                              router.push(`/org-settings?tab=permissions&subtab=levels&customTier=${userTier}`);
+                            } else {
+                              handlePermissionProfileChange(user.id, undefined, value, true);
+                            }
+                          };
+                          
                           return (
                             <FormControl size="small">
                               <StyledSelect
                                 value={displayValue}
-                                onChange={(e) => handlePermissionProfileChange(user.id, undefined, e.target.value as string, true)}
+                                onChange={(e) => handleDropdownChange(e.target.value as string)}
                                 disabled={savingPermission === user.id}
                                 displayEmpty
                               >
@@ -756,6 +768,10 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                                     {profile.name}
                                   </MenuItem>
                                 ))}
+                                <Divider sx={{ my: 0.5 }} />
+                                <MenuItem value="__custom__" sx={{ fontFamily, fontSize: 13, color: '#31664a', fontWeight: 500 }}>
+                                  + Custom Permissions
+                                </MenuItem>
                               </StyledSelect>
                             </FormControl>
                           );
