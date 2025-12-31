@@ -732,7 +732,11 @@ interface OverviewTableProps {
 function OverviewTable({ data, area, positions, expandedRows, toggleRow, cellPadding, thresholds, fillHeight }: OverviewTableProps) {
 
   return (
-    <StyledContainer sx={{ height: fillHeight ? '100%' : 'auto', maxHeight: fillHeight ? 'none' : undefined }}>
+    <StyledContainer sx={{ 
+      height: fillHeight ? '100%' : 'auto', 
+      maxHeight: fillHeight ? 'none' : undefined,
+      '@media (max-width: 768px)': fillHeight ? { maxHeight: 'none' } : undefined,
+    }}>
       <StyledTable>
         <TableHead>
           <TableRow>
@@ -867,7 +871,11 @@ interface PositionTableProps {
 
 function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, cellPadding, thresholds, fillHeight }: PositionTableProps) {
   return (
-    <StyledContainer sx={{ height: fillHeight ? '100%' : 'auto', maxHeight: fillHeight ? 'none' : undefined }}>
+    <StyledContainer sx={{ 
+      height: fillHeight ? '100%' : 'auto', 
+      maxHeight: fillHeight ? 'none' : undefined,
+      '@media (max-width: 768px)': fillHeight ? { maxHeight: 'none' } : undefined,
+    }}>
       <StyledTable>
         <TableHead>
           {/* First Header Row - Big 5 Labels */}
@@ -1010,7 +1018,11 @@ interface LeadershipTableProps {
 function LeadershipTable({ data, area, positions, expandedRows, toggleRow, cellPadding, thresholds, fillHeight }: LeadershipTableProps) {
 
   return (
-    <StyledContainer sx={{ height: fillHeight ? '100%' : 'auto', maxHeight: fillHeight ? 'none' : undefined }}>
+    <StyledContainer sx={{ 
+      height: fillHeight ? '100%' : 'auto', 
+      maxHeight: fillHeight ? 'none' : undefined,
+      '@media (max-width: 768px)': fillHeight ? { maxHeight: 'none' } : undefined,
+    }}>
       <StyledTable>
         <TableHead>
           <TableRow>

@@ -85,6 +85,12 @@
 
 /* Mobile-specific styles */
 @media (max-width: 768px) {
+  .root {
+    /* Use dynamic viewport height to account for browser chrome */
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+
   .header {
     padding: 10px 6px;
   }
@@ -104,14 +110,25 @@
 
   .main {
     padding: 6px 6px 4px 6px;
+    /* Flex to fill available space */
+    flex: 1;
+    min-height: 0;
+    /* Extra bottom padding for browser navigation */
+    padding-bottom: 80px;
   }
 
   .tableContainer {
     padding: 0 1px;
+    /* Fill available height */
+    flex: 1;
+    min-height: 0;
+    height: 100%;
   }
 
   .footer {
     padding: 8px 6px;
+    /* Position footer above browser controls */
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
 }
 
