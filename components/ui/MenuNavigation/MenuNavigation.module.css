@@ -67,15 +67,19 @@
   background: transparent;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .navButton:hover {
   background-color: #f3f4f6;
 }
 
+.navButton:hover .navButtonText {
+  color: #31664a;
+}
+
 .navButton.navButtonActive {
-  background-color: #f0fdf4;
+  background-color: #f3f4f6;
 }
 
 .navButtonText {

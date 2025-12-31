@@ -1,7 +1,7 @@
 .root {
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: 8px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
@@ -52,7 +52,7 @@
   flex-direction: row;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 8px;
   border-radius: 8px;
   text-decoration: none;
   transition: background-color 0.15s ease;
@@ -61,12 +61,12 @@
 }
 
 .menuCard:hover {
-  background-color: #f0fdf4;
+  background-color: #f3f4f6;
 }
 
 .menuCard:hover .iconContainer {
-  background-color: #dcfce7;
-  border-color: #bbf7d0;
+  background-color: #ffffff;
+  border-color: #e5e7eb;
 }
 
 .menuCard:hover .iconContainer svg {
@@ -83,7 +83,7 @@
 }
 
 .menuCardDisabled:hover .iconContainer {
-  background-color: #f3f4f6;
+  background-color: transparent;
   border-color: #e5e7eb;
 }
 
@@ -98,7 +98,7 @@
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background-color: #f3f4f6;
+  background-color: transparent;
   border: 1px solid #e5e7eb;
   flex-shrink: 0;
   transition: all 0.15s ease;
@@ -143,10 +143,6 @@
 }
 
 /* Two column layout adjustments */
-.twoColumn {
-  /* Slightly wider for two columns */
-}
-
 .twoColumnGrid .menuCard {
   min-width: 200px;
 }

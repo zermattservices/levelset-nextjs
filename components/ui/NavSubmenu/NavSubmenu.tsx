@@ -34,7 +34,7 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
   operations: [
     {
       label: 'Positional Excellence',
-      description: 'Track team member competencies',
+      description: 'View and summarize position ratings',
       href: '/positional-excellence',
       icon: <RocketLaunchOutlinedIcon sx={{ fontSize: 22 }} />,
     },
@@ -139,7 +139,17 @@ export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) 
                 title="Coming Soon" 
                 placement="top"
                 arrow
-                componentsProps={{
+                slotProps={{
+                  popper: {
+                    modifiers: [
+                      {
+                        name: 'offset',
+                        options: {
+                          offset: [0, -4],
+                        },
+                      },
+                    ],
+                  },
                   tooltip: {
                     sx: {
                       fontFamily: '"Satoshi", sans-serif',
