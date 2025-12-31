@@ -98,8 +98,18 @@
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  padding-top: 0;
+  padding-top: 9px;
   z-index: 100;
+}
+
+/* Invisible hover bridge to connect button and submenu */
+.submenuContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 9px;
 }
 
 .rightSection {

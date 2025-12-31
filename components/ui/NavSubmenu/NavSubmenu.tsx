@@ -140,16 +140,6 @@ export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) 
                 placement="top"
                 arrow
                 slotProps={{
-                  popper: {
-                    modifiers: [
-                      {
-                        name: 'offset',
-                        options: {
-                          offset: [0, -4],
-                        },
-                      },
-                    ],
-                  },
                   tooltip: {
                     sx: {
                       fontFamily: '"Satoshi", sans-serif',
