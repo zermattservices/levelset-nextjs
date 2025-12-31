@@ -391,7 +391,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         <meta property="og:type" content="website" />
         <meta property="og:title" content={`Levelset Mobile Portal - ${location.name ?? 'Location'}`} />
         <meta property="og:description" content="Capture positional ratings and discipline infractions quickly from any device." />
-        <meta property="og:image" content="https://app.levelset.io/logos/levelset-social-share.png" />
+        <meta property="og:image" content="https://app.levelset.io/Levelset App Opengraph.png" />
         <meta property="og:url" content={`https://app.levelset.io/mobile/${token}`} />
         <meta property="og:site_name" content="Levelset" />
         
@@ -399,7 +399,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`Levelset Mobile Portal - ${location.name ?? 'Location'}`} />
         <meta name="twitter:description" content="Capture positional ratings and discipline infractions quickly from any device." />
-        <meta name="twitter:image" content="https://app.levelset.io/logos/levelset-social-share.png" />
+        <meta name="twitter:image" content="https://app.levelset.io/Levelset App Opengraph.png" />
         
         <link rel="manifest" href={`/api/mobile/manifest/${token}`} />
         <link rel="icon" href="/Levelset Icon Non Trans.png" />
