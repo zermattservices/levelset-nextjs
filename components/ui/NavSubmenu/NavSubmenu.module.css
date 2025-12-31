@@ -158,8 +158,7 @@
   transition: opacity 0.15s ease;
 }
 
-/* Hide icon and text on hover, show coming soon */
-.menuCardDisabled:hover .iconContainer,
+/* Hide text on hover, show coming soon */
 .menuCardDisabled:hover .textContainer {
   opacity: 0;
 }
