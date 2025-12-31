@@ -98,7 +98,7 @@
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  padding-top: 11px;
+  padding-top: 10px;
   z-index: 100;
 }
 
@@ -109,7 +109,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 11px;
+  height: 10px;
 }
 
 .rightSection {
