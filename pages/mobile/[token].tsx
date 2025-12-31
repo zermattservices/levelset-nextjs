@@ -419,7 +419,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         sx={{
           minHeight: '100vh',
           backgroundColor: '#f2f5f4',
-          padding: '32px 16px 48px',
+          padding: '16px 16px 48px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -428,101 +428,102 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
       >
         <Box
           sx={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            zIndex: 10,
-          }}
-        >
-          <IconButton
-            onClick={(e) => setLanguageMenuAnchor(e.currentTarget)}
-            sx={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e5e7eb',
-              borderRadius: 2,
-              padding: '8px 12px',
-              '&:hover': {
-                backgroundColor: '#f9fafb',
-              },
-            }}
-            aria-label="Change language"
-          >
-            <LanguageIcon sx={{ fontSize: 20, color: '#31664a', mr: 0.5 }} />
-            <Typography
-              sx={{
-                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                fontSize: 13,
-                fontWeight: 600,
-                color: '#111827',
-                textTransform: 'uppercase',
-                mr: 0.5,
-              }}
-            >
-              {language}
-            </Typography>
-            <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
-          </IconButton>
-          <Menu
-            anchorEl={languageMenuAnchor}
-            open={Boolean(languageMenuAnchor)}
-            onClose={() => setLanguageMenuAnchor(null)}
-            PaperProps={{
-              sx: {
-                borderRadius: 2,
-                mt: 1,
-                minWidth: 160,
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              },
-            }}
-          >
-            {LANGUAGES.map((lang) => (
-              <MenuItem
-                key={lang.code}
-                selected={language === lang.code}
-                onClick={() => {
-                  const newLang = lang.code;
-                  setLanguage(newLang);
-                  i18n.changeLanguage(newLang);
-                  setLanguageMenuAnchor(null);
-                }}
-                sx={{
-                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  fontSize: 14,
-                  fontWeight: language === lang.code ? 600 : 500,
-                  color: language === lang.code ? '#31664a' : '#111827',
-                  '&.Mui-selected': {
-                    backgroundColor: '#f3f4f6',
-                    '&:hover': {
-                      backgroundColor: '#e5e7eb',
-                    },
-                  },
-                }}
-              >
-                {lang.nativeLabel}
-              </MenuItem>
-            ))}
-          </Menu>
-        </Box>
-
-        <Box
-          sx={{
             width: '100%',
             maxWidth: 480,
             display: 'flex',
             flexDirection: 'column',
-            gap: 3,
+            gap: 2,
             px: 2,
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: 1 }}>
+          {/* Header row with logo and language selector */}
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <Box sx={{ flex: 1 }} /> {/* Spacer for centering */}
             <Image
               src="/logos/Levelset no margin.png"
               alt="Levelset"
-              width={220}
-              height={72}
+              width={180}
+              height={60}
               priority
-              style={{ width: 'min(220px, 65vw)', height: 'auto' }}
+              style={{ width: 'min(180px, 50vw)', height: 'auto' }}
             />
+            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+              <IconButton
+                onClick={(e) => setLanguageMenuAnchor(e.currentTarget)}
+                sx={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: 2,
+                  padding: '8px 12px',
+                  '&:hover': {
+                    backgroundColor: '#f9fafb',
+                  },
+                }}
+                aria-label="Change language"
+              >
+                <LanguageIcon sx={{ fontSize: 20, color: '#31664a', mr: 0.5 }} />
+                <Typography
+                  sx={{
+                    fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: '#111827',
+                    textTransform: 'uppercase',
+                    mr: 0.5,
+                  }}
+                >
+                  {language}
+                </Typography>
+                <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+              </IconButton>
+              <Menu
+                anchorEl={languageMenuAnchor}
+                open={Boolean(languageMenuAnchor)}
+                onClose={() => setLanguageMenuAnchor(null)}
+                PaperProps={{
+                  sx: {
+                    borderRadius: 2,
+                    mt: 1,
+                    minWidth: 160,
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  },
+                }}
+              >
+                {LANGUAGES.map((lang) => (
+                  <MenuItem
+                    key={lang.code}
+                    selected={language === lang.code}
+                    onClick={() => {
+                      const newLang = lang.code;
+                      setLanguage(newLang);
+                      i18n.changeLanguage(newLang);
+                      setLanguageMenuAnchor(null);
+                    }}
+                    sx={{
+                      fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontSize: 14,
+                      fontWeight: language === lang.code ? 600 : 500,
+                      color: language === lang.code ? '#31664a' : '#111827',
+                      '&.Mui-selected': {
+                        backgroundColor: '#f3f4f6',
+                        '&:hover': {
+                          backgroundColor: '#e5e7eb',
+                        },
+                      },
+                    }}
+                  >
+                    {lang.nativeLabel}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
           </Box>
 
           {!summary && (
@@ -563,7 +564,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
             <Box 
               sx={{ 
                 position: 'fixed',
-                bottom: 32,
+                bottom: 40,
                 left: 16,
                 right: 16,
                 maxWidth: 480 - 32,
@@ -581,7 +582,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                 sx={{
                   textTransform: 'none',
                   padding: '14px 20px',
-                  borderRadius: '12px',
+                  borderRadius: '16px',
                   backgroundColor: '#ffffff',
                   color: '#31664a',
                   border: '4px solid #31664a',
