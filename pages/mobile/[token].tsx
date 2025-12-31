@@ -381,11 +381,26 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
       }}
     >
       <Head>
-        <title>{`Levelset Mobile Portal • ${location.name ?? 'Location'}`}</title>
+        <title>{`Levelset Mobile Portal - ${location.name ?? 'Location'}`}</title>
         <meta
           name="description"
           content="Capture positional ratings and discipline infractions quickly from any device."
         />
+        
+        {/* Open Graph / Social Sharing */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`Levelset Mobile Portal - ${location.name ?? 'Location'}`} />
+        <meta property="og:description" content="Capture positional ratings and discipline infractions quickly from any device." />
+        <meta property="og:image" content="https://app.levelset.io/logos/levelset-social-share.png" />
+        <meta property="og:url" content={`https://app.levelset.io/mobile/${token}`} />
+        <meta property="og:site_name" content="Levelset" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Levelset Mobile Portal - ${location.name ?? 'Location'}`} />
+        <meta name="twitter:description" content="Capture positional ratings and discipline infractions quickly from any device." />
+        <meta name="twitter:image" content="https://app.levelset.io/logos/levelset-social-share.png" />
+        
         <link rel="manifest" href={`/api/mobile/manifest/${token}`} />
         <link rel="icon" href="/Levelset Icon Non Trans.png" />
       </Head>
