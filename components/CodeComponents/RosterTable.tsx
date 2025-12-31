@@ -1245,6 +1245,7 @@ function EmployeesTableView({
         align: "center",
         headerAlign: "center",
         sortable: false,
+        disableColumnMenu: true,
         renderCell: (params) => {
           const employeeId = params.row.id as string;
           const checked = Boolean(params.value);
@@ -1264,6 +1265,7 @@ function EmployeesTableView({
         align: "center",
         headerAlign: "center",
         sortable: false,
+        disableColumnMenu: true,
         renderCell: (params) => {
           const employeeId = params.row.id as string;
           const checked = Boolean(params.value);
@@ -1453,6 +1455,7 @@ function EmployeesTableView({
         align: "right",
         headerAlign: "right",
         sortable: false,
+        disableColumnMenu: true,
         renderCell: (params) => {
           const employeeId = params.row.id as string;
           const employeeName = params.row.name as string;

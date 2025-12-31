@@ -34,8 +34,11 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const [activeMenu, setActiveMenu] = React.useState<MenuType | null>(null);
   const [isClosing, setIsClosing] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
+  const [submenuOffset, setSubmenuOffset] = React.useState<number>(0);
   const profileDropdownRef = React.useRef<HTMLDivElement>(null);
   const navButtonsRef = React.useRef<HTMLDivElement>(null);
+  const navContentRef = React.useRef<HTMLDivElement>(null);
+  const activeButtonRef = React.useRef<HTMLDivElement | null>(null);
   const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const closeAnimationTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -84,7 +87,43 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
     };
   }, []);
 
-  const handleMenuEnter = React.useCallback((menuType: MenuType) => {
+  // Calculate submenu offset to keep it within bounds
+  React.useEffect(() => {
+    if (!activeMenu || !activeButtonRef.current || !navContentRef.current) {
+      setSubmenuOffset(0);
+      return;
+    }
+
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      const buttonRect = activeButtonRef.current?.getBoundingClientRect();
+      const contentRect = navContentRef.current?.getBoundingClientRect();
+      
+      if (!buttonRect || !contentRect) {
+        setSubmenuOffset(0);
+        return;
+      }
+
+      // Estimate submenu width (Operations is wider due to 2 columns)
+      const estimatedSubmenuWidth = activeMenu === 'operations' ? 460 : 280;
+      
+      // Calculate where the centered submenu would be positioned
+      const buttonCenter = buttonRect.left + buttonRect.width / 2;
+      const submenuLeft = buttonCenter - estimatedSubmenuWidth / 2;
+      
+      // Check if it overflows past the left edge of navContent
+      const overflow = contentRect.left - submenuLeft;
+      
+      if (overflow > 0) {
+        // Need to shift right by the overflow amount
+        setSubmenuOffset(overflow);
+      } else {
+        setSubmenuOffset(0);
+      }
+    });
+  }, [activeMenu]);
+
+  const handleMenuEnter = React.useCallback((menuType: MenuType, buttonElement: HTMLDivElement | null) => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
@@ -94,6 +133,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
       closeAnimationTimeoutRef.current = null;
     }
     setIsClosing(false);
+    activeButtonRef.current = buttonElement;
     setActiveMenu(menuType);
   }, []);
 
@@ -135,7 +175,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
     >
       {/* Main navigation bar */}
       <div className={sty.navBar}>
-        <div className={sty.navContent}>
+        <div className={sty.navContent} ref={navContentRef}>
           {/* Logo */}
           <Link href="/" className={sty.logoLink}>
             <Image
@@ -155,7 +195,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               <div
                 key={type}
                 className={sty.navButtonContainer}
-                onMouseEnter={() => handleMenuEnter(type)}
+                onMouseEnter={(e) => handleMenuEnter(type, e.currentTarget)}
                 onMouseLeave={handleMenuLeave}
               >
                 <button 
@@ -174,7 +214,10 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
                 
                 {/* Submenu positioned under this button */}
                 {activeMenu === type && (
-                  <div className={sty.submenuContainer}>
+                  <div 
+                    className={sty.submenuContainer}
+                    style={{ transform: `translateX(calc(-50% + ${submenuOffset}px))` }}
+                  >
                     <NavSubmenu 
                       menuType={type} 
                       isClosing={isClosing}
