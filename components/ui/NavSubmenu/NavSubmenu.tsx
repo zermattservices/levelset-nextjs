@@ -34,7 +34,7 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
   operations: [
     {
       label: 'Positional Excellence',
-      description: 'View and summarize position ratings',
+      description: 'View position ratings',
       href: '/positional-excellence',
       icon: <RocketLaunchOutlinedIcon sx={{ fontSize: 22 }} />,
     },

@@ -43,8 +43,8 @@
 
 .itemsGrid.twoColumnGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
+  grid-template-columns: auto auto;
+  gap: 8px;
 }
 
 .menuCard {
@@ -57,7 +57,6 @@
   text-decoration: none;
   transition: background-color 0.15s ease;
   cursor: pointer;
-  min-width: 220px;
 }
 
 .menuCard:hover {
@@ -113,7 +112,6 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 0;
 }
 
 .itemLabel {
@@ -140,9 +138,4 @@
 
 .menuCardDisabled .itemDescription {
   color: #9ca3af;
-}
-
-/* Two column layout adjustments */
-.twoColumnGrid .menuCard {
-  min-width: 200px;
 }
