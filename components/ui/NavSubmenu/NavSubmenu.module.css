@@ -101,7 +101,7 @@
   background-color: transparent;
   border: 1px solid #e5e7eb;
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: all 0.15s ease, opacity 0.15s ease;
 }
 
 .iconContainer svg {
@@ -113,6 +113,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  transition: opacity 0.15s ease;
 }
 
 .itemLabel {
@@ -143,16 +144,26 @@
 
 /* Coming soon text - hidden by default, shown on hover */
 .comingSoonText {
-  display: none;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: #6b7280;
-  white-space: nowrap;
-  margin-left: auto;
-  padding-left: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+/* Hide icon and text on hover, show coming soon */
+.menuCardDisabled:hover .iconContainer,
+.menuCardDisabled:hover .textContainer {
+  opacity: 0;
 }
 
 .menuCardDisabled:hover .comingSoonText {
-  display: block;
+  opacity: 1;
 }
