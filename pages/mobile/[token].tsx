@@ -407,6 +407,13 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         {/* Apple PWA status bar - transparent to show background */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        
+        {/* Synchronous body background for iOS status bar transparency */}
+        <style>{`
+          html, body {
+            background-color: #f2f5f4 !important;
+          }
+        `}</style>
       </Head>
       <Box
         sx={{
