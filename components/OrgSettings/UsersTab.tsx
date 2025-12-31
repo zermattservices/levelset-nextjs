@@ -56,7 +56,7 @@ const StyledTextField = styled(TextField)(() => ({
 const StyledSelect = styled(Select)(() => ({
   fontFamily,
   fontSize: 13,
-  minWidth: 140,
+  minWidth: 160,
   '& .MuiOutlinedInput-notchedOutline': {
     borderColor: '#e5e7eb',
   },
@@ -67,7 +67,11 @@ const StyledSelect = styled(Select)(() => ({
     borderColor: '#31664a',
   },
   '& .MuiSelect-select': {
-    padding: '6px 12px',
+    padding: '6px 32px 6px 12px',
+  },
+  // Reset background when not focused
+  '&:not(.Mui-focused)': {
+    backgroundColor: 'transparent',
   },
 }));
 
@@ -650,9 +654,6 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                         <span className={sty.userName}>
                           {user.first_name} {user.last_name}
                         </span>
-                        {user.is_operator && (
-                          <span className={sty.operatorBadge}>Operator</span>
-                        )}
                       </td>
                       <td className={sty.cell}>
                         {editingId === user.id ? (
@@ -710,29 +711,55 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                         )}
                       </td>
                       <td className={sty.cell}>
-                        {disabled ? (
-                          <span className={sty.permissionLevelText}>
-                            {getPermissionProfileDisplay(user, true)}
-                          </span>
-                        ) : (
-                          <FormControl size="small">
-                            <StyledSelect
-                              value={currentProfileId}
-                              onChange={(e) => handlePermissionProfileChange(user.id, undefined, e.target.value as string, true)}
-                              disabled={savingPermission === user.id}
-                              displayEmpty
-                            >
-                              <MenuItem value="default" sx={{ fontFamily, fontSize: 13 }}>
-                                Default (from role)
-                              </MenuItem>
-                              {visibleProfiles.map((profile) => (
-                                <MenuItem key={profile.id} value={profile.id} sx={{ fontFamily, fontSize: 13 }}>
-                                  {profile.name}
-                                </MenuItem>
-                              ))}
-                            </StyledSelect>
-                          </FormControl>
-                        )}
+                        {(() => {
+                          // Get the user's role hierarchy level
+                          const role = orgRoles.find(r => r.role_name === user.employee_role);
+                          const userTier = role?.hierarchy_level ?? 999;
+                          const isOperator = userTier === 0;
+                          
+                          // Filter profiles to only show those on the user's tier
+                          const tierProfiles = permissionProfiles.filter(p => p.hierarchy_level === userTier);
+                          
+                          // Get the current profile or system default
+                          const currentProfile = user.permission_profile_id 
+                            ? permissionProfiles.find(p => p.id === user.permission_profile_id)
+                            : tierProfiles.find(p => p.is_system_default) || tierProfiles[0];
+                          
+                          const displayValue = currentProfile?.id || '';
+                          
+                          if (disabled || isOperator) {
+                            return (
+                              <FormControl size="small">
+                                <StyledSelect
+                                  value={displayValue}
+                                  disabled
+                                  displayEmpty
+                                >
+                                  <MenuItem value={displayValue} sx={{ fontFamily, fontSize: 13 }}>
+                                    {currentProfile?.name || 'Operator'}
+                                  </MenuItem>
+                                </StyledSelect>
+                              </FormControl>
+                            );
+                          }
+                          
+                          return (
+                            <FormControl size="small">
+                              <StyledSelect
+                                value={displayValue}
+                                onChange={(e) => handlePermissionProfileChange(user.id, undefined, e.target.value as string, true)}
+                                disabled={savingPermission === user.id}
+                                displayEmpty
+                              >
+                                {tierProfiles.map((profile) => (
+                                  <MenuItem key={profile.id} value={profile.id} sx={{ fontFamily, fontSize: 13 }}>
+                                    {profile.name}
+                                  </MenuItem>
+                                ))}
+                              </StyledSelect>
+                            </FormControl>
+                          );
+                        })()}
                       </td>
                       {locationCount > 1 && (
                         <td className={sty.cell}>
