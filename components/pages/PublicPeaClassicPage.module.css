@@ -54,7 +54,7 @@
   align-items: center;
   flex: 1;
   width: 100%;
-  padding: 16px 16px 8px 16px;
+  padding: 16px;
   overflow: visible;
   box-sizing: border-box;
   min-height: 0;
@@ -77,10 +77,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px;
+  padding: 12px;
   background-color: #ffffff;
   border-top: 1px solid #e5e7eb;
   flex-shrink: 0;
+  /* Account for safe area on devices with home indicator */
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
 /* Mobile-specific styles */
@@ -109,26 +111,23 @@
   }
 
   .main {
-    padding: 6px 6px 4px 6px;
-    /* Flex to fill available space */
+    /* Symmetric padding - same on all sides */
+    padding: 8px;
     flex: 1;
     min-height: 0;
-    /* Extra bottom padding for browser navigation */
-    padding-bottom: 80px;
   }
 
   .tableContainer {
     padding: 0 1px;
-    /* Fill available height */
     flex: 1;
     min-height: 0;
     height: 100%;
   }
 
   .footer {
-    padding: 8px 6px;
-    /* Position footer above browser controls */
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    padding: 10px 6px;
+    /* Position footer above browser controls / home indicator */
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
   }
 }
 
