@@ -1,0 +1,152 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+.root.closing {
+  animation: slideUp 0.2s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.itemsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.itemsGrid.twoColumnGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+
+.menuCard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+  min-width: 220px;
+}
+
+.menuCard:hover {
+  background-color: #f0fdf4;
+}
+
+.menuCard:hover .iconContainer {
+  background-color: #dcfce7;
+  border-color: #bbf7d0;
+}
+
+.menuCard:hover .iconContainer svg {
+  color: #31664a;
+}
+
+.menuCardDisabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.menuCardDisabled:hover {
+  background-color: transparent;
+}
+
+.menuCardDisabled:hover .iconContainer {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
+.menuCardDisabled:hover .iconContainer svg {
+  color: #9ca3af;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.iconContainer svg {
+  color: #6b7280;
+  transition: color 0.15s ease;
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.itemLabel {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.itemDescription {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.menuCardDisabled .itemLabel {
+  color: #9ca3af;
+}
+
+.menuCardDisabled .itemDescription {
+  color: #9ca3af;
+}
+
+/* Two column layout adjustments */
+.twoColumn {
+  /* Slightly wider for two columns */
+}
+
+.twoColumnGrid .menuCard {
+  min-width: 200px;
+}

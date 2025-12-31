@@ -4,11 +4,12 @@ import Image from 'next/image';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SettingsIcon from '@mui/icons-material/Settings';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import sty from './MenuNavigation.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 import { LevelsetButton } from '../LevelsetButton/LevelsetButton';
 import { LogoutButton } from '../LogoutButton/LogoutButton';
-import { DashboardSubmenu } from '../DashboardSubmenu/DashboardSubmenu';
+import { NavSubmenu, type MenuType } from '../NavSubmenu/NavSubmenu';
 import { LocationSelectDropdown } from '@/components/CodeComponents/LocationSelectDropdown';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
@@ -30,11 +31,11 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const { isImpersonating, impersonatedUser } = useImpersonation();
   const { userHierarchyLevel } = useLocationContext();
   const { has } = usePermissions();
-  const [dashboardOpen, setDashboardOpen] = React.useState(false);
+  const [activeMenu, setActiveMenu] = React.useState<MenuType | null>(null);
   const [isClosing, setIsClosing] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
   const profileDropdownRef = React.useRef<HTMLDivElement>(null);
-  const dashboardHoverRef = React.useRef<HTMLDivElement>(null);
+  const navButtonsRef = React.useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const closeAnimationTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -47,7 +48,6 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
     : (userRole || auth.role || '');
 
   // Check if the ORIGINAL user (not impersonated) is a Levelset Admin for Admin Mode access
-  // Admin Mode should only be visible to actual admins, not when impersonating
   const isActualLevelsetAdmin = auth.role === 'Levelset Admin';
   
   // Permission-based navigation access
@@ -84,7 +84,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
     };
   }, []);
 
-  const handleDashboardMouseEnter = React.useCallback(() => {
+  const handleMenuEnter = React.useCallback((menuType: MenuType) => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
@@ -94,20 +94,32 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
       closeAnimationTimeoutRef.current = null;
     }
     setIsClosing(false);
-    setDashboardOpen(true);
+    setActiveMenu(menuType);
   }, []);
 
-  const handleDashboardMouseLeave = React.useCallback(() => {
+  const handleMenuLeave = React.useCallback(() => {
     hoverTimeoutRef.current = setTimeout(() => {
-      // Start closing animation
       setIsClosing(true);
-      // After animation completes, actually close
       closeAnimationTimeoutRef.current = setTimeout(() => {
-        setDashboardOpen(false);
+        setActiveMenu(null);
         setIsClosing(false);
-      }, 200); // Match animation duration
-    }, 150); // Small delay to allow moving to submenu
+      }, 200);
+    }, 150);
   }, []);
+
+  const closeMenuImmediately = React.useCallback(() => {
+    setIsClosing(true);
+    closeAnimationTimeoutRef.current = setTimeout(() => {
+      setActiveMenu(null);
+      setIsClosing(false);
+    }, 200);
+  }, []);
+
+  const menuButtons: { type: MenuType; label: string }[] = [
+    { type: 'operations', label: 'Operations' },
+    { type: 'analytics', label: 'Analytics' },
+    { type: 'hr', label: 'HR' },
+  ];
 
   return (
     <div
@@ -138,27 +150,39 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
           </Link>
 
           {/* Navigation buttons */}
-          <div className={sty.navButtons}>
-            <div
-              ref={dashboardHoverRef}
-              className={sty.dashboardHoverContainer}
-              onMouseEnter={handleDashboardMouseEnter}
-              onMouseLeave={handleDashboardMouseLeave}
-            >
-              <LevelsetButton
-                color="clear"
-                size="compact"
+          <div className={sty.navButtons} ref={navButtonsRef}>
+            {menuButtons.map(({ type, label }) => (
+              <div
+                key={type}
+                className={sty.navButtonContainer}
+                onMouseEnter={() => handleMenuEnter(type)}
+                onMouseLeave={handleMenuLeave}
               >
-                <span className={sty.navButtonText}>Dashboards</span>
-              </LevelsetButton>
-              
-              {/* Submenu inside hover container to prevent flashing */}
-              {dashboardOpen && (
-                <div className={classNames(sty.submenuOverlay, isClosing && sty.submenuClosing)}>
-                  <DashboardSubmenu className={sty.dashboardSubmenu} />
-                </div>
-              )}
-            </div>
+                <button 
+                  className={classNames(sty.navButton, activeMenu === type && sty.navButtonActive)}
+                >
+                  <span className={sty.navButtonText}>{label}</span>
+                  <KeyboardArrowDownIcon 
+                    sx={{ 
+                      fontSize: 18, 
+                      color: activeMenu === type ? '#31664a' : '#6b7280',
+                      transition: 'transform 0.2s ease, color 0.15s ease',
+                      transform: activeMenu === type ? 'rotate(180deg)' : 'rotate(0deg)',
+                    }} 
+                  />
+                </button>
+                
+                {/* Submenu positioned under this button */}
+                {activeMenu === type && (
+                  <div className={sty.submenuContainer}>
+                    <NavSubmenu 
+                      menuType={type} 
+                      isClosing={isClosing}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
           {/* Right side - Admin Mode, Location selector, user info, logout, profile icon */}
@@ -219,16 +243,10 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
       </div>
 
       {/* Backdrop blur when submenu is open */}
-      {dashboardOpen && (
+      {activeMenu && (
         <div 
           className={classNames(sty.submenuBackdrop, isClosing && sty.submenuBackdropClosing)} 
-          onClick={() => {
-            setIsClosing(true);
-            closeAnimationTimeoutRef.current = setTimeout(() => {
-              setDashboardOpen(false);
-              setIsClosing(false);
-            }, 200);
-          }} 
+          onClick={closeMenuImmediately} 
         />
       )}
     </div>
