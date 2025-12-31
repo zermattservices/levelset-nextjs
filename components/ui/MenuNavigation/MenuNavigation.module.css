@@ -21,8 +21,8 @@
   padding: 0 16px;
 }
 
-/* Tablet responsive padding */
-@media (max-width: 1024px) {
+/* Tablet responsive padding - when content hits edge of screen */
+@media (max-width: 1280px) {
   .navBar {
     padding: 0 8px;
   }

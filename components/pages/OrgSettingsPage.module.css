@@ -28,6 +28,13 @@
   flex-shrink: 0;
 }
 
+/* Tablet responsive padding */
+@media (max-width: 1280px) {
+  .headerSection {
+    padding: 16px 8px;
+  }
+}
+
 .headerContent {
   display: flex;
   flex-direction: row;
@@ -79,6 +86,14 @@
   padding-bottom: 32px;
   overflow: hidden;
   min-height: 0;
+}
+
+/* Tablet responsive padding */
+@media (max-width: 1280px) {
+  .mainSection {
+    padding: 16px 8px;
+    padding-bottom: 32px;
+  }
 }
 
 .mainContent {

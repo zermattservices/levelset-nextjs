@@ -88,28 +88,33 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   }, []);
 
   // Calculate submenu offset to keep it within bounds
+  const submenuRef = React.useRef<HTMLDivElement | null>(null);
+  
   React.useEffect(() => {
     if (!activeMenu || !activeButtonRef.current || !navContentRef.current) {
       setSubmenuOffset(0);
       return;
     }
 
-    // Use requestAnimationFrame to ensure DOM is ready
-    requestAnimationFrame(() => {
+    // Use multiple frames to ensure submenu is rendered
+    const timer = setTimeout(() => {
       const buttonRect = activeButtonRef.current?.getBoundingClientRect();
       const contentRect = navContentRef.current?.getBoundingClientRect();
+      const submenuElement = submenuRef.current;
       
       if (!buttonRect || !contentRect) {
         setSubmenuOffset(0);
         return;
       }
 
-      // Estimate submenu width (Operations is wider due to 2 columns)
-      const estimatedSubmenuWidth = activeMenu === 'operations' ? 460 : 280;
+      // Get actual submenu width if available, otherwise estimate
+      const submenuWidth = submenuElement 
+        ? submenuElement.offsetWidth 
+        : (activeMenu === 'operations' ? 520 : 300);
       
       // Calculate where the centered submenu would be positioned
       const buttonCenter = buttonRect.left + buttonRect.width / 2;
-      const submenuLeft = buttonCenter - estimatedSubmenuWidth / 2;
+      const submenuLeft = buttonCenter - submenuWidth / 2;
       
       // Check if it overflows past the left edge of navContent
       const overflow = contentRect.left - submenuLeft;
@@ -120,7 +125,9 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
       } else {
         setSubmenuOffset(0);
       }
-    });
+    }, 10);
+    
+    return () => clearTimeout(timer);
   }, [activeMenu]);
 
   const handleMenuEnter = React.useCallback((menuType: MenuType, buttonElement: HTMLDivElement | null) => {
@@ -215,6 +222,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
                 {/* Submenu positioned under this button */}
                 {activeMenu === type && (
                   <div 
+                    ref={submenuRef}
                     className={sty.submenuContainer}
                     style={{ transform: `translateX(calc(-50% + ${submenuOffset}px))` }}
                   >

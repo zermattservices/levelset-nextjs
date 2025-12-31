@@ -154,6 +154,13 @@ svg {
   color: #dc2626; /* red-600 */
 }
 
+/* Ensure minimum padding on tablet/smaller screens */
+@media (max-width: 1280px) {
+  :root {
+    --plsmc-viewport-gap: 8px;
+  }
+}
+
 /* Tab navigation styles */
 .tab-nav {
   border-bottom: 1px solid #e5e7eb; /* gray-200 */
