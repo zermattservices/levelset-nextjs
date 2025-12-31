@@ -14,8 +14,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     start_url: startUrl,
     scope: '/mobile/',
     display: 'standalone',
-    background_color: '#f2f5f4',
-    theme_color: '#f2f5f4',
+    background_color: '#FFFFFF',
+    theme_color: '#31664a',
     icons: [
       {
         src: iconSrc,

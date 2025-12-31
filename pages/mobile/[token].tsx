@@ -404,9 +404,9 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         <link rel="manifest" href={`/api/mobile/manifest/${token}`} />
         <link rel="icon" href="/Levelset Icon Non Trans.png" />
         
-        {/* Theme color for status bar */}
-        <meta name="theme-color" content="#f2f5f4" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        {/* Apple PWA status bar - transparent to show background */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </Head>
       <Box
         sx={{
