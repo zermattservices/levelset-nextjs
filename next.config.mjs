@@ -44,6 +44,25 @@ const nextConfig = {
     '@mui/x-data-grid-premium',
     '@mui/x-date-pickers',
   ],
+  // Subdomain routing for roadmap.levelset.io
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // roadmap.levelset.io/ -> /roadmap
+        {
+          source: '/',
+          has: [{ type: 'host', value: 'roadmap.levelset.io' }],
+          destination: '/roadmap',
+        },
+        // roadmap.levelset.io/:path* -> /roadmap/:path*
+        {
+          source: '/:path*',
+          has: [{ type: 'host', value: 'roadmap.levelset.io' }],
+          destination: '/roadmap/:path*',
+        },
+      ],
+    };
+  },
 };
 
 export default nextConfig;
