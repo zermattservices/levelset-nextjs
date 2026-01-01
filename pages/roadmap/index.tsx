@@ -30,19 +30,25 @@ export default function RoadmapIndexPage() {
     sortBy: 'votes',
   });
 
-  // Load initial data
+  // Track if data has been loaded
+  const [dataFetched, setDataFetched] = useState(false);
+  
+  // Debug render
+  console.log('[Roadmap RENDER] auth.isLoaded:', auth.isLoaded, 'auth.id:', auth.id, 'dataFetched:', dataFetched);
+  
+  // Load data when auth becomes ready
   useEffect(() => {
+    console.log('[Roadmap EFFECT] Running, auth.isLoaded:', auth.isLoaded, 'dataFetched:', dataFetched);
+    // Skip if auth isn't loaded yet or we've already fetched
+    if (!auth.isLoaded || dataFetched) {
+      console.log('[Roadmap EFFECT] Skipping fetch - isLoaded:', auth.isLoaded, 'dataFetched:', dataFetched);
+      return;
+    }
+    
     let isMounted = true;
-    console.log('[Roadmap] useEffect triggered, auth.isLoaded:', auth.isLoaded, 'auth.id:', auth.id);
+    console.log('[Roadmap] Auth ready, starting data load. org_id:', auth.org_id, 'user_id:', auth.id);
     
     const loadData = async () => {
-      // Wait for auth to be loaded
-      if (!auth.isLoaded) {
-        console.log('[Roadmap] Waiting for auth...');
-        return;
-      }
-      
-      console.log('[Roadmap] Auth ready, starting data load...');
       setDataLoading(true);
       try {
         const [featuresData, statsData, userVotes] = await Promise.all([
@@ -56,6 +62,7 @@ export default function RoadmapIndexPage() {
           setFeatures(featuresData);
           setStats(statsData);
           setVotedFeatures(userVotes);
+          setDataFetched(true);
         }
       } catch (error) {
         console.error('[Roadmap] Error loading roadmap data:', error);
@@ -71,7 +78,7 @@ export default function RoadmapIndexPage() {
     return () => {
       isMounted = false;
     };
-  }, [auth.isLoaded, auth.id, auth.org_id]);
+  }, [auth.isLoaded, auth.id, auth.org_id, dataFetched]);
 
   // Handle filter changes
   const handleFilterChange = useCallback(async (filters: FilterState) => {
