@@ -383,7 +383,7 @@ export async function fetchAllFeaturesAdmin(): Promise<RoadmapFeature[]> {
 // Update a feature (for admin)
 export async function updateFeature(
   featureId: string,
-  updates: Partial<Pick<RoadmapFeature, 'title' | 'description' | 'category' | 'status' | 'priority' | 'is_public'>>
+  updates: Partial<Pick<RoadmapFeature, 'title' | 'description' | 'category' | 'status' | 'priority' | 'is_public' | 'created_by'>>
 ): Promise<RoadmapFeature | null> {
   const supabase = createSupabaseClient();
   

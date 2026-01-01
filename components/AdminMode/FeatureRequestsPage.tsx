@@ -74,6 +74,9 @@ export function FeatureRequestsPage() {
   const [editCategory, setEditCategory] = React.useState('');
   const [editStatus, setEditStatus] = React.useState('');
   const [editPriority, setEditPriority] = React.useState('');
+  const [editCreator, setEditCreator] = React.useState<string>('levelset');
+  const [editCreatorSearch, setEditCreatorSearch] = React.useState('');
+  const [showEditCreatorDropdown, setShowEditCreatorDropdown] = React.useState(false);
   
   // Create form state
   const [createTitle, setCreateTitle] = React.useState('');
@@ -87,6 +90,7 @@ export function FeatureRequestsPage() {
   
   const [actionLoading, setActionLoading] = React.useState(false);
   const creatorDropdownRef = React.useRef<HTMLDivElement>(null);
+  const editCreatorDropdownRef = React.useRef<HTMLDivElement>(null);
 
   // Fetch features and users
   React.useEffect(() => {
@@ -108,11 +112,14 @@ export function FeatureRequestsPage() {
     loadData();
   }, []);
 
-  // Close creator dropdown when clicking outside
+  // Close creator dropdowns when clicking outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (creatorDropdownRef.current && !creatorDropdownRef.current.contains(event.target as Node)) {
         setShowCreatorDropdown(false);
+      }
+      if (editCreatorDropdownRef.current && !editCreatorDropdownRef.current.contains(event.target as Node)) {
+        setShowEditCreatorDropdown(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -128,7 +135,7 @@ export function FeatureRequestsPage() {
     return name || user.email || 'Unknown User';
   }, [users]);
 
-  // Filter users for dropdown
+  // Filter users for create dropdown
   const filteredUsers = React.useMemo(() => {
     if (!creatorSearch.trim()) return users;
     const search = creatorSearch.toLowerCase();
@@ -138,6 +145,17 @@ export function FeatureRequestsPage() {
       return name.includes(search) || email.includes(search);
     });
   }, [users, creatorSearch]);
+
+  // Filter users for edit dropdown
+  const filteredEditUsers = React.useMemo(() => {
+    if (!editCreatorSearch.trim()) return users;
+    const search = editCreatorSearch.toLowerCase();
+    return users.filter(user => {
+      const name = [user.first_name, user.last_name].filter(Boolean).join(' ').toLowerCase();
+      const email = (user.email || '').toLowerCase();
+      return name.includes(search) || email.includes(search);
+    });
+  }, [users, editCreatorSearch]);
 
   // Filter and sort features (pending review at top)
   const filteredFeatures = React.useMemo(() => {
@@ -204,13 +222,25 @@ export function FeatureRequestsPage() {
     setEditCategory(feature.category);
     setEditStatus(feature.status);
     setEditPriority(feature.priority);
+    // Set creator - null means Levelset
+    setEditCreator(feature.created_by || 'levelset');
+    setEditCreatorSearch('');
+    setShowEditCreatorDropdown(false);
     setEditModalOpen(true);
+  };
+
+  const handleSelectEditCreator = (userId: string) => {
+    setEditCreator(userId);
+    setEditCreatorSearch('');
+    setShowEditCreatorDropdown(false);
   };
 
   const handleEditConfirm = async () => {
     if (!selectedFeature) return;
     setActionLoading(true);
     try {
+      // Pass null for Levelset, otherwise pass the user's auth_user_id
+      const createdBy = editCreator === 'levelset' ? null : editCreator;
       const updated = await updateFeature(selectedFeature.id, {
         title: editTitle,
         description: editDescription,
@@ -218,6 +248,7 @@ export function FeatureRequestsPage() {
         status: editStatus as RoadmapFeature['status'],
         priority: editPriority as RoadmapFeature['priority'],
         is_public: editStatus !== 'submitted',
+        created_by: createdBy,
       });
       if (updated) {
         setFeatures(prev => prev.map(f => f.id === updated.id ? updated : f));
@@ -570,17 +601,72 @@ export function FeatureRequestsPage() {
                 </select>
               </div>
             </div>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Priority</label>
-              <select
-                className={styles.modalSelect}
-                value={editPriority}
-                onChange={(e) => setEditPriority(e.target.value)}
-              >
-                {PRIORITIES.map(p => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Priority</label>
+                <select
+                  className={styles.modalSelect}
+                  value={editPriority}
+                  onChange={(e) => setEditPriority(e.target.value)}
+                >
+                  {PRIORITIES.map(p => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.formGroup} ref={editCreatorDropdownRef}>
+                <label className={styles.formLabel}>Creator</label>
+                <div className={styles.creatorDropdownContainer}>
+                  <input
+                    type="text"
+                    className={styles.modalInput}
+                    value={showEditCreatorDropdown ? editCreatorSearch : getUserDisplayName(editCreator)}
+                    onChange={(e) => {
+                      setEditCreatorSearch(e.target.value);
+                      setShowEditCreatorDropdown(true);
+                    }}
+                    onFocus={() => setShowEditCreatorDropdown(true)}
+                    placeholder="Search users..."
+                  />
+                  {showEditCreatorDropdown && (
+                    <div className={styles.creatorDropdown}>
+                      <div 
+                        className={`${styles.creatorOption} ${editCreator === 'levelset' ? styles.creatorOptionSelected : ''}`}
+                        onClick={() => handleSelectEditCreator('levelset')}
+                      >
+                        <img 
+                          src="/logos/Levelset no margin.png" 
+                          alt="Levelset" 
+                          className={styles.creatorAvatar}
+                        />
+                        <span>Levelset</span>
+                      </div>
+                      {filteredEditUsers.slice(0, 10).map(user => (
+                        <div 
+                          key={user.auth_user_id}
+                          className={`${styles.creatorOption} ${editCreator === user.auth_user_id ? styles.creatorOptionSelected : ''}`}
+                          onClick={() => handleSelectEditCreator(user.auth_user_id)}
+                        >
+                          <div className={styles.creatorAvatarPlaceholder}>
+                            {(user.first_name?.[0] || user.email?.[0] || '?').toUpperCase()}
+                          </div>
+                          <div className={styles.creatorInfo}>
+                            <span className={styles.creatorName}>
+                              {[user.first_name, user.last_name].filter(Boolean).join(' ') || 'Unknown'}
+                            </span>
+                            {user.email && (
+                              <span className={styles.creatorEmail}>{user.email}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {filteredEditUsers.length === 0 && editCreatorSearch && (
+                        <div className={styles.creatorNoResults}>No users found</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
           <div className={styles.modalActions}>
