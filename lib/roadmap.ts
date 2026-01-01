@@ -53,7 +53,7 @@ export function getAnonymousToken(): string {
 export async function fetchFeatures(
   status?: string,
   category?: string,
-  sortBy: 'votes' | 'newest' | 'oldest' = 'votes',
+  sortBy: 'votes' | 'newest' | 'comments' = 'votes',
   searchQuery?: string
 ): Promise<RoadmapFeature[]> {
   const supabase = createSupabaseClient();
@@ -85,8 +85,8 @@ export async function fetchFeatures(
     query = query.order('vote_count', { ascending: false }).order('created_at', { ascending: false });
   } else if (sortBy === 'newest') {
     query = query.order('created_at', { ascending: false });
-  } else {
-    query = query.order('created_at', { ascending: true });
+  } else if (sortBy === 'comments') {
+    query = query.order('comment_count', { ascending: false }).order('created_at', { ascending: false });
   }
   
   const { data, error } = await query;
@@ -255,20 +255,44 @@ export function timeAgo(dateString: string): string {
   return 'Just now';
 }
 
-// Status display helpers
+// Status display helpers - matching FormFlow
 export const STATUS_CONFIG = {
-  idea: { label: 'Idea', bgColor: '#e8f4fd', textColor: '#0066cc' },
-  planned: { label: 'Planned', bgColor: '#fff3e0', textColor: '#e65100' },
-  in_progress: { label: 'In Progress', bgColor: '#e8f5e9', textColor: '#2e7d32' },
-  completed: { label: 'Completed', bgColor: '#f3e5f5', textColor: '#7b1fa2' },
-  cancelled: { label: 'Cancelled', bgColor: '#f2f2f2', textColor: '#666666' },
+  idea: { label: 'Idea', bgColor: '#f3f4f6', textColor: '#374151', borderColor: '#e5e7eb' },
+  planned: { label: 'Planned', bgColor: '#fef3c7', textColor: '#92400e', borderColor: '#fcd34d' },
+  in_progress: { label: 'In Progress', bgColor: '#dbeafe', textColor: '#1e40af', borderColor: '#93c5fd' },
+  completed: { label: 'Complete', bgColor: '#d1fae5', textColor: '#065f46', borderColor: '#6ee7b7' },
+  cancelled: { label: 'Cancelled', bgColor: '#f2f2f2', textColor: '#666666', borderColor: '#e5e5e5' },
 };
 
+// Priority config - matching FormFlow
 export const PRIORITY_CONFIG = {
-  critical: { label: 'Critical', bgColor: '#ffebee', textColor: '#c62828', icon: '🔥' },
-  high: { label: 'High Priority', bgColor: '#fff8e1', textColor: '#f57f17', icon: null },
-  medium: { label: 'Medium', bgColor: '#f2f2f2', textColor: '#666666', icon: null },
-  low: { label: 'Low', bgColor: '#f2f2f2', textColor: '#666666', icon: null },
+  critical: { label: 'Critical', bgColor: '#fee2e2', textColor: '#dc2626', borderColor: '#fca5a5' },
+  high: { label: 'High Priority', bgColor: '#ffedd5', textColor: '#ea580c', borderColor: '#fdba74' },
+  medium: { label: 'Medium', bgColor: '#f3f4f6', textColor: '#6b7280', borderColor: '#e5e7eb' },
+  low: { label: 'Low', bgColor: '#f3f4f6', textColor: '#9ca3af', borderColor: '#e5e7eb' },
 };
 
-export const CATEGORIES = ['Dashboard', 'Mobile', 'Integrations', 'Analytics', 'HR'];
+// Categories matching FormFlow
+export const CATEGORIES = [
+  'Feature',
+  'Improvement', 
+  'Bug Fix',
+  'Integration',
+  'Performance',
+  'UI/UX'
+];
+
+// For backward compatibility with existing data
+export const CATEGORY_MAP: Record<string, string> = {
+  'Dashboard': 'Feature',
+  'Mobile': 'Feature',
+  'Integrations': 'Integration',
+  'Analytics': 'Feature',
+  'HR': 'Feature',
+  'Feature Requests': 'Feature',
+};
+
+// Check if a feature is "popular" (high vote count)
+export function isPopular(voteCount: number): boolean {
+  return voteCount >= 50;
+}

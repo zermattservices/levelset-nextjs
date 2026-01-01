@@ -15,7 +15,7 @@ export interface FilterState {
   search: string;
   status: string;
   category: string;
-  sortBy: 'votes' | 'newest' | 'oldest';
+  sortBy: 'votes' | 'newest' | 'comments';
 }
 
 export default function FeatureList({ 
@@ -42,71 +42,83 @@ export default function FeatureList({
     <div className={styles.content} id="features">
       {/* Filters */}
       <div className={styles.filters}>
-        <div className={styles.searchWrapper}>
-          <svg 
-            className={styles.searchIcon} 
-            width="16" 
-            height="16" 
-            viewBox="0 0 16 16" 
-            fill="none"
-          >
-            <path 
-              d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z" 
-              stroke="currentColor" 
-              strokeWidth="1.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Search</label>
+          <div className={styles.searchWrapper}>
+            <svg 
+              className={styles.searchIcon} 
+              width="16" 
+              height="16" 
+              viewBox="0 0 16 16" 
+              fill="none"
+            >
+              <path 
+                d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+              <path 
+                d="M14 14L10.5 10.5" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+            </svg>
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Search features..."
+              value={filters.search}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
             />
-            <path 
-              d="M14 14L10.5 10.5" 
-              stroke="currentColor" 
-              strokeWidth="1.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </svg>
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Search features..."
-            value={filters.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-          />
+          </div>
         </div>
         
-        <select
-          className={styles.filterSelect}
-          value={filters.status}
-          onChange={(e) => handleFilterChange('status', e.target.value)}
-        >
-          <option value="active">Active</option>
-          <option value="all">All Status</option>
-          <option value="idea">Ideas</option>
-          <option value="planned">Planned</option>
-          <option value="in_progress">In Progress</option>
-          <option value="completed">Completed</option>
-        </select>
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Status</label>
+          <select
+            className={styles.filterSelect}
+            value={filters.status}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+          >
+            <option value="active">Active (In Development)</option>
+            <option value="all">All (Including Complete)</option>
+            <option value="idea">Idea</option>
+            <option value="planned">Planned</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Complete</option>
+          </select>
+        </div>
         
-        <select
-          className={styles.filterSelect}
-          value={filters.category}
-          onChange={(e) => handleFilterChange('category', e.target.value)}
-        >
-          <option value="all">All Categories</option>
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Category</label>
+          <select
+            className={styles.filterSelect}
+            value={filters.category}
+            onChange={(e) => handleFilterChange('category', e.target.value)}
+          >
+            <option value="all">All Categories</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
         
-        <select
-          className={styles.filterSelect}
-          value={filters.sortBy}
-          onChange={(e) => handleFilterChange('sortBy', e.target.value as FilterState['sortBy'])}
-        >
-          <option value="votes">Most Votes</option>
-          <option value="newest">Newest</option>
-          <option value="oldest">Oldest</option>
-        </select>
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Sort by</label>
+          <select
+            className={styles.filterSelect}
+            value={filters.sortBy}
+            onChange={(e) => handleFilterChange('sortBy', e.target.value as FilterState['sortBy'])}
+          >
+            <option value="votes">Most Votes</option>
+            <option value="newest">Most Recent</option>
+            <option value="comments">Most Comments</option>
+          </select>
+        </div>
       </div>
       
       {/* Feature List */}
