@@ -64,11 +64,13 @@ function RoadmapLayoutContent({
     handleTokenAuth();
   }, [router.query, auth.authUser, router]);
 
-  // Redirect unauthenticated users to login on app subdomain
+  // Redirect unauthenticated users to bridge page on app subdomain
+  // The bridge will check for existing session and redirect with tokens, or send to login
   React.useEffect(() => {
     if (auth.isLoaded && !auth.authUser && !isSettingSession && !router.query.token) {
       const currentPath = router.asPath?.split('?')[0] || router.pathname;
-      const redirectUrl = `https://app.levelset.io/auth/login?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
+      // Use bridge page instead of login directly - bridge will check for existing session
+      const redirectUrl = `https://app.levelset.io/auth/bridge?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
       window.location.href = redirectUrl;
     }
   }, [auth.isLoaded, auth.authUser, router, isSettingSession]);
