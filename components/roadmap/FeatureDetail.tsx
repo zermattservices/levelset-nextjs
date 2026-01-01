@@ -33,7 +33,7 @@ export default function FeatureDetail({ feature, hasVoted, onVote }: FeatureDeta
             {statusConfig.label}
           </span>
           
-          {/* Priority Badge (only show if not medium/low) */}
+          {/* Priority Badge (only show if critical or high) */}
           {(feature.priority === 'critical' || feature.priority === 'high') && (
             <span 
               className={styles.priorityBadge}
@@ -56,12 +56,12 @@ export default function FeatureDetail({ feature, hasVoted, onVote }: FeatureDeta
         </div>
       </div>
       
-      {/* Vote Button - FormFlow style */}
+      {/* Vote Button - Levelset green */}
       <button
         className={`${styles.detailVoteButton} ${hasVoted ? styles.detailVoteButtonActive : ''}`}
         onClick={onVote}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
           <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
         </svg>
         <span className={styles.detailVoteCount}>{feature.vote_count}</span>
@@ -178,7 +178,7 @@ export function FeatureSidebar({ feature }: FeatureSidebarProps) {
             >
               <span 
                 className={styles.statusDot}
-                style={{ backgroundColor: statusConfig.textColor, width: '6px', height: '6px' }}
+                style={{ backgroundColor: statusConfig.textColor, width: '5px', height: '5px' }}
               />
               {statusConfig.label}
             </span>
@@ -197,7 +197,7 @@ export function FeatureSidebar({ feature }: FeatureSidebarProps) {
             >
               <span 
                 className={styles.priorityDot}
-                style={{ backgroundColor: priorityConfig.textColor, width: '6px', height: '6px' }}
+                style={{ backgroundColor: priorityConfig.textColor, width: '5px', height: '5px' }}
               />
               {priorityConfig.label}
             </span>

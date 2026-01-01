@@ -22,12 +22,12 @@ export default function RoadmapHero({ stats }: RoadmapHeroProps) {
       </div>
       
       <h1 className={styles.heroTitle}>
-        Welcome to<br />
+        What&apos;s Next for<br />
         <span className={styles.heroTitleAccent}>Levelset</span>
       </h1>
       
       <p className={styles.heroSubtitle}>
-        Share your ideas, vote on features, and help shape the future of Levelset together
+        Share your ideas, vote on features, and help shape the future of our platform together
       </p>
       
       <div className={styles.heroButtons}>
@@ -53,7 +53,7 @@ export default function RoadmapHero({ stats }: RoadmapHeroProps) {
         </div>
         <div className={styles.statItem}>
           <span className={styles.statNumber}>{formatNumber(stats.inProgress)}</span>
-          <span className={styles.statLabel}>In Progress</span>
+          <span className={styles.statLabel}>Features In Progress</span>
         </div>
       </div>
     </section>

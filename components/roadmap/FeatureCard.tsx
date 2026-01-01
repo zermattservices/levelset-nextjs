@@ -39,14 +39,13 @@ export default function FeatureCard({ feature, hasVoted, onVote }: FeatureCardPr
             style={{
               backgroundColor: statusConfig.bgColor,
               color: statusConfig.textColor,
-              border: `1px solid ${statusConfig.borderColor}`,
             }}
           >
             {statusConfig.label}
           </span>
         </div>
         
-        {/* Popular badge */}
+        {/* Popular badge - only show if popular */}
         {popular && (
           <div className={styles.popularBadge}>
             <span className={styles.popularIcon}>🔥</span>
@@ -63,26 +62,26 @@ export default function FeatureCard({ feature, hasVoted, onVote }: FeatureCardPr
         <span className={styles.categoryTag}>{feature.category}</span>
       </div>
       
-      {/* Vote button - tall blue rectangle on right */}
+      {/* Simple upvote button - FormFlow style */}
       <div 
-        className={`${styles.voteButtonTall} ${hasVoted ? styles.voteButtonTallActive : ''}`}
+        className={`${styles.voteButton} ${hasVoted ? styles.voteButtonActive : ''}`}
         onClick={handleVoteClick}
         role="button"
         aria-label={hasVoted ? 'Remove vote' : 'Vote for this feature'}
       >
         <svg 
-          width="20" 
-          height="20" 
+          width="16" 
+          height="16" 
           viewBox="0 0 24 24" 
           fill="none" 
           stroke="currentColor" 
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeLinecap="round" 
           strokeLinejoin="round"
         >
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
-        <span className={styles.voteCountTall}>{feature.vote_count}</span>
+        <span className={styles.voteCount}>{feature.vote_count}</span>
       </div>
     </div>
   );
