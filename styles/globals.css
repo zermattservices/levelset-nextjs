@@ -5,6 +5,9 @@
 
 html {
   color-scheme: light only;
+  min-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -66,6 +69,9 @@ body {
   font-family: 'ApercuMedium', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Make ApercuMedium available for Plasmic */

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   RoadmapLayout,
-  RoadmapHeader,
   RoadmapHero,
   FeatureList,
   FilterState,
@@ -11,11 +10,13 @@ import {
   RoadmapStats,
   fetchFeatures,
   fetchStats,
-  fetchUserVotes,
+  fetchUserVotesForUser,
   toggleVote,
 } from '@/lib/roadmap';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 export default function RoadmapIndexPage() {
+  const auth = useAuth();
   const [features, setFeatures] = useState<RoadmapFeature[]>([]);
   const [stats, setStats] = useState<RoadmapStats>({ totalFeatures: 0, totalVotes: 0, inProgress: 0 });
   const [votedFeatures, setVotedFeatures] = useState<Set<string>>(new Set());
@@ -30,12 +31,13 @@ export default function RoadmapIndexPage() {
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
+      if (!auth.isLoaded) return;
       setLoading(true);
       try {
         const [featuresData, statsData, userVotes] = await Promise.all([
-          fetchFeatures('active', undefined, 'votes'),
-          fetchStats(),
-          fetchUserVotes(),
+          fetchFeatures('active', undefined, 'votes', undefined, auth.org_id || undefined),
+          fetchStats(auth.org_id || undefined),
+          fetchUserVotesForUser(auth.id),
         ]);
         setFeatures(featuresData);
         setStats(statsData);
@@ -48,7 +50,7 @@ export default function RoadmapIndexPage() {
     };
 
     loadData();
-  }, []);
+  }, [auth.id, auth.isLoaded, auth.org_id]);
 
   // Handle filter changes
   const handleFilterChange = useCallback(async (filters: FilterState) => {
@@ -59,7 +61,8 @@ export default function RoadmapIndexPage() {
         filters.status,
         filters.category,
         filters.sortBy,
-        filters.search
+        filters.search,
+        auth.org_id || undefined
       );
       setFeatures(featuresData);
     } catch (error) {
@@ -72,6 +75,7 @@ export default function RoadmapIndexPage() {
   // Handle voting
   const handleVote = useCallback(async (featureId: string) => {
     const hasVoted = votedFeatures.has(featureId);
+    if (!auth.id) return;
     
     // Optimistic update
     setVotedFeatures(prev => {
@@ -98,7 +102,7 @@ export default function RoadmapIndexPage() {
     }));
 
     try {
-      await toggleVote(featureId, hasVoted);
+      await toggleVote(featureId, hasVoted, auth.id);
     } catch (error) {
       // Revert on error
       setVotedFeatures(prev => {
@@ -126,8 +130,7 @@ export default function RoadmapIndexPage() {
   }, [votedFeatures]);
 
   return (
-    <RoadmapLayout>
-      <RoadmapHeader />
+    <RoadmapLayout subHeaderMode="list" activeTab="features">
       <RoadmapHero stats={stats} />
       <FeatureList
         features={features}

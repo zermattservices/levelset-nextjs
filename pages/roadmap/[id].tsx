@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import {
   RoadmapLayout,
-  RoadmapHeader,
   FeatureDetail,
   FeatureSidebar,
   CommentSection,
@@ -12,16 +11,18 @@ import {
   RoadmapComment,
   fetchFeatureById,
   fetchComments,
-  fetchUserVotes,
+  fetchUserVotesForUser,
   toggleVote,
   submitComment,
   formatDate,
 } from '@/lib/roadmap';
 import styles from '@/components/roadmap/Roadmap.module.css';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 export default function FeatureDetailPage() {
   const router = useRouter();
   const { id } = router.query;
+  const auth = useAuth();
   
   const [feature, setFeature] = useState<RoadmapFeature | null>(null);
   const [comments, setComments] = useState<RoadmapComment[]>([]);
@@ -30,15 +31,15 @@ export default function FeatureDetailPage() {
 
   // Load feature and comments
   useEffect(() => {
-    if (!id || typeof id !== 'string') return;
+    if (!id || typeof id !== 'string' || !auth.isLoaded) return;
 
     const loadData = async () => {
       setLoading(true);
       try {
         const [featureData, commentsData, userVotes] = await Promise.all([
-          fetchFeatureById(id),
+          fetchFeatureById(id, auth.org_id || undefined),
           fetchComments(id),
-          fetchUserVotes(),
+          fetchUserVotesForUser(auth.id),
         ]);
         
         setFeature(featureData);
@@ -52,11 +53,11 @@ export default function FeatureDetailPage() {
     };
 
     loadData();
-  }, [id]);
+  }, [id, auth.id, auth.isLoaded, auth.org_id]);
 
   // Handle voting
   const handleVote = useCallback(async () => {
-    if (!feature) return;
+    if (!feature || !auth.id) return;
 
     const wasVoted = hasVoted;
     
@@ -68,7 +69,7 @@ export default function FeatureDetailPage() {
     } : null);
 
     try {
-      await toggleVote(feature.id, wasVoted);
+      await toggleVote(feature.id, wasVoted, auth.id);
     } catch (error) {
       // Revert on error
       setHasVoted(wasVoted);
@@ -87,7 +88,12 @@ export default function FeatureDetailPage() {
   ) => {
     if (!feature) return;
 
-    const newComment = await submitComment(feature.id, content, authorName, authorEmail);
+    const newComment = await submitComment(
+      feature.id,
+      content,
+      authorName || auth.full_name || `${auth.first_name || ''} ${auth.last_name || ''}`.trim() || 'Anonymous',
+      authorEmail || auth.email || undefined
+    );
     
     if (newComment) {
       setComments(prev => [newComment, ...prev]);
@@ -96,12 +102,11 @@ export default function FeatureDetailPage() {
         comment_count: prev.comment_count + 1,
       } : null);
     }
-  }, [feature]);
+  }, [feature, auth.full_name, auth.first_name, auth.last_name, auth.email]);
 
   if (loading) {
     return (
-      <RoadmapLayout title="Loading... | Levelset Roadmap">
-        <RoadmapHeader showBackToFeatures />
+      <RoadmapLayout title="Loading... | Levelset Roadmap" subHeaderMode="detail">
         <div className={styles.loadingState} style={{ padding: '100px 20px' }}>
           Loading feature...
         </div>
@@ -111,8 +116,7 @@ export default function FeatureDetailPage() {
 
   if (!feature) {
     return (
-      <RoadmapLayout title="Feature Not Found | Levelset Roadmap">
-        <RoadmapHeader showBackToFeatures />
+      <RoadmapLayout title="Feature Not Found | Levelset Roadmap" subHeaderMode="detail">
         <div className={styles.emptyState} style={{ margin: '100px auto', maxWidth: '600px' }}>
           <h2>Feature not found</h2>
           <p>This feature may have been removed or doesn&apos;t exist.</p>
@@ -128,9 +132,8 @@ export default function FeatureDetailPage() {
     <RoadmapLayout 
       title={`${feature.title} | Levelset Roadmap`}
       description={feature.description || `View details and vote for ${feature.title}`}
+      subHeaderMode="detail"
     >
-      <RoadmapHeader showBackToFeatures />
-      
       <main className={styles.detailMain}>
         <div className={styles.detailContent}>
           <FeatureDetail

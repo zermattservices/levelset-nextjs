@@ -12,6 +12,7 @@ export interface RoadmapFeature {
   comment_count: number;
   created_at: string;
   updated_at: string;
+  organization_id?: string | null;
 }
 
 export interface RoadmapComment {
@@ -38,23 +39,13 @@ export interface RoadmapStats {
 }
 
 // Anonymous token management
-export function getAnonymousToken(): string {
-  if (typeof window === 'undefined') return 'server-render';
-  
-  let token = localStorage.getItem('roadmap_token');
-  if (!token) {
-    token = `anon_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-    localStorage.setItem('roadmap_token', token);
-  }
-  return token;
-}
-
 // Supabase queries
 export async function fetchFeatures(
   status?: string,
   category?: string,
   sortBy: 'votes' | 'newest' | 'comments' = 'votes',
-  searchQuery?: string
+  searchQuery?: string,
+  organizationId?: string
 ): Promise<RoadmapFeature[]> {
   const supabase = createSupabaseClient();
   
@@ -73,6 +64,11 @@ export async function fetchFeatures(
   // Category filter
   if (category && category !== 'all') {
     query = query.eq('category', category);
+  }
+
+  // Organization filter: include public (null) or matching org
+  if (organizationId) {
+    query = query.or(`organization_id.is.null,organization_id.eq.${organizationId}`);
   }
   
   // Search filter
@@ -99,14 +95,14 @@ export async function fetchFeatures(
   return data || [];
 }
 
-export async function fetchFeatureById(id: string): Promise<RoadmapFeature | null> {
+export async function fetchFeatureById(id: string, organizationId?: string): Promise<RoadmapFeature | null> {
   const supabase = createSupabaseClient();
   
   const { data, error } = await supabase
     .from('roadmap_features')
     .select('*')
     .eq('id', id)
-    .eq('is_public', true)
+    .or(organizationId ? `is_public.eq.true,organization_id.is.null,organization_id.eq.${organizationId}` : 'is_public.eq.true,organization_id.is.null')
     .single();
   
   if (error) {
@@ -117,13 +113,20 @@ export async function fetchFeatureById(id: string): Promise<RoadmapFeature | nul
   return data;
 }
 
-export async function fetchStats(): Promise<RoadmapStats> {
+export async function fetchStats(organizationId?: string): Promise<RoadmapStats> {
   const supabase = createSupabaseClient();
   
   const [featuresRes, votesRes, progressRes] = await Promise.all([
-    supabase.from('roadmap_features').select('id', { count: 'exact' }).eq('is_public', true),
+    supabase
+      .from('roadmap_features')
+      .select('id', { count: 'exact' })
+      .or(organizationId ? `is_public.eq.true,organization_id.is.null,organization_id.eq.${organizationId}` : 'is_public.eq.true,organization_id.is.null'),
     supabase.from('roadmap_votes').select('id', { count: 'exact' }),
-    supabase.from('roadmap_features').select('id', { count: 'exact' }).eq('status', 'in_progress').eq('is_public', true),
+    supabase
+      .from('roadmap_features')
+      .select('id', { count: 'exact' })
+      .eq('status', 'in_progress')
+      .or(organizationId ? `is_public.eq.true,organization_id.is.null,organization_id.eq.${organizationId}` : 'is_public.eq.true,organization_id.is.null'),
   ]);
   
   return {
@@ -134,15 +137,19 @@ export async function fetchStats(): Promise<RoadmapStats> {
 }
 
 export async function fetchUserVotes(): Promise<Set<string>> {
-  if (typeof window === 'undefined') return new Set();
-  
+  // deprecated placeholder to avoid breaking existing callers
+  return new Set();
+}
+
+export async function fetchUserVotesForUser(userId?: string): Promise<Set<string>> {
+  if (typeof window === 'undefined' || !userId) return new Set();
+
   const supabase = createSupabaseClient();
-  const token = getAnonymousToken();
   
   const { data, error } = await supabase
     .from('roadmap_votes')
     .select('feature_id')
-    .eq('anonymous_token', token);
+    .eq('user_id', userId);
   
   if (error) {
     console.error('Error fetching votes:', error);
@@ -152,9 +159,11 @@ export async function fetchUserVotes(): Promise<Set<string>> {
   return new Set(data?.map(v => v.feature_id) || []);
 }
 
-export async function toggleVote(featureId: string, hasVoted: boolean): Promise<boolean> {
+export async function toggleVote(featureId: string, hasVoted: boolean, userId?: string): Promise<boolean> {
   const supabase = createSupabaseClient();
-  const token = getAnonymousToken();
+  if (!userId) {
+    throw new Error('User must be authenticated to vote');
+  }
   
   try {
     if (hasVoted) {
@@ -163,7 +172,7 @@ export async function toggleVote(featureId: string, hasVoted: boolean): Promise<
         .from('roadmap_votes')
         .delete()
         .eq('feature_id', featureId)
-        .eq('anonymous_token', token);
+        .eq('user_id', userId);
       
       if (error) throw error;
       return false; // No longer voted
@@ -173,7 +182,7 @@ export async function toggleVote(featureId: string, hasVoted: boolean): Promise<
         .from('roadmap_votes')
         .insert({
           feature_id: featureId,
-          anonymous_token: token,
+          user_id: userId,
           vote_type: 'upvote',
         });
       

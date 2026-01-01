@@ -1,17 +1,24 @@
 import React from 'react';
 import Head from 'next/head';
+import MenuNavigation from '@/components/ui/MenuNavigation/MenuNavigation';
+import AppProviders from '@/lib/providers/AppProviders';
+import RoadmapSubHeader from './RoadmapSubHeader';
 import styles from './Roadmap.module.css';
 
 interface RoadmapLayoutProps {
   children: React.ReactNode;
   title?: string;
   description?: string;
+  subHeaderMode?: 'list' | 'detail' | 'board';
+  activeTab?: 'features' | 'roadmap';
 }
 
 export default function RoadmapLayout({ 
   children, 
   title = 'Levelset Roadmap',
-  description = 'Share your ideas, vote on features, and help shape the future of Levelset'
+  description = 'Share your ideas, vote on features, and help shape the future of Levelset',
+  subHeaderMode = 'list',
+  activeTab = 'features',
 }: RoadmapLayoutProps) {
   return (
     <>
@@ -32,9 +39,13 @@ export default function RoadmapLayout({
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
       </Head>
-      <div className={styles.pageWrapper}>
-        {children}
-      </div>
+      <AppProviders>
+        <div className={styles.pageWrapper}>
+          <MenuNavigation />
+          <RoadmapSubHeader mode={subHeaderMode} activeTab={activeTab} />
+          {children}
+        </div>
+      </AppProviders>
     </>
   );
 }
