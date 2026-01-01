@@ -87,9 +87,13 @@ function RoadmapLayoutContent({
 
   return (
     <div className={styles.pageWrapper}>
-      <MenuNavigation />
+      <div className={styles.stickyNav}>
+        <MenuNavigation />
+      </div>
       <RoadmapSubHeader mode={subHeaderMode} activeTab={activeTab} />
-      {children}
+      <div className={styles.mainContent}>
+        {children}
+      </div>
     </div>
   );
 }

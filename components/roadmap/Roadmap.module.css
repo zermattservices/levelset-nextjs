@@ -13,6 +13,20 @@
   flex-direction: column;
 }
 
+/* Sticky navigation wrapper */
+.stickyNav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #ffffff;
+}
+
+/* Main scrollable content */
+.mainContent {
+  flex: 1;
+  overflow-y: auto;
+}
+
 /* Header - FormFlow style */
 .header {
   display: flex;
@@ -99,33 +113,37 @@
 .subHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 14px 32px;
   border-bottom: 1px solid #e5e7eb;
   background-color: #ffffff;
   gap: 16px;
   flex-shrink: 0;
   position: sticky;
-  top: 56px;
+  top: 57px;
   z-index: 99;
 }
 
 .subHeaderLeft {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
+  flex: 1;
 }
 
 .subHeaderRight {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-left: auto;
+  position: absolute;
+  right: 32px;
 }
 
 .subHeaderTabs {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -366,17 +384,32 @@
 
 /* Filters - FormFlow style */
 .filters {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
   gap: 16px;
   margin-bottom: 32px;
-  align-items: end;
+}
+
+.filters > .filterGroup:first-child {
+  flex: 1.5;
+}
+
+.filters > .filterGroup {
+  flex: 1;
 }
 
 @media (max-width: 768px) {
   .filters {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
     gap: 16px;
+  }
+  
+  .filters > .filterGroup,
+  .filters > .filterGroup:first-child {
+    flex: none;
+    width: 100%;
   }
 }
 

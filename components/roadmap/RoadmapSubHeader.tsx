@@ -16,7 +16,7 @@ export default function RoadmapSubHeader({ mode, activeTab = 'features' }: Roadm
       <div className={styles.subHeaderLeft}>
         {isDetail ? (
           <div className={styles.subHeaderBreadcrumb}>
-            <Link href="/" className={styles.subHeaderBack}>
+            <Link href="/features" className={styles.subHeaderBack}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
@@ -28,13 +28,13 @@ export default function RoadmapSubHeader({ mode, activeTab = 'features' }: Roadm
         ) : (
           <div className={styles.subHeaderTabs}>
             <Link
-              href="/"
+              href="/features"
               className={`${styles.subHeaderTab} ${activeTab === 'features' ? styles.subHeaderTabActive : ''}`}
             >
               Features
             </Link>
             <Link
-              href="/roadmap/roadmap"
+              href="/roadmap"
               className={`${styles.subHeaderTab} ${activeTab === 'roadmap' ? styles.subHeaderTabActive : ''}`}
             >
               Roadmap

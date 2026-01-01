@@ -13,19 +13,32 @@ export function middleware(request: NextRequest) {
     if (
       pathname.startsWith('/_next') ||
       pathname.startsWith('/api') ||
-      pathname.startsWith('/roadmap') ||
       pathname.includes('.') // Static files like favicon.ico, images, etc.
     ) {
       return NextResponse.next();
     }
     
-    // Rewrite root and other paths to /roadmap/*
-    if (pathname === '/') {
-      url.pathname = '/roadmap';
-    } else {
-      url.pathname = `/roadmap${pathname}`;
+    // Skip if already in /roadmap/ path (internal routing)
+    if (pathname.startsWith('/roadmap/')) {
+      return NextResponse.next();
     }
     
+    // Route mapping for roadmap subdomain:
+    // / or /features → /roadmap (features list)
+    // /roadmap → /roadmap/board (roadmap board)
+    // /[id] → /roadmap/[id] (feature detail)
+    if (pathname === '/' || pathname === '/features') {
+      url.pathname = '/roadmap';
+      return NextResponse.rewrite(url);
+    }
+    
+    if (pathname === '/roadmap') {
+      url.pathname = '/roadmap/board';
+      return NextResponse.rewrite(url);
+    }
+    
+    // All other paths get prefixed with /roadmap
+    url.pathname = `/roadmap${pathname}`;
     return NextResponse.rewrite(url);
   }
   
