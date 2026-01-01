@@ -8,6 +8,7 @@ html {
   min-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  background-color: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -72,6 +73,15 @@ body {
   min-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+/* Prevent black flash during page transitions */
+#__next {
+  background-color: #ffffff;
+  min-height: 100vh;
 }
 
 /* Make ApercuMedium available for Plasmic */
