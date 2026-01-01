@@ -156,7 +156,7 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
       const {
         data: { subscription: sub },
       } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "SIGNED_OUT" || event === "USER_DELETED") {
+        if (event === "SIGNED_OUT") {
           setCurrentUser(null);
           setAppUser(null);
           clearSharedCookies();
