@@ -26,9 +26,9 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
   const [features, setFeatures] = useState<RoadmapFeature[]>([]);
   const [stats, setStats] = useState<RoadmapStats>({ totalFeatures: 0, totalVotes: 0, inProgress: 0 });
   const [votedFeatures, setVotedFeatures] = useState<Set<string>>(new Set());
-  // Loading should be true until both auth is ready AND data is fetched
+  // Loading state for data fetching
   const [dataLoading, setDataLoading] = useState(true);
-  const loading = !auth.isLoaded || dataLoading;
+  const loading = dataLoading;
   const [currentFilters, setCurrentFilters] = useState<FilterState>({
     search: '',
     status: 'active',
@@ -36,27 +36,22 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
     sortBy: 'votes',
   });
 
-  // Use a ref to track if we've loaded data (to prevent re-fetching)
-  const hasLoadedRef = useRef(false);
-  const prevOrgIdRef = useRef<string | undefined>(undefined);
+  // Track loading state with a ref to prevent duplicate fetches
+  const loadingRef = useRef(false);
   
-  // Load data when auth becomes ready
+  // Load data on mount and when auth/org changes
   useEffect(() => {
-    // If auth isn't loaded yet, wait
-    if (!auth.isLoaded) {
-      return;
-    }
-    
-    // If we've already loaded and org hasn't changed, skip
-    if (hasLoadedRef.current && prevOrgIdRef.current === auth.org_id) {
-      return;
-    }
+    // Prevent duplicate fetches
+    if (loadingRef.current) return;
     
     let isMounted = true;
     
     const loadData = async () => {
+      loadingRef.current = true;
       setDataLoading(true);
+      
       try {
+        // Fetch data regardless of auth state - let RLS handle access
         const [featuresData, statsData, userVotes] = await Promise.all([
           fetchFeatures('active', undefined, 'votes', undefined, auth.org_id || undefined),
           fetchStats(auth.org_id || undefined),
@@ -67,14 +62,13 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
           setFeatures(featuresData);
           setStats(statsData);
           setVotedFeatures(userVotes);
-          hasLoadedRef.current = true;
-          prevOrgIdRef.current = auth.org_id;
         }
       } catch (error) {
         console.error('Error loading roadmap data:', error);
       } finally {
         if (isMounted) {
           setDataLoading(false);
+          loadingRef.current = false;
         }
       }
     };
@@ -84,7 +78,7 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
     return () => {
       isMounted = false;
     };
-  }, [auth.isLoaded, auth.id, auth.org_id]);
+  }, [auth.org_id, auth.id]);
 
   // Handle filter changes
   const handleFilterChange = useCallback(async (filters: FilterState) => {

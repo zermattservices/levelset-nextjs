@@ -102,14 +102,6 @@ function RoadmapLayoutContent({
     return <AuthLoadingScreen />;
   }
 
-  // Clone children with auth prop for direct access
-  const childrenWithAuth = React.Children.map(children, child => {
-    if (React.isValidElement(child)) {
-      return React.cloneElement(child as React.ReactElement<any>, { auth });
-    }
-    return child;
-  });
-
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.stickyNav}>
@@ -117,7 +109,7 @@ function RoadmapLayoutContent({
       </div>
       <RoadmapSubHeader mode={subHeaderMode} activeTab={activeTab} />
       <div className={styles.mainContent}>
-        {childrenWithAuth}
+        {children}
       </div>
     </div>
   );

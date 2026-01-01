@@ -23,27 +23,21 @@ export default function RoadmapBoardPage({ auth: authProp }: RoadmapBoardPagePro
   const auth = authProp || authFromHook;
   const [allFeatures, setAllFeatures] = useState<RoadmapFeature[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const loading = !auth.isLoaded || dataLoading;
+  const loading = dataLoading;
   
-  // Use refs to track loading state
-  const hasLoadedRef = useRef(false);
-  const prevOrgIdRef = useRef<string | undefined>(undefined);
+  // Track loading state with a ref to prevent duplicate fetches
+  const loadingRef = useRef(false);
 
   useEffect(() => {
-    // If auth isn't loaded yet, wait
-    if (!auth.isLoaded) {
-      return;
-    }
-    
-    // If we've already loaded and org hasn't changed, skip
-    if (hasLoadedRef.current && prevOrgIdRef.current === auth.org_id) {
-      return;
-    }
+    // Prevent duplicate fetches
+    if (loadingRef.current) return;
     
     let isMounted = true;
     
     const load = async () => {
+      loadingRef.current = true;
       setDataLoading(true);
+      
       try {
         // Fetch all three statuses; we can fetch wide and filter client-side
         const [planned, inProgress, completed] = await Promise.all([
@@ -54,14 +48,13 @@ export default function RoadmapBoardPage({ auth: authProp }: RoadmapBoardPagePro
         
         if (isMounted) {
           setAllFeatures([...planned, ...inProgress, ...completed]);
-          hasLoadedRef.current = true;
-          prevOrgIdRef.current = auth.org_id;
         }
       } catch (e) {
         console.error('Error loading roadmap board', e);
       } finally {
         if (isMounted) {
           setDataLoading(false);
+          loadingRef.current = false;
         }
       }
     };
@@ -71,7 +64,7 @@ export default function RoadmapBoardPage({ auth: authProp }: RoadmapBoardPagePro
     return () => {
       isMounted = false;
     };
-  }, [auth.isLoaded, auth.org_id]);
+  }, [auth.org_id]);
 
   const sections = useMemo(() => {
     return STATUS_SECTIONS.map(({ title, key }) => {
