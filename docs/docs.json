@@ -108,6 +108,10 @@
   "navbar": {
     "links": [
       {
+        "label": "Report a Bug",
+        "href": "https://roadmap.levelset.io"
+      },
+      {
         "label": "Dashboard",
         "href": "https://app.levelset.io/auth/login"
       }

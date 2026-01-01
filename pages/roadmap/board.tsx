@@ -19,8 +19,13 @@ export default function RoadmapBoardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth.isLoaded) return;
+    console.log('[RoadmapBoard] useEffect triggered, auth.isLoaded:', auth.isLoaded);
+    if (!auth.isLoaded) {
+      console.log('[RoadmapBoard] Skipping load - auth not loaded yet');
+      return;
+    }
     const load = async () => {
+      console.log('[RoadmapBoard] Starting data load...');
       setLoading(true);
       try {
         // Fetch all three statuses; we can fetch wide and filter client-side
@@ -29,9 +34,10 @@ export default function RoadmapBoardPage() {
           fetchFeatures('in_progress', undefined, 'votes', undefined, auth.org_id || undefined),
           fetchFeatures('completed', undefined, 'votes', undefined, auth.org_id || undefined),
         ]);
+        console.log('[RoadmapBoard] Data loaded:', { planned: planned.length, inProgress: inProgress.length, completed: completed.length });
         setAllFeatures([...planned, ...inProgress, ...completed]);
       } catch (e) {
-        console.error('Error loading roadmap board', e);
+        console.error('[RoadmapBoard] Error loading roadmap board', e);
       } finally {
         setLoading(false);
       }

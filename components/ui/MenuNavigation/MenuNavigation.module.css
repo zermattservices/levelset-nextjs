@@ -191,6 +191,53 @@
   color: #31664a !important;
 }
 
+.helpDropdownContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.helpDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 160px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.helpDropdownItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  font-family: "Satoshi";
+  font-size: 14px;
+  font-weight: 500;
+  color: #0d1b14;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.helpDropdownItem:hover {
+  background-color: #f6fffa;
+}
+
+.helpDropdownItem svg {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.helpDropdownItem:hover svg {
+  color: #31664a;
+}
+
 .profileDropdownContainer {
   position: relative;
   display: flex;

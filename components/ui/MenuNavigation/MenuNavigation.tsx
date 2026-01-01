@@ -34,8 +34,10 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const [activeMenu, setActiveMenu] = React.useState<MenuType | null>(null);
   const [isClosing, setIsClosing] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
+  const [helpDropdownOpen, setHelpDropdownOpen] = React.useState(false);
   const [submenuOffset, setSubmenuOffset] = React.useState<number>(0);
   const profileDropdownRef = React.useRef<HTMLDivElement>(null);
+  const helpDropdownRef = React.useRef<HTMLDivElement>(null);
   const navButtonsRef = React.useRef<HTMLDivElement>(null);
   const navContentRef = React.useRef<HTMLDivElement>(null);
   const activeButtonRef = React.useRef<HTMLDivElement | null>(null);
@@ -58,22 +60,25 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const canViewRoster = has(P.ROSTER_VIEW);
   const canAccessOrgSettings = has(P.ORG_VIEW_SETTINGS) || userHierarchyLevel !== null;
 
-  // Close profile dropdown when clicking outside
+  // Close dropdowns when clicking outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
         setProfileDropdownOpen(false);
       }
+      if (helpDropdownRef.current && !helpDropdownRef.current.contains(event.target as Node)) {
+        setHelpDropdownOpen(false);
+      }
     }
     
-    if (profileDropdownOpen) {
+    if (profileDropdownOpen || helpDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [profileDropdownOpen]);
+  }, [profileDropdownOpen, helpDropdownOpen]);
 
   // Cleanup timeouts on unmount
   React.useEffect(() => {
@@ -249,16 +254,55 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               </LevelsetButton>
             )}
 
-            {/* Help/Documentation link */}
-            <a 
-              href="https://docs.levelset.io" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className={sty.helpButton}
-            >
-              <HelpOutlineIcon sx={{ fontSize: 18 }} />
-              <span>Need Help?</span>
-            </a>
+            {/* Help dropdown */}
+            <div className={sty.helpDropdownContainer} ref={helpDropdownRef}>
+              <button 
+                className={sty.helpButton}
+                onClick={() => setHelpDropdownOpen(!helpDropdownOpen)}
+              >
+                <HelpOutlineIcon sx={{ fontSize: 18 }} />
+                <span>Need Help?</span>
+                <KeyboardArrowDownIcon 
+                  sx={{ 
+                    fontSize: 16, 
+                    marginLeft: '-2px',
+                    transition: 'transform 0.2s ease',
+                    transform: helpDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }} 
+                />
+              </button>
+              {helpDropdownOpen && (
+                <div className={sty.helpDropdown}>
+                  <a 
+                    href="https://docs.levelset.io" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={sty.helpDropdownItem}
+                    onClick={() => setHelpDropdownOpen(false)}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                    </svg>
+                    <span>Help Center</span>
+                  </a>
+                  <a 
+                    href="https://roadmap.levelset.io" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={sty.helpDropdownItem}
+                    onClick={() => setHelpDropdownOpen(false)}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                      <polyline points="2 17 12 22 22 17" />
+                      <polyline points="2 12 12 17 22 12" />
+                    </svg>
+                    <span>Roadmap</span>
+                  </a>
+                </div>
+              )}
+            </div>
 
             {/* Location dropdown */}
             <LocationSelectDropdown className={sty.locationDropdown} />

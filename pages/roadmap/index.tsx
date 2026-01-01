@@ -30,8 +30,15 @@ export default function RoadmapIndexPage() {
 
   // Load initial data
   useEffect(() => {
+    console.log('[Roadmap] useEffect triggered, auth.isLoaded:', auth.isLoaded, 'auth.id:', auth.id);
+    
     const loadData = async () => {
-      if (!auth.isLoaded) return;
+      if (!auth.isLoaded) {
+        console.log('[Roadmap] Skipping load - auth not loaded yet');
+        return;
+      }
+      
+      console.log('[Roadmap] Starting data load...');
       setLoading(true);
       try {
         const [featuresData, statsData, userVotes] = await Promise.all([
@@ -39,11 +46,12 @@ export default function RoadmapIndexPage() {
           fetchStats(auth.org_id || undefined),
           fetchUserVotesForUser(auth.id),
         ]);
+        console.log('[Roadmap] Data loaded:', { featuresCount: featuresData.length, stats: statsData });
         setFeatures(featuresData);
         setStats(statsData);
         setVotedFeatures(userVotes);
       } catch (error) {
-        console.error('Error loading roadmap data:', error);
+        console.error('[Roadmap] Error loading roadmap data:', error);
       } finally {
         setLoading(false);
       }
