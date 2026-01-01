@@ -16,17 +16,21 @@ const STATUS_SECTIONS: { title: string; key: StatusKey }[] = [
 export default function RoadmapBoardPage() {
   const auth = useAuth();
   const [allFeatures, setAllFeatures] = useState<RoadmapFeature[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+  const loading = !auth.isLoaded || dataLoading;
 
   useEffect(() => {
+    let isMounted = true;
     console.log('[RoadmapBoard] useEffect triggered, auth.isLoaded:', auth.isLoaded);
-    if (!auth.isLoaded) {
-      console.log('[RoadmapBoard] Skipping load - auth not loaded yet');
-      return;
-    }
+    
     const load = async () => {
+      if (!auth.isLoaded) {
+        console.log('[RoadmapBoard] Waiting for auth...');
+        return;
+      }
+      
       console.log('[RoadmapBoard] Starting data load...');
-      setLoading(true);
+      setDataLoading(true);
       try {
         // Fetch all three statuses; we can fetch wide and filter client-side
         const [planned, inProgress, completed] = await Promise.all([
@@ -34,15 +38,25 @@ export default function RoadmapBoardPage() {
           fetchFeatures('in_progress', undefined, 'votes', undefined, auth.org_id || undefined),
           fetchFeatures('completed', undefined, 'votes', undefined, auth.org_id || undefined),
         ]);
-        console.log('[RoadmapBoard] Data loaded:', { planned: planned.length, inProgress: inProgress.length, completed: completed.length });
-        setAllFeatures([...planned, ...inProgress, ...completed]);
+        
+        if (isMounted) {
+          console.log('[RoadmapBoard] Data loaded:', { planned: planned.length, inProgress: inProgress.length, completed: completed.length });
+          setAllFeatures([...planned, ...inProgress, ...completed]);
+        }
       } catch (e) {
         console.error('[RoadmapBoard] Error loading roadmap board', e);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setDataLoading(false);
+        }
       }
     };
+    
     load();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [auth.isLoaded, auth.org_id]);
 
   const sections = useMemo(() => {

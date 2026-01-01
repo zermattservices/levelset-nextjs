@@ -20,7 +20,9 @@ export default function RoadmapIndexPage() {
   const [features, setFeatures] = useState<RoadmapFeature[]>([]);
   const [stats, setStats] = useState<RoadmapStats>({ totalFeatures: 0, totalVotes: 0, inProgress: 0 });
   const [votedFeatures, setVotedFeatures] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
+  // Loading should be true until both auth is ready AND data is fetched
+  const [dataLoading, setDataLoading] = useState(true);
+  const loading = !auth.isLoaded || dataLoading;
   const [currentFilters, setCurrentFilters] = useState<FilterState>({
     search: '',
     status: 'active',
@@ -30,40 +32,51 @@ export default function RoadmapIndexPage() {
 
   // Load initial data
   useEffect(() => {
+    let isMounted = true;
     console.log('[Roadmap] useEffect triggered, auth.isLoaded:', auth.isLoaded, 'auth.id:', auth.id);
     
     const loadData = async () => {
+      // Wait for auth to be loaded
       if (!auth.isLoaded) {
-        console.log('[Roadmap] Skipping load - auth not loaded yet');
+        console.log('[Roadmap] Waiting for auth...');
         return;
       }
       
-      console.log('[Roadmap] Starting data load...');
-      setLoading(true);
+      console.log('[Roadmap] Auth ready, starting data load...');
+      setDataLoading(true);
       try {
         const [featuresData, statsData, userVotes] = await Promise.all([
           fetchFeatures('active', undefined, 'votes', undefined, auth.org_id || undefined),
           fetchStats(auth.org_id || undefined),
           fetchUserVotesForUser(auth.id),
         ]);
-        console.log('[Roadmap] Data loaded:', { featuresCount: featuresData.length, stats: statsData });
-        setFeatures(featuresData);
-        setStats(statsData);
-        setVotedFeatures(userVotes);
+        
+        if (isMounted) {
+          console.log('[Roadmap] Data loaded:', { featuresCount: featuresData.length, stats: statsData });
+          setFeatures(featuresData);
+          setStats(statsData);
+          setVotedFeatures(userVotes);
+        }
       } catch (error) {
         console.error('[Roadmap] Error loading roadmap data:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setDataLoading(false);
+        }
       }
     };
 
     loadData();
-  }, [auth.id, auth.isLoaded, auth.org_id]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [auth.isLoaded, auth.id, auth.org_id]);
 
   // Handle filter changes
   const handleFilterChange = useCallback(async (filters: FilterState) => {
     setCurrentFilters(filters);
-    setLoading(true);
+    setDataLoading(true);
     try {
       const featuresData = await fetchFeatures(
         filters.status,
@@ -76,7 +89,7 @@ export default function RoadmapIndexPage() {
     } catch (error) {
       console.error('Error filtering features:', error);
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
   }, [auth.org_id]);
 
