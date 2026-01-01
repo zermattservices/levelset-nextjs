@@ -1,6 +1,6 @@
-import { RoadmapFeature, PRIORITY_CONFIG } from '@/lib/roadmap';
+import { useState } from 'react';
+import { RoadmapFeature, PRIORITY_CONFIG, CATEGORY_MAP, CATEGORIES, STATUS_CONFIG, formatDate } from '@/lib/roadmap';
 import styles from './Roadmap.module.css';
-import Link from 'next/link';
 
 interface RoadmapBoardProps {
   sections: {
@@ -11,76 +11,207 @@ interface RoadmapBoardProps {
   }[];
 }
 
+// Helper to get display category (maps old categories to new ones)
+function getDisplayCategory(category: string): string {
+  if (CATEGORIES.includes(category)) {
+    return category;
+  }
+  return CATEGORY_MAP[category] || 'Feature';
+}
+
+// Get section class based on status
+function getSectionClass(statusKey: string): string {
+  switch (statusKey) {
+    case 'planned':
+      return styles.boardSectionPlanned;
+    case 'in_progress':
+      return styles.boardSectionInProgress;
+    case 'completed':
+      return styles.boardSectionCompleted;
+    default:
+      return '';
+  }
+}
+
 export function RoadmapBoard({ sections }: RoadmapBoardProps) {
-  const formatDate = (dateString: string) => {
+  const [selectedFeature, setSelectedFeature] = useState<RoadmapFeature | null>(null);
+
+  const formatDateShort = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric',
     });
   };
 
+  const handleCardClick = (feature: RoadmapFeature) => {
+    setSelectedFeature(feature);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedFeature(null);
+  };
+
   return (
-    <div className={styles.board}>
-      {sections.map((section) => (
-        <div key={section.statusKey} className={styles.boardSection}>
-          <div className={styles.boardSectionHeader}>
-            <span>{section.title}</span>
-            <span className={styles.boardSectionCount}>{section.count}</span>
+    <>
+      <div className={styles.board}>
+        {sections.map((section) => (
+          <div 
+            key={section.statusKey} 
+            className={`${styles.boardSection} ${getSectionClass(section.statusKey)}`}
+          >
+            <div className={styles.boardSectionHeader}>
+              <span>{section.title}</span>
+              <span className={styles.boardSectionCount}>{section.count}</span>
+            </div>
+            <div className={styles.boardCards}>
+              {section.items.map((feature) => {
+                const priorityConfig = PRIORITY_CONFIG[feature.priority];
+                const displayCategory = getDisplayCategory(feature.category);
+                return (
+                  <div 
+                    key={feature.id} 
+                    className={styles.boardCard}
+                    onClick={() => handleCardClick(feature)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        handleCardClick(feature);
+                      }
+                    }}
+                  >
+                    <div className={styles.boardCardTop}>
+                      <div className={styles.boardCardTitle}>{feature.title}</div>
+                      <span
+                        className={styles.boardPriority}
+                        style={{
+                          backgroundColor: priorityConfig.bgColor,
+                          color: priorityConfig.textColor,
+                          borderColor: priorityConfig.borderColor,
+                        }}
+                      >
+                        {priorityConfig.label}
+                      </span>
+                    </div>
+                    {feature.description && (
+                      <p className={styles.boardCardDescription}>
+                        {feature.description.slice(0, 100)}{feature.description.length > 100 ? '...' : ''}
+                      </p>
+                    )}
+                    <div className={styles.boardTagsRow}>
+                      <span className={styles.categoryTag}>{displayCategory}</span>
+                    </div>
+                    <div className={styles.boardMetaRow}>
+                      <div className={styles.boardMetaItem}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        <span>{feature.vote_count}</span>
+                      </div>
+                      <div className={styles.boardMetaItem}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                        <span>{feature.comment_count}</span>
+                      </div>
+                      <div className={styles.boardMetaItem}>
+                        <span>{formatDateShort(feature.created_at)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {section.items.length === 0 && (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#9ca3af', fontSize: '13px' }}>
+                  No items yet
+                </div>
+              )}
+            </div>
           </div>
-          <div className={styles.boardCards}>
-            {section.items.map((feature) => {
-              const priorityConfig = PRIORITY_CONFIG[feature.priority];
-              return (
-                <Link href={`/${feature.id}`} key={feature.id} className={styles.boardCard}>
-                  <div className={styles.boardCardTop}>
-                    <div className={styles.boardCardTitle}>{feature.title}</div>
-                    <span
-                      className={styles.boardPriority}
-                      style={{
-                        backgroundColor: priorityConfig.bgColor,
-                        color: priorityConfig.textColor,
-                        border: `1px solid ${priorityConfig.borderColor}`,
-                      }}
-                    >
-                      {priorityConfig.label}
-                    </span>
-                  </div>
-                  {feature.description && (
-                    <p className={styles.boardCardDescription}>{feature.description}</p>
-                  )}
-                  <div className={styles.boardTagsRow}>
-                    <span className={styles.categoryTag}>{feature.category}</span>
-                  </div>
-                  <div className={styles.boardMetaRow}>
-                    <div className={styles.boardMetaItem}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-                      </svg>
-                      <span>{feature.vote_count}</span>
-                    </div>
-                    <div className={styles.boardMetaItem}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                      </svg>
-                      <span>{feature.comment_count}</span>
-                    </div>
-                    <div className={styles.boardMetaItem}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                      </svg>
-                      <span>{formatDate(feature.created_at)}</span>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+        ))}
+      </div>
+
+      {/* Feature Detail Modal */}
+      {selectedFeature && (
+        <div className={styles.modalOverlay} onClick={handleCloseModal}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+            <button 
+              type="button" 
+              className={styles.modalCloseButton}
+              onClick={handleCloseModal}
+              aria-label="Close modal"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            <h2 className={styles.modalTitle}>{selectedFeature.title}</h2>
+            
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              <span 
+                className={styles.statusBadge}
+                style={{
+                  backgroundColor: STATUS_CONFIG[selectedFeature.status].bgColor,
+                  color: STATUS_CONFIG[selectedFeature.status].textColor,
+                  border: `1px solid ${STATUS_CONFIG[selectedFeature.status].borderColor}`,
+                }}
+              >
+                {STATUS_CONFIG[selectedFeature.status].label}
+              </span>
+              <span 
+                className={styles.boardPriority}
+                style={{
+                  backgroundColor: PRIORITY_CONFIG[selectedFeature.priority].bgColor,
+                  color: PRIORITY_CONFIG[selectedFeature.priority].textColor,
+                  borderColor: PRIORITY_CONFIG[selectedFeature.priority].borderColor,
+                }}
+              >
+                {PRIORITY_CONFIG[selectedFeature.priority].label}
+              </span>
+              <span className={styles.categoryTag}>{getDisplayCategory(selectedFeature.category)}</span>
+            </div>
+
+            {selectedFeature.description && (
+              <p style={{ 
+                fontSize: '15px', 
+                lineHeight: '1.7', 
+                color: '#4b5563', 
+                marginBottom: '20px',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {selectedFeature.description}
+              </p>
+            )}
+
+            <div style={{ 
+              display: 'flex', 
+              gap: '20px', 
+              paddingTop: '16px', 
+              borderTop: '1px solid #e5e7eb',
+              color: '#6b7280',
+              fontSize: '14px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <span><strong>{selectedFeature.vote_count}</strong> votes</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                <span><strong>{selectedFeature.comment_count}</strong> comments</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>Created {formatDate(selectedFeature.created_at)}</span>
+              </div>
+            </div>
           </div>
         </div>
-      ))}
-    </div>
+      )}
+    </>
   );
 }

@@ -32,7 +32,16 @@ import {
   deleteFeature,
   STATUS_CONFIG,
   CATEGORIES,
+  CATEGORY_MAP,
 } from '@/lib/roadmap';
+
+// Helper to get display category (maps old categories to new ones)
+function getDisplayCategory(category: string): string {
+  if (CATEGORIES.includes(category)) {
+    return category;
+  }
+  return CATEGORY_MAP[category] || 'Feature';
+}
 import styles from './FeatureRequestsPage.module.css';
 
 export function FeatureRequestsPage() {
@@ -126,7 +135,8 @@ export function FeatureRequestsPage() {
     setSelectedFeature(feature);
     setEditTitle(feature.title);
     setEditDescription(feature.description || '');
-    setEditCategory(feature.category);
+    // Map old categories to new ones so dropdown syncs correctly
+    setEditCategory(getDisplayCategory(feature.category));
     setEditStatus(feature.status);
     setEditPriority(feature.priority);
     setEditModalOpen(true);
@@ -317,7 +327,7 @@ export function FeatureRequestsPage() {
                     )}
                   </td>
                   <td>
-                    <span className={styles.categoryTag}>{feature.category}</span>
+                    <span className={styles.categoryTag}>{getDisplayCategory(feature.category)}</span>
                   </td>
                   <td>{getStatusBadge(feature.status)}</td>
                   <td className={styles.voteCount}>{feature.vote_count}</td>

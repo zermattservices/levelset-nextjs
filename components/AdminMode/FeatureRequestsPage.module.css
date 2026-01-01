@@ -83,10 +83,20 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+/* Center all headers except first (Title) */
+.table th:not(:first-child) {
+  text-align: center;
+}
+
 .table td {
   padding: 16px;
   border-bottom: 1px solid #f3f4f6;
-  vertical-align: top;
+  vertical-align: middle;
+}
+
+/* Center all cells except first (Title) */
+.table td:not(:first-child) {
+  text-align: center;
 }
 
 .table tbody tr:last-child td {
@@ -136,6 +146,7 @@
   font-size: 12px;
   font-weight: 500;
   border: 1px solid;
+  white-space: nowrap;
 }
 
 .voteCount {
