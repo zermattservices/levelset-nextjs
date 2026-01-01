@@ -12,7 +12,11 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <span 
       className={styles.statusBadge}
-      style={{ backgroundColor: config.bgColor, color: config.textColor }}
+      style={{ 
+        backgroundColor: config.bgColor, 
+        color: config.textColor,
+        border: `1px solid ${config.borderColor}`,
+      }}
     >
       <span className={styles.statusDot} style={{ backgroundColor: config.textColor }} />
       {config.label}
@@ -35,9 +39,13 @@ export function PriorityBadge({ priority }: PriorityBadgeProps) {
   return (
     <span 
       className={styles.priorityBadge}
-      style={{ backgroundColor: config.bgColor, color: config.textColor }}
+      style={{ 
+        backgroundColor: config.bgColor, 
+        color: config.textColor,
+        border: `1px solid ${config.borderColor}`,
+      }}
     >
-      {config.icon && <span>{config.icon}</span>}
+      <span className={styles.priorityDot} style={{ backgroundColor: config.textColor }} />
       {config.label}
     </span>
   );
