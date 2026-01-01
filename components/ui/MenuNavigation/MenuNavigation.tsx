@@ -18,6 +18,22 @@ import { useLocationContext } from '@/components/CodeComponents/LocationContext'
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 import { useImpersonation } from '@/lib/providers/ImpersonationProvider';
 
+// Check if we're on the roadmap subdomain
+function useIsRoadmapSubdomain(): boolean {
+  const [isRoadmap, setIsRoadmap] = React.useState(false);
+  
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsRoadmap(window.location.hostname === 'roadmap.levelset.io');
+    }
+  }, []);
+  
+  return isRoadmap;
+}
+
+// Get the app base URL (for links when on roadmap subdomain)
+const APP_BASE_URL = 'https://app.levelset.io';
+
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
@@ -33,6 +49,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const { isImpersonating, impersonatedUser } = useImpersonation();
   const { userHierarchyLevel, selectedLocationId } = useLocationContext();
   const { has } = usePermissions();
+  const isRoadmapSubdomain = useIsRoadmapSubdomain();
   const [activeMenu, setActiveMenu] = React.useState<MenuType | null>(null);
   const [isClosing, setIsClosing] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
@@ -45,6 +62,14 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const activeButtonRef = React.useRef<HTMLDivElement | null>(null);
   const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const closeAnimationTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Helper to get the correct link URL (absolute when on roadmap subdomain)
+  const getAppLink = React.useCallback((path: string) => {
+    if (isRoadmapSubdomain) {
+      return `${APP_BASE_URL}${path}`;
+    }
+    return path;
+  }, [isRoadmapSubdomain]);
 
   // When impersonating, show impersonated user's name; otherwise use props or auth
   const displayFirstName = isImpersonating && impersonatedUser
@@ -191,17 +216,31 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
       <div className={sty.navBar}>
         <div className={sty.navContent} ref={navContentRef}>
           {/* Logo */}
-          <Link href="/" className={sty.logoLink}>
-            <Image
-              className={sty.logo}
-              src="/logos/Levelset no margin.png"
-              alt="Levelset"
-              width={100}
-              height={30}
-              style={{ objectFit: 'contain', width: '100px', height: 'auto' }}
-              priority
-            />
-          </Link>
+          {isRoadmapSubdomain ? (
+            <a href={getAppLink('/')} className={sty.logoLink}>
+              <Image
+                className={sty.logo}
+                src="/logos/Levelset no margin.png"
+                alt="Levelset"
+                width={100}
+                height={30}
+                style={{ objectFit: 'contain', width: '100px', height: 'auto' }}
+                priority
+              />
+            </a>
+          ) : (
+            <Link href="/" className={sty.logoLink}>
+              <Image
+                className={sty.logo}
+                src="/logos/Levelset no margin.png"
+                alt="Levelset"
+                width={100}
+                height={30}
+                style={{ objectFit: 'contain', width: '100px', height: 'auto' }}
+                priority
+              />
+            </Link>
+          )}
 
           {/* Navigation buttons */}
           <div className={sty.navButtons} ref={navButtonsRef}>
@@ -250,7 +289,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               <LevelsetButton
                 color="softGreen"
                 size="compact"
-                link="/admin/organizations"
+                link={getAppLink('/admin/organizations')}
               >
                 <span className={sty.adminModeButton}>Admin Mode</span>
               </LevelsetButton>
@@ -332,15 +371,22 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
             <div className={sty.profileDropdownContainer} ref={profileDropdownRef}>
               <AccountCircleIcon 
                 className={sty.accountIcon} 
-                sx={{ fontSize: 32, color: '#31664a' }} 
+                sx={{ fontSize: 32, color: '#31664a', cursor: 'pointer' }} 
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
               />
               {profileDropdownOpen && canAccessOrgSettings && (
                 <div className={sty.profileDropdown}>
-                  <Link href="/org-settings" className={sty.profileDropdownItem} onClick={() => setProfileDropdownOpen(false)}>
-                    <SettingsIcon sx={{ fontSize: 18, color: '#666' }} />
-                    <span>Organization Settings</span>
-                  </Link>
+                  {isRoadmapSubdomain ? (
+                    <a href={getAppLink('/org-settings')} className={sty.profileDropdownItem} onClick={() => setProfileDropdownOpen(false)}>
+                      <SettingsIcon sx={{ fontSize: 18, color: '#666' }} />
+                      <span>Organization Settings</span>
+                    </a>
+                  ) : (
+                    <Link href="/org-settings" className={sty.profileDropdownItem} onClick={() => setProfileDropdownOpen(false)}>
+                      <SettingsIcon sx={{ fontSize: 18, color: '#666' }} />
+                      <span>Organization Settings</span>
+                    </Link>
+                  )}
                 </div>
               )}
             </div>

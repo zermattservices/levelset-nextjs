@@ -18,6 +18,21 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
+// Check if we're on the roadmap subdomain
+function useIsRoadmapSubdomain(): boolean {
+  const [isRoadmap, setIsRoadmap] = React.useState(false);
+  
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsRoadmap(window.location.hostname === 'roadmap.levelset.io');
+    }
+  }, []);
+  
+  return isRoadmap;
+}
+
+const APP_BASE_URL = 'https://app.levelset.io';
+
 export interface NavMenuItem {
   label: string;
   description: string;
@@ -107,6 +122,15 @@ export interface NavSubmenuProps {
 export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) {
   const items = menuItems[menuType];
   const isTwoColumn = menuType === 'operations';
+  const isRoadmapSubdomain = useIsRoadmapSubdomain();
+
+  // Helper to get the correct link URL
+  const getAppLink = (path: string) => {
+    if (isRoadmapSubdomain) {
+      return `${APP_BASE_URL}${path}`;
+    }
+    return path;
+  };
 
   return (
     <div
@@ -131,6 +155,21 @@ export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) 
                 </div>
                 <span className={sty.comingSoonText}>Coming soon!</span>
               </div>
+            );
+          }
+
+          // Use <a> tag with absolute URL when on roadmap subdomain
+          if (isRoadmapSubdomain) {
+            return (
+              <a key={item.label} href={getAppLink(item.href!)} className={sty.menuCard}>
+                <div className={sty.iconContainer}>
+                  {item.icon}
+                </div>
+                <div className={sty.textContainer}>
+                  <span className={sty.itemLabel}>{item.label}</span>
+                  <span className={sty.itemDescription}>{item.description}</span>
+                </div>
+              </a>
             );
           }
 
