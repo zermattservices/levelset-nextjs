@@ -432,3 +432,36 @@ export async function deleteFeature(featureId: string): Promise<boolean> {
   
   return true;
 }
+
+// Create a new feature (for admin)
+export async function createFeatureAdmin(
+  title: string,
+  description: string,
+  category: string,
+  status: RoadmapFeature['status'],
+  priority: RoadmapFeature['priority']
+): Promise<RoadmapFeature | null> {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('roadmap_features')
+    .insert({
+      title: title.trim(),
+      description: description.trim(),
+      category,
+      status,
+      priority,
+      vote_count: 0,
+      comment_count: 0,
+      is_public: status !== 'submitted',
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating feature:', error);
+    return null;
+  }
+  
+  return data;
+}

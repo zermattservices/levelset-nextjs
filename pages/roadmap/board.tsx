@@ -71,9 +71,9 @@ export default function RoadmapBoardPage({ auth: authProp }: RoadmapBoardPagePro
   }, [allFeatures]);
 
   return (
-    <RoadmapLayout subHeaderMode="board" activeTab="roadmap" title="Product Roadmap">
+    <RoadmapLayout subHeaderMode="board" activeTab="roadmap" title="Feature Roadmap">
       <div className={styles.hero} style={{ paddingBottom: 32 }}>
-        <h1 className={styles.heroTitle} style={{ fontSize: 36, marginBottom: 12 }}>Product Roadmap</h1>
+        <h1 className={styles.heroTitle} style={{ fontSize: 36, marginBottom: 12 }}>Feature Roadmap</h1>
         <p className={styles.heroSubtitle} style={{ marginBottom: 0 }}>
           Track the progress of features from planning to completion.
         </p>

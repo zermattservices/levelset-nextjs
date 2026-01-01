@@ -8,41 +8,44 @@ import {
   CircularProgress, 
   TextField, 
   InputAdornment,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   IconButton,
   Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddIcon from '@mui/icons-material/Add';
 import { 
   RoadmapFeature, 
   fetchAllFeaturesAdmin, 
   updateFeature, 
   approveFeature, 
   deleteFeature,
+  createFeatureAdmin,
   STATUS_CONFIG,
   CATEGORIES,
-  CATEGORY_MAP,
 } from '@/lib/roadmap';
-
-// Helper to get display category (maps old categories to new ones)
-function getDisplayCategory(category: string): string {
-  if (CATEGORIES.includes(category)) {
-    return category;
-  }
-  return CATEGORY_MAP[category] || 'Feature';
-}
 import styles from './FeatureRequestsPage.module.css';
+
+const STATUSES = [
+  { value: 'submitted', label: 'Pending Review' },
+  { value: 'idea', label: 'Idea' },
+  { value: 'planned', label: 'Planned' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'completed', label: 'Complete' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
+
+const PRIORITIES = [
+  { value: 'critical', label: 'Critical' },
+  { value: 'high', label: 'High' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'low', label: 'Low' },
+];
 
 export function FeatureRequestsPage() {
   const [features, setFeatures] = React.useState<RoadmapFeature[]>([]);
@@ -55,6 +58,7 @@ export function FeatureRequestsPage() {
   const [approveModalOpen, setApproveModalOpen] = React.useState(false);
   const [editModalOpen, setEditModalOpen] = React.useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+  const [createModalOpen, setCreateModalOpen] = React.useState(false);
   const [selectedFeature, setSelectedFeature] = React.useState<RoadmapFeature | null>(null);
   const [approveStatus, setApproveStatus] = React.useState<string>('idea');
   
@@ -64,6 +68,13 @@ export function FeatureRequestsPage() {
   const [editCategory, setEditCategory] = React.useState('');
   const [editStatus, setEditStatus] = React.useState('');
   const [editPriority, setEditPriority] = React.useState('');
+  
+  // Create form state
+  const [createTitle, setCreateTitle] = React.useState('');
+  const [createDescription, setCreateDescription] = React.useState('');
+  const [createCategory, setCreateCategory] = React.useState('Feature');
+  const [createStatus, setCreateStatus] = React.useState('idea');
+  const [createPriority, setCreatePriority] = React.useState('medium');
   
   const [actionLoading, setActionLoading] = React.useState(false);
 
@@ -135,8 +146,8 @@ export function FeatureRequestsPage() {
     setSelectedFeature(feature);
     setEditTitle(feature.title);
     setEditDescription(feature.description || '');
-    // Map old categories to new ones so dropdown syncs correctly
-    setEditCategory(getDisplayCategory(feature.category));
+    // Use raw category from DB
+    setEditCategory(feature.category);
     setEditStatus(feature.status);
     setEditPriority(feature.priority);
     setEditModalOpen(true);
@@ -156,11 +167,43 @@ export function FeatureRequestsPage() {
       });
       if (updated) {
         setFeatures(prev => prev.map(f => f.id === updated.id ? updated : f));
+        setEditModalOpen(false);
+        setSelectedFeature(null);
       }
-      setEditModalOpen(false);
-      setSelectedFeature(null);
     } catch (error) {
       console.error('Error updating feature:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle create
+  const handleCreateClick = () => {
+    setCreateTitle('');
+    setCreateDescription('');
+    setCreateCategory('Feature');
+    setCreateStatus('idea');
+    setCreatePriority('medium');
+    setCreateModalOpen(true);
+  };
+
+  const handleCreateConfirm = async () => {
+    if (!createTitle.trim()) return;
+    setActionLoading(true);
+    try {
+      const newFeature = await createFeatureAdmin(
+        createTitle,
+        createDescription,
+        createCategory,
+        createStatus as RoadmapFeature['status'],
+        createPriority as RoadmapFeature['priority']
+      );
+      if (newFeature) {
+        setFeatures(prev => [newFeature, ...prev]);
+        setCreateModalOpen(false);
+      }
+    } catch (error) {
+      console.error('Error creating feature:', error);
     } finally {
       setActionLoading(false);
     }
@@ -213,6 +256,14 @@ export function FeatureRequestsPage() {
     );
   };
 
+  // Get unique categories from features (including non-standard ones)
+  const uniqueCategories = React.useMemo(() => {
+    const cats = new Set<string>();
+    features.forEach(f => cats.add(f.category));
+    CATEGORIES.forEach(c => cats.add(c));
+    return Array.from(cats).sort();
+  }, [features]);
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -225,10 +276,16 @@ export function FeatureRequestsPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Feature Requests</h1>
-        <p className={styles.subtitle}>
-          Manage and approve user-submitted feature requests
-        </p>
+        <div>
+          <h1 className={styles.title}>Feature Requests</h1>
+          <p className={styles.subtitle}>
+            Manage and approve user-submitted feature requests
+          </p>
+        </div>
+        <button className={styles.createButton} onClick={handleCreateClick}>
+          <AddIcon fontSize="small" />
+          Create Feature
+        </button>
       </div>
 
       {/* Filters */}
@@ -248,36 +305,27 @@ export function FeatureRequestsPage() {
           sx={{ minWidth: 250 }}
         />
         
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={statusFilter}
-            label="Status"
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <MenuItem value="all">All Statuses</MenuItem>
-            <MenuItem value="submitted">Pending Review</MenuItem>
-            <MenuItem value="idea">Idea</MenuItem>
-            <MenuItem value="planned">Planned</MenuItem>
-            <MenuItem value="in_progress">In Progress</MenuItem>
-            <MenuItem value="completed">Complete</MenuItem>
-            <MenuItem value="cancelled">Cancelled</MenuItem>
-          </Select>
-        </FormControl>
+        <select
+          className={styles.filterSelect}
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="all">All Statuses</option>
+          {STATUSES.map(s => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
         
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Category</InputLabel>
-          <Select
-            value={categoryFilter}
-            label="Category"
-            onChange={(e) => setCategoryFilter(e.target.value)}
-          >
-            <MenuItem value="all">All Categories</MenuItem>
-            {CATEGORIES.map(cat => (
-              <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <select
+          className={styles.filterSelect}
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+        >
+          <option value="all">All Categories</option>
+          {uniqueCategories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
       </div>
 
       {/* Stats */}
@@ -327,7 +375,7 @@ export function FeatureRequestsPage() {
                     )}
                   </td>
                   <td>
-                    <span className={styles.categoryTag}>{getDisplayCategory(feature.category)}</span>
+                    <span className={styles.categoryTag}>{feature.category}</span>
                   </td>
                   <td>{getStatusBadge(feature.status)}</td>
                   <td className={styles.voteCount}>{feature.vote_count}</td>
@@ -379,110 +427,196 @@ export function FeatureRequestsPage() {
           <p style={{ marginBottom: 16 }}>
             Select the status for this feature after approval:
           </p>
-          <FormControl fullWidth>
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={approveStatus}
-              label="Status"
-              onChange={(e) => setApproveStatus(e.target.value)}
-            >
-              <MenuItem value="idea">Idea</MenuItem>
-              <MenuItem value="planned">Planned</MenuItem>
-              <MenuItem value="in_progress">In Progress</MenuItem>
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setApproveModalOpen(false)} disabled={actionLoading}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleApproveConfirm} 
-            variant="contained" 
-            disabled={actionLoading}
-            sx={{ backgroundColor: '#31664a', '&:hover': { backgroundColor: '#285840' } }}
+          <select
+            className={styles.modalSelect}
+            value={approveStatus}
+            onChange={(e) => setApproveStatus(e.target.value)}
           >
-            {actionLoading ? 'Approving...' : 'Approve'}
-          </Button>
-        </DialogActions>
+            <option value="idea">Idea</option>
+            <option value="planned">Planned</option>
+            <option value="in_progress">In Progress</option>
+          </select>
+          <div className={styles.modalActions}>
+            <button 
+              className={styles.cancelButton} 
+              onClick={() => setApproveModalOpen(false)} 
+              disabled={actionLoading}
+            >
+              Cancel
+            </button>
+            <button 
+              className={styles.primaryButton}
+              onClick={handleApproveConfirm}
+              disabled={actionLoading}
+            >
+              {actionLoading ? 'Approving...' : 'Approve'}
+            </button>
+          </div>
+        </DialogContent>
       </Dialog>
 
       {/* Edit Modal */}
       <Dialog open={editModalOpen} onClose={() => setEditModalOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Edit Feature</DialogTitle>
         <DialogContent>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 8 }}>
-            <TextField
-              label="Title"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Description"
-              value={editDescription}
-              onChange={(e) => setEditDescription(e.target.value)}
-              multiline
-              rows={3}
-              fullWidth
-            />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <FormControl fullWidth>
-                <InputLabel>Category</InputLabel>
-                <Select
+          <div className={styles.modalForm}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Title</label>
+              <input
+                type="text"
+                className={styles.modalInput}
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Description</label>
+              <textarea
+                className={styles.modalTextarea}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Category</label>
+                <select
+                  className={styles.modalSelect}
                   value={editCategory}
-                  label="Category"
                   onChange={(e) => setEditCategory(e.target.value)}
                 >
-                  {CATEGORIES.map(cat => (
-                    <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                  {uniqueCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
                   ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Status</label>
+                <select
+                  className={styles.modalSelect}
                   value={editStatus}
-                  label="Status"
                   onChange={(e) => setEditStatus(e.target.value)}
                 >
-                  <MenuItem value="submitted">Pending Review</MenuItem>
-                  <MenuItem value="idea">Idea</MenuItem>
-                  <MenuItem value="planned">Planned</MenuItem>
-                  <MenuItem value="in_progress">In Progress</MenuItem>
-                  <MenuItem value="completed">Complete</MenuItem>
-                  <MenuItem value="cancelled">Cancelled</MenuItem>
-                </Select>
-              </FormControl>
+                  {STATUSES.map(s => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <FormControl fullWidth>
-              <InputLabel>Priority</InputLabel>
-              <Select
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Priority</label>
+              <select
+                className={styles.modalSelect}
                 value={editPriority}
-                label="Priority"
                 onChange={(e) => setEditPriority(e.target.value)}
               >
-                <MenuItem value="critical">Critical</MenuItem>
-                <MenuItem value="high">High</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="low">Low</MenuItem>
-              </Select>
-            </FormControl>
+                {PRIORITIES.map(p => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className={styles.modalActions}>
+            <button 
+              className={styles.cancelButton} 
+              onClick={() => setEditModalOpen(false)} 
+              disabled={actionLoading}
+            >
+              Cancel
+            </button>
+            <button 
+              className={styles.primaryButton}
+              onClick={handleEditConfirm}
+              disabled={actionLoading}
+            >
+              {actionLoading ? 'Saving...' : 'Save Changes'}
+            </button>
           </div>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditModalOpen(false)} disabled={actionLoading}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleEditConfirm} 
-            variant="contained" 
-            disabled={actionLoading}
-            sx={{ backgroundColor: '#31664a', '&:hover': { backgroundColor: '#285840' } }}
-          >
-            {actionLoading ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </DialogActions>
+      </Dialog>
+
+      {/* Create Modal */}
+      <Dialog open={createModalOpen} onClose={() => setCreateModalOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Create Feature</DialogTitle>
+        <DialogContent>
+          <div className={styles.modalForm}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Title</label>
+              <input
+                type="text"
+                className={styles.modalInput}
+                value={createTitle}
+                onChange={(e) => setCreateTitle(e.target.value)}
+                placeholder="Enter feature title"
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Description</label>
+              <textarea
+                className={styles.modalTextarea}
+                value={createDescription}
+                onChange={(e) => setCreateDescription(e.target.value)}
+                rows={3}
+                placeholder="Describe the feature..."
+              />
+            </div>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Category</label>
+                <select
+                  className={styles.modalSelect}
+                  value={createCategory}
+                  onChange={(e) => setCreateCategory(e.target.value)}
+                >
+                  {CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Status</label>
+                <select
+                  className={styles.modalSelect}
+                  value={createStatus}
+                  onChange={(e) => setCreateStatus(e.target.value)}
+                >
+                  {STATUSES.map(s => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Priority</label>
+              <select
+                className={styles.modalSelect}
+                value={createPriority}
+                onChange={(e) => setCreatePriority(e.target.value)}
+              >
+                {PRIORITIES.map(p => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className={styles.modalActions}>
+            <button 
+              className={styles.cancelButton} 
+              onClick={() => setCreateModalOpen(false)} 
+              disabled={actionLoading}
+            >
+              Cancel
+            </button>
+            <button 
+              className={styles.primaryButton}
+              onClick={handleCreateConfirm}
+              disabled={actionLoading || !createTitle.trim()}
+            >
+              {actionLoading ? 'Creating...' : 'Create Feature'}
+            </button>
+          </div>
+        </DialogContent>
       </Dialog>
 
       {/* Delete Modal */}
@@ -494,20 +628,23 @@ export function FeatureRequestsPage() {
           <p style={{ color: '#dc2626', marginTop: 16, fontSize: 14 }}>
             This action cannot be undone.
           </p>
+          <div className={styles.modalActions}>
+            <button 
+              className={styles.cancelButton} 
+              onClick={() => setDeleteModalOpen(false)} 
+              disabled={actionLoading}
+            >
+              Cancel
+            </button>
+            <button 
+              className={styles.deleteButton}
+              onClick={handleDeleteConfirm}
+              disabled={actionLoading}
+            >
+              {actionLoading ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteModalOpen(false)} disabled={actionLoading}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleDeleteConfirm} 
-            variant="contained" 
-            color="error"
-            disabled={actionLoading}
-          >
-            {actionLoading ? 'Deleting...' : 'Delete'}
-          </Button>
-        </DialogActions>
       </Dialog>
     </div>
   );

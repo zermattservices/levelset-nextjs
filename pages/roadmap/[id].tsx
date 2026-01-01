@@ -157,11 +157,15 @@ export default function FeatureDetailPage() {
             <p className={styles.detailDescription}>{feature.description}</p>
           )}
           
-          {/* Author Info - FormFlow style */}
+          {/* Author Info - Levelset branding */}
           <div className={styles.authorInfo}>
-            <div className={styles.authorAvatar}>A</div>
+            <img 
+              src="/logos/Levelset no margin.png" 
+              alt="Levelset" 
+              className={styles.authorAvatarImg}
+            />
             <div className={styles.authorDetails}>
-              <span className={styles.authorName}>Anonymous User</span>
+              <span className={styles.authorName}>Levelset</span>
               <span className={styles.authorDate}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />

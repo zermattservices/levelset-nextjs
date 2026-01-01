@@ -1,22 +1,12 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { RoadmapFeature, isPopular, STATUS_CONFIG, CATEGORY_MAP, CATEGORIES } from '@/lib/roadmap';
+import { RoadmapFeature, isPopular, STATUS_CONFIG } from '@/lib/roadmap';
 import styles from './Roadmap.module.css';
 
 interface FeatureCardProps {
   feature: RoadmapFeature;
   hasVoted: boolean;
   onVote: (featureId: string) => void;
-}
-
-// Helper to get display category (maps old categories to new ones)
-function getDisplayCategory(category: string): string {
-  // If it's already a valid category, use it
-  if (CATEGORIES.includes(category)) {
-    return category;
-  }
-  // Otherwise, map it to a valid category
-  return CATEGORY_MAP[category] || 'Feature';
 }
 
 export default function FeatureCard({ feature, hasVoted, onVote }: FeatureCardProps) {
@@ -38,7 +28,6 @@ export default function FeatureCard({ feature, hasVoted, onVote }: FeatureCardPr
 
   const statusConfig = STATUS_CONFIG[feature.status];
   const popular = isPopular(feature.vote_count);
-  const displayCategory = getDisplayCategory(feature.category);
 
   return (
     <div className={styles.featureCard} onClick={handleCardClick}>
@@ -70,8 +59,8 @@ export default function FeatureCard({ feature, hasVoted, onVote }: FeatureCardPr
           <p className={styles.featureCardDescription}>{truncatedDescription}</p>
         )}
         
-        {/* Category tag */}
-        <span className={styles.categoryTag}>{displayCategory}</span>
+        {/* Category tag - show raw category from DB */}
+        <span className={styles.categoryTag}>{feature.category}</span>
       </div>
       
       {/* Simple upvote button - FormFlow style */}

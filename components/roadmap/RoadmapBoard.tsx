@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RoadmapFeature, PRIORITY_CONFIG, CATEGORY_MAP, CATEGORIES, STATUS_CONFIG, formatDate } from '@/lib/roadmap';
+import { RoadmapFeature, PRIORITY_CONFIG, STATUS_CONFIG, formatDate } from '@/lib/roadmap';
 import styles from './Roadmap.module.css';
 
 interface RoadmapBoardProps {
@@ -9,14 +9,6 @@ interface RoadmapBoardProps {
     count: number;
     items: RoadmapFeature[];
   }[];
-}
-
-// Helper to get display category (maps old categories to new ones)
-function getDisplayCategory(category: string): string {
-  if (CATEGORIES.includes(category)) {
-    return category;
-  }
-  return CATEGORY_MAP[category] || 'Feature';
 }
 
 // Get section class based on status
@@ -66,7 +58,6 @@ export function RoadmapBoard({ sections }: RoadmapBoardProps) {
             <div className={styles.boardCards}>
               {section.items.map((feature) => {
                 const priorityConfig = PRIORITY_CONFIG[feature.priority];
-                const displayCategory = getDisplayCategory(feature.category);
                 return (
                   <div 
                     key={feature.id} 
@@ -99,7 +90,7 @@ export function RoadmapBoard({ sections }: RoadmapBoardProps) {
                       </p>
                     )}
                     <div className={styles.boardTagsRow}>
-                      <span className={styles.categoryTag}>{displayCategory}</span>
+                      <span className={styles.categoryTag}>{feature.category}</span>
                     </div>
                     <div className={styles.boardMetaRow}>
                       <div className={styles.boardMetaItem}>
@@ -170,7 +161,7 @@ export function RoadmapBoard({ sections }: RoadmapBoardProps) {
               >
                 {PRIORITY_CONFIG[selectedFeature.priority].label}
               </span>
-              <span className={styles.categoryTag}>{getDisplayCategory(selectedFeature.category)}</span>
+              <span className={styles.categoryTag}>{selectedFeature.category}</span>
             </div>
 
             {selectedFeature.description && (

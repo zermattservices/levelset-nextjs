@@ -17,7 +17,7 @@ export default function FeatureDetail({ feature, hasVoted, onVote }: FeatureDeta
       <div className={styles.detailTitleContent}>
         <h1 className={styles.detailTitle}>{feature.title}</h1>
         <div className={styles.detailBadges}>
-          {/* Status Badge */}
+          {/* Status Badge with small dot */}
           <span 
             className={styles.statusBadge}
             style={{
@@ -33,7 +33,7 @@ export default function FeatureDetail({ feature, hasVoted, onVote }: FeatureDeta
             {statusConfig.label}
           </span>
           
-          {/* Priority Badge (only show if critical or high) */}
+          {/* Priority Badge (no dot) - only show if critical or high */}
           {(feature.priority === 'critical' || feature.priority === 'high') && (
             <span 
               className={styles.priorityBadge}
@@ -43,15 +43,11 @@ export default function FeatureDetail({ feature, hasVoted, onVote }: FeatureDeta
                 border: `1px solid ${priorityConfig.borderColor}`,
               }}
             >
-              <span 
-                className={styles.priorityDot}
-                style={{ backgroundColor: priorityConfig.textColor }}
-              />
               {priorityConfig.label}
             </span>
           )}
           
-          {/* Category Tag */}
+          {/* Category Tag - show raw category from DB */}
           <span className={styles.categoryTag}>{feature.category}</span>
         </div>
       </div>
@@ -157,15 +153,15 @@ export function FeatureSidebar({ feature }: FeatureSidebarProps) {
         </div>
         <div className={styles.detailsList}>
           <div className={styles.detailItem}>
-            <span className={styles.detailItemLabel}>Category</span>
+            <span className={styles.detailItemLabel}>CATEGORY</span>
             <span className={styles.detailItemValue}>{feature.category}</span>
           </div>
           <div className={styles.detailItem}>
-            <span className={styles.detailItemLabel}>Created</span>
+            <span className={styles.detailItemLabel}>CREATED</span>
             <span className={styles.detailItemValue}>{formatDate(feature.created_at)}</span>
           </div>
-          <div className={styles.detailItem}>
-            <span className={styles.detailItemLabel}>Status</span>
+          <div className={styles.detailItemInline}>
+            <span className={styles.detailItemLabel}>STATUS</span>
             <span 
               className={styles.statusBadge}
               style={{
@@ -173,18 +169,18 @@ export function FeatureSidebar({ feature }: FeatureSidebarProps) {
                 color: statusConfig.textColor,
                 border: `1px solid ${statusConfig.borderColor}`,
                 fontSize: '12px',
-                padding: '4px 8px',
+                padding: '4px 10px',
               }}
             >
               <span 
                 className={styles.statusDot}
-                style={{ backgroundColor: statusConfig.textColor, width: '5px', height: '5px' }}
+                style={{ backgroundColor: statusConfig.textColor }}
               />
               {statusConfig.label}
             </span>
           </div>
-          <div className={styles.detailItem}>
-            <span className={styles.detailItemLabel}>Priority</span>
+          <div className={styles.detailItemInline}>
+            <span className={styles.detailItemLabel}>PRIORITY</span>
             <span 
               className={styles.priorityBadge}
               style={{
@@ -192,13 +188,9 @@ export function FeatureSidebar({ feature }: FeatureSidebarProps) {
                 color: priorityConfig.textColor,
                 border: `1px solid ${priorityConfig.borderColor}`,
                 fontSize: '12px',
-                padding: '4px 8px',
+                padding: '4px 10px',
               }}
             >
-              <span 
-                className={styles.priorityDot}
-                style={{ backgroundColor: priorityConfig.textColor, width: '5px', height: '5px' }}
-              />
               {priorityConfig.label}
             </span>
           </div>
