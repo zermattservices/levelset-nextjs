@@ -13,10 +13,16 @@ import {
   fetchUserVotesForUser,
   toggleVote,
 } from '@/lib/roadmap';
-import { useAuth } from '@/lib/providers/AuthProvider';
+import { useAuth, AuthData } from '@/lib/providers/AuthProvider';
 
-export default function RoadmapIndexPage() {
-  const auth = useAuth();
+interface RoadmapIndexPageProps {
+  auth?: AuthData;
+}
+
+export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPageProps) {
+  // Use auth from props if available (passed from layout), otherwise use hook
+  const authFromHook = useAuth();
+  const auth = authProp || authFromHook;
   const [features, setFeatures] = useState<RoadmapFeature[]>([]);
   const [stats, setStats] = useState<RoadmapStats>({ totalFeatures: 0, totalVotes: 0, inProgress: 0 });
   const [votedFeatures, setVotedFeatures] = useState<Set<string>>(new Set());

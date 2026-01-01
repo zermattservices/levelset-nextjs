@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { RoadmapLayout } from '@/components/roadmap';
 import { RoadmapBoard } from '@/components/roadmap/RoadmapBoard';
 import { RoadmapFeature, fetchFeatures } from '@/lib/roadmap';
-import { useAuth } from '@/lib/providers/AuthProvider';
+import { useAuth, AuthData } from '@/lib/providers/AuthProvider';
 import styles from '@/components/roadmap/Roadmap.module.css';
 
 type StatusKey = RoadmapFeature['status'];
@@ -13,23 +13,36 @@ const STATUS_SECTIONS: { title: string; key: StatusKey }[] = [
   { title: 'Completed', key: 'completed' },
 ];
 
-export default function RoadmapBoardPage() {
-  const auth = useAuth();
+interface RoadmapBoardPageProps {
+  auth?: AuthData;
+}
+
+export default function RoadmapBoardPage({ auth: authProp }: RoadmapBoardPageProps) {
+  // Use auth from props if available (passed from layout), otherwise use hook
+  const authFromHook = useAuth();
+  const auth = authProp || authFromHook;
   const [allFeatures, setAllFeatures] = useState<RoadmapFeature[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const loading = !auth.isLoaded || dataLoading;
+  
+  // Use refs to track loading state
+  const hasLoadedRef = useRef(false);
+  const prevOrgIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
+    // If auth isn't loaded yet, wait
+    if (!auth.isLoaded) {
+      return;
+    }
+    
+    // If we've already loaded and org hasn't changed, skip
+    if (hasLoadedRef.current && prevOrgIdRef.current === auth.org_id) {
+      return;
+    }
+    
     let isMounted = true;
-    console.log('[RoadmapBoard] useEffect triggered, auth.isLoaded:', auth.isLoaded);
     
     const load = async () => {
-      if (!auth.isLoaded) {
-        console.log('[RoadmapBoard] Waiting for auth...');
-        return;
-      }
-      
-      console.log('[RoadmapBoard] Starting data load...');
       setDataLoading(true);
       try {
         // Fetch all three statuses; we can fetch wide and filter client-side
@@ -40,11 +53,12 @@ export default function RoadmapBoardPage() {
         ]);
         
         if (isMounted) {
-          console.log('[RoadmapBoard] Data loaded:', { planned: planned.length, inProgress: inProgress.length, completed: completed.length });
           setAllFeatures([...planned, ...inProgress, ...completed]);
+          hasLoadedRef.current = true;
+          prevOrgIdRef.current = auth.org_id;
         }
       } catch (e) {
-        console.error('[RoadmapBoard] Error loading roadmap board', e);
+        console.error('Error loading roadmap board', e);
       } finally {
         if (isMounted) {
           setDataLoading(false);

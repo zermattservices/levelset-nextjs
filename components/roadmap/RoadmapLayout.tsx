@@ -80,19 +80,18 @@ function RoadmapLayoutContent({
     return () => clearTimeout(timeout);
   }, [auth.isLoaded, auth.authUser, router, isSettingSession]);
 
-  // Debug auth state
-  console.log('[RoadmapLayout] Auth state:', { 
-    isLoaded: auth.isLoaded, 
-    hasUser: !!auth.authUser,
-    userId: auth.id,
-    isSettingSession,
-    hasToken: !!router.query.token 
-  });
-
   // Show loading screen while auth is loading, setting session, or redirecting
   if (!auth.isLoaded || (!auth.authUser && !isSettingSession && !router.query.token)) {
     return <AuthLoadingScreen />;
   }
+
+  // Clone children with auth prop for direct access
+  const childrenWithAuth = React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+      return React.cloneElement(child as React.ReactElement<any>, { auth });
+    }
+    return child;
+  });
 
   return (
     <div className={styles.pageWrapper}>
@@ -101,7 +100,7 @@ function RoadmapLayoutContent({
       </div>
       <RoadmapSubHeader mode={subHeaderMode} activeTab={activeTab} />
       <div className={styles.mainContent}>
-        {children}
+        {childrenWithAuth}
       </div>
     </div>
   );
