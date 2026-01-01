@@ -24,11 +24,12 @@ function RoadmapLayoutContent({
   const router = useRouter();
   const auth = useAuth();
 
-  // Redirect unauthenticated users to login
+  // Redirect unauthenticated users to login on app subdomain
   React.useEffect(() => {
     if (auth.isLoaded && !auth.authUser) {
       const currentPath = router.asPath || router.pathname;
-      router.push(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
+      const redirectUrl = `https://app.levelset.io/auth/login?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
+      window.location.href = redirectUrl;
     }
   }, [auth.isLoaded, auth.authUser, router]);
 
