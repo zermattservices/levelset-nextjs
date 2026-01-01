@@ -154,7 +154,7 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
     initializeFromSharedCookies().then((sessionFromCookies) => {
       // Set up auth state change listener
       const {
-        data: { sub },
+        data: { subscription: sub },
       } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === "SIGNED_OUT" || event === "USER_DELETED") {
           setCurrentUser(null);
