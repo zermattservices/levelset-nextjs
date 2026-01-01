@@ -4,6 +4,8 @@ import Image from 'next/image';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SettingsIcon from '@mui/icons-material/Settings';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import sty from './MenuNavigation.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
@@ -254,52 +256,61 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               </LevelsetButton>
             )}
 
-            {/* Help dropdown */}
-            <div className={sty.helpDropdownContainer} ref={helpDropdownRef}>
+            {/* Help dropdown - same styling as nav menu buttons */}
+            <div 
+              className={sty.navButtonContainer}
+              ref={helpDropdownRef}
+              onMouseEnter={() => setHelpDropdownOpen(true)}
+              onMouseLeave={() => setHelpDropdownOpen(false)}
+            >
               <button 
-                className={sty.helpButton}
-                onClick={() => setHelpDropdownOpen(!helpDropdownOpen)}
+                className={classNames(sty.navButton, helpDropdownOpen && sty.navButtonActive)}
               >
-                <HelpOutlineIcon sx={{ fontSize: 18 }} />
-                <span>Need Help?</span>
+                <HelpOutlineIcon sx={{ fontSize: 18, color: helpDropdownOpen ? '#31664a' : '#6b7280' }} />
+                <span className={sty.navButtonText}>Need Help?</span>
                 <KeyboardArrowDownIcon 
                   sx={{ 
-                    fontSize: 16, 
-                    marginLeft: '-2px',
-                    transition: 'transform 0.2s ease',
+                    fontSize: 18, 
+                    color: helpDropdownOpen ? '#31664a' : '#6b7280',
+                    transition: 'transform 0.2s ease, color 0.15s ease',
                     transform: helpDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                   }} 
                 />
               </button>
+              
+              {/* Help submenu - same structure as NavSubmenu */}
               {helpDropdownOpen && (
-                <div className={sty.helpDropdown}>
-                  <a 
-                    href="https://docs.levelset.io" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className={sty.helpDropdownItem}
-                    onClick={() => setHelpDropdownOpen(false)}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                    </svg>
-                    <span>Help Center</span>
-                  </a>
-                  <a 
-                    href="https://roadmap.levelset.io" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className={sty.helpDropdownItem}
-                    onClick={() => setHelpDropdownOpen(false)}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="12 2 2 7 12 12 22 7 12 2" />
-                      <polyline points="2 17 12 22 22 17" />
-                      <polyline points="2 12 12 17 22 12" />
-                    </svg>
-                    <span>Roadmap</span>
-                  </a>
+                <div className={sty.submenuContainer} style={{ transform: 'translateX(-50%)' }}>
+                  <div className={sty.helpSubmenu}>
+                    <a 
+                      href="https://docs.levelset.io" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={sty.helpMenuCard}
+                    >
+                      <div className={sty.helpIconContainer}>
+                        <MenuBookOutlinedIcon sx={{ fontSize: 22 }} />
+                      </div>
+                      <div className={sty.helpTextContainer}>
+                        <span className={sty.helpItemLabel}>Help Center</span>
+                        <span className={sty.helpItemDescription}>Browse documentation and guides</span>
+                      </div>
+                    </a>
+                    <a 
+                      href="https://roadmap.levelset.io" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={sty.helpMenuCard}
+                    >
+                      <div className={sty.helpIconContainer}>
+                        <MapOutlinedIcon sx={{ fontSize: 22 }} />
+                      </div>
+                      <div className={sty.helpTextContainer}>
+                        <span className={sty.helpItemLabel}>Roadmap</span>
+                        <span className={sty.helpItemDescription}>Vote on features and report bugs</span>
+                      </div>
+                    </a>
+                  </div>
                 </div>
               )}
             </div>
