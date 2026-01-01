@@ -102,8 +102,18 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
 
   // Handle voting
   const handleVote = useCallback(async (featureId: string) => {
+    console.log('[Roadmap] handleVote called for feature:', featureId);
+    console.log('[Roadmap] auth.id:', auth.id);
+    
+    if (!auth.id) {
+      console.warn('[Roadmap] User not authenticated, cannot vote');
+      // Redirect to login
+      const currentPath = window.location.pathname + window.location.search;
+      window.location.href = `https://app.levelset.io/auth/login?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
+      return;
+    }
+    
     const hasVoted = votedFeatures.has(featureId);
-    if (!auth.id) return;
     
     // Optimistic update
     setVotedFeatures(prev => {

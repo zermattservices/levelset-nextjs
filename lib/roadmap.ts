@@ -303,11 +303,11 @@ export const PRIORITY_CONFIG = {
   low: { label: 'Low', bgColor: '#f3f4f6', textColor: '#9ca3af', borderColor: '#e5e7eb' },
 };
 
-// Categories matching FormFlow
+// Categories for feature requests
 export const CATEGORIES = [
   'Feature',
-  'Improvement', 
   'Bug Fix',
+  'Improvement',
   'Integration',
   'Performance',
   'UI/UX'
@@ -439,7 +439,8 @@ export async function createFeatureAdmin(
   description: string,
   category: string,
   status: RoadmapFeature['status'],
-  priority: RoadmapFeature['priority']
+  priority: RoadmapFeature['priority'],
+  createdBy?: string | null
 ): Promise<RoadmapFeature | null> {
   const supabase = createSupabaseClient();
   
@@ -454,6 +455,7 @@ export async function createFeatureAdmin(
       vote_count: 0,
       comment_count: 0,
       is_public: status !== 'submitted',
+      created_by: createdBy || null,
     })
     .select()
     .single();
@@ -464,4 +466,29 @@ export async function createFeatureAdmin(
   }
   
   return data;
+}
+
+// Fetch all app users for creator dropdown
+export interface AppUser {
+  id: string;
+  auth_user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+}
+
+export async function fetchAllUsers(): Promise<AppUser[]> {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('app_users')
+    .select('id, auth_user_id, first_name, last_name, email')
+    .order('first_name', { ascending: true });
+  
+  if (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
+  
+  return data || [];
 }

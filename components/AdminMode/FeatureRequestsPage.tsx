@@ -26,6 +26,8 @@ import {
   approveFeature, 
   deleteFeature,
   createFeatureAdmin,
+  fetchAllUsers,
+  AppUser,
   STATUS_CONFIG,
   CATEGORIES,
 } from '@/lib/roadmap';
@@ -47,8 +49,12 @@ const PRIORITIES = [
   { value: 'low', label: 'Low' },
 ];
 
+// Special value for Levelset as creator
+const LEVELSET_CREATOR = { id: 'levelset', label: 'Levelset' };
+
 export function FeatureRequestsPage() {
   const [features, setFeatures] = React.useState<RoadmapFeature[]>([]);
+  const [users, setUsers] = React.useState<AppUser[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState<string>('all');
@@ -75,28 +81,67 @@ export function FeatureRequestsPage() {
   const [createCategory, setCreateCategory] = React.useState('Feature');
   const [createStatus, setCreateStatus] = React.useState('idea');
   const [createPriority, setCreatePriority] = React.useState('medium');
+  const [createCreator, setCreateCreator] = React.useState<string>('levelset');
+  const [creatorSearch, setCreatorSearch] = React.useState('');
+  const [showCreatorDropdown, setShowCreatorDropdown] = React.useState(false);
   
   const [actionLoading, setActionLoading] = React.useState(false);
+  const creatorDropdownRef = React.useRef<HTMLDivElement>(null);
 
-  // Fetch features
+  // Fetch features and users
   React.useEffect(() => {
-    async function loadFeatures() {
+    async function loadData() {
       setLoading(true);
       try {
-        const data = await fetchAllFeaturesAdmin();
-        setFeatures(data);
+        const [featuresData, usersData] = await Promise.all([
+          fetchAllFeaturesAdmin(),
+          fetchAllUsers(),
+        ]);
+        setFeatures(featuresData);
+        setUsers(usersData);
       } catch (error) {
-        console.error('Error loading features:', error);
+        console.error('Error loading data:', error);
       } finally {
         setLoading(false);
       }
     }
-    loadFeatures();
+    loadData();
   }, []);
 
-  // Filter features
+  // Close creator dropdown when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (creatorDropdownRef.current && !creatorDropdownRef.current.contains(event.target as Node)) {
+        setShowCreatorDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Get user display name
+  const getUserDisplayName = React.useCallback((userId: string | null): string => {
+    if (!userId || userId === 'levelset') return 'Levelset';
+    const user = users.find(u => u.auth_user_id === userId);
+    if (!user) return 'Unknown User';
+    const name = [user.first_name, user.last_name].filter(Boolean).join(' ');
+    return name || user.email || 'Unknown User';
+  }, [users]);
+
+  // Filter users for dropdown
+  const filteredUsers = React.useMemo(() => {
+    if (!creatorSearch.trim()) return users;
+    const search = creatorSearch.toLowerCase();
+    return users.filter(user => {
+      const name = [user.first_name, user.last_name].filter(Boolean).join(' ').toLowerCase();
+      const email = (user.email || '').toLowerCase();
+      return name.includes(search) || email.includes(search);
+    });
+  }, [users, creatorSearch]);
+
+  // Filter and sort features (pending review at top)
   const filteredFeatures = React.useMemo(() => {
-    return features.filter(feature => {
+    const filtered = features.filter(feature => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -114,6 +159,15 @@ export function FeatureRequestsPage() {
         return false;
       }
       return true;
+    });
+    
+    // Sort: pending review (submitted) at top, then by created_at desc
+    return filtered.sort((a, b) => {
+      // Pending review (submitted) first
+      if (a.status === 'submitted' && b.status !== 'submitted') return -1;
+      if (a.status !== 'submitted' && b.status === 'submitted') return 1;
+      // Then by created_at (newest first)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }, [features, searchQuery, statusFilter, categoryFilter]);
 
@@ -184,19 +238,31 @@ export function FeatureRequestsPage() {
     setCreateCategory('Feature');
     setCreateStatus('idea');
     setCreatePriority('medium');
+    setCreateCreator('levelset');
+    setCreatorSearch('');
+    setShowCreatorDropdown(false);
     setCreateModalOpen(true);
+  };
+
+  const handleSelectCreator = (userId: string) => {
+    setCreateCreator(userId);
+    setCreatorSearch('');
+    setShowCreatorDropdown(false);
   };
 
   const handleCreateConfirm = async () => {
     if (!createTitle.trim()) return;
     setActionLoading(true);
     try {
+      // Pass null for Levelset, otherwise pass the user's auth_user_id
+      const createdBy = createCreator === 'levelset' ? null : createCreator;
       const newFeature = await createFeatureAdmin(
         createTitle,
         createDescription,
         createCategory,
         createStatus as RoadmapFeature['status'],
-        createPriority as RoadmapFeature['priority']
+        createPriority as RoadmapFeature['priority'],
+        createdBy
       );
       if (newFeature) {
         setFeatures(prev => [newFeature, ...prev]);
@@ -587,17 +653,72 @@ export function FeatureRequestsPage() {
                 </select>
               </div>
             </div>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Priority</label>
-              <select
-                className={styles.modalSelect}
-                value={createPriority}
-                onChange={(e) => setCreatePriority(e.target.value)}
-              >
-                {PRIORITIES.map(p => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Priority</label>
+                <select
+                  className={styles.modalSelect}
+                  value={createPriority}
+                  onChange={(e) => setCreatePriority(e.target.value)}
+                >
+                  {PRIORITIES.map(p => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.formGroup} ref={creatorDropdownRef}>
+                <label className={styles.formLabel}>Creator</label>
+                <div className={styles.creatorDropdownContainer}>
+                  <input
+                    type="text"
+                    className={styles.modalInput}
+                    value={showCreatorDropdown ? creatorSearch : getUserDisplayName(createCreator)}
+                    onChange={(e) => {
+                      setCreatorSearch(e.target.value);
+                      setShowCreatorDropdown(true);
+                    }}
+                    onFocus={() => setShowCreatorDropdown(true)}
+                    placeholder="Search users..."
+                  />
+                  {showCreatorDropdown && (
+                    <div className={styles.creatorDropdown}>
+                      <div 
+                        className={`${styles.creatorOption} ${createCreator === 'levelset' ? styles.creatorOptionSelected : ''}`}
+                        onClick={() => handleSelectCreator('levelset')}
+                      >
+                        <img 
+                          src="/logos/Levelset no margin.png" 
+                          alt="Levelset" 
+                          className={styles.creatorAvatar}
+                        />
+                        <span>Levelset</span>
+                      </div>
+                      {filteredUsers.slice(0, 10).map(user => (
+                        <div 
+                          key={user.auth_user_id}
+                          className={`${styles.creatorOption} ${createCreator === user.auth_user_id ? styles.creatorOptionSelected : ''}`}
+                          onClick={() => handleSelectCreator(user.auth_user_id)}
+                        >
+                          <div className={styles.creatorAvatarPlaceholder}>
+                            {(user.first_name?.[0] || user.email?.[0] || '?').toUpperCase()}
+                          </div>
+                          <div className={styles.creatorInfo}>
+                            <span className={styles.creatorName}>
+                              {[user.first_name, user.last_name].filter(Boolean).join(' ') || 'Unknown'}
+                            </span>
+                            {user.email && (
+                              <span className={styles.creatorEmail}>{user.email}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {filteredUsers.length === 0 && creatorSearch && (
+                        <div className={styles.creatorNoResults}>No users found</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
           <div className={styles.modalActions}>

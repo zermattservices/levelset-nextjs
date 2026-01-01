@@ -68,7 +68,15 @@ export default function FeatureDetailPage() {
 
   // Handle voting
   const handleVote = useCallback(async () => {
-    if (!feature || !auth.id) return;
+    if (!feature) return;
+    
+    if (!auth.id) {
+      console.warn('[Roadmap] User not authenticated, cannot vote');
+      // Redirect to login
+      const currentPath = window.location.pathname + window.location.search;
+      window.location.href = `https://app.levelset.io/auth/login?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
+      return;
+    }
 
     const wasVoted = hasVoted;
     
@@ -89,7 +97,7 @@ export default function FeatureDetailPage() {
         vote_count: prev.vote_count + (wasVoted ? 1 : -1),
       } : null);
     }
-  }, [feature, hasVoted]);
+  }, [feature, hasVoted, auth.id]);
 
   // Handle comment submission
   const handleCommentSubmit = useCallback(async (

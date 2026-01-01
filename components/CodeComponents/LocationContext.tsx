@@ -26,10 +26,34 @@ interface LocationContextValue {
 
 const LocationContext = React.createContext<LocationContextValue | undefined>(undefined);
 
-const STORAGE_PREFIX = 'levelset.selectedLocation';
+const COOKIE_NAME = 'levelset-selected-location';
 
-function buildStorageKey(userId: string | null | undefined) {
-  return userId ? `${STORAGE_PREFIX}:${userId}` : STORAGE_PREFIX;
+// Cookie helpers for cross-subdomain persistence
+function getLocationCookie(): string | null {
+  if (typeof window === 'undefined') return null;
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === COOKIE_NAME && value) {
+      return decodeURIComponent(value);
+    }
+  }
+  return null;
+}
+
+function setLocationCookie(locationId: string) {
+  if (typeof window === 'undefined') return;
+  const maxAge = 100 * 365 * 24 * 60 * 60; // 100 years
+  const domain = window.location.hostname.includes('levelset.io') ? '.levelset.io' : '';
+  const domainPart = domain ? `Domain=${domain};` : '';
+  document.cookie = `${COOKIE_NAME}=${encodeURIComponent(locationId)}; ${domainPart} path=/; max-age=${maxAge}; SameSite=Lax; secure`;
+}
+
+function clearLocationCookie() {
+  if (typeof window === 'undefined') return;
+  const domain = window.location.hostname.includes('levelset.io') ? '.levelset.io' : '';
+  const domainPart = domain ? `Domain=${domain};` : '';
+  document.cookie = `${COOKIE_NAME}=; ${domainPart} path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; secure`;
 }
 
 async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupabaseClient>) {
@@ -194,10 +218,8 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       userIdRef.current = fetchedUserId;
       setLocations(fetchedLocations);
 
-      const storageKey = buildStorageKey(fetchedUserId);
-      const storedId = typeof window !== 'undefined'
-        ? sessionStorage.getItem(storageKey)
-        : null;
+      // Use cookie for cross-subdomain persistence
+      const storedId = getLocationCookie();
 
       ensureSelectionConsistent(fetchedLocations, storedId);
 
@@ -258,10 +280,7 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
   React.useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
-        const key = buildStorageKey(userIdRef.current);
-        if (typeof window !== 'undefined') {
-          sessionStorage.removeItem(key);
-        }
+        clearLocationCookie();
         setSelectedLocationId(null);
         setSelectedLocationNumber(null);
         setSelectedLocationMobileToken(null);
@@ -289,12 +308,10 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
       setSelectedLocationMobileToken(match.location_mobile_token ?? null);
       setSelectedLocationImageUrl(match.image_url ?? null);
 
-      if (typeof window !== 'undefined') {
-        const key = buildStorageKey(userId);
-        sessionStorage.setItem(key, match.id);
-      }
+      // Use cookie for cross-subdomain persistence
+      setLocationCookie(match.id);
     },
-    [locations, userId]
+    [locations]
   );
 
   const clearSelection = React.useCallback(() => {
@@ -305,11 +322,8 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
     setSelectedLocationImageUrl(null);
     setUserHierarchyLevel(null);
 
-    if (typeof window !== 'undefined') {
-      const key = buildStorageKey(userId);
-      sessionStorage.removeItem(key);
-    }
-  }, [userId]);
+    clearLocationCookie();
+  }, []);
 
   const value = React.useMemo<LocationContextValue>(
     () => ({
