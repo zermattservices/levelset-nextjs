@@ -7,6 +7,7 @@ import * as React from 'react';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import BusinessIcon from '@mui/icons-material/Business';
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import styles from './AdminModeSidebar.module.css';
 
 export interface AdminMenuItem {
@@ -34,6 +35,12 @@ const menuGroups: MenuGroup[] = [
         id: 'user-testing',
         label: 'User Testing',
         icon: <PersonSearchIcon sx={{ fontSize: 18 }} />,
+        status: 'active',
+      },
+      {
+        id: 'feature-requests',
+        label: 'Feature Requests',
+        icon: <LightbulbOutlinedIcon sx={{ fontSize: 18 }} />,
         status: 'active',
       },
     ],

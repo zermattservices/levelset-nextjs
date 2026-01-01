@@ -5,7 +5,7 @@ export interface RoadmapFeature {
   id: string;
   title: string;
   description: string | null;
-  status: 'idea' | 'planned' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'submitted' | 'idea' | 'planned' | 'in_progress' | 'completed' | 'cancelled';
   priority: 'critical' | 'high' | 'medium' | 'low';
   category: string;
   vote_count: number;
@@ -13,6 +13,8 @@ export interface RoadmapFeature {
   created_at: string;
   updated_at: string;
   organization_id?: string | null;
+  created_by?: string | null;
+  is_public?: boolean;
 }
 
 export interface RoadmapComment {
@@ -38,21 +40,23 @@ export interface RoadmapStats {
   inProgress: number;
 }
 
-// Anonymous token management
 // Supabase queries
 export async function fetchFeatures(
   status?: string,
   category?: string,
   sortBy: 'votes' | 'newest' | 'comments' = 'votes',
   searchQuery?: string,
-  organizationId?: string
+  organizationId?: string,
+  userId?: string
 ): Promise<RoadmapFeature[]> {
   const supabase = createSupabaseClient();
   
+  // Build the main query for public features
   let query = supabase
     .from('roadmap_features')
     .select('*')
-    .eq('is_public', true);
+    .eq('is_public', true)
+    .neq('status', 'submitted'); // Exclude submitted status from public view
   
   // Status filter
   if (status === 'active') {
@@ -92,7 +96,24 @@ export async function fetchFeatures(
     return [];
   }
   
-  return data || [];
+  let features = data || [];
+  
+  // Also fetch the user's own submitted features (pending review)
+  if (userId) {
+    const { data: userSubmissions, error: userError } = await supabase
+      .from('roadmap_features')
+      .select('*')
+      .eq('created_by', userId)
+      .eq('status', 'submitted')
+      .order('created_at', { ascending: false });
+    
+    if (!userError && userSubmissions) {
+      // Add user's submissions to the top of the list
+      features = [...userSubmissions, ...features];
+    }
+  }
+  
+  return features;
 }
 
 export async function fetchFeatureById(id: string, organizationId?: string): Promise<RoadmapFeature | null> {
@@ -265,7 +286,8 @@ export function timeAgo(dateString: string): string {
 }
 
 // Status display helpers - matching FormFlow
-export const STATUS_CONFIG = {
+export const STATUS_CONFIG: Record<string, { label: string; bgColor: string; textColor: string; borderColor: string }> = {
+  submitted: { label: 'Pending Review', bgColor: '#fef3c7', textColor: '#d97706', borderColor: '#fcd34d' },
   idea: { label: 'Idea', bgColor: '#f3f4f6', textColor: '#374151', borderColor: '#e5e7eb' },
   planned: { label: 'Planned', bgColor: '#fef3c7', textColor: '#92400e', borderColor: '#fcd34d' },
   in_progress: { label: 'In Progress', bgColor: '#dbeafe', textColor: '#1e40af', borderColor: '#93c5fd' },
@@ -304,4 +326,109 @@ export const CATEGORY_MAP: Record<string, string> = {
 // Check if a feature is "popular" (high vote count)
 export function isPopular(voteCount: number): boolean {
   return voteCount >= 50;
+}
+
+// Submit a new feature request (starts as 'submitted' status for review)
+export async function submitFeatureRequest(
+  title: string,
+  category: string,
+  description: string,
+  userId: string,
+  orgId?: string
+): Promise<RoadmapFeature | null> {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('roadmap_features')
+    .insert({
+      title: title.trim(),
+      description: description.trim(),
+      category,
+      status: 'submitted',
+      priority: 'medium',
+      vote_count: 0,
+      comment_count: 0,
+      is_public: false, // Hidden until approved
+      created_by: userId,
+      organization_id: orgId || null,
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error submitting feature request:', error);
+    return null;
+  }
+  
+  return data;
+}
+
+// Fetch all features for admin (includes submitted)
+export async function fetchAllFeaturesAdmin(): Promise<RoadmapFeature[]> {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('roadmap_features')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching all features:', error);
+    return [];
+  }
+  
+  return data || [];
+}
+
+// Update a feature (for admin)
+export async function updateFeature(
+  featureId: string,
+  updates: Partial<Pick<RoadmapFeature, 'title' | 'description' | 'category' | 'status' | 'priority' | 'is_public'>>
+): Promise<RoadmapFeature | null> {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('roadmap_features')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', featureId)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating feature:', error);
+    return null;
+  }
+  
+  return data;
+}
+
+// Approve a feature (set status and make public)
+export async function approveFeature(
+  featureId: string,
+  newStatus: string = 'idea'
+): Promise<RoadmapFeature | null> {
+  return updateFeature(featureId, {
+    status: newStatus as RoadmapFeature['status'],
+    is_public: true,
+  });
+}
+
+// Delete a feature
+export async function deleteFeature(featureId: string): Promise<boolean> {
+  const supabase = createSupabaseClient();
+  
+  const { error } = await supabase
+    .from('roadmap_features')
+    .delete()
+    .eq('id', featureId);
+  
+  if (error) {
+    console.error('Error deleting feature:', error);
+    return false;
+  }
+  
+  return true;
 }

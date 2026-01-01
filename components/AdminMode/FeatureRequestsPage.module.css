@@ -1,0 +1,185 @@
+.container {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 20px;
+  color: #6b7280;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statNumber {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.tableContainer {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table td {
+  padding: 16px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.pendingRow {
+  background-color: #fffbeb !important;
+}
+
+.pendingRow:hover {
+  background-color: #fef3c7 !important;
+}
+
+.featureTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.featureDescription {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.categoryTag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid;
+}
+
+.voteCount {
+  font-weight: 600;
+  color: #111827;
+}
+
+.dateCell {
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 20px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .filters {
+    flex-direction: column;
+  }
+  
+  .stats {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .tableContainer {
+    overflow-x: auto;
+  }
+  
+  .table {
+    min-width: 600px;
+  }
+}

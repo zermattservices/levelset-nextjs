@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/providers/AuthProvider';
 import { AdminModeSidebar } from '@/components/AdminMode/AdminModeSidebar';
 import { UserTestingPage } from '@/components/AdminMode/UserTestingPage';
 import { OrganizationsPage } from '@/components/AdminMode/OrganizationsPage';
+import { FeatureRequestsPage } from '@/components/AdminMode/FeatureRequestsPage';
 import { ComingSoonPlaceholder } from '@/components/OrgSettings/ComingSoonPlaceholder';
 import styles from './AdminLocationsPage.module.css';
 
@@ -16,10 +17,32 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
+const VALID_SECTIONS = ['user-testing', 'organizations', 'feature-requests'];
+
 export function AdminLocationsPage() {
   const router = useRouter();
   const auth = useAuth();
-  const [activeSection, setActiveSection] = React.useState<string>('user-testing');
+  
+  // Get active section from URL query parameter, default to 'user-testing'
+  const activeSection = React.useMemo(() => {
+    const tabParam = router.query.tab;
+    if (typeof tabParam === 'string' && VALID_SECTIONS.includes(tabParam)) {
+      return tabParam;
+    }
+    return 'user-testing';
+  }, [router.query.tab]);
+
+  // Update URL when section changes
+  const setActiveSection = React.useCallback((sectionId: string) => {
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { tab: sectionId },
+      },
+      undefined,
+      { shallow: true }
+    );
+  }, [router]);
 
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
 
@@ -30,6 +53,8 @@ export function AdminLocationsPage() {
         return <UserTestingPage />;
       case 'organizations':
         return <OrganizationsPage />;
+      case 'feature-requests':
+        return <FeatureRequestsPage />;
       default:
         return <UserTestingPage />;
     }

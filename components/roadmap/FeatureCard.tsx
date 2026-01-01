@@ -18,6 +18,7 @@ export default function FeatureCard({ feature, hasVoted, onVote }: FeatureCardPr
 
   const handleVoteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     onVote(feature.id);
   };
 
@@ -63,10 +64,10 @@ export default function FeatureCard({ feature, hasVoted, onVote }: FeatureCardPr
       </div>
       
       {/* Simple upvote button - FormFlow style */}
-      <div 
+      <button 
+        type="button"
         className={`${styles.voteButton} ${hasVoted ? styles.voteButtonActive : ''}`}
         onClick={handleVoteClick}
-        role="button"
         aria-label={hasVoted ? 'Remove vote' : 'Vote for this feature'}
       >
         <svg 
@@ -82,7 +83,7 @@ export default function FeatureCard({ feature, hasVoted, onVote }: FeatureCardPr
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
         <span className={styles.voteCount}>{feature.vote_count}</span>
-      </div>
+      </button>
     </div>
   );
 }

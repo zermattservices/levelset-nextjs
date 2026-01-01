@@ -4,6 +4,7 @@ import {
   RoadmapHero,
   FeatureList,
   FilterState,
+  SubmitFeatureModal,
 } from '@/components/roadmap';
 import {
   RoadmapFeature,
@@ -12,6 +13,7 @@ import {
   fetchStats,
   fetchUserVotesForUser,
   toggleVote,
+  submitFeatureRequest,
 } from '@/lib/roadmap';
 import { useAuth, AuthData } from '@/lib/providers/AuthProvider';
 
@@ -35,6 +37,7 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
     category: 'all',
     sortBy: 'votes',
   });
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
   // Load data on mount
   useEffect(() => {
@@ -47,7 +50,7 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
       try {
         // Fetch data regardless of auth state - let RLS handle access
         const [featuresData, statsData, userVotes] = await Promise.all([
-          fetchFeatures('active', undefined, 'votes', undefined, auth.org_id || undefined),
+          fetchFeatures('active', undefined, 'votes', undefined, auth.org_id || undefined, auth.id),
           fetchStats(auth.org_id || undefined),
           fetchUserVotesForUser(auth.id),
         ]);
@@ -86,7 +89,8 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
         filters.category,
         filters.sortBy,
         filters.search,
-        auth.org_id || undefined
+        auth.org_id || undefined,
+        auth.id
       );
       setFeatures(featuresData);
     } catch (error) {
@@ -94,7 +98,7 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
     } finally {
       setDataLoading(false);
     }
-  }, [auth.org_id]);
+  }, [auth.org_id, auth.id]);
 
   // Handle voting
   const handleVote = useCallback(async (featureId: string) => {
@@ -153,15 +157,49 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
     }
   }, [votedFeatures, auth.id]);
 
+  // Handle feature submission
+  const handleSubmitFeature = useCallback(async (
+    title: string,
+    category: string,
+    description: string
+  ): Promise<boolean> => {
+    if (!auth.id) return false;
+    
+    const newFeature = await submitFeatureRequest(
+      title,
+      category,
+      description,
+      auth.id,
+      auth.org_id || undefined
+    );
+    
+    if (newFeature) {
+      // Add the user's submitted feature to the list (they can see their own pending features)
+      setFeatures(prev => [newFeature, ...prev]);
+      setStats(prev => ({
+        ...prev,
+        totalFeatures: prev.totalFeatures + 1,
+      }));
+      return true;
+    }
+    
+    return false;
+  }, [auth.id, auth.org_id]);
+
   return (
     <RoadmapLayout subHeaderMode="list" activeTab="features">
-      <RoadmapHero stats={stats} />
+      <RoadmapHero stats={stats} onSubmitClick={() => setIsSubmitModalOpen(true)} />
       <FeatureList
         features={features}
         loading={loading}
         votedFeatures={votedFeatures}
         onVote={handleVote}
         onFilterChange={handleFilterChange}
+      />
+      <SubmitFeatureModal
+        isOpen={isSubmitModalOpen}
+        onClose={() => setIsSubmitModalOpen(false)}
+        onSubmit={handleSubmitFeature}
       />
     </RoadmapLayout>
   );

@@ -29,9 +29,11 @@ export default function FeatureDetailPage() {
   const [hasVoted, setHasVoted] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load feature and comments
+  // Load feature and comments on mount
   useEffect(() => {
-    if (!id || typeof id !== 'string' || !auth.isLoaded) return;
+    if (!id || typeof id !== 'string') return;
+
+    let isMounted = true;
 
     const loadData = async () => {
       setLoading(true);
@@ -42,18 +44,27 @@ export default function FeatureDetailPage() {
           fetchUserVotesForUser(auth.id),
         ]);
         
-        setFeature(featureData);
-        setComments(commentsData);
-        setHasVoted(userVotes.has(id));
+        if (isMounted) {
+          setFeature(featureData);
+          setComments(commentsData);
+          setHasVoted(userVotes.has(id));
+        }
       } catch (error) {
         console.error('Error loading feature:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadData();
-  }, [id, auth.id, auth.isLoaded, auth.org_id]);
+
+    return () => {
+      isMounted = false;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   // Handle voting
   const handleVote = useCallback(async () => {

@@ -7,4 +7,5 @@ export { default as FeatureDetail, FeatureSidebar } from './FeatureDetail';
 export { default as CommentSection } from './CommentSection';
 export { RoadmapBoard } from './RoadmapBoard';
 export { StatusBadge, PriorityBadge } from './StatusBadge';
+export { default as SubmitFeatureModal } from './SubmitFeatureModal';
 export type { FilterState } from './FeatureList';

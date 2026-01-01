@@ -4,9 +4,10 @@ import styles from './Roadmap.module.css';
 
 interface RoadmapHeroProps {
   stats: RoadmapStats;
+  onSubmitClick: () => void;
 }
 
-export default function RoadmapHero({ stats }: RoadmapHeroProps) {
+export default function RoadmapHero({ stats, onSubmitClick }: RoadmapHeroProps) {
   const formatNumber = (num: number) => {
     if (num >= 1000) {
       return `${(num / 1000).toFixed(1)}K`;
@@ -31,12 +32,13 @@ export default function RoadmapHero({ stats }: RoadmapHeroProps) {
       </p>
       
       <div className={styles.heroButtons}>
-        <a 
-          href="mailto:feedback@levelset.io?subject=Feature Request"
+        <button 
+          type="button"
+          onClick={onSubmitClick}
           className={styles.primaryButton}
         >
           + Submit Your Idea
-        </a>
+        </button>
         <a href="#features" className={styles.secondaryButton}>
           Explore Features
         </a>
