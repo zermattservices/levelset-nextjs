@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   RoadmapLayout,
   RoadmapHero,
@@ -30,23 +30,23 @@ export default function RoadmapIndexPage() {
     sortBy: 'votes',
   });
 
-  // Track if data has been loaded
-  const [dataFetched, setDataFetched] = useState(false);
-  
-  // Debug render
-  console.log('[Roadmap RENDER] auth.isLoaded:', auth.isLoaded, 'auth.id:', auth.id, 'dataFetched:', dataFetched);
+  // Use a ref to track if we've loaded data (to prevent re-fetching)
+  const hasLoadedRef = useRef(false);
+  const prevOrgIdRef = useRef<string | undefined>(undefined);
   
   // Load data when auth becomes ready
   useEffect(() => {
-    console.log('[Roadmap EFFECT] Running, auth.isLoaded:', auth.isLoaded, 'dataFetched:', dataFetched);
-    // Skip if auth isn't loaded yet or we've already fetched
-    if (!auth.isLoaded || dataFetched) {
-      console.log('[Roadmap EFFECT] Skipping fetch - isLoaded:', auth.isLoaded, 'dataFetched:', dataFetched);
+    // If auth isn't loaded yet, wait
+    if (!auth.isLoaded) {
+      return;
+    }
+    
+    // If we've already loaded and org hasn't changed, skip
+    if (hasLoadedRef.current && prevOrgIdRef.current === auth.org_id) {
       return;
     }
     
     let isMounted = true;
-    console.log('[Roadmap] Auth ready, starting data load. org_id:', auth.org_id, 'user_id:', auth.id);
     
     const loadData = async () => {
       setDataLoading(true);
@@ -58,14 +58,14 @@ export default function RoadmapIndexPage() {
         ]);
         
         if (isMounted) {
-          console.log('[Roadmap] Data loaded:', { featuresCount: featuresData.length, stats: statsData });
           setFeatures(featuresData);
           setStats(statsData);
           setVotedFeatures(userVotes);
-          setDataFetched(true);
+          hasLoadedRef.current = true;
+          prevOrgIdRef.current = auth.org_id;
         }
       } catch (error) {
-        console.error('[Roadmap] Error loading roadmap data:', error);
+        console.error('Error loading roadmap data:', error);
       } finally {
         if (isMounted) {
           setDataLoading(false);
@@ -78,7 +78,7 @@ export default function RoadmapIndexPage() {
     return () => {
       isMounted = false;
     };
-  }, [auth.isLoaded, auth.id, auth.org_id, dataFetched]);
+  }, [auth.isLoaded, auth.id, auth.org_id]);
 
   // Handle filter changes
   const handleFilterChange = useCallback(async (filters: FilterState) => {
