@@ -4,6 +4,7 @@ import Head from 'next/head';
 import MenuNavigation from '@/components/ui/MenuNavigation/MenuNavigation';
 import AppProviders from '@/lib/providers/AppProviders';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import RoadmapSubHeader from './RoadmapSubHeader';
 import styles from './Roadmap.module.css';
@@ -23,7 +24,23 @@ function RoadmapLayoutContent({
 }: Omit<RoadmapLayoutProps, 'title' | 'description'>) {
   const router = useRouter();
   const auth = useAuth();
+  const { selectLocation, selectedLocationId } = useLocationContext();
   const [isSettingSession, setIsSettingSession] = React.useState(false);
+  
+  // Handle location parameter from URL (passed from app.levelset.io)
+  React.useEffect(() => {
+    const locationParam = router.query.location;
+    if (locationParam && typeof locationParam === 'string' && locationParam !== selectedLocationId) {
+      selectLocation(locationParam);
+      // Clean URL after setting location
+      const { location, ...restQuery } = router.query;
+      if (Object.keys(restQuery).length === 0) {
+        router.replace(router.pathname, undefined, { shallow: true });
+      } else {
+        router.replace({ pathname: router.pathname, query: restQuery }, undefined, { shallow: true });
+      }
+    }
+  }, [router.query.location, selectedLocationId, selectLocation, router]);
 
   // Handle token from cross-domain auth redirect
   React.useEffect(() => {

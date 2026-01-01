@@ -31,7 +31,7 @@ export interface MenuNavigationProps {
 export function MenuNavigation({ className, firstName, userRole }: MenuNavigationProps) {
   const auth = useAuth();
   const { isImpersonating, impersonatedUser } = useImpersonation();
-  const { userHierarchyLevel } = useLocationContext();
+  const { userHierarchyLevel, selectedLocationId } = useLocationContext();
   const { has } = usePermissions();
   const [activeMenu, setActiveMenu] = React.useState<MenuType | null>(null);
   const [isClosing, setIsClosing] = React.useState(false);
@@ -297,7 +297,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
                       </div>
                     </a>
                     <a 
-                      href="https://roadmap.levelset.io" 
+                      href={`https://roadmap.levelset.io${selectedLocationId ? `?location=${selectedLocationId}` : ''}`}
                       target="_blank" 
                       rel="noopener noreferrer"
                       className={sty.helpMenuCard}
