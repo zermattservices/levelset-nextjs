@@ -44,7 +44,7 @@ export default function RoadmapSubHeader({ mode, activeTab = 'features' }: Roadm
       </div>
 
       <div className={styles.subHeaderRight}>
-        {isDetail ? (
+        {isDetail && (
           <div className={styles.subHeaderActions}>
             <button className={styles.subHeaderActionButton}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -62,10 +62,6 @@ export default function RoadmapSubHeader({ mode, activeTab = 'features' }: Roadm
               </svg>
               Share
             </button>
-          </div>
-        ) : (
-          <div className={styles.subHeaderMeta}>
-            {isBoard ? 'Product Roadmap' : 'Feature Requests'}
           </div>
         )}
       </div>

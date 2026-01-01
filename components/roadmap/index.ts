@@ -5,5 +5,6 @@ export { default as FeatureCard } from './FeatureCard';
 export { default as FeatureList } from './FeatureList';
 export { default as FeatureDetail, FeatureSidebar } from './FeatureDetail';
 export { default as CommentSection } from './CommentSection';
+export { RoadmapBoard } from './RoadmapBoard';
 export { StatusBadge, PriorityBadge } from './StatusBadge';
 export type { FilterState } from './FeatureList';

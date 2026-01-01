@@ -70,7 +70,7 @@ export default function RoadmapIndexPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [auth.org_id]);
 
   // Handle voting
   const handleVote = useCallback(async (featureId: string) => {
@@ -127,7 +127,7 @@ export default function RoadmapIndexPage() {
         totalVotes: prev.totalVotes + (hasVoted ? 1 : -1),
       }));
     }
-  }, [votedFeatures]);
+  }, [votedFeatures, auth.id]);
 
   return (
     <RoadmapLayout subHeaderMode="list" activeTab="features">

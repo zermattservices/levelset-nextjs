@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import {
   Dialog,
   DialogContent,
@@ -18,11 +19,15 @@ export interface LocationSelectModalProps {
 }
 
 export function LocationSelectModal({ className }: LocationSelectModalProps) {
+  const router = useRouter();
   const { locations, selectedLocationId, loading, error, selectLocation } = useLocationContext();
+
+  // Never show on auth/login pages
+  const isAuthPage = router.pathname?.startsWith('/auth') || router.pathname?.startsWith('/login');
 
   const shouldUseDropdown = locations.length > 2;
   const shouldShowButtons = !shouldUseDropdown && locations.length > 0;
-  const open = Boolean(!loading && !selectedLocationId && locations.length > 0);
+  const open = Boolean(!isAuthPage && !loading && !selectedLocationId && locations.length > 0);
 
   const handleClose = (_event: object, reason: 'backdropClick' | 'escapeKeyDown') => {
     if (reason === 'backdropClick' || reason === 'escapeKeyDown') {

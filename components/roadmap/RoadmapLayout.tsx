@@ -1,7 +1,10 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import Head from 'next/head';
 import MenuNavigation from '@/components/ui/MenuNavigation/MenuNavigation';
 import AppProviders from '@/lib/providers/AppProviders';
+import { useAuth } from '@/lib/providers/AuthProvider';
+import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import RoadmapSubHeader from './RoadmapSubHeader';
 import styles from './Roadmap.module.css';
 
@@ -11,6 +14,36 @@ interface RoadmapLayoutProps {
   description?: string;
   subHeaderMode?: 'list' | 'detail' | 'board';
   activeTab?: 'features' | 'roadmap';
+}
+
+function RoadmapLayoutContent({ 
+  children, 
+  subHeaderMode = 'list',
+  activeTab = 'features',
+}: Omit<RoadmapLayoutProps, 'title' | 'description'>) {
+  const router = useRouter();
+  const auth = useAuth();
+
+  // Redirect unauthenticated users to login
+  React.useEffect(() => {
+    if (auth.isLoaded && !auth.authUser) {
+      const currentPath = router.asPath || router.pathname;
+      router.push(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
+    }
+  }, [auth.isLoaded, auth.authUser, router]);
+
+  // Show loading screen while auth is loading or redirecting
+  if (!auth.isLoaded || !auth.authUser) {
+    return <AuthLoadingScreen />;
+  }
+
+  return (
+    <div className={styles.pageWrapper}>
+      <MenuNavigation />
+      <RoadmapSubHeader mode={subHeaderMode} activeTab={activeTab} />
+      {children}
+    </div>
+  );
 }
 
 export default function RoadmapLayout({ 
@@ -40,11 +73,9 @@ export default function RoadmapLayout({
         <meta name="twitter:description" content={description} />
       </Head>
       <AppProviders>
-        <div className={styles.pageWrapper}>
-          <MenuNavigation />
-          <RoadmapSubHeader mode={subHeaderMode} activeTab={activeTab} />
+        <RoadmapLayoutContent subHeaderMode={subHeaderMode} activeTab={activeTab}>
           {children}
-        </div>
+        </RoadmapLayoutContent>
       </AppProviders>
     </>
   );
