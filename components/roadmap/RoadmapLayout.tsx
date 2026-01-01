@@ -64,15 +64,20 @@ function RoadmapLayoutContent({
     handleTokenAuth();
   }, [router.query, auth.authUser, router]);
 
-  // Redirect unauthenticated users to bridge page on app subdomain
-  // The bridge will check for existing session and redirect with tokens, or send to login
+  // With shared cookies, we should be able to read the session directly
+  // Only redirect if we're truly not authenticated after checking cookies
   React.useEffect(() => {
-    if (auth.isLoaded && !auth.authUser && !isSettingSession && !router.query.token) {
-      const currentPath = router.asPath?.split('?')[0] || router.pathname;
-      // Use bridge page instead of login directly - bridge will check for existing session
-      const redirectUrl = `https://app.levelset.io/auth/bridge?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
-      window.location.href = redirectUrl;
-    }
+    // Give auth provider time to check shared cookies
+    const timeout = setTimeout(() => {
+      if (auth.isLoaded && !auth.authUser && !isSettingSession && !router.query.token) {
+        const currentPath = router.asPath?.split('?')[0] || router.pathname;
+        // Redirect to login on app subdomain
+        const redirectUrl = `https://app.levelset.io/auth/login?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
+        window.location.href = redirectUrl;
+      }
+    }, 500); // Small delay to allow cookie check
+
+    return () => clearTimeout(timeout);
   }, [auth.isLoaded, auth.authUser, router, isSettingSession]);
 
   // Show loading screen while auth is loading, setting session, or redirecting
