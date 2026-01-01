@@ -9,15 +9,6 @@
   position: relative;
 }
 
-/* Ensure html and body allow scrolling when using this layout */
-:global(html),
-:global(body) {
-  height: auto !important;
-  min-height: 100vh !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-}
-
 .header {
   display: flex;
   justify-content: space-between;
