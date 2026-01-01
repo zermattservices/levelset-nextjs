@@ -6,13 +6,15 @@ export interface LoginPageFormProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
   showGoogleSignIn?: boolean;
+  redirectUrl?: string;
 }
 
 export function LoginPageForm({ 
   className = "", 
   onSuccess,
   onError,
-  showGoogleSignIn = true
+  showGoogleSignIn = true,
+  redirectUrl
 }: LoginPageFormProps) {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -58,10 +60,22 @@ export function LoginPageForm({
     setErrorMessage(null);
     setGoogleLoading(true);
     try {
+      // For OAuth, we need to handle the redirect properly
+      // If redirectUrl is a cross-domain URL, we'll handle it after OAuth callback
+      // Otherwise, use the redirectUrl or default to current origin
+      let oauthRedirectTo = typeof window !== 'undefined' ? window.location.origin : undefined;
+      
+      // If we have a redirect URL, encode it as a parameter to pass through OAuth
+      if (redirectUrl) {
+        const callbackUrl = new URL(window.location.origin + '/auth/callback');
+        callbackUrl.searchParams.set('redirect', redirectUrl);
+        oauthRedirectTo = callbackUrl.toString();
+      }
+      
       const { error } = await supabase.auth.signInWithOAuth({ 
         provider: 'google',
         options: {
-          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined
+          redirectTo: oauthRedirectTo
         }
       });
       
@@ -69,15 +83,14 @@ export function LoginPageForm({
         const message = error.message || "Google sign-in failed";
         setErrorMessage(message);
         onError?.(message);
-      } else {
-        setErrorMessage(null);
-        onSuccess?.();
+        setGoogleLoading(false);
       }
+      // Note: onSuccess won't be called for OAuth as it redirects away
+      // The redirect will be handled by the callback page
     } catch (error) {
       const message = error instanceof Error ? error.message : "Google sign-in failed";
       setErrorMessage(message);
       onError?.(message);
-    } finally {
       setGoogleLoading(false);
     }
   };

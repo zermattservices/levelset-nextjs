@@ -24,20 +24,40 @@ export function LoginPage() {
   }, [router.query.redirect]);
 
   const handleSuccess = async () => {
+    const supabase = (await import('@/util/supabase/component')).createSupabaseClient();
+    
+    // Wait for session to be available (poll with timeout)
+    let attempts = 0;
+    const maxAttempts = 20; // 2 seconds max wait
+    
+    const waitForSession = async (): Promise<{ access_token: string; refresh_token: string } | null> => {
+      while (attempts < maxAttempts) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          return {
+            access_token: session.access_token,
+            refresh_token: session.refresh_token || ''
+          };
+        }
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      return null;
+    };
+
+    const session = await waitForSession();
+
     // If redirect is a full URL (cross-domain), use window.location
     if (redirectUrl.startsWith('http://') || redirectUrl.startsWith('https://')) {
-      // Get the current session token to pass to the other domain
-      const supabase = (await import('@/util/supabase/component')).createSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
       if (session?.access_token) {
         // Redirect with the access token as a query parameter
         // The roadmap domain will use this to set up the session
         const url = new URL(redirectUrl);
         url.searchParams.set('token', session.access_token);
-        url.searchParams.set('refresh_token', session.refresh_token || '');
+        url.searchParams.set('refresh_token', session.refresh_token);
         window.location.href = url.toString();
       } else {
+        // Fallback: redirect without token (user will need to re-auth on roadmap)
         window.location.href = redirectUrl;
       }
     } else {
@@ -87,6 +107,7 @@ export function LoginPage() {
           <LoginPageForm
             onSuccess={handleSuccess}
             showGoogleSignIn={true}
+            redirectUrl={redirectUrl}
           />
         </Box>
       </Box>
