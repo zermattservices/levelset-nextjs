@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { RoadmapLayout } from '@/components/roadmap';
 import { RoadmapBoard } from '@/components/roadmap/RoadmapBoard';
 import { RoadmapFeature, fetchFeatures } from '@/lib/roadmap';
@@ -25,18 +25,13 @@ export default function RoadmapBoardPage({ auth: authProp }: RoadmapBoardPagePro
   const [dataLoading, setDataLoading] = useState(true);
   const loading = dataLoading;
   
-  // Track loading state with a ref to prevent duplicate fetches
-  const loadingRef = useRef(false);
-
+  // Load data on mount
   useEffect(() => {
-    // Prevent duplicate fetches
-    if (loadingRef.current) return;
-    
     let isMounted = true;
     
     const load = async () => {
-      loadingRef.current = true;
       setDataLoading(true);
+      console.log('[RoadmapBoard] Starting data fetch...');
       
       try {
         // Fetch all three statuses; we can fetch wide and filter client-side
@@ -46,15 +41,16 @@ export default function RoadmapBoardPage({ auth: authProp }: RoadmapBoardPagePro
           fetchFeatures('completed', undefined, 'votes', undefined, auth.org_id || undefined),
         ]);
         
+        console.log('[RoadmapBoard] Fetched features:', planned.length, inProgress.length, completed.length);
+        
         if (isMounted) {
           setAllFeatures([...planned, ...inProgress, ...completed]);
         }
       } catch (e) {
-        console.error('Error loading roadmap board', e);
+        console.error('[RoadmapBoard] Error loading roadmap board', e);
       } finally {
         if (isMounted) {
           setDataLoading(false);
-          loadingRef.current = false;
         }
       }
     };
@@ -64,7 +60,8 @@ export default function RoadmapBoardPage({ auth: authProp }: RoadmapBoardPagePro
     return () => {
       isMounted = false;
     };
-  }, [auth.org_id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sections = useMemo(() => {
     return STATUS_SECTIONS.map(({ title, key }) => {

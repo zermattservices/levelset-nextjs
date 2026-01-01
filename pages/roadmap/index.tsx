@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   RoadmapLayout,
   RoadmapHero,
@@ -36,19 +36,13 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
     sortBy: 'votes',
   });
 
-  // Track loading state with a ref to prevent duplicate fetches
-  const loadingRef = useRef(false);
-  
-  // Load data on mount and when auth/org changes
+  // Load data on mount
   useEffect(() => {
-    // Prevent duplicate fetches
-    if (loadingRef.current) return;
-    
     let isMounted = true;
     
     const loadData = async () => {
-      loadingRef.current = true;
       setDataLoading(true);
+      console.log('[Roadmap] Starting data fetch...');
       
       try {
         // Fetch data regardless of auth state - let RLS handle access
@@ -58,17 +52,18 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
           fetchUserVotesForUser(auth.id),
         ]);
         
+        console.log('[Roadmap] Fetched features:', featuresData.length);
+        
         if (isMounted) {
           setFeatures(featuresData);
           setStats(statsData);
           setVotedFeatures(userVotes);
         }
       } catch (error) {
-        console.error('Error loading roadmap data:', error);
+        console.error('[Roadmap] Error loading roadmap data:', error);
       } finally {
         if (isMounted) {
           setDataLoading(false);
-          loadingRef.current = false;
         }
       }
     };
@@ -78,7 +73,8 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
     return () => {
       isMounted = false;
     };
-  }, [auth.org_id, auth.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle filter changes
   const handleFilterChange = useCallback(async (filters: FilterState) => {
