@@ -1,11 +1,12 @@
 import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { Box } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { LoginPageForm } from '@/components/CodeComponents/auth/LoginPageForm';
 
 export function LoginPage() {
   const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = React.useState(true);
 
   // Get redirect URL from query params - handle both relative and absolute URLs
   const redirectUrl = React.useMemo(() => {
@@ -22,6 +23,32 @@ export function LoginPage() {
     }
     return '/';
   }, [router.query.redirect]);
+
+  // Check if user is already authenticated
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = (await import('@/util/supabase/component')).createSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.access_token) {
+        // User is already authenticated, redirect immediately
+        if (redirectUrl.startsWith('http://') || redirectUrl.startsWith('https://')) {
+          const url = new URL(redirectUrl);
+          url.searchParams.set('token', session.access_token);
+          url.searchParams.set('refresh_token', session.refresh_token || '');
+          window.location.href = url.toString();
+        } else {
+          router.push(redirectUrl);
+        }
+      } else {
+        setCheckingAuth(false);
+      }
+    };
+
+    if (router.isReady) {
+      checkAuth();
+    }
+  }, [router.isReady, redirectUrl, router]);
 
   const handleSuccess = async () => {
     const supabase = (await import('@/util/supabase/component')).createSupabaseClient();
@@ -65,6 +92,38 @@ export function LoginPage() {
       router.push(redirectUrl);
     }
   };
+
+  // Show loading while checking auth
+  if (checkingAuth) {
+    return (
+      <>
+        <Head>
+          <title>Levelset | Login</title>
+        </Head>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+            width: '100%',
+            backgroundColor: '#f3f4f6',
+            fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
+          }}
+        >
+          <CircularProgress
+            size={32}
+            sx={{
+              color: '#31664a',
+              marginBottom: 2,
+            }}
+          />
+          <Box sx={{ color: '#6b7280', fontSize: 14 }}>Checking authentication...</Box>
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>
