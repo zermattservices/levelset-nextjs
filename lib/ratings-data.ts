@@ -100,154 +100,170 @@ interface ConsolidatedEmployee {
 }
 
 /**
- * Build a map of consolidated employees across all locations in an organization.
- * Groups employees by their consolidated_employee_id to handle employees who work at multiple locations.
+ * Build a map of consolidated employees for a specific location's roster.
+ * Only includes employees who are on the specified location's roster, but tracks
+ * their consolidated IDs so ratings from other locations can be included.
  * 
+ * @param rosterLocationId - The location to get the roster from (employees shown in table)
+ * @param allLocationIds - All locations in the org (for fetching consolidated employee info)
  * @returns Map where key = consolidated identity (primary employee ID), value = consolidated employee info
  */
 async function buildConsolidatedEmployeeMap(
   supabase: SupabaseClient,
   orgId: string,
-  locationIds: string[],
+  rosterLocationId: string,
+  allLocationIds: string[],
   area: 'FOH' | 'BOH'
 ): Promise<Map<string, ConsolidatedEmployee>> {
   const fohBohField = area === 'FOH' ? 'is_foh' : 'is_boh';
 
-  // Fetch all active employees from all org locations for the given area
-  const { data: allEmployees, error: empError } = await supabase
+  // Fetch employees from the CURRENT location only (the roster)
+  const { data: rosterEmployees, error: empError } = await supabase
     .from('employees')
     .select('id, full_name, first_name, last_name, consolidated_employee_id, location_id')
-    .in('location_id', locationIds)
+    .eq('location_id', rosterLocationId)
     .eq('active', true)
     .eq(fohBohField, true)
     .order('full_name');
 
-  if (empError || !allEmployees) {
+  if (empError || !rosterEmployees) {
     console.error('Error fetching employees for consolidation:', empError);
     return new Map();
   }
 
-  // Build consolidated employee map
+  // Build consolidated employee map from roster employees only
   // Key = the "primary" employee ID (either their own ID or their consolidated_employee_id)
   const consolidatedMap = new Map<string, ConsolidatedEmployee>();
 
-  // First pass: identify primary employees (those who are targets of consolidation or have no consolidation)
-  allEmployees.forEach(emp => {
-    // Determine the primary ID for this employee
-    // If consolidated_employee_id points to a DIFFERENT employee, use that as the primary
-    // If consolidated_employee_id points to self or is null, this employee IS the primary
+  // For each roster employee, determine their consolidated identity
+  for (const emp of rosterEmployees) {
     const consolidatedId = emp.consolidated_employee_id;
-    const isPrimary = !consolidatedId || consolidatedId === emp.id;
+    // The primary ID is either the consolidated_employee_id (if pointing to someone else) or their own ID
+    const primaryId = (consolidatedId && consolidatedId !== emp.id) ? consolidatedId : emp.id;
     
-    if (isPrimary) {
-      // This employee is a primary (either no consolidation or self-referencing)
-      if (!consolidatedMap.has(emp.id)) {
-        consolidatedMap.set(emp.id, {
-          primaryId: emp.id,
-          name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
-          firstName: emp.first_name,
-          lastName: emp.last_name,
-          allIds: [emp.id]
-        });
+    if (!consolidatedMap.has(primaryId)) {
+      // Create new entry for this consolidated identity
+      consolidatedMap.set(primaryId, {
+        primaryId: primaryId,
+        name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
+        firstName: emp.first_name,
+        lastName: emp.last_name,
+        allIds: [emp.id]
+      });
+      
+      // If this employee points to a different consolidated ID, add that ID too
+      if (consolidatedId && consolidatedId !== emp.id) {
+        consolidatedMap.get(primaryId)!.allIds.push(consolidatedId);
+      }
+    } else {
+      // Add this employee's ID to existing entry
+      const existing = consolidatedMap.get(primaryId)!;
+      if (!existing.allIds.includes(emp.id)) {
+        existing.allIds.push(emp.id);
       }
     }
-  });
+  }
 
-  // Second pass: add secondary employees to their primary's group
-  allEmployees.forEach(emp => {
-    const consolidatedId = emp.consolidated_employee_id;
-    const isPrimary = !consolidatedId || consolidatedId === emp.id;
+  // For each consolidated identity, fetch all linked employee IDs from ALL locations
+  // This ensures we capture ratings from other locations for these employees
+  const primaryIds = Array.from(consolidatedMap.keys());
+  for (let i = 0; i < primaryIds.length; i++) {
+    const primaryId = primaryIds[i];
+    const consolidated = consolidatedMap.get(primaryId)!;
     
-    if (!isPrimary && consolidatedId) {
-      // This employee points to another employee as their primary
-      if (consolidatedMap.has(consolidatedId)) {
-        // Add this employee's ID to the primary's allIds
-        const primary = consolidatedMap.get(consolidatedId)!;
-        if (!primary.allIds.includes(emp.id)) {
-          primary.allIds.push(emp.id);
+    // Find all employees across all locations that share this consolidated identity
+    const { data: linkedEmployees } = await supabase
+      .from('employees')
+      .select('id, consolidated_employee_id')
+      .in('location_id', allLocationIds)
+      .or(`id.eq.${primaryId},consolidated_employee_id.eq.${primaryId}`);
+
+    if (linkedEmployees) {
+      linkedEmployees.forEach(linked => {
+        if (!consolidated.allIds.includes(linked.id)) {
+          consolidated.allIds.push(linked.id);
         }
-      } else {
-        // The target doesn't exist in our map (might be inactive or different area)
-        // Create an entry using this employee's info but with the consolidated ID as primary
-        consolidatedMap.set(consolidatedId, {
-          primaryId: consolidatedId,
-          name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
-          firstName: emp.first_name,
-          lastName: emp.last_name,
-          allIds: [consolidatedId, emp.id]
-        });
-      }
+      });
     }
-  });
+  }
 
   return consolidatedMap;
 }
 
 /**
- * Build a map of consolidated leaders (raters) across all locations in an organization.
+ * Build a map of consolidated leaders (raters) for a specific location's roster.
  * Similar to buildConsolidatedEmployeeMap but doesn't filter by FOH/BOH since leaders can rate either.
+ * 
+ * @param rosterLocationId - The location to get the roster from (leaders shown in table)
+ * @param allLocationIds - All locations in the org (for fetching consolidated employee info)
  */
 async function buildConsolidatedLeaderMap(
   supabase: SupabaseClient,
   orgId: string,
-  locationIds: string[]
+  rosterLocationId: string,
+  allLocationIds: string[]
 ): Promise<Map<string, ConsolidatedEmployee>> {
-  // Fetch all active employees who could be raters (leaders) from all org locations
-  const { data: allEmployees, error: empError } = await supabase
+  // Fetch employees from the CURRENT location only (the roster)
+  const { data: rosterEmployees, error: empError } = await supabase
     .from('employees')
     .select('id, full_name, first_name, last_name, consolidated_employee_id, location_id, role')
-    .in('location_id', locationIds)
+    .eq('location_id', rosterLocationId)
     .eq('active', true)
     .order('full_name');
 
-  if (empError || !allEmployees) {
+  if (empError || !rosterEmployees) {
     console.error('Error fetching employees for leader consolidation:', empError);
     return new Map();
   }
 
-  // Build consolidated leader map using same logic as employee map
+  // Build consolidated leader map from roster employees only
   const consolidatedMap = new Map<string, ConsolidatedEmployee>();
 
-  // First pass: identify primary employees
-  allEmployees.forEach(emp => {
+  // For each roster employee, determine their consolidated identity
+  for (const emp of rosterEmployees) {
     const consolidatedId = emp.consolidated_employee_id;
-    const isPrimary = !consolidatedId || consolidatedId === emp.id;
+    const primaryId = (consolidatedId && consolidatedId !== emp.id) ? consolidatedId : emp.id;
     
-    if (isPrimary) {
-      if (!consolidatedMap.has(emp.id)) {
-        consolidatedMap.set(emp.id, {
-          primaryId: emp.id,
-          name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
-          firstName: emp.first_name,
-          lastName: emp.last_name,
-          allIds: [emp.id]
-        });
+    if (!consolidatedMap.has(primaryId)) {
+      consolidatedMap.set(primaryId, {
+        primaryId: primaryId,
+        name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
+        firstName: emp.first_name,
+        lastName: emp.last_name,
+        allIds: [emp.id]
+      });
+      
+      if (consolidatedId && consolidatedId !== emp.id) {
+        consolidatedMap.get(primaryId)!.allIds.push(consolidatedId);
+      }
+    } else {
+      const existing = consolidatedMap.get(primaryId)!;
+      if (!existing.allIds.includes(emp.id)) {
+        existing.allIds.push(emp.id);
       }
     }
-  });
+  }
 
-  // Second pass: add secondary employees to their primary's group
-  allEmployees.forEach(emp => {
-    const consolidatedId = emp.consolidated_employee_id;
-    const isPrimary = !consolidatedId || consolidatedId === emp.id;
+  // For each consolidated identity, fetch all linked employee IDs from ALL locations
+  const leaderPrimaryIds = Array.from(consolidatedMap.keys());
+  for (let i = 0; i < leaderPrimaryIds.length; i++) {
+    const primaryId = leaderPrimaryIds[i];
+    const consolidated = consolidatedMap.get(primaryId)!;
     
-    if (!isPrimary && consolidatedId) {
-      if (consolidatedMap.has(consolidatedId)) {
-        const primary = consolidatedMap.get(consolidatedId)!;
-        if (!primary.allIds.includes(emp.id)) {
-          primary.allIds.push(emp.id);
+    const { data: linkedEmployees } = await supabase
+      .from('employees')
+      .select('id, consolidated_employee_id')
+      .in('location_id', allLocationIds)
+      .or(`id.eq.${primaryId},consolidated_employee_id.eq.${primaryId}`);
+
+    if (linkedEmployees) {
+      linkedEmployees.forEach(linked => {
+        if (!consolidated.allIds.includes(linked.id)) {
+          consolidated.allIds.push(linked.id);
         }
-      } else {
-        consolidatedMap.set(consolidatedId, {
-          primaryId: consolidatedId,
-          name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
-          firstName: emp.first_name,
-          lastName: emp.last_name,
-          allIds: [consolidatedId, emp.id]
-        });
-      }
+      });
     }
-  });
+  }
 
   return consolidatedMap;
 }
@@ -276,11 +292,12 @@ export async function fetchOverviewData(
   // Get dynamic positions for this location/org
   const positions = await fetchPositionsList(supabase, locationId, area);
 
-  // Build consolidated employee map (handles employees at multiple locations)
+  // Build consolidated employee map (roster from current location, ratings from all locations)
   const consolidatedEmployeeMap = await buildConsolidatedEmployeeMap(
     supabase,
     orgId,
-    locationIds,
+    locationId,  // Roster from current location only
+    locationIds, // All locations for rating consolidation
     area
   );
 
@@ -500,12 +517,13 @@ export async function fetchPositionData(
   const fohBohField = isFOH ? 'is_foh' : 'is_boh';
   const area: 'FOH' | 'BOH' = isFOH ? 'FOH' : 'BOH';
 
-  // Build consolidated employee map for this area
+  // Build consolidated employee map for this area (roster from current location, ratings from all)
   // For special positions, we'll filter further after building the map
   let consolidatedEmployeeMap = await buildConsolidatedEmployeeMap(
     supabase,
     orgId,
-    locationIds,
+    locationId,  // Roster from current location only
+    locationIds, // All locations for rating consolidation
     area
   );
 
@@ -683,11 +701,12 @@ export async function fetchLeadershipData(
   // Get dynamic positions for this location/org
   const positions = await fetchPositionsList(supabase, locationId, area);
 
-  // Build consolidated leader map (handles leaders at multiple locations)
+  // Build consolidated leader map (roster from current location, ratings from all locations)
   const consolidatedLeaderMap = await buildConsolidatedLeaderMap(
     supabase,
     orgId,
-    locationIds
+    locationId,  // Roster from current location only
+    locationIds  // All locations for rating consolidation
   );
 
   // Build a reverse lookup: employee_id -> consolidated primary ID
