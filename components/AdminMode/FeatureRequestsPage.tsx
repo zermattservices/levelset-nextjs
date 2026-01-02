@@ -489,8 +489,10 @@ export function FeatureRequestsPage() {
               <span className={styles.statLabel}>Pending Review</span>
             </div>
             <div className={styles.statItem}>
-              <span className={styles.statNumber}>{features.length}</span>
-              <span className={styles.statLabel}>Total Features</span>
+              <span className={styles.statNumber}>
+                {features.filter(f => f.status !== 'completed' && f.status !== 'cancelled').length}
+              </span>
+              <span className={styles.statLabel}>Outstanding Features</span>
             </div>
           </>
         ) : (
