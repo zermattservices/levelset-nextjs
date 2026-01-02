@@ -56,8 +56,8 @@ export function FeatureRequestsPage() {
   const [features, setFeatures] = React.useState<RoadmapFeature[]>([]);
   const [users, setUsers] = React.useState<AppUser[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [activeTab, setActiveTab] = React.useState<'outstanding' | 'completed'>('outstanding');
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState<string>('all');
   const [categoryFilter, setCategoryFilter] = React.useState<string>('all');
   
   // Modal states
@@ -157,9 +157,16 @@ export function FeatureRequestsPage() {
     });
   }, [users, editCreatorSearch]);
 
-  // Filter and sort features (pending review at top)
+  // Filter and sort features based on active tab
   const filteredFeatures = React.useMemo(() => {
     const filtered = features.filter(feature => {
+      // Tab filter - Outstanding shows non-completed, Completed shows completed
+      if (activeTab === 'outstanding' && feature.status === 'completed') {
+        return false;
+      }
+      if (activeTab === 'completed' && feature.status !== 'completed') {
+        return false;
+      }
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -167,10 +174,6 @@ export function FeatureRequestsPage() {
             !feature.description?.toLowerCase().includes(query)) {
           return false;
         }
-      }
-      // Status filter
-      if (statusFilter !== 'all' && feature.status !== statusFilter) {
-        return false;
       }
       // Category filter
       if (categoryFilter !== 'all' && feature.category !== categoryFilter) {
@@ -181,13 +184,18 @@ export function FeatureRequestsPage() {
     
     // Sort: pending review (submitted) at top, then by created_at desc
     return filtered.sort((a, b) => {
-      // Pending review (submitted) first
+      // Pending review (submitted) first (only relevant for outstanding tab)
       if (a.status === 'submitted' && b.status !== 'submitted') return -1;
       if (a.status !== 'submitted' && b.status === 'submitted') return 1;
       // Then by created_at (newest first)
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-  }, [features, searchQuery, statusFilter, categoryFilter]);
+  }, [features, searchQuery, activeTab, categoryFilter]);
+  
+  // Count completed features
+  const completedCount = React.useMemo(() => {
+    return features.filter(f => f.status === 'completed').length;
+  }, [features]);
 
   // Handle approve
   const handleApproveClick = (feature: RoadmapFeature) => {
@@ -379,9 +387,27 @@ export function FeatureRequestsPage() {
             Manage and approve user-submitted feature requests
           </p>
         </div>
-        <button className={styles.createButton} onClick={handleCreateClick}>
-          <AddIcon fontSize="small" />
-          Create Feature
+        {activeTab === 'outstanding' && (
+          <button className={styles.createButton} onClick={handleCreateClick}>
+            <AddIcon fontSize="small" />
+            Create Feature
+          </button>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tab} ${activeTab === 'outstanding' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('outstanding')}
+        >
+          Outstanding
+        </button>
+        <button
+          className={`${styles.tab} ${activeTab === 'completed' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('completed')}
+        >
+          Completed
         </button>
       </div>
 
@@ -404,17 +430,6 @@ export function FeatureRequestsPage() {
         
         <select
           className={styles.filterSelect}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="all">All Statuses</option>
-          {STATUSES.map(s => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-        </select>
-        
-        <select
-          className={styles.filterSelect}
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
         >
@@ -428,14 +443,8 @@ export function FeatureRequestsPage() {
       {/* Stats */}
       <div className={styles.stats}>
         <div className={styles.statItem}>
-          <span className={styles.statNumber}>
-            {features.filter(f => f.status === 'submitted').length}
-          </span>
-          <span className={styles.statLabel}>Pending Review</span>
-        </div>
-        <div className={styles.statItem}>
-          <span className={styles.statNumber}>{features.length}</span>
-          <span className={styles.statLabel}>Total Features</span>
+          <span className={styles.statNumber}>{completedCount}</span>
+          <span className={styles.statLabel}>Completed Features</span>
         </div>
       </div>
 
