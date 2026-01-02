@@ -58,6 +58,7 @@ export function FeatureRequestsPage() {
   const [loading, setLoading] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState<'outstanding' | 'completed'>('outstanding');
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [statusFilter, setStatusFilter] = React.useState<string>('all');
   const [categoryFilter, setCategoryFilter] = React.useState<string>('all');
   
   // Modal states
@@ -175,6 +176,10 @@ export function FeatureRequestsPage() {
           return false;
         }
       }
+      // Status filter (only on outstanding tab)
+      if (activeTab === 'outstanding' && statusFilter !== 'all' && feature.status !== statusFilter) {
+        return false;
+      }
       // Category filter
       if (categoryFilter !== 'all' && feature.category !== categoryFilter) {
         return false;
@@ -209,7 +214,7 @@ export function FeatureRequestsPage() {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  }, [features, searchQuery, activeTab, categoryFilter]);
+  }, [features, searchQuery, activeTab, statusFilter, categoryFilter]);
   
   // Count completed/cancelled features
   const completedCount = React.useMemo(() => {
@@ -446,6 +451,20 @@ export function FeatureRequestsPage() {
           }}
           sx={{ minWidth: 250 }}
         />
+        
+        {activeTab === 'outstanding' && (
+          <select
+            className={styles.filterSelect}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All Statuses</option>
+            <option value="submitted">Pending Review</option>
+            <option value="idea">Idea</option>
+            <option value="planned">Planned</option>
+            <option value="in_progress">In Progress</option>
+          </select>
+        )}
         
         <select
           className={styles.filterSelect}
