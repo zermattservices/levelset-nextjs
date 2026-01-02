@@ -442,10 +442,25 @@ export function FeatureRequestsPage() {
 
       {/* Stats */}
       <div className={styles.stats}>
-        <div className={styles.statItem}>
-          <span className={styles.statNumber}>{completedCount}</span>
-          <span className={styles.statLabel}>Completed Features</span>
-        </div>
+        {activeTab === 'outstanding' ? (
+          <>
+            <div className={styles.statItem}>
+              <span className={styles.statNumber}>
+                {features.filter(f => f.status === 'submitted').length}
+              </span>
+              <span className={styles.statLabel}>Pending Review</span>
+            </div>
+            <div className={styles.statItem}>
+              <span className={styles.statNumber}>{features.length}</span>
+              <span className={styles.statLabel}>Total Features</span>
+            </div>
+          </>
+        ) : (
+          <div className={styles.statItem}>
+            <span className={styles.statNumber}>{completedCount}</span>
+            <span className={styles.statLabel}>Completed Features</span>
+          </div>
+        )}
       </div>
 
       {/* Features Table */}
