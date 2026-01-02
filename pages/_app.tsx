@@ -1,6 +1,8 @@
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { LicenseInfo } from '@mui/x-license';
+import { AuthProvider } from '@/lib/providers/AuthProvider';
 import "../styles/globals.css";
 import "../styles/datagrid-pro.css";
 import "../components/CodeComponents/scoreboard.css";
@@ -18,7 +20,13 @@ if (licenseKey) {
 }
 
 export default function MyApp({ Component, pageProps }: AppProps) {
-  return (
+  const router = useRouter();
+  
+  // Wrap roadmap pages in AuthProvider at _app level
+  // so useAuth() works correctly in page components
+  const isRoadmapPage = router.pathname.startsWith('/roadmap');
+  
+  const content = (
     <>
       <Head>
         {/* Force light mode */}
@@ -50,4 +58,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <Component {...pageProps} />
     </>
   );
+  
+  // Wrap roadmap pages in AuthProvider so useAuth works at page level
+  if (isRoadmapPage) {
+    return <AuthProvider>{content}</AuthProvider>;
+  }
+  
+  return content;
 }

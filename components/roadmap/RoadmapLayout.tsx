@@ -2,12 +2,19 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import MenuNavigation from '@/components/ui/MenuNavigation/MenuNavigation';
-import AppProviders from '@/lib/providers/AppProviders';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { PermissionsProvider } from '@/lib/providers/PermissionsProvider';
+import { ImpersonationProvider } from '@/lib/providers/ImpersonationProvider';
+import { LocationProvider } from '@/components/CodeComponents/LocationContext';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
+import { LocationSelectModal } from '@/components/CodeComponents/LocationSelectModal';
+import { ImpersonationBanner } from '@/components/ImpersonationBanner/ImpersonationBanner';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import RoadmapSubHeader from './RoadmapSubHeader';
 import styles from './Roadmap.module.css';
+
+// Import Plasmic CSS for design tokens
+import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 
 interface RoadmapLayoutProps {
   children: React.ReactNode;
@@ -141,11 +148,20 @@ export default function RoadmapLayout({
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
       </Head>
-      <AppProviders>
-        <RoadmapLayoutContent subHeaderMode={subHeaderMode} activeTab={activeTab}>
-          {children}
-        </RoadmapLayoutContent>
-      </AppProviders>
+      {/* AuthProvider is in _app.tsx for roadmap pages, so we just add the other providers here */}
+      <div className={projectcss.plasmic_tokens}>
+        <ImpersonationProvider>
+          <LocationProvider>
+            <PermissionsProvider>
+              <ImpersonationBanner />
+              <RoadmapLayoutContent subHeaderMode={subHeaderMode} activeTab={activeTab}>
+                {children}
+              </RoadmapLayoutContent>
+              <LocationSelectModal />
+            </PermissionsProvider>
+          </LocationProvider>
+        </ImpersonationProvider>
+      </div>
     </>
   );
 }

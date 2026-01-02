@@ -100,9 +100,12 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
   }, [supabase]);
 
   React.useEffect(() => {
+    // Track if we're in the process of setting session from cookies to avoid infinite loops
+    let isSettingSessionFromCookies = false;
+    
     // Helper function to set shared cookies for cross-domain auth
     const setSharedCookies = (session: any) => {
-      if (!session) return;
+      if (!session?.access_token) return;
       
       const maxAge = 100 * 365 * 24 * 60 * 60; // 100 years, never expires
       const domain = '.levelset.io'; // Shared across all subdomains
@@ -110,6 +113,7 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
       
       document.cookie = `levelset-access-token=${session.access_token}; ${cookieOptions}`;
       document.cookie = `levelset-refresh-token=${session.refresh_token || ''}; ${cookieOptions}`;
+      console.log('[Auth] Shared cookies set');
     };
 
     // Helper function to clear shared cookies
@@ -120,72 +124,96 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
       
       document.cookie = `levelset-access-token=; ${cookieOptions}`;
       document.cookie = `levelset-refresh-token=; ${cookieOptions}`;
+      console.log('[Auth] Shared cookies cleared');
     };
 
-    // Check for shared cookies on initialization and set session if found
-    const initializeFromSharedCookies = async () => {
+    // Helper function to get cookies
+    const getSharedCookies = () => {
       const cookies = document.cookie.split(/\s*;\s*/).map(cookie => cookie.split('='));
       const accessTokenCookie = cookies.find(x => x[0] === 'levelset-access-token');
       const refreshTokenCookie = cookies.find(x => x[0] === 'levelset-refresh-token');
-
-      if (accessTokenCookie && refreshTokenCookie && accessTokenCookie[1] && refreshTokenCookie[1]) {
-        try {
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessTokenCookie[1],
-            refresh_token: refreshTokenCookie[1],
-          });
-
-          if (!error && data.session) {
-            setCurrentUser(data.session.user);
-            fetchAppUserData(data.session.user);
-            setIsLoaded(true);
-            return true; // Session set from cookies
-          }
-        } catch (error) {
-          console.error('Error setting session from shared cookies:', error);
-        }
-      }
-      return false;
+      return {
+        accessToken: accessTokenCookie?.[1] || null,
+        refreshToken: refreshTokenCookie?.[1] || null,
+      };
     };
 
-    let subscription: any;
-
-    // Initialize from shared cookies first, then set up listeners
-    initializeFromSharedCookies().then((sessionFromCookies) => {
-      // Set up auth state change listener
-      const {
-        data: { subscription: sub },
-      } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "SIGNED_OUT") {
-          setCurrentUser(null);
-          setAppUser(null);
-          clearSharedCookies();
-        } else if (["SIGNED_IN", "INITIAL_SESSION", "TOKEN_REFRESHED"].includes(event) && session) {
-          setCurrentUser(session.user);
-          fetchAppUserData(session.user);
-          setSharedCookies(session); // Update shared cookies when session changes
+    // Set up auth state change listener FIRST
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[Auth] onAuthStateChange:', event, 'hasSession:', !!session);
+      
+      if (event === "SIGNED_OUT") {
+        setCurrentUser(null);
+        setAppUser(null);
+        clearSharedCookies();
+        setIsLoaded(true);
+      } else if (["SIGNED_IN", "INITIAL_SESSION", "TOKEN_REFRESHED"].includes(event) && session) {
+        setCurrentUser(session.user);
+        fetchAppUserData(session.user);
+        // Only update cookies if this wasn't triggered by us setting session from cookies
+        if (!isSettingSessionFromCookies) {
+          setSharedCookies(session);
         }
         setIsLoaded(true);
-      });
-      subscription = sub;
-
-      // Also check for existing session in case cookies weren't set yet
-      if (!sessionFromCookies) {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (session) {
-            setCurrentUser(session.user);
-            fetchAppUserData(session.user);
-            setSharedCookies(session);
-          }
-          setIsLoaded(true);
-        });
       }
     });
 
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
+    // Initialize auth - try existing session first, then cookies
+    const initializeAuth = async () => {
+      console.log('[Auth] Initializing...');
+      
+      // First, check if there's already a session
+      const { data: { session: existingSession } } = await supabase.auth.getSession();
+      
+      if (existingSession) {
+        console.log('[Auth] Found existing session');
+        setCurrentUser(existingSession.user);
+        fetchAppUserData(existingSession.user);
+        setSharedCookies(existingSession);
+        setIsLoaded(true);
+        return;
       }
+      
+      // No existing session - try to restore from shared cookies
+      const { accessToken, refreshToken } = getSharedCookies();
+      console.log('[Auth] No existing session, checking cookies...', { hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken });
+      
+      if (accessToken && refreshToken) {
+        try {
+          isSettingSessionFromCookies = true;
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          isSettingSessionFromCookies = false;
+          
+          if (!error && data.session) {
+            console.log('[Auth] Session restored from cookies');
+            // onAuthStateChange will handle setting user state
+            return;
+          } else {
+            console.log('[Auth] Failed to restore session from cookies:', error?.message);
+            // Clear invalid cookies
+            clearSharedCookies();
+          }
+        } catch (error) {
+          isSettingSessionFromCookies = false;
+          console.error('[Auth] Error setting session from cookies:', error);
+          clearSharedCookies();
+        }
+      }
+      
+      // No valid session found
+      console.log('[Auth] No valid session found');
+      setIsLoaded(true);
+    };
+
+    initializeAuth();
+
+    return () => {
+      subscription.unsubscribe();
     };
   }, [supabase, fetchAppUserData]);
 
