@@ -1,10 +1,18 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import FormControl from '@mui/material/FormControl';
 import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import sty from './OEPillarMappingTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 
@@ -36,6 +44,8 @@ interface Pillar {
   id: string;
   name: string;
   display_order: number;
+  weight: number;
+  description: string;
 }
 
 interface PillarMapping {
@@ -56,6 +66,7 @@ export function OEPillarMappingTab({ orgId, disabled = false }: OEPillarMappingT
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [descriptionsModalOpen, setDescriptionsModalOpen] = React.useState(false);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
@@ -82,7 +93,7 @@ export function OEPillarMappingTab({ orgId, disabled = false }: OEPillarMappingT
         // Fetch pillars
         const { data: pillarsData, error: pillarsError } = await supabase
           .from('oe_pillars')
-          .select('id, name, display_order')
+          .select('id, name, display_order, weight, description')
           .order('display_order', { ascending: true });
 
         if (pillarsError) throw pillarsError;
@@ -271,7 +282,37 @@ export function OEPillarMappingTab({ orgId, disabled = false }: OEPillarMappingT
   return (
     <div className={sty.container}>
       <div className={sty.intro}>
-        <h3 className={sty.introTitle}>OE Pillar Mapping</h3>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+          <h3 className={sty.introTitle} style={{ margin: 0 }}>OE Pillar Mapping</h3>
+          <Button
+            variant="outlined"
+            size="small"
+            disableRipple
+            startIcon={<InfoOutlinedIcon sx={{ fontSize: 16 }} />}
+            onClick={() => setDescriptionsModalOpen(true)}
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              textTransform: 'none',
+              height: 36,
+              minWidth: 150,
+              borderRadius: '8px',
+              borderColor: '#e5e7eb',
+              color: '#4b5563',
+              backgroundColor: '#ffffff',
+              padding: '8px 12px',
+              '&:hover': {
+                borderColor: '#31664a',
+                backgroundColor: '#ffffff',
+              },
+              '&:active': {
+                backgroundColor: '#ffffff',
+              },
+            }}
+          >
+            Pillar Descriptions
+          </Button>
+        </Box>
         <p className={sty.introDescription}>
           Assign up to two Operation Excellence pillars to each position. These pillars help categorize 
           positions by their primary areas of focus.
@@ -291,6 +332,56 @@ export function OEPillarMappingTab({ orgId, disabled = false }: OEPillarMappingT
           <span>Saving...</span>
         </div>
       )}
+
+      {/* Pillar Descriptions Modal */}
+      <Dialog 
+        open={descriptionsModalOpen} 
+        onClose={() => setDescriptionsModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            maxHeight: '80vh',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontFamily, 
+          fontSize: 18, 
+          fontWeight: 600, 
+          color: '#0d1b14',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingRight: 2,
+        }}>
+          OE Pillar Descriptions
+          <IconButton
+            onClick={() => setDescriptionsModalOpen(false)}
+            size="small"
+            sx={{ color: '#6b7280' }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ paddingTop: '8px !important' }}>
+          <p className={sty.modalSubtitle}>
+            These pillars are used to calculate overall operational excellence scores. Each pillar has a weight that determines its contribution to the total score.
+          </p>
+          <div className={sty.pillarDescriptionsList}>
+            {pillars.map((pillar) => (
+              <div key={pillar.id} className={sty.pillarDescriptionItem}>
+                <div className={sty.pillarDescriptionHeader}>
+                  <span className={sty.pillarDescriptionName}>{pillar.name}</span>
+                  <span className={sty.pillarDescriptionWeight}>{pillar.weight}%</span>
+                </div>
+                <p className={sty.pillarDescriptionText}>{pillar.description}</p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
