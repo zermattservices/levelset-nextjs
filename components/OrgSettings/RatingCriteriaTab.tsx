@@ -10,11 +10,16 @@ import TextField from '@mui/material/TextField';
 import Menu from '@mui/material/Menu';
 import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
 import TranslateIcon from '@mui/icons-material/Translate';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CloseIcon from '@mui/icons-material/Close';
 import sty from './RatingCriteriaTab.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 
@@ -81,10 +86,47 @@ const LanguageSelect = styled(Select)(() => ({
   },
 }));
 
+const PillarSelect = styled(Select)(() => ({
+  fontFamily,
+  fontSize: 12,
+  height: 32,
+  minWidth: 100,
+  borderRadius: 6,
+  backgroundColor: '#ffffff',
+  '& .MuiSelect-select': {
+    padding: '4px 8px',
+    paddingRight: '24px !important',
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#e5e7eb',
+    borderRadius: 6,
+  },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#31664a',
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#31664a',
+    borderWidth: 1,
+  },
+  '& .MuiSvgIcon-root': {
+    color: '#6b7280',
+    right: 4,
+    fontSize: 18,
+  },
+}));
+
 interface Position {
   id: string;
   name: string;
   zone: 'FOH' | 'BOH';
+}
+
+interface Pillar {
+  id: string;
+  name: string;
+  display_order: number;
+  weight: number;
+  description: string;
 }
 
 interface Criteria {
@@ -95,6 +137,8 @@ interface Criteria {
   name_es: string;
   description: string;
   description_es: string;
+  pillar_1_id: string | null;
+  pillar_2_id: string | null;
   isNew?: boolean;
 }
 
@@ -105,6 +149,7 @@ interface RatingCriteriaTabProps {
 
 export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTabProps) {
   const [positions, setPositions] = React.useState<Position[]>([]);
+  const [pillars, setPillars] = React.useState<Pillar[]>([]);
   const [selectedPositionId, setSelectedPositionId] = React.useState<string>('');
   const [criteria, setCriteria] = React.useState<Criteria[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -114,6 +159,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
   const [error, setError] = React.useState<string | null>(null);
   const [language, setLanguage] = React.useState<'en' | 'es'>('en');
   const [translateMenuAnchor, setTranslateMenuAnchor] = React.useState<HTMLElement | null>(null);
+  const [descriptionsModalOpen, setDescriptionsModalOpen] = React.useState(false);
   const textareaRefs = React.useRef<Map<string, HTMLTextAreaElement>>(new Map());
   
   // Refs for autosave on unmount
@@ -146,39 +192,48 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
     });
   }, [criteria]);
 
-  // Fetch positions
+  // Fetch positions and pillars
   React.useEffect(() => {
-    async function fetchPositions() {
+    async function fetchData() {
       if (!orgId) {
         setLoading(false);
         return;
       }
 
       try {
-        const { data, error: fetchError } = await supabase
+        // Fetch positions
+        const { data: positionsData, error: positionsError } = await supabase
           .from('org_positions')
           .select('id, name, zone')
           .eq('org_id', orgId)
           .eq('is_active', true)
           .order('display_order', { ascending: true });
 
-        if (fetchError) throw fetchError;
-
-        setPositions(data || []);
+        if (positionsError) throw positionsError;
+        setPositions(positionsData || []);
         
         // Auto-select first position if available
-        if (data && data.length > 0 && !selectedPositionId) {
-          setSelectedPositionId(data[0].id);
+        if (positionsData && positionsData.length > 0 && !selectedPositionId) {
+          setSelectedPositionId(positionsData[0].id);
         }
+
+        // Fetch pillars
+        const { data: pillarsData, error: pillarsError } = await supabase
+          .from('oe_pillars')
+          .select('id, name, display_order, weight, description')
+          .order('display_order', { ascending: true });
+
+        if (pillarsError) throw pillarsError;
+        setPillars(pillarsData || []);
       } catch (err) {
-        console.error('Error fetching positions:', err);
-        setError('Failed to load positions');
+        console.error('Error fetching data:', err);
+        setError('Failed to load data');
       } finally {
         setLoading(false);
       }
     }
 
-    fetchPositions();
+    fetchData();
   }, [orgId, supabase]);
 
   // Fetch criteria for selected position
@@ -192,7 +247,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
       try {
         const { data, error: fetchError } = await supabase
           .from('position_criteria')
-          .select('id, position_id, criteria_order, name, name_es, description, description_es')
+          .select('id, position_id, criteria_order, name, name_es, description, description_es, pillar_1_id, pillar_2_id')
           .eq('position_id', selectedPositionId)
           .order('criteria_order', { ascending: true });
 
@@ -209,6 +264,8 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
               ...existing,
               name_es: existing.name_es || '',
               description_es: existing.description_es || '',
+              pillar_1_id: existing.pillar_1_id || null,
+              pillar_2_id: existing.pillar_2_id || null,
             });
           } else {
             fullCriteria.push({
@@ -219,6 +276,8 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
               name_es: '',
               description: '',
               description_es: '',
+              pillar_1_id: null,
+              pillar_2_id: null,
               isNew: true,
             });
           }
@@ -243,7 +302,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
     setHasChanges(false);
   };
 
-  const handleCriteriaChange = (criteriaOrder: number, field: 'name' | 'name_es' | 'description' | 'description_es', value: string) => {
+  const handleCriteriaChange = (criteriaOrder: number, field: 'name' | 'name_es' | 'description' | 'description_es' | 'pillar_1_id' | 'pillar_2_id', value: string | null) => {
     setCriteria(criteria.map(c =>
       c.criteria_order === criteriaOrder ? { ...c, [field]: value } : c
     ));
@@ -275,6 +334,8 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
           name_es: c.name_es || null,
           description: c.description,
           description_es: c.description_es || null,
+          pillar_1_id: c.pillar_1_id || null,
+          pillar_2_id: c.pillar_2_id || null,
         }));
 
       if (criteriaToInsert.length > 0) {
@@ -321,6 +382,8 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                 name_es: c.name_es || null,
                 description: c.description,
                 description_es: c.description_es || null,
+                pillar_1_id: c.pillar_1_id || null,
+                pillar_2_id: c.pillar_2_id || null,
               }));
 
             if (criteriaToInsert.length > 0) {
@@ -582,40 +645,70 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
       {error && <div className={sty.errorMessage}>{error}</div>}
 
       <div className={sty.dropdownRow}>
-        <label className={sty.dropdownLabel}>Select a position:</label>
-        <FormControl sx={{ width: 280 }}>
-          <StyledSelect
-            value={selectedPositionId}
-            onChange={(e) => handlePositionChange(e.target.value as string)}
-            displayEmpty
-            renderValue={(value) => {
-              if (!value) return <span className={sty.placeholder}>Select a position</span>;
-              const pos = positions.find(p => p.id === value);
-              return pos ? `${pos.name} (${pos.zone})` : '';
-            }}
-          >
-            {fohPositions.length > 0 && (
-              <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' }}>
-                FOH Positions
-              </ListSubheader>
-            )}
-            {fohPositions.map(pos => (
-              <MenuItem key={pos.id} value={pos.id} sx={{ fontFamily }}>
-                {pos.name}
-              </MenuItem>
-            ))}
-            {bohPositions.length > 0 && (
-              <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' }}>
-                BOH Positions
-              </ListSubheader>
-            )}
-            {bohPositions.map(pos => (
-              <MenuItem key={pos.id} value={pos.id} sx={{ fontFamily }}>
-                {pos.name}
-              </MenuItem>
-            ))}
-          </StyledSelect>
-        </FormControl>
+        <div className={sty.dropdownLeft}>
+          <label className={sty.dropdownLabel}>Select a position:</label>
+          <FormControl sx={{ width: 280 }}>
+            <StyledSelect
+              value={selectedPositionId}
+              onChange={(e) => handlePositionChange(e.target.value as string)}
+              displayEmpty
+              renderValue={(value) => {
+                if (!value) return <span className={sty.placeholder}>Select a position</span>;
+                const pos = positions.find(p => p.id === value);
+                return pos ? `${pos.name} (${pos.zone})` : '';
+              }}
+            >
+              {fohPositions.length > 0 && (
+                <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' }}>
+                  FOH Positions
+                </ListSubheader>
+              )}
+              {fohPositions.map(pos => (
+                <MenuItem key={pos.id} value={pos.id} sx={{ fontFamily }}>
+                  {pos.name}
+                </MenuItem>
+              ))}
+              {bohPositions.length > 0 && (
+                <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' }}>
+                  BOH Positions
+                </ListSubheader>
+              )}
+              {bohPositions.map(pos => (
+                <MenuItem key={pos.id} value={pos.id} sx={{ fontFamily }}>
+                  {pos.name}
+                </MenuItem>
+              ))}
+            </StyledSelect>
+          </FormControl>
+        </div>
+        <Button
+          variant="outlined"
+          size="small"
+          disableRipple
+          startIcon={<InfoOutlinedIcon sx={{ fontSize: 16 }} />}
+          onClick={() => setDescriptionsModalOpen(true)}
+          sx={{
+            fontFamily,
+            fontSize: 13,
+            textTransform: 'none',
+            height: 36,
+            minWidth: 150,
+            borderRadius: '8px',
+            borderColor: '#e5e7eb',
+            color: '#4b5563',
+            backgroundColor: '#ffffff',
+            padding: '8px 12px',
+            '&:hover': {
+              borderColor: '#31664a',
+              backgroundColor: '#ffffff',
+            },
+            '&:active': {
+              backgroundColor: '#ffffff',
+            },
+          }}
+        >
+          Pillar Descriptions
+        </Button>
       </div>
 
       {selectedPositionId && (
@@ -624,6 +717,8 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
             <span className={sty.headerNumber}>#</span>
             <span className={sty.headerCriteriaName}>Criteria Name</span>
             <span className={sty.headerDescription}>Description</span>
+            <span className={sty.headerPillar}>Pillar 1</span>
+            <span className={sty.headerPillar}>Pillar 2</span>
           </div>
 
           <div className={sty.criteriaList}>
@@ -654,6 +749,60 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                   rows={1}
                   disabled={disabled}
                 />
+                <FormControl size="small" className={sty.pillarField}>
+                  <PillarSelect
+                    value={c.pillar_1_id || ''}
+                    onChange={(e) => handleCriteriaChange(c.criteria_order, 'pillar_1_id', e.target.value as string || null)}
+                    displayEmpty
+                    disabled={disabled}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: { maxHeight: 250 }
+                      }
+                    }}
+                  >
+                    <MenuItem value="" sx={{ fontFamily, fontSize: 12, color: '#9ca3af' }}>
+                      None
+                    </MenuItem>
+                    {pillars.map((pillar) => (
+                      <MenuItem
+                        key={pillar.id}
+                        value={pillar.id}
+                        disabled={pillar.id === c.pillar_2_id}
+                        sx={{ fontFamily, fontSize: 12 }}
+                      >
+                        {pillar.name}
+                      </MenuItem>
+                    ))}
+                  </PillarSelect>
+                </FormControl>
+                <FormControl size="small" className={sty.pillarField}>
+                  <PillarSelect
+                    value={c.pillar_2_id || ''}
+                    onChange={(e) => handleCriteriaChange(c.criteria_order, 'pillar_2_id', e.target.value as string || null)}
+                    displayEmpty
+                    disabled={disabled}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: { maxHeight: 250 }
+                      }
+                    }}
+                  >
+                    <MenuItem value="" sx={{ fontFamily, fontSize: 12, color: '#9ca3af' }}>
+                      None
+                    </MenuItem>
+                    {pillars.map((pillar) => (
+                      <MenuItem
+                        key={pillar.id}
+                        value={pillar.id}
+                        disabled={pillar.id === c.pillar_1_id}
+                        sx={{ fontFamily, fontSize: 12 }}
+                      >
+                        {pillar.name}
+                      </MenuItem>
+                    ))}
+                  </PillarSelect>
+                </FormControl>
                 {!disabled && language === 'es' && (
                   <IconButton
                     size="small"
@@ -697,6 +846,56 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
           </div>
         </div>
       )}
+
+      {/* Pillar Descriptions Modal */}
+      <Dialog 
+        open={descriptionsModalOpen} 
+        onClose={() => setDescriptionsModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            maxHeight: '80vh',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontFamily, 
+          fontSize: 18, 
+          fontWeight: 600, 
+          color: '#0d1b14',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingRight: 2,
+        }}>
+          OE Pillar Descriptions
+          <IconButton
+            onClick={() => setDescriptionsModalOpen(false)}
+            size="small"
+            sx={{ color: '#6b7280' }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ paddingTop: '8px !important' }}>
+          <p className={sty.modalSubtitle}>
+            These pillars are used to calculate overall operational excellence scores. Each pillar has a weight that determines its contribution to the total score.
+          </p>
+          <div className={sty.pillarDescriptionsList}>
+            {pillars.map((pillar) => (
+              <div key={pillar.id} className={sty.pillarDescriptionItem}>
+                <div className={sty.pillarDescriptionHeader}>
+                  <span className={sty.pillarDescriptionName}>{pillar.name}</span>
+                  <span className={sty.pillarDescriptionWeight}>{pillar.weight}%</span>
+                </div>
+                <p className={sty.pillarDescriptionText}>{pillar.description}</p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

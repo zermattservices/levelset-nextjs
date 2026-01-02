@@ -10,7 +10,6 @@ import sty from './PositionalExcellenceSettings.module.css';
 import { PositionsTab } from './PositionsTab';
 import { RatingCriteriaTab } from './RatingCriteriaTab';
 import { RoleMappingTab } from './RoleMappingTab';
-import { OEPillarMappingTab } from './OEPillarMappingTab';
 import { RatingScaleTab } from './RatingScaleTab';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
@@ -58,9 +57,9 @@ interface PositionalExcellenceSettingsProps {
   onSubTabChange?: (subtab: string | undefined) => void;
 }
 
-type TabValue = 'positions' | 'criteria' | 'role-mapping' | 'pillar-mapping' | 'rating-scale';
+type TabValue = 'positions' | 'criteria' | 'role-mapping' | 'rating-scale';
 
-const VALID_TABS: TabValue[] = ['positions', 'criteria', 'role-mapping', 'pillar-mapping', 'rating-scale'];
+const VALID_TABS: TabValue[] = ['positions', 'criteria', 'role-mapping', 'rating-scale'];
 
 export function PositionalExcellenceSettings({ orgId, disabled = false, activeSubTab, onSubTabChange }: PositionalExcellenceSettingsProps) {
   const [locationCount, setLocationCount] = React.useState<number>(0);
@@ -80,7 +79,6 @@ export function PositionalExcellenceSettings({ orgId, disabled = false, activeSu
   const canManagePositions = has(P.PE_MANAGE_POSITIONS) && !disabled;
   const canManageCriteria = has(P.PE_MANAGE_RATING_CRITERIA) && !disabled;
   const canManageRoleMappings = has(P.PE_MANAGE_ROLE_MAPPINGS) && !disabled;
-  const canManagePillarMappings = has(P.PE_MANAGE_ROLE_MAPPINGS) && !disabled; // Reuse role mappings permission
   const canManageRatingScale = has(P.PE_MANAGE_RATING_SCALE) && !disabled;
 
   // Fetch location count for the organization
@@ -105,9 +103,9 @@ export function PositionalExcellenceSettings({ orgId, disabled = false, activeSu
     }
   };
 
-  // Org-level tabs: rating-scale, role-mapping, pillar-mapping
+  // Org-level tabs: rating-scale, role-mapping
   // Only show tag if org has more than one location
-  const isOrgLevel = (activeTab === 'rating-scale' || activeTab === 'role-mapping' || activeTab === 'pillar-mapping') && locationCount > 1;
+  const isOrgLevel = (activeTab === 'rating-scale' || activeTab === 'role-mapping') && locationCount > 1;
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -117,8 +115,6 @@ export function PositionalExcellenceSettings({ orgId, disabled = false, activeSu
         return <RatingCriteriaTab orgId={orgId} disabled={!canManageCriteria} />;
       case 'role-mapping':
         return <RoleMappingTab orgId={orgId} disabled={!canManageRoleMappings} />;
-      case 'pillar-mapping':
-        return <OEPillarMappingTab orgId={orgId} disabled={!canManagePillarMappings} />;
       case 'rating-scale':
         return <RatingScaleTab orgId={orgId} disabled={!canManageRatingScale} />;
       default:
@@ -149,7 +145,6 @@ export function PositionalExcellenceSettings({ orgId, disabled = false, activeSu
           <StyledTab label="Positions" value="positions" />
           <StyledTab label="Rating Criteria" value="criteria" />
           <StyledTab label="Role Mapping" value="role-mapping" />
-          <StyledTab label="OE Pillar Mapping" value="pillar-mapping" />
           <StyledTab label="Rating Scale" value="rating-scale" />
         </StyledTabs>
 
