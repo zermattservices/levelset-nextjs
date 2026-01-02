@@ -182,13 +182,32 @@ export function FeatureRequestsPage() {
       return true;
     });
     
-    // Sort: pending review (submitted) at top, then by created_at desc
+    // Priority order for sorting (higher value = higher priority)
+    const priorityOrder: Record<string, number> = {
+      critical: 4,
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
+    
+    // Sort based on active tab
     return filtered.sort((a, b) => {
-      // Pending review (submitted) first (only relevant for outstanding tab)
-      if (a.status === 'submitted' && b.status !== 'submitted') return -1;
-      if (a.status !== 'submitted' && b.status === 'submitted') return 1;
-      // Then by created_at (newest first)
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      if (activeTab === 'outstanding') {
+        // Pending review (submitted) always at top
+        if (a.status === 'submitted' && b.status !== 'submitted') return -1;
+        if (a.status !== 'submitted' && b.status === 'submitted') return 1;
+        // Then by votes (highest first)
+        if (b.vote_count !== a.vote_count) {
+          return b.vote_count - a.vote_count;
+        }
+        // Then by priority (highest first)
+        const priorityA = priorityOrder[a.priority] || 0;
+        const priorityB = priorityOrder[b.priority] || 0;
+        return priorityB - priorityA;
+      } else {
+        // Completed: sort by created_at (newest first)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
     });
   }, [features, searchQuery, activeTab, categoryFilter]);
   
