@@ -2,6 +2,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import SettingsIcon from '@mui/icons-material/Settings';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
@@ -369,23 +370,42 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
 
             {/* Account icon with dropdown */}
             <div className={sty.profileDropdownContainer} ref={profileDropdownRef}>
-              <AccountCircleIcon 
-                className={sty.accountIcon} 
-                sx={{ fontSize: 32, color: '#31664a', cursor: 'pointer' }} 
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-              />
-              {profileDropdownOpen && canAccessOrgSettings && (
+              {auth.profile_image ? (
+                <img
+                  src={auth.profile_image}
+                  alt={displayFirstName || 'Profile'}
+                  className={sty.profileImage}
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <AccountCircleIcon 
+                  className={sty.accountIcon} 
+                  sx={{ fontSize: 32, color: '#31664a', cursor: 'pointer' }} 
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                />
+              )}
+              {profileDropdownOpen && (
                 <div className={sty.profileDropdown}>
-                  {isRoadmapSubdomain ? (
-                    <a href={getAppLink('/org-settings')} className={sty.profileDropdownItem} onClick={() => setProfileDropdownOpen(false)}>
-                      <SettingsIcon sx={{ fontSize: 18, color: '#666' }} />
-                      <span>Organization Settings</span>
-                    </a>
-                  ) : (
-                    <Link href="/org-settings" className={sty.profileDropdownItem} onClick={() => setProfileDropdownOpen(false)}>
-                      <SettingsIcon sx={{ fontSize: 18, color: '#666' }} />
-                      <span>Organization Settings</span>
-                    </Link>
+                  {/* Profile - disabled for now */}
+                  <div className={classNames(sty.profileDropdownItem, sty.profileDropdownItemDisabled)}>
+                    <PersonOutlineIcon sx={{ fontSize: 18, color: '#999' }} />
+                    <span>Profile</span>
+                  </div>
+                  
+                  {/* Organization Settings - only show if user has access */}
+                  {canAccessOrgSettings && (
+                    isRoadmapSubdomain ? (
+                      <a href={getAppLink('/org-settings')} className={sty.profileDropdownItem} onClick={() => setProfileDropdownOpen(false)}>
+                        <SettingsIcon sx={{ fontSize: 18, color: '#666' }} />
+                        <span>Organization Settings</span>
+                      </a>
+                    ) : (
+                      <Link href="/org-settings" className={sty.profileDropdownItem} onClick={() => setProfileDropdownOpen(false)}>
+                        <SettingsIcon sx={{ fontSize: 18, color: '#666' }} />
+                        <span>Organization Settings</span>
+                      </Link>
+                    )
                   )}
                 </div>
               )}

@@ -19,6 +19,7 @@ export interface AppUser {
   active?: boolean;
   created_at?: string;
   updated_at?: string;
+  profile_image?: string;
 }
 
 // Auth context data shape - matches SupabaseUserSession exactly
@@ -36,6 +37,7 @@ export interface AuthData {
   phone: string;
   hire_date: string;
   active: boolean;
+  profile_image: string;
   authUser: User | null;
   appUser: AppUser | null;
 }
@@ -60,6 +62,7 @@ export function useAuth(): AuthData {
       phone: '',
       hire_date: '',
       active: false,
+      profile_image: '',
       authUser: null,
       appUser: null,
     };
@@ -91,6 +94,19 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
         console.error('Error fetching app user data:', error);
         setAppUser(null);
       } else {
+        // If user has a Google profile image and app_user doesn't have one, save it
+        const googleAvatar = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture;
+        if (googleAvatar && !data.profile_image) {
+          // Update the profile image in the database
+          const { error: updateError } = await supabase
+            .from('app_users')
+            .update({ profile_image: googleAvatar })
+            .eq('id', data.id);
+          
+          if (!updateError) {
+            data.profile_image = googleAvatar;
+          }
+        }
         setAppUser(data);
       }
     } catch (err) {
@@ -218,6 +234,12 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
   }, [supabase, fetchAppUserData]);
 
   // Create auth data object with exact same shape as SupabaseUserSession
+  // Get profile image from app_user or fall back to Google OAuth avatar
+  const profileImage = appUser?.profile_image || 
+    currentUser?.user_metadata?.avatar_url || 
+    currentUser?.user_metadata?.picture || 
+    '';
+
   const authData: AuthData = React.useMemo(() => ({
     email: currentUser?.email || '',
     id: currentUser?.id || '',
@@ -232,9 +254,10 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
     phone: appUser?.phone || '',
     hire_date: appUser?.hire_date || '',
     active: appUser?.active || false,
+    profile_image: profileImage,
     authUser: currentUser,
     appUser: appUser,
-  }), [currentUser, appUser, isLoaded]);
+  }), [currentUser, appUser, isLoaded, profileImage]);
 
   return (
     <AuthContext.Provider value={authData}>

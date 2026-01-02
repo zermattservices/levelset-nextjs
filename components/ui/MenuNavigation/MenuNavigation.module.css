@@ -300,6 +300,31 @@
   background-color: #f6fffa;
 }
 
+.profileDropdownItemDisabled {
+  color: #999;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.profileDropdownItemDisabled:hover {
+  background-color: transparent;
+}
+
+.profileImage {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  object-fit: cover;
+  border: 2px solid #31664a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.profileImage:hover {
+  border-color: #275539;
+  box-shadow: 0 0 0 2px rgba(49, 102, 74, 0.2);
+}
+
 .submenuBackdrop {
   position: fixed;
   top: 57px;
