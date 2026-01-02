@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { RoadmapFeature, isPopular, STATUS_CONFIG } from '@/lib/roadmap';
+import { RoadmapFeature, isPopular, STATUS_CONFIG, PRIORITY_CONFIG } from '@/lib/roadmap';
 import styles from './Roadmap.module.css';
 
 interface FeatureCardProps {
@@ -27,6 +27,7 @@ export default function FeatureCard({ feature, hasVoted, onVote }: FeatureCardPr
     : '';
 
   const statusConfig = STATUS_CONFIG[feature.status];
+  const priorityConfig = PRIORITY_CONFIG[feature.priority];
   const popular = isPopular(feature.vote_count);
 
   return (
@@ -59,8 +60,20 @@ export default function FeatureCard({ feature, hasVoted, onVote }: FeatureCardPr
           <p className={styles.featureCardDescription}>{truncatedDescription}</p>
         )}
         
-        {/* Category tag - show raw category from DB */}
-        <span className={styles.categoryTag}>{feature.category}</span>
+        {/* Tags */}
+        <div className={styles.featureCardTags}>
+          <span className={styles.categoryTag}>{feature.category}</span>
+          <span 
+            className={styles.priorityTag}
+            style={{
+              backgroundColor: priorityConfig.bgColor,
+              color: priorityConfig.textColor,
+              border: `1px solid ${priorityConfig.borderColor}`,
+            }}
+          >
+            {priorityConfig.label}
+          </span>
+        </div>
       </div>
       
       {/* Simple upvote button - FormFlow style */}

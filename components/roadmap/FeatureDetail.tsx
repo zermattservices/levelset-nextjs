@@ -33,19 +33,17 @@ export default function FeatureDetail({ feature, hasVoted, onVote }: FeatureDeta
             {statusConfig.label}
           </span>
           
-          {/* Priority Badge (no dot) - only show if critical or high */}
-          {(feature.priority === 'critical' || feature.priority === 'high') && (
-            <span 
-              className={styles.priorityBadge}
-              style={{
-                backgroundColor: priorityConfig.bgColor,
-                color: priorityConfig.textColor,
-                border: `1px solid ${priorityConfig.borderColor}`,
-              }}
-            >
-              {priorityConfig.label}
-            </span>
-          )}
+          {/* Priority Badge (no dot) */}
+          <span 
+            className={styles.priorityBadge}
+            style={{
+              backgroundColor: priorityConfig.bgColor,
+              color: priorityConfig.textColor,
+              border: `1px solid ${priorityConfig.borderColor}`,
+            }}
+          >
+            {priorityConfig.label}
+          </span>
           
           {/* Category Tag - show raw category from DB */}
           <span className={styles.categoryTag}>{feature.category}</span>

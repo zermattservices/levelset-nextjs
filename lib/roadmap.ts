@@ -298,9 +298,9 @@ export const STATUS_CONFIG: Record<string, { label: string; bgColor: string; tex
 // Priority config - matching FormFlow
 export const PRIORITY_CONFIG = {
   critical: { label: 'Critical', bgColor: '#fee2e2', textColor: '#dc2626', borderColor: '#fca5a5' },
-  high: { label: 'High Priority', bgColor: '#ffedd5', textColor: '#ea580c', borderColor: '#fdba74' },
-  medium: { label: 'Medium', bgColor: '#f3f4f6', textColor: '#6b7280', borderColor: '#e5e7eb' },
-  low: { label: 'Low', bgColor: '#f3f4f6', textColor: '#9ca3af', borderColor: '#e5e7eb' },
+  high: { label: 'High', bgColor: '#fee2e2', textColor: '#f87171', borderColor: '#fecaca' },
+  medium: { label: 'Medium', bgColor: '#ffedd5', textColor: '#ea580c', borderColor: '#fdba74' },
+  low: { label: 'Low', bgColor: '#dcfce7', textColor: '#16a34a', borderColor: '#bbf7d0' },
 };
 
 // Categories for feature requests

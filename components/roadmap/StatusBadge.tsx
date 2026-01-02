@@ -37,11 +37,6 @@ interface PriorityBadgeProps {
 export function PriorityBadge({ priority }: PriorityBadgeProps) {
   const config = PRIORITY_CONFIG[priority];
   
-  // Only show badge for critical and high priority
-  if (priority !== 'critical' && priority !== 'high') {
-    return null;
-  }
-  
   return (
     <span 
       className={styles.priorityBadge}
@@ -51,7 +46,6 @@ export function PriorityBadge({ priority }: PriorityBadgeProps) {
         border: `1px solid ${config.borderColor}`,
       }}
     >
-      <span className={styles.priorityDot} style={{ backgroundColor: config.textColor }} />
       {config.label}
     </span>
   );
