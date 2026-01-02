@@ -10,8 +10,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const tokenParam = req.query.token;
   const positionParam = req.query.position;
+  const zoneParam = req.query.zone;
   const token = Array.isArray(tokenParam) ? tokenParam[0] : tokenParam;
   const position = Array.isArray(positionParam) ? positionParam[0] : positionParam;
+  const zone = Array.isArray(zoneParam) ? zoneParam[0] : zoneParam;
 
   if (!token || typeof token !== 'string') {
     return res.status(400).json({ error: 'Missing token' });
@@ -38,12 +40,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Primary source: position_criteria from org_positions (new org-level settings)
   if (location.org_id) {
     // First find the org position ID
-    const { data: orgPosition } = await supabase
+    // Include zone filter if provided (handles positions with same name in different zones)
+    let orgPositionQuery = supabase
       .from('org_positions')
       .select('id')
       .eq('org_id', location.org_id)
-      .ilike('name', position)
-      .maybeSingle();
+      .ilike('name', position);
+    
+    if (zone) {
+      orgPositionQuery = orgPositionQuery.eq('zone', zone);
+    }
+    
+    const { data: orgPosition } = await orgPositionQuery.maybeSingle();
 
     if (orgPosition) {
       // Fetch criteria with names, descriptions, and Spanish translations

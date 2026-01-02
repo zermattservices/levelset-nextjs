@@ -72,7 +72,21 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
 
   const [selectedLeader, setSelectedLeader] = React.useState('');
   const [selectedEmployee, setSelectedEmployee] = React.useState('');
-  const [selectedPosition, setSelectedPosition] = React.useState('');
+  // Store position as "zone|name" to handle positions with same name in different zones
+  const [selectedPositionValue, setSelectedPositionValue] = React.useState('');
+  
+  // Parse the compound position value into name and zone
+  const selectedPosition = React.useMemo(() => {
+    if (!selectedPositionValue) return '';
+    const parts = selectedPositionValue.split('|');
+    return parts.length > 1 ? parts[1] : parts[0];
+  }, [selectedPositionValue]);
+  
+  const selectedPositionZone = React.useMemo(() => {
+    if (!selectedPositionValue) return null;
+    const parts = selectedPositionValue.split('|');
+    return parts.length > 1 ? (parts[0] as 'FOH' | 'BOH') : null;
+  }, [selectedPositionValue]);
   const [labels, setLabels] = React.useState<string[]>([]);
   const [descriptions, setDescriptions] = React.useState<string[]>([]);
   const [ratings, setRatings] = React.useState<Array<RatingValue | null>>([]);
@@ -117,7 +131,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           setRolePermissions(payload.rolePermissions ?? {});
           setSelectedLeader('');
           setSelectedEmployee('');
-          setSelectedPosition('');
+          setSelectedPositionValue('');
           setLabels([]);
           setRatings([]);
           controls.setSubmitDisabled(true);
@@ -143,16 +157,19 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
   React.useEffect(() => {
     let cancelled = false;
 
-    async function loadLabels(position: string) {
+    async function loadLabels(position: string, zone: string | null) {
       controls.setSubmitDisabled(true);
       setLabelsError(null);
       setLabels([]);
       setDescriptions([]);
       setRatings([]);
       try {
-        const response = await fetch(
-          `/api/mobile/${encodeURIComponent(token)}/position-labels?position=${encodeURIComponent(position)}`
-        );
+        // Include zone in the query to disambiguate positions with the same name
+        let url = `/api/mobile/${encodeURIComponent(token)}/position-labels?position=${encodeURIComponent(position)}`;
+        if (zone) {
+          url += `&zone=${encodeURIComponent(zone)}`;
+        }
+        const response = await fetch(url);
         if (!response.ok) {
           const payload = await response.json().catch(() => ({ error: 'Failed to load labels' }));
           throw new Error(payload?.error ?? 'Failed to load labels');
@@ -189,12 +206,12 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
       return;
     }
 
-    loadLabels(selectedPosition);
+    loadLabels(selectedPosition, selectedPositionZone);
 
     return () => {
       cancelled = true;
     };
-  }, [controls, selectedPosition, token, language]);
+  }, [controls, selectedPosition, selectedPositionZone, token, language]);
 
   const selectedEmployeeOption = React.useMemo(
     () => employees.find((item) => item.id === selectedEmployee),
@@ -343,7 +360,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           onChange={(_, option) => {
             setSelectedLeader(option?.id ?? '');
             // Clear position selection when leader changes (positions may be filtered)
-            setSelectedPosition('');
+            setSelectedPositionValue('');
             setLabels([]);
             setRatings([]);
             markDirty();
@@ -373,10 +390,10 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           select
           SelectProps={{ native: true }}
           label={t('ratings.position')}
-          value={selectedPosition}
+          value={selectedPositionValue}
           fullWidth
           onChange={(event) => {
-            setSelectedPosition(event.target.value as string);
+            setSelectedPositionValue(event.target.value as string);
             markDirty();
           }}
           InputLabelProps={{ shrink: true }}
@@ -390,7 +407,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
               style={{ fontWeight: 700 }}
             >
               {group.options.map((option) => (
-                <option key={option.name} value={option.name}>
+                <option key={`${group.zone}|${option.name}`} value={`${group.zone}|${option.name}`}>
                   {translate(option, 'name', option.name)}
                 </option>
               ))}
