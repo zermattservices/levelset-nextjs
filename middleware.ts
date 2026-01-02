@@ -24,20 +24,30 @@ export function middleware(request: NextRequest) {
     }
     
     // Route mapping for roadmap subdomain:
-    // / or /features → /roadmap (features list)
-    // /roadmap → /roadmap/board (roadmap board)
+    // / → redirect to /features
+    // /features → /roadmap (features list page)
+    // /roadmap → /roadmap/board (roadmap board page)
     // /[id] → /roadmap/[id] (feature detail)
-    if (pathname === '/' || pathname === '/features') {
+    
+    // Redirect root to /features (preserve query params like location)
+    if (pathname === '/') {
+      url.pathname = '/features';
+      return NextResponse.redirect(url);
+    }
+    
+    // /features shows the features list
+    if (pathname === '/features') {
       url.pathname = '/roadmap';
       return NextResponse.rewrite(url);
     }
     
+    // /roadmap shows the board
     if (pathname === '/roadmap') {
       url.pathname = '/roadmap/board';
       return NextResponse.rewrite(url);
     }
     
-    // All other paths get prefixed with /roadmap
+    // All other paths get prefixed with /roadmap (e.g., /abc123 → /roadmap/abc123 for feature details)
     url.pathname = `/roadmap${pathname}`;
     return NextResponse.rewrite(url);
   }

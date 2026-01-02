@@ -337,7 +337,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
                       </div>
                     </a>
                     <a 
-                      href={`https://roadmap.levelset.io${selectedLocationId ? `?location=${selectedLocationId}` : ''}`}
+                      href={`https://roadmap.levelset.io/features${selectedLocationId ? `?location=${selectedLocationId}` : ''}`}
                       className={sty.helpMenuCard}
                     >
                       <div className={sty.helpIconContainer}>
