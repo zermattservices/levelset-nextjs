@@ -13,8 +13,14 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  padding: 16px;
+  padding: 16px 16px;
   background: #ffffff;
+}
+
+@media (max-width: 1280px) {
+  .headerSection {
+    padding: 16px 8px;
+  }
 }
 
 .headerContent {
@@ -57,6 +63,12 @@
   flex: 1;
   overflow: hidden;
   min-height: 0;
+}
+
+@media (max-width: 1280px) {
+  .mainContent {
+    padding: 24px 8px;
+  }
 }
 
 .contentContainer {
