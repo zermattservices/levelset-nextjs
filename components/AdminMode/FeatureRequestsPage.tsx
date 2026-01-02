@@ -160,11 +160,11 @@ export function FeatureRequestsPage() {
   // Filter and sort features based on active tab
   const filteredFeatures = React.useMemo(() => {
     const filtered = features.filter(feature => {
-      // Tab filter - Outstanding shows non-completed, Completed shows completed
-      if (activeTab === 'outstanding' && feature.status === 'completed') {
+      // Tab filter - Outstanding shows active features, Completed shows completed/cancelled
+      if (activeTab === 'outstanding' && (feature.status === 'completed' || feature.status === 'cancelled')) {
         return false;
       }
-      if (activeTab === 'completed' && feature.status !== 'completed') {
+      if (activeTab === 'completed' && feature.status !== 'completed' && feature.status !== 'cancelled') {
         return false;
       }
       // Search filter
@@ -192,9 +192,9 @@ export function FeatureRequestsPage() {
     });
   }, [features, searchQuery, activeTab, categoryFilter]);
   
-  // Count completed features
+  // Count completed/cancelled features
   const completedCount = React.useMemo(() => {
-    return features.filter(f => f.status === 'completed').length;
+    return features.filter(f => f.status === 'completed' || f.status === 'cancelled').length;
   }, [features]);
 
   // Handle approve
