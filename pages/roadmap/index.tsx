@@ -204,7 +204,14 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
       setStats(prev => ({
         ...prev,
         totalFeatures: prev.totalFeatures + 1,
+        totalVotes: prev.totalVotes + 1, // Auto-vote
       }));
+      // Add to voted features since user auto-votes for their own submission
+      setVotedFeatures(prev => {
+        const next = new Set(prev);
+        next.add(newFeature.id);
+        return next;
+      });
       return true;
     }
     

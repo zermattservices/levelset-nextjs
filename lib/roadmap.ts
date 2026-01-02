@@ -360,6 +360,24 @@ export async function submitFeatureRequest(
     return null;
   }
   
+  // Automatically vote for the feature the user just submitted
+  if (data?.id) {
+    try {
+      await supabase
+        .from('roadmap_votes')
+        .insert({
+          feature_id: data.id,
+          user_id: userId,
+          vote_type: 'upvote',
+        });
+      // Update the returned feature with the vote count
+      data.vote_count = 1;
+    } catch (voteError) {
+      console.error('Error auto-voting for submitted feature:', voteError);
+      // Don't fail the whole submission if voting fails
+    }
+  }
+  
   return data;
 }
 
