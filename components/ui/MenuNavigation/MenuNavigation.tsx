@@ -338,8 +338,6 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
                     </a>
                     <a 
                       href={`https://roadmap.levelset.io${selectedLocationId ? `?location=${selectedLocationId}` : ''}`}
-                      target="_blank" 
-                      rel="noopener noreferrer"
                       className={sty.helpMenuCard}
                     >
                       <div className={sty.helpIconContainer}>

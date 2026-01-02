@@ -40,14 +40,11 @@ function RoadmapLayoutContent({
     if (locationParam && typeof locationParam === 'string' && locationParam !== selectedLocationId) {
       selectLocation(locationParam);
       // Clean URL after setting location
-      // Use router.asPath (external URL) instead of router.pathname (internal path)
-      // because middleware rewrites change the internal path
       const { location, ...restQuery } = router.query;
-      const externalPath = router.asPath?.split('?')[0] || '/';
       if (Object.keys(restQuery).length === 0) {
-        router.replace(externalPath, undefined, { shallow: true });
+        router.replace(router.pathname, undefined, { shallow: true });
       } else {
-        router.replace({ pathname: externalPath, query: restQuery }, undefined, { shallow: true });
+        router.replace({ pathname: router.pathname, query: restQuery }, undefined, { shallow: true });
       }
     }
   }, [router.query.location, selectedLocationId, selectLocation, router]);
@@ -71,16 +68,14 @@ function RoadmapLayoutContent({
           if (error) {
             console.error('Error setting session:', error);
             // If setting session fails, redirect to login
-            // Use external path from asPath, not internal pathname
-            const currentPath = router.asPath?.split('?')[0] || '/';
+            const currentPath = router.asPath?.split('?')[0] || router.pathname;
             const redirectUrl = `https://app.levelset.io/auth/login?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
             window.location.href = redirectUrl;
             return;
           }
 
           // Remove token from URL after successful session setup
-          // Use external path from asPath, not internal pathname (which includes /roadmap prefix from middleware)
-          const cleanPath = router.asPath?.split('?')[0] || '/';
+          const cleanPath = router.asPath?.split('?')[0] || router.pathname;
           router.replace(cleanPath, undefined, { shallow: true });
         } catch (error) {
           console.error('Error handling token auth:', error);
@@ -99,8 +94,7 @@ function RoadmapLayoutContent({
     // Give auth provider time to check shared cookies
     const timeout = setTimeout(() => {
       if (auth.isLoaded && !auth.authUser && !isSettingSession && !router.query.token) {
-        // Use external path from asPath, not internal pathname
-        const currentPath = router.asPath?.split('?')[0] || '/';
+        const currentPath = router.asPath?.split('?')[0] || router.pathname;
         // Redirect to login on app subdomain
         const redirectUrl = `https://app.levelset.io/auth/login?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
         window.location.href = redirectUrl;
