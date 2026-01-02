@@ -70,11 +70,15 @@ export default function FeatureDetailPage() {
   const handleVote = useCallback(async () => {
     if (!feature) return;
     
+    // Wait for auth to be loaded
+    if (!auth.isLoaded) {
+      console.log('[Roadmap] Auth not loaded yet, waiting...');
+      return;
+    }
+    
     if (!auth.id) {
       console.warn('[Roadmap] User not authenticated, cannot vote');
-      // Redirect to login
-      const currentPath = window.location.pathname + window.location.search;
-      window.location.href = `https://app.levelset.io/auth/login?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
+      alert('Please log in to vote for features.');
       return;
     }
 
@@ -97,7 +101,7 @@ export default function FeatureDetailPage() {
         vote_count: prev.vote_count + (wasVoted ? 1 : -1),
       } : null);
     }
-  }, [feature, hasVoted, auth.id]);
+  }, [feature, hasVoted, auth.id, auth.isLoaded]);
 
   // Handle comment submission
   const handleCommentSubmit = useCallback(async (

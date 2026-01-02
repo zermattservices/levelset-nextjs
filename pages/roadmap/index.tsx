@@ -103,13 +103,17 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
   // Handle voting
   const handleVote = useCallback(async (featureId: string) => {
     console.log('[Roadmap] handleVote called for feature:', featureId);
-    console.log('[Roadmap] auth.id:', auth.id);
+    console.log('[Roadmap] auth:', { id: auth.id, isLoaded: auth.isLoaded });
+    
+    // Wait for auth to be loaded before making decisions
+    if (!auth.isLoaded) {
+      console.log('[Roadmap] Auth not loaded yet, waiting...');
+      return;
+    }
     
     if (!auth.id) {
       console.warn('[Roadmap] User not authenticated, cannot vote');
-      // Redirect to login
-      const currentPath = window.location.pathname + window.location.search;
-      window.location.href = `https://app.levelset.io/auth/login?redirect=${encodeURIComponent(`https://roadmap.levelset.io${currentPath}`)}`;
+      alert('Please log in to vote for features.');
       return;
     }
     
@@ -165,7 +169,7 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
         totalVotes: prev.totalVotes + (hasVoted ? 1 : -1),
       }));
     }
-  }, [votedFeatures, auth.id]);
+  }, [votedFeatures, auth.id, auth.isLoaded]);
 
   // Handle feature submission
   const handleSubmitFeature = useCallback(async (
@@ -173,7 +177,18 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
     category: string,
     description: string
   ): Promise<boolean> => {
-    if (!auth.id) return false;
+    console.log('[Roadmap] handleSubmitFeature called');
+    console.log('[Roadmap] auth:', { id: auth.id, isLoaded: auth.isLoaded });
+    
+    if (!auth.isLoaded) {
+      console.log('[Roadmap] Auth not loaded yet');
+      return false;
+    }
+    
+    if (!auth.id) {
+      console.warn('[Roadmap] User not authenticated, cannot submit');
+      return false;
+    }
     
     const newFeature = await submitFeatureRequest(
       title,
@@ -194,7 +209,7 @@ export default function RoadmapIndexPage({ auth: authProp }: RoadmapIndexPagePro
     }
     
     return false;
-  }, [auth.id, auth.org_id]);
+  }, [auth.id, auth.org_id, auth.isLoaded]);
 
   return (
     <RoadmapLayout subHeaderMode="list" activeTab="features">
