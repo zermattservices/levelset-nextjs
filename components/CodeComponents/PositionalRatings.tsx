@@ -1067,17 +1067,15 @@ export function PositionalRatings({
               return true;
             }
             
-            // Clean the position name to match the format in FOH_POSITIONS/BOH_POSITIONS arrays
-            // First remove " | Spanish" part, then remove " FOH"/" BOH" suffixes
-            let cleanedPosition = rating.position || '';
-            // Remove Spanish translation part (everything after " | ")
-            if (cleanedPosition.includes(' | ')) {
-              cleanedPosition = cleanedPosition.split(' | ')[0].trim();
+            // Get the position name for FOH/BOH filtering
+            // First remove " | Spanish" part (if present), but keep the FOH/BOH suffix for filtering
+            let positionForFilter = rating.position || '';
+            if (positionForFilter.includes(' | ')) {
+              positionForFilter = positionForFilter.split(' | ')[0].trim();
             }
-            // Remove FOH/BOH suffixes
-            cleanedPosition = cleanPositionName(cleanedPosition);
-            const isFOHPosition = FOH_POSITIONS.includes(cleanedPosition);
-            const isBOHPosition = BOH_POSITIONS.includes(cleanedPosition);
+            // Check against the full position names in FOH_POSITIONS/BOH_POSITIONS arrays
+            const isFOHPosition = FOH_POSITIONS.includes(positionForFilter);
+            const isBOHPosition = BOH_POSITIONS.includes(positionForFilter);
 
             if (!showFOH && !showBOH) {
               return false;

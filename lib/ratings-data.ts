@@ -17,7 +17,7 @@ export const FOH_POSITIONS = [
   'Drinks 2',
   '3H Week FOH',
   'Trainer FOH',
-  'Leadership FOH'
+  'Team Lead FOH'
 ];
 
 export const BOH_POSITIONS = [
@@ -29,15 +29,15 @@ export const BOH_POSITIONS = [
   'Prep',
   '3H Week BOH',
   'Trainer BOH',
-  'Leadership BOH'
+  'Team Lead BOH'
 ];
 
 /**
  * Remove "FOH" or "BOH" from position names for display
  */
 export function cleanPositionName(positionName: string): string {
-  // Remove " FOH" or " BOH" from 3H Week, Trainer, and Leadership positions
-  if (positionName.includes('3H Week') || positionName.includes('Trainer') || positionName.includes('Leadership')) {
+  // Remove " FOH" or " BOH" from 3H Week, Trainer, Team Lead, and Leadership positions
+  if (positionName.includes('3H Week') || positionName.includes('Trainer') || positionName.includes('Team Lead') || positionName.includes('Leadership')) {
     return positionName.replace(/ (FOH|BOH)$/i, '');
   }
   return positionName;
@@ -478,7 +478,7 @@ export async function fetchPositionData(
 
   // Determine filtering rules based on position
   const isTrainerPosition = position.toLowerCase().includes('trainer');
-  const isLeaderPosition = position.toLowerCase().includes('leadership') || position.toLowerCase().includes('3h week') || position.toLowerCase().includes('hope');
+  const isLeaderPosition = position.toLowerCase().includes('leadership') || position.toLowerCase().includes('team lead') || position.toLowerCase().includes('3h week') || position.toLowerCase().includes('hope');
   
   // Determine FOH/BOH - first try org_positions, then fallback to hardcoded lists
   let isFOH = FOH_POSITIONS.includes(position);
