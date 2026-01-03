@@ -90,6 +90,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
   const [labels, setLabels] = React.useState<string[]>([]);
   const [descriptions, setDescriptions] = React.useState<string[]>([]);
   const [ratings, setRatings] = React.useState<Array<RatingValue | null>>([]);
+  const [notes, setNotes] = React.useState('');
 
   const [dirty, setDirty] = React.useState(false);
 
@@ -239,6 +240,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
       employeeId: selectedEmployee,
       position: selectedPosition,
       ratings: ratings.map((value) => value ?? 0),
+      notes: notes.trim() || null,
     };
 
     const response = await fetch(`/api/mobile/${encodeURIComponent(token)}/ratings`, {
@@ -278,7 +280,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
       detail: `${selectedPosition} • Positional ratings`,
       overallRating: overallRating ? Number(overallRating.toFixed(2)) : null,
     });
-  }, [controls, ratings, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedLeader, selectedPosition, token]);
+  }, [controls, notes, ratings, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedLeader, selectedPosition, token]);
 
   React.useEffect(() => {
     controls.setSubmitHandler(() => submit());
@@ -540,6 +542,58 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
               </RadioGroup>
             </Box>
           ))}
+
+          {/* Additional Details (Notes) */}
+          <Box
+            sx={{
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #e5e7eb',
+              padding: '16px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1.5,
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: 16,
+                fontWeight: 600,
+                color: '#111827',
+              }}
+            >
+              {t('ratings.additionalDetails')}
+            </Typography>
+            <Typography
+              sx={{
+                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: 13,
+                fontWeight: 500,
+                color: '#6b7280',
+                lineHeight: 1.4,
+              }}
+            >
+              {t('ratings.additionalDetailsHelper')}
+            </Typography>
+            <TextField
+              multiline
+              minRows={3}
+              maxRows={6}
+              value={notes}
+              onChange={(e) => {
+                setNotes(e.target.value);
+                markDirty();
+              }}
+              placeholder={t('ratings.additionalDetailsPlaceholder')}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                  fontSize: 14,
+                },
+              }}
+            />
+          </Box>
           
           {/* Feedback reminder card */}
           {selectedEmployeeOption && (

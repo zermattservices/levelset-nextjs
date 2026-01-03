@@ -37,7 +37,10 @@
       "crushingIt": "Destacando"
     },
     "feedbackTitle": "¿Compartiste esta retroalimentación?",
-    "feedbackBody": "Asegúrate de que {{name}} sepa el PORQUÉ."
+    "feedbackBody": "Asegúrate de que {{name}} sepa el PORQUÉ.",
+    "additionalDetails": "Detalles Adicionales",
+    "additionalDetailsHelper": "Notas opcionales sobre esta calificación",
+    "additionalDetailsPlaceholder": "Agregue cualquier contexto u observación adicional..."
   }
 }
 

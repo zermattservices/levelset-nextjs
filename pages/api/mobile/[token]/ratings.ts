@@ -7,6 +7,7 @@ interface RatingsRequestBody {
   employeeId?: string;
   position?: string;
   ratings?: number[];
+  notes?: string | null;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -23,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const body: RatingsRequestBody = req.body ?? {};
-  const { leaderId, employeeId, position, ratings } = body;
+  const { leaderId, employeeId, position, ratings, notes } = body;
 
   if (!leaderId || !employeeId || !position || !Array.isArray(ratings)) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -75,6 +76,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       rating_5: ratings[4],
       location_id: location.id,
       org_id: location.org_id,
+      notes: notes || null,
     })
     .select('id')
     .single();

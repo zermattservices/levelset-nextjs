@@ -37,7 +37,10 @@
       "crushingIt": "Crushing It"
     },
     "feedbackTitle": "Did you share this feedback?",
-    "feedbackBody": "Make sure {{name}} knows the WHY."
+    "feedbackBody": "Make sure {{name}} knows the WHY.",
+    "additionalDetails": "Additional Details",
+    "additionalDetailsHelper": "Optional notes about this rating",
+    "additionalDetailsPlaceholder": "Add any additional context or observations..."
   }
 }
 
