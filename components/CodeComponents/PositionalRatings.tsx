@@ -2879,7 +2879,7 @@ export function PositionalRatings({
               <CloseIcon />
             </IconButton>
           </DialogTitle>
-          <DialogContent sx={{ p: 3, pt: 5 }}>
+          <DialogContent sx={{ p: 3, paddingTop: '40px !important' }}>
             {selectedRatingForDetail && (() => {
               const rating = selectedRatingForDetail;
               const labels = big5LabelsCache.get(rating.position);
