@@ -78,6 +78,7 @@ export interface Rating {
   rating_4: number | null;
   rating_5: number | null;
   rating_avg: number | null;
+  notes: string | null;
   created_at: string;
   location_id: string;
   org_id: string;

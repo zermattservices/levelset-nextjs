@@ -46,6 +46,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import CancelIcon from '@mui/icons-material/Cancel';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloseIcon from '@mui/icons-material/Close';
 import { createSupabaseClient } from '@/util/supabase/component';
 import type { Rating, PositionBig5Labels, Employee } from '@/lib/supabase.types';
 import { cleanPositionName, FOH_POSITIONS, BOH_POSITIONS } from '@/lib/ratings-data';
@@ -598,6 +600,10 @@ export function PositionalRatings({
   // Employee modal state (only used when employeeId is NOT provided - full table view)
   const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
+  
+  // Rating detail modal state
+  const [detailModalOpen, setDetailModalOpen] = React.useState(false);
+  const [selectedRatingForDetail, setSelectedRatingForDetail] = React.useState<RatingRow | null>(null);
   
   // Big 5 labels cache
   const [big5LabelsCache, setBig5LabelsCache] = React.useState<Map<string, PositionBig5Labels>>(new Map());
@@ -1312,6 +1318,17 @@ export function PositionalRatings({
     setRatingToDelete(null);
   };
 
+  // Handle viewing rating details
+  const handleViewDetail = (row: RatingRow) => {
+    setSelectedRatingForDetail(row);
+    setDetailModalOpen(true);
+  };
+
+  const handleDetailModalClose = () => {
+    setDetailModalOpen(false);
+    setSelectedRatingForDetail(null);
+  };
+
   // Handle clicking on employee or leader name to open their modal
   const handleNameClick = React.useCallback(async (empId: string | null) => {
     if (!empId || employeeId) return; // Don't open modal if employeeId is provided (we're already in employee view)
@@ -1783,6 +1800,38 @@ export function PositionalRatings({
 
   // Define columns
   const columns: GridColDef[] = [
+    {
+      field: 'view_detail',
+      headerName: '',
+      width: 40,
+      sortable: false,
+      filterable: false,
+      resizable: false,
+      disableColumnMenu: true,
+      disableExport: true, // Exclude from PDF export
+      hideable: false,
+      headerAlign: 'center',
+      align: 'center',
+      renderCell: (params) => {
+        const row = params.row as RatingRow;
+        return (
+          <IconButton
+            onClick={() => handleViewDetail(row)}
+            size="small"
+            sx={{ 
+              color: '#6b7280',
+              padding: '4px',
+              '&:hover': {
+                color: levelsetGreen,
+                backgroundColor: 'rgba(49, 102, 74, 0.04)',
+              },
+            }}
+          >
+            <VisibilityIcon sx={{ fontSize: 18 }} />
+          </IconButton>
+        );
+      },
+    },
     {
       field: 'formatted_date',
       headerName: 'Date',
@@ -2801,6 +2850,269 @@ export function PositionalRatings({
             initialTab="pe"
           />
         )}
+        
+        {/* Rating Detail Modal */}
+        <Dialog
+          open={detailModalOpen}
+          onClose={handleDetailModalClose}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '16px',
+              maxWidth: '720px',
+            }
+          }}
+        >
+          <DialogTitle sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            fontFamily,
+            fontWeight: 600,
+            fontSize: 18,
+            borderBottom: '1px solid #e5e7eb',
+            pb: 2,
+          }}>
+            Rating Details
+            <IconButton onClick={handleDetailModalClose} size="small" sx={{ color: '#6b7280' }}>
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ p: 3 }}>
+            {selectedRatingForDetail && (() => {
+              const rating = selectedRatingForDetail;
+              const labels = big5LabelsCache.get(rating.position);
+              const overallRating = rating.rating_avg ?? 0;
+              const yellowThreshold = thresholds?.yellow_threshold ?? 1.75;
+              const greenThreshold = thresholds?.green_threshold ?? 2.75;
+              
+              // Calculate position percentage for the dot (1-3 scale mapped to 0-100%)
+              const dotPosition = ((overallRating - 1) / 2) * 100;
+              
+              // Determine color based on thresholds
+              const getScoreColor = (score: number) => {
+                if (score >= greenThreshold) return '#249e6b';
+                if (score >= yellowThreshold) return '#ffb549';
+                return '#ad2624';
+              };
+              
+              const scoreColor = getScoreColor(overallRating);
+              
+              // Calculate threshold positions for the progress bar (1-3 scale mapped to 0-100%)
+              const yellowPos = ((yellowThreshold - 1) / 2) * 100;
+              const greenPos = ((greenThreshold - 1) / 2) * 100;
+              
+              return (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  {/* Two-column layout */}
+                  <Box sx={{ display: 'flex', gap: 4 }}>
+                    {/* Left Column - Metadata */}
+                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                      <Box>
+                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                          Rater
+                        </Typography>
+                        <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 600, color: '#111827' }}>
+                          {rating.rater_name}
+                        </Typography>
+                      </Box>
+                      
+                      <Box>
+                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                          Date
+                        </Typography>
+                        <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 500, color: '#111827' }}>
+                          {rating.formatted_date}
+                        </Typography>
+                      </Box>
+                      
+                      <Box>
+                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                          Position
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <PositionChip 
+                            label={rating.position_cleaned} 
+                            size="small" 
+                            positiontype={FOH_POSITIONS.includes(rating.position) ? 'FOH' : 'BOH'} 
+                          />
+                        </Box>
+                      </Box>
+                      
+                      <Box>
+                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                          Employee
+                        </Typography>
+                        <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 600, color: '#111827' }}>
+                          {rating.employee_name}
+                        </Typography>
+                      </Box>
+                      
+                      {rating.notes && (
+                        <Box>
+                          <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                            Additional Details
+                          </Typography>
+                          <Box sx={{ 
+                            backgroundColor: '#f9fafb', 
+                            borderRadius: '8px', 
+                            p: 1.5,
+                            border: '1px solid #e5e7eb',
+                          }}>
+                            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 400, color: '#374151', lineHeight: 1.5 }}>
+                              {rating.notes}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      )}
+                    </Box>
+                    
+                    {/* Right Column - Criteria Ratings */}
+                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                        Criteria Ratings
+                      </Typography>
+                      
+                      {[1, 2, 3, 4, 5].map((num) => {
+                        const ratingValue = rating[`rating_${num}` as keyof RatingRow] as number | null;
+                        const labelKey = `label_${num}` as keyof typeof labels;
+                        const criteriaLabel = labels?.[labelKey] || `Criteria ${num}`;
+                        
+                        return (
+                          <Box 
+                            key={num}
+                            sx={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'space-between',
+                              backgroundColor: '#f9fafb',
+                              borderRadius: '8px',
+                              p: 1.5,
+                              border: '1px solid #e5e7eb',
+                            }}
+                          >
+                            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: '#374151', flex: 1 }}>
+                              {criteriaLabel}
+                            </Typography>
+                            <Box
+                              sx={{
+                                backgroundColor: getRatingColor(ratingValue, thresholds || undefined),
+                                color: '#fff',
+                                fontWeight: 600,
+                                fontFamily,
+                                fontSize: 14,
+                                borderRadius: '6px',
+                                px: 1.5,
+                                py: 0.5,
+                                minWidth: 45,
+                                textAlign: 'center',
+                              }}
+                            >
+                              {ratingValue?.toFixed(2) || '—'}
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                  
+                  {/* Overall Score Section */}
+                  <Box sx={{ 
+                    mt: 2, 
+                    pt: 3, 
+                    borderTop: '1px solid #e5e7eb',
+                  }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#374151' }}>
+                        Overall Score
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography sx={{ 
+                          fontFamily, 
+                          fontSize: 24, 
+                          fontWeight: 700, 
+                          color: scoreColor,
+                        }}>
+                          {overallRating.toFixed(2)}
+                        </Typography>
+                        <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: '#9ca3af' }}>
+                          / 3.00
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    {/* Progress Bar with Color Zones */}
+                    <Box sx={{ position: 'relative', height: 24 }}>
+                      {/* Track background with color zones */}
+                      <Box sx={{ 
+                        position: 'absolute',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        left: 0,
+                        right: 0,
+                        height: 12,
+                        borderRadius: 6,
+                        overflow: 'hidden',
+                        display: 'flex',
+                      }}>
+                        {/* Red zone (1 to yellow threshold) */}
+                        <Box sx={{ 
+                          width: `${yellowPos}%`, 
+                          backgroundColor: '#fecaca',
+                          borderRight: '1px solid #fca5a5',
+                        }} />
+                        {/* Yellow zone (yellow threshold to green threshold) */}
+                        <Box sx={{ 
+                          width: `${greenPos - yellowPos}%`, 
+                          backgroundColor: '#fef08a',
+                          borderRight: '1px solid #fde047',
+                        }} />
+                        {/* Green zone (green threshold to 3) */}
+                        <Box sx={{ 
+                          flex: 1, 
+                          backgroundColor: '#bbf7d0',
+                        }} />
+                      </Box>
+                      
+                      {/* Score Dot */}
+                      <Box sx={{ 
+                        position: 'absolute',
+                        top: '50%',
+                        left: `${Math.max(0, Math.min(100, dotPosition))}%`,
+                        transform: 'translate(-50%, -50%)',
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        backgroundColor: scoreColor,
+                        border: '3px solid #fff',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1,
+                      }} />
+                      
+                      {/* Scale labels */}
+                      <Box sx={{ 
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        mt: 0.5,
+                      }}>
+                        <Typography sx={{ fontFamily, fontSize: 10, fontWeight: 500, color: '#9ca3af' }}>1</Typography>
+                        <Typography sx={{ fontFamily, fontSize: 10, fontWeight: 500, color: '#9ca3af' }}>3</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
       </StyledContainer>
     </LocalizationProvider>
   );
