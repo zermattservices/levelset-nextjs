@@ -2874,12 +2874,12 @@ export function PositionalRatings({
             borderBottom: '1px solid #e5e7eb',
             pb: 2,
           }}>
-            Rating Details
+            Rating for {selectedRatingForDetail?.employee_name || 'Employee'}
             <IconButton onClick={handleDetailModalClose} size="small" sx={{ color: '#6b7280' }}>
               <CloseIcon />
             </IconButton>
           </DialogTitle>
-          <DialogContent sx={{ p: 3 }}>
+          <DialogContent sx={{ p: 3, pt: 4 }}>
             {selectedRatingForDetail && (() => {
               const rating = selectedRatingForDetail;
               const labels = big5LabelsCache.get(rating.position);
@@ -2942,30 +2942,27 @@ export function PositionalRatings({
                       
                       <Box>
                         <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
-                          Employee
+                          Additional Details
                         </Typography>
-                        <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 600, color: '#111827' }}>
-                          {rating.employee_name}
-                        </Typography>
-                      </Box>
-                      
-                      {rating.notes && (
-                        <Box>
-                          <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
-                            Additional Details
-                          </Typography>
-                          <Box sx={{ 
-                            backgroundColor: '#f9fafb', 
-                            borderRadius: '8px', 
-                            p: 1.5,
-                            border: '1px solid #e5e7eb',
+                        <Box sx={{ 
+                          backgroundColor: '#f9fafb', 
+                          borderRadius: '8px', 
+                          p: 1.5,
+                          border: '1px solid #e5e7eb',
+                          minHeight: 60,
+                        }}>
+                          <Typography sx={{ 
+                            fontFamily, 
+                            fontSize: 14, 
+                            fontWeight: 400, 
+                            color: rating.notes ? '#374151' : '#9ca3af', 
+                            lineHeight: 1.5,
+                            fontStyle: rating.notes ? 'normal' : 'italic',
                           }}>
-                            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 400, color: '#374151', lineHeight: 1.5 }}>
-                              {rating.notes}
-                            </Typography>
-                          </Box>
+                            {rating.notes || 'No additional details provided'}
+                          </Typography>
                         </Box>
-                      )}
+                      </Box>
                     </Box>
                     
                     {/* Right Column - Criteria Ratings */}
@@ -3025,7 +3022,7 @@ export function PositionalRatings({
                   }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                       <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#374151' }}>
-                        Overall Score
+                        Overall Rating
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography sx={{ 
