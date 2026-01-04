@@ -192,16 +192,18 @@ async function buildConsolidatedEmployeeMap(
 
 /**
  * Build a map of consolidated leaders (raters) for a specific location's roster.
- * Similar to buildConsolidatedEmployeeMap but doesn't filter by FOH/BOH since leaders can rate either.
+ * Only includes employees whose roles are configured to submit ratings in position_role_permissions.
  * 
  * @param rosterLocationId - The location to get the roster from (leaders shown in table)
  * @param allLocationIds - All locations in the org (for fetching consolidated employee info)
+ * @param allowedRoles - Set of role names that are allowed to submit ratings (from position_role_permissions)
  */
 async function buildConsolidatedLeaderMap(
   supabase: SupabaseClient,
   orgId: string,
   rosterLocationId: string,
-  allLocationIds: string[]
+  allLocationIds: string[],
+  allowedRoles: Set<string> | null
 ): Promise<Map<string, ConsolidatedEmployee>> {
   // Fetch employees from the CURRENT location only (the roster)
   const { data: rosterEmployees, error: empError } = await supabase
@@ -217,10 +219,18 @@ async function buildConsolidatedLeaderMap(
   }
 
   // Build consolidated leader map from roster employees only
+  // Filter to only include employees whose roles are configured to submit ratings
   const consolidatedMap = new Map<string, ConsolidatedEmployee>();
 
   // For each roster employee, determine their consolidated identity
   for (const emp of rosterEmployees) {
+    // Skip employees whose roles are not configured to submit ratings
+    if (allowedRoles && allowedRoles.size > 0) {
+      if (!emp.role || !allowedRoles.has(emp.role)) {
+        continue;
+      }
+    }
+    
     const consolidatedId = emp.consolidated_employee_id;
     const primaryId = (consolidatedId && consolidatedId !== emp.id) ? consolidatedId : emp.id;
     
@@ -701,12 +711,40 @@ export async function fetchLeadershipData(
   // Get dynamic positions for this location/org
   const positions = await fetchPositionsList(supabase, locationId, area);
 
+  // Fetch position_role_permissions to get allowed rater roles
+  // Get ALL roles that can rate ANY position (for roster filtering)
+  // and area-specific roles (for rating filtering)
+  let allAllowedRoles: Set<string> | null = null;
+  let areaAllowedRoles: Set<string> | null = null;
+  
+  const { data: permissionsData } = await supabase
+    .from('position_role_permissions')
+    .select('role_name, org_positions!inner(name, zone)')
+    .eq('org_positions.org_id', orgId);
+
+  if (permissionsData && permissionsData.length > 0) {
+    allAllowedRoles = new Set<string>();
+    areaAllowedRoles = new Set<string>();
+    
+    permissionsData.forEach((p: any) => {
+      const positionZone = p.org_positions?.zone;
+      // Add to all allowed roles (for roster - show leaders who can rate any position)
+      allAllowedRoles!.add(p.role_name);
+      // Add to area-specific roles (for filtering ratings by area)
+      if (positionZone === area) {
+        areaAllowedRoles!.add(p.role_name);
+      }
+    });
+  }
+
   // Build consolidated leader map (roster from current location, ratings from all locations)
+  // Filter to only include employees whose roles are configured to submit ratings
   const consolidatedLeaderMap = await buildConsolidatedLeaderMap(
     supabase,
     orgId,
     locationId,  // Roster from current location only
-    locationIds  // All locations for rating consolidation
+    locationIds, // All locations for rating consolidation
+    allAllowedRoles // Only include employees whose roles can submit ratings
   );
 
   // Build a reverse lookup: employee_id -> consolidated primary ID
@@ -716,25 +754,6 @@ export async function fetchLeadershipData(
       employeeToConsolidated.set(empId, primaryId);
     });
   });
-
-  // Fetch position_role_permissions to get allowed rater roles
-  let allowedRaterRoles: Set<string> | null = null;
-  const { data: permissionsData } = await supabase
-    .from('position_role_permissions')
-    .select('role_name, org_positions!inner(name, zone)')
-    .eq('org_positions.org_id', orgId);
-
-  if (permissionsData && permissionsData.length > 0) {
-    // Get roles that can rate positions in the current area
-    allowedRaterRoles = new Set<string>();
-    permissionsData.forEach((p: any) => {
-      const positionZone = p.org_positions?.zone;
-      // Include role if it can rate any position in this area
-      if (positionZone === area) {
-        allowedRaterRoles!.add(p.role_name);
-      }
-    });
-  }
 
   // Get all ratings for this area from ALL org locations with leader names and roles
   const { data: ratings, error } = await supabase
@@ -758,11 +777,11 @@ export async function fetchLeadershipData(
   const leaderNames = new Map<string, string>(); // Track the primary name for each consolidated leader
   
   ratings.forEach((rating: any) => {
-    // Filter by allowed rater roles if configured
+    // Filter by area-specific allowed rater roles if configured
     const raterRole = rating.rater?.role;
-    if (allowedRaterRoles && allowedRaterRoles.size > 0) {
-      if (!raterRole || !allowedRaterRoles.has(raterRole)) {
-        return; // Skip this rating - rater's role is not configured for rating
+    if (areaAllowedRoles && areaAllowedRoles.size > 0) {
+      if (!raterRole || !areaAllowedRoles.has(raterRole)) {
+        return; // Skip this rating - rater's role is not configured for rating this area
       }
     }
 
