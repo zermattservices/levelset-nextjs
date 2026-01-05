@@ -6,6 +6,7 @@ import {
   Switch,
   Tooltip,
   CircularProgress,
+  Chip,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -15,7 +16,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
-import { fetchLeaderboardData, formatTenure, formatRatingDate } from '@/lib/ratings-data';
+import { fetchLeaderboardData, formatTenure } from '@/lib/ratings-data';
 import type { LeaderboardEntry } from '@/lib/ratings-data';
 import type { Employee } from '@/lib/supabase.types';
 import { EmployeeModal } from './EmployeeModal';
@@ -26,6 +27,9 @@ const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Se
 const levelsetGreen = '#31664a';
 const fohColor = '#006391';
 const bohColor = '#ffcc5b';
+
+// Minimum ratings required to show score (changed from 5 to 1)
+const MIN_RATINGS_FOR_SCORE = 1;
 
 // Date range helper
 const getDateRange = (preset: 'mtd' | 'qtd' | '30d' | '90d'): [Date, Date] => {
@@ -118,7 +122,72 @@ const StyledSwitch = styled(Switch)({
   },
 });
 
-// Top 3 card component
+// Role chip styling matching the rest of the app
+const RoleChip = styled(Chip)<{ roletype: string }>(({ roletype }) => {
+  const styles: Record<string, { bg: string; color: string }> = {
+    'New Hire': { bg: '#f0fdf4', color: '#166534' },
+    'Team Member': { bg: '#eff6ff', color: '#1d4ed8' },
+    'Trainer': { bg: '#fef2f2', color: '#dc2626' },
+    'Team Lead': { bg: '#fef3c7', color: '#d97706' },
+    'Team Leader': { bg: '#fef3c7', color: '#d97706' },
+    'Director': { bg: '#f3e8ff', color: '#7c3aed' },
+    'Executive': { bg: '#F0F0FF', color: '#483D8B' },
+    'Operator': { bg: '#F0F0FF', color: '#483D8B' },
+  };
+  
+  const style = styles[roletype] || styles['Team Member'];
+  
+  return {
+    fontFamily,
+    fontSize: 12,
+    fontWeight: 500,
+    backgroundColor: style.bg,
+    color: style.color,
+    height: 24,
+    borderRadius: 12,
+    '& .MuiChip-label': {
+      padding: '0 8px',
+    },
+  };
+});
+
+// Rank badge component
+interface RankBadgeProps {
+  rank: number;
+  size?: number;
+}
+
+function RankBadge({ rank, size = 32 }: RankBadgeProps) {
+  const rankColors: Record<number, { bg: string; text: string }> = {
+    1: { bg: 'linear-gradient(135deg, #ffd700 0%, #ffec8b 100%)', text: '#856404' },
+    2: { bg: 'linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%)', text: '#5a5a5a' },
+    3: { bg: 'linear-gradient(135deg, #cd7f32 0%, #daa06d 100%)', text: '#7a4a00' },
+  };
+  
+  const colors = rankColors[rank] || { bg: '#e5e7eb', text: '#6b7280' };
+  
+  return (
+    <Box
+      sx={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: colors.bg,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: rank <= 3 ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none',
+        flexShrink: 0,
+      }}
+    >
+      <Typography sx={{ fontFamily, fontSize: size * 0.44, fontWeight: 700, color: colors.text }}>
+        {rank}
+      </Typography>
+    </Box>
+  );
+}
+
+// Top 3 card component - condensed layout
 interface TopCardProps {
   entry: LeaderboardEntry;
   rank: number;
@@ -126,50 +195,26 @@ interface TopCardProps {
 }
 
 function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
-  const rankColors = {
-    1: { bg: 'linear-gradient(135deg, #ffd700 0%, #ffec8b 100%)', text: '#856404', badge: '#ffd700' },
-    2: { bg: 'linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%)', text: '#5a5a5a', badge: '#c0c0c0' },
-    3: { bg: 'linear-gradient(135deg, #cd7f32 0%, #daa06d 100%)', text: '#7a4a00', badge: '#cd7f32' },
-  };
-  
-  const colors = rankColors[rank as 1 | 2 | 3];
-  const hasScore = entry.ratings_needed === 0;
+  const hasScore = entry.total_ratings >= MIN_RATINGS_FOR_SCORE && entry.overall_rating !== null;
   
   return (
     <Box
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        padding: '20px',
-        borderRadius: '16px',
+        padding: '16px',
+        borderRadius: '12px',
         backgroundColor: '#ffffff',
         border: '1px solid #e5e7eb',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
         flex: 1,
-        minWidth: 200,
+        minWidth: 220,
         position: 'relative',
-        overflow: 'hidden',
       }}
     >
       {/* Rank badge */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          width: 32,
-          height: 32,
-          borderRadius: '50%',
-          background: colors.bg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-        }}
-      >
-        <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 700, color: colors.text }}>
-          {rank}
-        </Typography>
+      <Box sx={{ position: 'absolute', top: 12, right: 12 }}>
+        <RankBadge rank={rank} />
       </Box>
       
       {/* Employee name */}
@@ -177,7 +222,7 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
         onClick={() => onEmployeeClick(entry.employee_id)}
         sx={{
           fontFamily,
-          fontSize: 18,
+          fontSize: 16,
           fontWeight: 700,
           color: '#111827',
           cursor: 'pointer',
@@ -189,44 +234,42 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
         {entry.employee_name}
       </Typography>
       
-      {/* Role */}
-      <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', marginBottom: '16px' }}>
-        {entry.role || 'Team Member'}
-      </Typography>
+      {/* Role chip */}
+      <Box sx={{ marginBottom: '12px' }}>
+        <RoleChip label={entry.role || 'Team Member'} size="small" roletype={entry.role || 'Team Member'} />
+      </Box>
       
-      {/* Metrics */}
+      {/* Metrics - all on one row */}
       {hasScore ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box>
-            <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Overall Rating
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
+            <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', textTransform: 'uppercase' }}>
+              Rating
             </Typography>
-            <Typography sx={{ fontFamily, fontSize: 24, fontWeight: 700, color: levelsetGreen }}>
+            <Typography sx={{ fontFamily, fontSize: 20, fontWeight: 700, color: levelsetGreen }}>
               {entry.overall_rating?.toFixed(2)}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', gap: 3 }}>
-            <Box>
-              <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Total Ratings
-              </Typography>
-              <Typography sx={{ fontFamily, fontSize: 16, fontWeight: 600, color: '#374151' }}>
-                {entry.total_ratings}
-              </Typography>
-            </Box>
-            <Box>
-              <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Tenure
-              </Typography>
-              <Typography sx={{ fontFamily, fontSize: 16, fontWeight: 600, color: '#374151' }}>
-                {formatTenure(entry.tenure_months)}
-              </Typography>
-            </Box>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
+            <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', textTransform: 'uppercase' }}>
+              Total
+            </Typography>
+            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#374151' }}>
+              {entry.total_ratings}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
+            <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', textTransform: 'uppercase' }}>
+              Tenure
+            </Typography>
+            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#374151' }}>
+              {formatTenure(entry.tenure_months)}
+            </Typography>
           </Box>
         </Box>
       ) : (
-        <Typography sx={{ fontFamily, fontSize: 14, color: '#9ca3af', fontStyle: 'italic' }}>
-          {entry.ratings_needed} more ratings to be on the leaderboard
+        <Typography sx={{ fontFamily, fontSize: 13, color: '#9ca3af', fontStyle: 'italic' }}>
+          {Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more rating{MIN_RATINGS_FOR_SCORE - entry.total_ratings !== 1 ? 's' : ''} needed
         </Typography>
       )}
     </Box>
@@ -316,6 +359,7 @@ export function PELeaderboard() {
             end: endDate?.toLocaleDateString() || '',
           }}
           logoUrl={logoUrl}
+          minRatings={MIN_RATINGS_FOR_SCORE}
         />
       ).toBlob();
       
@@ -332,15 +376,15 @@ export function PELeaderboard() {
     }
   };
   
-  // Split entries into top 3 and rest
-  const rankedEntries = entries.filter(e => e.ratings_needed === 0);
-  const unrankedEntries = entries.filter(e => e.ratings_needed > 0);
+  // Split entries into ranked and unranked based on minimum ratings
+  const rankedEntries = entries.filter(e => e.total_ratings >= MIN_RATINGS_FOR_SCORE && e.overall_rating !== null);
+  const unrankedEntries = entries.filter(e => e.total_ratings < MIN_RATINGS_FOR_SCORE || e.overall_rating === null);
   const top3 = rankedEntries.slice(0, 3);
   const rest = [...rankedEntries.slice(3), ...unrankedEntries];
   
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, minHeight: 0, flex: 1, paddingTop: 1 }}>
         {/* Filter Bar */}
         <Box
           sx={{
@@ -349,7 +393,7 @@ export function PELeaderboard() {
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: 2,
-            padding: '16px 20px',
+            padding: '12px 16px',
             backgroundColor: '#ffffff',
             borderRadius: '12px',
             border: '1px solid #e5e7eb',
@@ -393,8 +437,10 @@ export function PELeaderboard() {
                     size: 'small',
                     sx: {
                       width: 140,
+                      '& .MuiInputBase-root': { fontFamily },
                       '& .MuiInputBase-input': { fontFamily, fontSize: 12 },
                       '& .MuiInputLabel-root': { fontFamily, fontSize: 12 },
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e5e7eb' },
                     },
                   },
                 }}
@@ -412,8 +458,10 @@ export function PELeaderboard() {
                     size: 'small',
                     sx: {
                       width: 140,
+                      '& .MuiInputBase-root': { fontFamily },
                       '& .MuiInputBase-input': { fontFamily, fontSize: 12 },
                       '& .MuiInputLabel-root': { fontFamily, fontSize: 12 },
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e5e7eb' },
                     },
                   },
                 }}
@@ -435,126 +483,146 @@ export function PELeaderboard() {
           </Tooltip>
         </Box>
         
-        {/* Loading State */}
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', padding: 4 }}>
-            <CircularProgress sx={{ color: levelsetGreen }} />
-          </Box>
-        ) : entries.length === 0 ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 4, gap: 2 }}>
-            <EmojiEventsIcon sx={{ fontSize: 48, color: '#d1d5db' }} />
-            <Typography sx={{ fontFamily, fontSize: 16, color: '#6b7280' }}>
-              No employees found for this area and date range.
-            </Typography>
-          </Box>
-        ) : (
-          <>
-            {/* Top 3 Cards */}
-            {top3.length > 0 && (
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                {top3.map((entry, index) => (
-                  <TopCard
-                    key={entry.employee_id}
-                    entry={entry}
-                    rank={index + 1}
-                    onEmployeeClick={handleEmployeeClick}
-                  />
-                ))}
-              </Box>
-            )}
-            
-            {/* Table for rest */}
-            {rest.length > 0 && (
-              <Box
-                sx={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '12px',
-                  border: '1px solid #e5e7eb',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Table Header */}
+        {/* Scrollable Content */}
+        <Box sx={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 2 }}>
+          {/* Loading State */}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', padding: 4 }}>
+              <CircularProgress sx={{ color: levelsetGreen }} />
+            </Box>
+          ) : entries.length === 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 4, gap: 2 }}>
+              <EmojiEventsIcon sx={{ fontSize: 48, color: '#d1d5db' }} />
+              <Typography sx={{ fontFamily, fontSize: 16, color: '#6b7280' }}>
+                No employees found for this area and date range.
+              </Typography>
+            </Box>
+          ) : (
+            <>
+              {/* Top 3 Cards */}
+              {top3.length > 0 && (
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  {top3.map((entry, index) => (
+                    <TopCard
+                      key={entry.employee_id}
+                      entry={entry}
+                      rank={index + 1}
+                      onEmployeeClick={handleEmployeeClick}
+                    />
+                  ))}
+                </Box>
+              )}
+              
+              {/* Table for rest */}
+              {rest.length > 0 && (
                 <Box
                   sx={{
-                    display: 'grid',
-                    gridTemplateColumns: '60px 1fr 150px 100px 120px 100px',
-                    gap: 2,
-                    padding: '12px 20px',
-                    backgroundColor: '#f9fafb',
-                    borderBottom: '1px solid #e5e7eb',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '12px',
+                    border: '1px solid #e5e7eb',
+                    overflow: 'hidden',
                   }}
                 >
-                  <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
-                    Rank
-                  </Typography>
-                  <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
-                    Name
-                  </Typography>
-                  <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
-                    Role
-                  </Typography>
-                  <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
-                    Rating
-                  </Typography>
-                  <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
-                    Total Ratings
-                  </Typography>
-                  <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
-                    Tenure
-                  </Typography>
-                </Box>
-                
-                {/* Table Rows */}
-                {rest.map((entry, index) => {
-                  const rank = entry.ratings_needed === 0 ? top3.length + index + 1 : null;
-                  return (
-                    <Box
-                      key={entry.employee_id}
-                      sx={{
-                        display: 'grid',
-                        gridTemplateColumns: '60px 1fr 150px 100px 120px 100px',
-                        gap: 2,
-                        padding: '14px 20px',
-                        borderBottom: '1px solid #f3f4f6',
-                        '&:last-child': { borderBottom: 'none' },
-                        '&:hover': { backgroundColor: '#f9fafb' },
-                      }}
-                    >
-                      <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: rank ? '#374151' : '#9ca3af' }}>
-                        {rank || '—'}
-                      </Typography>
-                      <Typography
-                        onClick={() => handleEmployeeClick(entry.employee_id)}
+                  {/* Table Header */}
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: '60px 1fr 140px 80px 100px 80px',
+                      gap: 2,
+                      padding: '12px 20px',
+                      backgroundColor: '#f9fafb',
+                      borderBottom: '1px solid #e5e7eb',
+                    }}
+                  >
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
+                      Rank
+                    </Typography>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
+                      Name
+                    </Typography>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
+                      Role
+                    </Typography>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
+                      Rating
+                    </Typography>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
+                      Total Ratings
+                    </Typography>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
+                      Tenure
+                    </Typography>
+                  </Box>
+                  
+                  {/* Table Rows */}
+                  {rest.map((entry, index) => {
+                    const hasScore = entry.total_ratings >= MIN_RATINGS_FOR_SCORE && entry.overall_rating !== null;
+                    const rank = hasScore ? top3.length + rankedEntries.slice(3).indexOf(entry) + 1 : null;
+                    return (
+                      <Box
+                        key={entry.employee_id}
                         sx={{
-                          fontFamily,
-                          fontSize: 14,
-                          fontWeight: 500,
-                          color: '#111827',
-                          cursor: 'pointer',
-                          '&:hover': { color: levelsetGreen },
+                          display: 'grid',
+                          gridTemplateColumns: '60px 1fr 140px 80px 100px 80px',
+                          gap: 2,
+                          padding: '12px 20px',
+                          alignItems: 'center',
+                          borderBottom: '1px solid #f3f4f6',
+                          '&:last-child': { borderBottom: 'none' },
+                          '&:hover': { backgroundColor: '#f9fafb' },
                         }}
                       >
-                        {entry.employee_name}
-                      </Typography>
-                      <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280' }}>
-                        {entry.role || 'Team Member'}
-                      </Typography>
-                      <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: entry.overall_rating ? levelsetGreen : '#9ca3af' }}>
-                        {entry.overall_rating ? entry.overall_rating.toFixed(2) : `${entry.ratings_needed} more`}
-                      </Typography>
-                      <Typography sx={{ fontFamily, fontSize: 14, color: '#374151' }}>
-                        {entry.total_ratings}
-                      </Typography>
-                      <Typography sx={{ fontFamily, fontSize: 14, color: '#374151' }}>
-                        {formatTenure(entry.tenure_months)}
-                      </Typography>
-                    </Box>
-                  );
-                })}
-              </Box>
-            )}
-          </>
-        )}
+                        {/* Rank with circle */}
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                          {rank ? (
+                            <RankBadge rank={rank} size={28} />
+                          ) : (
+                            <Typography sx={{ fontFamily, fontSize: 14, color: '#9ca3af' }}>—</Typography>
+                          )}
+                        </Box>
+                        
+                        {/* Name */}
+                        <Typography
+                          onClick={() => handleEmployeeClick(entry.employee_id)}
+                          sx={{
+                            fontFamily,
+                            fontSize: 14,
+                            fontWeight: 500,
+                            color: '#111827',
+                            cursor: 'pointer',
+                            '&:hover': { color: levelsetGreen },
+                          }}
+                        >
+                          {entry.employee_name}
+                        </Typography>
+                        
+                        {/* Role */}
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                          <RoleChip label={entry.role || 'Team Member'} size="small" roletype={entry.role || 'Team Member'} />
+                        </Box>
+                        
+                        {/* Rating */}
+                        <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: hasScore ? levelsetGreen : '#9ca3af', textAlign: 'center' }}>
+                          {hasScore ? entry.overall_rating?.toFixed(2) : `${Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more`}
+                        </Typography>
+                        
+                        {/* Total Ratings */}
+                        <Typography sx={{ fontFamily, fontSize: 14, color: '#374151', textAlign: 'center' }}>
+                          {entry.total_ratings}
+                        </Typography>
+                        
+                        {/* Tenure */}
+                        <Typography sx={{ fontFamily, fontSize: 14, color: '#374151', textAlign: 'center' }}>
+                          {formatTenure(entry.tenure_months)}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
+                </Box>
+              )}
+            </>
+          )}
+        </Box>
       </Box>
       
       {/* Employee Modal */}

@@ -20,19 +20,19 @@ const tabs: Tab[] = [
   {
     id: 'smartview',
     label: 'SmartView',
-    icon: <AutoAwesomeIcon sx={{ fontSize: 20 }} />,
+    icon: <AutoAwesomeIcon sx={{ fontSize: 18 }} />,
     href: '/positional-excellence/smartview',
   },
   {
     id: 'classic',
     label: 'Classic View',
-    icon: <TableChartIcon sx={{ fontSize: 20 }} />,
+    icon: <TableChartIcon sx={{ fontSize: 18 }} />,
     href: '/positional-excellence/classic',
   },
   {
     id: 'leaderboard',
     label: 'Leaderboard',
-    icon: <EmojiEventsIcon sx={{ fontSize: 20 }} />,
+    icon: <EmojiEventsIcon sx={{ fontSize: 18 }} />,
     href: '/positional-excellence/leaderboard',
   },
 ];
@@ -69,7 +69,6 @@ export function ManillaTabs({ activeTab, className }: ManillaTabsProps) {
           );
         })}
       </div>
-      <div className={sty.tabsConnector} />
     </div>
   );
 }

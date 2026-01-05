@@ -193,11 +193,12 @@ interface PELeaderboardPDFProps {
   area: 'FOH' | 'BOH';
   dateRange: { start: string; end: string };
   logoUrl: string;
+  minRatings?: number;
 }
 
-export function PELeaderboardPDF({ entries, area, dateRange, logoUrl }: PELeaderboardPDFProps) {
-  const rankedEntries = entries.filter(e => e.ratings_needed === 0);
-  const unrankedEntries = entries.filter(e => e.ratings_needed > 0);
+export function PELeaderboardPDF({ entries, area, dateRange, logoUrl, minRatings = 1 }: PELeaderboardPDFProps) {
+  const rankedEntries = entries.filter(e => e.total_ratings >= minRatings && e.overall_rating !== null);
+  const unrankedEntries = entries.filter(e => e.total_ratings < minRatings || e.overall_rating === null);
   const top3 = rankedEntries.slice(0, 3);
   const rest = [...rankedEntries.slice(3), ...unrankedEntries];
   

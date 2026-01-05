@@ -81,20 +81,20 @@ export function PositionalExcellenceDashboard({ activeTab }: PositionalExcellenc
           userRole={auth.role}
         />
 
-        {/* Header section with title and tabs */}
+        {/* Header section with title and tabs on same row */}
         <div className={sty.headerSection}>
           <div className={sty.headerContainer}>
-            <div className={sty.titleRow}>
-              <h1 className={sty.pageTitle}>Positional Excellence</h1>
-            </div>
+            <h1 className={sty.pageTitle}>Positional Excellence</h1>
+            <ManillaTabs activeTab={activeTab} />
           </div>
-          <ManillaTabs activeTab={activeTab} className={sty.tabs} />
         </div>
 
         {/* Tab content */}
         <div className={sty.contentSection}>
           <div className={sty.contentContainer}>
-            {renderTabContent()}
+            <div className={sty.tabContent} key={activeTab}>
+              {renderTabContent()}
+            </div>
           </div>
         </div>
       </div>

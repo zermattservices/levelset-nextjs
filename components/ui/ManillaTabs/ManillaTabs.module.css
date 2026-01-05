@@ -1,35 +1,35 @@
 .tabsContainer {
   display: flex;
-  flex-direction: column;
-  width: 100%;
+  flex-direction: row;
+  align-items: flex-end;
 }
 
 .tabsRow {
   display: flex;
   gap: 4px;
-  padding: 0 24px;
 }
 
 .tab {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 12px 12px 0 0;
+  gap: 6px;
+  padding: 10px 20px;
+  border: 1px solid #e5e7eb;
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
   font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
   position: relative;
-  z-index: 1;
 }
 
 .tabActive {
   background-color: #ffffff;
   color: #31664a;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+  border-color: #e5e7eb;
+  z-index: 1;
 }
 
 .tabActive::after {
@@ -45,6 +45,7 @@
 .tabInactive {
   background-color: #f3f4f6;
   color: #6b7280;
+  border-color: #e5e7eb;
 }
 
 .tabInactive:hover {
@@ -60,10 +61,4 @@
 
 .tabLabel {
   white-space: nowrap;
-}
-
-.tabsConnector {
-  height: 1px;
-  background-color: #e5e7eb;
-  margin-top: -1px;
 }

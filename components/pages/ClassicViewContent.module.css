@@ -4,13 +4,7 @@
   width: 100%;
   height: auto;
   min-height: 0;
-}
-
-.headerRow {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  margin-bottom: 16px;
+  padding-top: 8px;
 }
 
 .contentWrapper {

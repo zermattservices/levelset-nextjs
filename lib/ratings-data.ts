@@ -1085,7 +1085,7 @@ export interface LeaderboardEntry {
   overall_rating: number | null;
   total_ratings: number;
   last_rating_date: string | null;
-  ratings_needed: number; // 0 if has 5+ ratings, otherwise how many more needed
+  ratings_needed: number; // 0 if has 1+ ratings, otherwise how many more needed
 }
 
 /**
@@ -1282,12 +1282,12 @@ export async function fetchLeaderboardData(
   consolidatedMap.forEach((consolidated, primaryId) => {
     const empRatings = ratingsMap.get(primaryId) || [];
     const totalRatings = empRatings.length;
-    const ratingsNeeded = Math.max(0, 5 - totalRatings);
+    const ratingsNeeded = Math.max(0, 1 - totalRatings);
 
     // Calculate overall rating using rolling 4 average per position
     let overallRating: number | null = null;
 
-    if (totalRatings >= 5) {
+    if (totalRatings >= 1) {
       // Group by position
       const positionGroups = new Map<string, any[]>();
       empRatings.forEach((r: any) => {

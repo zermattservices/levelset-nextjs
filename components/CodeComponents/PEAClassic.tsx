@@ -67,6 +67,8 @@ export interface PEAClassicProps {
   compactControls?: boolean;
   /** Fill available height (for use in full-page layouts) */
   fillHeight?: boolean;
+  /** Additional action buttons to display next to Rating Scale */
+  additionalActions?: React.ReactNode;
 }
 
 const fontFamily = `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
@@ -354,7 +356,8 @@ export function PEAClassic({
   width,
   maxWidth,
   compactControls = false,
-  fillHeight = false
+  fillHeight = false,
+  additionalActions
 }: PEAClassicProps) {
   const [activeTab, setActiveTab] = React.useState<"overview" | "employees" | "leadership">(defaultTab);
   const [area, setArea] = React.useState<"FOH" | "BOH">(defaultArea);
@@ -617,29 +620,35 @@ export function PEAClassic({
           )}
         </Box>
         
-        {/* Show Rating Scale Button - only on Overview tab */}
-        {activeTab === 'overview' && (
-          <Button
-            onClick={() => setShowRatingScale(true)}
-            sx={{
-              fontFamily,
-              fontSize: compactControls ? 12 : 14,
-              fontWeight: 600,
-              backgroundColor: '#31664a',
-              color: '#ffffff',
-              borderRadius: '6px',
-              textTransform: 'none',
-              padding: compactControls ? '6px 12px' : '8px 16px',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              '&:hover': {
-                backgroundColor: '#27533d',
-              }
-            }}
-          >
-            Rating Scale
-          </Button>
-        )}
+        {/* Action buttons container */}
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexShrink: 0 }}>
+          {/* Additional actions passed from parent */}
+          {additionalActions}
+          
+          {/* Show Rating Scale Button - only on Overview tab */}
+          {activeTab === 'overview' && (
+            <Button
+              onClick={() => setShowRatingScale(true)}
+              sx={{
+                fontFamily,
+                fontSize: compactControls ? 12 : 14,
+                fontWeight: 600,
+                backgroundColor: '#31664a',
+                color: '#ffffff',
+                borderRadius: '6px',
+                textTransform: 'none',
+                padding: compactControls ? '6px 12px' : '8px 16px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                '&:hover': {
+                  backgroundColor: '#27533d',
+                }
+              }}
+            >
+              Rating Scale
+            </Button>
+          )}
+        </Box>
       </ControlsContainer>
 
       {/* Table Content - Render based on active tab with loading overlay */}
