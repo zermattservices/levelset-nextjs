@@ -169,15 +169,25 @@ export default function FeatureDetailPage() {
             <p className={styles.detailDescription}>{feature.description}</p>
           )}
           
-          {/* Author Info - Levelset branding */}
+          {/* Author Info - Dynamic based on creator */}
           <div className={styles.authorInfo}>
-            <img 
-              src="/logos/Levelset no margin.png" 
-              alt="Levelset" 
-              className={styles.authorAvatarImg}
-            />
+            {feature.created_by_name ? (
+              // User-submitted feature - show avatar with initials
+              <div className={styles.authorAvatar}>
+                {feature.created_by_name.charAt(0).toUpperCase()}
+              </div>
+            ) : (
+              // Levelset-created feature - show logo
+              <img 
+                src="/logos/Levelset no margin.png" 
+                alt="Levelset" 
+                className={styles.authorAvatarImg}
+              />
+            )}
             <div className={styles.authorDetails}>
-              <span className={styles.authorName}>Levelset</span>
+              <span className={styles.authorName}>
+                {feature.created_by_name || 'Levelset'}
+              </span>
               <span className={styles.authorDate}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />

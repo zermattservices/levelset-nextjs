@@ -14,6 +14,7 @@ export interface RoadmapFeature {
   updated_at: string;
   organization_id?: string | null;
   created_by?: string | null;
+  created_by_name?: string | null;
   is_public?: boolean;
 }
 
@@ -131,7 +132,24 @@ export async function fetchFeatureById(id: string, organizationId?: string): Pro
     return null;
   }
   
-  return data;
+  // Fetch creator's name if created_by exists
+  let created_by_name: string | null = null;
+  if (data.created_by) {
+    const { data: userData } = await supabase
+      .from('app_users')
+      .select('first_name, last_name')
+      .eq('auth_user_id', data.created_by)
+      .single();
+    
+    if (userData) {
+      created_by_name = `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || null;
+    }
+  }
+  
+  return {
+    ...data,
+    created_by_name,
+  };
 }
 
 export async function fetchStats(organizationId?: string): Promise<RoadmapStats> {
