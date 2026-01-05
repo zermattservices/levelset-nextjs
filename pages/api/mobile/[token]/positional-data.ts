@@ -178,7 +178,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     role: emp.role ?? null,
   }));
 
-  const leaders = employees.filter((emp) => isLeaderRole(emp.role));
+  // Determine leaders based on role permissions (who can rate positions)
+  // If rolePermissions is populated, use it to determine leaders
+  // Otherwise, fall back to the legacy isLeaderRole check
+  const rolesWithPermissions = new Set(Object.keys(rolePermissions));
+  
+  const leaders = employees.filter((emp) => {
+    if (!emp.role) return false;
+    
+    // If we have role permissions configured, use those to determine leaders
+    if (rolesWithPermissions.size > 0) {
+      return rolesWithPermissions.has(emp.role);
+    }
+    
+    // Fallback to legacy check if no role permissions are configured
+    return isLeaderRole(emp.role);
+  });
 
   res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json({
