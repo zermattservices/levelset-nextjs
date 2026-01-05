@@ -1073,3 +1073,304 @@ export function formatRatingDate(dateString: string): string {
   });
 }
 
+/**
+ * Leaderboard employee entry interface
+ */
+export interface LeaderboardEntry {
+  employee_id: string;
+  employee_name: string;
+  role: string | null;
+  hire_date: string | null;
+  tenure_months: number | null;
+  overall_rating: number | null;
+  total_ratings: number;
+  last_rating_date: string | null;
+  ratings_needed: number; // 0 if has 5+ ratings, otherwise how many more needed
+}
+
+/**
+ * Calculate tenure in months from hire_date
+ */
+function calculateTenureMonths(hireDate: string | null): number | null {
+  if (!hireDate) return null;
+  const hire = new Date(hireDate);
+  const now = new Date();
+  const months = (now.getFullYear() - hire.getFullYear()) * 12 + (now.getMonth() - hire.getMonth());
+  return Math.max(0, months);
+}
+
+/**
+ * Format tenure for display (e.g., "1 year 6 mo")
+ */
+export function formatTenure(months: number | null): string {
+  if (months === null || months < 0) return '—';
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  
+  if (years === 0) {
+    return `${remainingMonths} mo`;
+  } else if (remainingMonths === 0) {
+    return years === 1 ? '1 year' : `${years} years`;
+  } else {
+    return `${years} ${years === 1 ? 'year' : 'years'} ${remainingMonths} mo`;
+  }
+}
+
+/**
+ * Fetch Leaderboard data - ALL active employees ranked by their overall rating
+ * 
+ * Ranking algorithm:
+ * 1. Get all ratings in the date range for the selected area (FOH/BOH)
+ * 2. Group by employee, then by position
+ * 3. For each position: take the last 4 ratings (rolling 4), calculate average
+ * 4. Average all position averages = employee's overall rating
+ * 5. Require at least 5 ratings total to show a score
+ * 
+ * Uses consolidated employee IDs to aggregate ratings across locations.
+ */
+export async function fetchLeaderboardData(
+  supabase: SupabaseClient,
+  locationId: string,
+  area: 'FOH' | 'BOH',
+  startDate: Date,
+  endDate: Date
+): Promise<LeaderboardEntry[]> {
+  // Get org info and all locations for the org
+  const orgInfo = await getOrgLocations(supabase, locationId);
+  if (!orgInfo) {
+    console.error('Could not get org locations');
+    return [];
+  }
+  const { orgId, locationIds } = orgInfo;
+
+  // Get dynamic positions for this location/org
+  const positions = await fetchPositionsList(supabase, locationId, area);
+
+  const fohBohField = area === 'FOH' ? 'is_foh' : 'is_boh';
+
+  // Fetch ALL active employees from the current location's roster
+  const { data: rosterEmployees, error: empError } = await supabase
+    .from('employees')
+    .select('id, full_name, first_name, last_name, consolidated_employee_id, role, hire_date')
+    .eq('location_id', locationId)
+    .eq('active', true)
+    .eq(fohBohField, true)
+    .order('full_name');
+
+  if (empError || !rosterEmployees) {
+    console.error('Error fetching employees for leaderboard:', empError);
+    return [];
+  }
+
+  // Build consolidated employee map
+  const consolidatedMap = new Map<string, {
+    primaryId: string;
+    name: string;
+    role: string | null;
+    hire_date: string | null;
+    allIds: string[];
+  }>();
+
+  for (const emp of rosterEmployees) {
+    const consolidatedId = emp.consolidated_employee_id;
+    const primaryId = (consolidatedId && consolidatedId !== emp.id) ? consolidatedId : emp.id;
+    
+    if (!consolidatedMap.has(primaryId)) {
+      consolidatedMap.set(primaryId, {
+        primaryId: primaryId,
+        name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
+        role: emp.role,
+        hire_date: emp.hire_date,
+        allIds: [emp.id]
+      });
+      
+      if (consolidatedId && consolidatedId !== emp.id) {
+        consolidatedMap.get(primaryId)!.allIds.push(consolidatedId);
+      }
+    } else {
+      const existing = consolidatedMap.get(primaryId)!;
+      if (!existing.allIds.includes(emp.id)) {
+        existing.allIds.push(emp.id);
+      }
+    }
+  }
+
+  // Fetch all linked employee IDs from ALL locations for each consolidated identity
+  const primaryIds = Array.from(consolidatedMap.keys());
+  for (const primaryId of primaryIds) {
+    const consolidated = consolidatedMap.get(primaryId)!;
+    
+    const { data: linkedEmployees } = await supabase
+      .from('employees')
+      .select('id, consolidated_employee_id')
+      .in('location_id', locationIds)
+      .or(`id.eq.${primaryId},consolidated_employee_id.eq.${primaryId}`);
+
+    if (linkedEmployees) {
+      linkedEmployees.forEach(linked => {
+        if (!consolidated.allIds.includes(linked.id)) {
+          consolidated.allIds.push(linked.id);
+        }
+      });
+    }
+  }
+
+  // Build reverse lookup
+  const employeeToConsolidated = new Map<string, string>();
+  consolidatedMap.forEach((consolidated, primaryId) => {
+    consolidated.allIds.forEach(empId => {
+      employeeToConsolidated.set(empId, primaryId);
+    });
+  });
+
+  // Format dates for query
+  const startISO = startDate.toISOString();
+  const endISO = endDate.toISOString();
+
+  // Fetch all ratings in the date range from ALL org locations
+  let ratings: any[] = [];
+  let offset = 0;
+  const limit = 25000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('ratings')
+      .select('*')
+      .in('location_id', locationIds)
+      .in('position', positions)
+      .gte('created_at', startISO)
+      .lte('created_at', endISO)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Error fetching leaderboard ratings:', error);
+      break;
+    }
+
+    if (data && data.length > 0) {
+      ratings = ratings.concat(data);
+      hasMore = data.length === limit;
+      offset += limit;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  // Group ratings by consolidated employee ID
+  const ratingsMap = new Map<string, any[]>();
+  
+  ratings.forEach((rating: any) => {
+    const consolidatedId = employeeToConsolidated.get(rating.employee_id);
+    if (consolidatedId) {
+      if (!ratingsMap.has(consolidatedId)) {
+        ratingsMap.set(consolidatedId, []);
+      }
+      ratingsMap.get(consolidatedId)!.push(rating);
+    }
+  });
+
+  // Sort ratings within each group by date (most recent first)
+  ratingsMap.forEach((empRatings) => {
+    empRatings.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  });
+
+  // Calculate leaderboard entries for ALL employees
+  const entries: LeaderboardEntry[] = [];
+
+  consolidatedMap.forEach((consolidated, primaryId) => {
+    const empRatings = ratingsMap.get(primaryId) || [];
+    const totalRatings = empRatings.length;
+    const ratingsNeeded = Math.max(0, 5 - totalRatings);
+
+    // Calculate overall rating using rolling 4 average per position
+    let overallRating: number | null = null;
+
+    if (totalRatings >= 5) {
+      // Group by position
+      const positionGroups = new Map<string, any[]>();
+      empRatings.forEach((r: any) => {
+        if (!positionGroups.has(r.position)) {
+          positionGroups.set(r.position, []);
+        }
+        positionGroups.get(r.position)!.push(r);
+      });
+
+      // Calculate rolling 4 average for each position
+      const positionAverages: number[] = [];
+      positionGroups.forEach((posRatings) => {
+        // Sort by date (most recent first) and take last 4
+        posRatings.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const last4 = posRatings.slice(0, 4);
+        
+        const avgs: number[] = [];
+        last4.forEach((r: any) => {
+          if (r.rating_avg !== null) {
+            avgs.push(r.rating_avg);
+          } else {
+            const individualRatings = [r.rating_1, r.rating_2, r.rating_3, r.rating_4, r.rating_5]
+              .filter((v: number | null) => v !== null) as number[];
+            if (individualRatings.length > 0) {
+              const calculatedAvg = individualRatings.reduce((sum, v) => sum + v, 0) / individualRatings.length;
+              avgs.push(calculatedAvg);
+            }
+          }
+        });
+
+        if (avgs.length > 0) {
+          const posAvg = avgs.reduce((sum, v) => sum + v, 0) / avgs.length;
+          positionAverages.push(posAvg);
+        }
+      });
+
+      // Average all position averages
+      if (positionAverages.length > 0) {
+        overallRating = positionAverages.reduce((sum, v) => sum + v, 0) / positionAverages.length;
+      }
+    }
+
+    // Get last rating date
+    const lastRatingDate = empRatings.length > 0 ? empRatings[0].created_at : null;
+
+    // Calculate tenure
+    const tenureMonths = calculateTenureMonths(consolidated.hire_date);
+
+    entries.push({
+      employee_id: primaryId,
+      employee_name: consolidated.name,
+      role: consolidated.role,
+      hire_date: consolidated.hire_date,
+      tenure_months: tenureMonths,
+      overall_rating: overallRating,
+      total_ratings: totalRatings,
+      last_rating_date: lastRatingDate,
+      ratings_needed: ratingsNeeded
+    });
+  });
+
+  // Sort: First by whether they have enough ratings (5+), then by overall rating descending
+  entries.sort((a, b) => {
+    // Employees with 5+ ratings come first
+    if (a.ratings_needed === 0 && b.ratings_needed > 0) return -1;
+    if (a.ratings_needed > 0 && b.ratings_needed === 0) return 1;
+    
+    // Among those with scores, sort by overall rating descending
+    if (a.overall_rating !== null && b.overall_rating !== null) {
+      return b.overall_rating - a.overall_rating;
+    }
+    if (a.overall_rating !== null) return -1;
+    if (b.overall_rating !== null) return 1;
+    
+    // Among those without scores, sort by total ratings descending
+    if (a.total_ratings !== b.total_ratings) {
+      return b.total_ratings - a.total_ratings;
+    }
+    
+    // Finally, sort by name
+    return a.employee_name.localeCompare(b.employee_name);
+  });
+
+  return entries;
+}
+

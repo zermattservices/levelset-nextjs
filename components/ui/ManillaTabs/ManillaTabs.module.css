@@ -1,0 +1,69 @@
+.tabsContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.tabsRow {
+  display: flex;
+  gap: 4px;
+  padding: 0 24px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px 12px 0 0;
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.tabActive {
+  background-color: #ffffff;
+  color: #31664a;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tabActive::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #ffffff;
+}
+
+.tabInactive {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.tabInactive:hover {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.tabIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tabLabel {
+  white-space: nowrap;
+}
+
+.tabsConnector {
+  height: 1px;
+  background-color: #e5e7eb;
+  margin-top: -1px;
+}
