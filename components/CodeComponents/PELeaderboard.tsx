@@ -7,6 +7,7 @@ import {
   Tooltip,
   CircularProgress,
   Chip,
+  TextField,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -122,6 +123,45 @@ const StyledSwitch = styled(Switch)({
   },
 });
 
+// Custom DatePicker TextField - identical to PositionalRatings.tsx
+const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
+  <TextField
+    {...props}
+    ref={ref}
+    size="small"
+    sx={{
+      width: 130,
+      '& .MuiInputBase-input': {
+        fontFamily,
+        fontSize: 11,
+        padding: '8px 10px',
+      },
+      '& .MuiInputLabel-root': {
+        fontFamily,
+        fontSize: 11,
+      },
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#e5e7eb',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#d1d5db',
+      },
+      '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: levelsetGreen,
+        borderWidth: '2px',
+      },
+      // Calendar icon button - reduce size
+      '& .MuiIconButton-root': {
+        padding: '6px',
+        '& .MuiSvgIcon-root': {
+          fontSize: '1rem',
+        },
+      },
+      ...props.sx,
+    }}
+  />
+));
+
 // Role chip styling matching the rest of the app
 const RoleChip = styled(Chip)<{ roletype: string }>(({ roletype }) => {
   const styles: Record<string, { bg: string; color: string }> = {
@@ -187,7 +227,7 @@ function RankBadge({ rank, size = 32 }: RankBadgeProps) {
   );
 }
 
-// Top 3 card component - condensed layout
+// Top 3 card component - redesigned layout
 interface TopCardProps {
   entry: LeaderboardEntry;
   rank: number;
@@ -201,65 +241,58 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
     <Box
       sx={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
+        alignItems: 'center',
         padding: '16px',
         borderRadius: '12px',
         backgroundColor: '#ffffff',
         border: '1px solid #e5e7eb',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
         flex: 1,
-        minWidth: 220,
-        position: 'relative',
+        minWidth: 280,
+        gap: 2,
       }}
     >
-      {/* Rank badge */}
-      <Box sx={{ position: 'absolute', top: 12, right: 12 }}>
-        <RankBadge rank={rank} />
+      {/* Rank badge - left side, centered vertically */}
+      <Box sx={{ flexShrink: 0 }}>
+        <RankBadge rank={rank} size={40} />
       </Box>
       
-      {/* Employee name */}
-      <Typography
-        onClick={() => onEmployeeClick(entry.employee_id)}
-        sx={{
-          fontFamily,
-          fontSize: 16,
-          fontWeight: 700,
-          color: '#111827',
-          cursor: 'pointer',
-          '&:hover': { color: levelsetGreen },
-          marginBottom: '4px',
-          paddingRight: '40px',
-        }}
-      >
-        {entry.employee_name}
-      </Typography>
-      
-      {/* Role chip */}
-      <Box sx={{ marginBottom: '12px' }}>
-        <RoleChip label={entry.role || 'Team Member'} size="small" roletype={entry.role || 'Team Member'} />
-      </Box>
-      
-      {/* Metrics - all on one row */}
-      {hasScore ? (
-        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-            <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', textTransform: 'uppercase' }}>
-              Rating
-            </Typography>
-            <Typography sx={{ fontFamily, fontSize: 20, fontWeight: 700, color: levelsetGreen }}>
-              {entry.overall_rating?.toFixed(2)}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-            <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', textTransform: 'uppercase' }}>
-              Total
+      {/* Middle section - Name, Role, and metrics */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        {/* Employee name */}
+        <Typography
+          onClick={() => onEmployeeClick(entry.employee_id)}
+          sx={{
+            fontFamily,
+            fontSize: 16,
+            fontWeight: 700,
+            color: '#111827',
+            cursor: 'pointer',
+            '&:hover': { color: levelsetGreen },
+            marginBottom: '4px',
+          }}
+        >
+          {entry.employee_name}
+        </Typography>
+        
+        {/* Role chip */}
+        <Box sx={{ marginBottom: '8px' }}>
+          <RoleChip label={entry.role || 'Team Member'} size="small" roletype={entry.role || 'Team Member'} />
+        </Box>
+        
+        {/* Total Ratings and Tenure - same margin as name/role */}
+        <Box sx={{ display: 'flex', gap: 3 }}>
+          <Box>
+            <Typography sx={{ fontFamily, fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', marginBottom: '2px' }}>
+              Total Ratings
             </Typography>
             <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#374151' }}>
               {entry.total_ratings}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-            <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', textTransform: 'uppercase' }}>
+          <Box>
+            <Typography sx={{ fontFamily, fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', marginBottom: '2px' }}>
               Tenure
             </Typography>
             <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#374151' }}>
@@ -267,11 +300,23 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
             </Typography>
           </Box>
         </Box>
-      ) : (
-        <Typography sx={{ fontFamily, fontSize: 13, color: '#9ca3af', fontStyle: 'italic' }}>
-          {Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more rating{MIN_RATINGS_FOR_SCORE - entry.total_ratings !== 1 ? 's' : ''} needed
+      </Box>
+      
+      {/* Right section - Overall rating */}
+      <Box sx={{ flexShrink: 0, textAlign: 'center', paddingLeft: 2 }}>
+        <Typography sx={{ fontFamily, fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', marginBottom: '4px' }}>
+          Overall
         </Typography>
-      )}
+        {hasScore ? (
+          <Typography sx={{ fontFamily, fontSize: 28, fontWeight: 700, color: levelsetGreen, lineHeight: 1 }}>
+            {entry.overall_rating?.toFixed(2)}
+          </Typography>
+        ) : (
+          <Typography sx={{ fontFamily, fontSize: 12, color: '#9ca3af', fontStyle: 'italic' }}>
+            {Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more
+          </Typography>
+        )}
+      </Box>
     </Box>
   );
 }
@@ -423,50 +468,62 @@ export function PELeaderboard() {
               </PillButton>
             </Box>
             
-            {/* Custom Date Pickers */}
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <DatePicker
-                label="Start"
-                value={startDate}
-                onChange={(date) => {
-                  setStartDate(date);
-                  setDateRange('custom');
-                }}
-                slotProps={{
-                  textField: {
-                    size: 'small',
-                    sx: {
-                      width: 140,
-                      '& .MuiInputBase-root': { fontFamily },
-                      '& .MuiInputBase-input': { fontFamily, fontSize: 12 },
-                      '& .MuiInputLabel-root': { fontFamily, fontSize: 12 },
-                      '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e5e7eb' },
+            {/* Custom Date Pickers - identical to PositionalRatings */}
+            <DatePicker
+              label="Start Date"
+              value={startDate}
+              onChange={(date) => {
+                setStartDate(date);
+                setDateRange('custom');
+              }}
+              format="M/d/yyyy"
+              enableAccessibleFieldDOMStructure={false}
+              slots={{
+                textField: CustomDateTextField,
+              }}
+              slotProps={{
+                textField: {
+                  sx: {
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 11,
+                      color: '#6b7280',
+                      '&.Mui-focused': {
+                        color: levelsetGreen,
+                      },
                     },
                   },
-                }}
-              />
-              <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280' }}>to</Typography>
-              <DatePicker
-                label="End"
-                value={endDate}
-                onChange={(date) => {
-                  setEndDate(date);
-                  setDateRange('custom');
-                }}
-                slotProps={{
-                  textField: {
-                    size: 'small',
-                    sx: {
-                      width: 140,
-                      '& .MuiInputBase-root': { fontFamily },
-                      '& .MuiInputBase-input': { fontFamily, fontSize: 12 },
-                      '& .MuiInputLabel-root': { fontFamily, fontSize: 12 },
-                      '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e5e7eb' },
+                },
+              }}
+            />
+            
+            <DatePicker
+              label="End Date"
+              value={endDate}
+              onChange={(date) => {
+                setEndDate(date);
+                setDateRange('custom');
+              }}
+              format="M/d/yyyy"
+              enableAccessibleFieldDOMStructure={false}
+              slots={{
+                textField: CustomDateTextField,
+              }}
+              slotProps={{
+                textField: {
+                  sx: {
+                    '& .MuiInputLabel-root': {
+                      fontFamily,
+                      fontSize: 11,
+                      color: '#6b7280',
+                      '&.Mui-focused': {
+                        color: levelsetGreen,
+                      },
                     },
                   },
-                }}
-              />
-            </Box>
+                },
+              }}
+            />
           </Box>
           
           {/* PDF Export */}
@@ -527,7 +584,7 @@ export function PELeaderboard() {
                   <Box
                     sx={{
                       display: 'grid',
-                      gridTemplateColumns: '60px 1fr 140px 80px 100px 80px',
+                      gridTemplateColumns: '60px 1.5fr 1fr 1fr 1fr 1fr',
                       gap: 2,
                       padding: '12px 20px',
                       backgroundColor: '#f9fafb',
@@ -544,7 +601,7 @@ export function PELeaderboard() {
                       Role
                     </Typography>
                     <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
-                      Rating
+                      Overall
                     </Typography>
                     <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
                       Total Ratings
@@ -563,7 +620,7 @@ export function PELeaderboard() {
                         key={entry.employee_id}
                         sx={{
                           display: 'grid',
-                          gridTemplateColumns: '60px 1fr 140px 80px 100px 80px',
+                          gridTemplateColumns: '60px 1.5fr 1fr 1fr 1fr 1fr',
                           gap: 2,
                           padding: '12px 20px',
                           alignItems: 'center',
@@ -601,7 +658,7 @@ export function PELeaderboard() {
                           <RoleChip label={entry.role || 'Team Member'} size="small" roletype={entry.role || 'Team Member'} />
                         </Box>
                         
-                        {/* Rating */}
+                        {/* Overall */}
                         <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: hasScore ? levelsetGreen : '#9ca3af', textAlign: 'center' }}>
                           {hasScore ? entry.overall_rating?.toFixed(2) : `${Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more`}
                         </Typography>

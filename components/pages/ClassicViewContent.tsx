@@ -26,10 +26,9 @@ export function ClassicViewContent() {
         borderWidth: '2px',
         color: '#31664a',
         borderRadius: '6px',
-        padding: '6px 12px 6px 16px',
+        padding: '8px 16px',
         whiteSpace: 'nowrap',
         minWidth: 'auto',
-        lineHeight: 1,
         '&:hover': {
           borderColor: '#28543d',
           borderWidth: '2px',
