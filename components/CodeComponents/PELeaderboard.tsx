@@ -17,6 +17,7 @@ import { createSupabaseClient } from '@/util/supabase/component';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { fetchLeaderboardData, formatTenure, formatRatingDate } from '@/lib/ratings-data';
 import type { LeaderboardEntry } from '@/lib/ratings-data';
+import type { Employee } from '@/lib/supabase.types';
 import { EmployeeModal } from './EmployeeModal';
 import { pdf } from '@react-pdf/renderer';
 import PELeaderboardPDF from './PELeaderboardPDF';
@@ -241,7 +242,7 @@ export function PELeaderboard() {
   const [loading, setLoading] = React.useState(true);
   const [entries, setEntries] = React.useState<LeaderboardEntry[]>([]);
   const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = React.useState<string | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
   
   // Initialize dates on mount
   React.useEffect(() => {
@@ -281,9 +282,25 @@ export function PELeaderboard() {
     setArea(prev => prev === 'FOH' ? 'BOH' : 'FOH');
   };
   
-  const handleEmployeeClick = (employeeId: string) => {
-    setSelectedEmployeeId(employeeId);
-    setEmployeeModalOpen(true);
+  const handleEmployeeClick = async (employeeId: string) => {
+    try {
+      const supabase = createSupabaseClient();
+      const { data: employee, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('id', employeeId)
+        .single();
+      
+      if (error || !employee) {
+        console.error('Error fetching employee:', error);
+        return;
+      }
+      
+      setSelectedEmployee(employee as Employee);
+      setEmployeeModalOpen(true);
+    } catch (err) {
+      console.error('Error fetching employee:', err);
+    }
   };
   
   const handleExportPDF = async () => {
@@ -541,17 +558,16 @@ export function PELeaderboard() {
       </Box>
       
       {/* Employee Modal */}
-      {selectedEmployeeId && (
-        <EmployeeModal
-          open={employeeModalOpen}
-          onClose={() => {
-            setEmployeeModalOpen(false);
-            setSelectedEmployeeId(null);
-          }}
-          employeeId={selectedEmployeeId}
-          defaultTab="positional-excellence"
-        />
-      )}
+      <EmployeeModal
+        open={employeeModalOpen}
+        employee={selectedEmployee}
+        onClose={() => {
+          setEmployeeModalOpen(false);
+          setSelectedEmployee(null);
+        }}
+        locationId={selectedLocationId || ''}
+        initialTab="pe"
+      />
     </LocalizationProvider>
   );
 }
