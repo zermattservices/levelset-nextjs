@@ -608,6 +608,9 @@ export function PositionalRatings({
   // Big 5 labels cache
   const [big5LabelsCache, setBig5LabelsCache] = React.useState<Map<string, PositionBig5Labels>>(new Map());
   
+  // Position zone cache (position name -> zone)
+  const [positionZoneCache, setPositionZoneCache] = React.useState<Map<string, 'FOH' | 'BOH'>>(new Map());
+  
   // Unique values for filter dropdowns
   const [uniqueEmployees, setUniqueEmployees] = React.useState<string[]>([]);
   const [uniqueLeaders, setUniqueLeaders] = React.useState<string[]>([]);
@@ -823,21 +826,33 @@ export function PositionalRatings({
       }
 
       // Prepare table data from sorted rows
-      const tableData = sortedRows.map((row: any) => ({
-        date: row.formatted_date,
-        employeeName: row.employee_name,
-        employeeRole: row.employee_role,
-        leaderName: row.rater_name,
-        position: cleanPositionName(row.position_cleaned || row.position),
-        isFOH: FOH_POSITIONS.includes(row.position),
-        rating1: row.rating_1,
-        rating2: row.rating_2,
-        rating3: row.rating_3,
-        rating4: row.rating_4,
-        rating5: row.rating_5,
-        overall: row.rating_avg,
-        locationNumber: row.rating_location_id !== locationId ? row.rating_location_number : null,
-      }));
+      const tableData = sortedRows.map((row: any) => {
+        const zoneFromCache = positionZoneCache.get(row.position.toLowerCase());
+        const cachedLabels = big5LabelsCache.get(row.position);
+        let isFOH: boolean;
+        if (zoneFromCache) {
+          isFOH = zoneFromCache === 'FOH';
+        } else if (cachedLabels?.zone) {
+          isFOH = cachedLabels.zone === 'FOH';
+        } else {
+          isFOH = FOH_POSITIONS.includes(row.position);
+        }
+        return {
+          date: row.formatted_date,
+          employeeName: row.employee_name,
+          employeeRole: row.employee_role,
+          leaderName: row.rater_name,
+          position: cleanPositionName(row.position_cleaned || row.position),
+          isFOH,
+          rating1: row.rating_1,
+          rating2: row.rating_2,
+          rating3: row.rating_3,
+          rating4: row.rating_4,
+          rating5: row.rating_5,
+          overall: row.rating_avg,
+          locationNumber: row.rating_location_id !== locationId ? row.rating_location_number : null,
+        };
+      });
 
       // Generate PDF blob
       const blob = await pdf(
@@ -1066,6 +1081,38 @@ export function PositionalRatings({
         
         const uniqueRatings = Array.from(ratingsByKey.values());
         
+        // Fetch position zones from org_positions for accurate FOH/BOH detection
+        // This is needed because not all positions are in the hardcoded FOH_POSITIONS/BOH_POSITIONS arrays
+        const uniquePositionNames = Array.from(new Set(uniqueRatings.map((r: any) => r.position as string)));
+        let zoneMap = new Map<string, 'FOH' | 'BOH'>();
+        
+        // Get org_id from location
+        const { data: locationInfo } = await supabase
+          .from('locations')
+          .select('org_id')
+          .eq('id', locationId)
+          .single();
+        
+        if (locationInfo?.org_id) {
+          const { data: orgPositions } = await supabase
+            .from('org_positions')
+            .select('name, zone')
+            .eq('org_id', locationInfo.org_id)
+            .eq('is_active', true);
+          
+          if (orgPositions) {
+            // Build a case-insensitive map
+            orgPositions.forEach((op: any) => {
+              if (op.name && op.zone) {
+                zoneMap.set(op.name.toLowerCase(), op.zone as 'FOH' | 'BOH');
+              }
+            });
+          }
+        }
+        
+        // Update the position zone cache
+        setPositionZoneCache(zoneMap);
+        
         const transformedRows: RatingRow[] = uniqueRatings
           .filter((rating: any) => {
             // When employeeId or raterUserId is provided, show both FOH and BOH (no filtering)
@@ -1079,9 +1126,20 @@ export function PositionalRatings({
             if (positionForFilter.includes(' | ')) {
               positionForFilter = positionForFilter.split(' | ')[0].trim();
             }
-            // Check against the full position names in FOH_POSITIONS/BOH_POSITIONS arrays
-            const isFOHPosition = FOH_POSITIONS.includes(positionForFilter);
-            const isBOHPosition = BOH_POSITIONS.includes(positionForFilter);
+            
+            // Check zone from org_positions first, then fallback to hardcoded arrays
+            const zoneFromOrg = zoneMap.get(positionForFilter.toLowerCase());
+            let isFOHPosition: boolean;
+            let isBOHPosition: boolean;
+            
+            if (zoneFromOrg) {
+              isFOHPosition = zoneFromOrg === 'FOH';
+              isBOHPosition = zoneFromOrg === 'BOH';
+            } else {
+              // Fallback to hardcoded arrays for legacy positions
+              isFOHPosition = FOH_POSITIONS.includes(positionForFilter);
+              isBOHPosition = BOH_POSITIONS.includes(positionForFilter);
+            }
 
             if (!showFOH && !showBOH) {
               return false;
@@ -1969,8 +2027,17 @@ export function PositionalRatings({
       align: 'center',
       renderCell: (params) => {
         const row = params.row as RatingRow;
-        const isFOH = FOH_POSITIONS.includes(row.position);
-        const positionType = isFOH ? 'FOH' : 'BOH';
+        // First check the position zone cache, then cached labels, fallback to hardcoded lists
+        const zoneFromCache = positionZoneCache.get(row.position.toLowerCase());
+        const cachedLabels = big5LabelsCache.get(row.position);
+        let positionType: 'FOH' | 'BOH';
+        if (zoneFromCache) {
+          positionType = zoneFromCache;
+        } else if (cachedLabels?.zone) {
+          positionType = cachedLabels.zone;
+        } else {
+          positionType = FOH_POSITIONS.includes(row.position) ? 'FOH' : 'BOH';
+        }
         return <PositionChip label={params.value} size="small" positiontype={positionType} />;
       },
     },
@@ -2935,7 +3002,7 @@ export function PositionalRatings({
                           <PositionChip 
                             label={rating.position_cleaned} 
                             size="small" 
-                            positiontype={FOH_POSITIONS.includes(rating.position) ? 'FOH' : 'BOH'} 
+                            positiontype={positionZoneCache.get(rating.position.toLowerCase()) || labels?.zone || (FOH_POSITIONS.includes(rating.position) ? 'FOH' : 'BOH')} 
                           />
                         </Box>
                       </Box>

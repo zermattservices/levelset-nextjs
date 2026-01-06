@@ -976,7 +976,7 @@ export async function fetchBig5Labels(
     // with the same name (e.g., "Leadership", "Trainer", "H.O.P.E. Week")
     const { data: orgPositions } = await supabase
       .from('org_positions')
-      .select('id')
+      .select('id, zone')
       .eq('org_id', locationData.org_id)
       .ilike('name', position)
       .limit(1);
@@ -997,7 +997,7 @@ export async function fetchBig5Labels(
           org_id: locationData.org_id,
           location_id: locationId,
           position: position,
-          zone: 'FOH', // This will be set correctly from org_positions if needed
+          zone: (orgPosition.zone as 'FOH' | 'BOH') || 'FOH',
           label_1: criteriaData.find(c => c.criteria_order === 1)?.name || null,
           label_2: criteriaData.find(c => c.criteria_order === 2)?.name || null,
           label_3: criteriaData.find(c => c.criteria_order === 3)?.name || null,
