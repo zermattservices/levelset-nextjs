@@ -972,12 +972,16 @@ export async function fetchBig5Labels(
 
   if (locationData?.org_id) {
     // Try org-level positions first
-    const { data: orgPosition } = await supabase
+    // Use limit(1) instead of maybeSingle() because some positions exist in both FOH and BOH
+    // with the same name (e.g., "Leadership", "Trainer", "H.O.P.E. Week")
+    const { data: orgPositions } = await supabase
       .from('org_positions')
       .select('id')
       .eq('org_id', locationData.org_id)
       .ilike('name', position)
-      .maybeSingle();
+      .limit(1);
+    
+    const orgPosition = orgPositions?.[0];
 
     if (orgPosition) {
       const { data: criteriaData } = await supabase
