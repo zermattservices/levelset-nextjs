@@ -20,7 +20,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { Infraction, Employee } from "@/lib/supabase.types";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
@@ -153,7 +153,7 @@ export function InfractionEditModal({
     }
 
     // Set form values from infraction
-    setInfractionDate(infraction.infraction_date ? new Date(infraction.infraction_date) : null);
+    setInfractionDate(infraction.infraction_date ? parseISO(infraction.infraction_date) : null);
     setEmployeeId(infraction.employee_id || "");
     setEmployeeName(infraction.employee_name || "");
     setLeaderId(infraction.leader_id || "");

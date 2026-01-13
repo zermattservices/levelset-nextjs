@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Box, Typography, Tabs, Tab, Button } from "@mui/material";
+import { parseISO, format } from "date-fns";
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { Employee, Infraction, DisciplinaryAction } from "@/lib/supabase.types";
 import { Skeleton } from "@mui/material";
@@ -69,7 +70,7 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
                 lineHeight: "20px",
               }}
             >
-              {new Date(infraction.infraction_date).toLocaleDateString()}
+              {format(parseISO(infraction.infraction_date), 'M/d/yyyy')}
             </Typography>
           </Box>
 
@@ -215,7 +216,7 @@ function DisciplinaryActionListItem({ action }: DisciplinaryActionListItemProps)
                 lineHeight: "20px",
               }}
             >
-              {new Date(action.action_date).toLocaleDateString()}
+              {format(parseISO(action.action_date), 'M/d/yyyy')}
             </Typography>
           </Box>
 

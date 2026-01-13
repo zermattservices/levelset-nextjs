@@ -14,6 +14,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
+import { parseISO, format } from "date-fns";
 import type { RecommendedAction } from "@/lib/discipline-recommendations";
 import type { Employee, Infraction } from "@/lib/supabase.types";
 import { createSupabaseClient } from "@/util/supabase/component";
@@ -110,7 +111,7 @@ function InfractionCard({
                 lineHeight: "20px",
               }}
             >
-              {new Date(infraction.infraction_date).toLocaleDateString()}
+              {format(parseISO(infraction.infraction_date), 'M/d/yyyy')}
             </Typography>
           </Box>
 

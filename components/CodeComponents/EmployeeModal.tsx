@@ -15,6 +15,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import { createSupabaseClient } from "@/util/supabase/component";
+import { parseISO, format } from "date-fns";
 import type { Employee, Infraction, DisciplinaryAction } from "@/lib/supabase.types";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
@@ -93,7 +94,7 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
                 lineHeight: "20px",
               }}
             >
-              {new Date(infraction.infraction_date).toLocaleDateString()}
+              {format(parseISO(infraction.infraction_date), 'M/d/yyyy')}
             </Typography>
           </Box>
 
@@ -228,7 +229,7 @@ function DisciplinaryActionListItem({ action, onClick }: DisciplinaryActionListI
                 lineHeight: "20px",
               }}
             >
-              {new Date(action.action_date).toLocaleDateString()}
+              {format(parseISO(action.action_date), 'M/d/yyyy')}
             </Typography>
           </Box>
 

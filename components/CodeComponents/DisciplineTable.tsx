@@ -1,4 +1,5 @@
 import * as React from "react";
+import { parseISO, format } from "date-fns";
 import { createSupabaseClient } from "@/util/supabase/component";
 import { DisciplineTableSkeleton } from "./Skeletons/DisciplineTableSkeleton";
 import { Box, Typography } from "@mui/material";
@@ -441,7 +442,7 @@ export function DisciplineTable({
               color: '#111827',
             }}
           >
-            {params.value ? new Date(params.value).toLocaleDateString() : '-'}
+            {params.value ? format(parseISO(params.value), 'M/d/yyyy') : '-'}
           </Typography>
         </Box>
       ),
