@@ -101,15 +101,3 @@
 .menuItemActive .icon {
   color: #31664a;
 }
-
-.menuGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.groupDivider {
-  height: 1px;
-  background-color: #e5e5e5;
-  margin: 12px 0;
-}

@@ -773,6 +773,7 @@ export async function fetchLeadershipData(
   }
 
   // Group by consolidated rater ID, filtering by allowed roles if configured
+  // ONLY include ratings from leaders who are on the current location's roster
   const leaderMap = new Map<string, Rating[]>();
   const leaderNames = new Map<string, string>(); // Track the primary name for each consolidated leader
   
@@ -783,6 +784,13 @@ export async function fetchLeadershipData(
       if (!raterRole || !areaAllowedRoles.has(raterRole)) {
         return; // Skip this rating - rater's role is not configured for rating this area
       }
+    }
+
+    // Get the consolidated ID for this rater - ONLY include if rater is on current location's roster
+    const consolidatedRaterId = employeeToConsolidated.get(rating.rater_user_id);
+    if (!consolidatedRaterId) {
+      // Rater is not on the current location's roster - skip this rating
+      return;
     }
 
     const employeeName = rating.employee?.full_name || 
@@ -797,12 +805,9 @@ export async function fetchLeadershipData(
       rater_name: raterName
     };
 
-    // Get the consolidated ID for this rater
-    const consolidatedRaterId = employeeToConsolidated.get(rating.rater_user_id) || rating.rater_user_id;
-
     if (!leaderMap.has(consolidatedRaterId)) {
       leaderMap.set(consolidatedRaterId, []);
-      // Store the name from the consolidated map if available, otherwise use the rating's rater name
+      // Store the name from the consolidated map
       const consolidatedInfo = consolidatedLeaderMap.get(consolidatedRaterId);
       leaderNames.set(consolidatedRaterId, consolidatedInfo?.name || raterName);
     }

@@ -69,30 +69,22 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
   // Check if current user is a Levelset Admin
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
   
-  // Check if auth is fully loaded (including appUser data with role)
-  const isAuthFullyLoaded = auth.isLoaded && auth.appUser !== null;
-  
   // Restore impersonation state from sessionStorage on mount
   useEffect(() => {
-    // Wait until auth is fully loaded (including appUser/role) before restoring
-    if (!isAuthFullyLoaded || initialized) return;
+    if (!auth.isLoaded || initialized) return;
     
     try {
       const stored = sessionStorage.getItem(IMPERSONATION_STORAGE_KEY);
       if (stored) {
         const data: StoredImpersonationData = JSON.parse(stored);
         // Only restore if current user is still the admin who started impersonation
-        // Check role directly from appUser to ensure it's loaded
-        const isAdmin = auth.appUser?.role === 'Levelset Admin';
-        if (isAdmin && data.originalUserId === auth.authUser?.id) {
-          console.log('[IMPERSONATION] Restoring impersonation state');
+        if (isLevelsetAdmin && data.originalUserId === auth.authUser?.id) {
           setImpersonatedUser(data.impersonatedUser);
           setOriginalUserId(data.originalUserId);
           setConsoleLoggingEnabled(data.consoleLoggingEnabled);
           setNetworkLoggingEnabled(data.networkLoggingEnabled);
         } else {
           // Clear invalid stored data
-          console.log('[IMPERSONATION] Clearing invalid stored data - isAdmin:', isAdmin, 'originalUserId match:', data.originalUserId === auth.authUser?.id);
           sessionStorage.removeItem(IMPERSONATION_STORAGE_KEY);
         }
       }
@@ -102,7 +94,7 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
     }
     
     setInitialized(true);
-  }, [isAuthFullyLoaded, auth.authUser?.id, auth.appUser?.role, initialized]);
+  }, [auth.isLoaded, auth.authUser?.id, isLevelsetAdmin, initialized]);
   
   // Save impersonation state to sessionStorage when it changes
   useEffect(() => {
