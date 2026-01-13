@@ -172,11 +172,22 @@ async function buildConsolidatedEmployeeMap(
     const consolidated = consolidatedMap.get(primaryId)!;
     
     // Find all employees across all locations that share this consolidated identity
-    const { data: linkedEmployees } = await supabase
+    const { data: linkedEmployees, error: linkedError } = await supabase
       .from('employees')
       .select('id, consolidated_employee_id')
       .in('location_id', allLocationIds)
       .or(`id.eq.${primaryId},consolidated_employee_id.eq.${primaryId}`);
+
+    // Debug for Carlos
+    if (consolidated.name.toLowerCase().includes('carlos')) {
+      console.log('[buildConsolidatedEmployeeMap] Carlos linkedEmployees query:', {
+        primaryId,
+        allLocationIds,
+        linkedEmployeesCount: linkedEmployees?.length ?? 0,
+        linkedEmployees: linkedEmployees,
+        error: linkedError
+      });
+    }
 
     if (linkedEmployees) {
       linkedEmployees.forEach(linked => {
@@ -184,6 +195,11 @@ async function buildConsolidatedEmployeeMap(
           consolidated.allIds.push(linked.id);
         }
       });
+    }
+    
+    // Debug for Carlos - show final allIds
+    if (consolidated.name.toLowerCase().includes('carlos')) {
+      console.log('[buildConsolidatedEmployeeMap] Carlos final allIds:', consolidated.allIds);
     }
   }
 
@@ -376,8 +392,18 @@ export async function fetchOverviewData(
   });
 
   // Debug: check Carlos's employee IDs in lookup
-  console.log('[fetchOverviewData] Carlos d7826674 in lookup:', employeeToConsolidated.get('d7826674-cceb-4897-8797-608457019e3c'));
-  console.log('[fetchOverviewData] Carlos f7d29e02 in lookup:', employeeToConsolidated.get('f7d29e02-d43d-4131-b1ed-2e96dba43b69'));
+  const carlosD7 = employeeToConsolidated.get('d7826674-cceb-4897-8797-608457019e3c');
+  const carlosF7 = employeeToConsolidated.get('f7d29e02-d43d-4131-b1ed-2e96dba43b69');
+  console.log('[fetchOverviewData] CRITICAL - Carlos d7826674 in lookup:', carlosD7 ?? 'NOT FOUND');
+  console.log('[fetchOverviewData] CRITICAL - Carlos f7d29e02 in lookup:', carlosF7 ?? 'NOT FOUND');
+  
+  // Check if Carlos's consolidated entry has the right allIds
+  const carlosEntry = consolidatedEmployeeMap.get('d7826674-cceb-4897-8797-608457019e3c');
+  if (carlosEntry) {
+    console.log('[fetchOverviewData] CRITICAL - Carlos allIds:', carlosEntry.allIds);
+  } else {
+    console.log('[fetchOverviewData] CRITICAL - Carlos NOT in consolidatedEmployeeMap');
+  }
 
   // Group ratings by consolidated employee ID (combining ratings from all their employee records)
   const ratingsMap = new Map<string, Rating[]>();
@@ -407,7 +433,14 @@ export async function fetchOverviewData(
   
   // Debug: check Carlos's ratings in ratingsMap
   const carlosConsolidatedRatings = ratingsMap.get('d7826674-cceb-4897-8797-608457019e3c');
-  console.log('[fetchOverviewData] Carlos ratings in ratingsMap:', carlosConsolidatedRatings?.length ?? 0);
+  console.log('[fetchOverviewData] CRITICAL - Carlos ratings in ratingsMap:', carlosConsolidatedRatings?.length ?? 0);
+  if (carlosConsolidatedRatings && carlosConsolidatedRatings.length > 0) {
+    console.log('[fetchOverviewData] CRITICAL - Carlos first 3 ratings:', carlosConsolidatedRatings.slice(0, 3).map(r => ({
+      position: r.position,
+      rating_avg: r.rating_avg,
+      employee_id: r.employee_id
+    })));
+  }
 
   // Sort ratings within each group by date (most recent first)
   ratingsMap.forEach((empRatings) => {
