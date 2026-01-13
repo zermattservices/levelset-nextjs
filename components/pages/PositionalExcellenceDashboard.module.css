@@ -4,10 +4,9 @@
   position: relative;
   width: 100%;
   max-width: 100vw;
-  min-height: 100vh;
+  height: 100vh;
   background: #ffffff;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .menuNavigation:global(.__wab_instance) {
@@ -56,6 +55,7 @@
   background: #ffffff;
   border-top: 1px solid #e5e7eb;
   overflow-y: auto;
+  min-height: 0; /* Important for flex scrolling */
 }
 
 .contentContainer {
@@ -64,13 +64,17 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 8px 100px;
+  padding: 0 8px 24px;
   min-height: 0;
   flex: 1;
 }
 
 .tabContent {
   animation: fadeIn 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 @keyframes fadeIn {

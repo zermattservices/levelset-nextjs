@@ -85,17 +85,20 @@ const StyledContainer = styled(TableContainer)<{ componentwidth?: string | numbe
   overflowY: "auto",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
-  maxHeight: 650,
+  flex: 1,
+  minHeight: 0,
+  // Use calc to leave room for header/nav (approximately 200px)
+  maxHeight: 'calc(100vh - 200px)',
   boxSizing: 'border-box',
   // Mobile responsive
   '@media (max-width: 768px)': {
     borderRadius: 8,
-    maxHeight: 450,
+    maxHeight: 'calc(100vh - 220px)',
   },
   // iPad/Tablet styles
   '@media (min-width: 769px) and (max-width: 1024px)': {
     borderRadius: 12,
-    maxHeight: 550,
+    maxHeight: 'calc(100vh - 210px)',
   }
 }));
 
