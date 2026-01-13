@@ -54,7 +54,7 @@
   width: 100%;
   background: #ffffff;
   border-top: 1px solid #e5e7eb;
-  overflow-y: auto;
+  overflow: hidden;
   min-height: 0; /* Important for flex scrolling */
 }
 
@@ -64,9 +64,10 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 8px 24px;
+  padding: 0 8px;
   min-height: 0;
   flex: 1;
+  overflow: hidden;
 }
 
 .tabContent {
@@ -75,6 +76,7 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  overflow: hidden;
 }
 
 @keyframes fadeIn {

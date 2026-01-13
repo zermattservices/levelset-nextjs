@@ -52,6 +52,7 @@ export function ClassicViewContent() {
           locationId={selectedLocationId || ''}
           maxWidth="100%"
           width="100%"
+          fillHeight={true}
           additionalActions={embedButton}
         />
       </div>

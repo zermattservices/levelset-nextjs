@@ -87,18 +87,14 @@ const StyledContainer = styled(TableContainer)<{ componentwidth?: string | numbe
   fontFamily,
   flex: 1,
   minHeight: 0,
-  // Use calc to leave room for header/nav (approximately 200px)
-  maxHeight: 'calc(100vh - 200px)',
   boxSizing: 'border-box',
   // Mobile responsive
   '@media (max-width: 768px)': {
     borderRadius: 8,
-    maxHeight: 'calc(100vh - 220px)',
   },
   // iPad/Tablet styles
   '@media (min-width: 769px) and (max-width: 1024px)': {
     borderRadius: 12,
-    maxHeight: 'calc(100vh - 210px)',
   }
 }));
 
