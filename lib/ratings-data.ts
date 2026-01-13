@@ -342,9 +342,10 @@ export async function fetchOverviewData(
   }
 
   // Get all ratings from ALL org locations for this area (with pagination)
+  // Supabase has a max of 1000 rows per request, so we need to paginate
   let ratings: any[] = [];
   let offset = 0;
-  const limit = 25000;
+  const limit = 1000; // Supabase max rows per request
   let hasMore = true;
 
   while (hasMore) {
@@ -1317,9 +1318,10 @@ export async function fetchLeaderboardData(
   const endISO = endDate.toISOString();
 
   // Fetch all ratings in the date range from ALL org locations
+  // Supabase has a max of 1000 rows per request, so we need to paginate
   let ratings: any[] = [];
   let offset = 0;
-  const limit = 25000;
+  const limit = 1000; // Supabase max rows per request
   let hasMore = true;
 
   while (hasMore) {
