@@ -20,6 +20,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { format } from "date-fns";
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { Infraction, Employee } from "@/lib/supabase.types";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
@@ -301,7 +302,7 @@ export function InfractionEditModal({
       setSaving(true);
 
       const updatedInfraction: Partial<Infraction> = {
-        infraction_date: infractionDate ? infractionDate.toISOString().split('T')[0] : infraction.infraction_date,
+        infraction_date: infractionDate ? format(infractionDate, 'yyyy-MM-dd') : infraction.infraction_date,
         leader_id: leaderId || infraction.leader_id,
         acknowledgement: notified ? 'Notified' : 'Not notified',
         ack_bool: notified,

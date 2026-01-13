@@ -20,6 +20,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { format } from "date-fns";
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { Infraction, Employee } from "@/lib/supabase.types";
 
@@ -286,7 +287,7 @@ export function AddInfractionModal({
 
       const newInfraction: Partial<Infraction> = {
         employee_id: employee.id,
-        infraction_date: infractionDate ? infractionDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        infraction_date: infractionDate ? format(infractionDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
         leader_id: leaderId,
         acknowledgement: notified ? 'Notified' : 'Not notified',
         ack_bool: notified,
