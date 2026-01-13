@@ -85,16 +85,17 @@ const StyledContainer = styled(TableContainer)<{ componentwidth?: string | numbe
   overflowY: "auto",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
-  flex: 1,
-  minHeight: 0,
   boxSizing: 'border-box',
+  maxHeight: 600,
   // Mobile responsive
   '@media (max-width: 768px)': {
     borderRadius: 8,
+    maxHeight: 400,
   },
   // iPad/Tablet styles
   '@media (min-width: 769px) and (max-width: 1024px)': {
     borderRadius: 12,
+    maxHeight: 500,
   }
 }));
 

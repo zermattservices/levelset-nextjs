@@ -429,8 +429,8 @@ export function PELeaderboard() {
   
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1, paddingTop: 1, overflow: 'hidden' }}>
-        {/* Filter Bar - Sticky */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', paddingTop: 1, gap: 2 }}>
+        {/* Filter Bar */}
         <Box
           sx={{
             display: 'flex',
@@ -442,8 +442,6 @@ export function PELeaderboard() {
             backgroundColor: '#ffffff',
             borderRadius: '12px',
             border: '1px solid #e5e7eb',
-            flexShrink: 0,
-            marginBottom: 2,
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -542,8 +540,8 @@ export function PELeaderboard() {
           </Tooltip>
         </Box>
         
-        {/* Scrollable Content */}
-        <Box sx={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 2, minHeight: 0 }}>
+        {/* Content */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {/* Loading State */}
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', padding: 4 }}>
