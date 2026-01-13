@@ -29,8 +29,8 @@ const levelsetGreen = '#31664a';
 const fohColor = '#006391';
 const bohColor = '#ffcc5b';
 
-// Minimum ratings required to show score (changed from 5 to 1)
-const MIN_RATINGS_FOR_SCORE = 1;
+// Minimum ratings required to show score
+const MIN_RATINGS_FOR_SCORE = 10;
 
 // Date range helper
 const getDateRange = (preset: 'mtd' | 'qtd' | '30d' | '90d'): [Date, Date] => {
@@ -312,8 +312,8 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
             {entry.overall_rating?.toFixed(2)}
           </Typography>
         ) : (
-          <Typography sx={{ fontFamily, fontSize: 12, color: '#9ca3af', fontStyle: 'italic' }}>
-            {Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more
+          <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', fontStyle: 'italic', textAlign: 'center' }}>
+            Needs {Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more
           </Typography>
         )}
       </Box>
@@ -659,8 +659,8 @@ export function PELeaderboard() {
                         </Box>
                         
                         {/* Overall */}
-                        <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: hasScore ? levelsetGreen : '#9ca3af', textAlign: 'center' }}>
-                          {hasScore ? entry.overall_rating?.toFixed(2) : `${Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more`}
+                        <Typography sx={{ fontFamily, fontSize: hasScore ? 14 : 11, fontWeight: hasScore ? 600 : 400, fontStyle: hasScore ? 'normal' : 'italic', color: hasScore ? levelsetGreen : '#9ca3af', textAlign: 'center' }}>
+                          {hasScore ? entry.overall_rating?.toFixed(2) : `Needs ${Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more`}
                         </Typography>
                         
                         {/* Total Ratings */}
