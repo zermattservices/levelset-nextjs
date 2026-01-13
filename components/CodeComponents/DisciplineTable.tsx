@@ -160,7 +160,8 @@ export function DisciplineTable({
   
   // Fetch discipline data from Supabase
   const fetchDisciplineData = React.useCallback(async () => {
-        if (!locationId) {
+        // Don't fetch if locationId is missing or is the default placeholder
+        if (!locationId || locationId === "default-location") {
           setData([]);
           setDisciplineActions([]);
           setLoading(false);
