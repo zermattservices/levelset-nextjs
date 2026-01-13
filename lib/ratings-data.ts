@@ -431,16 +431,18 @@ export async function fetchOverviewData(
     });
   }
   
-  // Debug: check Carlos's ratings in ratingsMap
+  // Debug: CRITICAL Carlos diagnostic - combine all info into one log
   const carlosConsolidatedRatings = ratingsMap.get('d7826674-cceb-4897-8797-608457019e3c');
-  console.log('[fetchOverviewData] CRITICAL - Carlos ratings in ratingsMap:', carlosConsolidatedRatings?.length ?? 0);
-  if (carlosConsolidatedRatings && carlosConsolidatedRatings.length > 0) {
-    console.log('[fetchOverviewData] CRITICAL - Carlos first 3 ratings:', carlosConsolidatedRatings.slice(0, 3).map(r => ({
-      position: r.position,
-      rating_avg: r.rating_avg,
-      employee_id: r.employee_id
-    })));
-  }
+  const carlosD7InLookup = employeeToConsolidated.get('d7826674-cceb-4897-8797-608457019e3c');
+  const carlosF7InLookup = employeeToConsolidated.get('f7d29e02-d43d-4131-b1ed-2e96dba43b69');
+  
+  // Find Carlos's ratings in the raw fetched ratings
+  const carlosRawRatings = ratings.filter(r => 
+    r.employee_id === 'd7826674-cceb-4897-8797-608457019e3c' || 
+    r.employee_id === 'f7d29e02-d43d-4131-b1ed-2e96dba43b69'
+  );
+  
+  console.log(`[CARLOS] positions: ${positions.length}, totalRatings: ${ratings.length}, rawCarlos: ${carlosRawRatings.length}, d7Lookup: ${carlosD7InLookup ?? 'MISSING'}, f7Lookup: ${carlosF7InLookup ?? 'MISSING'}, inMap: ${carlosConsolidatedRatings?.length ?? 0}`);
 
   // Sort ratings within each group by date (most recent first)
   ratingsMap.forEach((empRatings) => {
