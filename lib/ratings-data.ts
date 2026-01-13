@@ -298,9 +298,11 @@ export async function fetchOverviewData(
     return [];
   }
   const { orgId, locationIds } = orgInfo;
+  console.log('[fetchOverviewData] locationId:', locationId, 'area:', area, 'locationIds:', locationIds);
 
   // Get dynamic positions for this location/org
   const positions = await fetchPositionsList(supabase, locationId, area);
+  console.log('[fetchOverviewData] positions list:', positions);
 
   // Build consolidated employee map (roster from current location, ratings from all locations)
   const consolidatedEmployeeMap = await buildConsolidatedEmployeeMap(
@@ -310,6 +312,14 @@ export async function fetchOverviewData(
     locationIds, // All locations for rating consolidation
     area
   );
+
+  console.log('[fetchOverviewData] consolidatedEmployeeMap size:', consolidatedEmployeeMap.size);
+  // Debug: find Carlos
+  consolidatedEmployeeMap.forEach((emp, id) => {
+    if (emp.name.toLowerCase().includes('carlos')) {
+      console.log('[fetchOverviewData] Found Carlos in consolidated map:', id, emp);
+    }
+  });
 
   if (consolidatedEmployeeMap.size === 0) {
     return [];
@@ -347,6 +357,15 @@ export async function fetchOverviewData(
       hasMore = false;
     }
   }
+  console.log('[fetchOverviewData] total ratings fetched:', ratings.length);
+  
+  // Debug: find Carlos's ratings
+  const carlosRatings = ratings.filter(r => 
+    r.employee?.full_name?.toLowerCase().includes('carlos') ||
+    r.employee_id === 'd7826674-cceb-4897-8797-608457019e3c' ||
+    r.employee_id === 'f7d29e02-d43d-4131-b1ed-2e96dba43b69'
+  );
+  console.log('[fetchOverviewData] Carlos ratings found in fetch:', carlosRatings.length);
 
   // Build a reverse lookup: employee_id -> consolidated primary ID
   const employeeToConsolidated = new Map<string, string>();
@@ -355,6 +374,10 @@ export async function fetchOverviewData(
       employeeToConsolidated.set(empId, primaryId);
     });
   });
+
+  // Debug: check Carlos's employee IDs in lookup
+  console.log('[fetchOverviewData] Carlos d7826674 in lookup:', employeeToConsolidated.get('d7826674-cceb-4897-8797-608457019e3c'));
+  console.log('[fetchOverviewData] Carlos f7d29e02 in lookup:', employeeToConsolidated.get('f7d29e02-d43d-4131-b1ed-2e96dba43b69'));
 
   // Group ratings by consolidated employee ID (combining ratings from all their employee records)
   const ratingsMap = new Map<string, Rating[]>();
@@ -381,6 +404,10 @@ export async function fetchOverviewData(
       }
     });
   }
+  
+  // Debug: check Carlos's ratings in ratingsMap
+  const carlosConsolidatedRatings = ratingsMap.get('d7826674-cceb-4897-8797-608457019e3c');
+  console.log('[fetchOverviewData] Carlos ratings in ratingsMap:', carlosConsolidatedRatings?.length ?? 0);
 
   // Sort ratings within each group by date (most recent first)
   ratingsMap.forEach((empRatings) => {
@@ -465,6 +492,19 @@ export async function fetchOverviewData(
     // Recent ratings for expandable rows (last 4 across all positions from any location)
     const recent_ratings = empRatings.slice(0, 4);
 
+    // Debug for Carlos
+    if (employeeName.toLowerCase().includes('carlos')) {
+      console.log('[fetchOverviewData] Carlos aggregate:', {
+        primaryId,
+        employeeName,
+        ratingsCount: empRatings.length,
+        overall_avg,
+        total_count_90d,
+        positionAverages,
+        recentRatingsCount: recent_ratings.length
+      });
+    }
+
     aggregates.push({
       employee_id: primaryId,
       employee_name: employeeName,
@@ -475,6 +515,11 @@ export async function fetchOverviewData(
       recent_ratings
     });
   });
+
+  // Debug: count total aggregates
+  console.log('[fetchOverviewData] total aggregates:', aggregates.length);
+  const carlosAggregate = aggregates.find(a => a.employee_name.toLowerCase().includes('carlos'));
+  console.log('[fetchOverviewData] Carlos in final aggregates:', carlosAggregate ? 'YES' : 'NO');
 
   // Sort by employee name
   return aggregates.sort((a, b) => a.employee_name.localeCompare(b.employee_name));
