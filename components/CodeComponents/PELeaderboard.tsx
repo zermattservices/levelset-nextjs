@@ -324,7 +324,7 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
 export function PELeaderboard() {
   const { selectedLocationId, selectedLocationImageUrl } = useLocationContext();
   const [area, setArea] = React.useState<'FOH' | 'BOH'>('FOH');
-  const [dateRange, setDateRange] = React.useState<'mtd' | 'qtd' | '30d' | '90d' | 'custom'>('30d');
+  const [dateRange, setDateRange] = React.useState<'mtd' | 'qtd' | '30d' | '90d' | 'custom'>('90d');
   const [startDate, setStartDate] = React.useState<Date | null>(null);
   const [endDate, setEndDate] = React.useState<Date | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -334,7 +334,7 @@ export function PELeaderboard() {
   
   // Initialize dates on mount
   React.useEffect(() => {
-    const [start, end] = getDateRange('30d');
+    const [start, end] = getDateRange('90d');
     setStartDate(start);
     setEndDate(end);
   }, []);
