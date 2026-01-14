@@ -279,6 +279,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
       employeeName: `Employee: ${result.employeeName ?? selectedEmployeeOption?.name ?? 'Team member'}`,
       detail: `${selectedPosition} • Positional ratings`,
       overallRating: overallRating ? Number(overallRating.toFixed(2)) : null,
+      position: selectedPosition,
     });
   }, [controls, notes, ratings, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedLeader, selectedPosition, token]);
 

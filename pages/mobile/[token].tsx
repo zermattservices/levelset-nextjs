@@ -280,6 +280,17 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
       >
         {summary.employeeName}
       </Typography>
+      {summary.position && (
+        <Typography
+          sx={{
+            fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            fontSize: 16,
+            color: '#1f2937',
+          }}
+        >
+          Position: {summary.position}
+        </Typography>
+      )}
       {summary.form === 'ratings' && typeof summary.overallRating === 'number' ? (
         <Box
           sx={{

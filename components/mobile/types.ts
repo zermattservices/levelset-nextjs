@@ -7,6 +7,7 @@ export interface SubmissionSummary {
   action?: string;
   points?: number | null;
   overallRating?: number | null;
+  position?: string | null;
 }
 
 export interface FormControlCallbacks {
