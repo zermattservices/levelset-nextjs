@@ -251,16 +251,6 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         gap: 2,
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Image
-          src="/logos/Levelset no margin.png"
-          alt="Levelset"
-          width={140}
-          height={48}
-          priority
-          style={{ width: 'min(140px, 50vw)', height: 'auto' }}
-        />
-      </Box>
       <Typography
         sx={{
           fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -281,15 +271,50 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         {summary.employeeName}
       </Typography>
       {summary.position && (
-        <Typography
+        <Box
           sx={{
-            fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-            fontSize: 16,
-            color: '#1f2937',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
           }}
         >
-          Position: {summary.position}
-        </Typography>
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 0.75,
+              backgroundColor: summary.positionZone === 'BOH' ? '#fffcf0' : '#eaf9ff',
+              border: `1px solid ${summary.positionZone === 'BOH' ? '#ffcc5b' : '#006391'}`,
+              borderRadius: '16px',
+              padding: '6px 14px',
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: 13,
+                fontWeight: 600,
+                color: summary.positionZone === 'BOH' ? '#92400e' : '#006391',
+              }}
+            >
+              {summary.position}
+            </Typography>
+            <Box
+              sx={{
+                backgroundColor: summary.positionZone === 'BOH' ? '#ffcc5b' : '#006391',
+                color: summary.positionZone === 'BOH' ? '#92400e' : '#ffffff',
+                borderRadius: '8px',
+                padding: '2px 6px',
+                fontSize: 10,
+                fontWeight: 700,
+                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              }}
+            >
+              {summary.positionZone || 'FOH'}
+            </Box>
+          </Box>
+        </Box>
       )}
       {summary.form === 'ratings' && typeof summary.overallRating === 'number' ? (
         <Box

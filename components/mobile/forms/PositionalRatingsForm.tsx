@@ -280,6 +280,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
       detail: `${selectedPosition} • Positional ratings`,
       overallRating: overallRating ? Number(overallRating.toFixed(2)) : null,
       position: selectedPosition,
+      positionZone: selectedPositionZone,
     });
   }, [controls, notes, ratings, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedLeader, selectedPosition, token]);
 

@@ -8,6 +8,7 @@ export interface SubmissionSummary {
   points?: number | null;
   overallRating?: number | null;
   position?: string | null;
+  positionZone?: 'FOH' | 'BOH' | null;
 }
 
 export interface FormControlCallbacks {
