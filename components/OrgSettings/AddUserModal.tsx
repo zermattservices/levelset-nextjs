@@ -189,13 +189,13 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
           .from('org_roles')
           .select('role_name, hierarchy_level, color')
           .eq('org_id', orgId)
-          .lte('hierarchy_level', 2) // Only levels 0, 1, 2
+          .lte('hierarchy_level', 3) // Only levels 0, 1, 2, 3
           .order('hierarchy_level');
 
         if (rolesError) throw rolesError;
         setRoles(rolesData || []);
 
-        // Get role names with hierarchy level 0, 1, or 2
+        // Get role names with hierarchy level 0, 1, 2, or 3
         const eligibleRoles = (rolesData || []).map(r => r.role_name);
 
         // Fetch employees with these roles
@@ -423,7 +423,7 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
                   value={selectedEmployeeId}
                   onChange={(e) => setSelectedEmployeeId(e.target.value)}
                   fullWidth
-                  helperText="Only the Operator and the next 2 levels of leadership can have access to the Levelset dashboard at this time"
+                  helperText="Only the Operator and the next 3 levels of leadership can have access to the Levelset dashboard at this time"
                   InputLabelProps={{ shrink: true }}
                 >
                   <MenuItem value="" disabled>
