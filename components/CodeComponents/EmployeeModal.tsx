@@ -323,32 +323,34 @@ export function EmployeeModal({
           return;
         }
 
-        // Check if the employee's role is in position_role_permissions
-        const { data: permissions } = await supabase
+        // Use JOIN to properly filter by org - matches the mobile API approach
+        // This ensures we only check positions that belong to this org
+        const { data: permissionsData } = await supabase
           .from('position_role_permissions')
-          .select('role_name')
-          .eq('role_name', employee.role);
+          .select('role_name, position_id, org_positions!inner(name, org_id)')
+          .eq('org_positions.org_id', locationData.org_id);
 
-        // Filter permissions to only include those for this org's positions
-        const { data: orgPositionIds } = await supabase
-          .from('org_positions')
-          .select('id')
-          .eq('org_id', locationData.org_id);
-
-        if (!orgPositionIds || orgPositionIds.length === 0) {
-          setCanBeRater(false);
+        if (!permissionsData || permissionsData.length === 0) {
+          // No permissions configured for this org - fall back to legacy role check
+          // Check if role is a leadership role that should be able to rate
+          const leadershipRoles = ['Director', 'Manager', 'Team Lead', 'Trainer', 'Kitchen Lead'];
+          const isLeadershipRole = leadershipRoles.some(r => 
+            employee.role?.toLowerCase().includes(r.toLowerCase())
+          );
+          setCanBeRater(isLeadershipRole);
           return;
         }
 
-        const positionIdSet = new Set(orgPositionIds.map(p => p.id));
-        
-        // Check if the employee's role has any permissions for this org's positions
-        const { data: rolePermissions } = await supabase
-          .from('position_role_permissions')
-          .select('role_name, position_id')
-          .eq('role_name', employee.role);
+        // Build set of roles that have permissions for this org
+        const rolesWithPermissions = new Set<string>();
+        permissionsData.forEach((p: any) => {
+          if (p.role_name) {
+            rolesWithPermissions.add(p.role_name);
+          }
+        });
 
-        const hasPermissions = rolePermissions?.some(p => positionIdSet.has(p.position_id)) ?? false;
+        // Check if employee's role is in the set (case-sensitive match)
+        const hasPermissions = rolesWithPermissions.has(employee.role);
         setCanBeRater(hasPermissions);
       } catch (err) {
         console.error('Error checking rater permissions:', err);
