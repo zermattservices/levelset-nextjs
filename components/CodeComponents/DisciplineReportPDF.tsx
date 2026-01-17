@@ -159,8 +159,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.grey100,
     borderRadius: 4,
     fontSize: 10,
-    color: colors.grey900,
-    fontStyle: 'italic',
+    color: colors.grey600,
   },
   pointsPill: {
     paddingHorizontal: 8,
@@ -231,7 +230,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: colors.grey600,
     fontSize: 11,
-    fontStyle: 'italic',
   },
   // Footer
   footer: {
