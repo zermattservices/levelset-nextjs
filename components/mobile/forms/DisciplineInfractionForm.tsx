@@ -31,6 +31,8 @@ interface InfractionOption {
   action: string;
   action_es?: string | null;
   points: number;
+  require_tm_signature?: boolean;
+  require_leader_signature?: boolean;
 }
 
 interface InfractionDataResponse {
@@ -240,6 +242,10 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     }
   }, [selectedLeader]);
 
+  // Determine if signatures are required based on selected infraction settings
+  const requireTmSignature = selectedInfractionOption?.require_tm_signature ?? false;
+  const requireLeaderSignature = selectedInfractionOption?.require_leader_signature ?? false;
+
   const isComplete = React.useMemo(() => {
     if (!selectedLeader || !selectedEmployee || !selectedInfraction) {
       return false;
@@ -247,14 +253,16 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     if (!infractionDate) {
       return false;
     }
+    // Leader signature is always required, but may be "required" by infraction setting
     if (!leaderSignature.trim()) {
       return false;
     }
-    if (acknowledged && !teamSignature.trim()) {
+    // Team member signature required if acknowledged OR if infraction requires it
+    if ((acknowledged || requireTmSignature) && !teamSignature.trim()) {
       return false;
     }
     return true;
-  }, [acknowledged, infractionDate, leaderSignature, selectedEmployee, selectedInfraction, selectedLeader, teamSignature]);
+  }, [acknowledged, infractionDate, leaderSignature, requireTmSignature, selectedEmployee, selectedInfraction, selectedLeader, teamSignature]);
 
   React.useEffect(() => {
     controls.setSubmitDisabled(!isComplete);
@@ -592,23 +600,33 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
         />
 
         <SignatureCanvas
-          label={t('infraction.teamSignature')}
+          label={requireTmSignature ? `${t('infraction.teamSignature')} *` : t('infraction.teamSignature')}
           value={teamSignature}
           onSignatureChange={(dataUrl) => {
             setTeamSignature(dataUrl);
             markDirty();
           }}
-          helperText={acknowledged ? t('infraction.teamSignatureHelperPresent') : t('infraction.teamSignatureHelperAbsent')}
+          helperText={
+            requireTmSignature
+              ? t('infraction.teamSignatureRequired', 'Required for this infraction type')
+              : acknowledged 
+                ? t('infraction.teamSignatureHelperPresent') 
+                : t('infraction.teamSignatureHelperAbsent')
+          }
         />
 
         <SignatureCanvas
-          label={t('infraction.leaderSignature')}
+          label={requireLeaderSignature ? `${t('infraction.leaderSignature')} *` : t('infraction.leaderSignature')}
           value={leaderSignature}
           onSignatureChange={(dataUrl) => {
             setLeaderSignature(dataUrl);
             markDirty();
           }}
-          helperText={t('infraction.leaderSignatureHelper')}
+          helperText={
+            requireLeaderSignature 
+              ? t('infraction.leaderSignatureRequired', 'Required for this infraction type')
+              : t('infraction.leaderSignatureHelper')
+          }
         />
       </Box>
 

@@ -11,6 +11,7 @@ import { PositionsTab } from './PositionsTab';
 import { RatingCriteriaTab } from './RatingCriteriaTab';
 import { RoleMappingTab } from './RoleMappingTab';
 import { RatingScaleTab } from './RatingScaleTab';
+import { FormSettingsTab } from './FormSettingsTab';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
@@ -57,9 +58,9 @@ interface PositionalExcellenceSettingsProps {
   onSubTabChange?: (subtab: string | undefined) => void;
 }
 
-type TabValue = 'positions' | 'criteria' | 'role-mapping' | 'rating-scale';
+type TabValue = 'positions' | 'criteria' | 'role-mapping' | 'rating-scale' | 'form-settings';
 
-const VALID_TABS: TabValue[] = ['positions', 'criteria', 'role-mapping', 'rating-scale'];
+const VALID_TABS: TabValue[] = ['positions', 'criteria', 'role-mapping', 'rating-scale', 'form-settings'];
 
 export function PositionalExcellenceSettings({ orgId, disabled = false, activeSubTab, onSubTabChange }: PositionalExcellenceSettingsProps) {
   const [locationCount, setLocationCount] = React.useState<number>(0);
@@ -80,6 +81,8 @@ export function PositionalExcellenceSettings({ orgId, disabled = false, activeSu
   const canManageCriteria = has(P.PE_MANAGE_RATING_CRITERIA) && !disabled;
   const canManageRoleMappings = has(P.PE_MANAGE_ROLE_MAPPINGS) && !disabled;
   const canManageRatingScale = has(P.PE_MANAGE_RATING_SCALE) && !disabled;
+  // Form settings uses the same permission as rating scale for now
+  const canManageFormSettings = has(P.PE_MANAGE_RATING_SCALE) && !disabled;
 
   // Fetch location count for the organization
   React.useEffect(() => {
@@ -103,9 +106,9 @@ export function PositionalExcellenceSettings({ orgId, disabled = false, activeSu
     }
   };
 
-  // Org-level tabs: rating-scale, role-mapping
+  // Org-level tabs: rating-scale, role-mapping, form-settings
   // Only show tag if org has more than one location
-  const isOrgLevel = (activeTab === 'rating-scale' || activeTab === 'role-mapping') && locationCount > 1;
+  const isOrgLevel = (activeTab === 'rating-scale' || activeTab === 'role-mapping' || activeTab === 'form-settings') && locationCount > 1;
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -117,6 +120,8 @@ export function PositionalExcellenceSettings({ orgId, disabled = false, activeSu
         return <RoleMappingTab orgId={orgId} disabled={!canManageRoleMappings} />;
       case 'rating-scale':
         return <RatingScaleTab orgId={orgId} disabled={!canManageRatingScale} />;
+      case 'form-settings':
+        return <FormSettingsTab orgId={orgId} disabled={!canManageFormSettings} />;
       default:
         return null;
     }
@@ -146,6 +151,7 @@ export function PositionalExcellenceSettings({ orgId, disabled = false, activeSu
           <StyledTab label="Rating Criteria" value="criteria" />
           <StyledTab label="Role Mapping" value="role-mapping" />
           <StyledTab label="Rating Scale" value="rating-scale" />
+          <StyledTab label="Form Settings" value="form-settings" />
         </StyledTabs>
 
         <div className={sty.tabContent}>

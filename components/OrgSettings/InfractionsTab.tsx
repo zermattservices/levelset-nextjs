@@ -3,6 +3,8 @@ import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
+import Checkbox from '@mui/material/Checkbox';
+import Tooltip from '@mui/material/Tooltip';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -28,6 +30,8 @@ interface Infraction {
   id: string;
   action: string;
   points: number | null;
+  require_tm_signature?: boolean;
+  require_leader_signature?: boolean;
   isNew?: boolean;
 }
 
@@ -75,7 +79,7 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
         // First try to get org-level infractions (location_id IS NULL)
         let { data, error: fetchError } = await supabase
           .from('infractions_rubric')
-          .select('id, action, points')
+          .select('id, action, points, require_tm_signature, require_leader_signature')
           .eq('org_id', orgId)
           .is('location_id', null)
           .order('points', { ascending: true });
@@ -86,7 +90,7 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
         if (!data || data.length === 0) {
           const { data: locationData, error: locationError } = await supabase
             .from('infractions_rubric')
-            .select('id, action, points')
+            .select('id, action, points, require_tm_signature, require_leader_signature')
             .eq('org_id', orgId)
             .not('location_id', 'is', null)
             .order('points', { ascending: true });
@@ -125,6 +129,8 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
       id: `new-${Date.now()}`,
       action: '',
       points: null,
+      require_tm_signature: false,
+      require_leader_signature: false,
       isNew: true,
     };
     setInfractions([...infractions, newInfraction]);
@@ -179,6 +185,8 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
           .update({
             action: inf.action,
             points: inf.points,
+            require_tm_signature: inf.require_tm_signature ?? false,
+            require_leader_signature: inf.require_leader_signature ?? false,
           })
           .eq('id', inf.id);
 
@@ -193,6 +201,8 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
             org_id: orgId,
             action: inf.action,
             points: inf.points,
+            require_tm_signature: inf.require_tm_signature ?? false,
+            require_leader_signature: inf.require_leader_signature ?? false,
           })))
           .select();
 
@@ -244,6 +254,8 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
                 .update({
                   action: inf.action,
                   points: inf.points,
+                  require_tm_signature: inf.require_tm_signature ?? false,
+                  require_leader_signature: inf.require_leader_signature ?? false,
                 })
                 .eq('id', inf.id);
             }
@@ -256,6 +268,8 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
                   org_id: currentOrgId,
                   action: inf.action,
                   points: inf.points,
+                  require_tm_signature: inf.require_tm_signature ?? false,
+                  require_leader_signature: inf.require_leader_signature ?? false,
                 })));
             }
           } catch (err) {
@@ -289,6 +303,12 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
         <div className={sty.header}>
           <span className={sty.headerName}>Infraction Name</span>
           <span className={sty.headerPoints}>Point Value</span>
+          <Tooltip title="When checked, team member signature is required for this infraction type">
+            <span className={sty.headerSignature}>Req. TM Sig.</span>
+          </Tooltip>
+          <Tooltip title="When checked, leader signature is required for this infraction type">
+            <span className={sty.headerSignature}>Req. Leader Sig.</span>
+          </Tooltip>
           <span className={sty.headerActions}></span>
         </div>
 
@@ -318,6 +338,34 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
                 inputProps={{ step: 0.5 }}
                 disabled={disabled}
               />
+              <div className={sty.checkboxCell}>
+                <Checkbox
+                  checked={infraction.require_tm_signature ?? false}
+                  onChange={(e) => handleInfractionChange(infraction.id, 'require_tm_signature', e.target.checked)}
+                  disabled={disabled}
+                  size="small"
+                  sx={{
+                    color: '#9ca3af',
+                    '&.Mui-checked': {
+                      color: '#31664a',
+                    },
+                  }}
+                />
+              </div>
+              <div className={sty.checkboxCell}>
+                <Checkbox
+                  checked={infraction.require_leader_signature ?? false}
+                  onChange={(e) => handleInfractionChange(infraction.id, 'require_leader_signature', e.target.checked)}
+                  disabled={disabled}
+                  size="small"
+                  sx={{
+                    color: '#9ca3af',
+                    '&.Mui-checked': {
+                      color: '#31664a',
+                    },
+                  }}
+                />
+              </div>
               {!disabled && (
                 <IconButton
                   size="small"

@@ -129,7 +129,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (location.org_id) {
     const { data: orgRubricData, error: orgRubricError } = await supabase
       .from('infractions_rubric')
-      .select('id, action, action_es, points')
+      .select('id, action, action_es, points, require_tm_signature, require_leader_signature')
       .eq('org_id', location.org_id)
       .is('location_id', null)
       .order('points');
@@ -143,7 +143,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!finalRubricData || finalRubricData.length === 0) {
     const { data: locationRubricData, error: locationRubricError } = await supabase
       .from('infractions_rubric')
-      .select('id, action, action_es, points')
+      .select('id, action, action_es, points, require_tm_signature, require_leader_signature')
       .eq('location_id', location.id)
       .order('points');
 
@@ -153,7 +153,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.warn('[mobile] action_es column not found, falling back to base columns', token);
         const fallbackResult = await supabase
           .from('infractions_rubric')
-          .select('id, action, points')
+          .select('id, action, points, require_tm_signature, require_leader_signature')
           .eq('location_id', location.id)
           .order('points');
 
@@ -200,6 +200,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     action: item.action,
     action_es: item.action_es ?? null,
     points: item.points ?? 0,
+    require_tm_signature: item.require_tm_signature ?? false,
+    require_leader_signature: item.require_leader_signature ?? false,
   }));
 
   res.setHeader('Cache-Control', 'no-store');

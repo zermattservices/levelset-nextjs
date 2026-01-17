@@ -52,7 +52,7 @@
 
 .header {
   display: grid;
-  grid-template-columns: 1fr 120px 40px;
+  grid-template-columns: 1fr 100px 90px 110px 40px;
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid #e5e5e5;
@@ -60,6 +60,7 @@
 
 .headerName,
 .headerPoints,
+.headerSignature,
 .headerActions {
   font-family: "Satoshi";
   font-size: 12px;
@@ -68,12 +69,23 @@
   text-transform: uppercase;
 }
 
+.headerSignature {
+  text-align: center;
+  cursor: help;
+}
+
 .row {
   display: grid;
-  grid-template-columns: 1fr 120px 40px;
+  grid-template-columns: 1fr 100px 90px 110px 40px;
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+}
+
+.checkboxCell {
+  display: flex;
+  justify-content: center;
   align-items: center;
 }
 
