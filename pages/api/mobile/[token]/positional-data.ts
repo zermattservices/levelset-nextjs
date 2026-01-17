@@ -150,6 +150,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Fetch role permissions for filtering positions by leader role
   let rolePermissions: Record<string, string[]> = {};
+  let requireRatingComments = false;
+  
   if (location.org_id) {
     const { data: permissionsData } = await supabase
       .from('position_role_permissions')
@@ -169,6 +171,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
       });
+    }
+    
+    // Fetch org feature toggles for require_rating_comments
+    const { data: featureToggles } = await supabase
+      .from('org_feature_toggles')
+      .select('require_rating_comments')
+      .eq('org_id', location.org_id)
+      .single();
+    
+    if (featureToggles?.require_rating_comments) {
+      requireRatingComments = true;
     }
   }
 
@@ -201,6 +214,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     leaders,
     positions,
     rolePermissions, // Map of role -> position names that role can rate
+    requireRatingComments, // Whether additional comments field is required
   });
 }
 

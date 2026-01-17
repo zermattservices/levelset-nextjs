@@ -42,6 +42,7 @@ interface PositionalDataResponse {
   leaders: EmployeeOption[];
   positions: PositionOption[];
   rolePermissions?: Record<string, string[]>;
+  requireRatingComments?: boolean;
 }
 
 interface LabelsResponse {
@@ -69,6 +70,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
   const [leaders, setLeaders] = React.useState<EmployeeOption[]>([]);
   const [positions, setPositions] = React.useState<PositionOption[]>([]);
   const [rolePermissions, setRolePermissions] = React.useState<Record<string, string[]>>({});
+  const [requireRatingComments, setRequireRatingComments] = React.useState(false);
 
   const [selectedLeader, setSelectedLeader] = React.useState('');
   const [selectedEmployee, setSelectedEmployee] = React.useState('');
@@ -130,6 +132,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           setLeaders(leaderOptions);
           setPositions((payload.positions ?? []).map((item) => ({ ...item })));
           setRolePermissions(payload.rolePermissions ?? {});
+          setRequireRatingComments(payload.requireRatingComments ?? false);
           setSelectedLeader('');
           setSelectedEmployee('');
           setSelectedPositionValue('');
@@ -226,8 +229,11 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
     if (labels.length === 0 || ratings.length !== labels.length) {
       return false;
     }
+    if (requireRatingComments && !notes.trim()) {
+      return false;
+    }
     return ratings.every((value): value is RatingValue => value === 1 || value === 2 || value === 3);
-  }, [labels.length, ratings, selectedEmployee, selectedLeader, selectedPosition]);
+  }, [labels.length, notes, ratings, requireRatingComments, selectedEmployee, selectedLeader, selectedPosition]);
 
   React.useEffect(() => {
     controls.setSubmitDisabled(!isComplete);
@@ -550,7 +556,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             sx={{
               backgroundColor: '#ffffff',
               borderRadius: '12px',
-              border: '1px solid #e5e7eb',
+              border: requireRatingComments && !notes.trim() ? '1px solid #f59e0b' : '1px solid #e5e7eb',
               padding: '16px 20px',
               display: 'flex',
               flexDirection: 'column',
@@ -563,20 +569,29 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                 fontSize: 16,
                 fontWeight: 600,
                 color: '#111827',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
               }}
             >
               {t('ratings.additionalDetails')}
+              {requireRatingComments && (
+                <Box component="span" sx={{ color: '#dc2626', fontSize: 14 }}>*</Box>
+              )}
             </Typography>
             <Typography
               sx={{
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 fontSize: 13,
                 fontWeight: 500,
-                color: '#6b7280',
+                color: requireRatingComments ? '#92400e' : '#6b7280',
                 lineHeight: 1.4,
               }}
             >
-              {t('ratings.additionalDetailsHelper')}
+              {requireRatingComments 
+                ? t('ratings.additionalDetailsRequiredHelper', 'Additional comments are required for this rating.')
+                : t('ratings.additionalDetailsHelper')
+              }
             </Typography>
             <TextField
               multiline
@@ -588,6 +603,8 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                 markDirty();
               }}
               placeholder={t('ratings.additionalDetailsPlaceholder')}
+              required={requireRatingComments}
+              error={requireRatingComments && dirty && !notes.trim()}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',

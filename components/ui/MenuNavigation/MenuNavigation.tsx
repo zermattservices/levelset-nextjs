@@ -14,6 +14,7 @@ import { LevelsetButton } from '../LevelsetButton/LevelsetButton';
 import { LogoutButton } from '../LogoutButton/LogoutButton';
 import { NavSubmenu, type MenuType } from '../NavSubmenu/NavSubmenu';
 import { LocationSelectDropdown } from '@/components/CodeComponents/LocationSelectDropdown';
+import { ProfileModal } from '../ProfileModal/ProfileModal';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
@@ -55,6 +56,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
   const [isClosing, setIsClosing] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
   const [helpDropdownOpen, setHelpDropdownOpen] = React.useState(false);
+  const [profileModalOpen, setProfileModalOpen] = React.useState(false);
   const [submenuOffset, setSubmenuOffset] = React.useState<number>(0);
   const profileDropdownRef = React.useRef<HTMLDivElement>(null);
   const helpDropdownRef = React.useRef<HTMLDivElement>(null);
@@ -385,9 +387,16 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               )}
               {profileDropdownOpen && (
                 <div className={sty.profileDropdown}>
-                  {/* Profile - disabled for now */}
-                  <div className={classNames(sty.profileDropdownItem, sty.profileDropdownItemDisabled)}>
-                    <PersonOutlineIcon sx={{ fontSize: 18, color: '#999' }} />
+                  {/* Profile */}
+                  <div 
+                    className={sty.profileDropdownItem}
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      setProfileModalOpen(true);
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <PersonOutlineIcon sx={{ fontSize: 18, color: '#666' }} />
                     <span>Profile</span>
                   </div>
                   
@@ -419,6 +428,12 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
           onClick={closeMenuImmediately} 
         />
       )}
+
+      {/* Profile Modal */}
+      <ProfileModal
+        open={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+      />
     </div>
   );
 }

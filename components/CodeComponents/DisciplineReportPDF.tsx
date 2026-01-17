@@ -153,6 +153,17 @@ const styles = StyleSheet.create({
     color: colors.grey900,
     flex: 1,
   },
+  signatureRow: {
+    flexDirection: 'row',
+    fontSize: 10,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  signatureImage: {
+    width: 100,
+    height: 40,
+    objectFit: 'contain',
+  },
   logEntryNotes: {
     marginTop: 6,
     padding: 8,
@@ -415,15 +426,23 @@ export const DisciplineReportPDF: React.FC<DisciplineReportPDFProps> = ({
                   </Text>
                 </View>
                 {infraction.leader_signature && (
-                  <View style={styles.logEntryRow}>
+                  <View style={styles.signatureRow}>
                     <Text style={styles.logEntryLabel}>Leader Sig:</Text>
-                    <Text style={styles.logEntryValue}>{infraction.leader_signature}</Text>
+                    {infraction.leader_signature.startsWith('data:image') ? (
+                      <Image src={infraction.leader_signature} style={styles.signatureImage} />
+                    ) : (
+                      <Text style={styles.logEntryValue}>Signed</Text>
+                    )}
                   </View>
                 )}
                 {infraction.team_member_signature && (
-                  <View style={styles.logEntryRow}>
+                  <View style={styles.signatureRow}>
                     <Text style={styles.logEntryLabel}>TM Sig:</Text>
-                    <Text style={styles.logEntryValue}>{infraction.team_member_signature}</Text>
+                    {infraction.team_member_signature.startsWith('data:image') ? (
+                      <Image src={infraction.team_member_signature} style={styles.signatureImage} />
+                    ) : (
+                      <Text style={styles.logEntryValue}>Signed</Text>
+                    )}
                   </View>
                 )}
                 <View style={styles.logEntryRow}>
