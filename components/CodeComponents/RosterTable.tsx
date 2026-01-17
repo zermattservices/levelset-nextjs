@@ -1117,6 +1117,19 @@ function EmployeesTableView({
     if (!employeeToTerminate) return;
     
     try {
+      // First, fetch the employee's current points (90-day rolling)
+      let currentPoints = 0;
+      try {
+        const pointsResponse = await fetch(`/api/employees/points?employee_id=${employeeToTerminate.id}`);
+        if (pointsResponse.ok) {
+          const pointsData = await pointsResponse.json();
+          currentPoints = pointsData.points || 0;
+        }
+      } catch (err) {
+        console.warn('Could not fetch current points:', err);
+        // Continue with termination even if points fetch fails
+      }
+
       const response = await fetch('/api/employees', {
         method: 'POST',
         headers: {
@@ -1128,6 +1141,7 @@ function EmployeesTableView({
           active: false,
           termination_date: new Date().toISOString().split('T')[0],
           termination_reason: terminationReason || null,
+          last_points_total: currentPoints,
         }),
       });
 

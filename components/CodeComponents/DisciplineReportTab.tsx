@@ -45,6 +45,7 @@ interface InactiveEmployee {
   hire_date: string | null;
   termination_date: string | null;
   termination_reason: string | null;
+  last_points_total: number;
 }
 
 interface DisciplineActions {
@@ -186,10 +187,12 @@ const ActiveEmployeeRow = ({
 // Inactive Employee Row Component
 const InactiveEmployeeRow = ({ 
   employee,
+  disciplineActions,
   onGenerateReport,
   isGenerating,
 }: { 
   employee: InactiveEmployee;
+  disciplineActions: DisciplineActions[];
   onGenerateReport: (employeeId: string) => void;
   isGenerating: boolean;
 }) => {
@@ -197,7 +200,7 @@ const InactiveEmployeeRow = ({
     <Box
       sx={{
         display: 'grid',
-        gridTemplateColumns: '1fr 120px 100px 110px 1fr 140px',
+        gridTemplateColumns: '1fr 120px 100px 110px 100px 1fr 140px',
         alignItems: 'center',
         padding: '12px 16px',
         borderBottom: '1px solid #f3f4f6',
@@ -221,6 +224,9 @@ const InactiveEmployeeRow = ({
       <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', textAlign: 'center' }}>
         {employee.termination_date ? format(parseISO(employee.termination_date), 'M/d/yyyy') : '-'}
       </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <PointsBadge points={employee.last_points_total} disciplineActions={disciplineActions} />
+      </Box>
       <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {employee.termination_reason || '-'}
       </Typography>
@@ -292,7 +298,7 @@ const InactiveHeaderRow = () => (
   <Box
     sx={{
       display: 'grid',
-      gridTemplateColumns: '1fr 120px 100px 110px 1fr 140px',
+      gridTemplateColumns: '1fr 120px 100px 110px 100px 1fr 140px',
       alignItems: 'center',
       padding: '10px 16px',
       backgroundColor: '#f9fafb',
@@ -310,6 +316,9 @@ const InactiveHeaderRow = () => (
     </Typography>
     <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
       Term. Date
+    </Typography>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+      Last Points
     </Typography>
     <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
       Term. Reason
@@ -571,6 +580,7 @@ export function DisciplineReportTab() {
                 <InactiveEmployeeRow
                   key={employee.id}
                   employee={employee}
+                  disciplineActions={disciplineActions}
                   onGenerateReport={handleGenerateReport}
                   isGenerating={generatingReportFor === employee.id}
                 />

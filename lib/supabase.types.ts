@@ -28,6 +28,7 @@ export interface Employee {
   consolidated_employee_id?: string;
   termination_date?: string;
   termination_reason?: string;
+  last_points_total?: number;
   created_at?: string;
   updated_at?: string;
 }

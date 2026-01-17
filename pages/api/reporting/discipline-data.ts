@@ -66,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Fetch inactive employees
     const { data: inactiveEmployeesRaw, error: inactiveError } = await supabase
       .from('employees')
-      .select('id, full_name, role, hire_date, termination_date, termination_reason')
+      .select('id, full_name, role, hire_date, termination_date, termination_reason, last_points_total')
       .eq('location_id', location_id)
       .eq('active', false)
       .order('full_name');
@@ -138,6 +138,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       hire_date: emp.hire_date,
       termination_date: emp.termination_date,
       termination_reason: emp.termination_reason,
+      last_points_total: emp.last_points_total ?? 0,
     }));
 
     return res.status(200).json({
