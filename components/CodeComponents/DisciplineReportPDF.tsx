@@ -26,6 +26,8 @@ const colors = {
   redLight: '#fee2e2',
   orange: '#f59e0b',
   orangeLight: '#fef3c7',
+  blue: '#2563eb',
+  blueLight: '#dbeafe',
 };
 
 // Styles
@@ -41,14 +43,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 20,
-    paddingBottom: 16,
+    marginBottom: 12,
+    paddingBottom: 10,
     borderBottomWidth: 2,
     borderBottomColor: colors.levelsetGreen,
   },
   headerLeft: {
     flexDirection: 'column',
-    gap: 4,
+    gap: 2,
   },
   title: {
     fontSize: 24,
@@ -56,8 +58,9 @@ const styles = StyleSheet.create({
     color: colors.levelsetGreen,
   },
   subtitle: {
-    fontSize: 11,
+    fontSize: 10,
     color: colors.grey600,
+    marginTop: 2,
   },
   logo: {
     width: 70,
@@ -66,20 +69,21 @@ const styles = StyleSheet.create({
   },
   // Employee Info Section
   employeeInfoSection: {
-    marginBottom: 20,
+    marginBottom: 8,
     padding: 14,
     backgroundColor: colors.grey100,
     borderRadius: 10,
   },
   employeeInfoGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 30,
   },
   employeeInfoItem: {
     flexDirection: 'column',
+    alignItems: 'center',
     gap: 2,
-    minWidth: 100,
   },
   employeeInfoLabel: {
     fontSize: 9,
@@ -97,7 +101,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    alignSelf: 'flex-start',
   },
   pointsBadgeText: {
     fontSize: 12,
@@ -108,12 +111,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 700,
     color: colors.grey900,
-    marginBottom: 10,
-    marginTop: 16,
+    marginBottom: 8,
+    marginTop: 8,
   },
   // Log Entry Styles
   logEntry: {
-    marginBottom: 10,
+    marginBottom: 8,
     padding: 10,
     backgroundColor: colors.white,
     borderWidth: 1,
@@ -132,6 +135,11 @@ const styles = StyleSheet.create({
     color: colors.grey900,
     flex: 1,
   },
+  logEntryTypeLabel: {
+    fontSize: 10,
+    fontWeight: 500,
+    color: colors.grey600,
+  },
   logEntryDate: {
     fontSize: 10,
     color: colors.grey600,
@@ -147,21 +155,31 @@ const styles = StyleSheet.create({
   logEntryLabel: {
     fontWeight: 600,
     color: colors.grey600,
-    width: 80,
+    width: 70,
   },
   logEntryValue: {
     color: colors.grey900,
     flex: 1,
   },
-  signatureRow: {
+  signaturesRow: {
     flexDirection: 'row',
     fontSize: 10,
     alignItems: 'center',
     marginTop: 4,
+    gap: 16,
+  },
+  signatureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  signatureLabel: {
+    fontWeight: 600,
+    color: colors.grey600,
+    marginRight: 4,
   },
   signatureImage: {
-    width: 100,
-    height: 40,
+    width: 80,
+    height: 30,
     objectFit: 'contain',
   },
   logEntryNotes: {
@@ -181,6 +199,18 @@ const styles = StyleSheet.create({
   pointsPillText: {
     fontSize: 10,
     fontWeight: 600,
+  },
+  actionPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginLeft: 8,
+    backgroundColor: colors.blueLight,
+  },
+  actionPillText: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: colors.blue,
   },
   // Action Thresholds Table
   thresholdsSection: {
@@ -309,6 +339,11 @@ interface DisciplineReportPDFProps {
   actionThresholds: ActionThreshold[];
 }
 
+// Combined type for sorting
+type DisciplineEntry = 
+  | { type: 'infraction'; date: string; data: Infraction }
+  | { type: 'action'; date: string; data: DisciplinaryAction };
+
 const getPointsBadgeStyle = (points: number) => {
   if (points === 0) {
     return { bg: colors.grey200, color: colors.grey900 };
@@ -348,13 +383,23 @@ export const DisciplineReportPDF: React.FC<DisciplineReportPDFProps> = ({
   actionThresholds,
 }) => {
   const pointsStyle = getPointsBadgeStyle(currentPoints);
-  const sortedInfractions = [...infractions].sort((a, b) => 
-    new Date(b.infraction_date).getTime() - new Date(a.infraction_date).getTime()
-  );
-  const sortedActions = [...actions].sort((a, b) => 
-    new Date(b.action_date).getTime() - new Date(a.action_date).getTime()
-  );
+  
+  // Combine infractions and actions into a single sorted list (oldest to newest)
+  const combinedEntries: DisciplineEntry[] = [
+    ...infractions.map((inf): DisciplineEntry => ({ 
+      type: 'infraction', 
+      date: inf.infraction_date, 
+      data: inf 
+    })),
+    ...actions.map((act): DisciplineEntry => ({ 
+      type: 'action', 
+      date: act.action_date, 
+      data: act 
+    })),
+  ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
   const sortedThresholds = [...actionThresholds].sort((a, b) => a.points_threshold - b.points_threshold);
+  const totalEntries = infractions.length + actions.length;
 
   return (
     <Document>
@@ -386,7 +431,7 @@ export const DisciplineReportPDF: React.FC<DisciplineReportPDFProps> = ({
               <Text style={styles.employeeInfoValue}>{formatDate(hireDate)}</Text>
             </View>
             <View style={styles.employeeInfoItem}>
-              <Text style={styles.employeeInfoLabel}>Current Points (90-day)</Text>
+              <Text style={styles.employeeInfoLabel}>Total Points</Text>
               <View style={[styles.pointsBadge, { backgroundColor: pointsStyle.bg }]}>
                 <Text style={[styles.pointsBadgeText, { color: pointsStyle.color }]}>
                   {currentPoints} points
@@ -396,93 +441,106 @@ export const DisciplineReportPDF: React.FC<DisciplineReportPDFProps> = ({
           </View>
         </View>
 
-        {/* Infractions Log */}
-        <Text style={styles.sectionHeader}>Infraction History ({infractions.length} total)</Text>
-        {sortedInfractions.length === 0 ? (
-          <Text style={styles.emptyState}>No infractions recorded for this employee.</Text>
+        {/* Combined Discipline History */}
+        <Text style={styles.sectionHeader}>Discipline History ({totalEntries} total)</Text>
+        {combinedEntries.length === 0 ? (
+          <Text style={styles.emptyState}>No discipline history recorded for this employee.</Text>
         ) : (
-          sortedInfractions.map((infraction, index) => (
-            <View key={infraction.id || index} style={styles.logEntry} wrap={false}>
-              <View style={styles.logEntryHeader}>
-                <Text style={styles.logEntryTitle}>{infraction.infraction || 'Infraction'}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={styles.logEntryDate}>{formatDate(infraction.infraction_date)}</Text>
-                  <View style={[styles.pointsPill, { backgroundColor: colors.redLight }]}>
-                    <Text style={[styles.pointsPillText, { color: colors.red }]}>
-                      +{infraction.points} pts
+          combinedEntries.map((entry, index) => {
+            if (entry.type === 'infraction') {
+              const infraction = entry.data as Infraction;
+              const hasTmSig = infraction.team_member_signature;
+              const hasLeaderSig = infraction.leader_signature;
+              const hasAnySig = hasTmSig || hasLeaderSig;
+              
+              return (
+                <View key={`inf-${infraction.id || index}`} style={styles.logEntry} wrap={false}>
+                  <View style={styles.logEntryHeader}>
+                    <Text style={styles.logEntryTitle}>
+                      <Text style={styles.logEntryTypeLabel}>Infraction: </Text>
+                      {infraction.infraction || 'Infraction'}
                     </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Text style={styles.logEntryDate}>{formatDate(infraction.infraction_date)}</Text>
+                      <View style={[styles.pointsPill, { backgroundColor: colors.redLight }]}>
+                        <Text style={[styles.pointsPillText, { color: colors.red }]}>
+                          +{infraction.points} pts
+                        </Text>
+                      </View>
+                    </View>
                   </View>
-                </View>
-              </View>
-              <View style={styles.logEntryDetails}>
-                <View style={styles.logEntryRow}>
-                  <Text style={styles.logEntryLabel}>Issued By:</Text>
-                  <Text style={styles.logEntryValue}>{infraction.leader_name || 'Unknown'}</Text>
-                </View>
-                <View style={styles.logEntryRow}>
-                  <Text style={styles.logEntryLabel}>Acknowledged:</Text>
-                  <Text style={styles.logEntryValue}>
-                    {infraction.acknowledgement || (infraction.ack_bool ? 'Yes' : 'No')}
-                  </Text>
-                </View>
-                {infraction.leader_signature && (
-                  <View style={styles.signatureRow}>
-                    <Text style={styles.logEntryLabel}>Leader Sig:</Text>
-                    {infraction.leader_signature.startsWith('data:image') ? (
-                      <Image src={infraction.leader_signature} style={styles.signatureImage} />
-                    ) : (
-                      <Text style={styles.logEntryValue}>Signed</Text>
+                  <View style={styles.logEntryDetails}>
+                    <View style={styles.logEntryRow}>
+                      <Text style={styles.logEntryLabel}>Issued By:</Text>
+                      <Text style={styles.logEntryValue}>{infraction.leader_name || 'Unknown'}</Text>
+                    </View>
+                    <View style={styles.logEntryRow}>
+                      <Text style={styles.logEntryLabel}>Recorded:</Text>
+                      <Text style={styles.logEntryValue}>{formatDateTime(infraction.created_at)}</Text>
+                    </View>
+                    {hasAnySig && (
+                      <View style={styles.signaturesRow}>
+                        {hasTmSig && (
+                          <View style={styles.signatureItem}>
+                            <Text style={styles.signatureLabel}>TM:</Text>
+                            {infraction.team_member_signature?.startsWith('data:image') ? (
+                              <Image src={infraction.team_member_signature} style={styles.signatureImage} />
+                            ) : (
+                              <Text style={{ fontSize: 10, color: colors.grey900 }}>Signed</Text>
+                            )}
+                          </View>
+                        )}
+                        {hasLeaderSig && (
+                          <View style={styles.signatureItem}>
+                            <Text style={styles.signatureLabel}>Leader:</Text>
+                            {infraction.leader_signature?.startsWith('data:image') ? (
+                              <Image src={infraction.leader_signature} style={styles.signatureImage} />
+                            ) : (
+                              <Text style={{ fontSize: 10, color: colors.grey900 }}>Signed</Text>
+                            )}
+                          </View>
+                        )}
+                      </View>
                     )}
                   </View>
-                )}
-                {infraction.team_member_signature && (
-                  <View style={styles.signatureRow}>
-                    <Text style={styles.logEntryLabel}>TM Sig:</Text>
-                    {infraction.team_member_signature.startsWith('data:image') ? (
-                      <Image src={infraction.team_member_signature} style={styles.signatureImage} />
-                    ) : (
-                      <Text style={styles.logEntryValue}>Signed</Text>
-                    )}
+                  {infraction.notes && (
+                    <Text style={styles.logEntryNotes}>Notes: {infraction.notes}</Text>
+                  )}
+                </View>
+              );
+            } else {
+              const action = entry.data as DisciplinaryAction;
+              return (
+                <View key={`act-${action.id || index}`} style={styles.logEntry} wrap={false}>
+                  <View style={styles.logEntryHeader}>
+                    <Text style={styles.logEntryTitle}>
+                      <Text style={styles.logEntryTypeLabel}>Action: </Text>
+                      {action.action || 'Action'}
+                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Text style={styles.logEntryDate}>{formatDate(action.action_date)}</Text>
+                      <View style={styles.actionPill}>
+                        <Text style={styles.actionPillText}>Action</Text>
+                      </View>
+                    </View>
                   </View>
-                )}
-                <View style={styles.logEntryRow}>
-                  <Text style={styles.logEntryLabel}>Recorded:</Text>
-                  <Text style={styles.logEntryValue}>{formatDateTime(infraction.created_at)}</Text>
+                  <View style={styles.logEntryDetails}>
+                    <View style={styles.logEntryRow}>
+                      <Text style={styles.logEntryLabel}>Issued By:</Text>
+                      <Text style={styles.logEntryValue}>{action.leader_name || 'Unknown'}</Text>
+                    </View>
+                    <View style={styles.logEntryRow}>
+                      <Text style={styles.logEntryLabel}>Recorded:</Text>
+                      <Text style={styles.logEntryValue}>{formatDateTime(action.created_at)}</Text>
+                    </View>
+                  </View>
+                  {action.notes && (
+                    <Text style={styles.logEntryNotes}>Notes: {action.notes}</Text>
+                  )}
                 </View>
-              </View>
-              {infraction.notes && (
-                <Text style={styles.logEntryNotes}>Notes: {infraction.notes}</Text>
-              )}
-            </View>
-          ))
-        )}
-
-        {/* Disciplinary Actions Log */}
-        <Text style={styles.sectionHeader}>Disciplinary Actions ({actions.length} total)</Text>
-        {sortedActions.length === 0 ? (
-          <Text style={styles.emptyState}>No disciplinary actions recorded for this employee.</Text>
-        ) : (
-          sortedActions.map((action, index) => (
-            <View key={action.id || index} style={styles.logEntry} wrap={false}>
-              <View style={styles.logEntryHeader}>
-                <Text style={styles.logEntryTitle}>{action.action || 'Action'}</Text>
-                <Text style={styles.logEntryDate}>{formatDate(action.action_date)}</Text>
-              </View>
-              <View style={styles.logEntryDetails}>
-                <View style={styles.logEntryRow}>
-                  <Text style={styles.logEntryLabel}>Issued By:</Text>
-                  <Text style={styles.logEntryValue}>{action.leader_name || 'Unknown'}</Text>
-                </View>
-                <View style={styles.logEntryRow}>
-                  <Text style={styles.logEntryLabel}>Recorded:</Text>
-                  <Text style={styles.logEntryValue}>{formatDateTime(action.created_at)}</Text>
-                </View>
-              </View>
-              {action.notes && (
-                <Text style={styles.logEntryNotes}>Notes: {action.notes}</Text>
-              )}
-            </View>
-          ))
+              );
+            }
+          })
         )}
 
         {/* Action Thresholds Table */}
@@ -529,4 +587,3 @@ export const DisciplineReportPDF: React.FC<DisciplineReportPDFProps> = ({
 };
 
 export default DisciplineReportPDF;
-
