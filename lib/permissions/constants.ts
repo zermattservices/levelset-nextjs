@@ -13,6 +13,7 @@ export const PERMISSION_MODULES = {
   ROLES: 'roles',
   PERMISSIONS: 'permissions',
   MOBILE_APP: 'mobile_app',
+  HR_REPORTING: 'hr_reporting',
 } as const;
 
 // All permission keys as const for type safety
@@ -72,6 +73,9 @@ export const P = {
   MOBILE_MANAGE_CONFIG: 'mobile_app.manage_configuration',
   MOBILE_VIEW_PASSWORD: 'mobile_app.view_form_password',
   MOBILE_CHANGE_PASSWORD: 'mobile_app.change_form_password',
+
+  // HR Reporting
+  HR_VIEW_REPORTING: 'hr_reporting.view_hr_reporting',
 } as const;
 
 // Type for any valid permission key
@@ -127,6 +131,11 @@ export const MODULE_METADATA: Record<string, ModuleMetadata> = {
     name: 'Mobile App',
     description: 'Mobile PWA application settings',
     order: 8,
+  },
+  [PERMISSION_MODULES.HR_REPORTING]: {
+    name: 'HR Reporting',
+    description: 'Access to HR reporting dashboards and reports',
+    order: 9,
   },
 };
 
@@ -395,6 +404,14 @@ export const SUB_ITEM_METADATA: Record<PermissionKey, SubItemMetadata> = {
     order: 4,
     module: PERMISSION_MODULES.MOBILE_APP,
     dependsOn: P.MOBILE_VIEW_PASSWORD, // Auto-enable dependency
+  },
+
+  // HR Reporting
+  [P.HR_VIEW_REPORTING]: {
+    name: 'View HR Reporting',
+    description: 'Access to view HR reporting dashboards, discipline reports, and employee data',
+    order: 1,
+    module: PERMISSION_MODULES.HR_REPORTING,
   },
 };
 

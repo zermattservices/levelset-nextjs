@@ -2,6 +2,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import sty from './DashboardSubmenu.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
+import { usePermissions, P, type PermissionKey } from '@/lib/providers/PermissionsProvider';
 
 // MUI Icons
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
@@ -14,6 +15,7 @@ import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -24,6 +26,7 @@ interface MenuItem {
   href?: string;
   icon: React.ReactNode;
   disabled?: boolean;
+  requiredPermission?: PermissionKey;
 }
 
 interface MenuGroup {
@@ -86,6 +89,12 @@ const menuGroups: MenuGroup[] = [
         icon: <GroupOutlinedIcon sx={{ fontSize: 18 }} />,
       },
       {
+        label: 'Reporting',
+        href: '/reporting',
+        icon: <AssessmentOutlinedIcon sx={{ fontSize: 18 }} />,
+        requiredPermission: P.HR_VIEW_REPORTING,
+      },
+      {
         label: '360 Overview',
         icon: <AllInclusiveOutlinedIcon sx={{ fontSize: 18 }} />,
         disabled: true,
@@ -104,6 +113,17 @@ export interface DashboardSubmenuProps {
 }
 
 export function DashboardSubmenu({ className }: DashboardSubmenuProps) {
+  const { has } = usePermissions();
+  
+  // Filter items based on required permissions
+  const filteredMenuGroups = menuGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => {
+      if (!item.requiredPermission) return true;
+      return has(item.requiredPermission);
+    }),
+  })).filter(group => group.items.length > 0); // Remove empty groups
+  
   return (
     <div
       className={classNames(
@@ -117,7 +137,7 @@ export function DashboardSubmenu({ className }: DashboardSubmenuProps) {
       )}
     >
       <div className={sty.submenuContent}>
-        {menuGroups.map((group) => (
+        {filteredMenuGroups.map((group) => (
           <div key={group.title} className={sty.menuGroup}>
             <div className={sty.groupTitle}>{group.title}</div>
             <div className={sty.groupItems}>

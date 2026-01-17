@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import sty from './NavSubmenu.module.css';
+import { usePermissions, P, type PermissionKey } from '@/lib/providers/PermissionsProvider';
 
 // MUI Icons
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
@@ -13,6 +14,7 @@ import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -39,6 +41,7 @@ export interface NavMenuItem {
   href?: string;
   icon: React.ReactNode;
   disabled?: boolean;
+  requiredPermission?: PermissionKey;
 }
 
 export type MenuType = 'operations' | 'analytics' | 'hr';
@@ -99,6 +102,13 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       icon: <GroupOutlinedIcon sx={{ fontSize: 22 }} />,
     },
     {
+      label: 'Reporting',
+      description: 'HR reports and analytics',
+      href: '/reporting',
+      icon: <AssessmentOutlinedIcon sx={{ fontSize: 22 }} />,
+      requiredPermission: P.HR_VIEW_REPORTING,
+    },
+    {
       label: '360 Overview',
       description: 'Complete employee profiles',
       icon: <AllInclusiveOutlinedIcon sx={{ fontSize: 22 }} />,
@@ -120,7 +130,13 @@ export interface NavSubmenuProps {
 }
 
 export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) {
-  const items = menuItems[menuType];
+  const { has } = usePermissions();
+  const allItems = menuItems[menuType];
+  // Filter items based on required permissions
+  const items = allItems.filter(item => {
+    if (!item.requiredPermission) return true;
+    return has(item.requiredPermission);
+  });
   const isTwoColumn = menuType === 'operations';
   const isRoadmapSubdomain = useIsRoadmapSubdomain();
 

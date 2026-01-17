@@ -13,6 +13,9 @@ import {
   Tab,
   Dialog,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  Select,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -578,6 +581,7 @@ function EmployeesTableView({
   // Terminate confirmation modal state
   const [terminateConfirmOpen, setTerminateConfirmOpen] = React.useState(false);
   const [employeeToTerminate, setEmployeeToTerminate] = React.useState<{ id: string; name: string } | null>(null);
+  const [terminationReason, setTerminationReason] = React.useState<string>('');
 
   // Get current user's role and employee_id from props (passed from parent component)
   const currentUserRole = currentUserRoleProp || '';
@@ -1122,6 +1126,8 @@ function EmployeesTableView({
           intent: 'update',
           id: employeeToTerminate.id,
           active: false,
+          termination_date: new Date().toISOString().split('T')[0],
+          termination_reason: terminationReason || null,
         }),
       });
 
@@ -1132,6 +1138,7 @@ function EmployeesTableView({
       
       setTerminateConfirmOpen(false);
       setEmployeeToTerminate(null);
+      setTerminationReason('');
       
       // Refresh data with cache busting to get fresh data after mutation
       fetchEmployees(true);
@@ -1664,6 +1671,7 @@ function EmployeesTableView({
         onClose={() => {
           setTerminateConfirmOpen(false);
           setEmployeeToTerminate(null);
+          setTerminationReason('');
         }}
         PaperProps={{
           sx: {
@@ -1678,14 +1686,47 @@ function EmployeesTableView({
           Terminate Employee
         </DialogTitle>
         <Box sx={{ px: 3, pb: 2 }}>
-          <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', mb: 3 }}>
+          <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', mb: 2 }}>
             Are you sure you want to terminate {employeeToTerminate?.name}? This will mark them as inactive in your roster.
           </Typography>
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <InputLabel 
+              id="termination-reason-label"
+              sx={{ fontFamily, fontSize: 14 }}
+            >
+              Termination Reason (optional)
+            </InputLabel>
+            <Select
+              labelId="termination-reason-label"
+              value={terminationReason}
+              label="Termination Reason (optional)"
+              onChange={(e) => setTerminationReason(e.target.value)}
+              sx={{
+                fontFamily,
+                fontSize: 14,
+                borderRadius: '8px',
+              }}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value="Voluntary - Resignation">Voluntary - Resignation</MenuItem>
+              <MenuItem value="Voluntary - Job Abandonment">Voluntary - Job Abandonment</MenuItem>
+              <MenuItem value="Involuntary - Performance">Involuntary - Performance</MenuItem>
+              <MenuItem value="Involuntary - Attendance">Involuntary - Attendance</MenuItem>
+              <MenuItem value="Involuntary - Policy Violation">Involuntary - Policy Violation</MenuItem>
+              <MenuItem value="Involuntary - Other">Involuntary - Other</MenuItem>
+              <MenuItem value="End of Seasonal Employment">End of Seasonal Employment</MenuItem>
+              <MenuItem value="Transfer">Transfer</MenuItem>
+              <MenuItem value="Other">Other</MenuItem>
+            </Select>
+          </FormControl>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
             <Button
               onClick={() => {
                 setTerminateConfirmOpen(false);
                 setEmployeeToTerminate(null);
+                setTerminationReason('');
               }}
               sx={{
                 fontFamily,

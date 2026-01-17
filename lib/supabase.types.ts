@@ -26,6 +26,8 @@ export interface Employee {
   hire_date?: string;
   payroll_name?: string;
   consolidated_employee_id?: string;
+  termination_date?: string;
+  termination_reason?: string;
   created_at?: string;
   updated_at?: string;
 }

@@ -63,6 +63,8 @@ export const DEFAULT_PERMISSIONS: Record<number, Set<PermissionKey>> = {
     P.MOBILE_MANAGE_CONFIG,
     P.MOBILE_VIEW_PASSWORD,
     P.MOBILE_CHANGE_PASSWORD,
+    // HR Reporting - view
+    P.HR_VIEW_REPORTING,
   ]),
 
   // Level 2 - Supervisor Access (Team Lead)
