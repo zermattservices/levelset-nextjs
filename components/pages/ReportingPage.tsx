@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import sty from './ReportingPage.module.css';
 import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
+import { RedirectIf } from '@/components/CodeComponents/RedirectIf';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
@@ -128,36 +129,55 @@ export function ReportingPage() {
           userRole={auth.role}
         />
 
-        {/* Header section with title and tabs */}
-        <div className={sty.headerSection}>
-          <div className={sty.headerContainer}>
-            <h1 className={sty.pageTitle}>HR Reporting</h1>
-            <div className={sty.tabsContainer}>
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  className={classNames(sty.tab, activeTab === tab.id && sty.tabActive)}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  {tab.label}
-                </button>
-              ))}
+        <RedirectIf
+          className={classNames("__wab_instance", sty.redirectIf)}
+          condition={!!(auth.authUser && auth.authUser.email)}
+          onFalse={() => router.push('/auth/login')}
+        >
+          {/* Header section - same structure as roster page */}
+          <div className={classNames(projectcss.all, sty.freeBox__t6I6)}>
+            <div className={classNames(projectcss.all, sty.freeBox__qEcUx)}>
+              <div className={classNames(projectcss.all, sty.freeBox__qcdYx)}>
+                <div className={classNames(projectcss.all, sty.freeBox__bYvUh)}>
+                  <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__fFys8)}>
+                    HR Reporting
+                  </div>
+                </div>
+                <div className={classNames(projectcss.all, sty.freeBox__m8LNv)}>
+                  <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text__m1CSw)}>
+                    View discipline reports for active and inactive employees.
+                  </div>
+                </div>
+              </div>
+              {/* Tabs container */}
+              <div className={sty.tabsContainer}>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    className={classNames(sty.tab, activeTab === tab.id && sty.tabActive)}
+                    onClick={() => setActiveTab(tab.id)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Tab content */}
-        <div className={sty.contentSection}>
-          <div className={sty.contentContainer}>
-            <div className={sty.tabContent} key={activeTab}>
-              {renderTabContent()}
+          {/* Main content - same structure as roster page */}
+          <div className={classNames(projectcss.all, sty.freeBox__xbZ1E)}>
+            <div className={classNames(projectcss.all, sty.freeBox__hhgMy)}>
+              <div className={classNames(projectcss.all, sty.verticalStack)}>
+                <div className={sty.tabContent} key={activeTab}>
+                  {renderTabContent()}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </RedirectIf>
       </div>
     </>
   );
 }
 
 export default ReportingPage;
-
