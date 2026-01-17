@@ -189,6 +189,18 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     fontSize: 10,
     color: colors.grey600,
+    flexDirection: 'row',
+  },
+  logEntryNotesLabel: {
+    fontWeight: 600,
+    color: colors.grey600,
+    fontSize: 10,
+  },
+  logEntryNotesText: {
+    fontWeight: 400,
+    color: colors.grey600,
+    fontSize: 10,
+    flex: 1,
   },
   pointsPill: {
     paddingHorizontal: 8,
@@ -504,7 +516,10 @@ export const DisciplineReportPDF: React.FC<DisciplineReportPDFProps> = ({
                     )}
                   </View>
                   {infraction.notes && (
-                    <Text style={styles.logEntryNotes}>Notes: {infraction.notes}</Text>
+                    <View style={styles.logEntryNotes}>
+                      <Text style={styles.logEntryNotesLabel}>Notes: </Text>
+                      <Text style={styles.logEntryNotesText}>{infraction.notes}</Text>
+                    </View>
                   )}
                 </View>
               );
@@ -535,7 +550,10 @@ export const DisciplineReportPDF: React.FC<DisciplineReportPDFProps> = ({
                     </View>
                   </View>
                   {action.notes && (
-                    <Text style={styles.logEntryNotes}>Notes: {action.notes}</Text>
+                    <View style={styles.logEntryNotes}>
+                      <Text style={styles.logEntryNotesLabel}>Notes: </Text>
+                      <Text style={styles.logEntryNotesText}>{action.notes}</Text>
+                    </View>
                   )}
                 </View>
               );
