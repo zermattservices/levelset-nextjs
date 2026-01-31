@@ -1,0 +1,640 @@
+/**
+ * DisciplineInfractionForm Component
+ * Form for recording employee discipline infractions
+ */
+
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Switch,
+  Platform,
+} from "react-native";
+import { SymbolView } from "expo-symbols";
+import { useTranslation } from "react-i18next";
+
+import { colors } from "../../lib/colors";
+import { typography } from "../../lib/fonts";
+import { borderRadius } from "../../lib/theme";
+import { useForms } from "../../context/FormsContext";
+import { useTranslatedContent } from "../../hooks/useTranslatedContent";
+import {
+  fetchInfractionData,
+  submitInfraction,
+  type Employee,
+  type Infraction,
+  ApiError,
+} from "../../lib/api";
+import {
+  isDisciplineInfractionFormComplete,
+  formatDateForApi,
+} from "../../lib/validation";
+
+import { AutocompleteDropdown, type DropdownOption } from "./AutocompleteDropdown";
+import { DatePickerField } from "./DatePickerField";
+import { SignatureCanvas } from "./SignatureCanvas";
+
+// =============================================================================
+// Component
+// =============================================================================
+
+export function DisciplineInfractionForm() {
+  const { t } = useTranslation();
+  const { translate } = useTranslatedContent();
+  const { setDirty, closeForm, completeSubmission } = useForms();
+
+  // Loading and error states
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Form data from API
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [leaders, setLeaders] = useState<Employee[]>([]);
+  const [infractions, setInfractions] = useState<Infraction[]>([]);
+
+  // Form state
+  const [selectedLeaderId, setSelectedLeaderId] = useState<string>("");
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const [selectedInfractionId, setSelectedInfractionId] = useState<string>("");
+  const [infractionDate, setInfractionDate] = useState<Date>(new Date());
+  const [acknowledged, setAcknowledged] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [teamSignature, setTeamSignature] = useState<string>("");
+  const [leaderSignature, setLeaderSignature] = useState<string>("");
+
+  // Token for API calls - will come from auth context in Sprint 5
+  const token = "demo-token";
+
+  // =============================================================================
+  // Data Loading
+  // =============================================================================
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadData() {
+      setLoading(true);
+      setLoadError(null);
+
+      try {
+        const data = await fetchInfractionData(token);
+
+        if (!cancelled) {
+          setEmployees(data.employees ?? []);
+          setLeaders(data.leaders?.length ? data.leaders : data.employees ?? []);
+          setInfractions(data.infractions ?? []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          const message = err instanceof ApiError
+            ? err.message
+            : "Unable to load form data";
+          setLoadError(message);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  // =============================================================================
+  // Computed Values
+  // =============================================================================
+
+  const leaderOptions = useMemo((): DropdownOption[] => {
+    const source = leaders.length ? leaders : employees;
+    return source.map((item) => ({
+      value: item.id,
+      label: item.name,
+      subtitle: item.role ?? undefined,
+    }));
+  }, [leaders, employees]);
+
+  const employeeOptions = useMemo((): DropdownOption[] => {
+    return employees.map((item) => ({
+      value: item.id,
+      label: item.name,
+      subtitle: item.role ?? undefined,
+    }));
+  }, [employees]);
+
+  const infractionOptions = useMemo((): DropdownOption[] => {
+    return infractions.map((item) => ({
+      value: item.id,
+      label: translate(item, "action", item.action),
+      group: formatPointsLabel(item.points),
+    }));
+  }, [infractions, translate]);
+
+  const selectedInfraction = useMemo(() => {
+    return infractions.find((i) => i.id === selectedInfractionId) ?? null;
+  }, [infractions, selectedInfractionId]);
+
+  const selectedEmployee = useMemo(() => {
+    return employees.find((e) => e.id === selectedEmployeeId) ?? null;
+  }, [employees, selectedEmployeeId]);
+
+  const requireTmSignature = selectedInfraction?.require_tm_signature ?? false;
+
+  const isComplete = useMemo(() => {
+    return isDisciplineInfractionFormComplete({
+      leaderId: selectedLeaderId || null,
+      employeeId: selectedEmployeeId || null,
+      infractionId: selectedInfractionId || null,
+      date: infractionDate,
+      acknowledged,
+      notes,
+      teamSignature: teamSignature || null,
+      leaderSignature: leaderSignature || null,
+      requireTeamSignature: requireTmSignature,
+    });
+  }, [
+    selectedLeaderId,
+    selectedEmployeeId,
+    selectedInfractionId,
+    infractionDate,
+    acknowledged,
+    notes,
+    teamSignature,
+    leaderSignature,
+    requireTmSignature,
+  ]);
+
+  // =============================================================================
+  // Handlers
+  // =============================================================================
+
+  const markDirty = useCallback(() => {
+    setDirty(true);
+  }, [setDirty]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!isComplete || !selectedLeaderId || !selectedEmployeeId || !selectedInfractionId) {
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      await submitInfraction(token, {
+        leaderId: selectedLeaderId,
+        employeeId: selectedEmployeeId,
+        infractionId: selectedInfractionId,
+        infractionDate: formatDateForApi(infractionDate),
+        acknowledged,
+        notes: notes.trim() || null,
+        teamMemberSignature: teamSignature || null,
+        leaderSignature: leaderSignature,
+      });
+
+      completeSubmission({
+        formType: "infractions",
+        employeeName: selectedEmployee?.name ?? "Team member",
+        submittedAt: new Date(),
+        details: {
+          infraction: selectedInfraction?.action,
+          points: selectedInfraction?.points,
+        },
+      });
+
+      setDirty(false);
+      closeForm();
+    } catch (err) {
+      const message = err instanceof ApiError
+        ? err.message
+        : "Failed to submit infraction";
+      setSubmitError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [
+    isComplete,
+    selectedLeaderId,
+    selectedEmployeeId,
+    selectedInfractionId,
+    selectedEmployee,
+    selectedInfraction,
+    infractionDate,
+    acknowledged,
+    notes,
+    teamSignature,
+    leaderSignature,
+    token,
+    completeSubmission,
+    setDirty,
+    closeForm,
+  ]);
+
+  // =============================================================================
+  // Render
+  // =============================================================================
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>{t("common.loading")}</Text>
+      </View>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorTitle}>{t("common.error")}</Text>
+        <Text style={styles.errorMessage}>{loadError}</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => {
+            setLoadError(null);
+            setLoading(true);
+          }}
+        >
+          <Text style={styles.retryButtonText}>{t("common.tryAgain")}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      <AutocompleteDropdown
+        label={t("forms.infraction.leader")}
+        placeholder={t("common.select")}
+        options={leaderOptions}
+        value={selectedLeaderId}
+        onChange={(value) => {
+          setSelectedLeaderId(value);
+          setLeaderSignature("");
+          markDirty();
+        }}
+        required
+      />
+
+      <AutocompleteDropdown
+        label={t("forms.infraction.employee")}
+        placeholder={t("common.select")}
+        options={employeeOptions}
+        value={selectedEmployeeId}
+        onChange={(value) => {
+          setSelectedEmployeeId(value);
+          markDirty();
+        }}
+        required
+      />
+
+      <DatePickerField
+        label={t("forms.infraction.date")}
+        value={infractionDate}
+        onChange={(date) => {
+          setInfractionDate(date);
+          markDirty();
+        }}
+        maximumDate={new Date()}
+        required
+      />
+
+      <AutocompleteDropdown
+        label={t("forms.infraction.infraction")}
+        placeholder={t("forms.infraction.selectInfraction")}
+        options={infractionOptions}
+        value={selectedInfractionId}
+        onChange={(value) => {
+          setSelectedInfractionId(value);
+          markDirty();
+        }}
+        groupBy
+        required
+      />
+
+      {selectedInfraction && (
+        <View style={styles.pointsContainer}>
+          <Text style={styles.pointsLabel}>{t("forms.infraction.points")}</Text>
+          <View
+            style={[
+              styles.pointsBadge,
+              selectedInfraction.points > 0
+                ? styles.pointsPositive
+                : selectedInfraction.points < 0
+                  ? styles.pointsNegative
+                  : styles.pointsZero,
+            ]}
+          >
+            <Text
+              style={[
+                styles.pointsValue,
+                selectedInfraction.points > 0
+                  ? styles.pointsValuePositive
+                  : selectedInfraction.points < 0
+                    ? styles.pointsValueNegative
+                    : styles.pointsValueZero,
+              ]}
+            >
+              {selectedInfraction.points > 0
+                ? `+${selectedInfraction.points}`
+                : selectedInfraction.points}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      <View style={styles.toggleContainer}>
+        <View style={styles.toggleInfo}>
+          <Text style={styles.toggleLabel}>{t("forms.infraction.acknowledged")}</Text>
+          <Text style={styles.toggleHelper}>
+            {t("forms.infraction.acknowledgedHelper")}
+          </Text>
+        </View>
+        <Switch
+          value={acknowledged}
+          onValueChange={(value) => {
+            setAcknowledged(value);
+            markDirty();
+          }}
+          trackColor={{ false: colors.outline, true: colors.primaryTransparent }}
+          thumbColor={acknowledged ? colors.primary : colors.surface}
+        />
+      </View>
+
+      <View style={styles.fieldContainer}>
+        <Text style={styles.fieldLabel}>{t("forms.infraction.notes")}</Text>
+        <TextInput
+          style={styles.notesInput}
+          value={notes}
+          onChangeText={(text) => {
+            setNotes(text);
+            markDirty();
+          }}
+          placeholder={t("forms.infraction.notesPlaceholder")}
+          placeholderTextColor={colors.onSurfaceDisabled}
+          multiline
+          numberOfLines={3}
+          textAlignVertical="top"
+        />
+        <Text style={styles.fieldHelper}>{t("forms.infraction.notesHelper")}</Text>
+      </View>
+
+      <SignatureCanvas
+        label={
+          requireTmSignature || acknowledged
+            ? `${t("forms.infraction.teamSignature")} *`
+            : t("forms.infraction.teamSignature")
+        }
+        value={teamSignature || undefined}
+        onSignatureChange={(signature) => {
+          setTeamSignature(signature);
+          markDirty();
+        }}
+        helperText={
+          requireTmSignature
+            ? t("forms.infraction.teamSignatureRequired")
+            : acknowledged
+              ? t("forms.infraction.teamSignatureHelperPresent")
+              : t("forms.infraction.teamSignatureHelperAbsent")
+        }
+      />
+
+      <SignatureCanvas
+        label={`${t("forms.infraction.leaderSignature")} *`}
+        value={leaderSignature || undefined}
+        onSignatureChange={(signature) => {
+          setLeaderSignature(signature);
+          markDirty();
+        }}
+        helperText={t("forms.infraction.leaderSignatureHelper")}
+      />
+
+      {submitError && (
+        <View style={styles.submitErrorContainer}>
+          <Text style={styles.submitErrorText}>{submitError}</Text>
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={[
+          styles.submitButton,
+          (!isComplete || submitting) && styles.submitButtonDisabled,
+        ]}
+        onPress={handleSubmit}
+        disabled={!isComplete || submitting}
+        activeOpacity={0.8}
+      >
+        {submitting ? (
+          <ActivityIndicator size="small" color={colors.onPrimary} />
+        ) : (
+          <>
+            {Platform.OS === "ios" && (
+              <SymbolView
+                name="checkmark.circle.fill"
+                size={20}
+                tintColor={colors.onPrimary}
+                style={styles.submitIcon}
+              />
+            )}
+            <Text style={styles.submitButtonText}>{t("common.submit")}</Text>
+          </>
+        )}
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+function formatPointsLabel(points: number): string {
+  const suffix = Math.abs(points) === 1 ? "Point" : "Points";
+  if (points > 0) return `+${points} ${suffix}`;
+  return `${points} ${suffix}`;
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+    paddingBottom: 40,
+    gap: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 40,
+  },
+  loadingText: {
+    ...typography.bodyMedium,
+    color: colors.onSurfaceVariant,
+    marginTop: 12,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 40,
+  },
+  errorTitle: {
+    ...typography.h4,
+    color: colors.error,
+    marginBottom: 8,
+  },
+  errorMessage: {
+    ...typography.bodyMedium,
+    color: colors.onSurfaceVariant,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: borderRadius.full,
+  },
+  retryButtonText: {
+    ...typography.labelLarge,
+    color: colors.onPrimary,
+  },
+  fieldContainer: {
+    marginBottom: 4,
+  },
+  fieldLabel: {
+    ...typography.labelLarge,
+    color: colors.onSurface,
+    marginBottom: 6,
+  },
+  fieldHelper: {
+    ...typography.bodySmall,
+    color: colors.onSurfaceVariant,
+    marginTop: 4,
+  },
+  pointsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.outline,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  pointsLabel: {
+    ...typography.labelLarge,
+    color: colors.onSurface,
+  },
+  pointsBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: borderRadius.sm,
+  },
+  pointsPositive: {
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
+  },
+  pointsNegative: {
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
+  },
+  pointsZero: {
+    backgroundColor: "rgba(107, 114, 128, 0.1)",
+  },
+  pointsValue: {
+    ...typography.labelLarge,
+    fontWeight: "700",
+  },
+  pointsValuePositive: {
+    color: colors.error,
+  },
+  pointsValueNegative: {
+    color: colors.success,
+  },
+  pointsValueZero: {
+    color: colors.onSurfaceVariant,
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.outline,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  toggleInfo: {
+    flex: 1,
+    marginRight: 16,
+  },
+  toggleLabel: {
+    ...typography.labelLarge,
+    color: colors.onSurface,
+    marginBottom: 2,
+  },
+  toggleHelper: {
+    ...typography.bodySmall,
+    color: colors.onSurfaceVariant,
+  },
+  notesInput: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.outline,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    ...typography.bodyMedium,
+    color: colors.onSurface,
+    minHeight: 100,
+  },
+  submitErrorContainer: {
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    borderWidth: 1,
+    borderColor: colors.error,
+    borderRadius: borderRadius.md,
+    padding: 12,
+  },
+  submitErrorText: {
+    ...typography.bodyMedium,
+    color: colors.error,
+  },
+  submitButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.full,
+    paddingVertical: 16,
+    marginTop: 8,
+  },
+  submitButtonDisabled: {
+    backgroundColor: colors.primaryTransparent,
+    opacity: 0.6,
+  },
+  submitIcon: {
+    marginRight: 8,
+  },
+  submitButtonText: {
+    ...typography.labelLarge,
+    color: colors.onPrimary,
+    fontWeight: "600",
+  },
+});
+
+export default DisciplineInfractionForm;

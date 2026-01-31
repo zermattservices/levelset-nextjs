@@ -1,0 +1,149 @@
+/**
+ * ShiftCard Component
+ * Displays a single shift with time, area, and role information
+ */
+
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { GlassCard } from "../glass";
+import { Shift } from "../../context/ScheduleContext";
+import { colors } from "../../lib/colors";
+import { typography } from "../../lib/fonts";
+import { borderRadius } from "../../lib/theme";
+
+interface ShiftCardProps {
+  shift: Shift;
+  onPress?: () => void;
+}
+
+export function ShiftCard({ shift, onPress }: ShiftCardProps) {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case "completed":
+        return colors.success;
+      case "cancelled":
+        return colors.error;
+      default:
+        return colors.primary;
+    }
+  };
+
+  return (
+    <GlassCard onPress={onPress} style={styles.card}>
+      <View style={styles.header}>
+        <Text style={styles.date}>{formatDate(shift.date)}</Text>
+        <View
+          style={[
+            styles.hoursBadge,
+            { backgroundColor: getStatusColor(shift.status) + "20" },
+          ]}
+        >
+          <Text
+            style={[
+              styles.hoursText,
+              { color: getStatusColor(shift.status) },
+            ]}
+          >
+            {shift.hours}h
+          </Text>
+        </View>
+      </View>
+
+      <Text style={styles.time}>
+        {shift.startTime} - {shift.endTime}
+      </Text>
+
+      {(shift.area || shift.role) && (
+        <View style={styles.details}>
+          {shift.area && <Text style={styles.detail}>{shift.area}</Text>}
+          {shift.area && shift.role && <Text style={styles.separator}>•</Text>}
+          {shift.role && <Text style={styles.detail}>{shift.role}</Text>}
+        </View>
+      )}
+
+      {shift.status && shift.status !== "scheduled" && (
+        <View
+          style={[
+            styles.statusBadge,
+            { backgroundColor: getStatusColor(shift.status) + "15" },
+          ]}
+        >
+          <Text
+            style={[
+              styles.statusText,
+              { color: getStatusColor(shift.status) },
+            ]}
+          >
+            {shift.status.charAt(0).toUpperCase() + shift.status.slice(1)}
+          </Text>
+        </View>
+      )}
+    </GlassCard>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    marginBottom: 12,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  date: {
+    ...typography.h4,
+    color: colors.onSurface,
+  },
+  hoursBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: borderRadius.full,
+  },
+  hoursText: {
+    ...typography.labelMedium,
+    fontWeight: "600",
+  },
+  time: {
+    ...typography.bodyLarge,
+    color: colors.onSurface,
+    marginBottom: 4,
+  },
+  details: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  detail: {
+    ...typography.bodySmall,
+    color: colors.onSurfaceVariant,
+  },
+  separator: {
+    ...typography.bodySmall,
+    color: colors.onSurfaceVariant,
+    marginHorizontal: 8,
+  },
+  statusBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: borderRadius.sm,
+    marginTop: 8,
+  },
+  statusText: {
+    ...typography.labelSmall,
+    fontWeight: "600",
+  },
+});
+
+export default ShiftCard;

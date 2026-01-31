@@ -1,0 +1,18 @@
+{
+  "submit": "Enviar",
+  "cancel": "Cancelar",
+  "save": "Guardar",
+  "close": "Cerrar",
+  "clear": "Limpiar",
+  "done": "Listo",
+  "loading": "Cargando...",
+  "error": "Error",
+  "success": "Éxito",
+  "required": "Requerido",
+  "optional": "Opcional",
+  "select": "Seleccionar...",
+  "search": "Buscar...",
+  "noResults": "No se encontraron resultados",
+  "pullToRefresh": "Desliza para actualizar",
+  "tryAgain": "Intentar de nuevo"
+}
