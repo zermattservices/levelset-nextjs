@@ -7,6 +7,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   TextInput,
@@ -16,6 +17,8 @@ import {
   Platform,
 } from "react-native";
 import { SymbolView } from "expo-symbols";
+import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 import { useTranslation } from "react-i18next";
 
 import { colors } from "../../lib/colors";
@@ -26,6 +29,7 @@ import { useTranslatedContent } from "../../hooks/useTranslatedContent";
 import {
   fetchInfractionData,
   submitInfraction,
+  uploadInfractionDocument,
   type Employee,
   type Infraction,
   ApiError,
@@ -68,6 +72,9 @@ export function DisciplineInfractionForm() {
   const [notes, setNotes] = useState("");
   const [teamSignature, setTeamSignature] = useState<string>("");
   const [leaderSignature, setLeaderSignature] = useState<string>("");
+  const [attachedFiles, setAttachedFiles] = useState<
+    Array<{ uri: string; name: string; type: string; size?: number }>
+  >([]);
 
   // Token for API calls - will come from auth context in Sprint 5
   const token = "demo-token";
@@ -183,6 +190,81 @@ export function DisciplineInfractionForm() {
     setDirty(true);
   }, [setDirty]);
 
+  const pickFromGallery = useCallback(async () => {
+    const remaining = 5 - attachedFiles.length;
+    if (remaining <= 0) return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets) {
+      const newFiles = result.assets.map((asset) => ({
+        uri: asset.uri,
+        name: asset.fileName || `photo_${Date.now()}.jpg`,
+        type: asset.mimeType || "image/jpeg",
+        size: asset.fileSize,
+      }));
+      setAttachedFiles((prev) => [...prev, ...newFiles].slice(0, 5));
+      markDirty();
+    }
+  }, [attachedFiles.length, markDirty]);
+
+  const takePhoto = useCallback(async () => {
+    if (attachedFiles.length >= 5) return;
+
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") return;
+
+    const result = await ImagePicker.launchCameraAsync({
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      setAttachedFiles((prev) => [
+        ...prev,
+        {
+          uri: asset.uri,
+          name: asset.fileName || `photo_${Date.now()}.jpg`,
+          type: asset.mimeType || "image/jpeg",
+          size: asset.fileSize,
+        },
+      ].slice(0, 5));
+      markDirty();
+    }
+  }, [attachedFiles.length, markDirty]);
+
+  const pickDocument = useCallback(async () => {
+    if (attachedFiles.length >= 5) return;
+
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "application/pdf",
+      multiple: false,
+    });
+
+    if (!result.canceled && result.assets?.[0]) {
+      const asset = result.assets[0];
+      setAttachedFiles((prev) => [
+        ...prev,
+        {
+          uri: asset.uri,
+          name: asset.name || `document_${Date.now()}.pdf`,
+          type: asset.mimeType || "application/pdf",
+          size: asset.size,
+        },
+      ].slice(0, 5));
+      markDirty();
+    }
+  }, [attachedFiles.length, markDirty]);
+
+  const removeFile = useCallback((index: number) => {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
   const handleSubmit = useCallback(async () => {
     if (!isComplete || !selectedLeaderId || !selectedEmployeeId || !selectedInfractionId) {
       return;
@@ -192,7 +274,7 @@ export function DisciplineInfractionForm() {
     setSubmitError(null);
 
     try {
-      await submitInfraction(token, {
+      const result = await submitInfraction(token, {
         leaderId: selectedLeaderId,
         employeeId: selectedEmployeeId,
         infractionId: selectedInfractionId,
@@ -202,6 +284,18 @@ export function DisciplineInfractionForm() {
         teamMemberSignature: teamSignature || null,
         leaderSignature: leaderSignature,
       });
+
+      // Upload attached files if any
+      if (result?.infractionId && attachedFiles.length > 0) {
+        for (const file of attachedFiles) {
+          try {
+            await uploadInfractionDocument(token, result.infractionId, file);
+          } catch (err) {
+            console.warn("[DisciplineInfractionForm] File upload failed:", err);
+            // Don't fail the whole submission
+          }
+        }
+      }
 
       completeSubmission({
         formType: "infractions",
@@ -235,6 +329,7 @@ export function DisciplineInfractionForm() {
     notes,
     teamSignature,
     leaderSignature,
+    attachedFiles,
     token,
     completeSubmission,
     setDirty,
@@ -393,6 +488,84 @@ export function DisciplineInfractionForm() {
           textAlignVertical="top"
         />
         <Text style={styles.fieldHelper}>{t("forms.infraction.notesHelper")}</Text>
+      </View>
+
+      {/* File Attachments */}
+      <View style={styles.fieldContainer}>
+        <Text style={styles.fieldLabel}>
+          {t("forms.infraction.attachments", "Attachments")} ({attachedFiles.length}/5)
+        </Text>
+
+        {/* Thumbnail Strip */}
+        {attachedFiles.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.thumbnailStrip}
+            contentContainerStyle={styles.thumbnailStripContent}
+          >
+            {attachedFiles.map((file, idx) => (
+              <View key={`file-${idx}`} style={styles.thumbnail}>
+                {file.type.startsWith("image/") ? (
+                  <Image
+                    source={{ uri: file.uri }}
+                    style={styles.thumbnailImage}
+                  />
+                ) : (
+                  <View style={styles.thumbnailPdf}>
+                    <Text style={styles.thumbnailPdfLabel}>PDF</Text>
+                    <Text style={styles.thumbnailPdfName} numberOfLines={1}>
+                      {file.name}
+                    </Text>
+                  </View>
+                )}
+                <TouchableOpacity
+                  style={styles.thumbnailRemove}
+                  onPress={() => removeFile(idx)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text style={styles.thumbnailRemoveText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+
+        {/* Picker Buttons */}
+        {attachedFiles.length < 5 && (
+          <View style={styles.pickerButtons}>
+            <TouchableOpacity
+              style={styles.pickerButton}
+              onPress={takePhoto}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.pickerButtonIcon}>📷</Text>
+              <Text style={styles.pickerButtonText}>
+                {t("forms.infraction.camera", "Camera")}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.pickerButton}
+              onPress={pickFromGallery}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.pickerButtonIcon}>🖼️</Text>
+              <Text style={styles.pickerButtonText}>
+                {t("forms.infraction.gallery", "Gallery")}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.pickerButton}
+              onPress={pickDocument}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.pickerButtonIcon}>📄</Text>
+              <Text style={styles.pickerButtonText}>
+                {t("forms.infraction.pdf", "PDF")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <SignatureCanvas
@@ -634,6 +807,87 @@ const styles = StyleSheet.create({
     ...typography.labelLarge,
     color: colors.onPrimary,
     fontWeight: "600",
+  },
+  thumbnailStrip: {
+    marginBottom: 8,
+  },
+  thumbnailStripContent: {
+    gap: 8,
+    paddingVertical: 4,
+  },
+  thumbnail: {
+    width: 72,
+    height: 72,
+    borderRadius: borderRadius.sm,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: colors.outline,
+    backgroundColor: colors.surface,
+    position: "relative",
+  },
+  thumbnailImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  thumbnailPdf: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 4,
+  },
+  thumbnailPdfLabel: {
+    ...typography.labelLarge,
+    color: colors.error,
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  thumbnailPdfName: {
+    ...typography.bodySmall,
+    fontSize: 8,
+    color: colors.onSurfaceVariant,
+    textAlign: "center",
+  },
+  thumbnailRemove: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  thumbnailRemoveText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  pickerButtons: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  pickerButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: borderRadius.md,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  pickerButtonIcon: {
+    fontSize: 16,
+  },
+  pickerButtonText: {
+    ...typography.labelLarge,
+    color: colors.primary,
+    fontSize: 12,
   },
 });
 

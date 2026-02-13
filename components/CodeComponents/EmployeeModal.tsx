@@ -19,6 +19,7 @@ import { parseISO, format } from "date-fns";
 import type { Employee, Infraction, DisciplinaryAction } from "@/lib/supabase.types";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { InfractionEditModal } from "./InfractionEditModal";
 import { AddInfractionModal } from "./AddInfractionModal";
 import { AddActionModal } from "./AddActionModal";
@@ -137,6 +138,26 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
           >
             {infraction.ack_bool ? 'Notified' : 'Not notified'}
           </Typography>
+
+          {(infraction.document_count ?? 0) > 0 && (
+            <>
+              <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
+              <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <AttachFileIcon sx={{ fontSize: "1em", color: "#535862", transform: "rotate(45deg)" }} />
+                <Typography
+                  sx={{
+                    fontFamily: "Satoshi",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    color: "#535862",
+                    lineHeight: "20px",
+                  }}
+                >
+                  {infraction.document_count}
+                </Typography>
+              </Box>
+            </>
+          )}
         </Box>
       </Box>
 
@@ -383,7 +404,31 @@ export function EmployeeModal({
           .order('infraction_date', { ascending: false });
 
         if (!infractionsError && infractionsData) {
-          setInfractions(infractionsData as Infraction[]);
+          // Fetch document counts for these infractions
+          const infractionIds = infractionsData.map((i: any) => i.id);
+          if (infractionIds.length > 0) {
+            const { data: docCounts } = await supabase
+              .from('infraction_documents')
+              .select('infraction_id')
+              .in('infraction_id', infractionIds);
+
+            // Count documents per infraction
+            const countMap: Record<string, number> = {};
+            if (docCounts) {
+              for (const doc of docCounts) {
+                countMap[doc.infraction_id] = (countMap[doc.infraction_id] || 0) + 1;
+              }
+            }
+
+            // Attach document_count to each infraction
+            const infractionsWithCounts = infractionsData.map((inf: any) => ({
+              ...inf,
+              document_count: countMap[inf.id] || 0,
+            }));
+            setInfractions(infractionsWithCounts as Infraction[]);
+          } else {
+            setInfractions(infractionsData as Infraction[]);
+          }
         } else {
           console.error('Error fetching infractions:', infractionsError);
           setInfractions([]);

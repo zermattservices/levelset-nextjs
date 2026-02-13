@@ -37,6 +37,7 @@
     "antd": "^5.27.5",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
+    "formidable": "^3.5.4",
     "i18next": "^25.6.2",
     "next": "^14.2.5",
     "qrcode.react": "^4.2.0",
@@ -47,6 +48,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@types/formidable": "^3.4.6",
     "@types/node": "^22.10.7",
     "@types/pdfkit": "^0.17.4",
     "@types/qrcode": "^1.5.6",
