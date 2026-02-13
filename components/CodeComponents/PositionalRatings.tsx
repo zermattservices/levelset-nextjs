@@ -1477,8 +1477,9 @@ export function PositionalRatings({
     ];
   };
 
-  // Custom toolbar
-  function CustomToolbar() {
+  // Custom toolbar - memoized to prevent DataGrid from unmounting/remounting
+  // the toolbar on every render (which causes search input to lose focus)
+  const CustomToolbar = React.useCallback(() => {
     return (
       <GridToolbarContainer sx={{ p: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}>
         {/* Left side - FOH/BOH and Date filters */}
@@ -1850,7 +1851,8 @@ export function PositionalRatings({
         </Box>
       </GridToolbarContainer>
     );
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showFOH, showBOH, dateRange, startDate, endDate, employeeId, raterUserId]);
 
   // Custom numeric operators for rating columns
   const ratingOperators: GridFilterOperator[] = getGridNumericOperators()

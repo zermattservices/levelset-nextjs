@@ -65,6 +65,9 @@ export const DEFAULT_PERMISSIONS: Record<number, Set<PermissionKey>> = {
     P.MOBILE_CHANGE_PASSWORD,
     // HR Reporting - view
     P.HR_VIEW_REPORTING,
+    // Billing - view and edit
+    P.BILLING_VIEW,
+    P.BILLING_EDIT,
   ]),
 
   // Level 2 - Supervisor Access (Team Lead)
@@ -85,6 +88,8 @@ export const DEFAULT_PERMISSIONS: Record<number, Set<PermissionKey>> = {
     P.PERMS_MANAGE,
     // Mobile - access only
     P.MOBILE_ACCESS,
+    // Billing - view only
+    P.BILLING_VIEW,
   ]),
 
   // Level 3+ - Standard Access (Team Member)

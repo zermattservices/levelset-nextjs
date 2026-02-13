@@ -14,6 +14,7 @@ export const PERMISSION_MODULES = {
   PERMISSIONS: 'permissions',
   MOBILE_APP: 'mobile_app',
   HR_REPORTING: 'hr_reporting',
+  BILLING: 'billing',
 } as const;
 
 // All permission keys as const for type safety
@@ -76,6 +77,10 @@ export const P = {
 
   // HR Reporting
   HR_VIEW_REPORTING: 'hr_reporting.view_hr_reporting',
+
+  // Billing
+  BILLING_VIEW: 'billing.view_billing',
+  BILLING_EDIT: 'billing.edit_billing',
 } as const;
 
 // Type for any valid permission key
@@ -136,6 +141,11 @@ export const MODULE_METADATA: Record<string, ModuleMetadata> = {
     name: 'HR Reporting',
     description: 'Access to HR reporting dashboards and reports',
     order: 9,
+  },
+  [PERMISSION_MODULES.BILLING]: {
+    name: 'Billing',
+    description: 'Billing and subscription management',
+    order: 10,
   },
 };
 
@@ -412,6 +422,20 @@ export const SUB_ITEM_METADATA: Record<PermissionKey, SubItemMetadata> = {
     description: 'Access to view HR reporting dashboards, discipline reports, and employee data',
     order: 1,
     module: PERMISSION_MODULES.HR_REPORTING,
+  },
+
+  // Billing
+  [P.BILLING_VIEW]: {
+    name: 'View Billing',
+    description: 'Access to view billing information, invoices, and subscription details',
+    order: 1,
+    module: PERMISSION_MODULES.BILLING,
+  },
+  [P.BILLING_EDIT]: {
+    name: 'Edit Billing',
+    description: 'Ability to manage billing settings, payment methods, and subscription plans',
+    order: 2,
+    module: PERMISSION_MODULES.BILLING,
   },
 };
 
