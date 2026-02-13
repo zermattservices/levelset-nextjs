@@ -40,6 +40,7 @@ const VALID_SECTIONS = [
   'mobile-config',
   'location-details',
   'org-details',
+  'billing',
 ];
 
 export function OrgSettingsPage() {
@@ -192,6 +193,7 @@ export function OrgSettingsPage() {
   const standaloneItems: StandaloneItem[] = [
     { id: 'location-details', label: 'Location Details', status: 'active' },
     { id: 'org-details', label: 'Organization Details', status: 'active' },
+    { id: 'billing', label: 'Billing', status: 'coming-soon' },
   ];
 
   const renderContent = () => {
@@ -220,6 +222,8 @@ export function OrgSettingsPage() {
         return <LocationDetails locationId={selectedLocationId} disabled={!canEdit} />;
       case 'org-details':
         return <OrganizationDetails orgId={selectedLocationOrgId} disabled={!canEdit} />;
+      case 'billing':
+        return <ComingSoonPlaceholder title="Billing" description="Billing management, invoices, and subscription details coming soon." />;
       default:
         return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
     }
