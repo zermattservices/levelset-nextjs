@@ -33,6 +33,20 @@ export interface Employee {
   updated_at?: string;
 }
 
+export interface InfractionDocument {
+  id: string;
+  infraction_id: string;
+  org_id: string;
+  location_id: string;
+  file_path: string;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  uploaded_by?: string;
+  created_at?: string;
+  url?: string; // Populated at runtime with signed URL
+}
+
 export interface Infraction {
   id: string;
   employee_id: string;
@@ -51,6 +65,8 @@ export interface Infraction {
   leader_signature?: string | null;
   team_member_signature?: string | null;
   created_at?: string;
+  documents?: InfractionDocument[]; // Attached files (populated when fetched)
+  document_count?: number; // Count of attached documents (populated in list views)
 }
 
 export interface DisciplinaryAction {

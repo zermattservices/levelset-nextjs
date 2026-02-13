@@ -3,12 +3,18 @@ import Autocomplete from '@mui/material/Autocomplete';
 import {
   Alert,
   Box,
+  Button,
   Checkbox,
   CircularProgress,
   FormControlLabel,
+  IconButton,
   TextField,
   Typography,
 } from '@mui/material';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import CloseIcon from '@mui/icons-material/Close';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -97,6 +103,8 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
   const [notes, setNotes] = React.useState('');
   const [teamSignature, setTeamSignature] = React.useState('');
   const [leaderSignature, setLeaderSignature] = React.useState('');
+  const [attachedFiles, setAttachedFiles] = React.useState<File[]>([]);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [dirty, setDirty] = React.useState(false);
 
@@ -304,6 +312,25 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
     }
 
     const result = await response.json();
+
+    // Upload attached files if any
+    if (result?.infractionId && attachedFiles.length > 0) {
+      for (const file of attachedFiles) {
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('infraction_id', result.infractionId);
+          await fetch(`/api/mobile/${encodeURIComponent(token)}/infraction-documents`, {
+            method: 'POST',
+            body: formData,
+          });
+        } catch (err) {
+          console.warn('[DisciplineInfractionForm] File upload failed:', err);
+          // Don't fail the whole submission
+        }
+      }
+    }
+
     resetDirty();
     controls.completeSubmission({
       form: 'infractions',
@@ -314,7 +341,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           ? result.points
           : selectedInfractionOption?.points ?? 0,
     });
-  }, [acknowledged, controls, infractionDate, leaderSignature, notes, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedInfraction, selectedInfractionOption?.action, selectedInfractionOption?.points, selectedLeader, teamSignature, token]);
+  }, [acknowledged, attachedFiles, controls, infractionDate, leaderSignature, notes, resetDirty, selectedEmployee, selectedEmployeeOption?.name, selectedInfraction, selectedInfractionOption?.action, selectedInfractionOption?.points, selectedLeader, teamSignature, token]);
 
   React.useEffect(() => {
     controls.setSubmitHandler(() => submit());
@@ -598,6 +625,151 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             },
           }}
         />
+
+        {/* File Attachments */}
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', mb: '8px' }}>
+            <AttachFileIcon sx={{ fontSize: 16, color: '#6b7280', transform: 'rotate(45deg)' }} />
+            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#374151' }}>
+              {t('infraction.attachments', 'Attachments')}
+            </Typography>
+            <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#9ca3af' }}>
+              ({attachedFiles.length}/5)
+            </Typography>
+          </Box>
+
+          {/* Thumbnail Strip */}
+          {attachedFiles.length > 0 && (
+            <Box
+              sx={{
+                display: 'flex',
+                gap: '8px',
+                overflowX: 'auto',
+                pb: '8px',
+                mb: '8px',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
+              {attachedFiles.map((file, idx) => (
+                <Box
+                  key={`file-${idx}`}
+                  sx={{
+                    position: 'relative',
+                    flexShrink: 0,
+                    width: 72,
+                    height: 72,
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    border: '1px solid #e5e7eb',
+                    backgroundColor: '#f9fafb',
+                  }}
+                >
+                  {file.type.startsWith('image/') ? (
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={file.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100%',
+                        p: '4px',
+                      }}
+                    >
+                      <PictureAsPdfIcon sx={{ fontSize: 24, color: '#ef4444' }} />
+                      <Typography
+                        sx={{
+                          fontFamily,
+                          fontSize: 8,
+                          color: '#6b7280',
+                          textAlign: 'center',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          maxWidth: '100%',
+                        }}
+                      >
+                        {file.name}
+                      </Typography>
+                    </Box>
+                  )}
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setAttachedFiles((prev) => prev.filter((_, i) => i !== idx));
+                    }}
+                    sx={{
+                      position: 'absolute',
+                      top: 2,
+                      right: 2,
+                      backgroundColor: 'rgba(0,0,0,0.5)',
+                      color: '#fff',
+                      width: 20,
+                      height: 20,
+                      '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' },
+                    }}
+                  >
+                    <CloseIcon sx={{ fontSize: 12 }} />
+                  </IconButton>
+                </Box>
+              ))}
+            </Box>
+          )}
+
+          {attachedFiles.length < 5 && (
+            <Button
+              variant="outlined"
+              startIcon={<AddAPhotoIcon />}
+              onClick={() => fileInputRef.current?.click()}
+              fullWidth
+              sx={{
+                fontFamily,
+                fontSize: 13,
+                textTransform: 'none',
+                color: levelsetGreen,
+                borderColor: levelsetGreen,
+                borderRadius: '8px',
+                py: '10px',
+                '&:hover': {
+                  borderColor: '#254d36',
+                  backgroundColor: 'rgba(49,102,74,0.04)',
+                },
+              }}
+            >
+              {t('infraction.attachFile', 'Attach Photo or Document')}
+            </Button>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/heic,image/webp,application/pdf"
+            capture="environment"
+            multiple
+            onChange={(e) => {
+              if (!e.target.files) return;
+              const remaining = 5 - attachedFiles.length;
+              const newFiles: File[] = [];
+              for (let i = 0; i < Math.min(e.target.files.length, remaining); i++) {
+                const file = e.target.files[i];
+                if (file.size <= 10 * 1024 * 1024) {
+                  newFiles.push(file);
+                }
+              }
+              if (newFiles.length > 0) {
+                setAttachedFiles((prev) => [...prev, ...newFiles]);
+                markDirty();
+              }
+              if (fileInputRef.current) fileInputRef.current.value = '';
+            }}
+            style={{ display: 'none' }}
+          />
+        </Box>
 
         <SignatureCanvas
           label={requireTmSignature ? `${t('infraction.teamSignature')} *` : t('infraction.teamSignature')}

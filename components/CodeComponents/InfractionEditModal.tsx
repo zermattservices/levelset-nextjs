@@ -22,8 +22,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format, parseISO } from "date-fns";
 import { createSupabaseClient } from "@/util/supabase/component";
-import type { Infraction, Employee } from "@/lib/supabase.types";
+import type { Infraction, Employee, InfractionDocument } from "@/lib/supabase.types";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
+import { InfractionFileUpload } from "./InfractionFileUpload";
+import { DocumentPreviewModal, type PreviewDocument } from "./DocumentPreviewModal";
 
 export interface InfractionEditModalProps {
   open: boolean;
@@ -144,6 +146,11 @@ export function InfractionEditModal({
   const [saving, setSaving] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
+  const [existingDocuments, setExistingDocuments] = React.useState<InfractionDocument[]>([]);
+  const [newFiles, setNewFiles] = React.useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = React.useState(false);
+  const [previewOpen, setPreviewOpen] = React.useState(false);
+  const [previewIndex, setPreviewIndex] = React.useState(0);
   const supabase = createSupabaseClient();
 
   // Load initial data
@@ -280,10 +287,27 @@ export function InfractionEditModal({
       }
     };
 
+    // Fetch existing documents
+    const fetchDocuments = async () => {
+      try {
+        const res = await fetch(`/api/infractions/${infraction.id}/documents`);
+        if (res.ok) {
+          const data = await res.json();
+          setExistingDocuments(data.documents || []);
+        }
+      } catch (err) {
+        console.error('[InfractionEditModal] Error fetching documents:', err);
+      }
+    };
+
     fetchLocationName();
     fetchEmployees();
     fetchLeaders();
     fetchInfractionsRubric();
+    fetchDocuments();
+
+    // Reset new files when modal opens
+    setNewFiles([]);
   }, [open, infraction, locationId, supabase]);
 
   // Handle infraction type change - update points automatically
@@ -318,6 +342,44 @@ export function InfractionEditModal({
 
       if (error) throw error;
 
+      // Upload new files if any
+      if (newFiles.length > 0) {
+        setUploadingFiles(true);
+        try {
+          for (const file of newFiles) {
+            const timestamp = Date.now();
+            const sanitized = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 100);
+            const storagePath = `${infraction.org_id}/${infraction.id}/${timestamp}_${sanitized}`;
+
+            const { error: uploadError } = await supabase.storage
+              .from('infraction_documents')
+              .upload(storagePath, file, {
+                contentType: file.type,
+                upsert: false,
+              });
+
+            if (uploadError) {
+              console.error('[InfractionEditModal] File upload failed:', uploadError);
+              continue;
+            }
+
+            await supabase.from('infraction_documents').insert({
+              infraction_id: infraction.id,
+              org_id: infraction.org_id,
+              location_id: infraction.location_id || locationId,
+              file_path: storagePath,
+              file_name: file.name,
+              file_type: file.type,
+              file_size: file.size,
+            });
+          }
+        } catch (err) {
+          console.error('[InfractionEditModal] Error uploading files:', err);
+        } finally {
+          setUploadingFiles(false);
+        }
+      }
+
       // Call onSave callback with updated infraction
       if (onSave) {
         onSave({ ...infraction, ...updatedInfraction } as Infraction);
@@ -332,11 +394,59 @@ export function InfractionEditModal({
     }
   };
 
+  // Handle removing an existing document
+  const handleRemoveExisting = React.useCallback(async (docId: string) => {
+    const doc = existingDocuments.find((d) => d.id === docId);
+    if (!doc || !infraction) return;
+
+    try {
+      const res = await fetch(
+        `/api/infractions/${infraction.id}/documents?document_id=${docId}`,
+        { method: 'DELETE' }
+      );
+      if (res.ok) {
+        setExistingDocuments((prev) => prev.filter((d) => d.id !== docId));
+      }
+    } catch (err) {
+      console.error('[InfractionEditModal] Error removing document:', err);
+    }
+  }, [existingDocuments, infraction]);
+
+  // Handle preview click
+  const handlePreview = React.useCallback(
+    (doc: InfractionDocument | File, index: number) => {
+      setPreviewIndex(index);
+      setPreviewOpen(true);
+    },
+    []
+  );
+
+  // Build preview documents list for the modal
+  const previewDocuments: PreviewDocument[] = React.useMemo(() => {
+    const existing: PreviewDocument[] = existingDocuments.map((doc) => ({
+      url: doc.url || '',
+      file_name: doc.file_name,
+      file_type: doc.file_type,
+    }));
+    const staged: PreviewDocument[] = newFiles.map((file) => ({
+      url: URL.createObjectURL(file),
+      file_name: file.name,
+      file_type: file.type,
+    }));
+    return [...existing, ...staged];
+  }, [existingDocuments, newFiles]);
+
   const handleDelete = async () => {
     if (!infraction) return;
 
     try {
       setDeleting(true);
+
+      // Clean up storage files before deleting infraction
+      if (existingDocuments.length > 0) {
+        const filePaths = existingDocuments.map((d) => d.file_path);
+        await supabase.storage.from('infraction_documents').remove(filePaths);
+      }
 
       const { error } = await supabase
         .from('infractions')
@@ -691,6 +801,16 @@ export function InfractionEditModal({
             }}
           />
 
+          {/* Attachments */}
+          <InfractionFileUpload
+            existingDocuments={existingDocuments}
+            stagedFiles={newFiles}
+            onStagedFilesChange={setNewFiles}
+            onRemoveExisting={handleRemoveExisting}
+            onPreview={handlePreview}
+            uploading={uploadingFiles}
+          />
+
           {/* Action Buttons */}
           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, mt: 1 }}>
             <Button
@@ -746,7 +866,7 @@ export function InfractionEditModal({
                   },
                 }}
               >
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? (uploadingFiles ? "Uploading files..." : "Saving...") : "Save Changes"}
               </Button>
             </Box>
           </Box>
@@ -759,6 +879,13 @@ export function InfractionEditModal({
         message="Are you sure you want to delete this infraction? This action cannot be undone."
         onConfirm={handleDelete}
         onCancel={() => setDeleteConfirmOpen(false)}
+      />
+
+      <DocumentPreviewModal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        documents={previewDocuments}
+        initialIndex={previewIndex}
       />
     </LocalizationProvider>
   );

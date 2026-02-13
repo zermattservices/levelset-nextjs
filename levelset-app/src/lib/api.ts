@@ -125,6 +125,7 @@ export interface SubmissionResult {
   action?: string;
   points?: number;
   employeeName?: string;
+  infractionId?: string; // Returned after infraction submission for document uploads
 }
 
 // =============================================================================
@@ -242,6 +243,36 @@ export async function submitRatings(
 }
 
 // =============================================================================
+// Infraction Document Upload API
+// =============================================================================
+
+/**
+ * Upload a document attachment for an infraction
+ */
+export async function uploadInfractionDocument(
+  token: string,
+  infractionId: string,
+  file: { uri: string; name: string; type: string }
+): Promise<{ id: string; file_name: string }> {
+  const formData = new FormData();
+  formData.append("infraction_id", infractionId);
+  formData.append("file", {
+    uri: file.uri,
+    name: file.name,
+    type: file.type,
+  } as any);
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/mobile/${encodeURIComponent(token)}/infraction-documents`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+  return handleResponse<{ id: string; file_name: string }>(response);
+}
+
+// =============================================================================
 // Export all
 // =============================================================================
 
@@ -253,6 +284,8 @@ export default {
   // Infraction API
   fetchInfractionData,
   submitInfraction,
+  // Document uploads
+  uploadInfractionDocument,
   // Ratings API
   fetchPositionalData,
   fetchPositionLabels,

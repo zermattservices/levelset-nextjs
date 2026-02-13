@@ -23,6 +23,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format } from "date-fns";
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { Infraction, Employee } from "@/lib/supabase.types";
+import { InfractionFileUpload } from "./InfractionFileUpload";
 
 export interface AddInfractionModalProps {
   open: boolean;
@@ -142,6 +143,8 @@ export function AddInfractionModal({
   const [leaders, setLeaders] = React.useState<Employee[]>([]);
   const [infractionsRubricOptions, setInfractionsRubricOptions] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
+  const [stagedFiles, setStagedFiles] = React.useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = React.useState(false);
   const supabase = createSupabaseClient();
 
   // Load initial data
@@ -155,6 +158,7 @@ export function AddInfractionModal({
       setInfractionType("");
       setPoints(0);
       setNotes("");
+      setStagedFiles([]);
       return;
     }
 
@@ -305,6 +309,45 @@ export function AddInfractionModal({
         .single();
 
       if (error) throw error;
+
+      // Upload staged files if any
+      if (data && stagedFiles.length > 0) {
+        setUploadingFiles(true);
+        try {
+          for (const file of stagedFiles) {
+            const timestamp = Date.now();
+            const sanitized = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 100);
+            const storagePath = `${locationOrgId || data.org_id}/${data.id}/${timestamp}_${sanitized}`;
+
+            const { error: uploadError } = await supabase.storage
+              .from('infraction_documents')
+              .upload(storagePath, file, {
+                contentType: file.type,
+                upsert: false,
+              });
+
+            if (uploadError) {
+              console.error('[AddInfractionModal] File upload failed:', uploadError);
+              continue; // Don't fail the whole save
+            }
+
+            // Insert document record
+            await supabase.from('infraction_documents').insert({
+              infraction_id: data.id,
+              org_id: locationOrgId || data.org_id,
+              location_id: locationId,
+              file_path: storagePath,
+              file_name: file.name,
+              file_type: file.type,
+              file_size: file.size,
+            });
+          }
+        } catch (err) {
+          console.error('[AddInfractionModal] Error uploading files:', err);
+        } finally {
+          setUploadingFiles(false);
+        }
+      }
 
       // Call onSave callback with new infraction
       if (onSave && data) {
@@ -622,6 +665,16 @@ export function AddInfractionModal({
             }}
           />
 
+          {/* Attachments */}
+          <InfractionFileUpload
+            existingDocuments={[]}
+            stagedFiles={stagedFiles}
+            onStagedFilesChange={setStagedFiles}
+            onRemoveExisting={() => {}}
+            onPreview={() => {}}
+            uploading={uploadingFiles}
+          />
+
           {/* Action Buttons */}
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 1 }}>
             <Button
@@ -655,7 +708,7 @@ export function AddInfractionModal({
                 },
               }}
             >
-              {saving ? "Saving..." : "Record Infraction"}
+              {saving ? (uploadingFiles ? "Uploading files..." : "Saving...") : "Record Infraction"}
             </Button>
           </Box>
         </Box>
