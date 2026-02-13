@@ -168,11 +168,76 @@ pg_cron (every 30 min)
 
 ## 2. Memory & Learning System
 
-### Org Memory Store
+### 4-Layer Memory Architecture
 
-Unlike OpenClaw's local markdown files, Levi stores memory in Supabase, scoped per org:
+Levi's memory operates in four distinct layers with strict access controls:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  LAYER 1: GLOBAL CONTEXT (all orgs)                                 │
+│                                                                     │
+│  • Chick-fil-A brand standards and policies                        │
+│  • Industry compliance requirements (food safety, labor law)       │
+│  • Common operational procedures                                    │
+│  • Shared terminology across all locations                         │
+│                                                                     │
+│  Source: Managed by Levelset admins, immutable by orgs             │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LAYER 2: ORG MEMORY                                                │
+│                                                                     │
+│  • Local terminology ("we call it the walk-in")                    │
+│  • Process variations from standard                                │
+│  • Org-specific policies and procedures                            │
+│  • Learned patterns from org interactions                          │
+│                                                                     │
+│  Source: Configured by org admins + learned by Levi                │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LAYER 3: USER MEMORY                                               │
+│                                                                     │
+│  • Communication preferences (detail level, formality)             │
+│  • Common queries and shortcuts                                    │
+│  • Language preference (English/Spanish/code-switching)            │
+│  • Interaction patterns                                            │
+│                                                                     │
+│  Source: Learned from user interactions                            │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LAYER 4: SENSITIVE CONTEXT (compartmentalized)                     │
+│                                                                     │
+│  • Employee disclosures (personal issues, complaints)              │
+│  • Locked to specific employee + authorized user(s)                │
+│  • Time-boxed retention or explicit unlock required                │
+│  • NEVER surfaces in reports, analytics, or to unauthorized users  │
+│                                                                     │
+│  Source: Conversations flagged as sensitive                        │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Memory Tables
 
 ```sql
+-- Global context (managed by Levelset, applies to all orgs)
+CREATE TABLE levi_global_context (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  context_type TEXT NOT NULL,  -- 'brand_standard', 'compliance', 'procedure', 'terminology'
+  key TEXT NOT NULL,
+  value JSONB NOT NULL,
+  applies_to TEXT[] DEFAULT '{}',  -- Empty = all orgs, or specific org types
+  version INTEGER DEFAULT 1,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(context_type, key)
+);
+
 -- Long-term organizational memory
 CREATE TABLE levi_org_memory (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -193,13 +258,35 @@ CREATE TABLE levi_user_memory (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
   org_id UUID NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
-  memory_type TEXT NOT NULL,  -- 'preference', 'pattern', 'feedback'
+  memory_type TEXT NOT NULL,  -- 'preference', 'pattern', 'language', 'shortcut'
   key TEXT NOT NULL,
   value JSONB NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(user_id, memory_type, key)
 );
+
+-- Sensitive context with strict access control
+CREATE TABLE levi_sensitive_context (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id UUID NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  employee_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  visible_to_user_ids UUID[] NOT NULL,  -- Only these users can see this context
+  context_type TEXT NOT NULL,  -- 'disclosure', 'complaint', 'personal', 'medical'
+  summary TEXT NOT NULL,  -- What Levi remembers (not full transcript)
+  source_conversation_id UUID REFERENCES ai_conversations(id),
+  expires_at TIMESTAMPTZ,  -- Optional auto-expiry
+  unlocked_by UUID REFERENCES app_users(id),  -- If manually unlocked to additional users
+  unlocked_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+
+  -- Ensure employee's own conversations are always visible to them
+  CONSTRAINT employee_always_visible CHECK (employee_id = ANY(visible_to_user_ids) OR visible_to_user_ids = '{}')
+);
+
+-- Index for fast lookup of sensitive context
+CREATE INDEX idx_sensitive_context_employee ON levi_sensitive_context(employee_id);
+CREATE INDEX idx_sensitive_context_visible ON levi_sensitive_context USING GIN(visible_to_user_ids);
 
 -- Feedback for adaptive learning
 CREATE TABLE levi_feedback (
@@ -259,7 +346,318 @@ User Interaction
 
 ---
 
-## 3. Autonomy & Escalation System
+## 3. Action Items & Task Management
+
+Action items are the **primary object** Levi revolves around. Every meeting produces them, every heartbeat checks them, and Levi can own them just like a human team member.
+
+### Action Items as First-Class Citizens
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ACTION ITEM LIFECYCLE                            │
+│                                                                     │
+│  Sources:                     Ownership:                           │
+│  • Meeting extraction         • Human-assigned (to team member)    │
+│  • Manual creation            • Levi-assigned (to team member)     │
+│  • AI suggestion              • Levi-owned (Levi does the work)    │
+│  • Heartbeat detection        • Shared (human + Levi collaborate)  │
+│                                                                     │
+│  Tracking:                    Resolution:                          │
+│  • Due dates + reminders      • Completed by assignee              │
+│  • Progress updates           • Completed by Levi                  │
+│  • Blockers flagged           • Escalated to manager               │
+│  • Linked objects             • Expired/cancelled                  │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Levi-Owned Action Items
+
+Levi can own tasks just like any team member:
+
+```typescript
+// Examples of Levi-owned action items:
+const leviOwnedTasks = [
+  {
+    title: "Follow up with Sarah about training completion",
+    assigned_to: 'LEVI',  // Special assignee
+    action_type: 'follow_up',
+    target_employee_id: 'sarah-uuid',
+    due_date: '2024-01-20',
+    auto_action: {
+      trigger: 'due_date',
+      action: 'check_training_status',
+      if_incomplete: 'notify_manager',
+      if_complete: 'mark_done_and_celebrate'
+    }
+  },
+  {
+    title: "Monitor John's ratings for 2 weeks",
+    assigned_to: 'LEVI',
+    action_type: 'monitor',
+    target_employee_id: 'john-uuid',
+    duration_days: 14,
+    auto_action: {
+      trigger: 'pattern_detected',
+      if_improved: 'notify_manager_positive',
+      if_declined: 'escalate_with_recommendation'
+    }
+  },
+  {
+    title: "Send weekly summary to management",
+    assigned_to: 'LEVI',
+    action_type: 'recurring',
+    schedule: 'weekly_friday_4pm',
+    auto_action: {
+      trigger: 'schedule',
+      action: 'generate_and_send_summary'
+    }
+  }
+];
+```
+
+### Task Management Dashboard Integration
+
+Managers (Level 0, 1, 2) can view and manage Levi's tasks alongside team tasks:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  TASK MANAGEMENT DASHBOARD                                          │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  [All Tasks] [My Tasks] [Team Tasks] [Levi's Tasks]                │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  LEVI'S CURRENT FOCUS                                        │   │
+│  │                                                              │   │
+│  │  🔄 In Progress (3)                                         │   │
+│  │  ├─ Monitoring Sarah's ratings (day 5 of 14)               │   │
+│  │  ├─ Following up on Monday's meeting action items          │   │
+│  │  └─ Preparing weekly summary for Friday                    │   │
+│  │                                                              │   │
+│  │  📋 Queued (2)                                              │   │
+│  │  ├─ Check John's training completion (due tomorrow)        │   │
+│  │  └─ Send reminder to Maria about evaluation                │   │
+│  │                                                              │   │
+│  │  ✅ Completed Today (4)                                     │   │
+│  │  ├─ Sent reminder to Alex about ServSafe                   │   │
+│  │  ├─ Updated action item status from team sync              │   │
+│  │  └─ ...                                                     │   │
+│  │                                                              │   │
+│  │  [Override] [Reassign] [Cancel] [Add Task for Levi]        │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Manager Override Capabilities
+
+Managers can intervene in Levi's tasks at any time:
+
+| Action | Effect |
+|--------|--------|
+| **Override** | Take over a task from Levi, or change how Levi handles it |
+| **Reassign** | Move task from Levi to human, or vice versa |
+| **Cancel** | Stop Levi from working on a task |
+| **Pause** | Temporarily halt Levi's work on sensitive items |
+| **Expedite** | Bump priority, Levi handles immediately |
+
+### Action Item Database Schema
+
+```sql
+CREATE TABLE action_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id UUID NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  location_id UUID REFERENCES locations(id),
+
+  -- Core fields
+  title TEXT NOT NULL,
+  description TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'blocked', 'completed', 'cancelled', 'expired')),
+  priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+  due_date DATE,
+
+  -- Assignment (can be human or Levi)
+  assigned_to UUID REFERENCES app_users(id),  -- NULL if assigned to Levi
+  assigned_to_levi BOOLEAN DEFAULT false,
+  ownership_type TEXT DEFAULT 'human' CHECK (ownership_type IN ('human', 'levi', 'shared')),
+
+  -- Source tracking
+  created_by UUID REFERENCES app_users(id),
+  source_type TEXT CHECK (source_type IN ('manual', 'meeting', 'ai_suggestion', 'heartbeat', 'pattern')),
+  source_id UUID,
+  source_meeting_id UUID REFERENCES meetings(id),
+
+  -- Linked objects (what this action item relates to)
+  linked_employee_id UUID REFERENCES employees(id),
+  linked_infraction_id UUID REFERENCES infractions(id),
+  linked_rating_id UUID REFERENCES ratings(id),
+  linked_evaluation_id UUID REFERENCES evaluations(id),
+  linked_action_id UUID REFERENCES disciplinary_actions(id),
+
+  -- Levi tracking
+  levi_auto_action JSONB,  -- What Levi should do automatically
+  levi_reminder_count INTEGER DEFAULT 0,
+  levi_last_reminder_at TIMESTAMPTZ,
+  levi_escalated BOOLEAN DEFAULT false,
+  levi_escalated_at TIMESTAMPTZ,
+  levi_progress_notes JSONB DEFAULT '[]',  -- Levi's notes on progress
+
+  -- Detection metadata
+  auto_detected BOOLEAN DEFAULT false,
+  ai_confidence NUMERIC(4,3),
+
+  -- Completion
+  completed_at TIMESTAMPTZ,
+  completed_by UUID REFERENCES app_users(id),  -- NULL if Levi completed
+  completed_by_levi BOOLEAN DEFAULT false,
+  completion_notes TEXT,
+
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Index for Levi's task queue
+CREATE INDEX idx_action_items_levi ON action_items(org_id, assigned_to_levi, status, due_date)
+  WHERE assigned_to_levi = true;
+
+-- Index for manager task views
+CREATE INDEX idx_action_items_location ON action_items(location_id, status, due_date);
+```
+
+### Meeting Follow-Through Loop
+
+Every meeting creates action items, and Levi ensures they get done:
+
+```
+Meeting ends
+     │
+     ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  POST-MEETING PROCESSING                                            │
+│                                                                     │
+│  1. Levi sends summary to participants (in-app notification)       │
+│  2. Action items created with source_type = 'meeting'              │
+│  3. Each item tagged with source_meeting_id for traceability       │
+└─────────────────────────────────────────────────────────────────────┘
+     │
+     ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  VISIBILITY                                                         │
+│                                                                     │
+│  • Dashboard shows "Created by Levi from [Meeting Name]"           │
+│  • Manager can see all action items from a meeting grouped         │
+│  • Click meeting → see transcript + extracted items                │
+└─────────────────────────────────────────────────────────────────────┘
+     │
+     ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  HEARTBEAT PICKS UP (every 30 min)                                  │
+│                                                                     │
+│  Checks action items where source_type = 'meeting':                │
+│  • 24h before due → Send reminder to assignee                      │
+│  • On due date → Check status, nudge if needed                     │
+│  • Overdue → Escalate to meeting originator                        │
+└─────────────────────────────────────────────────────────────────────┘
+     │
+     ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LOOP CLOSURE                                                       │
+│                                                                     │
+│  When completed:                                                    │
+│  • Levi notifies meeting originator                                │
+│  • "Sarah completed her task from Monday's sync ✓"                 │
+│  • Links back to original meeting for context                      │
+│                                                                     │
+│  If all items from meeting complete:                               │
+│  • "All action items from Monday's team sync are done!"           │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 4. Autonomy & Escalation System
+
+### Progressive Trust Unlocks
+
+Trust is earned through successful interactions. Managers can see and control Levi's autonomy level:
+
+```typescript
+interface TrustLevel {
+  level: 1 | 2 | 3 | 4 | 5;
+  name: 'Observer' | 'Assistant' | 'Contributor' | 'Partner' | 'Autonomous';
+
+  capabilities: {
+    // Level 1: Observer
+    read_data: boolean;              // ✓ from start
+    answer_questions: boolean;       // ✓ from start
+
+    // Level 2: Assistant
+    send_reminders_to_self: boolean; // Remind the user who asked
+    draft_messages: boolean;         // Draft but don't send
+
+    // Level 3: Contributor
+    send_reminders_to_assignee: boolean;  // Remind action item owners
+    update_action_item_status: boolean;   // Mark items complete
+    create_action_items: boolean;         // From meetings/patterns
+
+    // Level 4: Partner
+    send_to_others: boolean;         // Notify managers, escalate
+    own_action_items: boolean;       // Levi can be assigned tasks
+
+    // Level 5: Autonomous
+    auto_escalate: boolean;          // Escalate without asking
+    auto_schedule: boolean;          // Schedule meetings/evaluations
+    proactive_outreach: boolean;     // Reach out unprompted
+  };
+}
+
+// Unlock criteria (org can customize thresholds)
+interface TrustUnlockCriteria {
+  level: number;
+  requirements: {
+    successful_interactions: number;  // e.g., 50 for level 2
+    positive_feedback_rate: number;   // e.g., 80% for level 3
+    days_active: number;              // e.g., 14 days for level 2
+    manager_approval: boolean;        // Required for levels 4+
+    no_major_errors_days: number;     // e.g., 7 days without issues
+  };
+}
+
+const DEFAULT_UNLOCK_CRITERIA: TrustUnlockCriteria[] = [
+  { level: 2, requirements: { successful_interactions: 25, positive_feedback_rate: 0.7, days_active: 7, manager_approval: false, no_major_errors_days: 3 }},
+  { level: 3, requirements: { successful_interactions: 100, positive_feedback_rate: 0.8, days_active: 14, manager_approval: false, no_major_errors_days: 7 }},
+  { level: 4, requirements: { successful_interactions: 250, positive_feedback_rate: 0.85, days_active: 30, manager_approval: true, no_major_errors_days: 14 }},
+  { level: 5, requirements: { successful_interactions: 500, positive_feedback_rate: 0.9, days_active: 60, manager_approval: true, no_major_errors_days: 30 }},
+];
+```
+
+### Trust Level UI (Settings Page)
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  LEVI TRUST LEVEL                                          Settings │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Current Level: ██████████░░░░░░░░░░ Level 3 - Contributor         │
+│                                                                     │
+│  ✓ Read data and answer questions                                  │
+│  ✓ Send reminders to you                                           │
+│  ✓ Send reminders to action item owners                            │
+│  ✓ Update action item status                                       │
+│  ✓ Create action items from meetings                               │
+│  ○ Notify managers and escalate (Level 4)                          │
+│  ○ Own action items (Level 4)                                      │
+│  ○ Autonomous operations (Level 5)                                 │
+│                                                                     │
+│  Progress to Level 4:                                              │
+│  ├─ Interactions: 187/250                                          │
+│  ├─ Feedback score: 88% (need 85%)  ✓                             │
+│  ├─ Days active: 22/30                                             │
+│  └─ Manager approval: Required  [Request Unlock]                   │
+│                                                                     │
+│  [View Levi's Activity Log]  [Adjust Trust Settings]               │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ### Role-Based Autonomy Configuration
 
@@ -330,34 +728,168 @@ const escalationRules: EscalationRule[] = [
 ];
 ```
 
+### Proactive Pattern Detection
+
+Beyond checking action items, Levi actively looks for patterns that humans might miss:
+
+| Pattern | Detection Logic | Levi's Action |
+|---------|-----------------|---------------|
+| **Employee Decline** | 3+ consecutive rating drops | "Maria's ratings have dropped 3 weeks in a row (4.2 → 3.8 → 3.4). Want me to flag for 1:1?" |
+| **Meeting Inflation** | Same action items appear in multiple meetings | "This is the 3rd meeting where 'inventory count' was discussed. Should I create a recurring task?" |
+| **Quiet Quitting Signals** | Reduced engagement + no infractions + no ratings logged | "John hasn't had any ratings logged in 2 weeks. Everything okay?" |
+| **Positive Momentum** | Streak of early completions + rating improvements | "Sarah has completed 5 action items early this month and ratings are up 15%. Recognition opportunity?" |
+| **Training Gap** | Multiple similar infractions across employees | "3 employees have had 'improper food storage' infractions this month. Training refresher needed?" |
+| **Scheduling Conflict** | Evaluations due during peak periods | "5 evaluations are due next week, which overlaps with the holiday rush. Want to reschedule?" |
+| **Burnout Risk** | High action item load + declining completion rate | "Alex has 12 open action items and completion rate dropped from 90% to 60%. Overloaded?" |
+
+### Pattern Detection Engine
+
+```typescript
+interface PatternRule {
+  id: string;
+  name: string;
+  description: string;
+
+  // Detection
+  trigger: 'heartbeat' | 'real_time' | 'daily_batch';
+  query: string;  // SQL or function reference
+  threshold: Record<string, number>;
+
+  // Action
+  severity: 'info' | 'warning' | 'alert';
+  suggested_action: string;
+  auto_create_action_item: boolean;
+  notify_roles: string[];  // Which roles see this pattern
+}
+
+const PATTERN_RULES: PatternRule[] = [
+  {
+    id: 'employee_decline',
+    name: 'Employee Performance Decline',
+    description: 'Detects consecutive rating drops',
+    trigger: 'heartbeat',
+    query: `
+      SELECT employee_id, array_agg(rating ORDER BY created_at DESC) as recent_ratings
+      FROM ratings
+      WHERE created_at > now() - interval '21 days'
+      GROUP BY employee_id
+      HAVING count(*) >= 3
+    `,
+    threshold: { consecutive_drops: 3, min_drop_percent: 10 },
+    severity: 'warning',
+    suggested_action: 'Schedule 1:1 check-in',
+    auto_create_action_item: false,  // Requires trust level 4+
+    notify_roles: ['manager', 'director']
+  },
+  {
+    id: 'recurring_meeting_topic',
+    name: 'Recurring Meeting Topic',
+    description: 'Same action items appearing across meetings',
+    trigger: 'real_time',  // Detected during meeting processing
+    query: 'semantic_similarity_search',
+    threshold: { similar_items: 3, time_window_days: 14 },
+    severity: 'info',
+    suggested_action: 'Convert to recurring task or address root cause',
+    auto_create_action_item: false,
+    notify_roles: ['manager']
+  },
+  {
+    id: 'positive_momentum',
+    name: 'Positive Employee Momentum',
+    description: 'Streak of good performance',
+    trigger: 'daily_batch',
+    query: `
+      SELECT employee_id
+      FROM action_items
+      WHERE completed_at < due_date
+        AND created_at > now() - interval '30 days'
+      GROUP BY employee_id
+      HAVING count(*) >= 5
+    `,
+    threshold: { early_completions: 5, rating_improvement_percent: 10 },
+    severity: 'info',
+    suggested_action: 'Send recognition or nominate for reward',
+    auto_create_action_item: true,  // Auto-create "send recognition" task for Levi
+    notify_roles: ['manager']
+  }
+];
+```
+
 ### Proactive Recommendation Engine
 
-Beyond following rules, Levi can recommend escalations:
+Beyond following rules, Levi surfaces insights with context and reasoning:
 
 ```typescript
 interface ProactiveRecommendation {
-  type: 'escalation' | 'intervention' | 'recognition' | 'scheduling';
+  id: string;
+  type: 'escalation' | 'intervention' | 'recognition' | 'scheduling' | 'training' | 'pattern';
   priority: 'suggestion' | 'recommendation' | 'urgent';
+
   context: {
     employee_id?: string;
-    pattern_detected?: string;
-    supporting_data?: any;
+    pattern_id?: string;
+    supporting_data: Record<string, any>;
+    confidence: number;  // 0-1
   };
+
   recommended_action: string;
-  reasoning: string;  // Explain why Levi suggests this
+  reasoning: string;  // Human-readable explanation
+
+  // What happens if accepted
+  on_accept: {
+    create_action_item?: Partial<ActionItem>;
+    send_notification?: NotificationConfig;
+    schedule_meeting?: MeetingConfig;
+  };
+
+  // Tracking
+  surfaced_at: Date;
+  surfaced_to: string[];  // User IDs
+  response: 'accepted' | 'dismissed' | 'snoozed' | 'pending';
+  response_at?: Date;
 }
+```
 
-// Example recommendations Levi might surface:
-// "I noticed Maria's ratings dropped 20% this month and she has 2 overdue action items.
-//  Recommend scheduling a 1-on-1 to check in. Should I help set that up?"
+**Example recommendations Levi surfaces:**
 
-// "John completed his last 5 action items ahead of schedule and his ratings are up 15%.
-//  This might be a good time for a positive recognition. Want me to draft something?"
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  💡 LEVI'S RECOMMENDATION                                          │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Maria's ratings dropped 20% this month                            │
+│                                                                     │
+│  Pattern detected: 3 consecutive weeks of declining ratings        │
+│  (4.2 → 3.8 → 3.4) combined with 2 overdue action items.          │
+│                                                                     │
+│  Suggested: Schedule a 1:1 check-in to understand what's going on. │
+│                                                                     │
+│  [Schedule 1:1]  [Assign to Me]  [Dismiss]  [Snooze 1 Week]       │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  🌟 POSITIVE PATTERN                                               │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  John is on a roll!                                                │
+│                                                                     │
+│  • Completed last 5 action items ahead of schedule                 │
+│  • Ratings up 15% this month                                       │
+│  • No infractions in 60 days                                       │
+│                                                                     │
+│  This might be a good time for recognition.                        │
+│                                                                     │
+│  [Draft Recognition]  [Nominate for Award]  [Dismiss]             │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 4. Meeting Participation System
+## 5. Meeting Participation System
 
 ### Meeting Modes
 
@@ -619,21 +1151,344 @@ interface MeetingSession {
 
 ---
 
-## 5. Technology Stack
+## 6. Levi's Presence & Cross-Channel Continuity
+
+### Levi's View Dashboard Widget
+
+Levi should feel "present" even when not actively chatting. A persistent dashboard widget shows Levi's current state:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  🤖 LEVI'S FOCUS TODAY                                    [Expand] │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  📋 Action Items                                                   │
+│  ├─ 3 need attention today                                        │
+│  ├─ 2 overdue (following up)                                      │
+│  └─ 5 completed yesterday                                         │
+│                                                                     │
+│  👀 Watching                                                       │
+│  ├─ Sarah's ratings (monitoring for 2 weeks)                      │
+│  └─ Monday's meeting follow-ups                                   │
+│                                                                     │
+│  💡 1 recommendation ready                                         │
+│                                                                     │
+│  💬 "Good morning! 3 things need your attention today."           │
+│                                                                     │
+│  [Open Chat]  [View Tasks]  [See Recommendations]                 │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Widget States
+
+The widget adapts to Levi's current state:
+
+| State | Appearance | Message |
+|-------|------------|---------|
+| **All Clear** | Green accent | "Everything's on track! No urgent items." |
+| **Attention Needed** | Yellow accent | "3 items need your attention today." |
+| **Urgent** | Red accent | "2 overdue items require immediate action." |
+| **Learning** | Blue accent | "I noticed something - got a recommendation for you." |
+| **In Meeting** | Purple accent | "Currently in team sync - extracting action items." |
+
+### Expanded Widget View
+
+When expanded, shows more detail:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  🤖 LEVI'S DASHBOARD                                       [Close] │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  TODAY'S FOCUS                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  ⚠️  Follow up with Alex about ServSafe (overdue)           │   │
+│  │  📅  Maria's evaluation due tomorrow                        │   │
+│  │  📋  3 action items from Monday's sync need review         │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│  LEVI'S ACTIVE TASKS                                               │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  🔄 Monitoring Sarah's ratings (day 5 of 14)                │   │
+│  │  🔄 Tracking John's training completion                     │   │
+│  │  ✅ Sent reminder to Alex (2 hours ago)                     │   │
+│  │  ✅ Updated meeting summary (yesterday)                     │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│  RECOMMENDATIONS                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  💡 Maria's ratings down 3 weeks in a row - schedule 1:1?  │   │
+│  │     [Schedule]  [Dismiss]  [Snooze]                        │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│  [Open Full Chat]  [View All Tasks]  [Levi Settings]              │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Cross-Channel Conversation Continuity
+
+Levi maintains context across all channels - chat, meetings, email, SMS. A conversation started in one channel continues seamlessly in another:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  CHANNEL CONTINUITY EXAMPLE                                        │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  [MEETING - Monday 2pm]                                            │
+│  Manager: "Sarah needs to complete her ServSafe by Friday"         │
+│  Levi: "Got it. Action item created."                             │
+│                                                                     │
+│  [CHAT - Wednesday 10am]                                           │
+│  Manager: "Hey Levi, what did we say about Sarah?"                │
+│  Levi: "In Monday's team sync, you assigned Sarah to complete      │
+│         ServSafe by Friday. She hasn't started yet - want me      │
+│         to send a reminder?"                                       │
+│  Manager: "Yes please"                                             │
+│  Levi: "Sent! I'll follow up if she doesn't complete by Thursday."│
+│                                                                     │
+│  [SMS - Thursday 4pm]                                              │
+│  Levi → Manager: "Heads up: Sarah's ServSafe is due tomorrow      │
+│         and still not started. Want me to escalate?"              │
+│                                                                     │
+│  [CHAT - Friday 9am]                                               │
+│  Levi: "Good news! Sarah completed her ServSafe this morning.     │
+│         The action item from Monday's sync is done. ✓"            │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Context Handoff Architecture
+
+```typescript
+interface ConversationContext {
+  // Core identity
+  user_id: string;
+  org_id: string;
+
+  // Active threads (what Levi is tracking for this user)
+  active_threads: Thread[];
+
+  // Recent context (last 24h of relevant interactions)
+  recent_context: {
+    meetings: MeetingSummary[];
+    action_items_mentioned: ActionItem[];
+    employees_discussed: Employee[];
+    topics: string[];
+  };
+
+  // Channel history (for "what did we say about X?")
+  channel_history: {
+    channel: 'chat' | 'meeting' | 'email' | 'sms';
+    timestamp: Date;
+    summary: string;
+    full_context_id: string;  // Link to full conversation
+  }[];
+}
+
+// When user says "what did we say about Sarah?"
+// Levi searches across ALL channels for Sarah mentions
+const findContext = async (query: string, user: User): Promise<ContextMatch[]> => {
+  return await Promise.all([
+    searchMeetingTranscripts(query, user),
+    searchChatHistory(query, user),
+    searchEmailThreads(query, user),
+    searchActionItems(query, user)
+  ]).then(results => rankByRelevance(results.flat()));
+};
+```
+
+### Channel-Specific Behavior
+
+| Channel | Levi's Tone | Length | Proactive? |
+|---------|-------------|--------|------------|
+| **Chat** | Conversational, helpful | Full responses | Yes - surfaces recommendations |
+| **Meeting** | Brief, non-disruptive | Short interjections | Only when needed |
+| **Email** | Professional, structured | Detailed with context | Daily/weekly digests only |
+| **SMS** | Urgent, actionable | Very short | Only urgent items |
+| **Push** | Alert-style | Title + short body | Reminders, completions |
+
+---
+
+## 7. Bilingual Intelligence
+
+### Beyond Translation
+
+Levi doesn't just translate - it understands cultural context and communication norms for English and Spanish speakers:
+
+```typescript
+interface LanguageProfile {
+  primary_language: 'en' | 'es';
+  detected_from: 'explicit' | 'first_interaction' | 'user_settings';
+
+  // Communication style
+  formality: 'formal' | 'informal' | 'adaptive';
+  honorifics: boolean;  // Use "usted" vs "tú" in Spanish
+
+  // Code-switching
+  code_switching_enabled: boolean;  // Handle Spanglish naturally
+  common_switches: string[];  // Words user mixes between languages
+}
+```
+
+### Language Detection Flow
+
+```
+User sends first message
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  LANGUAGE DETECTION                                                 │
+│                                                                     │
+│  1. Check user settings (if set)                                   │
+│  2. Detect language of message                                     │
+│  3. Check for code-switching patterns                              │
+│  4. Store preference for future interactions                       │
+└─────────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  RESPONSE GENERATION                                                │
+│                                                                     │
+│  • Respond in detected language                                    │
+│  • Match formality level                                           │
+│  • Use culturally appropriate phrasing                             │
+│  • Handle code-switching naturally if detected                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Code-Switching Support
+
+Many Spanish-English speakers naturally mix languages. Levi handles this gracefully:
+
+```
+User: "Oye Levi, what's the deal con Sarah's training? She was supposed to finish last week pero todavía nothing."
+
+Levi: "Sí, I see Sarah's ServSafe training is overdue by 5 days. She started the online portion pero hasn't completed the final assessment. Want me to send her a reminder, or do you want to talk to her directly?"
+```
+
+### Culturally Appropriate Communication
+
+| Aspect | English | Spanish |
+|--------|---------|---------|
+| **Greeting** | "Hi! How can I help?" | "¡Hola! ¿En qué te puedo ayudar?" |
+| **Urgency** | "This needs attention ASAP" | "Esto requiere atención urgente" |
+| **Positive** | "Great job!" | "¡Excelente trabajo!" |
+| **Formal request** | "Could you please..." | "¿Podría usted..." (formal) / "¿Podrías..." (informal) |
+| **Reminder tone** | Direct but friendly | Slightly softer, relationship-aware |
+
+### Escalation to Human
+
+For sensitive conversations, Levi knows when to suggest human intervention:
+
+```typescript
+const shouldEscalateToHuman = (context: ConversationContext): boolean => {
+  // Sensitive topics that may need human touch
+  if (context.topic_sensitivity > 0.8) return true;
+
+  // Complex emotional situations
+  if (context.detected_emotion === 'distressed') return true;
+
+  // Legal/HR matters
+  if (context.topic_type === 'complaint' || context.topic_type === 'harassment') return true;
+
+  // User explicitly asks
+  if (context.requested_human) return true;
+
+  return false;
+};
+
+// Levi's response when escalating:
+// EN: "This sounds like something that might be better to discuss with your manager directly. Would you like me to help schedule a private conversation?"
+// ES: "Esto suena como algo que sería mejor discutir directamente con tu gerente. ¿Te gustaría que te ayude a programar una conversación privada?"
+```
+
+---
+
+## 8. Technology Stack
 
 ### LLM Strategy
 
-**Primary**: Claude 3.5 Sonnet
-- Complex reasoning, tool orchestration, real-time chat
-- 200K context for meeting transcripts
+**Tiered Routing via OpenRouter**
 
-**Future Tiering**: Kimi K2.5
-- Simple queries, batch analytics
-- 80% cost reduction for suitable tasks
+OpenRouter provides a unified API for multiple LLM providers with automatic fallback and cost optimization.
 
-**Model Abstraction Layer**: `lib/ai/llm-client.ts`
-- Swap models without changing tool code
-- Route queries based on complexity
+| Tier | Models | Use Case | Latency Priority |
+|------|--------|----------|------------------|
+| **Critical** | Claude 3.5 Sonnet (direct Anthropic) | Real-time meeting interventions, complex tool orchestration | Lowest latency required |
+| **Standard** | Claude 3.5 Sonnet (via OpenRouter) | User chat, tool calls, summaries | Normal |
+| **Fast** | Claude 3.5 Haiku, Gemini Flash | Meeting processor NLP, simple queries | Fast response |
+| **Batch** | Llama 3.1 70B, Mistral Large | Heartbeat checks, batch analytics, learning engine | Cost optimized |
+
+**Routing Logic:**
+
+```typescript
+// lib/ai/llm-router.ts
+type TaskType =
+  | 'meeting_intervention'    // Real-time, latency critical
+  | 'user_chat'               // Interactive, needs quality
+  | 'tool_orchestration'      // Complex reasoning
+  | 'meeting_processor'       // Continuous NLP, high volume
+  | 'heartbeat_check'         // Batch, cost sensitive
+  | 'summary_generation'      // Quality matters, not latency
+  | 'action_item_extraction'  // Structured output
+  | 'simple_query';           // FAQ-style questions
+
+const routeToModel = (task: TaskType) => {
+  switch (task) {
+    // Direct Anthropic - bypass OpenRouter for lowest latency
+    case 'meeting_intervention':
+      return { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' };
+
+    // OpenRouter - quality + fallback
+    case 'user_chat':
+    case 'tool_orchestration':
+    case 'summary_generation':
+      return {
+        provider: 'openrouter',
+        model: 'anthropic/claude-3.5-sonnet',
+        fallback: ['openai/gpt-4o', 'google/gemini-pro-1.5']
+      };
+
+    // OpenRouter - fast + cheap
+    case 'meeting_processor':
+    case 'action_item_extraction':
+    case 'simple_query':
+      return {
+        provider: 'openrouter',
+        model: 'anthropic/claude-3-haiku',
+        fallback: ['google/gemini-flash-1.5', 'meta-llama/llama-3.1-8b-instruct']
+      };
+
+    // OpenRouter - batch + cheapest
+    case 'heartbeat_check':
+      return {
+        provider: 'openrouter',
+        model: 'meta-llama/llama-3.1-70b-instruct',
+        fallback: ['mistralai/mistral-large']
+      };
+  }
+};
+```
+
+**Why OpenRouter:**
+- **Single API** - One integration for 100+ models
+- **Automatic fallback** - If Claude is down, routes to GPT-4 or Gemini
+- **Cost tracking** - Built-in usage monitoring across all models
+- **No vendor lock-in** - Switch models without code changes
+
+**Cost Impact (estimated per org, 500 queries/day):**
+
+| Scenario | Monthly LLM Cost |
+|----------|------------------|
+| All Claude Sonnet (direct) | $45-150 |
+| Tiered routing (OpenRouter) | $15-50 |
+| **Savings** | **60-70%** |
+
+**Environment Variables:**
+```
+ANTHROPIC_API_KEY=sk-ant-...     # Direct for critical path
+OPENROUTER_API_KEY=sk-or-...     # Routed for everything else
+```
 
 ### Hybrid RAG
 
@@ -653,7 +1508,7 @@ interface MeetingSession {
 
 ---
 
-## 6. Database Schema
+## 9. Database Schema
 
 ### Core Tables
 
@@ -851,7 +1706,7 @@ CREATE TABLE action_items (
 
 ---
 
-## 7. Feature-Level Tools
+## 10. Feature-Level Tools
 
 ```typescript
 // lib/ai/tools/index.ts
@@ -885,7 +1740,7 @@ export const LEVI_TOOLS = {
 
 ---
 
-## 8. Phased Implementation
+## 11. Phased Implementation
 
 ### Phase 1: Infrastructure & Monorepo (Weeks 1-2)
 - Initialize pnpm workspaces + Turborepo
@@ -985,14 +1840,18 @@ export const LEVI_TOOLS = {
 
 ---
 
-## 9. File Structure
+## 12. File Structure
 
 ```
 lib/ai/
 ├── ARCHITECTURE.md           # This document
 ├── gateway.ts                # Central control plane
 ├── session-manager.ts        # Session lifecycle
-├── llm-client.ts             # Model abstraction
+├── llm/
+│   ├── router.ts             # Task → model routing logic
+│   ├── anthropic.ts          # Direct Anthropic client (critical path)
+│   ├── openrouter.ts         # OpenRouter client (routed queries)
+│   └── types.ts              # Shared types
 ├── agent.ts                  # ReAct orchestration
 ├── context-builder.ts        # Permission-aware context
 ├── prompts.ts                # System prompts
@@ -1021,13 +1880,14 @@ lib/ai/
 
 ---
 
-## 10. Cost Estimates
+## 13. Cost Estimates
 
 ### Per Organization (500 queries/day)
 
+**Without OpenRouter Tiering:**
 | Service | Usage | Monthly Cost |
 |---------|-------|--------------|
-| Claude 3.5 Sonnet | ~15M tokens | $45-150 |
+| Claude 3.5 Sonnet (all queries) | ~15M tokens | $45-150 |
 | PageIndex | ~300 queries | $10-30 |
 | OpenAI Embeddings | ~2M tokens | $0.04 |
 | AssemblyAI | ~20 hours | $7.40 |
@@ -1035,16 +1895,35 @@ lib/ai/
 | Twilio SMS | ~100 messages | $8 |
 | **Total/org** | | **$85-210** |
 
-### With Kimi K2.5 Tiering
+**With OpenRouter Tiered Routing:**
+| Service | Usage | Monthly Cost |
+|---------|-------|--------------|
+| Claude Sonnet (direct, critical) | ~2M tokens | $6-20 |
+| Claude Sonnet (OpenRouter, standard) | ~5M tokens | $15-50 |
+| Haiku/Gemini Flash (fast tier) | ~5M tokens | $1-3 |
+| Llama 3.1 70B (batch tier) | ~3M tokens | $2-5 |
+| PageIndex | ~300 queries | $10-30 |
+| OpenAI Embeddings | ~2M tokens | $0.04 |
+| AssemblyAI | ~20 hours | $7.40 |
+| SendGrid | ~1000 emails | $15 |
+| Twilio SMS | ~100 messages | $8 |
+| **Total/org** | | **$65-140** |
 
-| Scenario | Cost Reduction |
-|----------|----------------|
-| 50% queries to Kimi | ~35% LLM savings |
-| Heartbeat only to Kimi | ~20% savings |
+### Cost Savings Summary
+
+| Scenario | LLM Cost | Savings |
+|----------|----------|---------|
+| All Claude Sonnet | $45-150 | - |
+| OpenRouter tiered | $24-78 | **45-50%** |
+
+OpenRouter also provides:
+- Built-in cost tracking dashboard
+- Per-model usage breakdown
+- Automatic fallback (no failed requests = no retries)
 
 ---
 
-## 11. Security & Compliance
+## 14. Security & Compliance
 
 ### Org Sandbox Isolation
 
@@ -1062,7 +1941,7 @@ lib/ai/
 
 ---
 
-## 12. Repository & Hosting Architecture
+## 15. Repository & Hosting Architecture
 
 ### Context
 
@@ -1284,10 +2163,15 @@ User sees "Transcript ready!" in real-time
 | `SUPABASE_ANON_KEY` | ✓ | ✗ | ✓ |
 | `SUPABASE_SERVICE_KEY` | ✓ | ✓ | ✗ |
 | `ANTHROPIC_API_KEY` | ✗ | ✓ | ✗ |
+| `OPENROUTER_API_KEY` | ✗ | ✓ | ✗ |
 | `ASSEMBLYAI_API_KEY` | ✗ | ✓ | ✗ |
 | `INNGEST_EVENT_KEY` | ✓ | ✓ | ✗ |
 | `AGENT_SERVICE_SECRET` | ✓ | ✓ | ✗ |
 | `HEARTBEAT_SECRET` | ✗ | ✓ | ✗ |
+
+**LLM Keys:**
+- `ANTHROPIC_API_KEY` - Direct Anthropic access for latency-critical paths (meeting interventions)
+- `OPENROUTER_API_KEY` - Routed access for standard/fast/batch tiers with automatic fallback
 
 ### Fly.io Configuration
 
@@ -1422,7 +2306,7 @@ See **Section 8: Phased Implementation** for detailed timeline. High-level:
 - [PageIndex RAG](https://pageindex.ai/blog/pageindex-intro) - Reasoning-based document retrieval
 - [Agentic RAG - Weaviate](https://weaviate.io/blog/what-is-agentic-rag) - Tool orchestration patterns
 - [Writing Tools for Agents - Anthropic](https://www.anthropic.com/engineering/writing-tools-for-agents)
-- [Kimi K2.5](https://artificialanalysis.ai/models/kimi-k2-5) - Cost optimization option
+- [OpenRouter API](https://openrouter.ai/docs) - Multi-model routing with automatic fallback
 - [Inngest Documentation](https://www.inngest.com/docs) - Background job orchestration
 - [Fly.io Documentation](https://fly.io/docs) - Agent service hosting
 - [AssemblyAI Real-time API](https://www.assemblyai.com/docs/speech-to-text/streaming) - Real-time transcription streaming
