@@ -44,6 +44,14 @@ const nextConfig = {
     '@mui/x-data-grid-premium',
     '@mui/x-date-pickers',
   ],
+  // Exclude levelset-app (Expo/React Native) from Next.js build
+  webpack: (config) => {
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: [...(config.watchOptions?.ignored || []), '**/levelset-app/**'],
+    };
+    return config;
+  },
   // Subdomain routing handled by middleware.ts
 };
 
