@@ -749,7 +749,6 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/heic,image/webp,application/pdf"
-            capture="environment"
             multiple
             onChange={(e) => {
               if (!e.target.files) return;

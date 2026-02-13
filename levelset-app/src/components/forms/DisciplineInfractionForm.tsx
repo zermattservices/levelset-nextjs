@@ -15,6 +15,8 @@ import {
   ActivityIndicator,
   Switch,
   Platform,
+  Alert,
+  ActionSheetIOS,
 } from "react-native";
 import { SymbolView } from "expo-symbols";
 import * as ImagePicker from "expo-image-picker";
@@ -217,7 +219,16 @@ export function DisciplineInfractionForm() {
     if (attachedFiles.length >= 5) return;
 
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") return;
+    if (status !== "granted") {
+      Alert.alert(
+        t("forms.infraction.permissionNeeded", "Permission Needed"),
+        t(
+          "forms.infraction.cameraPermissionMessage",
+          "Camera access is required to take photos. Please enable it in your device Settings."
+        )
+      );
+      return;
+    }
 
     const result = await ImagePicker.launchCameraAsync({
       quality: 0.8,
@@ -264,6 +275,43 @@ export function DisciplineInfractionForm() {
   const removeFile = useCallback((index: number) => {
     setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
+
+  const openAttachmentMenu = useCallback(() => {
+    if (attachedFiles.length >= 5) return;
+
+    const options = [
+      t("forms.infraction.camera", "Camera"),
+      t("forms.infraction.gallery", "Photo Library"),
+      t("forms.infraction.pdf", "PDF Document"),
+      t("common.cancel", "Cancel"),
+    ];
+
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex: 3,
+          title: t("forms.infraction.attachFile", "Attach Photo or Document"),
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 0) takePhoto();
+          else if (buttonIndex === 1) pickFromGallery();
+          else if (buttonIndex === 2) pickDocument();
+        }
+      );
+    } else {
+      Alert.alert(
+        t("forms.infraction.attachFile", "Attach Photo or Document"),
+        undefined,
+        [
+          { text: options[0], onPress: takePhoto },
+          { text: options[1], onPress: pickFromGallery },
+          { text: options[2], onPress: pickDocument },
+          { text: options[3], style: "cancel" },
+        ]
+      );
+    }
+  }, [attachedFiles.length, takePhoto, pickFromGallery, pickDocument, t]);
 
   const handleSubmit = useCallback(async () => {
     if (!isComplete || !selectedLeaderId || !selectedEmployeeId || !selectedInfractionId) {
@@ -531,40 +579,18 @@ export function DisciplineInfractionForm() {
           </ScrollView>
         )}
 
-        {/* Picker Buttons */}
+        {/* Attach Button */}
         {attachedFiles.length < 5 && (
-          <View style={styles.pickerButtons}>
-            <TouchableOpacity
-              style={styles.pickerButton}
-              onPress={takePhoto}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.pickerButtonIcon}>📷</Text>
-              <Text style={styles.pickerButtonText}>
-                {t("forms.infraction.camera", "Camera")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.pickerButton}
-              onPress={pickFromGallery}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.pickerButtonIcon}>🖼️</Text>
-              <Text style={styles.pickerButtonText}>
-                {t("forms.infraction.gallery", "Gallery")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.pickerButton}
-              onPress={pickDocument}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.pickerButtonIcon}>📄</Text>
-              <Text style={styles.pickerButtonText}>
-                {t("forms.infraction.pdf", "PDF")}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={styles.pickerButton}
+            onPress={openAttachmentMenu}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.pickerButtonIcon}>📎</Text>
+            <Text style={styles.pickerButtonText}>
+              {t("forms.infraction.attachFile", "Attach Photo or Document")}
+            </Text>
+          </TouchableOpacity>
         )}
       </View>
 
@@ -864,12 +890,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "700",
   },
-  pickerButtons: {
-    flexDirection: "row",
-    gap: 8,
-  },
   pickerButton: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
