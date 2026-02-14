@@ -83,7 +83,7 @@ export default function AuthCallback() {
           <CircularProgress
             size={32}
             sx={{
-              color: '#31664a',
+              color: '#31664a' /* TODO: Use design token */,
               marginBottom: 2,
             }}
           />

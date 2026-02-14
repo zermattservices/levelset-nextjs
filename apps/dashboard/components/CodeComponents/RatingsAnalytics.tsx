@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Box, Skeleton } from '@mui/material';
 import AnalyticsMetricCard from './AnalyticsMetricCard';
-import TrendCard from '../TrendCard';
+import TrendCard from '../ui/TrendCard/TrendCard';
 import type { GridRowsProp, GridFilterModel } from '@mui/x-data-grid-pro';
 
 interface RatingsAnalyticsProps {

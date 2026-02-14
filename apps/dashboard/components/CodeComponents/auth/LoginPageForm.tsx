@@ -127,7 +127,7 @@ export function LoginPageForm({
           <h1 className="logo-fallback" style={{
             fontSize: '32px',
             fontWeight: '700',
-            color: '#31664A',
+            color: '#31664A' /* TODO: Use design token */,
             margin: 0,
             textAlign: 'center',
             position: 'relative',
@@ -143,7 +143,7 @@ export function LoginPageForm({
               transform: 'translateX(-50%)',
               width: '16px',
               height: '2px',
-              backgroundColor: '#31664A',
+              backgroundColor: '#31664A' /* TODO: Use design token */,
               borderRadius: '1px'
             }}></div>
             <div style={{
@@ -153,7 +153,7 @@ export function LoginPageForm({
               transform: 'translateX(-50%)',
               width: '20px',
               height: '2px',
-              backgroundColor: '#31664A',
+              backgroundColor: '#31664A' /* TODO: Use design token */,
               borderRadius: '1px'
             }}></div>
           </h1>
@@ -231,7 +231,7 @@ export function LoginPageForm({
                 alignItems: 'center'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#31664A';
+                e.target.style.borderColor = '#31664A' /* TODO: Use design token */;
                 e.target.style.boxShadow = '0 0 0 3px rgba(49, 102, 74, 0.1)';
               }}
               onBlur={(e) => {
@@ -268,7 +268,7 @@ export function LoginPageForm({
                 alignItems: 'center'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#31664A';
+                e.target.style.borderColor = '#31664A' /* TODO: Use design token */;
                 e.target.style.boxShadow = '0 0 0 3px rgba(49, 102, 74, 0.1)';
               }}
               onBlur={(e) => {
@@ -288,7 +288,7 @@ export function LoginPageForm({
               padding: '12px 16px',
               fontSize: '16px',
               fontWeight: '600',
-              backgroundColor: '#31664A',
+              backgroundColor: '#31664A' /* TODO: Use design token */,
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -305,7 +305,7 @@ export function LoginPageForm({
             }}
             onMouseLeave={(e) => {
               if (!isLoading) {
-                e.currentTarget.style.backgroundColor = '#31664A';
+                e.currentTarget.style.backgroundColor = '#31664A' /* TODO: Use design token */;
               }
             }}
             data-plasmic-name="signin-button"

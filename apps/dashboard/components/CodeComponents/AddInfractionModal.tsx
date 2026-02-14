@@ -36,7 +36,7 @@ export interface AddInfractionModalProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a';
+const levelsetGreen = '#31664a'; // TODO: Use design token
 
 // Custom TextField matching RecordActionModal
 const CustomTextField = React.forwardRef((props: any, ref: any) => (

@@ -115,7 +115,7 @@ export function LoginPage() {
           <CircularProgress
             size={32}
             sx={{
-              color: '#31664a',
+              color: '#31664a' /* TODO: Use design token */,
               marginBottom: 2,
             }}
           />

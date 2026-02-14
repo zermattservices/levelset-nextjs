@@ -31,10 +31,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontSize: 14,
     borderRadius: 8,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
   '& .MuiInputLabel-root': {
@@ -183,7 +183,7 @@ export function OrganizationDetails({ orgId, disabled = false }: OrganizationDet
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -238,7 +238,7 @@ export function OrganizationDetails({ orgId, disabled = false }: OrganizationDet
             sx={{
               fontFamily,
               textTransform: 'none',
-              backgroundColor: '#31664a',
+              backgroundColor: '#31664a' /* TODO: Use design token */,
               '&:hover': {
                 backgroundColor: '#264d38',
               },

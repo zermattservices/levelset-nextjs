@@ -152,5 +152,5 @@
   margin-top: 16px;
   font-family: "Satoshi";
   font-size: 12px;
-  color: #31664a;
+  color: var(--ls-color-brand);
 }

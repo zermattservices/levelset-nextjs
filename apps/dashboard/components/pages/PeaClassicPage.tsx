@@ -5,7 +5,7 @@ import { Button } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import ArrowLeftIcon from '@mui/icons-material/ArrowBack';
 import sty from './PeaClassicPage.module.css';
-import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
+import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { RedirectIf } from '@/components/CodeComponents/RedirectIf';
 import { LevelsetButton } from '@/components/ui/LevelsetButton/LevelsetButton';
@@ -99,9 +99,9 @@ export function PeaClassicPage() {
                         fontSize: 'inherit',
                         fontWeight: 600,
                         textTransform: 'none',
-                        borderColor: '#31664a',
+                        borderColor: '#31664a' /* TODO: Use design token */,
                         borderWidth: '2px',
-                        color: '#31664a',
+                        color: '#31664a' /* TODO: Use design token */,
                         borderRadius: '6px',
                         padding: '6px 12px 6px 16px',
                         whiteSpace: 'nowrap',

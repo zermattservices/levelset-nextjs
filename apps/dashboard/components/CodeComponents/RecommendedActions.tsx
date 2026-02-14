@@ -37,7 +37,7 @@ export interface DisciplineNotificationsProps {
 export type RecommendedActionsProps = DisciplineNotificationsProps;
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a';
+const levelsetGreen = '#31664a'; // TODO: Use design token
 
 // Infraction Card Component - for Infractions This Week section
 function InfractionCard({ 

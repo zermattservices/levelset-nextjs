@@ -120,7 +120,7 @@
 .helpLink {
   font-family: "Satoshi";
   font-size: 13px;
-  color: #31664a;
+  color: var(--ls-color-brand);
   font-weight: 500;
   background: none;
   border: none;

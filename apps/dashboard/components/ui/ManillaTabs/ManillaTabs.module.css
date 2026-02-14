@@ -27,7 +27,7 @@
 
 .tabActive {
   background-color: #ffffff;
-  color: #31664a;
+  color: var(--ls-color-brand);
   border-color: #e5e7eb;
   z-index: 1;
 }

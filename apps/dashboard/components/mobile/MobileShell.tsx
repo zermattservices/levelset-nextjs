@@ -146,7 +146,7 @@ export function MobileShell({ location }: MobileShellProps) {
             disabled
             sx={{
               width: '100%',
-              backgroundColor: '#31664a',
+              backgroundColor: '#31664a' /* TODO: Use design token */,
               fontFamily: 'Satoshi, sans-serif',
               fontWeight: 600,
               textTransform: 'none',
@@ -178,7 +178,7 @@ export function MobileShell({ location }: MobileShellProps) {
             disabled
             sx={{
               width: '100%',
-              backgroundColor: '#31664a',
+              backgroundColor: '#31664a' /* TODO: Use design token */,
               fontFamily: 'Satoshi, sans-serif',
               fontWeight: 600,
               textTransform: 'none',

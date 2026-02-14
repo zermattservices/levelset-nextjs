@@ -186,7 +186,7 @@ export function RosterTable(props: RosterTableProps) {
               fontSize: 14,
               fontWeight: 500,
               textTransform: 'none',
-              backgroundColor: '#31664a',
+              backgroundColor: '#31664a' /* TODO: Use design token */,
               color: '#ffffff',
               borderRadius: '8px',
               '&:hover': {
@@ -367,7 +367,7 @@ const StyledContainer = styled(Box)(() => ({
 const StyledTabs = styled(Tabs)(() => ({
   marginBottom: 16,
   '& .MuiTabs-indicator': {
-    backgroundColor: '#31664a',
+    backgroundColor: '#31664a' /* TODO: Use design token */,
     height: 3,
   },
 }));
@@ -392,7 +392,7 @@ const StyledTab = styled(Tab)(() => ({
   textTransform: 'none',
   color: '#6b7280',
   '&.Mui-selected': {
-    color: '#31664a',
+    color: '#31664a' /* TODO: Use design token */,
     fontWeight: 600,
   },
 }));
@@ -401,7 +401,7 @@ const BrandCheckbox = styled(Checkbox)(() => ({
   color: "#9ca3af",
   padding: 0,
   "&.Mui-checked": {
-    color: "#31664a",
+    color: "#31664a" /* TODO: Use design token */,
   },
   "&:hover": {
     backgroundColor: "rgba(49, 102, 74, 0.08)",
@@ -497,15 +497,15 @@ const CertificationChip = styled(Box)(() => ({
   },
   "&.not-certified": {
     backgroundColor: "transparent",
-    color: "#31664a",
-    border: "1px solid #31664a",
+    color: "#31664a" /* TODO: Use design token */,
+    border: "1px solid #31664a", /* TODO: Use design token */
   },
   "&.pending": {
     backgroundColor: "#fef3c7",
     color: "#d97706",
   },
   "&.certified": {
-    backgroundColor: "#31664a",
+    backgroundColor: "#31664a" /* TODO: Use design token */,
     color: "#ffffff",
   },
   "&.pip": {

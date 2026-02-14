@@ -18,10 +18,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
 }));
@@ -283,7 +283,7 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -347,7 +347,7 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
                   sx={{
                     color: '#9ca3af',
                     '&.Mui-checked': {
-                      color: '#31664a',
+                      color: '#31664a' /* TODO: Use design token */,
                     },
                   }}
                 />
@@ -361,7 +361,7 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
                   sx={{
                     color: '#9ca3af',
                     '&.Mui-checked': {
-                      color: '#31664a',
+                      color: '#31664a' /* TODO: Use design token */,
                     },
                   }}
                 />
@@ -389,7 +389,7 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
               fontFamily,
               fontSize: 12,
               textTransform: 'none',
-              color: '#31664a',
+              color: '#31664a' /* TODO: Use design token */,
               alignSelf: 'flex-start',
               marginTop: 2,
               '&:hover': {
@@ -414,7 +414,7 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
                 sx={{
                   fontFamily,
                   textTransform: 'none',
-                  backgroundColor: '#31664a',
+                  backgroundColor: '#31664a' /* TODO: Use design token */,
                   '&:hover': {
                     backgroundColor: '#264d38',
                   },

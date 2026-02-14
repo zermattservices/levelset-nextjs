@@ -1,0 +1,202 @@
+/**
+ * Base CSS Module — Replaces Plasmic's projectcss reset classes.
+ *
+ * Provides the foundational CSS resets that hand-written components
+ * previously got from plasmic_levelset_v2.module.css.
+ *
+ * Usage (replaces `import projectcss from '@/components/plasmic/...'`):
+ *   import basecss from '@/styles/base.module.css';
+ *
+ * Classes provided:
+ *   basecss.all          — Box-model reset for all elements
+ *   basecss.root_reset   — Typography baseline + element resets
+ *   basecss.plasmic_default_styles — (empty, kept for compat)
+ *   basecss.plasmic_mixins         — (empty, kept for compat)
+ *   basecss.plasmic_tokens         — (empty, tokens now on :root via variables.css)
+ *   basecss.button       — Button element reset
+ *   basecss.__wab_text   — Text element reset
+ */
+
+/* ===================================================================
+ * .all — Foundational box-model reset
+ * Mirrors Plasmic's :where(.all) selector
+ * =================================================================== */
+:where(.all) {
+  display: block;
+  white-space: inherit;
+  grid-row: auto;
+  grid-column: auto;
+  position: relative;
+  background: none;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  row-gap: 0px;
+  column-gap: 0px;
+  box-shadow: none;
+  box-sizing: border-box;
+  text-decoration-line: none;
+  margin: 0;
+  border-width: 0px;
+}
+
+/* ===================================================================
+ * .root_reset — Typography baseline
+ * Sets Satoshi as the base font (was Source Sans Pro in Plasmic)
+ * =================================================================== */
+:where(.root_reset) {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-sm);
+  font-weight: 400;
+  font-style: normal;
+  color: var(--ls-color-text-primary);
+  text-align: left;
+  text-transform: none;
+  line-height: var(--ls-line-height-normal);
+  letter-spacing: normal;
+  white-space: pre-wrap;
+}
+
+:where(.root_reset) h1,
+:where(.root_reset) h2,
+:where(.root_reset) h3,
+:where(.root_reset) h4,
+:where(.root_reset) h5,
+:where(.root_reset) h6 {
+  font-family: var(--ls-font-heading);
+  font-weight: 600;
+}
+
+:where(.root_reset) h1 { font-size: var(--ls-font-size-4xl); }
+:where(.root_reset) h2 { font-size: var(--ls-font-size-3xl); }
+:where(.root_reset) h3 { font-size: var(--ls-font-size-2xl); }
+:where(.root_reset) h4 { font-size: var(--ls-font-size-xl); }
+:where(.root_reset) h5 { font-size: var(--ls-font-size-base); }
+:where(.root_reset) h6 { font-size: var(--ls-font-size-sm); }
+
+:where(.root_reset) a {
+  color: var(--ls-color-brand);
+}
+
+:where(.root_reset) a:hover {
+  color: var(--ls-color-brand-border);
+}
+
+/* ===================================================================
+ * Element resets
+ * =================================================================== */
+:where(.all) :where(span) {
+  display: inline;
+  position: static;
+  font-family: inherit;
+  font-size: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  color: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  white-space: inherit;
+}
+
+:where(.all) :where(input) {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  color: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  white-space: inherit;
+  background: var(--ls-color-bg-container);
+  border: 1px solid var(--ls-color-border);
+  border-radius: var(--ls-radius-md);
+  padding: var(--ls-space-2) var(--ls-space-3);
+}
+
+:where(.all) :where(textarea) {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  color: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  white-space: inherit;
+  border: 1px solid var(--ls-color-border);
+  border-radius: var(--ls-radius-md);
+  padding: var(--ls-space-2) var(--ls-space-3);
+}
+
+:where(.all) :where(p),
+:where(.all) :where(h1),
+:where(.all) :where(h2),
+:where(.all) :where(h3),
+:where(.all) :where(h4),
+:where(.all) :where(h5),
+:where(.all) :where(h6) {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  color: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  white-space: inherit;
+}
+
+:where(.all) :where(img) {
+  display: inline-block;
+}
+
+:where(.all) :where(li) {
+  display: list-item;
+}
+
+:where(.all) :where(ul),
+:where(.all) :where(ol) {
+  list-style: none;
+  padding: 0;
+}
+
+/* ===================================================================
+ * .button — Button element reset
+ * =================================================================== */
+:where(.button) {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  color: inherit;
+  text-align: center;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  white-space: inherit;
+  border: 1px solid var(--ls-color-border);
+  background: var(--ls-color-bg-container);
+  border-radius: var(--ls-radius-md);
+  padding: var(--ls-space-2) var(--ls-space-4);
+  cursor: pointer;
+}
+
+/* ===================================================================
+ * .__wab_text — Text element reset
+ * =================================================================== */
+:where(.__wab_text) {
+  white-space: pre-wrap;
+}
+
+/* ===================================================================
+ * Compatibility stubs — empty classes for backwards compatibility.
+ * Tokens are now set on :root via variables.css, so these are no-ops.
+ * =================================================================== */
+.plasmic_default_styles {}
+.plasmic_mixins {}
+.plasmic_tokens {}

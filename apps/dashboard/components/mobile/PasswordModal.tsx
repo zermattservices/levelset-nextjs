@@ -157,7 +157,7 @@ export function PasswordModal({
               borderColor: error ? '#dc2626' : '#d1d5db',
             },
             '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: error ? '#dc2626' : '#31664a',
+              borderColor: error ? '#dc2626' : '#31664a' /* TODO: Use design token */,
               borderWidth: '2px',
             },
           }}
@@ -173,7 +173,7 @@ export function PasswordModal({
             textTransform: 'none',
             fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             fontWeight: 600,
-            backgroundColor: '#31664a',
+            backgroundColor: '#31664a' /* TODO: Use design token */,
             borderRadius: '8px',
             '&:hover': {
               backgroundColor: '#264d38',

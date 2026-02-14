@@ -226,7 +226,7 @@ const StyledTabs = styled(Tabs)(() => ({
   borderBottom: '1px solid #e5e7eb',
   marginBottom: 12,
   '& .MuiTabs-indicator': {
-    backgroundColor: '#31664a',
+    backgroundColor: '#31664a' /* TODO: Use design token */,
     height: 3
   },
   '@media (max-width: 768px)': {
@@ -245,7 +245,7 @@ const StyledTab = styled(Tab)(() => ({
   textTransform: 'none',
   color: '#6b7280',
   '&.Mui-selected': {
-    color: '#31664a',
+    color: '#31664a' /* TODO: Use design token */,
     fontWeight: 600
   },
   '@media (max-width: 768px)': {
@@ -558,7 +558,7 @@ export function PEAClassic({
   if (isInitialLoad) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-        <CircularProgress sx={{ color: '#31664a' }} />
+        <CircularProgress sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </Box>
     );
   }
@@ -633,7 +633,7 @@ export function PEAClassic({
                 fontFamily,
                 fontSize: compactControls ? 12 : 14,
                 fontWeight: 600,
-                backgroundColor: '#31664a',
+                backgroundColor: '#31664a' /* TODO: Use design token */,
                 color: '#ffffff',
                 borderRadius: '6px',
                 textTransform: 'none',
@@ -655,7 +655,7 @@ export function PEAClassic({
       <Box sx={{ position: 'relative', minHeight: 400, flex: fillHeight ? 1 : 'none', overflow: 'hidden' }}>
         {loading && (
           <LoadingOverlay>
-            <CircularProgress sx={{ color: '#31664a' }} />
+            <CircularProgress sx={{ color: '#31664a' /* TODO: Use design token */ }} />
           </LoadingOverlay>
         )}
         

@@ -25,7 +25,7 @@ import { pdf } from '@react-pdf/renderer';
 import PELeaderboardPDF from './PELeaderboardPDF';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a';
+const levelsetGreen = '#31664a'; // TODO: Use design token
 const fohColor = '#006391';
 const bohColor = '#ffcc5b';
 

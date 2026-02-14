@@ -1,0 +1,35 @@
+{
+  "name": "@levelset/design-tokens",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./css/variables.css": "./src/css/variables.css",
+    "./css/plasmic-compat.css": "./src/css/plasmic-compat.css",
+    "./native": {
+      "types": "./src/native/index.ts",
+      "import": "./dist/native/index.js"
+    },
+    "./native/colors": {
+      "types": "./src/native/colors.ts",
+      "import": "./dist/native/colors.js"
+    },
+    "./native/spacing": {
+      "types": "./src/native/spacing.ts",
+      "import": "./dist/native/spacing.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

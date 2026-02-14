@@ -85,7 +85,7 @@ export default function MobileLaunchPage() {
               onClick={() => router.push('/')}
               sx={{
                 textTransform: 'none',
-                backgroundColor: '#31664a',
+                backgroundColor: '#31664a' /* TODO: Use design token */,
                 borderRadius: '8px',
                 '&:hover': { backgroundColor: '#264d38' },
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',

@@ -3,6 +3,8 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { LicenseInfo } from '@mui/x-license';
 import { AuthProvider } from '@/lib/providers/AuthProvider';
+import "@levelset/design-tokens/css/variables.css";
+import "@levelset/design-tokens/css/plasmic-compat.css";
 import "../styles/globals.css";
 import "../styles/datagrid-pro.css";
 import "../components/CodeComponents/scoreboard.css";

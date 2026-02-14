@@ -307,7 +307,7 @@ export function PermissionLevelsTab({
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -342,7 +342,7 @@ export function PermissionLevelsTab({
                 borderColor: '#e5e7eb',
                 color: '#374151',
                 '&:hover': {
-                  borderColor: '#31664a',
+                  borderColor: '#31664a' /* TODO: Use design token */,
                   backgroundColor: 'rgba(49, 102, 74, 0.04)',
                 },
               }}
@@ -419,8 +419,8 @@ export function PermissionLevelsTab({
                         onClick={() => handleViewAssignments(profile.id)}
                         title="View Assignments"
                         sx={{
-                          color: isSelected ? '#31664a' : '#6b7280',
-                          '&:hover': { color: '#31664a' },
+                          color: isSelected ? '#31664a' /* TODO: Use design token */ : '#6b7280',
+                          '&:hover': { color: '#31664a' /* TODO: Use design token */ },
                         }}
                       >
                         <VisibilityIcon fontSize="small" />
@@ -433,7 +433,7 @@ export function PermissionLevelsTab({
                             title="Edit Permissions"
                             sx={{
                               color: '#6b7280',
-                              '&:hover': { color: '#31664a' },
+                              '&:hover': { color: '#31664a' /* TODO: Use design token */ },
                             }}
                           >
                             <EditIcon fontSize="small" />
@@ -507,8 +507,8 @@ export function PermissionLevelsTab({
                             onClick={() => handleViewAssignments(profile.id)}
                             title="View Assignments"
                             sx={{
-                              color: isSelected ? '#31664a' : '#6b7280',
-                              '&:hover': { color: '#31664a' },
+                              color: isSelected ? '#31664a' /* TODO: Use design token */ : '#6b7280',
+                              '&:hover': { color: '#31664a' /* TODO: Use design token */ },
                             }}
                           >
                             <VisibilityIcon fontSize="small" />
@@ -520,7 +520,7 @@ export function PermissionLevelsTab({
                               title="Edit Permissions"
                               sx={{
                                 color: '#6b7280',
-                                '&:hover': { color: '#31664a' },
+                                '&:hover': { color: '#31664a' /* TODO: Use design token */ },
                               }}
                             >
                               <EditIcon fontSize="small" />
@@ -554,7 +554,7 @@ export function PermissionLevelsTab({
             </div>
           ) : loadingUsers ? (
             <div className={sty.loadingUsers}>
-              <CircularProgress size={24} sx={{ color: '#31664a' }} />
+              <CircularProgress size={24} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
             </div>
           ) : assignedUsers.length === 0 ? (
             <div className={sty.emptyState}>

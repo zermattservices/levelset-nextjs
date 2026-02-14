@@ -164,8 +164,8 @@ export function EditLocationAccessModal({
                     onChange={() => handleLocationToggle(loc.id)}
                     disabled={disabled}
                     sx={{
-                      color: '#31664a',
-                      '&.Mui-checked': { color: '#31664a' },
+                      color: '#31664a' /* TODO: Use design token */,
+                      '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
                     }}
                   />
                 }
@@ -197,7 +197,7 @@ export function EditLocationAccessModal({
           sx={{
             fontFamily,
             textTransform: 'none',
-            backgroundColor: '#31664a',
+            backgroundColor: '#31664a' /* TODO: Use design token */,
             '&:hover': {
               backgroundColor: '#264d38',
             },

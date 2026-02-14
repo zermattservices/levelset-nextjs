@@ -3,7 +3,7 @@ import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/render
 import type { LeaderboardEntry } from '@/lib/ratings-data';
 import { formatTenure } from '@/lib/ratings-data';
 
-const levelsetGreen = '#31664a';
+const levelsetGreen = '#31664a'; // TODO: Use design token
 
 const styles = StyleSheet.create({
   page: {

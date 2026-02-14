@@ -1,6 +1,6 @@
 import * as React from 'react';
 import sty from './MetricCard.module.css';
-import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
+import projectcss from '@/styles/base.module.css';
 import { TrendCard } from '../TrendCard/TrendCard';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {

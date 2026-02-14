@@ -11,7 +11,7 @@ import { RolePill } from './shared/RolePill';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a';
+const levelsetGreen = '#31664a'; // TODO: Use design token
 
 const STATUS_ORDER: Record<string, number> = {
   Planned: 0,
@@ -831,7 +831,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
           <Typography
             component="button"
             onClick={fetchData}
-            sx={{ fontFamily, color: '#31664a', cursor: 'pointer', background: 'none', border: 'none' }}
+            sx={{ fontFamily, color: '#31664a' /* TODO: Use design token */, cursor: 'pointer', background: 'none', border: 'none' }}
           >
             Retry
           </Typography>

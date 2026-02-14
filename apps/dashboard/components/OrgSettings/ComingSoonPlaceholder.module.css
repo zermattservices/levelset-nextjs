@@ -40,9 +40,9 @@
   font-family: "Satoshi";
   font-size: 12px;
   font-weight: 600;
-  color: #31664a;
+  color: var(--ls-color-brand);
   background: #f6fffa;
   padding: 6px 16px;
   border-radius: 20px;
-  border: 1px solid #31664a;
+  border: 1px solid var(--ls-color-brand);
 }

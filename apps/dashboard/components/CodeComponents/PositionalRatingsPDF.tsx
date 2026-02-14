@@ -14,7 +14,7 @@ Font.register({
 
 // Colors
 const colors = {
-  levelsetGreen: '#31664a',
+  levelsetGreen: '#31664a', // TODO: Use design token
   fohColor: '#006391',
   bohColor: '#ffcc5b',
   fohColorLight: '#eaf9ff',

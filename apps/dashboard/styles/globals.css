@@ -18,14 +18,6 @@ html {
 }
 
 @font-face {
-  font-family: 'ApercuMedium';
-  src: url('/fonts/ApercuMedium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
   font-family: 'Mont';
   src: url('/fonts/Mont-Regular.woff2') format('woff2');
   font-weight: 400;
@@ -67,29 +59,24 @@ html {
 
 /* Global font family for the app */
 body {
-  font-family: 'ApercuMedium', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: var(--ls-font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  background-color: #ffffff;
+  background-color: var(--ls-color-bg-container);
   margin: 0;
   padding: 0;
 }
 
 /* Prevent black flash during page transitions */
 #__next {
-  background-color: #ffffff;
+  background-color: var(--ls-color-bg-container);
   min-height: 100vh;
 }
 
-/* Make ApercuMedium available for Plasmic */
-.apercu-medium {
-  font-family: 'ApercuMedium', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
-}
-
-/* Make Mont available for Plasmic */
+/* Mont font utility classes */
 .mont {
   font-family: 'Mont', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
 }
@@ -99,7 +86,7 @@ body {
   font-weight: 700 !important;
 }
 
-/* Make Satoshi available for Plasmic */
+/* Satoshi font utility classes */
 .satoshi {
   font-family: 'Satoshi', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
 }
@@ -142,14 +129,14 @@ svg {
 
 /* Dashboard specific styles */
 .dashboard-container {
-  background-color: #f9fafb; /* gray-50 */
+  background-color: var(--ls-color-neutral-foreground); /* gray-50 */
 }
 
 .dashboard-card {
-  background-color: white;
-  border-radius: 0.5rem;
+  background-color: var(--ls-color-bg-container);
+  border-radius: var(--ls-radius-lg);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  border: 1px solid #e5e7eb; /* gray-200 */
+  border: 1px solid var(--ls-color-muted-border); /* gray-200 */
 }
 
 .metric-card {
@@ -161,13 +148,13 @@ svg {
 }
 
 .badge-positive {
-  background-color: #dcfce7; /* green-100 */
-  color: #16a34a; /* green-600 */
+  background-color: var(--ls-color-success-soft); /* green-100 */
+  color: var(--ls-color-success); /* green-600 */
 }
 
 .badge-negative {
-  background-color: #fee2e2; /* red-100 */
-  color: #dc2626; /* red-600 */
+  background-color: var(--ls-color-destructive-foreground); /* red-100 */
+  color: #dc2626; /* red-600 — not yet in tokens */
 }
 
 /* Ensure minimum padding on tablet/smaller screens */
@@ -179,7 +166,7 @@ svg {
 
 /* Tab navigation styles */
 .tab-nav {
-  border-bottom: 1px solid #e5e7eb; /* gray-200 */
+  border-bottom: 1px solid var(--ls-color-muted-border); /* gray-200 */
 }
 
 .tab-nav .tab-link {
@@ -188,11 +175,11 @@ svg {
 }
 
 .tab-nav .tab-link.active {
-  border-bottom-color: #3b82f6; /* blue-500 */
-  color: #2563eb; /* blue-600 */
+  border-bottom-color: var(--ls-color-brand);
+  color: var(--ls-color-brand);
 }
 
 .tab-nav .tab-link:hover:not(.active) {
-  border-bottom-color: #d1d5db; /* gray-300 */
-  color: #374151; /* gray-700 */
+  border-bottom-color: var(--ls-color-border); /* gray-300 */
+  color: var(--ls-color-neutral); /* gray-700 */
 }

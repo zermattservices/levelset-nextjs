@@ -66,10 +66,10 @@
   justify-content: space-between;
   width: 100%;
   height: auto;
-  max-width: var(--token-eC7sN0TdrMwT);
+  max-width: var(--ls-max-content-width);
   min-width: 0;
   padding: 0px 0px 8px;
-  border-bottom: 1px solid var(--token-bGw1ZBUIaR08);
+  border-bottom: 1px solid var(--ls-color-border);
 }
 .freeBox__qcdYx {
   display: flex;
@@ -120,7 +120,7 @@
   width: 100%;
   height: auto;
   max-width: 100%;
-  font-size: var(--token-BlA-iDkaAWvO);
+  font-size: var(--ls-font-size-base);
   font-family: "Satoshi";
   min-width: 0;
   color: #6b7280;
@@ -154,9 +154,9 @@
 }
 
 .tabActive {
-  background: #31664a;
+  background: var(--ls-color-brand);
   color: #ffffff;
-  border-color: #31664a;
+  border-color: var(--ls-color-brand);
 }
 
 .tabActive:hover {
@@ -186,7 +186,7 @@
   justify-content: space-between;
   width: 100%;
   height: auto;
-  max-width: var(--token-eC7sN0TdrMwT);
+  max-width: var(--ls-max-content-width);
   flex-grow: 0;
   min-width: 0;
   padding: 0px 8px;

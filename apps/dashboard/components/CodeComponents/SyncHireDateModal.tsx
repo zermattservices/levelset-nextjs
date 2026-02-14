@@ -48,7 +48,7 @@ export interface SyncHireDateModalProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a';
+const levelsetGreen = '#31664a'; // TODO: Use design token
 const warningColor = '#FACC15';
 const destructiveColor = '#dc2626';
 

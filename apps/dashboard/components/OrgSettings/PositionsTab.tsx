@@ -21,7 +21,7 @@ const BrandCheckbox = styled(Checkbox)(() => ({
   color: "#9ca3af",
   padding: 4,
   "&.Mui-checked": {
-    color: "#31664a",
+    color: "#31664a" /* TODO: Use design token */,
   },
   "&:hover": {
     backgroundColor: "rgba(49, 102, 74, 0.08)",
@@ -33,10 +33,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
 }));
@@ -57,10 +57,10 @@ const LanguageSelect = styled(Select)(() => ({
     borderRadius: 8,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
     borderWidth: 1,
   },
   '& .MuiSvgIcon-root': {
@@ -428,7 +428,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -450,7 +450,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
               fontFamily,
               fontSize: 12,
               textTransform: 'none',
-              color: '#31664a',
+              color: '#31664a' /* TODO: Use design token */,
               '&:hover': {
                 backgroundColor: 'rgba(49, 102, 74, 0.08)',
               },
@@ -513,7 +513,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
                     onClick={() => handleAutoTranslate(false, position.id)}
                     disabled={translating}
                     title="Translate this position"
-                    sx={{ color: '#6b7280', '&:hover': { color: '#31664a' } }}
+                    sx={{ color: '#6b7280', '&:hover': { color: '#31664a' /* TODO: Use design token */ } }}
                   >
                     <TranslateIcon fontSize="small" />
                   </IconButton>
@@ -560,7 +560,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
                   backgroundColor: '#ffffff',
                   padding: '8px 12px',
                   '&:hover': {
-                    borderColor: '#31664a',
+                    borderColor: '#31664a' /* TODO: Use design token */,
                     backgroundColor: 'rgba(49, 102, 74, 0.04)',
                   },
                 }}
@@ -604,10 +604,10 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
                 sx={{
                   fontFamily,
                   textTransform: 'none',
-                  borderColor: '#31664a',
-                  color: '#31664a',
+                  borderColor: '#31664a' /* TODO: Use design token */,
+                  color: '#31664a' /* TODO: Use design token */,
                   '&:hover': {
-                    borderColor: '#31664a',
+                    borderColor: '#31664a' /* TODO: Use design token */,
                     backgroundColor: 'rgba(49, 102, 74, 0.08)',
                   },
                 }}

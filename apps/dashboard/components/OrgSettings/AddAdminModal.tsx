@@ -30,10 +30,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
   '& .MuiInputLabel-root': {
@@ -375,8 +375,8 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
                           checked={selectedLocationIds.has(loc.id)}
                           onChange={() => handleLocationToggle(loc.id)}
                           sx={{
-                            color: '#31664a',
-                            '&.Mui-checked': { color: '#31664a' },
+                            color: '#31664a' /* TODO: Use design token */,
+                            '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
                           }}
                         />
                       }
@@ -414,7 +414,7 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
                     {createdEmail}
                   </Typography>
                   <IconButton size="small" onClick={() => handleCopy(createdEmail, 'email')}>
-                    {copiedEmail ? <CheckIcon fontSize="small" sx={{ color: '#31664a' }} /> : <ContentCopyIcon fontSize="small" />}
+                    {copiedEmail ? <CheckIcon fontSize="small" sx={{ color: '#31664a' /* TODO: Use design token */ }} /> : <ContentCopyIcon fontSize="small" />}
                   </IconButton>
                 </Box>
               </Box>
@@ -439,7 +439,7 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
                     {createdPassword}
                   </Typography>
                   <IconButton size="small" onClick={() => handleCopy(createdPassword, 'password')}>
-                    {copiedPassword ? <CheckIcon fontSize="small" sx={{ color: '#31664a' }} /> : <ContentCopyIcon fontSize="small" />}
+                    {copiedPassword ? <CheckIcon fontSize="small" sx={{ color: '#31664a' /* TODO: Use design token */ }} /> : <ContentCopyIcon fontSize="small" />}
                   </IconButton>
                 </Box>
               </Box>
@@ -485,7 +485,7 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
               sx={{
                 fontFamily,
                 textTransform: 'none',
-                backgroundColor: '#31664a',
+                backgroundColor: '#31664a' /* TODO: Use design token */,
                 '&:hover': {
                   backgroundColor: '#264d38',
                 },
@@ -504,7 +504,7 @@ export function AddAdminModal({ open, onClose, onUserCreated, orgId }: AddAdminM
             sx={{
               fontFamily,
               textTransform: 'none',
-              backgroundColor: '#31664a',
+              backgroundColor: '#31664a' /* TODO: Use design token */,
               '&:hover': {
                 backgroundColor: '#264d38',
               },

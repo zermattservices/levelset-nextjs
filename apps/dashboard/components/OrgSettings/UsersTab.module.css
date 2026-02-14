@@ -136,7 +136,7 @@
 }
 
 .editButton:hover {
-  color: #31664a;
+  color: var(--ls-color-brand);
 }
 
 .deleteButton {

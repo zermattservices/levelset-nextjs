@@ -224,6 +224,6 @@
   gap: 8px;
   font-family: "Satoshi";
   font-size: 13px;
-  color: #31664a;
+  color: var(--ls-color-brand);
   padding: 8px 0;
 }

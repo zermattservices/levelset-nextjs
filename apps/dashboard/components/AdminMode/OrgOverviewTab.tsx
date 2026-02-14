@@ -104,10 +104,10 @@ export function OrgOverviewTab({ organization, locationNames }: OrgOverviewTabPr
                 borderColor: '#e5e5e5',
               },
               '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#31664a',
+                borderColor: '#31664a' /* TODO: Use design token */,
               },
               '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#31664a',
+                borderColor: '#31664a' /* TODO: Use design token */,
               },
             }}
           >

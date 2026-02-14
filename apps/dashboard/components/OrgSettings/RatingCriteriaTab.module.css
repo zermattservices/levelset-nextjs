@@ -131,7 +131,7 @@
   width: 28px;
   height: 28px;
   background: #f6fffa;
-  color: #31664a;
+  color: var(--ls-color-brand);
   font-family: "Satoshi";
   font-size: 14px;
   font-weight: 600;
@@ -164,7 +164,7 @@
 
 .descriptionTextarea:focus {
   outline: none;
-  border-color: #31664a;
+  border-color: var(--ls-color-brand);
 }
 
 .descriptionTextarea::placeholder {
@@ -226,7 +226,7 @@
   font-family: "Satoshi";
   font-size: 14px;
   font-weight: 600;
-  color: #31664a;
+  color: var(--ls-color-brand);
   background: #dcfce7;
   padding: 4px 10px;
   border-radius: 100px;

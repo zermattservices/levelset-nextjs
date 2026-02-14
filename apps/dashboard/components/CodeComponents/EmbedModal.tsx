@@ -124,8 +124,8 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                 py: 1.5,
                 cursor: 'pointer',
                 backgroundColor: selectedMenu === item.key ? '#ffffff' : 'transparent',
-                borderLeft: selectedMenu === item.key ? '3px solid #31664a' : '3px solid transparent',
-                color: selectedMenu === item.key ? '#31664a' : '#4b5563',
+                borderLeft: selectedMenu === item.key ? '3px solid #31664a' : '3px solid transparent', /* TODO: Use design token */
+                color: selectedMenu === item.key ? '#31664a' /* TODO: Use design token */ : '#4b5563',
                 fontFamily,
                 fontSize: 14,
                 fontWeight: selectedMenu === item.key ? 600 : 500,
@@ -182,7 +182,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                       size={180}
                       level="H"
                       includeMargin={true}
-                      fgColor="#31664a"
+                      fgColor="#31664a" /* TODO: Use design token */
                       imageSettings={{
                         src: '/Levelset Icon Non Trans.png',
                         x: undefined,
@@ -203,7 +203,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                       sx={{
                         fontFamily,
                         fontSize: 13,
-                        color: '#31664a',
+                        color: '#31664a' /* TODO: Use design token */,
                         textDecoration: 'underline',
                         '&:hover': { color: '#264d38' },
                       }}
@@ -213,7 +213,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                     <IconButton
                       size="small"
                       onClick={handleCopyUrl}
-                      sx={{ color: copiedUrl ? '#31664a' : '#6b7280' }}
+                      sx={{ color: copiedUrl ? '#31664a' /* TODO: Use design token */ : '#6b7280' }}
                     >
                       {copiedUrl ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
                     </IconButton>
@@ -258,7 +258,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                   minHeight: 36,
                   mb: 2,
                   '& .MuiTabs-indicator': {
-                    backgroundColor: '#31664a',
+                    backgroundColor: '#31664a' /* TODO: Use design token */,
                   },
                 }}
               >
@@ -272,8 +272,8 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                     textTransform: 'none',
                     minHeight: 36,
                     py: 0,
-                    color: embedTab === 'html' ? '#31664a' : '#6b7280',
-                    '&.Mui-selected': { color: '#31664a' },
+                    color: embedTab === 'html' ? '#31664a' /* TODO: Use design token */ : '#6b7280',
+                    '&.Mui-selected': { color: '#31664a' /* TODO: Use design token */ },
                   }}
                 />
                 <Tab
@@ -286,8 +286,8 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                     textTransform: 'none',
                     minHeight: 36,
                     py: 0,
-                    color: embedTab === 'url' ? '#31664a' : '#6b7280',
-                    '&.Mui-selected': { color: '#31664a' },
+                    color: embedTab === 'url' ? '#31664a' /* TODO: Use design token */ : '#6b7280',
+                    '&.Mui-selected': { color: '#31664a' /* TODO: Use design token */ },
                   }}
                 />
               </Tabs>

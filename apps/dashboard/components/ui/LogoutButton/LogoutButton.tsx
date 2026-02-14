@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useRouter } from 'next/router';
 import { SupabaseUserLogOut } from '@/components/CodeComponents/auth/SupabaseUserLogOut';
 import sty from './LogoutButton.module.css';
-import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
+import projectcss from '@/styles/base.module.css';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');

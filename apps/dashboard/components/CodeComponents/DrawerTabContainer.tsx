@@ -522,7 +522,7 @@ export function DrawerTabContainer({
                 size="small"
                 onClick={onRecordAction}
                 sx={{
-                  backgroundColor: "#31664a",
+                  backgroundColor: "#31664a" /* TODO: Use design token */,
                   textTransform: "none",
                   borderRadius: "8px",
                   fontSize: "13px",
@@ -632,11 +632,11 @@ export function DrawerTabContainer({
               minHeight: 48,
               color: "#6b7280",
               "&.Mui-selected": {
-                color: "#31664a",
+                color: "#31664a" /* TODO: Use design token */,
               },
             },
             "& .MuiTabs-indicator": {
-              backgroundColor: "#31664a",
+              backgroundColor: "#31664a" /* TODO: Use design token */,
               height: 2,
             },
           }}

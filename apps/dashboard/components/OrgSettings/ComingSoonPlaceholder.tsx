@@ -11,7 +11,7 @@ export function ComingSoonPlaceholder({ title, description }: ComingSoonPlacehol
   return (
     <div className={sty.container}>
       <div className={sty.iconContainer}>
-        <RocketLaunchIcon sx={{ fontSize: 48, color: '#31664a' }} />
+        <RocketLaunchIcon sx={{ fontSize: 48, color: '#31664a' /* TODO: Use design token */ }} />
       </div>
       <h2 className={sty.title}>{title}</h2>
       <p className={sty.description}>{description}</p>

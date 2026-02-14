@@ -41,7 +41,7 @@ export interface SyncEmployeesModalProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a';
+const levelsetGreen = '#31664a'; // TODO: Use design token
 const warningColor = '#FACC15';
 const destructiveColor = '#dc2626';
 
@@ -237,7 +237,7 @@ function createEmployeeColumns(
                 fontFamily,
                 fontSize: 12,
                 borderRadius: 6,
-                border: matchedEmployee ? '2px solid #31664a' : '1px solid #d1d5db',
+                border: matchedEmployee ? '2px solid #31664a' : '1px solid #d1d5db', /* TODO: Use design token */
                 backgroundColor: matchedEmployee ? '#f0fdf4' : '#ffffff',
                 cursor: 'pointer',
               }}
@@ -632,6 +632,7 @@ var baseUrl='${baseUrl}';
 var locationId='${locationId}';
 var orgId='${orgId}';
 var loadingDiv=document.createElement('div');
+// TODO: Use design token for #31664a below (bookmarklet context - CSS vars not available)
 loadingDiv.style.cssText='position:fixed;top:20px;right:20px;background:#31664a;color:white;padding:15px 20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;';
 loadingDiv.textContent='Fetching employee data...';
 document.body.appendChild(loadingDiv);

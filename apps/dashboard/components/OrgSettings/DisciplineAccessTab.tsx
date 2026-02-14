@@ -22,7 +22,7 @@ const BrandCheckbox = styled(Checkbox)(() => ({
   color: "#9ca3af",
   padding: 8,
   "&.Mui-checked": {
-    color: "#31664a",
+    color: "#31664a" /* TODO: Use design token */,
   },
   "&:hover": {
     backgroundColor: "rgba(49, 102, 74, 0.08)",
@@ -34,10 +34,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
 }));
@@ -47,10 +47,10 @@ const PasswordTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
   '& input[type="password"]': {
@@ -262,7 +262,7 @@ export function DisciplineAccessTab({ orgId, locationId, onNavigate, disabled = 
   if (loading || passwordLoading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -355,7 +355,7 @@ export function DisciplineAccessTab({ orgId, locationId, onNavigate, disabled = 
               sx={{
                 fontFamily,
                 textTransform: 'none',
-                backgroundColor: '#31664a',
+                backgroundColor: '#31664a' /* TODO: Use design token */,
                 '&:hover': {
                   backgroundColor: '#264d38',
                 },
@@ -415,7 +415,7 @@ export function DisciplineAccessTab({ orgId, locationId, onNavigate, disabled = 
             sx={{
               fontFamily,
               textTransform: 'none',
-              backgroundColor: '#31664a',
+              backgroundColor: '#31664a' /* TODO: Use design token */,
               '&:hover': {
                 backgroundColor: '#264d38',
               },

@@ -29,10 +29,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontSize: 14,
     backgroundColor: '#ffffff',
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
 }));
@@ -46,10 +46,10 @@ const StyledSelect = styled(Select)(() => ({
     alignItems: 'center',
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
 }));
 
@@ -354,7 +354,7 @@ export function UserTestingPage() {
       {/* Users table */}
       {loading ? (
           <div className={styles.loadingContainer}>
-            <CircularProgress size={32} sx={{ color: '#31664a' }} />
+            <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className={styles.emptyState}>

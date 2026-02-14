@@ -21,8 +21,8 @@
   cursor: pointer;
 }
 .slotTargetSlot3 {
-  font-size: var(--token-7z5Kw5B89TZR);
-  color: var(--token-FTu687H3gT3S);
+  font-size: var(--ls-font-size-sm);
+  color: var(--ls-color-brand);
   font-weight: 600;
   font-family: "Satoshi";
 }

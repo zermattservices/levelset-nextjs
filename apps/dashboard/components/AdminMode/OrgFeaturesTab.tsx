@@ -229,7 +229,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -247,7 +247,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
           Configure which features this organization has access to.
         </Typography>
         {saving && (
-          <CircularProgress size={16} sx={{ color: '#31664a' }} />
+          <CircularProgress size={16} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
         )}
       </div>
 
@@ -302,9 +302,9 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
                   onClick={(e) => e.stopPropagation()}
                   sx={{
                     padding: '4px',
-                    color: '#31664a',
-                    '&.Mui-checked': { color: '#31664a' },
-                    '&.MuiCheckbox-indeterminate': { color: '#31664a' },
+                    color: '#31664a' /* TODO: Use design token */,
+                    '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
+                    '&.MuiCheckbox-indeterminate': { color: '#31664a' /* TODO: Use design token */ },
                   }}
                 />
                 <Chip
@@ -349,7 +349,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
                           sx={{
                             padding: '4px',
                             color: '#d1d5db',
-                            '&.Mui-checked': { color: '#31664a' },
+                            '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
                           }}
                         />
                         <div className={styles.permissionContent}>

@@ -10,7 +10,7 @@ import type { InfractionDocument } from "@/lib/supabase.types";
 
 const fontFamily =
   '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = "#31664a";
+const levelsetGreen = "#31664a"; // TODO: Use design token
 
 const ALLOWED_TYPES = [
   "image/jpeg",

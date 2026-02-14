@@ -141,7 +141,7 @@ export function FormDrawer({
             disabled={disabled || submitting}
             sx={{
               width: '100%',
-              backgroundColor: '#31664a',
+              backgroundColor: '#31664a' /* TODO: Use design token */,
               textTransform: 'none',
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               fontSize: 16,
@@ -185,7 +185,7 @@ export function FormDrawer({
             sx={{
               textTransform: 'none',
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-              color: '#31664a',
+              color: '#31664a' /* TODO: Use design token */,
               fontWeight: 600,
               borderRadius: '8px',
             }}

@@ -51,7 +51,7 @@
   background: #f1f8f3;
 }
 .rootcolor_brand {
-  background: #31664a;
+  background: var(--ls-color-brand);
 }
 .rootcolor_red {
   background: #d23230;
@@ -82,7 +82,7 @@
 }
 .rootcolor_brandOutline {
   background: #ffffff00;
-  border: 1px solid #31664a;
+  border: 1px solid var(--ls-color-brand);
 }
 .rootshowStartIcon_shape_rounded {
   padding-left: 16px;
@@ -293,7 +293,7 @@
   color: #1b1b18;
 }
 .slotTargetChildrencolor_brandOutline {
-  color: #31664a;
+  color: var(--ls-color-brand);
 }
 .root:focus-within .slotTargetChildren > *,
 .root:focus-within .slotTargetChildren > :global(.__wab_slot) > *,
@@ -360,7 +360,7 @@
   outline: none;
 }
 .rootcolor_brandOutline:hover .slotTargetChildrencolor_brandOutline {
-  color: #31664a;
+  color: var(--ls-color-brand);
 }
 .rootcolor_brandOutline:hover
   .slotTargetChildrencolor_brandOutline
@@ -419,7 +419,7 @@
   text-decoration-line: underline;
 }
 .rootcolor_brandOutline:active .slotTargetChildrencolor_brandOutline {
-  color: #31664a;
+  color: var(--ls-color-brand);
 }
 .endIconContainer {
   display: flex;

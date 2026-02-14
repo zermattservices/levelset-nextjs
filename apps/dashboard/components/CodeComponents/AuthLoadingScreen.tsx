@@ -30,7 +30,7 @@ export function AuthLoadingScreen() {
         size={28}
         thickness={4}
         sx={{
-          color: '#31664a',
+          color: '#31664a' /* TODO: Use design token */,
         }}
       />
     </Box>

@@ -53,7 +53,7 @@ interface DisciplineInfractionFormProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a';
+const levelsetGreen = '#31664a'; // TODO: Use design token
 
 const InfractionDateTextField = React.forwardRef(function InfractionDateTextField(
   props: React.ComponentProps<typeof TextField>,
@@ -585,9 +585,9 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                 markDirty();
               }}
               sx={{
-                color: '#31664a',
+                color: '#31664a' /* TODO: Use design token */,
                 '&.Mui-checked': {
-                  color: '#31664a',
+                  color: '#31664a' /* TODO: Use design token */,
                 },
               }}
             />

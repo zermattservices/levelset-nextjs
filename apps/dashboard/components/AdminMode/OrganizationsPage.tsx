@@ -177,7 +177,7 @@ export function OrganizationsPage() {
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <CircularProgress size={40} sx={{ color: '#31664a' }} />
+        <CircularProgress size={40} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -212,8 +212,8 @@ export function OrganizationsPage() {
               fontFamily: '"Satoshi", sans-serif',
               fontSize: 14,
               borderRadius: '8px',
-              '&:hover fieldset': { borderColor: '#31664a' },
-              '&.Mui-focused fieldset': { borderColor: '#31664a' },
+              '&:hover fieldset': { borderColor: '#31664a' /* TODO: Use design token */ },
+              '&.Mui-focused fieldset': { borderColor: '#31664a' /* TODO: Use design token */ },
             },
           }}
         />

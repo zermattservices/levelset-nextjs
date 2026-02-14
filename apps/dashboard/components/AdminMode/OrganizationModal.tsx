@@ -161,7 +161,7 @@ export function OrganizationModal({ open, organization, onClose }: OrganizationM
             marginTop: '16px',
             minHeight: 'unset',
             '& .MuiTabs-indicator': {
-              backgroundColor: '#31664a',
+              backgroundColor: '#31664a' /* TODO: Use design token */,
             },
             '& .MuiTab-root': {
               fontFamily: '"Satoshi", sans-serif',
@@ -172,7 +172,7 @@ export function OrganizationModal({ open, organization, onClose }: OrganizationM
               padding: '8px 16px',
               color: '#666',
               '&.Mui-selected': {
-                color: '#31664a',
+                color: '#31664a' /* TODO: Use design token */,
                 fontWeight: 600,
               },
             },

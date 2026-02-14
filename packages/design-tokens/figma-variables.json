@@ -1,0 +1,161 @@
+{
+  "collections": [
+    {
+      "name": "Colors",
+      "modes": ["Default"],
+      "variables": [
+        { "name": "brand/base", "type": "COLOR", "value": "#31664A" },
+        { "name": "brand/border", "type": "COLOR", "value": "#458461" },
+        { "name": "brand/foreground", "type": "COLOR", "value": "#EFF6FF" },
+        { "name": "brand/soft", "type": "COLOR", "value": "#DBEAFE" },
+        { "name": "brand/soft-foreground", "type": "COLOR", "value": "#1E3A8A" },
+
+        { "name": "destructive/base", "type": "COLOR", "value": "#D23230" },
+        { "name": "destructive/border", "type": "COLOR", "value": "#E64F4D" },
+        { "name": "destructive/foreground", "type": "COLOR", "value": "#FEF2F2" },
+        { "name": "destructive/soft", "type": "COLOR", "value": "#F7ABAA" },
+        { "name": "destructive/soft-foreground", "type": "COLOR", "value": "#7F1D1D" },
+
+        { "name": "success/base", "type": "COLOR", "value": "#16A34A" },
+        { "name": "success/border", "type": "COLOR", "value": "#86EFAC" },
+        { "name": "success/foreground", "type": "COLOR", "value": "#F0FDF4" },
+        { "name": "success/soft", "type": "COLOR", "value": "#DCFCE7" },
+        { "name": "success/soft-foreground", "type": "COLOR", "value": "#14532D" },
+
+        { "name": "warning/base", "type": "COLOR", "value": "#FACC15" },
+        { "name": "warning/border", "type": "COLOR", "value": "#FDE047" },
+        { "name": "warning/foreground", "type": "COLOR", "value": "#422006" },
+        { "name": "warning/soft", "type": "COLOR", "value": "#FEF9C3" },
+        { "name": "warning/soft-foreground", "type": "COLOR", "value": "#713F12" },
+
+        { "name": "muted/base", "type": "COLOR", "value": "#6B7280" },
+        { "name": "muted/border", "type": "COLOR", "value": "#E5E7EB" },
+        { "name": "muted/foreground", "type": "COLOR", "value": "#E5E7EB" },
+        { "name": "muted/soft", "type": "COLOR", "value": "#F3F4F6" },
+        { "name": "muted/soft-foreground", "type": "COLOR", "value": "#6B7280" },
+
+        { "name": "neutral/base", "type": "COLOR", "value": "#374151" },
+        { "name": "neutral/border", "type": "COLOR", "value": "#D1D5DB" },
+        { "name": "neutral/foreground", "type": "COLOR", "value": "#F9FAFB" },
+        { "name": "neutral/soft", "type": "COLOR", "value": "#E5E7EB" },
+        { "name": "neutral/soft-foreground", "type": "COLOR", "value": "#111827" },
+
+        { "name": "basic/text-primary", "type": "COLOR", "value": "#181D27" },
+        { "name": "basic/text-secondary", "type": "COLOR", "value": "#414651" },
+        { "name": "basic/border", "type": "COLOR", "value": "#D1D5DB" },
+        { "name": "basic/container-bg", "type": "COLOR", "value": "#FFFFFF" },
+        { "name": "basic/input-bg", "type": "COLOR", "value": "#E5E7EB" },
+        { "name": "basic/ring", "type": "COLOR", "value": "#9CA3AF" },
+
+        { "name": "interaction/focus-ring", "type": "COLOR", "value": "#31664A40" },
+        { "name": "interaction/hover-overlay", "type": "COLOR", "value": "#31664A0A" },
+        { "name": "interaction/active-overlay", "type": "COLOR", "value": "#31664A14" },
+        { "name": "interaction/selected-bg", "type": "COLOR", "value": "#DBEAFE" },
+        { "name": "interaction/disabled-text", "type": "COLOR", "value": "#9CA3AF" },
+        { "name": "interaction/disabled-bg", "type": "COLOR", "value": "#F3F4F6" }
+      ]
+    },
+    {
+      "name": "Spacing",
+      "modes": ["Default"],
+      "variables": [
+        { "name": "0", "type": "FLOAT", "value": 0 },
+        { "name": "0.5", "type": "FLOAT", "value": 2 },
+        { "name": "1", "type": "FLOAT", "value": 4 },
+        { "name": "1.5", "type": "FLOAT", "value": 6 },
+        { "name": "2", "type": "FLOAT", "value": 8 },
+        { "name": "2.5", "type": "FLOAT", "value": 10 },
+        { "name": "3", "type": "FLOAT", "value": 12 },
+        { "name": "3.5", "type": "FLOAT", "value": 14 },
+        { "name": "4", "type": "FLOAT", "value": 16 },
+        { "name": "4.5", "type": "FLOAT", "value": 18 },
+        { "name": "5", "type": "FLOAT", "value": 20 },
+        { "name": "6", "type": "FLOAT", "value": 24 },
+        { "name": "7", "type": "FLOAT", "value": 28 },
+        { "name": "8", "type": "FLOAT", "value": 32 },
+        { "name": "9", "type": "FLOAT", "value": 36 },
+        { "name": "10", "type": "FLOAT", "value": 40 },
+        { "name": "11", "type": "FLOAT", "value": 44 },
+        { "name": "12", "type": "FLOAT", "value": 48 },
+        { "name": "14", "type": "FLOAT", "value": 56 },
+        { "name": "16", "type": "FLOAT", "value": 64 },
+        { "name": "20", "type": "FLOAT", "value": 80 },
+        { "name": "24", "type": "FLOAT", "value": 96 },
+        { "name": "28", "type": "FLOAT", "value": 112 },
+        { "name": "32", "type": "FLOAT", "value": 128 },
+        { "name": "36", "type": "FLOAT", "value": 144 },
+        { "name": "40", "type": "FLOAT", "value": 160 },
+        { "name": "48", "type": "FLOAT", "value": 192 },
+        { "name": "64", "type": "FLOAT", "value": 256 },
+        { "name": "80", "type": "FLOAT", "value": 320 },
+        { "name": "96", "type": "FLOAT", "value": 384 }
+      ]
+    },
+    {
+      "name": "Typography",
+      "modes": ["Default"],
+      "variables": [
+        { "name": "font-size/xs", "type": "FLOAT", "value": 12 },
+        { "name": "font-size/sm", "type": "FLOAT", "value": 14 },
+        { "name": "font-size/base", "type": "FLOAT", "value": 16 },
+        { "name": "font-size/lg", "type": "FLOAT", "value": 18 },
+        { "name": "font-size/xl", "type": "FLOAT", "value": 20 },
+        { "name": "font-size/2xl", "type": "FLOAT", "value": 24 },
+        { "name": "font-size/3xl", "type": "FLOAT", "value": 30 },
+        { "name": "font-size/4xl", "type": "FLOAT", "value": 36 },
+
+        { "name": "line-height/none", "type": "FLOAT", "value": 1.0 },
+        { "name": "line-height/tight", "type": "FLOAT", "value": 1.25 },
+        { "name": "line-height/snug", "type": "FLOAT", "value": 1.375 },
+        { "name": "line-height/normal", "type": "FLOAT", "value": 1.5 },
+        { "name": "line-height/relaxed", "type": "FLOAT", "value": 1.625 },
+        { "name": "line-height/loose", "type": "FLOAT", "value": 2.0 },
+
+        { "name": "font-weight/normal", "type": "FLOAT", "value": 400 },
+        { "name": "font-weight/medium", "type": "FLOAT", "value": 500 },
+        { "name": "font-weight/semibold", "type": "FLOAT", "value": 600 },
+        { "name": "font-weight/bold", "type": "FLOAT", "value": 700 }
+      ]
+    },
+    {
+      "name": "Layout",
+      "modes": ["Default"],
+      "variables": [
+        { "name": "radius/none", "type": "FLOAT", "value": 0 },
+        { "name": "radius/sm", "type": "FLOAT", "value": 4 },
+        { "name": "radius/md", "type": "FLOAT", "value": 6 },
+        { "name": "radius/lg", "type": "FLOAT", "value": 8 },
+        { "name": "radius/xl", "type": "FLOAT", "value": 12 },
+        { "name": "radius/2xl", "type": "FLOAT", "value": 16 },
+        { "name": "radius/full", "type": "FLOAT", "value": 9999 },
+
+        { "name": "max-width/narrow", "type": "FLOAT", "value": 768 },
+        { "name": "max-width/content", "type": "FLOAT", "value": 1200 },
+        { "name": "max-width/wide", "type": "FLOAT", "value": 1440 },
+
+        { "name": "breakpoint/sm", "type": "FLOAT", "value": 640 },
+        { "name": "breakpoint/md", "type": "FLOAT", "value": 768 },
+        { "name": "breakpoint/lg", "type": "FLOAT", "value": 1024 },
+        { "name": "breakpoint/xl", "type": "FLOAT", "value": 1280 },
+        { "name": "breakpoint/2xl", "type": "FLOAT", "value": 1536 },
+
+        { "name": "z-index/dropdown", "type": "FLOAT", "value": 1000 },
+        { "name": "z-index/sticky", "type": "FLOAT", "value": 1020 },
+        { "name": "z-index/overlay", "type": "FLOAT", "value": 1040 },
+        { "name": "z-index/modal", "type": "FLOAT", "value": 1060 },
+        { "name": "z-index/popover", "type": "FLOAT", "value": 1070 },
+        { "name": "z-index/toast", "type": "FLOAT", "value": 1080 },
+        { "name": "z-index/tooltip", "type": "FLOAT", "value": 1090 }
+      ]
+    }
+  ],
+  "_meta": {
+    "description": "Levelset Design Tokens for Figma Variables import. Use with Figma REST API POST /v1/files/:file_key/variables or a Variables import plugin.",
+    "generatedFrom": "packages/design-tokens/src/",
+    "fonts": {
+      "body": "Satoshi",
+      "heading": "Mont",
+      "mono": "JetBrains Mono"
+    }
+  }
+}

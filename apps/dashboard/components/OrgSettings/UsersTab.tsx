@@ -47,10 +47,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
 }));
@@ -63,10 +63,10 @@ const StyledSelect = styled(Select)(() => ({
     borderColor: '#e5e7eb',
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
   '& .MuiSelect-select': {
     padding: '6px 32px 6px 12px',
@@ -592,7 +592,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -673,7 +673,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                               size="small"
                               onClick={() => handleSaveEmail(user.id)}
                               disabled={saving}
-                              sx={{ color: '#31664a' }}
+                              sx={{ color: '#31664a' /* TODO: Use design token */ }}
                             >
                               <CheckIcon fontSize="small" />
                             </IconButton>
@@ -769,7 +769,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                                   </MenuItem>
                                 ))}
                                 <Divider sx={{ my: 0.5 }} />
-                                <MenuItem value="__custom__" sx={{ fontFamily, fontSize: 13, color: '#31664a', fontWeight: 500 }}>
+                                <MenuItem value="__custom__" sx={{ fontFamily, fontSize: 13, color: '#31664a' /* TODO: Use design token */, fontWeight: 500 }}>
                                   + Custom Permissions
                                 </MenuItem>
                               </StyledSelect>
@@ -811,11 +811,11 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
               fontFamily,
               fontSize: 13,
               textTransform: 'none',
-              borderColor: '#31664a',
-              color: '#31664a',
+              borderColor: '#31664a' /* TODO: Use design token */,
+              color: '#31664a' /* TODO: Use design token */,
               marginTop: 2,
               '&:hover': {
-                borderColor: '#31664a',
+                borderColor: '#31664a' /* TODO: Use design token */,
                 backgroundColor: 'rgba(49, 102, 74, 0.08)',
               },
             }}
@@ -876,7 +876,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                             size="small"
                             onClick={() => handleSaveEmail(user.id)}
                             disabled={saving}
-                            sx={{ color: '#31664a' }}
+                            sx={{ color: '#31664a' /* TODO: Use design token */ }}
                           >
                             <CheckIcon fontSize="small" />
                           </IconButton>
@@ -966,11 +966,11 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
               fontFamily,
               fontSize: 13,
               textTransform: 'none',
-              borderColor: '#31664a',
-              color: '#31664a',
+              borderColor: '#31664a' /* TODO: Use design token */,
+              color: '#31664a' /* TODO: Use design token */,
               marginTop: 2,
               '&:hover': {
-                borderColor: '#31664a',
+                borderColor: '#31664a' /* TODO: Use design token */,
                 backgroundColor: 'rgba(49, 102, 74, 0.08)',
               },
             }}

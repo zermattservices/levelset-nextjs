@@ -1,0 +1,202 @@
+/**
+ * Levelset Design Tokens — CSS Custom Properties
+ *
+ * Import this file in your app entry point:
+ *   import '@levelset/design-tokens/css/variables.css';
+ *
+ * Then use variables anywhere:
+ *   color: var(--ls-color-brand);
+ *   padding: var(--ls-space-4);
+ *   font-family: var(--ls-font-body);
+ */
+
+:root {
+  /* ===================================================================
+   * Colors — Brand
+   * =================================================================== */
+  --ls-color-brand: #31664A;
+  --ls-color-brand-border: #458461;
+  --ls-color-brand-foreground: #EFF6FF;
+  --ls-color-brand-soft: #DBEAFE;
+  --ls-color-brand-soft-foreground: #1E3A8A;
+
+  /* ===================================================================
+   * Colors — Destructive
+   * =================================================================== */
+  --ls-color-destructive: #D23230;
+  --ls-color-destructive-border: #E64F4D;
+  --ls-color-destructive-foreground: #FEF2F2;
+  --ls-color-destructive-soft: #F7ABAA;
+  --ls-color-destructive-soft-foreground: #7F1D1D;
+
+  /* ===================================================================
+   * Colors — Success
+   * =================================================================== */
+  --ls-color-success: #16A34A;
+  --ls-color-success-border: #86EFAC;
+  --ls-color-success-foreground: #F0FDF4;
+  --ls-color-success-soft: #DCFCE7;
+  --ls-color-success-soft-foreground: #14532D;
+
+  /* ===================================================================
+   * Colors — Warning
+   * =================================================================== */
+  --ls-color-warning: #FACC15;
+  --ls-color-warning-border: #FDE047;
+  --ls-color-warning-foreground: #422006;
+  --ls-color-warning-soft: #FEF9C3;
+  --ls-color-warning-soft-foreground: #713F12;
+
+  /* ===================================================================
+   * Colors — Muted
+   * =================================================================== */
+  --ls-color-muted: #6B7280;
+  --ls-color-muted-border: #E5E7EB;
+  --ls-color-muted-foreground: #E5E7EB;
+  --ls-color-muted-soft: #F3F4F6;
+  --ls-color-muted-soft-foreground: #6B7280;
+
+  /* ===================================================================
+   * Colors — Neutral
+   * =================================================================== */
+  --ls-color-neutral: #374151;
+  --ls-color-neutral-border: #D1D5DB;
+  --ls-color-neutral-foreground: #F9FAFB;
+  --ls-color-neutral-soft: #E5E7EB;
+  --ls-color-neutral-soft-foreground: #111827;
+
+  /* ===================================================================
+   * Colors — Basic / Utility
+   * =================================================================== */
+  --ls-color-text-primary: #181D27;
+  --ls-color-text-secondary: #414651;
+  --ls-color-border: #D1D5DB;
+  --ls-color-bg-container: #FFFFFF;
+  --ls-color-bg-input: #E5E7EB;
+  --ls-color-bg-overlay: #0A0A0A80;
+  --ls-color-ring: #9CA3AF;
+
+  /* ===================================================================
+   * Colors — Interaction
+   * =================================================================== */
+  --ls-color-focus-ring: #31664A40;
+  --ls-color-hover-overlay: #31664A0A;
+  --ls-color-active-overlay: #31664A14;
+  --ls-color-selected-bg: #DBEAFE;
+  --ls-color-disabled-text: #9CA3AF;
+  --ls-color-disabled-bg: #F3F4F6;
+
+  /* ===================================================================
+   * Spacing — Tailwind-inspired rem scale
+   * =================================================================== */
+  --ls-space-0: 0rem;
+  --ls-space-0-5: 0.125rem;
+  --ls-space-1: 0.25rem;
+  --ls-space-1-5: 0.375rem;
+  --ls-space-2: 0.5rem;
+  --ls-space-2-5: 0.625rem;
+  --ls-space-3: 0.75rem;
+  --ls-space-3-5: 0.875rem;
+  --ls-space-4: 1rem;
+  --ls-space-4-5: 1.125rem;
+  --ls-space-5: 1.25rem;
+  --ls-space-6: 1.5rem;
+  --ls-space-7: 1.75rem;
+  --ls-space-8: 2rem;
+  --ls-space-9: 2.25rem;
+  --ls-space-10: 2.5rem;
+  --ls-space-11: 2.75rem;
+  --ls-space-12: 3rem;
+  --ls-space-14: 3.5rem;
+  --ls-space-16: 4rem;
+  --ls-space-20: 5rem;
+  --ls-space-24: 6rem;
+  --ls-space-28: 7rem;
+  --ls-space-32: 8rem;
+  --ls-space-36: 9rem;
+  --ls-space-40: 10rem;
+  --ls-space-44: 11rem;
+  --ls-space-48: 12rem;
+  --ls-space-52: 13rem;
+  --ls-space-56: 14rem;
+  --ls-space-60: 15rem;
+  --ls-space-64: 16rem;
+  --ls-space-72: 18rem;
+  --ls-space-80: 20rem;
+  --ls-space-96: 24rem;
+
+  /* ===================================================================
+   * Typography — Font Families
+   * =================================================================== */
+  --ls-font-body: 'Satoshi', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ls-font-heading: 'Mont', 'Satoshi', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ls-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+
+  /* ===================================================================
+   * Typography — Font Sizes
+   * =================================================================== */
+  --ls-font-size-xs: 0.75rem;
+  --ls-font-size-sm: 0.875rem;
+  --ls-font-size-base: 1rem;
+  --ls-font-size-lg: 1.125rem;
+  --ls-font-size-xl: 1.25rem;
+  --ls-font-size-2xl: 1.5rem;
+  --ls-font-size-3xl: 1.875rem;
+  --ls-font-size-4xl: 2.25rem;
+
+  /* ===================================================================
+   * Typography — Line Heights
+   * =================================================================== */
+  --ls-line-height-none: 1;
+  --ls-line-height-tight: 1.25;
+  --ls-line-height-snug: 1.375;
+  --ls-line-height-normal: 1.5;
+  --ls-line-height-relaxed: 1.625;
+  --ls-line-height-loose: 2;
+
+  /* ===================================================================
+   * Typography — Font Weights
+   * =================================================================== */
+  --ls-font-weight-normal: 400;
+  --ls-font-weight-medium: 500;
+  --ls-font-weight-semibold: 600;
+  --ls-font-weight-bold: 700;
+
+  /* ===================================================================
+   * Layout — Max Widths
+   * =================================================================== */
+  --ls-max-content-width: 1200px;
+  --ls-max-narrow-width: 768px;
+  --ls-max-wide-width: 1440px;
+
+  /* ===================================================================
+   * Layout — Border Radii
+   * =================================================================== */
+  --ls-radius-none: 0px;
+  --ls-radius-sm: 4px;
+  --ls-radius-md: 6px;
+  --ls-radius-lg: 8px;
+  --ls-radius-xl: 12px;
+  --ls-radius-2xl: 16px;
+  --ls-radius-full: 9999px;
+
+  /* ===================================================================
+   * Layout — Breakpoints (reference only — use in @media queries)
+   * =================================================================== */
+  --ls-breakpoint-sm: 640px;
+  --ls-breakpoint-md: 768px;
+  --ls-breakpoint-lg: 1024px;
+  --ls-breakpoint-xl: 1280px;
+  --ls-breakpoint-2xl: 1536px;
+
+  /* ===================================================================
+   * Layout — Z-Index
+   * =================================================================== */
+  --ls-z-dropdown: 1000;
+  --ls-z-sticky: 1020;
+  --ls-z-overlay: 1040;
+  --ls-z-modal: 1060;
+  --ls-z-popover: 1070;
+  --ls-z-toast: 1080;
+  --ls-z-tooltip: 1090;
+}

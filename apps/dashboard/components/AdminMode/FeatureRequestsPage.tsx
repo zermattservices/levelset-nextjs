@@ -396,7 +396,7 @@ export function FeatureRequestsPage() {
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
         <span>Loading feature requests...</span>
       </div>
     );
@@ -548,7 +548,7 @@ export function FeatureRequestsPage() {
                           <IconButton 
                             size="small" 
                             onClick={() => handleApproveClick(feature)}
-                            sx={{ color: '#31664a' }}
+                            sx={{ color: '#31664a' /* TODO: Use design token */ }}
                           >
                             <CheckCircleOutlineIcon fontSize="small" />
                           </IconButton>

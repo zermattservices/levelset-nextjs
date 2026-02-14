@@ -69,7 +69,7 @@
 }
 
 .menuCard:hover .iconContainer svg {
-  color: #31664a;
+  color: var(--ls-color-brand);
 }
 
 .menuCardDisabled {
@@ -88,7 +88,7 @@
 }
 
 .menuCardDisabled:hover .iconContainer svg {
-  color: #31664a;
+  color: var(--ls-color-brand);
 }
 
 .iconContainer {

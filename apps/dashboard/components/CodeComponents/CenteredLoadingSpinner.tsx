@@ -16,7 +16,7 @@ export interface CenteredLoadingSpinnerProps {
 export function CenteredLoadingSpinner({
   className = "",
   size = 48,
-  color = "#31664a",
+  color = "#31664a" /* TODO: Use design token */,
   backgroundColor = "rgba(255, 255, 255, 0.8)",
   opacity = 0.8,
   children,

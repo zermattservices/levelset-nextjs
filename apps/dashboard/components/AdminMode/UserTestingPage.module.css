@@ -190,7 +190,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background-color: #31664a;
+  background-color: var(--ls-color-brand);
   color: #ffffff;
   border: none;
   border-radius: 6px;

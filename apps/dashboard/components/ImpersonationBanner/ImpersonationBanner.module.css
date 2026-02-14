@@ -21,7 +21,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: var(--token-eC7sN0TdrMwT);
+  max-width: var(--ls-max-content-width);
 }
 
 .userInfo {

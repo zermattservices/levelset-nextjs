@@ -26,10 +26,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
   '& .MuiInputLabel-root': {
@@ -407,7 +407,7 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 1 }}>
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress size={32} sx={{ color: '#31664a' }} />
+                <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
               </Box>
             ) : (
               <>
@@ -500,8 +500,8 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
                                   checked={selectedLocationIds.has(loc.id)}
                                   onChange={() => handleLocationToggle(loc.id)}
                                   sx={{
-                                    color: '#31664a',
-                                    '&.Mui-checked': { color: '#31664a' },
+                                    color: '#31664a' /* TODO: Use design token */,
+                                    '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
                                   }}
                                 />
                               }
@@ -543,7 +543,7 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
                     {createdEmail}
                   </Typography>
                   <IconButton size="small" onClick={() => handleCopy(createdEmail, 'email')}>
-                    {copiedEmail ? <CheckIcon fontSize="small" sx={{ color: '#31664a' }} /> : <ContentCopyIcon fontSize="small" />}
+                    {copiedEmail ? <CheckIcon fontSize="small" sx={{ color: '#31664a' /* TODO: Use design token */ }} /> : <ContentCopyIcon fontSize="small" />}
                   </IconButton>
                 </Box>
               </Box>
@@ -568,7 +568,7 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
                     {createdPassword}
                   </Typography>
                   <IconButton size="small" onClick={() => handleCopy(createdPassword, 'password')}>
-                    {copiedPassword ? <CheckIcon fontSize="small" sx={{ color: '#31664a' }} /> : <ContentCopyIcon fontSize="small" />}
+                    {copiedPassword ? <CheckIcon fontSize="small" sx={{ color: '#31664a' /* TODO: Use design token */ }} /> : <ContentCopyIcon fontSize="small" />}
                   </IconButton>
                 </Box>
               </Box>
@@ -642,7 +642,7 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
               sx={{
                 fontFamily,
                 textTransform: 'none',
-                backgroundColor: '#31664a',
+                backgroundColor: '#31664a' /* TODO: Use design token */,
                 '&:hover': {
                   backgroundColor: '#264d38',
                 },
@@ -661,7 +661,7 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
             sx={{
               fontFamily,
               textTransform: 'none',
-              backgroundColor: '#31664a',
+              backgroundColor: '#31664a' /* TODO: Use design token */,
               '&:hover': {
                 backgroundColor: '#264d38',
               },

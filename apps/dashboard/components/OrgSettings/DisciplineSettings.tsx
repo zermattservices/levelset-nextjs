@@ -32,7 +32,7 @@ const OrgLevelTag = styled(Chip)(() => ({
 const StyledTabs = styled(Tabs)(() => ({
   marginBottom: 24,
   '& .MuiTabs-indicator': {
-    backgroundColor: '#31664a',
+    backgroundColor: '#31664a' /* TODO: Use design token */,
     height: 3,
   },
 }));
@@ -44,7 +44,7 @@ const StyledTab = styled(Tab)(() => ({
   textTransform: 'none',
   color: '#6b7280',
   '&.Mui-selected': {
-    color: '#31664a',
+    color: '#31664a' /* TODO: Use design token */,
     fontWeight: 600,
   },
 }));

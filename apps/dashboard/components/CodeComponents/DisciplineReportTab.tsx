@@ -18,7 +18,7 @@ import { DisciplineReportPDF } from './DisciplineReportPDF';
 import { pdf } from '@react-pdf/renderer';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a';
+const levelsetGreen = '#31664a'; // TODO: Use design token
 
 // Color gradient from lightest to darkest red (5 levels)
 const redGradient = [

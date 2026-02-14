@@ -59,7 +59,7 @@
   font-family: "Satoshi";
   font-size: 14px;
   font-weight: 600;
-  color: #31664a;
+  color: var(--ls-color-brand);
   margin: 0;
   padding-bottom: 8px;
   border-bottom: 1px solid #f0f0f0;

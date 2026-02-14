@@ -393,7 +393,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         onClick={() => setSummary(null)}
         sx={{
           marginTop: '12px',
-          backgroundColor: '#31664a',
+          backgroundColor: '#31664a' /* TODO: Use design token */,
           textTransform: 'none',
           fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           fontWeight: 600,
@@ -505,7 +505,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                 }}
                 aria-label="Change language"
               >
-                <LanguageIcon sx={{ fontSize: 20, color: '#31664a', mr: 0.5 }} />
+                <LanguageIcon sx={{ fontSize: 20, color: '#31664a' /* TODO: Use design token */, mr: 0.5 }} />
                 <Typography
                   sx={{
                     fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -547,7 +547,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                       fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                       fontSize: 14,
                       fontWeight: language === lang.code ? 600 : 500,
-                      color: language === lang.code ? '#31664a' : '#111827',
+                      color: language === lang.code ? '#31664a' /* TODO: Use design token */ : '#111827',
                       '&.Mui-selected': {
                         backgroundColor: '#f3f4f6',
                         '&:hover': {
@@ -621,15 +621,15 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                   padding: '14px 20px',
                   borderRadius: '16px',
                   backgroundColor: '#ffffff',
-                  color: '#31664a',
-                  border: '4px solid #31664a',
+                  color: '#31664a' /* TODO: Use design token */,
+                  border: '4px solid #31664a', /* TODO: Use design token */
                   fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                   fontSize: 16,
                   fontWeight: 600,
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                   '&:hover': {
                     backgroundColor: '#f0fdf4',
-                    border: '4px solid #31664a',
+                    border: '4px solid #31664a', /* TODO: Use design token */
                   },
                 }}
               >
@@ -697,7 +697,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                 textTransform: 'none',
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 fontWeight: 600,
-                backgroundColor: '#31664a',
+                backgroundColor: '#31664a' /* TODO: Use design token */,
                 borderRadius: '999px',
                 padding: '10px 18px',
                 '&:hover': { backgroundColor: '#264d38' },
@@ -710,7 +710,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
               sx={{
                 textTransform: 'none',
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                color: '#31664a',
+                color: '#31664a' /* TODO: Use design token */,
                 borderRadius: '8px',
               }}
             >
@@ -748,7 +748,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
             sx={{
               textTransform: 'none',
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-              color: '#31664a',
+              color: '#31664a' /* TODO: Use design token */,
               fontWeight: 600,
             }}
           >

@@ -41,7 +41,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const BUCKET_NAME = 'location_assets';
 const QR_FOLDER = 'pwa/qr_img';
 const PDF_FOLDER = 'pwa/info_pdf';
-const LEVELSET_GREEN = '#31664a';
+const LEVELSET_GREEN = '#31664a'; // TODO: Use design token
 
 interface Location {
   id: string;

@@ -73,7 +73,7 @@
 
 .menuItemActive {
   background-color: #f6fffa;
-  color: #31664a;
+  color: var(--ls-color-brand);
   font-weight: 600;
 }
 
@@ -99,5 +99,5 @@
 }
 
 .menuItemActive .icon {
-  color: #31664a;
+  color: var(--ls-color-brand);
 }

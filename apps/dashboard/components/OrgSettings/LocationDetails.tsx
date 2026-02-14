@@ -164,7 +164,7 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -207,10 +207,10 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
                       fontFamily: '"Satoshi", sans-serif',
                       fontSize: 12,
                       textTransform: 'none',
-                      borderColor: '#31664a',
-                      color: '#31664a',
+                      borderColor: '#31664a' /* TODO: Use design token */,
+                      color: '#31664a' /* TODO: Use design token */,
                       '&:hover': {
-                        borderColor: '#31664a',
+                        borderColor: '#31664a' /* TODO: Use design token */,
                         backgroundColor: 'rgba(49, 102, 74, 0.08)',
                       },
                     }}
@@ -264,7 +264,7 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
 
           {uploading && (
             <div className={sty.uploadingOverlay}>
-              <CircularProgress size={24} sx={{ color: '#31664a' }} />
+              <CircularProgress size={24} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
               <span>Uploading...</span>
             </div>
           )}

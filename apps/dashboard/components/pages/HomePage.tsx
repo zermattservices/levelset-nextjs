@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import sty from './HomePage.module.css';
-import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
+import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { RedirectIf } from '@/components/CodeComponents/RedirectIf';
 import { DashboardMetricCard } from '@/components/CodeComponents/DashboardMetricCard';

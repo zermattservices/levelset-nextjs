@@ -68,7 +68,7 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
           </Typography>
 
           {loading && (
-            <CircularProgress size={32} sx={{ color: '#31664a' }} />
+            <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
           )}
 
           {!loading && error && (
@@ -97,7 +97,7 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
                     paddingX: 6,
                     width: "auto",
                     minWidth: 0,
-                    backgroundColor: '#31664a',
+                    backgroundColor: '#31664a' /* TODO: Use design token */,
                     whiteSpace: 'nowrap',
                     color: '#ffffff',
                     boxShadow: '0px 6px 16px rgba(49, 102, 74, 0.12)',

@@ -44,12 +44,12 @@
   height: auto;
   max-width: 100%;
   font-family: "Satoshi";
-  color: var(--token-WOsv3R6KKLJw);
+  color: var(--ls-color-muted);
 }
 .text__v0804 {
   font-style: italic;
   font-family: "Satoshi";
-  color: var(--token-WOsv3R6KKLJw);
+  color: var(--ls-color-muted);
 }
 .dashboardSubmenu___5Cxq:global(.__wab_instance) {
   max-width: 100%;
@@ -85,10 +85,10 @@
   justify-content: flex-start;
   width: 100%;
   height: auto;
-  max-width: var(--token-eC7sN0TdrMwT);
+  max-width: var(--ls-max-content-width);
   min-width: 0;
   padding: 0px 0px 8px;
-  border-bottom: 1px solid var(--token-bGw1ZBUIaR08);
+  border-bottom: 1px solid var(--ls-color-border);
 }
 .freeBox__rv6F {
   display: flex;
@@ -152,7 +152,7 @@
   object-fit: cover;
   width: 16px;
   height: 16px;
-  color: var(--token-pwLzGroeEMjk);
+  color: var(--ls-color-bg-container);
 }
 .text__fWt60 {
   font-family: "Satoshi";
@@ -181,7 +181,7 @@
   width: 100%;
   height: auto;
   max-width: 100%;
-  font-size: var(--token-BlA-iDkaAWvO);
+  font-size: var(--ls-font-size-base);
   font-family: "Satoshi";
   min-width: 0;
   display: none;
@@ -191,7 +191,7 @@
   width: 100%;
   height: auto;
   max-width: 100%;
-  font-size: var(--token-BlA-iDkaAWvO);
+  font-size: var(--ls-font-size-base);
   font-family: "Satoshi";
   min-width: 0;
 }
@@ -216,7 +216,7 @@
   justify-content: space-between;
   width: 100%;
   height: auto;
-  max-width: var(--token-eC7sN0TdrMwT);
+  max-width: var(--ls-max-content-width);
   flex-grow: 0;
   min-width: 0;
   padding: 0px 8px;
@@ -240,7 +240,7 @@
   max-width: 100%;
   font-family: "Satoshi";
   font-weight: 700;
-  font-size: var(--token-B10hUni6jzpI);
+  font-size: var(--ls-font-size-2xl);
   min-width: 0;
 }
 .bohSlider:global(.__wab_instance) {
@@ -278,7 +278,7 @@
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
-  row-gap: var(--token-rX_8jNE36opk);
+  row-gap: var(--ls-space-4);
   padding: 8px;
 }
 .text__mFycJ {
@@ -288,7 +288,7 @@
   max-width: 100%;
   font-family: "Satoshi";
   font-weight: 700;
-  font-size: var(--token-B10hUni6jzpI);
+  font-size: var(--ls-font-size-2xl);
   text-align: center;
   min-width: 0;
 }

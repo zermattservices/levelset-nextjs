@@ -650,7 +650,7 @@ export function EmployeeModal({
                   fontSize: "13px",
                   fontWeight: 500,
                   textTransform: "none",
-                  color: "#31664a",
+                  color: "#31664a" /* TODO: Use design token */,
                   padding: "4px 12px",
                   minWidth: "auto",
                   borderRadius: '8px',
@@ -724,7 +724,7 @@ export function EmployeeModal({
                   fontSize: "13px",
                   fontWeight: 500,
                   textTransform: "none",
-                  color: "#31664a",
+                  color: "#31664a" /* TODO: Use design token */,
                   padding: "4px 12px",
                   minWidth: "auto",
                   borderRadius: '8px',
@@ -741,7 +741,7 @@ export function EmployeeModal({
                   size="small"
                   onClick={onRecordAction}
                   sx={{
-                    backgroundColor: "#31664a",
+                    backgroundColor: "#31664a" /* TODO: Use design token */,
                     textTransform: "none",
                     borderRadius: "8px",
                     fontSize: "13px",
@@ -839,7 +839,7 @@ export function EmployeeModal({
                         fontFamily: "Satoshi",
                         fontSize: 13,
                         textTransform: "none",
-                        backgroundColor: "#31664a",
+                        backgroundColor: "#31664a" /* TODO: Use design token */,
                         padding: "6px 16px",
                         borderRadius: '8px',
                         "&:hover": {
@@ -966,7 +966,7 @@ export function EmployeeModal({
                   borderRadius: "18px",
                   padding: "6px 16px",
                   minWidth: "auto",
-                  backgroundColor: peViewMode === 'employee' ? "#31664a" : "transparent",
+                  backgroundColor: peViewMode === 'employee' ? "#31664a" /* TODO: Use design token */ : "transparent",
                   color: peViewMode === 'employee' ? "#ffffff" : "#6b7280",
                   "&:hover": {
                     backgroundColor: peViewMode === 'employee' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
@@ -986,7 +986,7 @@ export function EmployeeModal({
                   borderRadius: "18px",
                   padding: "6px 16px",
                   minWidth: "auto",
-                  backgroundColor: peViewMode === 'rater' ? "#31664a" : "transparent",
+                  backgroundColor: peViewMode === 'rater' ? "#31664a" /* TODO: Use design token */ : "transparent",
                   color: peViewMode === 'rater' ? "#ffffff" : "#6b7280",
                   "&:hover": {
                     backgroundColor: peViewMode === 'rater' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
@@ -1105,11 +1105,11 @@ export function EmployeeModal({
               minHeight: 48,
               color: "#6b7280",
               "&.Mui-selected": {
-                color: "#31664a",
+                color: "#31664a" /* TODO: Use design token */,
               },
             },
             "& .MuiTabs-indicator": {
-              backgroundColor: "#31664a",
+              backgroundColor: "#31664a" /* TODO: Use design token */,
               height: 2,
             },
           }}

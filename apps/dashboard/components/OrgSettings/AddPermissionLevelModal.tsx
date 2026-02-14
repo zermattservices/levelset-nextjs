@@ -28,17 +28,17 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
   '& .MuiInputLabel-root': {
     fontFamily,
     fontSize: 14,
     '&.Mui-focused': {
-      color: '#31664a',
+      color: '#31664a' /* TODO: Use design token */,
     },
   },
 }));
@@ -50,10 +50,10 @@ const StyledSelect = styled(Select)(() => ({
     borderColor: '#e5e7eb',
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
 }));
 
@@ -225,7 +225,7 @@ export function AddPermissionLevelModal({
                 backgroundColor: '#fff',
                 px: 0.5,
                 '&.Mui-focused': {
-                  color: '#31664a',
+                  color: '#31664a' /* TODO: Use design token */,
                 },
               }}
             >
@@ -283,7 +283,7 @@ export function AddPermissionLevelModal({
             fontFamily,
             fontSize: 14,
             textTransform: 'none',
-            backgroundColor: '#31664a',
+            backgroundColor: '#31664a' /* TODO: Use design token */,
             '&:hover': {
               backgroundColor: '#285540',
             },

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import sty from './DashboardSubmenu.module.css';
-import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
+import projectcss from '@/styles/base.module.css';
 import { usePermissions, P, type PermissionKey } from '@/lib/providers/PermissionsProvider';
 
 // MUI Icons

@@ -1,0 +1,71 @@
+/**
+ * Plasmic Compatibility Layer
+ *
+ * Maps opaque Plasmic token IDs used in hand-written code to the new
+ * --ls-* CSS custom properties. This allows existing code to continue
+ * working during the migration from Plasmic to native CSS variables.
+ *
+ * Once all hand-written code is migrated to --ls-* variables, this
+ * file can be safely deleted.
+ *
+ * Import after variables.css:
+ *   import '@levelset/design-tokens/css/variables.css';
+ *   import '@levelset/design-tokens/css/plasmic-compat.css';
+ */
+
+:root {
+  /* ===================================================================
+   * Color Tokens
+   * =================================================================== */
+
+  /* Brand green — used in HomePage, LogoutButton */
+  --token-FTu687H3gT3S: var(--ls-color-brand);
+
+  /* Border gray (#D1D5DB) — used in DisciplinePage, HomePage, PeaClassicPage, etc. */
+  --token-bGw1ZBUIaR08: var(--ls-color-border);
+
+  /* Container background white (#FFFFFF) — used in PeaClassicPage */
+  --token-pwLzGroeEMjk: var(--ls-color-bg-container);
+
+  /* Text primary (#181D27) — used in DisciplinePage, HomePage */
+  --token-b4D6G1fNo7IC: var(--ls-color-text-primary);
+
+  /* Muted gray (#6B7280) — used in DisciplinePage, HomePage, PeaClassicPage, etc. */
+  --token-WOsv3R6KKLJw: var(--ls-color-muted);
+
+  /* ===================================================================
+   * Layout Tokens
+   * =================================================================== */
+
+  /* Max content width (1200px) — used in 9+ page layouts */
+  --token-eC7sN0TdrMwT: var(--ls-max-content-width);
+
+  /* ===================================================================
+   * Typography Tokens
+   * =================================================================== */
+
+  /* Font size heading 4 (~24px / 1.5rem) — used in DisciplinePage, HomePage, etc. */
+  --token-B10hUni6jzpI: var(--ls-font-size-2xl);
+
+  /* Font size base (~14px / 0.875rem) — used in LogoutButton */
+  --token-7z5Kw5B89TZR: var(--ls-font-size-sm);
+
+  /* ===================================================================
+   * Spacing Tokens
+   * =================================================================== */
+
+  /* Spacing 0.5 (0.125rem / 2px) — used in MetricCard */
+  --token-IUVIp1DHBSFd: var(--ls-space-0-5);
+
+  /* Font size heading 3 (~24px / 1.5rem) — used in HomePage */
+  --token-16_cC9w3e0Nk: var(--ls-font-size-2xl);
+
+  /* Font size heading 5 (~16px / 1rem) — used in PositionalExcellencePage, PeaClassicPage, etc. */
+  --token-BlA-iDkaAWvO: var(--ls-font-size-base);
+
+  /* Font size LG (~16px / 1rem) — used in DisciplinePage */
+  --token-LGg-zkf2M2GB: var(--ls-font-size-base);
+
+  /* Margin M (~16px / 1rem) — used in PositionalExcellencePage, PeaClassicPage */
+  --token-rX_8jNE36opk: var(--ls-space-4);
+}

@@ -28,10 +28,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
 }));
@@ -41,10 +41,10 @@ const PasswordTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
   '& input[type="password"]': {
@@ -220,7 +220,7 @@ export function MobileAppAccess({ disabled = false }: MobileAppAccessProps) {
           <>
             <div className={sty.qrContainer}>
               {qrLoading ? (
-                <CircularProgress size={32} sx={{ color: '#31664a' }} />
+                <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
               ) : qrImageUrl && !useLocalQr ? (
                 // Use QR from storage (same as PDF)
                 <img 
@@ -235,7 +235,7 @@ export function MobileAppAccess({ disabled = false }: MobileAppAccessProps) {
                   size={200}
                   level="H"
                   includeMargin={true}
-                  fgColor="#31664a"
+                  fgColor="#31664a" /* TODO: Use design token */
                   imageSettings={{
                     src: '/Levelset Icon Non Trans.png',
                     x: undefined,
@@ -257,7 +257,7 @@ export function MobileAppAccess({ disabled = false }: MobileAppAccessProps) {
                   size="small"
                   onClick={handleCopyUrl}
                   title="Copy link"
-                  sx={{ color: copied ? '#31664a' : '#666' }}
+                  sx={{ color: copied ? '#31664a' /* TODO: Use design token */ : '#666' }}
                 >
                   {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
                 </IconButton>
@@ -279,11 +279,11 @@ export function MobileAppAccess({ disabled = false }: MobileAppAccessProps) {
               sx={{
                 fontFamily,
                 textTransform: 'none',
-                borderColor: '#31664a',
-                color: '#31664a',
+                borderColor: '#31664a' /* TODO: Use design token */,
+                color: '#31664a' /* TODO: Use design token */,
                 marginTop: 2,
                 '&:hover': {
-                  borderColor: '#31664a',
+                  borderColor: '#31664a' /* TODO: Use design token */,
                   backgroundColor: 'rgba(49, 102, 74, 0.08)',
                 },
               }}
@@ -337,7 +337,7 @@ export function MobileAppAccess({ disabled = false }: MobileAppAccessProps) {
               sx={{
                 fontFamily,
                 textTransform: 'none',
-                backgroundColor: '#31664a',
+                backgroundColor: '#31664a' /* TODO: Use design token */,
                 '&:hover': {
                   backgroundColor: '#264d38',
                 },
@@ -387,7 +387,7 @@ export function MobileAppAccess({ disabled = false }: MobileAppAccessProps) {
             sx={{
               fontFamily,
               textTransform: 'none',
-              backgroundColor: '#31664a',
+              backgroundColor: '#31664a' /* TODO: Use design token */,
               '&:hover': {
                 backgroundColor: '#264d38',
               },

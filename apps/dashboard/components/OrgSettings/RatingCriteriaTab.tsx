@@ -30,10 +30,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
 }));
@@ -51,10 +51,10 @@ const StyledSelect = styled(Select)(() => ({
     borderRadius: 12,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
 }));
 
@@ -74,10 +74,10 @@ const LanguageSelect = styled(Select)(() => ({
     borderRadius: 8,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
     borderWidth: 1,
   },
   '& .MuiSvgIcon-root': {
@@ -102,10 +102,10 @@ const PillarSelect = styled(Select)(() => ({
     borderRadius: 6,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a',
+    borderColor: '#31664a' /* TODO: Use design token */,
     borderWidth: 1,
   },
   '& .MuiSvgIcon-root': {
@@ -540,7 +540,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -571,12 +571,12 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                     height: 36,
                     minWidth: 110,
                     borderRadius: '8px',
-                    borderColor: translateMenuAnchor ? '#31664a' : '#e5e7eb',
+                    borderColor: translateMenuAnchor ? '#31664a' /* TODO: Use design token */ : '#e5e7eb',
                     color: '#4b5563',
                     backgroundColor: '#ffffff',
                     padding: '8px 12px',
                     '&:hover': {
-                      borderColor: '#31664a',
+                      borderColor: '#31664a' /* TODO: Use design token */,
                       backgroundColor: '#ffffff',
                     },
                     '&:active': {
@@ -659,7 +659,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
               }}
             >
               {fohPositions.length > 0 && (
-                <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' }}>
+                <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' /* TODO: Use design token */ }}>
                   FOH Positions
                 </ListSubheader>
               )}
@@ -669,7 +669,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                 </MenuItem>
               ))}
               {bohPositions.length > 0 && (
-                <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' }}>
+                <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' /* TODO: Use design token */ }}>
                   BOH Positions
                 </ListSubheader>
               )}
@@ -699,7 +699,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
             backgroundColor: '#ffffff',
             padding: '8px 12px',
             '&:hover': {
-              borderColor: '#31664a',
+              borderColor: '#31664a' /* TODO: Use design token */,
               backgroundColor: '#ffffff',
             },
             '&:active': {
@@ -809,7 +809,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                     onClick={() => handleAutoTranslate('row', c.criteria_order)}
                     disabled={translating}
                     title="Translate this criteria"
-                    sx={{ color: '#6b7280', '&:hover': { color: '#31664a' } }}
+                    sx={{ color: '#6b7280', '&:hover': { color: '#31664a' /* TODO: Use design token */ } }}
                   >
                     <TranslateIcon fontSize="small" />
                   </IconButton>
@@ -832,10 +832,10 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                 sx={{
                   fontFamily,
                   textTransform: 'none',
-                  borderColor: '#31664a',
-                  color: '#31664a',
+                  borderColor: '#31664a' /* TODO: Use design token */,
+                  color: '#31664a' /* TODO: Use design token */,
                   '&:hover': {
-                    borderColor: '#31664a',
+                    borderColor: '#31664a' /* TODO: Use design token */,
                     backgroundColor: 'rgba(49, 102, 74, 0.08)',
                   },
                 }}

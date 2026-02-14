@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { Button } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import sty from './DisciplinePage.module.css';
-import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
+import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { CenteredLoadingSpinner } from '@/components/CodeComponents/CenteredLoadingSpinner';
 import { RedirectIf } from '@/components/CodeComponents/RedirectIf';
@@ -71,7 +71,7 @@ export function DisciplinePage() {
         <CenteredLoadingSpinner
           className={classNames("__wab_instance", sty.centeredLoadingSpinner)}
           backgroundColor="rgba(255, 255, 255, 0.8)"
-          color="#31664a"
+          color="#31664a" /* TODO: Use design token */
           opacity={0.8}
           showChildren={true}
           size={48}

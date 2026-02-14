@@ -72,7 +72,7 @@
   position: relative;
   align-self: stretch;
   flex-direction: row;
-  column-gap: var(--token-IUVIp1DHBSFd);
+  column-gap: var(--ls-space-0-5);
   align-items: flex-end;
   justify-content: flex-start;
 }

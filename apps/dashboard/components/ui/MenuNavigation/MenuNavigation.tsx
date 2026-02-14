@@ -9,7 +9,7 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import sty from './MenuNavigation.module.css';
-import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
+import projectcss from '@/styles/base.module.css';
 import { LevelsetButton } from '../LevelsetButton/LevelsetButton';
 import { LogoutButton } from '../LogoutButton/LogoutButton';
 import { NavSubmenu, type MenuType } from '../NavSubmenu/NavSubmenu';
@@ -261,7 +261,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
                   <KeyboardArrowDownIcon 
                     sx={{ 
                       fontSize: 18, 
-                      color: activeMenu === type ? '#31664a' : '#6b7280',
+                      color: activeMenu === type ? '#31664a' /* TODO: Use design token */ : '#6b7280',
                       transition: 'transform 0.2s ease, color 0.15s ease',
                       transform: activeMenu === type ? 'rotate(180deg)' : 'rotate(0deg)',
                     }} 
@@ -308,12 +308,12 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               <button 
                 className={classNames(sty.navButton, helpDropdownOpen && sty.navButtonActive)}
               >
-                <HelpOutlineIcon sx={{ fontSize: 18, color: helpDropdownOpen ? '#31664a' : '#6b7280' }} />
+                <HelpOutlineIcon sx={{ fontSize: 18, color: helpDropdownOpen ? '#31664a' /* TODO: Use design token */ : '#6b7280' }} />
                 <span className={sty.navButtonText}>Need Help?</span>
                 <KeyboardArrowDownIcon 
                   sx={{ 
                     fontSize: 18, 
-                    color: helpDropdownOpen ? '#31664a' : '#6b7280',
+                    color: helpDropdownOpen ? '#31664a' /* TODO: Use design token */ : '#6b7280',
                     transition: 'transform 0.2s ease, color 0.15s ease',
                     transform: helpDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                   }} 
@@ -381,7 +381,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               ) : (
                 <AccountCircleIcon 
                   className={sty.accountIcon} 
-                  sx={{ fontSize: 32, color: '#31664a', cursor: 'pointer' }} 
+                  sx={{ fontSize: 32, color: '#31664a' /* TODO: Use design token */, cursor: 'pointer' }} 
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 />
               )}

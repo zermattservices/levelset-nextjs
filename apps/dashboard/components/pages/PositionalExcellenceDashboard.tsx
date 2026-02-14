@@ -2,7 +2,7 @@ import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import sty from './PositionalExcellenceDashboard.module.css';
-import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
+import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { ManillaTabs, TabId } from '@/components/ui/ManillaTabs/ManillaTabs';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';

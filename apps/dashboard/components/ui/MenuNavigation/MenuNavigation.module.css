@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  max-width: var(--token-eC7sN0TdrMwT);
+  max-width: var(--ls-max-content-width);
   gap: 16px;
 }
 
@@ -82,7 +82,7 @@
 }
 
 .navButton:hover .navButtonText {
-  color: #31664a;
+  color: var(--ls-color-brand);
 }
 
 .navButton.navButtonActive {
@@ -97,7 +97,7 @@
 }
 
 .navButtonActive .navButtonText {
-  color: #31664a;
+  color: var(--ls-color-brand);
 }
 
 .submenuContainer {
@@ -159,7 +159,7 @@
 }
 
 .adminModeButton {
-  color: #31664a;
+  color: var(--ls-color-brand);
   font-family: "Satoshi";
   font-size: 16px;
   font-weight: 600;
@@ -212,7 +212,7 @@
 }
 
 .helpMenuCard:hover .helpIconContainer svg {
-  color: #31664a;
+  color: var(--ls-color-brand);
 }
 
 .helpIconContainer {
@@ -316,7 +316,7 @@
   border-radius: 50%;
   cursor: pointer;
   object-fit: cover;
-  border: 2px solid #31664a;
+  border: 2px solid var(--ls-color-brand);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 

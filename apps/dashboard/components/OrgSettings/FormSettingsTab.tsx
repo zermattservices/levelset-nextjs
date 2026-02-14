@@ -12,13 +12,13 @@ const fontFamily = '"Satoshi", sans-serif';
 
 const StyledSwitch = styled(Switch)(() => ({
   '& .MuiSwitch-switchBase.Mui-checked': {
-    color: '#31664a',
+    color: '#31664a' /* TODO: Use design token */,
     '&:hover': {
       backgroundColor: 'rgba(49, 102, 74, 0.08)',
     },
   },
   '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-    backgroundColor: '#31664a',
+    backgroundColor: '#31664a' /* TODO: Use design token */,
   },
 }));
 
@@ -112,7 +112,7 @@ export function FormSettingsTab({ orgId, disabled = false }: FormSettingsTabProp
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -180,7 +180,7 @@ export function FormSettingsTab({ orgId, disabled = false }: FormSettingsTabProp
                 sx={{
                   fontFamily,
                   textTransform: 'none',
-                  backgroundColor: '#31664a',
+                  backgroundColor: '#31664a' /* TODO: Use design token */,
                   '&:hover': {
                     backgroundColor: '#264d38',
                   },

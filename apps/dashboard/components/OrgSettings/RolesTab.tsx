@@ -37,10 +37,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
 }));
@@ -385,7 +385,7 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -504,7 +504,7 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
               sx={{
                 fontFamily,
                 textTransform: 'none',
-                color: '#31664a',
+                color: '#31664a' /* TODO: Use design token */,
                 '&:hover': {
                   backgroundColor: 'rgba(49, 102, 74, 0.08)',
                 },
@@ -554,7 +554,7 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
 
       {saving && (
         <div className={sty.savingIndicator}>
-          <CircularProgress size={16} sx={{ color: '#31664a' }} />
+          <CircularProgress size={16} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
           <span>Saving...</span>
         </div>
       )}

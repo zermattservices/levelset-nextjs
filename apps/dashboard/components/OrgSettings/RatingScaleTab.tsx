@@ -19,10 +19,10 @@ const ThresholdInput = styled(TextField)(() => ({
       padding: '8px 12px',
     },
     '&:hover fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a',
+      borderColor: '#31664a' /* TODO: Use design token */,
     },
   },
 }));
@@ -141,7 +141,7 @@ export function RatingScaleTab({ orgId, disabled = false }: RatingScaleTabProps)
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' }} />
+        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
       </div>
     );
   }
@@ -225,7 +225,7 @@ export function RatingScaleTab({ orgId, disabled = false }: RatingScaleTabProps)
 
         {saving && (
           <div className={sty.savingIndicator}>
-            <CircularProgress size={16} sx={{ color: '#31664a' }} />
+            <CircularProgress size={16} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
             <span>Saving...</span>
           </div>
         )}

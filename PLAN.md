@@ -2,7 +2,7 @@
 
 ## Context
 
-The current codebase is a flat Next.js app deployed to Vercel from the root directory. We need to restructure into a pnpm monorepo so the existing dashboard lives at `apps/dashboard/` and a new Levi agent service lives at `apps/agent/`, deployed to Fly.io. The mobile app (`levelset-app/`) will eventually become `apps/mobile/` but is **out of scope** for this plan.
+The current codebase is a flat Next.js app deployed to Vercel from the root directory. We need to restructure into a pnpm monorepo so the existing dashboard lives at `apps/dashboard/` and a new Levi agent service lives at `apps/agent/`, deployed to Fly.io. The mobile app (`levelset-mobile/`) will eventually become `apps/mobile/` but is **out of scope** for this plan.
 
 **Key constraints:**
 - Vercel currently deploys from root — must update settings to point to `apps/dashboard`
@@ -39,7 +39,7 @@ This is the most critical and delicate step. Move the existing Next.js app:
 - `docs/` — Mintlify documentation
 - `.github/` — CI/CD workflows
 - `.env*` files — environment configuration
-- `levelset-app/` — mobile app (moved later)
+- `levelset-mobile/` — mobile app (moved later)
 
 **Update all import paths:**
 - `tsconfig.json` paths (`@/*`, `~/*`) remain relative to `apps/dashboard/`
@@ -353,7 +353,7 @@ fly deploy
 ## What This Plan Does NOT Do
 
 - Does not implement any AI features (chat, RAG, meeting transcription, etc.)
-- Does not move the mobile app (`levelset-app/`) — that's a separate effort
+- Does not move the mobile app (`levelset-mobile/`) — that's a separate effort
 - Does not extract shared packages fully — uses re-exports initially for safety
 - Does not set up Inngest, AssemblyAI, OpenRouter, or other AI service integrations
 - Does not create the `packages/ai-tools/` package — that comes with actual AI implementation

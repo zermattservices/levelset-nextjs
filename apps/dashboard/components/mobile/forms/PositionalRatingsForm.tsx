@@ -18,7 +18,7 @@ import type { FormControlCallbacks } from '../types';
 const RATING_OPTIONS: Array<{ labelKey: string; value: RatingValue; color: string }> = [
   { labelKey: 'ratings.ratingLabels.notYet', value: 1, color: '#b91c1c' },
   { labelKey: 'ratings.ratingLabels.onTheRise', value: 2, color: '#f59e0b' },
-  { labelKey: 'ratings.ratingLabels.crushingIt', value: 3, color: '#31664a' },
+  { labelKey: 'ratings.ratingLabels.crushingIt', value: 3, color: '#31664a' /* TODO: Use design token */ },
 ];
 
 type RatingValue = 1 | 2 | 3;
@@ -657,7 +657,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                           component="span"
                           sx={{
                             fontWeight: 600,
-                            color: '#31664a',
+                            color: '#31664a' /* TODO: Use design token */,
                           }}
                         >
                           {firstName}

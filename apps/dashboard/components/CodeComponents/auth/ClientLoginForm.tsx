@@ -180,7 +180,7 @@ export function ClientLoginForm({
               style={{
                 width: '100%',
                 padding: '12px',
-                backgroundColor: '#31664A',
+                backgroundColor: '#31664A' /* TODO: Use design token */,
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',

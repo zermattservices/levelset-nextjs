@@ -7,7 +7,7 @@ import { LocationSelectModal } from '@/components/CodeComponents/LocationSelectM
 import { ImpersonationBanner } from '@/components/ImpersonationBanner/ImpersonationBanner';
 
 // Import Plasmic CSS for design tokens and base styles
-import projectcss from '@/components/plasmic/levelset_v2/plasmic_levelset_v2.module.css';
+import projectcss from '@/styles/base.module.css';
 
 interface AppProvidersProps {
   children: React.ReactNode;

@@ -15,7 +15,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     scope: '/mobile/',
     display: 'standalone',
     background_color: '#FFFFFF',
-    theme_color: '#31664a',
+    theme_color: '#31664a' /* TODO: Use design token */,
     icons: [
       {
         src: iconSrc,

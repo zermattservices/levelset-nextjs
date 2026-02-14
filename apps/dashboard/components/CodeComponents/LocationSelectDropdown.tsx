@@ -62,14 +62,14 @@ export function LocationSelectDropdown({
           borderWidth: '1px',
         },
         '&:hover .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#31664a',
+          borderColor: '#31664a' /* TODO: Use design token */,
         },
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#31664a',
+          borderColor: '#31664a' /* TODO: Use design token */,
           borderWidth: 2,
         },
         '& .MuiSelect-icon': {
-          color: '#31664a',
+          color: '#31664a' /* TODO: Use design token */,
           marginRight: 0,
           right: 12,
           pointerEvents: 'auto',
@@ -125,7 +125,7 @@ export function LocationSelectDropdown({
                 paddingX: 2,
                 '&.Mui-selected': {
                   backgroundColor: '#eef5f0',
-                  color: '#31664a',
+                  color: '#31664a' /* TODO: Use design token */,
                 },
                 '&.Mui-selected:hover': {
                   backgroundColor: '#e3efe6',

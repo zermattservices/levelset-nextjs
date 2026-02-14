@@ -123,7 +123,7 @@
 }
 
 .uploadPlaceholder:hover {
-  border-color: #31664a;
+  border-color: var(--ls-color-brand);
   background-color: rgba(49, 102, 74, 0.04);
 }
 
@@ -158,5 +158,5 @@
   gap: 8px;
   font-family: "Satoshi";
   font-size: 12px;
-  color: #31664a;
+  color: var(--ls-color-brand);
 }
