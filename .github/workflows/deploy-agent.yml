@@ -2,20 +2,82 @@ name: Deploy Agent to Fly.io
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - develop
     paths:
       - 'apps/agent/**'
       - 'packages/shared/**'
       - 'packages/supabase-client/**'
       - 'packages/permissions/**'
+      - '.github/workflows/deploy-agent.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deploy environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - production
 
 jobs:
-  deploy:
+  deploy-agent:
     name: Deploy Agent
     runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: "--max-old-space-size=8192"
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy . --config apps/agent/fly.toml --dockerfile apps/agent/Dockerfile --remote-only
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Fly.io CLI
+        uses: superfly/flyctl-actions/setup-flyctl@1.5
+
+      - name: Set deployment target
+        id: deploy-target
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.environment }}" == "production" ]]; then
+              echo "app=levelset-agent" >> $GITHUB_OUTPUT
+              echo "api_url=https://levelset-agent.fly.dev" >> $GITHUB_OUTPUT
+            else
+              echo "app=levelset-agent-dev" >> $GITHUB_OUTPUT
+              echo "api_url=https://levelset-agent-dev.fly.dev" >> $GITHUB_OUTPUT
+            fi
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "app=levelset-agent" >> $GITHUB_OUTPUT
+            echo "api_url=https://levelset-agent.fly.dev" >> $GITHUB_OUTPUT
+          else
+            echo "app=levelset-agent-dev" >> $GITHUB_OUTPUT
+            echo "api_url=https://levelset-agent-dev.fly.dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy to Fly.io
+        run: |
+          flyctl deploy . \
+            --config apps/agent/fly.toml \
+            --dockerfile apps/agent/Dockerfile \
+            --app ${{ steps.deploy-target.outputs.app }} \
+            --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Verify deployment health
+        run: |
+          sleep 30
+          curl -f ${{ steps.deploy-target.outputs.api_url }}/health || exit 1
+
+      - name: Deployment summary
+        run: |
+          echo "## Agent Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**App:** ${{ steps.deploy-target.outputs.app }}" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** ${{ steps.deploy-target.outputs.api_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Endpoints" >> $GITHUB_STEP_SUMMARY
+          echo "- Health Check: ${{ steps.deploy-target.outputs.api_url }}/health" >> $GITHUB_STEP_SUMMARY
+          echo "- AI Chat: ${{ steps.deploy-target.outputs.api_url }}/api/ai/chat" >> $GITHUB_STEP_SUMMARY
