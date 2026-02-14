@@ -5,11 +5,11 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from "react-native";
-import { SymbolView } from "expo-symbols";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { AppIcon } from "../ui";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
-import { borderRadius } from "../../lib/theme";
+import { borderRadius, haptics } from "../../lib/theme";
 
 export interface RadioOption {
   value: number | string;
@@ -65,7 +65,12 @@ export function RadioButtonGroup({
                 isSelected && { borderColor: optionColor },
                 disabled && styles.optionDisabled,
               ]}
-              onPress={() => !disabled && onChange(option.value)}
+              onPress={() => {
+                if (!disabled) {
+                  haptics.selection();
+                  onChange(option.value);
+                }
+              }}
               activeOpacity={0.7}
               disabled={disabled}
             >
@@ -98,10 +103,10 @@ export function RadioButtonGroup({
                   )}
                 </View>
               </View>
-              {isSelected && Platform.OS === "ios" && (
-                <SymbolView
+              {isSelected && (
+                <AppIcon
                   name="checkmark"
-                  size={18}
+                  size={16}
                   tintColor={optionColor}
                   style={styles.checkmark}
                 />
@@ -170,6 +175,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: borderRadius.md,
+    borderCurve: "continuous",
     paddingHorizontal: 16,
     paddingVertical: 14,
   },

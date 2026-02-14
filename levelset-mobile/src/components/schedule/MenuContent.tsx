@@ -4,10 +4,10 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SymbolView } from "expo-symbols";
 import { useSlidingMenu } from "../../context/SlidingMenuContext";
+import { AppIcon } from "../../components/ui";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
 
@@ -56,19 +56,11 @@ export function MenuContent({ children }: MenuContentProps) {
           onPress={openMenu}
           activeOpacity={0.7}
         >
-          {Platform.OS === "ios" ? (
-            <SymbolView
-              name="line.3.horizontal"
-              size={24}
-              tintColor={colors.onSurface}
-            />
-          ) : (
-            <View style={styles.hamburgerIcon}>
-              <View style={styles.hamburgerLine} />
-              <View style={styles.hamburgerLine} />
-              <View style={styles.hamburgerLine} />
-            </View>
-          )}
+          <AppIcon
+            name="line.3.horizontal"
+            size={24}
+            tintColor={colors.onSurface}
+          />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{currentTab?.label || "Schedule"}</Text>
         <View style={styles.headerSpacer} />
@@ -103,17 +95,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 22,
     backgroundColor: colors.surfaceVariant,
-  },
-  hamburgerIcon: {
-    width: 20,
-    height: 16,
-    justifyContent: "space-between",
-  },
-  hamburgerLine: {
-    width: 20,
-    height: 2,
-    backgroundColor: colors.onSurface,
-    borderRadius: 1,
   },
   headerTitle: {
     ...typography.h4,

@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "levelset",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
@@ -17,7 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.levelset.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "Allow Levelset to access your camera for scanning signatures and documents.",
+        "NSCameraUsageDescription": "Allow Levelset to access your camera for capturing signatures and documents.",
         "NSFaceIDUsageDescription": "Allow Levelset to use Face ID for secure authentication.",
         "ITSAppUsesNonExemptEncryption": false
       }

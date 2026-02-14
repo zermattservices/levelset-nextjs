@@ -1,6 +1,7 @@
 /**
  * FormsContext
- * Manages form state, submission, and navigation for mobile forms
+ * Manages form state, submission, and language for mobile forms
+ * Navigation is now handled by expo-router instead of modal state
  */
 
 import React, {
@@ -21,16 +22,10 @@ export interface SubmissionSummary {
 }
 
 interface FormsContextType {
-  // Active form state
-  activeForm: FormType;
-  isFormOpen: boolean;
+  // Form state
   isDirty: boolean;
   isSubmitting: boolean;
   submitError: string | null;
-
-  // Form navigation
-  openForm: (formType: FormType) => void;
-  closeForm: () => void;
 
   // Form state management
   setDirty: (dirty: boolean) => void;
@@ -54,29 +49,12 @@ interface FormsProviderProps {
 }
 
 export function FormsProvider({ children }: FormsProviderProps) {
-  // Form state
-  const [activeForm, setActiveForm] = useState<FormType>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [lastSubmission, setLastSubmission] = useState<SubmissionSummary | null>(null);
+  const [lastSubmission, setLastSubmission] =
+    useState<SubmissionSummary | null>(null);
   const [language, setLanguageState] = useState<"en" | "es">("en");
-
-  const isFormOpen = activeForm !== null;
-
-  const openForm = useCallback((formType: FormType) => {
-    setActiveForm(formType);
-    setIsDirty(false);
-    setSubmitError(null);
-    setLastSubmission(null);
-  }, []);
-
-  const closeForm = useCallback(() => {
-    setActiveForm(null);
-    setIsDirty(false);
-    setIsSubmitting(false);
-    setSubmitError(null);
-  }, []);
 
   const setDirty = useCallback((dirty: boolean) => {
     setIsDirty(dirty);
@@ -102,13 +80,9 @@ export function FormsProvider({ children }: FormsProviderProps) {
 
   const value = useMemo(
     () => ({
-      activeForm,
-      isFormOpen,
       isDirty,
       isSubmitting,
       submitError,
-      openForm,
-      closeForm,
       setDirty,
       setSubmitting,
       setSubmitError,
@@ -119,13 +93,9 @@ export function FormsProvider({ children }: FormsProviderProps) {
       setLanguage,
     }),
     [
-      activeForm,
-      isFormOpen,
       isDirty,
       isSubmitting,
       submitError,
-      openForm,
-      closeForm,
       setDirty,
       setSubmitting,
       setSubmitError,

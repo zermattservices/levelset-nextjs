@@ -1,32 +1,30 @@
 /**
  * Forms Tab
- * Main forms screen with form selection cards and form drawers
+ * Main forms screen with form selection cards and route-based navigation
  */
 
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { useForms } from "../../src/context/FormsContext";
 import { colors } from "../../src/lib/colors";
 import { typography } from "../../src/lib/fonts";
+import { haptics } from "../../src/lib/theme";
 import { GlassCard } from "../../src/components/glass";
-import {
-  FormDrawer,
-  DisciplineInfractionForm,
-  PositionalRatingsForm,
-} from "../../src/components/forms";
+import { AppIcon } from "../../src/components/ui";
 
 // Import i18n to ensure it's initialized
 import "../../src/lib/i18n";
 
 function FormsScreenContent() {
-  const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { t } = useTranslation();
-  const { openForm, lastSubmission, clearLastSubmission } = useForms();
+  const { lastSubmission, clearLastSubmission } = useForms();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Forms</Text>
         <Text style={styles.subtitle}>
@@ -37,6 +35,7 @@ function FormsScreenContent() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
       >
         {/* Success Message */}
@@ -46,7 +45,7 @@ function FormsScreenContent() {
             onPress={clearLastSubmission}
           >
             <View style={styles.successContent}>
-              <Text style={styles.successIcon}>✓</Text>
+              <AppIcon name="checkmark.circle.fill" size={20} tintColor="#10B981" />
               <View style={styles.successInfo}>
                 <Text style={styles.successTitle}>
                   {t("forms.submitSuccess")}
@@ -63,39 +62,52 @@ function FormsScreenContent() {
         )}
 
         {/* Positional Ratings Card */}
-        <GlassCard onPress={() => openForm("ratings")} style={styles.formCard}>
-          <View style={styles.formCardContent}>
-            <View style={[styles.iconContainer, styles.ratingsIcon]}>
-              <Text style={styles.iconText}>⭐</Text>
+        <Animated.View entering={FadeIn.delay(0 * 80)}>
+          <GlassCard
+            onPress={() => {
+              haptics.light();
+              router.push("/forms/ratings");
+            }}
+            style={styles.formCard}
+          >
+            <View style={styles.formCardContent}>
+              <View style={[styles.iconContainer, styles.ratingsIcon]}>
+                <AppIcon name="star.fill" size={24} tintColor={colors.primary} />
+              </View>
+              <View style={styles.formInfo}>
+                <Text style={styles.formTitle}>{t("forms.positionalRatings")}</Text>
+                <Text style={styles.formDescription}>
+                  Record Big 5 competency scores for team members
+                </Text>
+              </View>
             </View>
-            <View style={styles.formInfo}>
-              <Text style={styles.formTitle}>{t("forms.positionalRatings")}</Text>
-              <Text style={styles.formDescription}>
-                Record Big 5 competency scores for team members
-              </Text>
-            </View>
-          </View>
-        </GlassCard>
+          </GlassCard>
+        </Animated.View>
 
         {/* Discipline Infractions Card */}
-        <GlassCard
-          onPress={() => openForm("infractions")}
-          style={styles.formCard}
-        >
-          <View style={styles.formCardContent}>
-            <View style={[styles.iconContainer, styles.infractionsIcon]}>
-              <Text style={styles.iconText}>📋</Text>
+        <Animated.View entering={FadeIn.delay(1 * 80)}>
+          <GlassCard
+            onPress={() => {
+              haptics.light();
+              router.push("/forms/infractions");
+            }}
+            style={styles.formCard}
+          >
+            <View style={styles.formCardContent}>
+              <View style={[styles.iconContainer, styles.infractionsIcon]}>
+                <AppIcon name="doc.text.fill" size={24} tintColor={colors.primary} />
+              </View>
+              <View style={styles.formInfo}>
+                <Text style={styles.formTitle}>
+                  {t("forms.disciplineInfraction")}
+                </Text>
+                <Text style={styles.formDescription}>
+                  Log infractions and capture acknowledgements
+                </Text>
+              </View>
             </View>
-            <View style={styles.formInfo}>
-              <Text style={styles.formTitle}>
-                {t("forms.disciplineInfraction")}
-              </Text>
-              <Text style={styles.formDescription}>
-                Log infractions and capture acknowledgements
-              </Text>
-            </View>
-          </View>
-        </GlassCard>
+          </GlassCard>
+        </Animated.View>
 
         {/* Info Card */}
         <View style={styles.infoSection}>
@@ -105,22 +117,6 @@ function FormsScreenContent() {
           </Text>
         </View>
       </ScrollView>
-
-      {/* Positional Ratings Form Drawer */}
-      <FormDrawer
-        title={t("forms.positionalRatings")}
-        formType="ratings"
-      >
-        <PositionalRatingsForm />
-      </FormDrawer>
-
-      {/* Discipline Infraction Form Drawer */}
-      <FormDrawer
-        title={t("forms.disciplineInfraction")}
-        formType="infractions"
-      >
-        <DisciplineInfractionForm />
-      </FormDrawer>
     </View>
   );
 }
@@ -163,13 +159,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  successIcon: {
-    fontSize: 24,
-    color: colors.success,
-    marginRight: 12,
-  },
   successInfo: {
     flex: 1,
+    marginLeft: 12,
   },
   successTitle: {
     ...typography.labelLarge,
@@ -200,9 +192,6 @@ const styles = StyleSheet.create({
   },
   infractionsIcon: {
     backgroundColor: colors.primaryTransparent,
-  },
-  iconText: {
-    fontSize: 24,
   },
   formInfo: {
     flex: 1,

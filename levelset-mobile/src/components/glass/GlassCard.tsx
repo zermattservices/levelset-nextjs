@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
 import { colors } from "../../lib/colors";
-import { borderRadius } from "../../lib/theme";
+import { borderRadius, haptics } from "../../lib/theme";
 
 export type GlassCardVariant = "default" | "elevated" | "outlined";
 
@@ -41,6 +41,13 @@ export function GlassCard({
 
   const variantStyles = getVariantStyles(variant);
 
+  const handlePress = onPress
+    ? () => {
+        haptics.light();
+        onPress();
+      }
+    : undefined;
+
   // Glass effect version (iOS with glass available)
   if (useGlassEffect && GlassView) {
     const glassContent = (
@@ -54,10 +61,10 @@ export function GlassCard({
       </GlassView>
     );
 
-    if (onPress) {
+    if (handlePress) {
       return (
         <TouchableOpacity
-          onPress={onPress}
+          onPress={handlePress}
           disabled={disabled}
           activeOpacity={0.8}
         >
@@ -76,10 +83,10 @@ export function GlassCard({
     </View>
   );
 
-  if (onPress) {
+  if (handlePress) {
     return (
       <TouchableOpacity
-        onPress={onPress}
+        onPress={handlePress}
         disabled={disabled}
         activeOpacity={0.8}
       >
@@ -120,11 +127,13 @@ function getVariantStyles(variant: GlassCardVariant) {
 const styles = StyleSheet.create({
   glassContainer: {
     borderRadius: borderRadius.lg,
+    borderCurve: "continuous",
     overflow: "hidden",
   },
   fallbackContainer: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
+    borderCurve: "continuous",
     borderWidth: 1,
     borderColor: colors.outline,
   },

@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
 import { colors } from "../../lib/colors";
-import { borderRadius } from "../../lib/theme";
+import { borderRadius, haptics } from "../../lib/theme";
 import { typography } from "../../lib/fonts";
 
 export type GlassButtonVariant = "default" | "primary" | "danger" | "outline";
@@ -55,6 +55,24 @@ export function GlassButton({
 
   const isDisabled = disabled || loading;
 
+  const handlePress = () => {
+    switch (variant) {
+      case "primary":
+        haptics.medium();
+        break;
+      case "danger":
+        haptics.warning();
+        break;
+      case "outline":
+        haptics.light();
+        break;
+      default:
+        haptics.light();
+        break;
+    }
+    onPress();
+  };
+
   const buttonContent = (
     <>
       {loading ? (
@@ -85,7 +103,7 @@ export function GlassButton({
   if (useGlassEffect && GlassView && variant === "default") {
     return (
       <TouchableOpacity
-        onPress={onPress}
+        onPress={handlePress}
         disabled={isDisabled}
         activeOpacity={0.7}
         style={[fullWidth && styles.fullWidth]}
@@ -110,7 +128,7 @@ export function GlassButton({
   // Fallback version (non-iOS, glass not available, or non-default variant)
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       disabled={isDisabled}
       activeOpacity={0.7}
       style={[fullWidth && styles.fullWidth]}
@@ -217,10 +235,12 @@ function getSizeStyles(size: GlassButtonSize) {
 const styles = StyleSheet.create({
   glassContainer: {
     borderRadius: borderRadius.full,
+    borderCurve: "continuous",
     overflow: "hidden",
   },
   fallbackContainer: {
     borderRadius: borderRadius.full,
+    borderCurve: "continuous",
     overflow: "hidden",
   },
   contentRow: {

@@ -12,13 +12,12 @@ import {
   TouchableOpacity,
   FlatList,
   Modal,
-  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SymbolView } from "expo-symbols";
+import { AppIcon } from "../ui";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
-import { borderRadius } from "../../lib/theme";
+import { borderRadius, haptics } from "../../lib/theme";
 
 export interface DropdownOption {
   value: string;
@@ -91,6 +90,7 @@ export function AutocompleteDropdown({
 
   const handleSelect = useCallback(
     (option: DropdownOption) => {
+      haptics.selection();
       onChange(option.value);
       handleClose();
     },
@@ -116,16 +116,9 @@ export function AutocompleteDropdown({
               <Text style={styles.optionSubtitle}>{item.subtitle}</Text>
             )}
           </View>
-          {isSelected &&
-            (Platform.OS === "ios" ? (
-              <SymbolView
-                name="checkmark"
-                size={18}
-                tintColor={colors.primary}
-              />
-            ) : (
-              <Text style={styles.checkmark}>✓</Text>
-            ))}
+          {isSelected && (
+            <AppIcon name="checkmark" size={18} tintColor={colors.primary} />
+          )}
         </TouchableOpacity>
       );
     },
@@ -180,15 +173,7 @@ export function AutocompleteDropdown({
         >
           {selectedOption?.label || placeholder}
         </Text>
-        {Platform.OS === "ios" ? (
-          <SymbolView
-            name="chevron.down"
-            size={16}
-            tintColor={colors.onSurfaceVariant}
-          />
-        ) : (
-          <Text style={styles.chevron}>▼</Text>
-        )}
+        <AppIcon name="chevron.down" size={16} tintColor={colors.onSurfaceVariant} />
       </TouchableOpacity>
 
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -202,15 +187,7 @@ export function AutocompleteDropdown({
         <View style={[styles.modalContainer, { paddingTop: insets.top }]}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-              {Platform.OS === "ios" ? (
-                <SymbolView
-                  name="xmark.circle.fill"
-                  size={28}
-                  tintColor={colors.onSurfaceVariant}
-                />
-              ) : (
-                <Text style={styles.closeText}>✕</Text>
-              )}
+              <AppIcon name="xmark.circle.fill" size={24} tintColor={colors.onSurfaceVariant} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>{label}</Text>
             <View style={styles.closeButton} />
@@ -270,6 +247,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: borderRadius.md,
+    borderCurve: "continuous",
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
@@ -287,11 +265,6 @@ const styles = StyleSheet.create({
   },
   triggerPlaceholder: {
     color: colors.onSurfaceDisabled,
-  },
-  chevron: {
-    fontSize: 12,
-    color: colors.onSurfaceVariant,
-    marginLeft: 8,
   },
   errorText: {
     ...typography.bodySmall,
@@ -317,10 +290,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  closeText: {
-    fontSize: 20,
-    color: colors.onSurfaceVariant,
-  },
   modalTitle: {
     ...typography.h4,
     color: colors.onSurface,
@@ -338,6 +307,7 @@ const styles = StyleSheet.create({
     ...typography.bodyMedium,
     backgroundColor: colors.surfaceVariant,
     borderRadius: borderRadius.md,
+    borderCurve: "continuous",
     paddingHorizontal: 16,
     paddingVertical: 12,
     color: colors.onSurface,
@@ -353,6 +323,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     backgroundColor: colors.surface,
     borderRadius: borderRadius.md,
+    borderCurve: "continuous",
     marginBottom: 8,
     borderWidth: 1,
     borderColor: colors.outline,
@@ -376,11 +347,6 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     color: colors.onSurfaceVariant,
     marginTop: 2,
-  },
-  checkmark: {
-    fontSize: 18,
-    color: colors.primary,
-    marginLeft: 8,
   },
   groupHeader: {
     ...typography.labelMedium,

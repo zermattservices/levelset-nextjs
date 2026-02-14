@@ -18,15 +18,17 @@ import {
   Alert,
   ActionSheetIOS,
 } from "react-native";
-import { SymbolView } from "expo-symbols";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
-import { borderRadius } from "../../lib/theme";
+import { borderRadius, haptics } from "../../lib/theme";
+import { useAuth } from "../../context/AuthContext";
 import { useForms } from "../../context/FormsContext";
+import { AppIcon } from "../ui";
 import { useTranslatedContent } from "../../hooks/useTranslatedContent";
 import {
   fetchInfractionData,
@@ -52,7 +54,10 @@ import { SignatureCanvas } from "./SignatureCanvas";
 export function DisciplineInfractionForm() {
   const { t } = useTranslation();
   const { translate } = useTranslatedContent();
-  const { setDirty, closeForm, completeSubmission } = useForms();
+  const { setDirty, completeSubmission } = useForms();
+  const { session } = useAuth();
+  const router = useRouter();
+  const token = session?.access_token ?? "";
 
   // Loading and error states
   const [loading, setLoading] = useState(true);
@@ -77,9 +82,6 @@ export function DisciplineInfractionForm() {
   const [attachedFiles, setAttachedFiles] = useState<
     Array<{ uri: string; name: string; type: string; size?: number }>
   >([]);
-
-  // Token for API calls - will come from auth context in Sprint 5
-  const token = "demo-token";
 
   // =============================================================================
   // Data Loading
@@ -211,6 +213,7 @@ export function DisciplineInfractionForm() {
         size: asset.fileSize,
       }));
       setAttachedFiles((prev) => [...prev, ...newFiles].slice(0, 5));
+      haptics.medium();
       markDirty();
     }
   }, [attachedFiles.length, markDirty]);
@@ -245,6 +248,7 @@ export function DisciplineInfractionForm() {
           size: asset.fileSize,
         },
       ].slice(0, 5));
+      haptics.medium();
       markDirty();
     }
   }, [attachedFiles.length, markDirty]);
@@ -268,6 +272,7 @@ export function DisciplineInfractionForm() {
           size: asset.size,
         },
       ].slice(0, 5));
+      haptics.medium();
       markDirty();
     }
   }, [attachedFiles.length, markDirty]);
@@ -345,6 +350,8 @@ export function DisciplineInfractionForm() {
         }
       }
 
+      haptics.success();
+
       completeSubmission({
         formType: "infractions",
         employeeName: selectedEmployee?.name ?? "Team member",
@@ -356,7 +363,7 @@ export function DisciplineInfractionForm() {
       });
 
       setDirty(false);
-      closeForm();
+      router.back();
     } catch (err) {
       const message = err instanceof ApiError
         ? err.message
@@ -381,12 +388,14 @@ export function DisciplineInfractionForm() {
     token,
     completeSubmission,
     setDirty,
-    closeForm,
+    router,
   ]);
 
   // =============================================================================
   // Render
   // =============================================================================
+
+  if (!token) return null;
 
   if (loading) {
     return (
@@ -465,6 +474,7 @@ export function DisciplineInfractionForm() {
         value={selectedInfractionId}
         onChange={(value) => {
           setSelectedInfractionId(value);
+          haptics.selection();
           markDirty();
         }}
         groupBy
@@ -643,14 +653,12 @@ export function DisciplineInfractionForm() {
           <ActivityIndicator size="small" color={colors.onPrimary} />
         ) : (
           <>
-            {Platform.OS === "ios" && (
-              <SymbolView
-                name="checkmark.circle.fill"
-                size={20}
-                tintColor={colors.onPrimary}
-                style={styles.submitIcon}
-              />
-            )}
+            <AppIcon
+              name="checkmark.circle.fill"
+              size={20}
+              tintColor={colors.onPrimary}
+              style={styles.submitIcon}
+            />
             <Text style={styles.submitButtonText}>{t("common.submit")}</Text>
           </>
         )}
@@ -707,6 +715,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: borderRadius.full,
+    borderCurve: 'continuous',
   },
   retryButtonText: {
     ...typography.labelLarge,
@@ -733,6 +742,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: borderRadius.md,
+    borderCurve: 'continuous',
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
@@ -744,6 +754,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: borderRadius.sm,
+    borderCurve: 'continuous',
   },
   pointsPositive: {
     backgroundColor: "rgba(239, 68, 68, 0.1)",
@@ -775,6 +786,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: borderRadius.md,
+    borderCurve: 'continuous',
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
@@ -796,6 +808,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: borderRadius.md,
+    borderCurve: 'continuous',
     paddingHorizontal: 16,
     paddingVertical: 14,
     ...typography.bodyMedium,
@@ -807,6 +820,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.error,
     borderRadius: borderRadius.md,
+    borderCurve: 'continuous',
     padding: 12,
   },
   submitErrorText: {
@@ -819,6 +833,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.primary,
     borderRadius: borderRadius.full,
+    borderCurve: 'continuous',
     paddingVertical: 16,
     marginTop: 8,
   },
@@ -845,6 +860,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: borderRadius.sm,
+    borderCurve: 'continuous',
     overflow: "hidden",
     borderWidth: 1,
     borderColor: colors.outline,
@@ -899,6 +915,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.primary,
     borderRadius: borderRadius.md,
+    borderCurve: 'continuous',
     paddingVertical: 10,
     paddingHorizontal: 8,
   },

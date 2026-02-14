@@ -3,9 +3,9 @@
  */
 
 export const fontFamilies = {
-  // Headings - Mont
-  heading: "Mont-Bold",
-  headingRegular: "Mont-Regular",
+  // Headings - Satoshi (bold weight used for distinction)
+  heading: "Satoshi-Variable",
+  headingRegular: "Satoshi-Variable",
 
   // Body - Satoshi
   body: "Satoshi-Variable",
@@ -43,7 +43,7 @@ export const lineHeights = {
 
 // Typography presets
 export const typography = {
-  // Headings (Mont Bold)
+  // Headings (Satoshi Bold)
   h1: {
     fontFamily: fontFamilies.heading,
     fontSize: fontSizes["3xl"],

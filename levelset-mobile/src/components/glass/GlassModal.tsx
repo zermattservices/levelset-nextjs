@@ -3,7 +3,7 @@
  * A modal with Liquid Glass effect on iOS, fallback on other platforms
  */
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Modal,
@@ -11,13 +11,18 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Animated,
   Dimensions,
   KeyboardAvoidingView,
   Platform,
   ViewStyle,
   StyleProp,
 } from "react-native";
+import ReAnimated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
 import { colors } from "../../lib/colors";
@@ -33,7 +38,6 @@ interface GlassModalProps {
   scrollable?: boolean;
   fullScreen?: boolean;
   style?: StyleProp<ViewStyle>;
-  animationDuration?: number;
 }
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -47,45 +51,31 @@ export function GlassModal({
   scrollable = true,
   fullScreen = false,
   style,
-  animationDuration = 250,
 }: GlassModalProps) {
   const { GlassView } = useGlass();
   const useGlassEffect = isGlassAvailable();
   const insets = useSafeAreaInsets();
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const fadeAnim = useSharedValue(0);
+  const slideAnim = useSharedValue(SCREEN_HEIGHT);
 
   useEffect(() => {
     if (visible) {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: animationDuration,
-          useNativeDriver: true,
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          tension: 65,
-          friction: 11,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      fadeAnim.value = withTiming(1, { duration: 200 });
+      slideAnim.value = withSpring(0, { damping: 20, stiffness: 200 });
     } else {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: animationDuration,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: SCREEN_HEIGHT,
-          duration: animationDuration,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      fadeAnim.value = withTiming(0, { duration: 150 });
+      slideAnim.value = withTiming(SCREEN_HEIGHT, { duration: 200 });
     }
-  }, [visible, fadeAnim, slideAnim, animationDuration]);
+  }, [visible]);
+
+  const backdropAnimStyle = useAnimatedStyle(() => ({
+    opacity: fadeAnim.value,
+  }));
+
+  const contentAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: slideAnim.value }],
+  }));
 
   const modalContent = (
     <>
@@ -136,20 +126,17 @@ export function GlassModal({
         style={styles.keyboardView}
       >
         {/* Backdrop */}
-        <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
+        <ReAnimated.View style={[styles.backdrop, backdropAnimStyle]}>
           <TouchableOpacity
             style={StyleSheet.absoluteFill}
             onPress={onClose}
             activeOpacity={1}
           />
-        </Animated.View>
+        </ReAnimated.View>
 
         {/* Modal Content */}
-        <Animated.View
-          style={[
-            styles.animatedContainer,
-            { transform: [{ translateY: slideAnim }] },
-          ]}
+        <ReAnimated.View
+          style={[styles.animatedContainer, contentAnimStyle]}
         >
           {useGlassEffect && GlassView ? (
             <GlassView
@@ -164,7 +151,7 @@ export function GlassModal({
               {modalContent}
             </View>
           )}
-        </Animated.View>
+        </ReAnimated.View>
       </KeyboardAvoidingView>
     </Modal>
   );
@@ -185,6 +172,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     borderTopLeftRadius: borderRadius.lg,
     borderTopRightRadius: borderRadius.lg,
+    borderCurve: "continuous",
     overflow: "hidden",
     maxHeight: SCREEN_HEIGHT * 0.85,
   },
@@ -195,6 +183,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopLeftRadius: borderRadius.lg,
     borderTopRightRadius: borderRadius.lg,
+    borderCurve: "continuous",
   },
   header: {
     flexDirection: "row",

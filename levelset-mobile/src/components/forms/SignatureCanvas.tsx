@@ -4,11 +4,11 @@
  */
 
 import React, { useRef, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import SignatureScreen, {
   SignatureViewRef,
 } from "react-native-signature-canvas";
-import { SymbolView } from "expo-symbols";
+import { AppIcon } from "../ui";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
 import { borderRadius } from "../../lib/theme";
@@ -79,15 +79,7 @@ export function SignatureCanvas({
         </Text>
         {value && !disabled && (
           <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
-            {Platform.OS === "ios" ? (
-              <SymbolView
-                name="arrow.counterclockwise"
-                size={16}
-                tintColor={colors.primary}
-              />
-            ) : (
-              <Text style={styles.clearText}>↺</Text>
-            )}
+            <AppIcon name="arrow.counterclockwise" size={16} tintColor={colors.primary} />
             <Text style={styles.clearButtonText}>Clear</Text>
           </TouchableOpacity>
         )}
@@ -129,15 +121,7 @@ export function SignatureCanvas({
 
       {value && (
         <View style={styles.signedIndicator}>
-          {Platform.OS === "ios" ? (
-            <SymbolView
-              name="checkmark.circle.fill"
-              size={16}
-              tintColor={colors.success}
-            />
-          ) : (
-            <Text style={styles.checkmark}>✓</Text>
-          )}
+          <AppIcon name="checkmark.circle.fill" size={16} tintColor={colors.success} />
           <Text style={styles.signedText}>Signed</Text>
         </View>
       )}
@@ -176,11 +160,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
-  clearText: {
-    fontSize: 16,
-    color: colors.primary,
-    marginRight: 4,
-  },
   clearButtonText: {
     ...typography.labelSmall,
     color: colors.primary,
@@ -189,6 +168,7 @@ const styles = StyleSheet.create({
   canvasContainer: {
     height: 150,
     borderRadius: borderRadius.md,
+    borderCurve: "continuous",
     backgroundColor: colors.surfaceVariant,
     borderWidth: 1,
     borderColor: colors.outline,
@@ -223,11 +203,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 8,
-  },
-  checkmark: {
-    color: colors.success,
-    fontSize: 16,
-    marginRight: 4,
   },
   signedText: {
     ...typography.labelSmall,

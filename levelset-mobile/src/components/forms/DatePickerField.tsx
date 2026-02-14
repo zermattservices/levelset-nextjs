@@ -10,12 +10,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
-  Modal,
 } from "react-native";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { SymbolView } from "expo-symbols";
+import { AppIcon } from "../ui";
 import { format } from "date-fns";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
@@ -42,18 +41,12 @@ export function DatePickerField({
   required = false,
   error,
 }: DatePickerFieldProps) {
-  const [showPicker, setShowPicker] = useState(false);
-
-  const handlePress = useCallback(() => {
-    if (!disabled) {
-      setShowPicker(true);
-    }
-  }, [disabled]);
+  const [showAndroidPicker, setShowAndroidPicker] = useState(false);
 
   const handleChange = useCallback(
     (event: DateTimePickerEvent, selectedDate?: Date) => {
       if (Platform.OS === "android") {
-        setShowPicker(false);
+        setShowAndroidPicker(false);
       }
       if (event.type === "set" && selectedDate) {
         onChange(selectedDate);
@@ -62,9 +55,11 @@ export function DatePickerField({
     [onChange]
   );
 
-  const handleDone = useCallback(() => {
-    setShowPicker(false);
-  }, []);
+  const handleAndroidPress = useCallback(() => {
+    if (!disabled) {
+      setShowAndroidPicker(true);
+    }
+  }, [disabled]);
 
   const formattedDate = format(value, "EEEE, MMMM d, yyyy");
 
@@ -75,69 +70,41 @@ export function DatePickerField({
         {required && <Text style={styles.required}> *</Text>}
       </Text>
 
-      <TouchableOpacity
+      <View
         style={[
           styles.trigger,
           disabled && styles.triggerDisabled,
           error && styles.triggerError,
         ]}
-        onPress={handlePress}
-        disabled={disabled}
-        activeOpacity={0.7}
       >
+        <AppIcon name="calendar" size={20} tintColor={colors.onSurfaceVariant} style={styles.icon} />
         {Platform.OS === "ios" ? (
-          <SymbolView
-            name="calendar"
-            size={20}
-            tintColor={colors.onSurfaceVariant}
-            style={styles.icon}
+          <DateTimePicker
+            value={value}
+            mode="date"
+            display="compact"
+            onChange={handleChange}
+            minimumDate={minimumDate}
+            maximumDate={maximumDate}
+            disabled={disabled}
+            style={styles.compactPicker}
           />
         ) : (
-          <Text style={styles.iconText}>📅</Text>
+          <TouchableOpacity
+            onPress={handleAndroidPress}
+            disabled={disabled}
+            activeOpacity={0.7}
+            style={styles.androidTrigger}
+          >
+            <Text style={styles.triggerText}>{formattedDate}</Text>
+          </TouchableOpacity>
         )}
-        <Text style={styles.triggerText}>{formattedDate}</Text>
-      </TouchableOpacity>
+      </View>
 
       {error && <Text style={styles.errorText}>{error}</Text>}
 
-      {/* iOS Modal Picker */}
-      {Platform.OS === "ios" && showPicker && (
-        <Modal
-          visible={showPicker}
-          transparent
-          animationType="slide"
-          onRequestClose={handleDone}
-        >
-          <View style={styles.modalOverlay}>
-            <TouchableOpacity
-              style={styles.modalBackdrop}
-              onPress={handleDone}
-              activeOpacity={1}
-            />
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>{label}</Text>
-                <TouchableOpacity onPress={handleDone}>
-                  <Text style={styles.doneButton}>Done</Text>
-                </TouchableOpacity>
-              </View>
-              <DateTimePicker
-                value={value}
-                mode="date"
-                display="spinner"
-                onChange={handleChange}
-                minimumDate={minimumDate}
-                maximumDate={maximumDate}
-                style={styles.picker}
-                textColor={colors.onSurface}
-              />
-            </View>
-          </View>
-        </Modal>
-      )}
-
       {/* Android Picker */}
-      {Platform.OS === "android" && showPicker && (
+      {Platform.OS === "android" && showAndroidPicker && (
         <DateTimePicker
           value={value}
           mode="date"
@@ -170,6 +137,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: borderRadius.md,
+    borderCurve: "continuous",
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
@@ -183,9 +151,11 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 12,
   },
-  iconText: {
-    fontSize: 18,
-    marginRight: 12,
+  compactPicker: {
+    flex: 1,
+  },
+  androidTrigger: {
+    flex: 1,
   },
   triggerText: {
     ...typography.bodyMedium,
@@ -196,39 +166,6 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     color: colors.error,
     marginTop: 4,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-  },
-  modalContent: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.outline,
-  },
-  modalTitle: {
-    ...typography.h4,
-    color: colors.onSurface,
-  },
-  doneButton: {
-    ...typography.labelLarge,
-    color: colors.primary,
-  },
-  picker: {
-    height: 200,
   },
 });
 

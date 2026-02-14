@@ -5,6 +5,7 @@
 
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { GlassCard } from "../glass";
 import { Shift } from "../../context/ScheduleContext";
 import { colors } from "../../lib/colors";
@@ -14,9 +15,10 @@ import { borderRadius } from "../../lib/theme";
 interface ShiftCardProps {
   shift: Shift;
   onPress?: () => void;
+  index?: number;
 }
 
-export function ShiftCard({ shift, onPress }: ShiftCardProps) {
+export function ShiftCard({ shift, onPress, index }: ShiftCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -38,62 +40,65 @@ export function ShiftCard({ shift, onPress }: ShiftCardProps) {
   };
 
   return (
-    <GlassCard onPress={onPress} style={styles.card}>
-      <View style={styles.header}>
-        <Text style={styles.date}>{formatDate(shift.date)}</Text>
-        <View
-          style={[
-            styles.hoursBadge,
-            { backgroundColor: getStatusColor(shift.status) + "20" },
-          ]}
-        >
-          <Text
+    <Animated.View entering={FadeIn.delay((index ?? 0) * 50)}>
+      <GlassCard onPress={onPress} style={styles.card}>
+        <View style={styles.header}>
+          <Text style={styles.date}>{formatDate(shift.date)}</Text>
+          <View
             style={[
-              styles.hoursText,
-              { color: getStatusColor(shift.status) },
+              styles.hoursBadge,
+              { backgroundColor: getStatusColor(shift.status) + "20" },
             ]}
           >
-            {shift.hours}h
-          </Text>
+            <Text
+              style={[
+                styles.hoursText,
+                { color: getStatusColor(shift.status) },
+              ]}
+            >
+              {shift.hours}h
+            </Text>
+          </View>
         </View>
-      </View>
 
-      <Text style={styles.time}>
-        {shift.startTime} - {shift.endTime}
-      </Text>
+        <Text style={styles.time}>
+          {shift.startTime} - {shift.endTime}
+        </Text>
 
-      {(shift.area || shift.role) && (
-        <View style={styles.details}>
-          {shift.area && <Text style={styles.detail}>{shift.area}</Text>}
-          {shift.area && shift.role && <Text style={styles.separator}>•</Text>}
-          {shift.role && <Text style={styles.detail}>{shift.role}</Text>}
-        </View>
-      )}
+        {(shift.area || shift.role) && (
+          <View style={styles.details}>
+            {shift.area && <Text style={styles.detail}>{shift.area}</Text>}
+            {shift.area && shift.role && <Text style={styles.separator}>•</Text>}
+            {shift.role && <Text style={styles.detail}>{shift.role}</Text>}
+          </View>
+        )}
 
-      {shift.status && shift.status !== "scheduled" && (
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: getStatusColor(shift.status) + "15" },
-          ]}
-        >
-          <Text
+        {shift.status && shift.status !== "scheduled" && (
+          <View
             style={[
-              styles.statusText,
-              { color: getStatusColor(shift.status) },
+              styles.statusBadge,
+              { backgroundColor: getStatusColor(shift.status) + "15" },
             ]}
           >
-            {shift.status.charAt(0).toUpperCase() + shift.status.slice(1)}
-          </Text>
-        </View>
-      )}
-    </GlassCard>
+            <Text
+              style={[
+                styles.statusText,
+                { color: getStatusColor(shift.status) },
+              ]}
+            >
+              {shift.status.charAt(0).toUpperCase() + shift.status.slice(1)}
+            </Text>
+          </View>
+        )}
+      </GlassCard>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     marginBottom: 12,
+    borderCurve: "continuous",
   },
   header: {
     flexDirection: "row",
@@ -109,6 +114,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: borderRadius.full,
+    borderCurve: "continuous",
   },
   hoursText: {
     ...typography.labelMedium,
@@ -138,6 +144,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: borderRadius.sm,
+    borderCurve: "continuous",
     marginTop: 8,
   },
   statusText: {

@@ -12,15 +12,17 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
 } from "react-native";
-import { SymbolView } from "expo-symbols";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
-import { borderRadius } from "../../lib/theme";
+import { borderRadius, haptics } from "../../lib/theme";
+import { useAuth } from "../../context/AuthContext";
 import { useForms } from "../../context/FormsContext";
+import { AppIcon } from "../ui";
 import { useTranslatedContent } from "../../hooks/useTranslatedContent";
 import {
   fetchPositionalData,
@@ -47,7 +49,10 @@ type RatingValue = 1 | 2 | 3;
 export function PositionalRatingsForm() {
   const { t } = useTranslation();
   const { translate, language, getRatingLabel, getRatingColor } = useTranslatedContent();
-  const { setDirty, closeForm, completeSubmission } = useForms();
+  const { setDirty, completeSubmission } = useForms();
+  const { session } = useAuth();
+  const router = useRouter();
+  const token = session?.access_token ?? "";
 
   // Loading and error states
   const [loading, setLoading] = useState(true);
@@ -74,9 +79,6 @@ export function PositionalRatingsForm() {
   const [selectedPositionKey, setSelectedPositionKey] = useState<string>("");
   const [ratings, setRatings] = useState<(RatingValue | null)[]>([]);
   const [notes, setNotes] = useState("");
-
-  // Token for API calls - will come from auth context in Sprint 5
-  const token = "demo-token";
 
   // =============================================================================
   // Data Loading
@@ -278,6 +280,7 @@ export function PositionalRatingsForm() {
         next[index] = value;
         return next;
       });
+      haptics.selection();
       markDirty();
     },
     [markDirty]
@@ -300,6 +303,8 @@ export function PositionalRatingsForm() {
         notes: notes.trim() || null,
       });
 
+      haptics.success();
+
       completeSubmission({
         formType: "ratings",
         employeeName: selectedEmployee?.name ?? "Team member",
@@ -311,7 +316,7 @@ export function PositionalRatingsForm() {
       });
 
       setDirty(false);
-      closeForm();
+      router.back();
     } catch (err) {
       const message = err instanceof ApiError
         ? err.message
@@ -331,12 +336,14 @@ export function PositionalRatingsForm() {
     token,
     completeSubmission,
     setDirty,
-    closeForm,
+    router,
   ]);
 
   // =============================================================================
   // Render
   // =============================================================================
+
+  if (!token) return null;
 
   if (loading) {
     return (
@@ -445,49 +452,51 @@ export function PositionalRatingsForm() {
           <Text style={styles.sectionTitle}>{t("forms.ratings.ratePerformance")}</Text>
 
           {labels.map((label, index) => (
-            <View key={index} style={styles.ratingCard}>
-              <View style={styles.ratingHeader}>
-                <Text style={styles.ratingLabel}>{label}</Text>
-                {descriptions[index] && (
-                  <Text style={styles.ratingDescription}>{descriptions[index]}</Text>
-                )}
-              </View>
+            <Animated.View key={index} entering={FadeIn.delay(index * 60)}>
+              <View style={styles.ratingCard}>
+                <View style={styles.ratingHeader}>
+                  <Text style={styles.ratingLabel}>{label}</Text>
+                  {descriptions[index] && (
+                    <Text style={styles.ratingDescription}>{descriptions[index]}</Text>
+                  )}
+                </View>
 
-              <View style={styles.ratingOptionsContainer}>
-                {([1, 2, 3] as RatingValue[]).map((value) => {
-                  const isSelected = ratings[index] === value;
-                  const optionColor = getRatingColor(value);
-                  return (
-                    <TouchableOpacity
-                      key={value}
-                      style={[
-                        styles.ratingOption,
-                        isSelected && styles.ratingOptionSelected,
-                        isSelected && { borderColor: optionColor },
-                      ]}
-                      onPress={() => handleRatingChange(index, value)}
-                      activeOpacity={0.7}
-                    >
-                      <View
+                <View style={styles.ratingOptionsContainer}>
+                  {([1, 2, 3] as RatingValue[]).map((value) => {
+                    const isSelected = ratings[index] === value;
+                    const optionColor = getRatingColor(value);
+                    return (
+                      <TouchableOpacity
+                        key={value}
                         style={[
-                          styles.ratingDot,
-                          { borderColor: optionColor },
-                          isSelected && { backgroundColor: optionColor },
+                          styles.ratingOption,
+                          isSelected && styles.ratingOptionSelected,
+                          isSelected && { borderColor: optionColor },
                         ]}
-                      />
-                      <Text
-                        style={[
-                          styles.ratingOptionLabel,
-                          isSelected && { color: optionColor, fontWeight: "600" },
-                        ]}
+                        onPress={() => handleRatingChange(index, value)}
+                        activeOpacity={0.7}
                       >
-                        {getRatingLabel(value)}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                        <View
+                          style={[
+                            styles.ratingDot,
+                            { borderColor: optionColor },
+                            isSelected && { backgroundColor: optionColor },
+                          ]}
+                        />
+                        <Text
+                          style={[
+                            styles.ratingOptionLabel,
+                            isSelected && { color: optionColor, fontWeight: "600" },
+                          ]}
+                        >
+                          {getRatingLabel(value)}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </View>
-            </View>
+            </Animated.View>
           ))}
 
           {/* Additional Details */}
@@ -565,14 +574,12 @@ export function PositionalRatingsForm() {
           <ActivityIndicator size="small" color={colors.onPrimary} />
         ) : (
           <>
-            {Platform.OS === "ios" && (
-              <SymbolView
-                name="checkmark.circle.fill"
-                size={20}
-                tintColor={colors.onPrimary}
-                style={styles.submitIcon}
-              />
-            )}
+            <AppIcon
+              name="checkmark.circle.fill"
+              size={20}
+              tintColor={colors.onPrimary}
+              style={styles.submitIcon}
+            />
             <Text style={styles.submitButtonText}>{t("common.submit")}</Text>
           </>
         )}
@@ -635,6 +642,7 @@ const styles = StyleSheet.create({
   descriptionContainer: {
     backgroundColor: colors.surfaceVariant,
     borderRadius: borderRadius.md,
+    borderCurve: 'continuous',
     padding: 12,
   },
   descriptionText: {
@@ -647,6 +655,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.error,
     borderRadius: borderRadius.md,
+    borderCurve: 'continuous',
     padding: 12,
   },
   errorBoxText: {
@@ -676,6 +685,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: borderRadius.lg,
+    borderCurve: 'continuous',
     padding: 16,
     gap: 12,
   },
@@ -705,6 +715,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: borderRadius.sm,
+    borderCurve: 'continuous',
     paddingVertical: 10,
     paddingHorizontal: 8,
     gap: 6,
@@ -728,6 +739,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: borderRadius.lg,
+    borderCurve: 'continuous',
     padding: 16,
     gap: 12,
   },
@@ -755,6 +767,7 @@ const styles = StyleSheet.create({
   notesInput: {
     backgroundColor: colors.surfaceVariant,
     borderRadius: borderRadius.md,
+    borderCurve: 'continuous',
     paddingHorizontal: 12,
     paddingVertical: 10,
     ...typography.bodyMedium,
@@ -766,6 +779,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: borderRadius.lg,
+    borderCurve: 'continuous',
     padding: 16,
     gap: 8,
   },
@@ -784,6 +798,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.error,
     borderRadius: borderRadius.md,
+    borderCurve: 'continuous',
     padding: 12,
   },
   submitErrorText: {
@@ -796,6 +811,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.primary,
     borderRadius: borderRadius.full,
+    borderCurve: 'continuous',
     paddingVertical: 16,
     marginTop: 8,
   },

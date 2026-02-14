@@ -3,24 +3,30 @@
  * A sliding drawer menu with Liquid Glass effect for the Schedule tab
  */
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Animated,
   Dimensions,
-  Platform,
   Pressable,
 } from "react-native";
+import ReAnimated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SymbolView } from "expo-symbols";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
 import { useSlidingMenu, MenuTab } from "../../context/SlidingMenuContext";
+import { AppIcon } from "../../components/ui";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
-import { borderRadius } from "../../lib/theme";
+import { borderRadius, haptics } from "../../lib/theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const MENU_WIDTH = SCREEN_WIDTH * 0.75;
@@ -32,42 +38,46 @@ export function SlidingMenu() {
   const { isMenuOpen, closeMenu, activeTab, setActiveTab, menuTabs } =
     useSlidingMenu();
 
-  const slideAnim = useRef(new Animated.Value(-MENU_WIDTH)).current;
-  const backdropAnim = useRef(new Animated.Value(0)).current;
+  const slideX = useSharedValue(-MENU_WIDTH);
+  const backdropOpacity = useSharedValue(0);
 
   useEffect(() => {
-    if (isMenuOpen) {
-      Animated.parallel([
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          tension: 65,
-          friction: 11,
-          useNativeDriver: true,
-        }),
-        Animated.timing(backdropAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.spring(slideAnim, {
-          toValue: -MENU_WIDTH,
-          tension: 65,
-          friction: 11,
-          useNativeDriver: true,
-        }),
-        Animated.timing(backdropAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [isMenuOpen, slideAnim, backdropAnim]);
+    slideX.value = withSpring(isMenuOpen ? 0 : -MENU_WIDTH, {
+      damping: 20,
+      stiffness: 200,
+    });
+    backdropOpacity.value = withTiming(isMenuOpen ? 1 : 0, { duration: 200 });
+  }, [isMenuOpen]);
+
+  const menuStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: slideX.value }],
+  }));
+
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: backdropOpacity.value,
+  }));
+
+  const panGesture = Gesture.Pan()
+    .activeOffsetX(-20)
+    .onUpdate((e) => {
+      if (e.translationX < 0) {
+        slideX.value = e.translationX;
+      }
+    })
+    .onEnd((e) => {
+      if (e.translationX < -MENU_WIDTH * 0.3) {
+        slideX.value = withSpring(-MENU_WIDTH, {
+          damping: 20,
+          stiffness: 200,
+        });
+        runOnJS(closeMenu)();
+      } else {
+        slideX.value = withSpring(0, { damping: 20, stiffness: 200 });
+      }
+    });
 
   const handleTabPress = (tabId: MenuTab) => {
+    haptics.selection();
     setActiveTab(tabId);
   };
 
@@ -90,25 +100,14 @@ export function SlidingMenu() {
               activeOpacity={0.7}
             >
               <View style={styles.menuItemContent}>
-                {Platform.OS === "ios" ? (
-                  <SymbolView
-                    name={tab.icon as any}
-                    size={22}
-                    tintColor={isActive ? colors.primary : colors.onSurfaceVariant}
-                    style={styles.menuIcon}
-                  />
-                ) : (
-                  <View
-                    style={[
-                      styles.menuIconPlaceholder,
-                      {
-                        backgroundColor: isActive
-                          ? colors.primary
-                          : colors.onSurfaceVariant,
-                      },
-                    ]}
-                  />
-                )}
+                <AppIcon
+                  name={tab.icon as string}
+                  size={22}
+                  tintColor={
+                    isActive ? colors.primary : colors.onSurfaceVariant
+                  }
+                  style={styles.menuIcon}
+                />
                 <Text
                   style={[
                     styles.menuLabel,
@@ -129,39 +128,34 @@ export function SlidingMenu() {
   return (
     <>
       {/* Backdrop */}
-      <Animated.View
+      <ReAnimated.View
         style={[
           styles.backdrop,
+          backdropStyle,
           {
-            opacity: backdropAnim,
             pointerEvents: isMenuOpen ? "auto" : "none",
           },
         ]}
       >
         <Pressable style={StyleSheet.absoluteFill} onPress={closeMenu} />
-      </Animated.View>
+      </ReAnimated.View>
 
       {/* Menu */}
-      <Animated.View
-        style={[
-          styles.menuContainer,
-          {
-            transform: [{ translateX: slideAnim }],
-          },
-        ]}
-      >
-        {useGlassEffect && GlassView ? (
-          <GlassView
-            style={styles.glassMenu}
-            glassEffectStyle="regular"
-            tintColor={colors.glassTintLight}
-          >
-            {menuContent}
-          </GlassView>
-        ) : (
-          <View style={styles.fallbackMenu}>{menuContent}</View>
-        )}
-      </Animated.View>
+      <GestureDetector gesture={panGesture}>
+        <ReAnimated.View style={[styles.menuContainer, menuStyle]}>
+          {useGlassEffect && GlassView ? (
+            <GlassView
+              style={styles.glassMenu}
+              glassEffectStyle="regular"
+              tintColor={colors.glassTintLight}
+            >
+              {menuContent}
+            </GlassView>
+          ) : (
+            <View style={styles.fallbackMenu}>{menuContent}</View>
+          )}
+        </ReAnimated.View>
+      </GestureDetector>
     </>
   );
 }
@@ -184,6 +178,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderTopRightRadius: borderRadius.lg,
     borderBottomRightRadius: borderRadius.lg,
+    borderCurve: "continuous",
     overflow: "hidden",
   },
   fallbackMenu: {
@@ -191,6 +186,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopRightRadius: borderRadius.lg,
     borderBottomRightRadius: borderRadius.lg,
+    borderCurve: "continuous",
     borderRightWidth: 1,
     borderRightColor: colors.outline,
   },
@@ -216,6 +212,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 12,
     borderRadius: borderRadius.md,
+    borderCurve: "continuous",
     marginBottom: 4,
   },
   menuItemActive: {
@@ -230,12 +227,6 @@ const styles = StyleSheet.create({
     marginRight: 14,
     width: 22,
     height: 22,
-  },
-  menuIconPlaceholder: {
-    width: 22,
-    height: 22,
-    borderRadius: 4,
-    marginRight: 14,
   },
   menuLabel: {
     ...typography.bodyMedium,

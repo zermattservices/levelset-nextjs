@@ -62,6 +62,12 @@ function RootLayoutNav() {
           headerTitle: "",
         }}
       />
+      <Stack.Screen
+        name="forms"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
@@ -70,9 +76,7 @@ export default function RootLayout() {
   const [loaded, error] = useFonts({
     "SpaceMono-Regular": require("../assets/fonts/SpaceMono-Regular.ttf"),
     "Satoshi-Variable": require("../assets/fonts/Satoshi-Variable.ttf"),
-    // Mont fonts would be added here when TTF versions are available
-    // 'Mont-Regular': require('../assets/fonts/Mont-Regular.ttf'),
-    // 'Mont-Bold': require('../assets/fonts/Mont-Bold.ttf'),
+    // Headings use Satoshi-Variable with bold weight (see src/lib/fonts.ts)
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -94,7 +98,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AuthProvider>
-          <StatusBar style="dark" />
+          <StatusBar style="auto" />
           <RootLayoutNav />
         </AuthProvider>
       </SafeAreaProvider>

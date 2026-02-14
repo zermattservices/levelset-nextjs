@@ -3,6 +3,7 @@
  * Combines colors, typography, and spacing into a unified theme
  */
 
+import * as Haptics from 'expo-haptics';
 import { colors } from "./colors";
 import { fontFamilies, typography, fontSizes } from "./fonts";
 
@@ -31,36 +32,20 @@ export const spacing = {
   16: 64,
 } as const;
 
-// Shadow definitions
+// Shadow definitions (CSS boxShadow format)
 export const shadows = {
-  none: {
-    shadowColor: "transparent",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
-  },
-  sm: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  md: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  lg: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
+  none: { boxShadow: "none" },
+  sm: { boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)" },
+  md: { boxShadow: "0 4px 6px rgba(0, 0, 0, 0.07)" },
+  lg: { boxShadow: "0 10px 15px rgba(0, 0, 0, 0.1)" },
+} as const;
+
+// Rounded styles with continuous border curve (iOS squircle)
+export const roundedStyles = {
+  sm: { borderRadius: 6, borderCurve: 'continuous' as const },
+  md: { borderRadius: 12, borderCurve: 'continuous' as const },
+  lg: { borderRadius: 16, borderCurve: 'continuous' as const },
+  xl: { borderRadius: 20, borderCurve: 'continuous' as const },
 } as const;
 
 // Glass effect styles
@@ -85,6 +70,45 @@ export const glassStyles = {
   },
 } as const;
 
+// Haptics utilities (iOS only)
+export const haptics = {
+  light: () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  },
+  medium: () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+  },
+  heavy: () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }
+  },
+  success: () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  },
+  warning: () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    }
+  },
+  error: () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  },
+  selection: () => {
+    if (process.env.EXPO_OS === 'ios') {
+      Haptics.selectionAsync();
+    }
+  },
+};
+
 // Complete theme export
 export const theme = {
   colors,
@@ -94,7 +118,9 @@ export const theme = {
   borderRadius,
   spacing,
   shadows,
+  roundedStyles,
   glassStyles,
+  haptics,
 } as const;
 
 export type Theme = typeof theme;

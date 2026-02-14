@@ -1,21 +1,23 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { colors } from "../../src/lib/colors";
 import { typography } from "../../src/lib/fonts";
 
 export default function HomeScreen() {
-  const insets = useSafeAreaInsets();
-
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.content}>
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ flexGrow: 1 }}
+      style={styles.container}
+    >
+      <Animated.View entering={FadeIn.duration(300)} style={styles.content}>
         <Text style={styles.title}>Welcome to Levelset</Text>
         <Text style={styles.subtitle}>
           Your workforce management companion
         </Text>
-      </View>
-    </View>
+      </Animated.View>
+    </ScrollView>
   );
 }
 

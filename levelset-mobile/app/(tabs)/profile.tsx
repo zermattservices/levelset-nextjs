@@ -10,28 +10,28 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  TouchableOpacity,
   Image,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { FadeIn } from "react-native-reanimated";
+import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../src/context/AuthContext";
 import { useForms } from "../../src/context/FormsContext";
 import { colors } from "../../src/lib/colors";
 import { typography } from "../../src/lib/fonts";
-import { borderRadius } from "../../src/lib/theme";
+import { borderRadius, haptics } from "../../src/lib/theme";
 import { GlassCard, GlassButton } from "../../src/components/glass";
 
 // Import i18n to ensure it's initialized
 import "../../src/lib/i18n";
 
 export default function ProfileScreen() {
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { fullName, email, profileImage, role, signOut, user } = useAuth();
   const { language, setLanguage } = useForms();
 
   const handleLogout = useCallback(() => {
+    haptics.warning();
     Alert.alert(
       t("profile.signOut"),
       language === "en"
@@ -51,10 +51,6 @@ export default function ProfileScreen() {
     );
   }, [signOut, t, language]);
 
-  const toggleLanguage = useCallback(() => {
-    setLanguage(language === "en" ? "es" : "en");
-  }, [language, setLanguage]);
-
   // Get initials for avatar
   const getInitials = (name: string | null | undefined) => {
     if (!name) return email?.charAt(0)?.toUpperCase() || "U";
@@ -73,19 +69,20 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ padding: 20, gap: 16 }}
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>
           {language === "en" ? "Profile" : "Perfil"}
         </Text>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* User Info Card */}
+      {/* User Info Card */}
+      <Animated.View entering={FadeIn}>
         <GlassCard style={styles.profileCard}>
           <View style={styles.avatarContainer}>
             {profileImage ? (
@@ -108,90 +105,64 @@ export default function ProfileScreen() {
             </View>
           )}
         </GlassCard>
+      </Animated.View>
 
-        {/* Settings Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {language === "en" ? "Settings" : "Configuración"}
-          </Text>
+      {/* Settings Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          {language === "en" ? "Settings" : "Configuracion"}
+        </Text>
 
-          {/* Language Toggle */}
-          <TouchableOpacity onPress={toggleLanguage} activeOpacity={0.7}>
-            <GlassCard style={styles.settingCard}>
-              <View style={styles.settingRow}>
-                <View style={styles.settingInfo}>
-                  <Text style={styles.settingLabel}>{t("profile.language")}</Text>
-                  <Text style={styles.settingDescription}>
-                    {language === "en"
-                      ? "App language preference"
-                      : "Preferencia de idioma"}
-                  </Text>
-                </View>
-                <View style={styles.languageToggle}>
-                  <View
-                    style={[
-                      styles.languageOption,
-                      language === "en" && styles.languageOptionActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.languageOptionText,
-                        language === "en" && styles.languageOptionTextActive,
-                      ]}
-                    >
-                      EN
-                    </Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.languageOption,
-                      language === "es" && styles.languageOptionActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.languageOptionText,
-                        language === "es" && styles.languageOptionTextActive,
-                      ]}
-                    >
-                      ES
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </GlassCard>
-          </TouchableOpacity>
-
-          {/* Version Info */}
-          <GlassCard style={styles.settingCard}>
-            <View style={styles.settingRow}>
-              <Text style={styles.settingLabel}>{t("profile.version")}</Text>
-              <Text style={styles.settingValue}>1.0.0</Text>
-            </View>
-          </GlassCard>
-        </View>
-
-        {/* Logout Button */}
-        <View style={styles.logoutSection}>
-          <GlassButton
-            label={t("profile.signOut")}
-            variant="outline"
-            onPress={handleLogout}
-            fullWidth
-          />
-        </View>
-
-        {/* User ID (for debugging/support) */}
-        {user?.id && (
-          <View style={styles.debugSection}>
-            <Text style={styles.debugText}>
-              User ID: {user.id.slice(0, 8)}...
+        {/* Language Toggle */}
+        <GlassCard style={styles.settingCard}>
+          <View style={styles.settingInfo}>
+            <Text style={styles.settingLabel}>{t("profile.language")}</Text>
+            <Text style={styles.settingDescription}>
+              {language === "en"
+                ? "App language preference"
+                : "Preferencia de idioma"}
             </Text>
           </View>
-        )}
-      </ScrollView>
-    </View>
+          <SegmentedControl
+            values={["English", "Espanol"]}
+            selectedIndex={language === "en" ? 0 : 1}
+            onChange={(event) => {
+              const newLang =
+                event.nativeEvent.selectedSegmentIndex === 0 ? "en" : "es";
+              setLanguage(newLang);
+            }}
+            style={styles.segmentedControl}
+          />
+        </GlassCard>
+
+        {/* Version Info */}
+        <GlassCard style={styles.settingCard}>
+          <View style={styles.settingRow}>
+            <Text style={styles.settingLabel}>{t("profile.version")}</Text>
+            <Text style={styles.settingValue}>1.0.0</Text>
+          </View>
+        </GlassCard>
+      </View>
+
+      {/* Logout Button */}
+      <View style={styles.logoutSection}>
+        <GlassButton
+          label={t("profile.signOut")}
+          variant="outline"
+          onPress={handleLogout}
+          fullWidth
+        />
+      </View>
+
+      {/* User ID (for debugging/support) */}
+      {user?.id && (
+        <View style={styles.debugSection}>
+          <Text style={styles.debugText}>
+            User ID: {user.id.slice(0, 8)}...
+          </Text>
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
@@ -201,24 +172,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
     paddingBottom: 8,
   },
   title: {
     ...typography.h2,
     color: colors.onBackground,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-  },
   profileCard: {
     alignItems: "center",
     paddingVertical: 24,
-    marginBottom: 24,
+    borderCurve: "continuous",
   },
   avatarContainer: {
     marginBottom: 16,
@@ -227,6 +190,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
+    borderCurve: "continuous",
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
@@ -235,11 +199,12 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
+    borderCurve: "continuous",
   },
   avatarText: {
     fontSize: 32,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: colors.onPrimary,
   },
   userName: {
     ...typography.h3,
@@ -257,6 +222,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: borderRadius.full,
+    borderCurve: "continuous",
     marginTop: 4,
   },
   roleText: {
@@ -264,16 +230,15 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   section: {
-    marginBottom: 24,
+    gap: 8,
   },
   sectionTitle: {
     ...typography.labelLarge,
     color: colors.onSurfaceVariant,
-    marginBottom: 12,
     paddingHorizontal: 4,
   },
   settingCard: {
-    marginBottom: 8,
+    borderCurve: "continuous",
   },
   settingRow: {
     flexDirection: "row",
@@ -281,7 +246,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   settingInfo: {
-    flex: 1,
+    marginBottom: 12,
   },
   settingLabel: {
     ...typography.bodyMedium,
@@ -296,32 +261,14 @@ const styles = StyleSheet.create({
     ...typography.bodyMedium,
     color: colors.onSurfaceVariant,
   },
-  languageToggle: {
-    flexDirection: "row",
-    backgroundColor: colors.background,
-    borderRadius: borderRadius.sm,
-    padding: 2,
-  },
-  languageOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: borderRadius.sm - 2,
-  },
-  languageOptionActive: {
-    backgroundColor: colors.primary,
-  },
-  languageOptionText: {
-    ...typography.labelMedium,
-    color: colors.onSurfaceVariant,
-  },
-  languageOptionTextActive: {
-    color: "#FFFFFF",
+  segmentedControl: {
+    marginTop: 4,
   },
   logoutSection: {
     marginTop: 8,
   },
   debugSection: {
-    marginTop: 24,
+    marginTop: 8,
     alignItems: "center",
   },
   debugText: {

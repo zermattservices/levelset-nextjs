@@ -1,7 +1,7 @@
 /**
- * FormDrawer Component
- * A full-screen drawer for displaying forms with glass effect
- * Includes header with close button and dirty state confirmation
+ * FormDrawer Component (DEPRECATED)
+ * Forms now use route-based form sheets via app/forms/ routes.
+ * This component is kept for backward compatibility but should not be used.
  */
 
 import React, { useCallback } from "react";
@@ -16,9 +16,10 @@ import {
   Platform,
   Alert,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SymbolView } from "expo-symbols";
-import { useForms, type FormType } from "../../context/FormsContext";
+import { useForms } from "../../context/FormsContext";
+import { AppIcon } from "../ui";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
 import { borderRadius } from "../../lib/theme";
@@ -26,16 +27,16 @@ import { borderRadius } from "../../lib/theme";
 interface FormDrawerProps {
   title: string;
   formType: "ratings" | "infractions";
+  visible?: boolean;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }
 
-export function FormDrawer({ title, formType, children, footer }: FormDrawerProps) {
+/** @deprecated Use route-based form sheets instead (app/forms/) */
+export function FormDrawer({ title, formType, visible = false, children, footer }: FormDrawerProps) {
   const insets = useSafeAreaInsets();
-  const { activeForm, isDirty, closeForm, language, setLanguage } = useForms();
-
-  // Only show this drawer if it matches the active form
-  const isVisible = activeForm === formType;
+  const { isDirty, language, setLanguage } = useForms();
+  const router = useRouter();
 
   const handleClose = useCallback(() => {
     if (isDirty) {
@@ -52,14 +53,14 @@ export function FormDrawer({ title, formType, children, footer }: FormDrawerProp
           {
             text: language === "en" ? "Discard" : "Descartar",
             style: "destructive",
-            onPress: closeForm,
+            onPress: () => router.back(),
           },
         ]
       );
     } else {
-      closeForm();
+      router.back();
     }
-  }, [isDirty, closeForm, language]);
+  }, [isDirty, router, language]);
 
   const toggleLanguage = useCallback(() => {
     setLanguage(language === "en" ? "es" : "en");
@@ -67,7 +68,7 @@ export function FormDrawer({ title, formType, children, footer }: FormDrawerProp
 
   return (
     <Modal
-      visible={isVisible}
+      visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
@@ -83,15 +84,11 @@ export function FormDrawer({ title, formType, children, footer }: FormDrawerProp
             style={styles.closeButton}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            {Platform.OS === "ios" ? (
-              <SymbolView
-                name="xmark.circle.fill"
-                size={28}
-                tintColor={colors.onSurfaceVariant}
-              />
-            ) : (
-              <Text style={styles.closeText}>✕</Text>
-            )}
+            <AppIcon
+              name="xmark.circle.fill"
+              size={28}
+              tintColor={colors.onSurfaceVariant}
+            />
           </TouchableOpacity>
 
           {/* Title */}

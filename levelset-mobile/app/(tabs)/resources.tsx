@@ -12,12 +12,14 @@ import {
   Linking,
   Alert,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 import { useForms } from "../../src/context/FormsContext";
 import { colors } from "../../src/lib/colors";
 import { typography } from "../../src/lib/fonts";
+import { haptics } from "../../src/lib/theme";
 import { GlassCard } from "../../src/components/glass";
+import { AppIcon } from "../../src/components/ui";
 
 // Import i18n to ensure it's initialized
 import "../../src/lib/i18n";
@@ -29,7 +31,7 @@ interface ResourceItem {
   description: string;
   description_es?: string;
   url: string;
-  icon: string;
+  iconName: string;
 }
 
 const RESOURCES: ResourceItem[] = [
@@ -40,7 +42,7 @@ const RESOURCES: ResourceItem[] = [
     description: "Access the full Levelset web application",
     description_es: "Accede a la aplicación web completa de Levelset",
     url: "https://levelset.vercel.app",
-    icon: "🖥️",
+    iconName: "desktopcomputer",
   },
   {
     id: "2",
@@ -49,7 +51,7 @@ const RESOURCES: ResourceItem[] = [
     description: "View training guides and documentation",
     description_es: "Ver guías de capacitación y documentación",
     url: "https://levelset.vercel.app/training",
-    icon: "📚",
+    iconName: "book.fill",
   },
   {
     id: "3",
@@ -58,7 +60,7 @@ const RESOURCES: ResourceItem[] = [
     description: "View team performance and metrics",
     description_es: "Ver rendimiento y métricas del equipo",
     url: "https://levelset.vercel.app/reports",
-    icon: "📊",
+    iconName: "chart.bar",
   },
   {
     id: "4",
@@ -67,15 +69,15 @@ const RESOURCES: ResourceItem[] = [
     description: "Get help with Levelset features",
     description_es: "Obtén ayuda con las funciones de Levelset",
     url: "https://levelset.vercel.app/help",
-    icon: "❓",
+    iconName: "questionmark.circle",
   },
 ];
 
 export default function ResourcesScreen() {
-  const insets = useSafeAreaInsets();
   const { language } = useForms();
 
   const handleOpenResource = async (url: string) => {
+    haptics.light();
     try {
       const supported = await Linking.canOpenURL(url);
       if (supported) {
@@ -108,7 +110,12 @@ export default function ResourcesScreen() {
       : resource.description;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ padding: 20, gap: 16 }}
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>
           {language === "en" ? "Resources" : "Recursos"}
@@ -120,20 +127,19 @@ export default function ResourcesScreen() {
         </Text>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {RESOURCES.map((resource) => (
+      {RESOURCES.map((resource, index) => (
+        <Animated.View key={resource.id} entering={FadeIn.delay(index * 60)}>
           <GlassCard
-            key={resource.id}
             onPress={() => handleOpenResource(resource.url)}
             style={styles.resourceCard}
           >
             <View style={styles.resourceContent}>
               <View style={styles.iconContainer}>
-                <Text style={styles.iconText}>{resource.icon}</Text>
+                <AppIcon
+                  name={resource.iconName}
+                  size={24}
+                  tintColor={colors.primary}
+                />
               </View>
               <View style={styles.resourceInfo}>
                 <Text style={styles.resourceTitle}>{getTitle(resource)}</Text>
@@ -141,20 +147,24 @@ export default function ResourcesScreen() {
                   {getDescription(resource)}
                 </Text>
               </View>
-              <Text style={styles.chevron}>›</Text>
+              <AppIcon
+                name="chevron.right"
+                size={16}
+                tintColor={colors.onSurfaceVariant}
+              />
             </View>
           </GlassCard>
-        ))}
+        </Animated.View>
+      ))}
 
-        <View style={styles.infoSection}>
-          <Text style={styles.infoText}>
-            {language === "en"
-              ? "Links will open in your default browser"
-              : "Los enlaces se abrirán en su navegador predeterminado"}
-          </Text>
-        </View>
-      </ScrollView>
-    </View>
+      <View style={styles.infoSection}>
+        <Text style={styles.infoText}>
+          {language === "en"
+            ? "Links will open in your default browser"
+            : "Los enlaces se abrirán en su navegador predeterminado"}
+        </Text>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -164,8 +174,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
     paddingBottom: 8,
   },
   title: {
@@ -177,15 +185,9 @@ const styles = StyleSheet.create({
     ...typography.bodyMedium,
     color: colors.onSurfaceVariant,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    gap: 12,
-  },
   resourceCard: {
     marginBottom: 0,
+    borderCurve: "continuous",
   },
   resourceContent: {
     flexDirection: "row",
@@ -195,13 +197,11 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 10,
+    borderCurve: "continuous",
     backgroundColor: colors.primaryTransparent,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
-  },
-  iconText: {
-    fontSize: 22,
   },
   resourceInfo: {
     flex: 1,
@@ -215,13 +215,8 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     color: colors.onSurfaceVariant,
   },
-  chevron: {
-    fontSize: 24,
-    color: colors.onSurfaceVariant,
-    marginLeft: 8,
-  },
   infoSection: {
-    marginTop: 12,
+    marginTop: 4,
     paddingHorizontal: 8,
   },
   infoText: {
