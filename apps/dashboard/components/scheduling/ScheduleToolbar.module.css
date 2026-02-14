@@ -1,0 +1,185 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--ls-color-bg-container);
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  gap: 16px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* ── Left: navigation ── */
+.navSection {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.navArrow {
+  width: 32px;
+  height: 32px;
+  color: var(--ls-color-muted);
+}
+
+.dateLabel {
+  font-family: var(--ls-font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  min-width: 180px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.todayBtn {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-brand);
+  background: none;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 8px;
+}
+.todayBtn:hover {
+  background: var(--ls-color-hover-overlay);
+  border-color: var(--ls-color-brand);
+}
+
+/* ── Center: status + toggles + summary ── */
+.centerSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.statusChip {
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--ls-radius-xl);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.statusDraft {
+  background: var(--ls-color-warning-soft);
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+.statusPublished {
+  background: var(--ls-color-success-soft);
+  color: var(--ls-color-success-soft-foreground);
+  border: 1px solid var(--ls-color-success);
+}
+
+.toggleGroup {
+  display: flex;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  overflow: hidden;
+}
+
+.toggleBtn {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  background: var(--ls-color-bg-container);
+  border: none;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.toggleBtn:not(:last-child) {
+  border-right: 1px solid var(--ls-color-neutral-border);
+}
+.toggleActive {
+  background: var(--ls-color-brand);
+  color: var(--ls-color-bg-container);
+}
+.toggleBtn:not(.toggleActive):hover {
+  background: var(--ls-color-muted-soft);
+}
+
+.summaryChips {
+  display: flex;
+  gap: 8px;
+}
+.summaryChip {
+  font-family: var(--ls-font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-neutral);
+  background: var(--ls-color-muted-soft);
+  padding: 4px 10px;
+  border-radius: var(--ls-radius-md);
+}
+
+/* ── Right: actions ── */
+.actionSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.secondaryBtn {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-neutral);
+  background: var(--ls-color-bg-container);
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.secondaryBtn:hover {
+  background: var(--ls-color-muted-soft);
+  border-color: var(--ls-color-disabled-text);
+}
+
+.publishBtn {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-bg-container);
+  background: var(--ls-color-brand);
+  border: none;
+  border-radius: var(--ls-radius-md);
+  padding: 6px 18px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.publishBtn:hover {
+  background: #265339;
+}
+
+.unpublishBtn {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-destructive);
+  background: var(--ls-color-bg-container);
+  border: 1px solid #fecaca;
+  border-radius: var(--ls-radius-md);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.unpublishBtn:hover {
+  background: var(--ls-color-destructive-foreground);
+  border-color: var(--ls-color-destructive);
+}

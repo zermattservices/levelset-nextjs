@@ -1,0 +1,87 @@
+.block {
+  position: relative;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border-left: 3px solid var(--ls-color-muted);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+  min-height: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.block:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+.block:hover .deleteBtn {
+  opacity: 1;
+}
+
+.openShift {
+  border-left-style: dashed;
+  border: 1px dashed var(--ls-color-disabled-text);
+  border-left-width: 3px;
+  background-color: var(--ls-color-neutral-foreground) !important;
+}
+
+.timeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.time {
+  font-family: var(--ls-font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-neutral);
+  white-space: nowrap;
+}
+
+.label {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.openLabel {
+  font-family: var(--ls-font-body);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ls-color-disabled-text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.costHint {
+  font-family: var(--ls-font-heading);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ls-color-disabled-text);
+}
+
+.deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ls-color-disabled-text);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+  border-radius: 3px;
+  width: 16px;
+  height: 16px;
+}
+.deleteBtn:hover {
+  color: var(--ls-color-destructive);
+  background: rgba(220, 38, 38, 0.08);
+}

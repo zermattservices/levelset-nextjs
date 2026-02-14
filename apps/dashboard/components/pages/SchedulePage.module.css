@@ -1,0 +1,94 @@
+.root {
+  display: grid;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  align-content: flex-start;
+  justify-items: center;
+  overflow: auto;
+  background: var(--ls-color-bg-container);
+  min-width: 0;
+  grid-template-columns:
+    var(--plsmc-viewport-gap) 1fr minmax(0, var(--plsmc-wide-chunk))
+    min(
+      var(--plsmc-standard-width),
+      calc(100% - var(--plsmc-viewport-gap) - var(--plsmc-viewport-gap))
+    )
+    minmax(0, var(--plsmc-wide-chunk)) 1fr var(--plsmc-viewport-gap);
+  padding: 0px;
+}
+
+.root > * {
+  grid-column: 4;
+}
+
+.menuNavigation:global(.__wab_instance) {
+  max-width: 100%;
+  width: 100%;
+  left: 0px;
+  top: 0px;
+  z-index: 20;
+  position: sticky;
+  grid-column-start: 1 !important;
+  grid-column-end: -1 !important;
+}
+
+/* Schedule container takes full width */
+.scheduleContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  grid-column-start: 1 !important;
+  grid-column-end: -1 !important;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* Loading */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+}
+
+/* No location selected */
+.noLocationContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+}
+.noLocationText {
+  font-family: var(--ls-font-body);
+  font-size: 16px;
+  color: var(--ls-color-disabled-text);
+  margin: 0;
+}
+
+/* Unauthorized */
+.unauthorizedContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  gap: 16px;
+}
+
+.unauthorizedTitle {
+  font-family: var(--ls-font-heading);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin: 0;
+}
+
+.unauthorizedText {
+  font-family: var(--ls-font-body);
+  font-size: 16px;
+  color: var(--ls-color-muted);
+  margin: 0;
+  max-width: 400px;
+}
