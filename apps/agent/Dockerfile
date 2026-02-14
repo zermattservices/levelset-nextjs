@@ -28,11 +28,10 @@ RUN pnpm --filter agent build
 FROM base AS runtime
 WORKDIR /app
 
-# Copy built output and node_modules
+# Copy built output and production dependencies
 COPY --from=build /app/apps/agent/dist ./dist
 COPY --from=build /app/apps/agent/package.json ./
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/apps/agent/node_modules ./apps/agent/node_modules 2>/dev/null || true
 COPY --from=build /app/packages ./packages
 
 EXPOSE 3000
