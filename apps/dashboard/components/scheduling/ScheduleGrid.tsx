@@ -227,8 +227,8 @@ function WeekPositionView({
       return (
         <React.Fragment key={pos.id}>
           <div className={sty.rowLabel}>
-            <div className={sty.areaLabelRow}>
-              <span className={sty.areaColorDot} style={{ backgroundColor: posColor }} />
+            <div className={sty.positionLabelRow}>
+              <span className={sty.positionColorDot} style={{ backgroundColor: posColor }} />
               <span className={sty.empName}>{pos.name}</span>
             </div>
           </div>
@@ -483,8 +483,8 @@ function DayPositionView({
           return (
             <div key={pos.id} className={sty.dayRow}>
               <div className={sty.rowLabel}>
-                <div className={sty.areaLabelRow}>
-                  <span className={sty.areaColorDot} style={{ backgroundColor: posColor }} />
+                <div className={sty.positionLabelRow}>
+                  <span className={sty.positionColorDot} style={{ backgroundColor: posColor }} />
                   <span className={sty.empName}>{pos.name}</span>
                 </div>
               </div>
