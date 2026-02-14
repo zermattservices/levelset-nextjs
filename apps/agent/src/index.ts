@@ -1,3 +1,4 @@
+import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
@@ -20,9 +21,9 @@ app.route('/api/ai/chat', chatRoute);
 
 const port = parseInt(process.env.PORT || '3000', 10);
 
-console.log(`Levelset Agent starting on port ${port}`);
-
-export default {
-  port,
+serve({
   fetch: app.fetch,
-};
+  port,
+}, (info) => {
+  console.log(`Levelset Agent listening on http://localhost:${info.port}`);
+});
