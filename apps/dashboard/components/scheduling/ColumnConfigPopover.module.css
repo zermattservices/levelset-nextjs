@@ -1,0 +1,28 @@
+.menu {
+  padding: 12px 16px;
+  min-width: 180px;
+}
+
+.menuTitle {
+  font-family: var(--ls-font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-disabled-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.toggleLabel {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-neutral-soft-foreground);
+}

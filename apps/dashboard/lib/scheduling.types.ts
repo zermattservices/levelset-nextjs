@@ -32,6 +32,7 @@ export interface Shift {
   start_time: string;
   end_time: string;
   break_minutes: number;
+  is_house_shift?: boolean;
   notes?: string;
   position?: Position;
   assignment?: ShiftAssignment;

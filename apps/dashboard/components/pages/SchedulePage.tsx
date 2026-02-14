@@ -6,12 +6,14 @@ import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useScheduleData } from '@/components/scheduling/useScheduleData';
+import { useColumnConfig } from '@/components/scheduling/useColumnConfig';
 import { ScheduleToolbar } from '@/components/scheduling/ScheduleToolbar';
 import { ScheduleGrid } from '@/components/scheduling/ScheduleGrid';
 import { ShiftModal } from '@/components/scheduling/ShiftModal';
-import { LaborSummaryBar } from '@/components/scheduling/LaborSummaryBar';
+import { BottomPanel } from '@/components/scheduling/BottomPanel';
 import CircularProgress from '@mui/material/CircularProgress';
 import type { Shift } from '@/lib/scheduling.types';
 
@@ -25,6 +27,9 @@ export function SchedulePage() {
   const { selectedLocationId } = useLocationContext();
 
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
+  const { has } = usePermissions();
+  const canViewPay = has(P.ROSTER_MANAGE_PAY);
+  const { config: columnConfig, updateConfig: updateColumnConfig } = useColumnConfig();
 
   // Modal state
   const [shiftModalOpen, setShiftModalOpen] = React.useState(false);
@@ -210,6 +215,7 @@ export function SchedulePage() {
               zoneFilter={data.zoneFilter}
               schedule={data.schedule}
               laborSummary={data.laborSummary}
+              canViewPay={canViewPay}
               onNavigateWeek={data.navigateWeek}
               onNavigateDay={data.navigateDay}
               onGoToToday={data.goToToday}
@@ -235,6 +241,9 @@ export function SchedulePage() {
                 timeViewMode={data.timeViewMode}
                 laborSummary={data.laborSummary}
                 isPublished={isPublished}
+                canViewPay={canViewPay}
+                columnConfig={columnConfig}
+                onColumnConfigUpdate={updateColumnConfig}
                 onCellClick={handleCellClick}
                 onShiftClick={handleShiftClick}
                 onShiftDelete={handleShiftDelete}
@@ -242,8 +251,16 @@ export function SchedulePage() {
               />
             )}
 
-            {!data.isLoading && data.shifts.length > 0 && (
-              <LaborSummaryBar laborSummary={data.laborSummary} />
+            {!data.isLoading && (
+              <BottomPanel
+                shifts={data.shifts}
+                positions={data.allPositions}
+                laborSummary={data.laborSummary}
+                days={data.days}
+                canViewPay={canViewPay}
+                isPublished={isPublished}
+                onDeleteShift={data.deleteShift}
+              />
             )}
           </div>
         )}
@@ -259,6 +276,7 @@ export function SchedulePage() {
         prefillEmployeeId={prefillEmployeeId}
         prefillStartTime={prefillStartTime}
         prefillEndTime={prefillEndTime}
+        canViewPay={canViewPay}
         positions={data.allPositions}
         employees={data.employees}
         isPublished={isPublished}

@@ -1,8 +1,10 @@
 import * as React from 'react';
 import sty from './ScheduleGrid.module.css';
 import { ShiftBlock } from './ShiftBlock';
+import { ColumnConfigPopover } from './ColumnConfigPopover';
 import AddIcon from '@mui/icons-material/Add';
 import type { Shift, Position, GridViewMode, TimeViewMode, LaborSummary } from '@/lib/scheduling.types';
+import type { ColumnConfig } from './useColumnConfig';
 
 interface Employee {
   id: string;
@@ -23,6 +25,9 @@ interface ScheduleGridProps {
   timeViewMode: TimeViewMode;
   laborSummary: LaborSummary;
   isPublished: boolean;
+  canViewPay?: boolean;
+  columnConfig?: ColumnConfig;
+  onColumnConfigUpdate?: (partial: Partial<ColumnConfig>) => void;
   onCellClick: (date: string, entityId?: string) => void;
   onShiftClick: (shift: Shift) => void;
   onShiftDelete: (shiftId: string) => void;
@@ -87,6 +92,7 @@ function snapTo15(minutes: number): number {
 // ── Week View: Employee Rows ──
 function WeekEmployeeView({
   shifts, employees, days, laborSummary, isPublished,
+  canViewPay, columnConfig, onColumnConfigUpdate,
   onCellClick, onShiftClick, onShiftDelete,
 }: Omit<ScheduleGridProps, 'positions' | 'selectedDay' | 'gridViewMode' | 'timeViewMode' | 'onDragCreate'>) {
   const shiftMap = React.useMemo(() => {
@@ -131,6 +137,9 @@ function WeekEmployeeView({
       <div className={sty.grid} style={{ gridTemplateColumns: '200px repeat(7, 1fr)' }}>
         <div className={`${sty.headerCell} ${sty.cornerCell}`}>
           <span className={sty.cornerLabel}>Employee</span>
+          {columnConfig && onColumnConfigUpdate && (
+            <ColumnConfigPopover config={columnConfig} canViewPay={!!canViewPay} onUpdate={onColumnConfigUpdate} />
+          )}
         </div>
         {days.map((day) => {
           const { dayLabel, dateLabel } = formatDateHeader(day);
@@ -150,9 +159,16 @@ function WeekEmployeeView({
               <div className={sty.rowLabel}>
                 <span className={sty.empNameLink}>{emp.full_name}</span>
                 <div className={sty.empMeta}>
-                  <span className={sty.empHours}>{summary.hours.toFixed(1)} / {summary.hours.toFixed(1)}</span>
-                  <span className={sty.empWage}>{formatCurrency(summary.cost)}</span>
+                  {columnConfig?.showHours !== false && (
+                    <span className={sty.empHours}>{summary.hours.toFixed(1)} / {summary.hours.toFixed(1)}</span>
+                  )}
+                  {columnConfig?.showWage !== false && canViewPay && (
+                    <span className={sty.empWage}>{formatCurrency(summary.cost)}</span>
+                  )}
                 </div>
+                {columnConfig?.showRole && (
+                  <span className={sty.empRole}>{emp.role}</span>
+                )}
               </div>
               {days.map((day) => {
                 const dayShifts = empDayMap?.get(day) ?? [];
@@ -194,7 +210,9 @@ function WeekEmployeeView({
             <div key={day} className={`${sty.cell} ${sty.summaryRow} ${isToday(day) ? sty.todayCol : ''}`}>
               <div className={sty.summaryCell}>
                 <span className={sty.summaryValue}>{daySummary ? `${daySummary.hours.toFixed(1)}h` : '0h'}</span>
-                <span className={sty.summaryCost}>{daySummary ? formatCurrency(daySummary.cost) : '$0'}</span>
+                {canViewPay && (
+                  <span className={sty.summaryCost}>{daySummary ? formatCurrency(daySummary.cost) : '$0'}</span>
+                )}
               </div>
             </div>
           );
@@ -206,9 +224,9 @@ function WeekEmployeeView({
 
 // ── Week View: Position Rows (grouped by zone) ──
 function WeekPositionView({
-  shifts, positions, days, laborSummary, isPublished,
+  shifts, positions, days, laborSummary, isPublished, canViewPay,
   onCellClick, onShiftClick, onShiftDelete,
-}: Omit<ScheduleGridProps, 'employees' | 'selectedDay' | 'gridViewMode' | 'timeViewMode' | 'onDragCreate'>) {
+}: Omit<ScheduleGridProps, 'employees' | 'selectedDay' | 'gridViewMode' | 'timeViewMode' | 'onDragCreate' | 'columnConfig' | 'onColumnConfigUpdate'>) {
   const shiftMap = React.useMemo(() => {
     const map = new Map<string, Map<string, Shift[]>>();
     for (const s of shifts) {
@@ -303,7 +321,9 @@ function WeekPositionView({
             <div key={day} className={`${sty.cell} ${sty.summaryRow} ${isToday(day) ? sty.todayCol : ''}`}>
               <div className={sty.summaryCell}>
                 <span className={sty.summaryValue}>{daySummary ? `${daySummary.hours.toFixed(1)}h` : '0h'}</span>
-                <span className={sty.summaryCost}>{daySummary ? formatCurrency(daySummary.cost) : '$0'}</span>
+                {canViewPay && (
+                  <span className={sty.summaryCost}>{daySummary ? formatCurrency(daySummary.cost) : '$0'}</span>
+                )}
               </div>
             </div>
           );
@@ -389,12 +409,16 @@ function useDragToCreate(
 // ── Day View: Employee Rows ──
 function DayEmployeeView({
   shifts, employees, selectedDay, isPublished,
+  canViewPay, columnConfig, onColumnConfigUpdate,
   onCellClick, onShiftClick, onDragCreate,
 }: {
   shifts: Shift[];
   employees: Employee[];
   selectedDay: string;
   isPublished: boolean;
+  canViewPay?: boolean;
+  columnConfig?: ColumnConfig;
+  onColumnConfigUpdate?: (partial: Partial<ColumnConfig>) => void;
   onCellClick: (date: string, entityId?: string) => void;
   onShiftClick: (shift: Shift) => void;
   onShiftDelete: (shiftId: string) => void;
@@ -447,7 +471,11 @@ function DayEmployeeView({
     <div className={sty.gridWrapper}>
       <div className={sty.dayGrid}>
         <div className={sty.dayHeaderRow}>
-          <div className={sty.dayCornerCell} />
+          <div className={sty.dayCornerCell}>
+            {columnConfig && onColumnConfigUpdate && (
+              <ColumnConfigPopover config={columnConfig} canViewPay={!!canViewPay} onUpdate={onColumnConfigUpdate} />
+            )}
+          </div>
           <div className={sty.timelineHeader}>
             {timeRange.hours.map((h) => (
               <span key={h} className={sty.timeLabel} style={{ left: `${((h - timeRange.minHour) / (timeRange.maxHour - timeRange.minHour)) * 100}%` }}>
@@ -478,6 +506,8 @@ function DayEmployeeView({
               totalMinutes={totalMinutes}
               shiftStyleFn={shiftStyle}
               isPublished={isPublished}
+              canViewPay={canViewPay}
+              columnConfig={columnConfig}
               onCellClick={onCellClick}
               onShiftClick={onShiftClick}
               onDragCreate={onDragCreate}
@@ -504,6 +534,7 @@ function DayEmployeeView({
 // Single employee row with drag-to-create
 function DayEmployeeRow({
   emp, empShifts, empHours, empCost, selectedDay, timeRange, totalMinutes, shiftStyleFn, isPublished,
+  canViewPay, columnConfig,
   onCellClick, onShiftClick, onDragCreate,
 }: {
   emp: Employee;
@@ -515,6 +546,8 @@ function DayEmployeeRow({
   totalMinutes: number;
   shiftStyleFn: (s: Shift) => { left: string; width: string };
   isPublished: boolean;
+  canViewPay?: boolean;
+  columnConfig?: ColumnConfig;
   onCellClick: (date: string, entityId?: string) => void;
   onShiftClick: (shift: Shift) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
@@ -536,9 +569,16 @@ function DayEmployeeRow({
       <div className={sty.rowLabel}>
         <span className={sty.empNameLink}>{emp.full_name}</span>
         <div className={sty.empMeta}>
-          <span className={sty.empHours}>{empHours.toFixed(1)} / {empHours.toFixed(1)}</span>
-          <span className={sty.empWage}>{formatCurrency(empCost)}</span>
+          {columnConfig?.showHours !== false && (
+            <span className={sty.empHours}>{empHours.toFixed(1)} / {empHours.toFixed(1)}</span>
+          )}
+          {columnConfig?.showWage !== false && canViewPay && (
+            <span className={sty.empWage}>{formatCurrency(empCost)}</span>
+          )}
         </div>
+        {columnConfig?.showRole && (
+          <span className={sty.empRole}>{emp.role}</span>
+        )}
       </div>
       <div
         ref={timelineRef}
@@ -570,13 +610,14 @@ function DayEmployeeRow({
 
 // ── Day View: Position Rows ──
 function DayPositionView({
-  shifts, positions, selectedDay, isPublished,
+  shifts, positions, selectedDay, isPublished, canViewPay,
   onCellClick, onShiftClick, onDragCreate,
 }: {
   shifts: Shift[];
   positions: Position[];
   selectedDay: string;
   isPublished: boolean;
+  canViewPay?: boolean;
   onCellClick: (date: string, entityId?: string) => void;
   onShiftClick: (shift: Shift) => void;
   onShiftDelete: (shiftId: string) => void;
@@ -715,16 +756,21 @@ function DayPositionRow({
 
 // ── Main ScheduleGrid ──
 export function ScheduleGrid(props: ScheduleGridProps) {
-  const { shifts, positions, employees, days, selectedDay, gridViewMode, timeViewMode, laborSummary, isPublished, onCellClick, onShiftClick, onShiftDelete, onDragCreate } = props;
+  const {
+    shifts, positions, employees, days, selectedDay,
+    gridViewMode, timeViewMode, laborSummary, isPublished,
+    canViewPay, columnConfig, onColumnConfigUpdate,
+    onCellClick, onShiftClick, onShiftDelete, onDragCreate,
+  } = props;
 
   if (timeViewMode === 'day' && gridViewMode === 'employees') {
-    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} />;
+    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} />;
   }
   if (timeViewMode === 'day' && gridViewMode === 'positions') {
-    return <DayPositionView shifts={shifts} positions={positions} selectedDay={selectedDay} isPublished={isPublished} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} />;
+    return <DayPositionView shifts={shifts} positions={positions} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} />;
   }
   if (gridViewMode === 'positions') {
-    return <WeekPositionView shifts={shifts} positions={positions} days={days} laborSummary={laborSummary} isPublished={isPublished} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
+    return <WeekPositionView shifts={shifts} positions={positions} days={days} laborSummary={laborSummary} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
   }
-  return <WeekEmployeeView shifts={shifts} employees={employees} days={days} laborSummary={laborSummary} isPublished={isPublished} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
+  return <WeekEmployeeView shifts={shifts} employees={employees} days={days} laborSummary={laborSummary} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
 }

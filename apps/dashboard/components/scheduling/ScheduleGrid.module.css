@@ -28,9 +28,11 @@
   gap: 1px;
 }
 .cornerCell {
-  align-items: flex-start;
-  justify-content: flex-end;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
   padding-left: 12px;
+  padding-right: 4px;
   position: sticky;
   left: 0;
   z-index: 3;
@@ -121,6 +123,16 @@
   font-weight: 600;
   color: var(--ls-color-neutral-soft-foreground);
   white-space: nowrap;
+}
+.empRole {
+  font-family: var(--ls-font-body);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ls-color-disabled-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .positionLabelRow {

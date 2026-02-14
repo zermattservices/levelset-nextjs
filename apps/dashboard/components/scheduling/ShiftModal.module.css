@@ -256,6 +256,32 @@
 }
 
 /* ------------------------------------------------------------------ */
+/*  Checkbox row (house shift)                                         */
+/* ------------------------------------------------------------------ */
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.checkboxRow input[type='checkbox'] {
+  accent-color: var(--ls-color-brand);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.checkboxLabel {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+/* ------------------------------------------------------------------ */
 /*  Projected cost display                                             */
 /* ------------------------------------------------------------------ */
 

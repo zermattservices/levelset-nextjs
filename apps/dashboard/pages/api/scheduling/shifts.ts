@@ -21,6 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const {
         schedule_id, org_id, position_id, shift_date,
         start_time, end_time, break_minutes, notes, employee_id,
+        is_house_shift,
       } = req.body;
 
       if (!schedule_id || !org_id || !shift_date || !start_time || !end_time) {
@@ -39,6 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           end_time,
           break_minutes: break_minutes || 0,
           notes: notes || null,
+          is_house_shift: is_house_shift ?? false,
         })
         .select(`
           *,
@@ -84,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (intent === 'update') {
-      const { id, position_id, shift_date, start_time, end_time, break_minutes, notes } = req.body;
+      const { id, position_id, shift_date, start_time, end_time, break_minutes, notes, is_house_shift } = req.body;
 
       if (!id) {
         return res.status(400).json({ error: 'id is required' });
@@ -97,6 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (end_time !== undefined) updateData.end_time = end_time;
       if (break_minutes !== undefined) updateData.break_minutes = break_minutes;
       if (notes !== undefined) updateData.notes = notes;
+      if (is_house_shift !== undefined) updateData.is_house_shift = is_house_shift;
 
       const { data, error } = await supabase
         .from('shifts')

@@ -13,6 +13,7 @@ interface ScheduleToolbarProps {
   zoneFilter: ZoneFilter;
   schedule: Schedule | null;
   laborSummary: LaborSummary;
+  canViewPay?: boolean;
   onNavigateWeek: (dir: -1 | 1) => void;
   onNavigateDay: (dir: -1 | 1) => void;
   onGoToToday: () => void;
@@ -65,6 +66,7 @@ export function ScheduleToolbar({
   zoneFilter,
   schedule,
   laborSummary,
+  canViewPay,
   onNavigateWeek,
   onNavigateDay,
   onGoToToday,
@@ -161,7 +163,9 @@ export function ScheduleToolbar({
 
         <div className={sty.summaryChips}>
           <span className={sty.summaryChip}>{formatHours(laborSummary.total_hours)}</span>
-          <span className={sty.summaryChip}>{formatCurrency(laborSummary.total_cost)}</span>
+          {canViewPay && (
+            <span className={sty.summaryChip}>{formatCurrency(laborSummary.total_cost)}</span>
+          )}
         </div>
       </div>
 

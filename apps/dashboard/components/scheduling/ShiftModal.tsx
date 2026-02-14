@@ -26,6 +26,7 @@ interface ShiftModalProps {
   prefillEmployeeId?: string;
   prefillStartTime?: string;
   prefillEndTime?: string;
+  canViewPay?: boolean;
   positions: Position[];
   employees: Employee[];
   isPublished: boolean;
@@ -37,6 +38,7 @@ interface ShiftModalProps {
     break_minutes: number;
     notes?: string;
     employee_id?: string;
+    is_house_shift?: boolean;
   }) => Promise<void>;
   onUpdate: (id: string, data: {
     shift_date?: string;
@@ -45,6 +47,7 @@ interface ShiftModalProps {
     position_id?: string | null;
     break_minutes?: number;
     notes?: string | null;
+    is_house_shift?: boolean;
   }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onAssign: (shiftId: string, employeeId: string) => Promise<void>;
@@ -104,6 +107,7 @@ export function ShiftModal({
   prefillEmployeeId,
   prefillStartTime,
   prefillEndTime,
+  canViewPay,
   positions,
   employees,
   isPublished,
@@ -122,6 +126,7 @@ export function ShiftModal({
   const [positionId, setPositionId] = React.useState('');
   const [employeeId, setEmployeeId] = React.useState('');
   const [notes, setNotes] = React.useState('');
+  const [isHouseShift, setIsHouseShift] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState('');
   const [employeeSearch, setEmployeeSearch] = React.useState('');
@@ -137,6 +142,7 @@ export function ShiftModal({
         setPositionId(shift.position_id ?? '');
         setEmployeeId(shift.assignment?.employee_id ?? '');
         setNotes(shift.notes ?? '');
+        setIsHouseShift(shift.is_house_shift ?? false);
       } else {
         setDate(prefillDate ?? '');
         setStartTime(prefillStartTime || '09:00');
@@ -145,6 +151,7 @@ export function ShiftModal({
         setPositionId(prefillPositionId ?? '');
         setEmployeeId(prefillEmployeeId ?? '');
         setNotes('');
+        setIsHouseShift(false);
       }
       setError('');
       setEmployeeSearch('');
@@ -190,6 +197,7 @@ export function ShiftModal({
           position_id: positionId || null,
           break_minutes: breakMin,
           notes: notes || null,
+          is_house_shift: isHouseShift,
         });
 
         const currentEmpId = shift.assignment?.employee_id;
@@ -210,6 +218,7 @@ export function ShiftModal({
           break_minutes: breakMin,
           notes: notes || undefined,
           employee_id: employeeId || undefined,
+          is_house_shift: isHouseShift || undefined,
         });
       }
       onClose();
@@ -379,14 +388,14 @@ export function ShiftModal({
               {filteredEmployees.map((e) => (
                 <option key={e.id} value={e.id}>
                   {e.full_name} — {e.role}
-                  {e.calculated_pay ? ` ($${e.calculated_pay.toFixed(2)}/hr)` : ''}
+                  {canViewPay && e.calculated_pay ? ` ($${e.calculated_pay.toFixed(2)}/hr)` : ''}
                 </option>
               ))}
             </select>
           </div>
 
           {/* Projected cost */}
-          {selectedEmployee && (
+          {canViewPay && selectedEmployee && (
             <div className={sty.costDisplay}>
               <span className={sty.costLabel}>Projected Cost</span>
               <span className={sty.costValue}>
@@ -410,6 +419,17 @@ export function ShiftModal({
               disabled={readOnly}
             />
           </div>
+
+          {/* House Shift */}
+          <label className={sty.checkboxRow}>
+            <input
+              type="checkbox"
+              checked={isHouseShift}
+              onChange={(e) => setIsHouseShift(e.target.checked)}
+              disabled={readOnly}
+            />
+            <span className={sty.checkboxLabel}>Make available as house shift</span>
+          </label>
         </div>
 
         {/* ---------- Error ---------- */}

@@ -233,6 +233,7 @@ export function useScheduleData() {
     break_minutes?: number;
     notes?: string;
     employee_id?: string;
+    is_house_shift?: boolean;
   }) => {
     const sched = await ensureSchedule();
     const res = await fetch('/api/scheduling/shifts', {
@@ -260,6 +261,7 @@ export function useScheduleData() {
     end_time: string;
     break_minutes: number;
     notes: string | null;
+    is_house_shift: boolean;
   }>) => {
     const res = await fetch('/api/scheduling/shifts', {
       method: 'POST',
