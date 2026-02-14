@@ -8,17 +8,17 @@ import CloseIcon from '@mui/icons-material/Close';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import CheckIcon from '@mui/icons-material/Check';
-import type { ShiftArea } from '@/lib/scheduling.types';
+import type { Position } from '@/lib/scheduling.types';
 
 const DEFAULT_COLORS = [
   '#dc6843', '#3b82f6', '#8b5cf6', '#f59e0b',
-  '#22c55e', '#ec4899', '#06b6d4', '#6b7280',
+  '#22c55e', '#ec4899', '#06b6d4', 'var(--ls-color-muted)',
 ];
 
 interface AreaManagerModalProps {
   open: boolean;
   onClose: () => void;
-  areas: ShiftArea[];
+  areas: Position[];
   onCreate: (name: string, color?: string) => Promise<void>;
   onUpdate: (id: string, params: Partial<{ name: string; color: string; display_order: number; is_active: boolean }>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
@@ -50,10 +50,10 @@ export function AreaManagerModal({
     }
   };
 
-  const startEdit = (area: ShiftArea) => {
+  const startEdit = (area: Position) => {
     setEditingId(area.id);
     setEditName(area.name);
-    setEditColor(area.color);
+    setEditColor((area as any).color ?? '#6b7280');
   };
 
   const handleUpdate = async () => {
@@ -132,11 +132,11 @@ export function AreaManagerModal({
                 </div>
               ) : (
                 <div className={sty.viewRow}>
-                  <span className={sty.colorDot} style={{ backgroundColor: area.color }} />
+                  <span className={sty.colorDot} style={{ backgroundColor: (area as any).color ?? '#6b7280' }} />
                   <span className={sty.areaName}>{area.name}</span>
                   <div className={sty.areaActions}>
                     <IconButton size="small" onClick={() => startEdit(area)}>
-                      <EditOutlinedIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+                      <EditOutlinedIcon sx={{ fontSize: 16, color: 'var(--ls-color-muted)' }} />
                     </IconButton>
                     <IconButton size="small" onClick={() => handleDelete(area.id, area.name)}>
                       <DeleteOutlineIcon sx={{ fontSize: 16, color: '#dc2626' }} />

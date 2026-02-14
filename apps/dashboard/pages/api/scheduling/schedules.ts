@@ -36,12 +36,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json({ schedule: null, shifts: [] });
       }
 
-      // Fetch all shifts with their areas and assignments (with employee data)
+      // Fetch all shifts with their positions and assignments (with employee data)
       const { data: shifts, error: shiftsError } = await supabase
         .from('shifts')
         .select(`
           *,
-          shift_area:shift_areas(id, name, color, display_order),
+          position:org_positions(id, name, zone, display_order),
           assignment:shift_assignments(
             id, employee_id, assigned_by, projected_cost,
             employee:employees(id, full_name, role, is_foh, is_boh, calculated_pay)
@@ -59,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Flatten the nested assignment array (each shift has at most one assignment in MVP)
       const flattenedShifts = (shifts || []).map((shift: any) => ({
         ...shift,
-        shift_area: shift.shift_area || null,
+        position: shift.position || null,
         assignment: shift.assignment && shift.assignment.length > 0
           ? {
               ...shift.assignment[0],

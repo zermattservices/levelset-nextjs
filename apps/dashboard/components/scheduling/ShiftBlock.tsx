@@ -19,16 +19,22 @@ function formatTimeShort(time: string): string {
   return m === 0 ? `${hour}${period}` : `${hour}:${String(m).padStart(2, '0')}${period}`;
 }
 
+// Position colors based on zone
+const ZONE_COLORS: Record<string, string> = {
+  BOH: '#dc6843',
+  FOH: '#3b82f6',
+};
+
 export function ShiftBlock({ shift, viewMode, isPublished, onClick, onDelete }: ShiftBlockProps) {
-  const area = shift.shift_area;
+  const position = shift.position;
   const assignment = shift.assignment;
-  const areaColor = area?.color ?? '#6b7280';
+  const posColor = position ? (ZONE_COLORS[position.zone] ?? 'var(--ls-color-muted)') : 'var(--ls-color-muted)';
   const isOpen = !assignment;
   const timeStr = `${formatTimeShort(shift.start_time)}–${formatTimeShort(shift.end_time)}`;
 
-  // In employee view: show area name. In area view: show employee name.
+  // In employee view: show position name. In position view: show employee name.
   const label = viewMode === 'employees'
-    ? (area?.name ?? '')
+    ? (position?.name ?? '')
     : (assignment?.employee?.full_name ?? '');
 
   const handleClick = (e: React.MouseEvent) => {
@@ -45,8 +51,8 @@ export function ShiftBlock({ shift, viewMode, isPublished, onClick, onDelete }: 
     <div
       className={`${sty.block} ${isOpen ? sty.openShift : ''}`}
       style={{
-        backgroundColor: `${areaColor}18`,
-        borderLeftColor: areaColor,
+        backgroundColor: `${posColor}18`,
+        borderLeftColor: posColor,
       }}
       onClick={handleClick}
       role="button"
@@ -55,7 +61,7 @@ export function ShiftBlock({ shift, viewMode, isPublished, onClick, onDelete }: 
       <div className={sty.timeRow}>
         <span className={sty.time}>{timeStr}</span>
         {isPublished && (
-          <LockOutlinedIcon sx={{ fontSize: 11, color: '#9ca3af' }} />
+          <LockOutlinedIcon sx={{ fontSize: 11, color: 'var(--ls-color-disabled-text)' }} />
         )}
         {!isPublished && onDelete && (
           <button className={sty.deleteBtn} onClick={handleDelete} aria-label="Delete shift">

@@ -3,13 +3,14 @@ import sty from './ScheduleToolbar.module.css';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import IconButton from '@mui/material/IconButton';
-import type { Schedule, GridViewMode, TimeViewMode, LaborSummary } from '@/lib/scheduling.types';
+import type { Schedule, GridViewMode, TimeViewMode, ZoneFilter, LaborSummary } from '@/lib/scheduling.types';
 
 interface ScheduleToolbarProps {
   weekStart: Date;
   selectedDay: string;
   timeViewMode: TimeViewMode;
   gridViewMode: GridViewMode;
+  zoneFilter: ZoneFilter;
   schedule: Schedule | null;
   laborSummary: LaborSummary;
   onNavigateWeek: (dir: -1 | 1) => void;
@@ -17,7 +18,7 @@ interface ScheduleToolbarProps {
   onGoToToday: () => void;
   onTimeViewChange: (mode: TimeViewMode) => void;
   onGridViewChange: (mode: GridViewMode) => void;
-  onManageAreas: () => void;
+  onZoneFilterChange: (zone: ZoneFilter) => void;
   onPublish: () => void;
   onUnpublish: () => void;
 }
@@ -61,6 +62,7 @@ export function ScheduleToolbar({
   selectedDay,
   timeViewMode,
   gridViewMode,
+  zoneFilter,
   schedule,
   laborSummary,
   onNavigateWeek,
@@ -68,7 +70,7 @@ export function ScheduleToolbar({
   onGoToToday,
   onTimeViewChange,
   onGridViewChange,
-  onManageAreas,
+  onZoneFilterChange,
   onPublish,
   onUnpublish,
 }: ScheduleToolbarProps) {
@@ -100,7 +102,7 @@ export function ScheduleToolbar({
         <button className={sty.todayBtn} onClick={onGoToToday}>Today</button>
       </div>
 
-      {/* Center: status + toggles + summary */}
+      {/* Center: status + toggles + zone filter + summary */}
       <div className={sty.centerSection}>
         <span className={`${sty.statusChip} ${isPublished ? sty.statusPublished : sty.statusDraft}`}>
           {isPublished ? 'Published' : 'Draft'}
@@ -129,10 +131,31 @@ export function ScheduleToolbar({
             Employees
           </button>
           <button
-            className={`${sty.toggleBtn} ${gridViewMode === 'areas' ? sty.toggleActive : ''}`}
-            onClick={() => onGridViewChange('areas')}
+            className={`${sty.toggleBtn} ${gridViewMode === 'positions' ? sty.toggleActive : ''}`}
+            onClick={() => onGridViewChange('positions')}
           >
-            Areas
+            Positions
+          </button>
+        </div>
+
+        <div className={sty.toggleGroup}>
+          <button
+            className={`${sty.toggleBtn} ${zoneFilter === 'all' ? sty.toggleActive : ''}`}
+            onClick={() => onZoneFilterChange('all')}
+          >
+            All
+          </button>
+          <button
+            className={`${sty.toggleBtn} ${zoneFilter === 'FOH' ? sty.toggleActive : ''}`}
+            onClick={() => onZoneFilterChange('FOH')}
+          >
+            FOH
+          </button>
+          <button
+            className={`${sty.toggleBtn} ${zoneFilter === 'BOH' ? sty.toggleActive : ''}`}
+            onClick={() => onZoneFilterChange('BOH')}
+          >
+            BOH
           </button>
         </div>
 
@@ -144,7 +167,6 @@ export function ScheduleToolbar({
 
       {/* Right: actions */}
       <div className={sty.actionSection}>
-        <button className={sty.secondaryBtn} onClick={onManageAreas}>Manage Areas</button>
         {isPublished ? (
           <button className={sty.unpublishBtn} onClick={onUnpublish}>Unpublish</button>
         ) : (

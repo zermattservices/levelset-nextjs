@@ -2,7 +2,7 @@ import * as React from 'react';
 import sty from './ScheduleGrid.module.css';
 import { ShiftBlock } from './ShiftBlock';
 import AddIcon from '@mui/icons-material/Add';
-import type { Shift, ShiftArea, GridViewMode, TimeViewMode, LaborSummary } from '@/lib/scheduling.types';
+import type { Shift, Position, GridViewMode, TimeViewMode, LaborSummary } from '@/lib/scheduling.types';
 
 interface Employee {
   id: string;
@@ -15,7 +15,7 @@ interface Employee {
 
 interface ScheduleGridProps {
   shifts: Shift[];
-  areas: ShiftArea[];
+  positions: Position[];
   employees: Employee[];
   days: string[];
   selectedDay: string;
@@ -29,6 +29,11 @@ interface ScheduleGridProps {
 }
 
 const DAY_LABELS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+const ZONE_COLORS: Record<string, string> = {
+  BOH: '#dc6843',
+  FOH: '#3b82f6',
+};
 
 function formatDateHeader(dateStr: string): { dayLabel: string; dateLabel: string } {
   const d = new Date(dateStr + 'T00:00:00');
@@ -65,8 +70,7 @@ function shiftNetHours(shift: Shift): number {
 function WeekEmployeeView({
   shifts, employees, days, laborSummary, isPublished,
   onCellClick, onShiftClick, onShiftDelete,
-}: Omit<ScheduleGridProps, 'areas' | 'selectedDay' | 'gridViewMode' | 'timeViewMode'>) {
-  // Build lookup: employeeId → date → shifts[]
+}: Omit<ScheduleGridProps, 'positions' | 'selectedDay' | 'gridViewMode' | 'timeViewMode'>) {
   const shiftMap = React.useMemo(() => {
     const map = new Map<string, Map<string, Shift[]>>();
     for (const s of shifts) {
@@ -79,18 +83,15 @@ function WeekEmployeeView({
     return map;
   }, [shifts]);
 
-  // Employees who have shifts + all employees from roster (merged, deduped)
   const rowEmployees = React.useMemo(() => {
     const ids = new Set<string>();
     const result: Employee[] = [];
-    // First: employees with shifts
     for (const emp of employees) {
       if (shiftMap.has(emp.id)) {
         ids.add(emp.id);
         result.push(emp);
       }
     }
-    // Then: remaining employees
     for (const emp of employees) {
       if (!ids.has(emp.id)) {
         result.push(emp);
@@ -99,10 +100,8 @@ function WeekEmployeeView({
     return result;
   }, [employees, shiftMap]);
 
-  // Open shifts (unassigned)
   const openShifts = React.useMemo(() => shiftMap.get('__open__') ?? new Map(), [shiftMap]);
 
-  // Per-employee weekly summary
   function empWeekSummary(empId: string) {
     let hours = 0;
     let cost = 0;
@@ -118,24 +117,19 @@ function WeekEmployeeView({
   return (
     <div className={sty.gridWrapper}>
       <div className={sty.grid} style={{ gridTemplateColumns: '200px repeat(7, 1fr)' }}>
-        {/* Header row */}
         <div className={`${sty.headerCell} ${sty.cornerCell}`}>
           <span className={sty.cornerLabel}>Employee</span>
         </div>
         {days.map((day) => {
           const { dayLabel, dateLabel } = formatDateHeader(day);
           return (
-            <div
-              key={day}
-              className={`${sty.headerCell} ${isToday(day) ? sty.todayHeader : ''}`}
-            >
+            <div key={day} className={`${sty.headerCell} ${isToday(day) ? sty.todayHeader : ''}`}>
               <span className={sty.dayLabel}>{dayLabel}</span>
               <span className={sty.dateHeaderLabel}>{dateLabel}</span>
             </div>
           );
         })}
 
-        {/* Employee rows */}
         {rowEmployees.map((emp) => {
           const summary = empWeekSummary(emp.id);
           const empDayMap = shiftMap.get(emp.id);
@@ -153,25 +147,12 @@ function WeekEmployeeView({
               {days.map((day) => {
                 const dayShifts = empDayMap?.get(day) ?? [];
                 return (
-                  <div
-                    key={day}
-                    className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`}
-                    onClick={() => onCellClick(day, emp.id)}
-                  >
+                  <div key={day} className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`} onClick={() => onCellClick(day, emp.id)}>
                     {dayShifts.map((s) => (
-                      <ShiftBlock
-                        key={s.id}
-                        shift={s}
-                        viewMode="employees"
-                        isPublished={isPublished}
-                        onClick={onShiftClick}
-                        onDelete={onShiftDelete}
-                      />
+                      <ShiftBlock key={s.id} shift={s} viewMode="employees" isPublished={isPublished} onClick={onShiftClick} onDelete={onShiftDelete} />
                     ))}
                     {dayShifts.length === 0 && (
-                      <div className={sty.addHint}>
-                        <AddIcon sx={{ fontSize: 14, color: '#d1d5db' }} />
-                      </div>
+                      <div className={sty.addHint}><AddIcon sx={{ fontSize: 14, color: 'var(--ls-color-border)' }} /></div>
                     )}
                   </div>
                 );
@@ -180,29 +161,15 @@ function WeekEmployeeView({
           );
         })}
 
-        {/* Open shifts row */}
         {openShifts.size > 0 && (
           <>
-            <div className={`${sty.rowLabel} ${sty.openRow}`}>
-              <span className={sty.empName}>Open Shifts</span>
-            </div>
+            <div className={`${sty.rowLabel} ${sty.openRow}`}><span className={sty.empName}>Open Shifts</span></div>
             {days.map((day) => {
               const dayShifts = openShifts.get(day) ?? [];
               return (
-                <div
-                  key={day}
-                  className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`}
-                  onClick={() => onCellClick(day)}
-                >
+                <div key={day} className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`} onClick={() => onCellClick(day)}>
                   {dayShifts.map((s) => (
-                    <ShiftBlock
-                      key={s.id}
-                      shift={s}
-                      viewMode="employees"
-                      isPublished={isPublished}
-                      onClick={onShiftClick}
-                      onDelete={onShiftDelete}
-                    />
+                    <ShiftBlock key={s.id} shift={s} viewMode="employees" isPublished={isPublished} onClick={onShiftClick} onDelete={onShiftDelete} />
                   ))}
                 </div>
               );
@@ -210,20 +177,13 @@ function WeekEmployeeView({
           </>
         )}
 
-        {/* Summary row */}
-        <div className={`${sty.rowLabel} ${sty.summaryRow}`}>
-          <span className={sty.summaryLabel}>Total</span>
-        </div>
+        <div className={`${sty.rowLabel} ${sty.summaryRow}`}><span className={sty.summaryLabel}>Total</span></div>
         {days.map((day) => {
           const daySummary = laborSummary.by_day[day];
           return (
             <div key={day} className={`${sty.cell} ${sty.summaryRow} ${isToday(day) ? sty.todayCol : ''}`}>
-              <span className={sty.summaryValue}>
-                {daySummary ? `${daySummary.hours.toFixed(1)}h` : '0h'}
-              </span>
-              <span className={sty.summaryCost}>
-                {daySummary ? formatCurrency(daySummary.cost) : '$0'}
-              </span>
+              <span className={sty.summaryValue}>{daySummary ? `${daySummary.hours.toFixed(1)}h` : '0h'}</span>
+              <span className={sty.summaryCost}>{daySummary ? formatCurrency(daySummary.cost) : '$0'}</span>
             </div>
           );
         })}
@@ -232,18 +192,17 @@ function WeekEmployeeView({
   );
 }
 
-// ── Week View: Area Rows ──
-function WeekAreaView({
-  shifts, areas, days, laborSummary, isPublished,
+// ── Week View: Position Rows (grouped by zone) ──
+function WeekPositionView({
+  shifts, positions, days, laborSummary, isPublished,
   onCellClick, onShiftClick, onShiftDelete,
 }: Omit<ScheduleGridProps, 'employees' | 'selectedDay' | 'gridViewMode' | 'timeViewMode'>) {
-  // Build lookup: areaId → date → shifts[]
   const shiftMap = React.useMemo(() => {
     const map = new Map<string, Map<string, Shift[]>>();
     for (const s of shifts) {
-      const areaId = s.shift_area_id ?? '__none__';
-      if (!map.has(areaId)) map.set(areaId, new Map());
-      const dayMap = map.get(areaId)!;
+      const posId = s.position_id ?? '__none__';
+      if (!map.has(posId)) map.set(posId, new Map());
+      const dayMap = map.get(posId)!;
       if (!dayMap.has(s.shift_date)) dayMap.set(s.shift_date, []);
       dayMap.get(s.shift_date)!.push(s);
     }
@@ -251,89 +210,87 @@ function WeekAreaView({
   }, [shifts]);
 
   const rows = React.useMemo(() => {
-    const result = [...areas];
-    // Add "No Area" row if there are unassigned-area shifts
+    const result = [...positions];
     if (shiftMap.has('__none__')) {
-      result.push({ id: '__none__', name: 'No Area', color: '#6b7280' } as ShiftArea);
+      result.push({ id: '__none__', name: 'No Position', zone: 'BOH', display_order: 999 } as Position);
     }
     return result;
-  }, [areas, shiftMap]);
+  }, [positions, shiftMap]);
+
+  const bohPositions = rows.filter((p) => p.zone === 'BOH');
+  const fohPositions = rows.filter((p) => p.zone === 'FOH');
+
+  function renderPositionRows(positionList: Position[]) {
+    return positionList.map((pos) => {
+      const posDayMap = shiftMap.get(pos.id);
+      const posColor = ZONE_COLORS[pos.zone] ?? 'var(--ls-color-muted)';
+      return (
+        <React.Fragment key={pos.id}>
+          <div className={sty.rowLabel}>
+            <div className={sty.areaLabelRow}>
+              <span className={sty.areaColorDot} style={{ backgroundColor: posColor }} />
+              <span className={sty.empName}>{pos.name}</span>
+            </div>
+          </div>
+          {days.map((day) => {
+            const dayShifts = posDayMap?.get(day) ?? [];
+            return (
+              <div key={day} className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`} onClick={() => onCellClick(day, pos.id)}>
+                {dayShifts.map((s) => (
+                  <ShiftBlock key={s.id} shift={s} viewMode="positions" isPublished={isPublished} onClick={onShiftClick} onDelete={onShiftDelete} />
+                ))}
+                {dayShifts.length === 0 && (
+                  <div className={sty.addHint}><AddIcon sx={{ fontSize: 14, color: 'var(--ls-color-border)' }} /></div>
+                )}
+              </div>
+            );
+          })}
+        </React.Fragment>
+      );
+    });
+  }
 
   return (
     <div className={sty.gridWrapper}>
       <div className={sty.grid} style={{ gridTemplateColumns: '200px repeat(7, 1fr)' }}>
-        {/* Header row */}
-        <div className={`${sty.headerCell} ${sty.cornerCell}`}>
-          <span className={sty.cornerLabel}>Area</span>
-        </div>
+        <div className={`${sty.headerCell} ${sty.cornerCell}`}><span className={sty.cornerLabel}>Position</span></div>
         {days.map((day) => {
           const { dayLabel, dateLabel } = formatDateHeader(day);
           return (
-            <div
-              key={day}
-              className={`${sty.headerCell} ${isToday(day) ? sty.todayHeader : ''}`}
-            >
+            <div key={day} className={`${sty.headerCell} ${isToday(day) ? sty.todayHeader : ''}`}>
               <span className={sty.dayLabel}>{dayLabel}</span>
               <span className={sty.dateHeaderLabel}>{dateLabel}</span>
             </div>
           );
         })}
 
-        {/* Area rows */}
-        {rows.map((area) => {
-          const areaDayMap = shiftMap.get(area.id);
-          return (
-            <React.Fragment key={area.id}>
-              <div className={sty.rowLabel}>
-                <div className={sty.areaLabelRow}>
-                  <span className={sty.areaColorDot} style={{ backgroundColor: area.color }} />
-                  <span className={sty.empName}>{area.name}</span>
-                </div>
-              </div>
-              {days.map((day) => {
-                const dayShifts = areaDayMap?.get(day) ?? [];
-                return (
-                  <div
-                    key={day}
-                    className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`}
-                    onClick={() => onCellClick(day, area.id)}
-                  >
-                    {dayShifts.map((s) => (
-                      <ShiftBlock
-                        key={s.id}
-                        shift={s}
-                        viewMode="areas"
-                        isPublished={isPublished}
-                        onClick={onShiftClick}
-                        onDelete={onShiftDelete}
-                      />
-                    ))}
-                    {dayShifts.length === 0 && (
-                      <div className={sty.addHint}>
-                        <AddIcon sx={{ fontSize: 14, color: '#d1d5db' }} />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </React.Fragment>
-          );
-        })}
+        {bohPositions.length > 0 && (
+          <>
+            <div className={`${sty.rowLabel} ${sty.zoneSectionHeader}`}>
+              <span className={sty.zoneBadge} style={{ backgroundColor: '#dc684320', color: '#dc6843' }}>BOH</span>
+            </div>
+            {days.map((day) => (<div key={day} className={`${sty.cell} ${sty.zoneSectionHeader}`} />))}
+            {renderPositionRows(bohPositions)}
+          </>
+        )}
 
-        {/* Summary row */}
-        <div className={`${sty.rowLabel} ${sty.summaryRow}`}>
-          <span className={sty.summaryLabel}>Total</span>
-        </div>
+        {fohPositions.length > 0 && (
+          <>
+            <div className={`${sty.rowLabel} ${sty.zoneSectionHeader}`}>
+              <span className={sty.zoneBadge} style={{ backgroundColor: '#3b82f620', color: '#3b82f6' }}>FOH</span>
+            </div>
+            {days.map((day) => (<div key={day} className={`${sty.cell} ${sty.zoneSectionHeader}`} />))}
+            {renderPositionRows(fohPositions)}
+          </>
+        )}
+
+        <div className={`${sty.rowLabel} ${sty.summaryRow}`}><span className={sty.summaryLabel}>Total</span></div>
         {days.map((day) => {
           const daySummary = laborSummary.by_day[day];
           return (
             <div key={day} className={`${sty.cell} ${sty.summaryRow} ${isToday(day) ? sty.todayCol : ''}`}>
-              <span className={sty.summaryValue}>
-                {daySummary ? `${daySummary.hours.toFixed(1)}h` : '0h'}
-              </span>
-              <span className={sty.summaryCost}>
-                {daySummary ? formatCurrency(daySummary.cost) : '$0'}
-              </span>
+              <span className={sty.summaryValue}>{daySummary ? `${daySummary.hours.toFixed(1)}h` : '0h'}</span>
+              <span className={sty.summaryCost}>{daySummary ? formatCurrency(daySummary.cost) : '$0'}</span>
             </div>
           );
         })}
@@ -345,7 +302,7 @@ function WeekAreaView({
 // ── Day View: Employee Rows ──
 function DayEmployeeView({
   shifts, employees, selectedDay, isPublished,
-  onCellClick, onShiftClick, onShiftDelete,
+  onCellClick, onShiftClick,
 }: {
   shifts: Shift[];
   employees: Employee[];
@@ -355,12 +312,8 @@ function DayEmployeeView({
   onShiftClick: (shift: Shift) => void;
   onShiftDelete: (shiftId: string) => void;
 }) {
-  const dayShifts = React.useMemo(
-    () => shifts.filter((s) => s.shift_date === selectedDay),
-    [shifts, selectedDay],
-  );
+  const dayShifts = React.useMemo(() => shifts.filter((s) => s.shift_date === selectedDay), [shifts, selectedDay]);
 
-  // Build lookup: employeeId → shifts
   const shiftMap = React.useMemo(() => {
     const map = new Map<string, Shift[]>();
     for (const s of dayShifts) {
@@ -371,15 +324,11 @@ function DayEmployeeView({
     return map;
   }, [dayShifts]);
 
-  // Employees with shifts first, then rest
   const rowEmployees = React.useMemo(() => {
     const ids = new Set<string>();
     const result: Employee[] = [];
     for (const emp of employees) {
-      if (shiftMap.has(emp.id)) {
-        ids.add(emp.id);
-        result.push(emp);
-      }
+      if (shiftMap.has(emp.id)) { ids.add(emp.id); result.push(emp); }
     }
     for (const emp of employees) {
       if (!ids.has(emp.id)) result.push(emp);
@@ -387,7 +336,6 @@ function DayEmployeeView({
     return result;
   }, [employees, shiftMap]);
 
-  // Time range for the day: 6am to 11pm (or extend based on shifts)
   const timeRange = React.useMemo(() => {
     let minHour = 6;
     let maxHour = 23;
@@ -403,35 +351,25 @@ function DayEmployeeView({
   }, [dayShifts]);
 
   const totalMinutes = (timeRange.maxHour - timeRange.minHour) * 60;
-
   function shiftStyle(shift: Shift) {
     const startMin = parseTime(shift.start_time) - timeRange.minHour * 60;
     const endMin = parseTime(shift.end_time) - timeRange.minHour * 60;
-    const left = Math.max(0, (startMin / totalMinutes) * 100);
-    const width = Math.max(2, ((endMin - startMin) / totalMinutes) * 100);
-    return { left: `${left}%`, width: `${width}%` };
+    return { left: `${Math.max(0, (startMin / totalMinutes) * 100)}%`, width: `${Math.max(2, ((endMin - startMin) / totalMinutes) * 100)}%` };
   }
 
   return (
     <div className={sty.gridWrapper}>
       <div className={sty.dayGrid}>
-        {/* Time header */}
         <div className={sty.dayHeaderRow}>
           <div className={sty.dayCornerCell} />
           <div className={sty.timelineHeader}>
             {timeRange.hours.map((h) => (
-              <span
-                key={h}
-                className={sty.timeLabel}
-                style={{ left: `${((h - timeRange.minHour) / (timeRange.maxHour - timeRange.minHour)) * 100}%` }}
-              >
+              <span key={h} className={sty.timeLabel} style={{ left: `${((h - timeRange.minHour) / (timeRange.maxHour - timeRange.minHour)) * 100}%` }}>
                 {h === 0 ? '12a' : h < 12 ? `${h}a` : h === 12 ? '12p' : `${h - 12}p`}
               </span>
             ))}
           </div>
         </div>
-
-        {/* Employee rows */}
         {rowEmployees.map((emp) => {
           const empShifts = shiftMap.get(emp.id) ?? [];
           return (
@@ -440,56 +378,28 @@ function DayEmployeeView({
                 <span className={sty.empName}>{emp.full_name}</span>
                 <span className={sty.empRole}>{emp.role}</span>
               </div>
-              <div
-                className={sty.timeline}
-                onClick={() => onCellClick(selectedDay, emp.id)}
-              >
-                {empShifts.map((s) => (
-                  <div
-                    key={s.id}
-                    className={sty.timelineBlock}
-                    style={{
-                      ...shiftStyle(s),
-                      backgroundColor: `${s.shift_area?.color ?? '#6b7280'}25`,
-                      borderLeft: `3px solid ${s.shift_area?.color ?? '#6b7280'}`,
-                    }}
-                    onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}
-                  >
-                    <span className={sty.timelineBlockTime}>
-                      {formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}
-                    </span>
-                    <span className={sty.timelineBlockLabel}>
-                      {s.shift_area?.name ?? ''}
-                    </span>
-                  </div>
-                ))}
-                {empShifts.length === 0 && (
-                  <div className={sty.timelineEmpty}>
-                    <AddIcon sx={{ fontSize: 14, color: '#d1d5db' }} />
-                  </div>
-                )}
+              <div className={sty.timeline} onClick={() => onCellClick(selectedDay, emp.id)}>
+                {empShifts.map((s) => {
+                  const posColor = s.position ? (ZONE_COLORS[s.position.zone] ?? 'var(--ls-color-muted)') : 'var(--ls-color-muted)';
+                  return (
+                    <div key={s.id} className={sty.timelineBlock} style={{ ...shiftStyle(s), backgroundColor: `${posColor}25`, borderLeft: `3px solid ${posColor}` }} onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}>
+                      <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
+                      <span className={sty.timelineBlockLabel}>{s.position?.name ?? ''}</span>
+                    </div>
+                  );
+                })}
+                {empShifts.length === 0 && (<div className={sty.timelineEmpty}><AddIcon sx={{ fontSize: 14, color: 'var(--ls-color-border)' }} /></div>)}
               </div>
             </div>
           );
         })}
-
-        {/* Open shifts row */}
         {shiftMap.has('__open__') && (
           <div className={`${sty.dayRow} ${sty.openRow}`}>
-            <div className={sty.rowLabel}>
-              <span className={sty.empName}>Open Shifts</span>
-            </div>
+            <div className={sty.rowLabel}><span className={sty.empName}>Open Shifts</span></div>
             <div className={sty.timeline} onClick={() => onCellClick(selectedDay)}>
               {(shiftMap.get('__open__') ?? []).map((s) => (
-                <div
-                  key={s.id}
-                  className={`${sty.timelineBlock} ${sty.timelineBlockOpen}`}
-                  style={shiftStyle(s)}
-                  onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}
-                >
-                  <span className={sty.timelineBlockTime}>
-                    {formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}
-                  </span>
+                <div key={s.id} className={`${sty.timelineBlock} ${sty.timelineBlockOpen}`} style={shiftStyle(s)} onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}>
+                  <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
                 </div>
               ))}
             </div>
@@ -500,41 +410,38 @@ function DayEmployeeView({
   );
 }
 
-// ── Day View: Area Rows ──
-function DayAreaView({
-  shifts, areas, selectedDay, isPublished,
-  onCellClick, onShiftClick, onShiftDelete,
+// ── Day View: Position Rows ──
+function DayPositionView({
+  shifts, positions, selectedDay, isPublished,
+  onCellClick, onShiftClick,
 }: {
   shifts: Shift[];
-  areas: ShiftArea[];
+  positions: Position[];
   selectedDay: string;
   isPublished: boolean;
   onCellClick: (date: string, entityId?: string) => void;
   onShiftClick: (shift: Shift) => void;
   onShiftDelete: (shiftId: string) => void;
 }) {
-  const dayShifts = React.useMemo(
-    () => shifts.filter((s) => s.shift_date === selectedDay),
-    [shifts, selectedDay],
-  );
+  const dayShifts = React.useMemo(() => shifts.filter((s) => s.shift_date === selectedDay), [shifts, selectedDay]);
 
   const shiftMap = React.useMemo(() => {
     const map = new Map<string, Shift[]>();
     for (const s of dayShifts) {
-      const areaId = s.shift_area_id ?? '__none__';
-      if (!map.has(areaId)) map.set(areaId, []);
-      map.get(areaId)!.push(s);
+      const posId = s.position_id ?? '__none__';
+      if (!map.has(posId)) map.set(posId, []);
+      map.get(posId)!.push(s);
     }
     return map;
   }, [dayShifts]);
 
   const rows = React.useMemo(() => {
-    const result = [...areas];
+    const result = [...positions];
     if (shiftMap.has('__none__')) {
-      result.push({ id: '__none__', name: 'No Area', color: '#6b7280' } as ShiftArea);
+      result.push({ id: '__none__', name: 'No Position', zone: 'BOH', display_order: 999 } as Position);
     }
     return result;
-  }, [areas, shiftMap]);
+  }, [positions, shiftMap]);
 
   const timeRange = React.useMemo(() => {
     let minHour = 6;
@@ -551,73 +458,44 @@ function DayAreaView({
   }, [dayShifts]);
 
   const totalMinutes = (timeRange.maxHour - timeRange.minHour) * 60;
-
   function shiftStyle(shift: Shift) {
     const startMin = parseTime(shift.start_time) - timeRange.minHour * 60;
     const endMin = parseTime(shift.end_time) - timeRange.minHour * 60;
-    const left = Math.max(0, (startMin / totalMinutes) * 100);
-    const width = Math.max(2, ((endMin - startMin) / totalMinutes) * 100);
-    return { left: `${left}%`, width: `${width}%` };
+    return { left: `${Math.max(0, (startMin / totalMinutes) * 100)}%`, width: `${Math.max(2, ((endMin - startMin) / totalMinutes) * 100)}%` };
   }
 
   return (
     <div className={sty.gridWrapper}>
       <div className={sty.dayGrid}>
-        {/* Time header */}
         <div className={sty.dayHeaderRow}>
           <div className={sty.dayCornerCell} />
           <div className={sty.timelineHeader}>
             {timeRange.hours.map((h) => (
-              <span
-                key={h}
-                className={sty.timeLabel}
-                style={{ left: `${((h - timeRange.minHour) / (timeRange.maxHour - timeRange.minHour)) * 100}%` }}
-              >
+              <span key={h} className={sty.timeLabel} style={{ left: `${((h - timeRange.minHour) / (timeRange.maxHour - timeRange.minHour)) * 100}%` }}>
                 {h === 0 ? '12a' : h < 12 ? `${h}a` : h === 12 ? '12p' : `${h - 12}p`}
               </span>
             ))}
           </div>
         </div>
-
-        {/* Area rows */}
-        {rows.map((area) => {
-          const areaShifts = shiftMap.get(area.id) ?? [];
+        {rows.map((pos) => {
+          const posShifts = shiftMap.get(pos.id) ?? [];
+          const posColor = ZONE_COLORS[pos.zone] ?? 'var(--ls-color-muted)';
           return (
-            <div key={area.id} className={sty.dayRow}>
+            <div key={pos.id} className={sty.dayRow}>
               <div className={sty.rowLabel}>
                 <div className={sty.areaLabelRow}>
-                  <span className={sty.areaColorDot} style={{ backgroundColor: area.color }} />
-                  <span className={sty.empName}>{area.name}</span>
+                  <span className={sty.areaColorDot} style={{ backgroundColor: posColor }} />
+                  <span className={sty.empName}>{pos.name}</span>
                 </div>
               </div>
-              <div
-                className={sty.timeline}
-                onClick={() => onCellClick(selectedDay, area.id)}
-              >
-                {areaShifts.map((s) => (
-                  <div
-                    key={s.id}
-                    className={`${sty.timelineBlock} ${!s.assignment ? sty.timelineBlockOpen : ''}`}
-                    style={{
-                      ...shiftStyle(s),
-                      backgroundColor: `${area.color}25`,
-                      borderLeft: `3px solid ${area.color}`,
-                    }}
-                    onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}
-                  >
-                    <span className={sty.timelineBlockTime}>
-                      {formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}
-                    </span>
-                    <span className={sty.timelineBlockLabel}>
-                      {s.assignment?.employee?.full_name ?? 'Open'}
-                    </span>
+              <div className={sty.timeline} onClick={() => onCellClick(selectedDay, pos.id)}>
+                {posShifts.map((s) => (
+                  <div key={s.id} className={`${sty.timelineBlock} ${!s.assignment ? sty.timelineBlockOpen : ''}`} style={{ ...shiftStyle(s), backgroundColor: `${posColor}25`, borderLeft: `3px solid ${posColor}` }} onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}>
+                    <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
+                    <span className={sty.timelineBlockLabel}>{s.assignment?.employee?.full_name ?? 'Open'}</span>
                   </div>
                 ))}
-                {areaShifts.length === 0 && (
-                  <div className={sty.timelineEmpty}>
-                    <AddIcon sx={{ fontSize: 14, color: '#d1d5db' }} />
-                  </div>
-                )}
+                {posShifts.length === 0 && (<div className={sty.timelineEmpty}><AddIcon sx={{ fontSize: 14, color: 'var(--ls-color-border)' }} /></div>)}
               </div>
             </div>
           );
@@ -627,7 +505,6 @@ function DayAreaView({
   );
 }
 
-// ── Shared time format helper ──
 function formatTimeShort(time: string): string {
   const [h, m] = time.split(':').map(Number);
   const period = h >= 12 ? 'p' : 'a';
@@ -637,65 +514,16 @@ function formatTimeShort(time: string): string {
 
 // ── Main ScheduleGrid ──
 export function ScheduleGrid(props: ScheduleGridProps) {
-  const {
-    shifts, areas, employees, days, selectedDay,
-    gridViewMode, timeViewMode, laborSummary, isPublished,
-    onCellClick, onShiftClick, onShiftDelete,
-  } = props;
+  const { shifts, positions, employees, days, selectedDay, gridViewMode, timeViewMode, laborSummary, isPublished, onCellClick, onShiftClick, onShiftDelete } = props;
 
   if (timeViewMode === 'day' && gridViewMode === 'employees') {
-    return (
-      <DayEmployeeView
-        shifts={shifts}
-        employees={employees}
-        selectedDay={selectedDay}
-        isPublished={isPublished}
-        onCellClick={onCellClick}
-        onShiftClick={onShiftClick}
-        onShiftDelete={onShiftDelete}
-      />
-    );
+    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
   }
-
-  if (timeViewMode === 'day' && gridViewMode === 'areas') {
-    return (
-      <DayAreaView
-        shifts={shifts}
-        areas={areas}
-        selectedDay={selectedDay}
-        isPublished={isPublished}
-        onCellClick={onCellClick}
-        onShiftClick={onShiftClick}
-        onShiftDelete={onShiftDelete}
-      />
-    );
+  if (timeViewMode === 'day' && gridViewMode === 'positions') {
+    return <DayPositionView shifts={shifts} positions={positions} selectedDay={selectedDay} isPublished={isPublished} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
   }
-
-  if (gridViewMode === 'areas') {
-    return (
-      <WeekAreaView
-        shifts={shifts}
-        areas={areas}
-        days={days}
-        laborSummary={laborSummary}
-        isPublished={isPublished}
-        onCellClick={onCellClick}
-        onShiftClick={onShiftClick}
-        onShiftDelete={onShiftDelete}
-      />
-    );
+  if (gridViewMode === 'positions') {
+    return <WeekPositionView shifts={shifts} positions={positions} days={days} laborSummary={laborSummary} isPublished={isPublished} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
   }
-
-  return (
-    <WeekEmployeeView
-      shifts={shifts}
-      employees={employees}
-      days={days}
-      laborSummary={laborSummary}
-      isPublished={isPublished}
-      onCellClick={onCellClick}
-      onShiftClick={onShiftClick}
-      onShiftDelete={onShiftDelete}
-    />
-  );
+  return <WeekEmployeeView shifts={shifts} employees={employees} days={days} laborSummary={laborSummary} isPublished={isPublished} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
 }

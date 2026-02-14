@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import type {
-  Schedule, Shift, ShiftArea, ShiftAssignment,
-  GridViewMode, TimeViewMode, LaborSummary,
+  Schedule, Shift, Position,
+  GridViewMode, TimeViewMode, ZoneFilter, LaborSummary,
 } from '@/lib/scheduling.types';
 
 interface Employee {
@@ -61,11 +61,12 @@ export function useScheduleData() {
   const [selectedDay, setSelectedDay] = useState<string>(() => formatDate(new Date()));
   const [gridViewMode, setGridViewMode] = useState<GridViewMode>('employees');
   const [timeViewMode, setTimeViewMode] = useState<TimeViewMode>('week');
+  const [zoneFilter, setZoneFilter] = useState<ZoneFilter>('all');
 
   // Data state
   const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [shifts, setShifts] = useState<Shift[]>([]);
-  const [areas, setAreas] = useState<ShiftArea[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -76,6 +77,8 @@ export function useScheduleData() {
 
   const weekStartStr = formatDate(weekStart);
   const days = useMemo(() => weekDates(weekStart), [weekStart]);
+
+  const orgId = selectedLocationOrgId ?? auth.org_id;
 
   // ── Fetch schedule + shifts ──
   const fetchSchedule = useCallback(async () => {
@@ -98,18 +101,18 @@ export function useScheduleData() {
     }
   }, [selectedLocationId, weekStartStr]);
 
-  // ── Fetch areas ──
-  const fetchAreas = useCallback(async () => {
-    if (!selectedLocationId) return;
+  // ── Fetch positions (from org_positions) ──
+  const fetchPositions = useCallback(async () => {
+    if (!orgId) return;
     try {
-      const res = await fetch(`/api/scheduling/areas?location_id=${selectedLocationId}`);
-      if (!res.ok) throw new Error('Failed to fetch areas');
+      const res = await fetch(`/api/scheduling/positions?org_id=${orgId}`);
+      if (!res.ok) throw new Error('Failed to fetch positions');
       const data = await res.json();
-      setAreas(data.areas ?? []);
+      setPositions(data.positions ?? []);
     } catch (err) {
-      console.error('Error fetching areas:', err);
+      console.error('Error fetching positions:', err);
     }
-  }, [selectedLocationId]);
+  }, [orgId]);
 
   // ── Fetch employees ──
   const fetchEmployees = useCallback(async () => {
@@ -127,27 +130,50 @@ export function useScheduleData() {
   // Refetch when location or week changes
   useEffect(() => {
     fetchSchedule();
-    fetchAreas();
+    fetchPositions();
     fetchEmployees();
-  }, [fetchSchedule, fetchAreas, fetchEmployees]);
+  }, [fetchSchedule, fetchPositions, fetchEmployees]);
 
   const refetch = useCallback(() => {
     fetchSchedule();
-    fetchAreas();
-  }, [fetchSchedule, fetchAreas]);
+    fetchPositions();
+  }, [fetchSchedule, fetchPositions]);
+
+  // ── Filtered data by zone ──
+  const filteredPositions = useMemo(() => {
+    if (zoneFilter === 'all') return positions;
+    return positions.filter((p) => p.zone === zoneFilter);
+  }, [positions, zoneFilter]);
+
+  const filteredEmployees = useMemo(() => {
+    if (zoneFilter === 'all') return employees;
+    return employees.filter((e) => {
+      if (zoneFilter === 'FOH') return e.is_foh;
+      if (zoneFilter === 'BOH') return e.is_boh;
+      return true;
+    });
+  }, [employees, zoneFilter]);
+
+  const filteredShifts = useMemo(() => {
+    if (zoneFilter === 'all') return shifts;
+    return shifts.filter((s) => {
+      if (!s.position) return true; // show shifts without a position in all filters
+      return s.position.zone === zoneFilter;
+    });
+  }, [shifts, zoneFilter]);
 
   // ── Labor summary ──
   const laborSummary = useMemo<LaborSummary>(() => {
     let totalHours = 0;
     let totalCost = 0;
     const byDay: Record<string, { hours: number; cost: number }> = {};
-    const byArea: Record<string, { hours: number; cost: number; area_name: string }> = {};
+    const byPosition: Record<string, { hours: number; cost: number; position_name: string; zone: string }> = {};
 
     for (const day of days) {
       byDay[day] = { hours: 0, cost: 0 };
     }
 
-    for (const shift of shifts) {
+    for (const shift of filteredShifts) {
       const hours = shiftNetHours(shift);
       const cost = shift.assignment?.projected_cost ?? 0;
 
@@ -159,16 +185,21 @@ export function useScheduleData() {
         byDay[shift.shift_date].cost += cost;
       }
 
-      const areaId = shift.shift_area_id ?? 'unassigned';
-      if (!byArea[areaId]) {
-        byArea[areaId] = { hours: 0, cost: 0, area_name: shift.shift_area?.name ?? 'No Area' };
+      const posId = shift.position_id ?? 'unassigned';
+      if (!byPosition[posId]) {
+        byPosition[posId] = {
+          hours: 0,
+          cost: 0,
+          position_name: shift.position?.name ?? 'No Position',
+          zone: shift.position?.zone ?? '',
+        };
       }
-      byArea[areaId].hours += hours;
-      byArea[areaId].cost += cost;
+      byPosition[posId].hours += hours;
+      byPosition[posId].cost += cost;
     }
 
-    return { total_hours: totalHours, total_cost: totalCost, by_day: byDay, by_area: byArea };
-  }, [shifts, days]);
+    return { total_hours: totalHours, total_cost: totalCost, by_day: byDay, by_position: byPosition };
+  }, [filteredShifts, days]);
 
   // ── Ensure schedule exists (auto-create draft if needed) ──
   const ensureSchedule = useCallback(async (): Promise<Schedule> => {
@@ -180,7 +211,7 @@ export function useScheduleData() {
       body: JSON.stringify({
         intent: 'create',
         location_id: selectedLocationId,
-        org_id: selectedLocationOrgId ?? auth.org_id,
+        org_id: orgId,
         week_start: weekStartStr,
       }),
     });
@@ -191,14 +222,14 @@ export function useScheduleData() {
     const data = await res.json();
     setSchedule(data.schedule);
     return data.schedule;
-  }, [schedule, selectedLocationId, selectedLocationOrgId, auth.org_id, weekStartStr]);
+  }, [schedule, selectedLocationId, orgId, weekStartStr]);
 
   // ── CRUD: Shifts ──
   const createShift = useCallback(async (params: {
     shift_date: string;
     start_time: string;
     end_time: string;
-    shift_area_id?: string;
+    position_id?: string;
     break_minutes?: number;
     notes?: string;
     employee_id?: string;
@@ -223,7 +254,7 @@ export function useScheduleData() {
   }, [ensureSchedule, fetchSchedule]);
 
   const updateShift = useCallback(async (id: string, params: Partial<{
-    shift_area_id: string | null;
+    position_id: string | null;
     shift_date: string;
     start_time: string;
     end_time: string;
@@ -264,7 +295,7 @@ export function useScheduleData() {
         intent: 'assign',
         shift_id: shiftId,
         employee_id: employeeId,
-        org_id: selectedLocationOrgId ?? auth.org_id,
+        org_id: orgId,
       }),
     });
     if (!res.ok) {
@@ -272,7 +303,7 @@ export function useScheduleData() {
       throw new Error(err.error || 'Failed to assign employee');
     }
     await fetchSchedule();
-  }, [selectedLocationOrgId, auth.org_id, fetchSchedule]);
+  }, [orgId, fetchSchedule]);
 
   const unassignEmployee = useCallback(async (shiftId: string, employeeId: string) => {
     const res = await fetch('/api/scheduling/assignments', {
@@ -302,7 +333,7 @@ export function useScheduleData() {
         shift_id: shiftId,
         old_employee_id: oldEmployeeId,
         new_employee_id: newEmployeeId,
-        org_id: selectedLocationOrgId ?? auth.org_id,
+        org_id: orgId,
       }),
     });
     if (!res.ok) {
@@ -310,7 +341,7 @@ export function useScheduleData() {
       throw new Error(err.error || 'Failed to reassign employee');
     }
     await fetchSchedule();
-  }, [selectedLocationOrgId, auth.org_id, fetchSchedule]);
+  }, [orgId, fetchSchedule]);
 
   // ── Publish / Unpublish ──
   const publishSchedule = useCallback(async () => {
@@ -350,54 +381,6 @@ export function useScheduleData() {
     setSchedule(data.schedule);
   }, [schedule]);
 
-  // ── Area CRUD ──
-  const createArea = useCallback(async (name: string, color?: string) => {
-    const res = await fetch('/api/scheduling/areas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        intent: 'create',
-        name,
-        color: color ?? '#6b7280',
-        location_id: selectedLocationId,
-        org_id: selectedLocationOrgId ?? auth.org_id,
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Failed to create area');
-    }
-    await fetchAreas();
-  }, [selectedLocationId, selectedLocationOrgId, auth.org_id, fetchAreas]);
-
-  const updateArea = useCallback(async (id: string, params: Partial<{
-    name: string; color: string; display_order: number; is_active: boolean;
-  }>) => {
-    const res = await fetch('/api/scheduling/areas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ intent: 'update', id, ...params }),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Failed to update area');
-    }
-    await fetchAreas();
-  }, [fetchAreas]);
-
-  const deleteArea = useCallback(async (id: string) => {
-    const res = await fetch('/api/scheduling/areas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ intent: 'delete', id }),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Failed to delete area');
-    }
-    await fetchAreas();
-  }, [fetchAreas]);
-
   // ── Navigation helpers ──
   const navigateWeek = useCallback((direction: -1 | 1) => {
     setWeekStartRaw(prev => {
@@ -424,9 +407,10 @@ export function useScheduleData() {
   return {
     // Data
     schedule,
-    shifts,
-    areas,
-    employees,
+    shifts: filteredShifts,
+    positions: filteredPositions,
+    employees: filteredEmployees,
+    allPositions: positions,
     laborSummary,
     isLoading,
     days,
@@ -441,11 +425,13 @@ export function useScheduleData() {
     navigateDay,
     goToToday,
 
-    // View modes
+    // View modes & filter
     gridViewMode,
     setGridViewMode,
     timeViewMode,
     setTimeViewMode,
+    zoneFilter,
+    setZoneFilter,
 
     // Shift CRUD
     createShift,
@@ -460,11 +446,6 @@ export function useScheduleData() {
     // Schedule actions
     publishSchedule,
     unpublishSchedule,
-
-    // Area CRUD
-    createArea,
-    updateArea,
-    deleteArea,
 
     // Misc
     refetch,

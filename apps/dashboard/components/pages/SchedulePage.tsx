@@ -11,7 +11,6 @@ import { useScheduleData } from '@/components/scheduling/useScheduleData';
 import { ScheduleToolbar } from '@/components/scheduling/ScheduleToolbar';
 import { ScheduleGrid } from '@/components/scheduling/ScheduleGrid';
 import { ShiftModal } from '@/components/scheduling/ShiftModal';
-import { AreaManagerModal } from '@/components/scheduling/AreaManagerModal';
 import { LaborSummaryBar } from '@/components/scheduling/LaborSummaryBar';
 import CircularProgress from '@mui/material/CircularProgress';
 import type { Shift } from '@/lib/scheduling.types';
@@ -31,9 +30,8 @@ export function SchedulePage() {
   const [shiftModalOpen, setShiftModalOpen] = React.useState(false);
   const [editingShift, setEditingShift] = React.useState<Shift | null>(null);
   const [prefillDate, setPrefillDate] = React.useState('');
-  const [prefillAreaId, setPrefillAreaId] = React.useState('');
+  const [prefillPositionId, setPrefillPositionId] = React.useState('');
   const [prefillEmployeeId, setPrefillEmployeeId] = React.useState('');
-  const [areaModalOpen, setAreaModalOpen] = React.useState(false);
 
   const data = useScheduleData();
 
@@ -94,14 +92,14 @@ export function SchedulePage() {
     setEditingShift(null);
     setPrefillDate(date);
 
-    if (data.gridViewMode === 'areas' && entityId && entityId !== '__none__') {
-      setPrefillAreaId(entityId);
+    if (data.gridViewMode === 'positions' && entityId && entityId !== '__none__') {
+      setPrefillPositionId(entityId);
       setPrefillEmployeeId('');
     } else if (data.gridViewMode === 'employees' && entityId) {
       setPrefillEmployeeId(entityId);
-      setPrefillAreaId('');
+      setPrefillPositionId('');
     } else {
-      setPrefillAreaId('');
+      setPrefillPositionId('');
       setPrefillEmployeeId('');
     }
 
@@ -111,7 +109,7 @@ export function SchedulePage() {
   const handleShiftClick = (shift: Shift) => {
     setEditingShift(shift);
     setPrefillDate('');
-    setPrefillAreaId('');
+    setPrefillPositionId('');
     setPrefillEmployeeId('');
     setShiftModalOpen(true);
   };
@@ -182,6 +180,7 @@ export function SchedulePage() {
               selectedDay={data.selectedDay}
               timeViewMode={data.timeViewMode}
               gridViewMode={data.gridViewMode}
+              zoneFilter={data.zoneFilter}
               schedule={data.schedule}
               laborSummary={data.laborSummary}
               onNavigateWeek={data.navigateWeek}
@@ -189,7 +188,7 @@ export function SchedulePage() {
               onGoToToday={data.goToToday}
               onTimeViewChange={data.setTimeViewMode}
               onGridViewChange={data.setGridViewMode}
-              onManageAreas={() => setAreaModalOpen(true)}
+              onZoneFilterChange={data.setZoneFilter}
               onPublish={handlePublish}
               onUnpublish={handleUnpublish}
             />
@@ -201,7 +200,7 @@ export function SchedulePage() {
             ) : (
               <ScheduleGrid
                 shifts={data.shifts}
-                areas={data.areas}
+                positions={data.positions}
                 employees={data.employees}
                 days={data.days}
                 selectedDay={data.selectedDay}
@@ -228,9 +227,9 @@ export function SchedulePage() {
         onClose={() => setShiftModalOpen(false)}
         shift={editingShift}
         prefillDate={prefillDate}
-        prefillAreaId={prefillAreaId}
+        prefillPositionId={prefillPositionId}
         prefillEmployeeId={prefillEmployeeId}
-        areas={data.areas}
+        positions={data.allPositions}
         employees={data.employees}
         isPublished={isPublished}
         onSave={data.createShift}
@@ -238,16 +237,6 @@ export function SchedulePage() {
         onDelete={data.deleteShift}
         onAssign={data.assignEmployee}
         onUnassign={data.unassignEmployee}
-      />
-
-      {/* Area Manager Modal */}
-      <AreaManagerModal
-        open={areaModalOpen}
-        onClose={() => setAreaModalOpen(false)}
-        areas={data.areas}
-        onCreate={data.createArea}
-        onUpdate={data.updateArea}
-        onDelete={data.deleteArea}
       />
     </>
   );

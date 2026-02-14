@@ -4,7 +4,7 @@ import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import type { Shift, ShiftArea } from '@/lib/scheduling.types';
+import type { Shift, Position } from '@/lib/scheduling.types';
 
 interface Employee {
   id: string;
@@ -18,16 +18,16 @@ interface ShiftModalProps {
   onClose: () => void;
   shift?: Shift | null;
   prefillDate?: string;
-  prefillAreaId?: string;
+  prefillPositionId?: string;
   prefillEmployeeId?: string;
-  areas: ShiftArea[];
+  positions: Position[];
   employees: Employee[];
   isPublished: boolean;
   onSave: (data: {
     shift_date: string;
     start_time: string;
     end_time: string;
-    shift_area_id?: string;
+    position_id?: string;
     break_minutes: number;
     notes?: string;
     employee_id?: string;
@@ -36,7 +36,7 @@ interface ShiftModalProps {
     shift_date?: string;
     start_time?: string;
     end_time?: string;
-    shift_area_id?: string | null;
+    position_id?: string | null;
     break_minutes?: number;
     notes?: string | null;
   }) => Promise<void>;
@@ -61,8 +61,8 @@ function calculateCost(employee: Employee | undefined, startTime: string, endTim
 }
 
 export function ShiftModal({
-  open, onClose, shift, prefillDate, prefillAreaId, prefillEmployeeId,
-  areas, employees, isPublished,
+  open, onClose, shift, prefillDate, prefillPositionId, prefillEmployeeId,
+  positions, employees, isPublished,
   onSave, onUpdate, onDelete, onAssign, onUnassign,
 }: ShiftModalProps) {
   const isEdit = !!shift;
@@ -71,7 +71,7 @@ export function ShiftModal({
   const [startTime, setStartTime] = React.useState('09:00');
   const [endTime, setEndTime] = React.useState('17:00');
   const [breakMin, setBreakMin] = React.useState(0);
-  const [areaId, setAreaId] = React.useState('');
+  const [positionId, setPositionId] = React.useState('');
   const [employeeId, setEmployeeId] = React.useState('');
   const [notes, setNotes] = React.useState('');
   const [saving, setSaving] = React.useState(false);
@@ -86,7 +86,7 @@ export function ShiftModal({
         setStartTime(parseTimeToInput(shift.start_time));
         setEndTime(parseTimeToInput(shift.end_time));
         setBreakMin(shift.break_minutes || 0);
-        setAreaId(shift.shift_area_id ?? '');
+        setPositionId(shift.position_id ?? '');
         setEmployeeId(shift.assignment?.employee_id ?? '');
         setNotes(shift.notes ?? '');
       } else {
@@ -94,14 +94,14 @@ export function ShiftModal({
         setStartTime('09:00');
         setEndTime('17:00');
         setBreakMin(0);
-        setAreaId(prefillAreaId ?? '');
+        setPositionId(prefillPositionId ?? '');
         setEmployeeId(prefillEmployeeId ?? '');
         setNotes('');
       }
       setError('');
       setEmployeeSearch('');
     }
-  }, [open, shift, prefillDate, prefillAreaId, prefillEmployeeId]);
+  }, [open, shift, prefillDate, prefillPositionId, prefillEmployeeId]);
 
   const selectedEmployee = employees.find((e) => e.id === employeeId);
   const projectedCost = calculateCost(selectedEmployee, startTime, endTime, breakMin);
@@ -134,7 +134,7 @@ export function ShiftModal({
           shift_date: date,
           start_time: startTime,
           end_time: endTime,
-          shift_area_id: areaId || null,
+          position_id: positionId || null,
           break_minutes: breakMin,
           notes: notes || null,
         });
@@ -154,7 +154,7 @@ export function ShiftModal({
           shift_date: date,
           start_time: startTime,
           end_time: endTime,
-          shift_area_id: areaId || undefined,
+          position_id: positionId || undefined,
           break_minutes: breakMin,
           notes: notes || undefined,
           employee_id: employeeId || undefined,
@@ -258,19 +258,19 @@ export function ShiftModal({
             />
           </div>
 
-          {/* Area */}
+          {/* Position */}
           <div className={sty.field}>
-            <label className={sty.label}>Shift Area</label>
+            <label className={sty.label}>Position</label>
             <select
               className={sty.select}
-              value={areaId}
-              onChange={(e) => setAreaId(e.target.value)}
+              value={positionId}
+              onChange={(e) => setPositionId(e.target.value)}
               disabled={readOnly}
             >
-              <option value="">— No area —</option>
-              {areas.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
+              <option value="">— No position —</option>
+              {positions.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.zone} — {p.name}
                 </option>
               ))}
             </select>

@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (intent === 'create') {
       const {
-        schedule_id, org_id, shift_area_id, shift_date,
+        schedule_id, org_id, position_id, shift_date,
         start_time, end_time, break_minutes, notes, employee_id,
       } = req.body;
 
@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .insert({
           schedule_id,
           org_id,
-          shift_area_id: shift_area_id || null,
+          position_id: position_id || null,
           shift_date,
           start_time,
           end_time,
@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
         .select(`
           *,
-          shift_area:shift_areas(id, name, color, display_order)
+          position:org_positions(id, name, zone, display_order)
         `)
         .single();
 
@@ -84,14 +84,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (intent === 'update') {
-      const { id, shift_area_id, shift_date, start_time, end_time, break_minutes, notes } = req.body;
+      const { id, position_id, shift_date, start_time, end_time, break_minutes, notes } = req.body;
 
       if (!id) {
         return res.status(400).json({ error: 'id is required' });
       }
 
       const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
-      if (shift_area_id !== undefined) updateData.shift_area_id = shift_area_id || null;
+      if (position_id !== undefined) updateData.position_id = position_id || null;
       if (shift_date !== undefined) updateData.shift_date = shift_date;
       if (start_time !== undefined) updateData.start_time = start_time;
       if (end_time !== undefined) updateData.end_time = end_time;
@@ -104,7 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .eq('id', id)
         .select(`
           *,
-          shift_area:shift_areas(id, name, color, display_order),
+          position:org_positions(id, name, zone, display_order),
           assignment:shift_assignments(
             id, employee_id, assigned_by, projected_cost,
             employee:employees(id, full_name, role, is_foh, is_boh, calculated_pay)
@@ -181,7 +181,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .insert(shifts.map((s: any) => ({
           schedule_id: s.schedule_id,
           org_id: s.org_id,
-          shift_area_id: s.shift_area_id || null,
+          position_id: s.position_id || null,
           shift_date: s.shift_date,
           start_time: s.start_time,
           end_time: s.end_time,
@@ -190,7 +190,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })))
         .select(`
           *,
-          shift_area:shift_areas(id, name, color, display_order)
+          position:org_positions(id, name, zone, display_order)
         `);
 
       if (error) {

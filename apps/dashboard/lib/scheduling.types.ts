@@ -1,9 +1,9 @@
-export interface ShiftArea {
+export interface Position {
   id: string;
   org_id: string;
-  location_id: string;
   name: string;
-  color: string;
+  zone: 'FOH' | 'BOH';
+  description?: string;
   display_order: number;
   is_active: boolean;
 }
@@ -27,13 +27,13 @@ export interface Shift {
   id: string;
   org_id: string;
   schedule_id: string;
-  shift_area_id?: string;
+  position_id?: string;
   shift_date: string;
   start_time: string;
   end_time: string;
   break_minutes: number;
   notes?: string;
-  shift_area?: ShiftArea;
+  position?: Position;
   assignment?: ShiftAssignment;
 }
 
@@ -57,15 +57,16 @@ export interface ShiftAssignment {
 export interface ScheduleGridData {
   schedule: Schedule | null;
   shifts: Shift[];
-  areas: ShiftArea[];
+  positions: Position[];
 }
 
-export type GridViewMode = 'employees' | 'areas';
+export type GridViewMode = 'employees' | 'positions';
 export type TimeViewMode = 'week' | 'day';
+export type ZoneFilter = 'all' | 'FOH' | 'BOH';
 
 export interface LaborSummary {
   total_hours: number;
   total_cost: number;
   by_day: Record<string, { hours: number; cost: number }>;
-  by_area: Record<string, { hours: number; cost: number; area_name: string }>;
+  by_position: Record<string, { hours: number; cost: number; position_name: string; zone: string }>;
 }
