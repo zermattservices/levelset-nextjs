@@ -1,0 +1,22 @@
+name: Deploy Agent to Fly.io
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/agent/**'
+      - 'packages/shared/**'
+      - 'packages/supabase-client/**'
+      - 'packages/permissions/**'
+
+jobs:
+  deploy:
+    name: Deploy Agent
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        working-directory: apps/agent
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

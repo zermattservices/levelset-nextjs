@@ -16,21 +16,24 @@ jobs:
     steps:
       - id: checkout
         name: Checking out repository...
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           fetch-depth: 0
+      - id: pnpm
+        name: Setting up pnpm...
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - id: node
-        name: Setting up node v18...
-        uses: actions/setup-node@v3
+        name: Setting up node v20...
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
-      - id: cache
-        name: Recovering cache...
-        uses: actions/cache@v4
-        with:
-          key: lock-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}
-          path: ${{ github.event.client_payload.data.directory }}/node_modules
+          node-version: "20"
+          cache: 'pnpm'
+      - id: install
+        name: Installing dependencies...
+        run: pnpm install --frozen-lockfile
       - id: init
         name: Initializing Plasmic app...
         uses: plasmicapp/plasmic-action@master
