@@ -22,6 +22,11 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 COPY apps/agent/ ./apps/agent/
 COPY packages/ ./packages/
 
+# Build workspace packages first (they compile TS → JS)
+RUN pnpm --filter @levelset/shared build && \
+    pnpm --filter @levelset/permissions build && \
+    pnpm --filter @levelset/supabase-client build
+
 # Build the agent
 RUN pnpm --filter agent build
 
