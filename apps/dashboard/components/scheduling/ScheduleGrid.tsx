@@ -150,14 +150,8 @@ function WeekEmployeeView({
               <div className={sty.rowLabel}>
                 <span className={sty.empNameLink}>{emp.full_name}</span>
                 <div className={sty.empMeta}>
-                  {summary.hours > 0 ? (
-                    <>
-                      <span className={sty.empHours}>{summary.hours.toFixed(0)} / {summary.hours.toFixed(0)}</span>
-                      <span className={sty.empWage}>{formatCurrency(summary.cost)}</span>
-                    </>
-                  ) : (
-                    <span className={sty.empHours}>{emp.role}</span>
-                  )}
+                  <span className={sty.empHours}>{summary.hours.toFixed(1)} / {summary.hours.toFixed(1)}</span>
+                  <span className={sty.empWage}>{formatCurrency(summary.cost)}</span>
                 </div>
               </div>
               {days.map((day) => {
@@ -462,21 +456,34 @@ function DayEmployeeView({
             ))}
           </div>
         </div>
-        {rowEmployees.map((emp) => (
-          <DayEmployeeRow
-            key={emp.id}
-            emp={emp}
-            empShifts={shiftMap.get(emp.id) ?? []}
-            selectedDay={selectedDay}
-            timeRange={timeRange}
-            totalMinutes={totalMinutes}
-            shiftStyleFn={shiftStyle}
-            isPublished={isPublished}
-            onCellClick={onCellClick}
-            onShiftClick={onShiftClick}
-            onDragCreate={onDragCreate}
-          />
-        ))}
+        {rowEmployees.map((emp) => {
+          const empShifts = shiftMap.get(emp.id) ?? [];
+          let hours = 0;
+          let cost = 0;
+          for (const s of shifts) {
+            if (s.assignment?.employee_id === emp.id) {
+              hours += shiftNetHours(s);
+              cost += s.assignment?.projected_cost ?? 0;
+            }
+          }
+          return (
+            <DayEmployeeRow
+              key={emp.id}
+              emp={emp}
+              empShifts={empShifts}
+              empHours={hours}
+              empCost={cost}
+              selectedDay={selectedDay}
+              timeRange={timeRange}
+              totalMinutes={totalMinutes}
+              shiftStyleFn={shiftStyle}
+              isPublished={isPublished}
+              onCellClick={onCellClick}
+              onShiftClick={onShiftClick}
+              onDragCreate={onDragCreate}
+            />
+          );
+        })}
         {shiftMap.has('__open__') && (
           <div className={`${sty.dayRow} ${sty.openRow}`}>
             <div className={sty.rowLabel}><span className={sty.empName}>Open Shifts</span></div>
@@ -496,11 +503,13 @@ function DayEmployeeView({
 
 // Single employee row with drag-to-create
 function DayEmployeeRow({
-  emp, empShifts, selectedDay, timeRange, totalMinutes, shiftStyleFn, isPublished,
+  emp, empShifts, empHours, empCost, selectedDay, timeRange, totalMinutes, shiftStyleFn, isPublished,
   onCellClick, onShiftClick, onDragCreate,
 }: {
   emp: Employee;
   empShifts: Shift[];
+  empHours: number;
+  empCost: number;
   selectedDay: string;
   timeRange: { minHour: number; maxHour: number };
   totalMinutes: number;
@@ -526,7 +535,10 @@ function DayEmployeeRow({
     <div className={sty.dayRow}>
       <div className={sty.rowLabel}>
         <span className={sty.empNameLink}>{emp.full_name}</span>
-        <span className={sty.empHours}>{emp.role}</span>
+        <div className={sty.empMeta}>
+          <span className={sty.empHours}>{empHours.toFixed(1)} / {empHours.toFixed(1)}</span>
+          <span className={sty.empWage}>{formatCurrency(empCost)}</span>
+        </div>
       </div>
       <div
         ref={timelineRef}
