@@ -285,6 +285,15 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
             ))}
           </div>
 
+          {/* Scheduling - direct link, Levelset Admin only */}
+          {isActualLevelsetAdmin && (
+            <div className={sty.navButtonContainer}>
+              <Link href="/schedule" className={classNames(sty.navButton, sty.navButtonDirect)}>
+                <span className={sty.navButtonText}>Scheduling</span>
+              </Link>
+            </div>
+          )}
+
           {/* Right side - Admin Mode, Location selector, user info, logout, profile icon */}
           <div className={sty.rightSection}>
             {/* Admin Mode - only for actual Levelset Admin (not impersonated role) */}
