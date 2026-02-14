@@ -13,6 +13,7 @@
 
 export const brand = {
   base: "#31664A",
+  hover: "#264D38",
   border: "#458461",
   foreground: "#EFF6FF",
   soft: "#DBEAFE",

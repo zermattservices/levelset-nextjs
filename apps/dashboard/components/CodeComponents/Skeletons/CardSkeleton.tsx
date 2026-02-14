@@ -25,7 +25,7 @@ export function CardSkeleton({
         height,
         borderRadius: 2,
         boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
-        border: "1px solid #e5e7eb",
+        border: "1px solid var(--ls-color-muted-border)",
       }}
     >
       <CardContent>
@@ -43,7 +43,7 @@ export function CardSkeleton({
         height,
         borderRadius: 2,
         boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
-        border: "1px solid #e5e7eb",
+        border: "1px solid var(--ls-color-muted-border)",
       }}
     >
       <CardContent>

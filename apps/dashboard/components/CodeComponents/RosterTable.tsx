@@ -163,12 +163,12 @@ export function RosterTable(props: RosterTableProps) {
               fontSize: 14,
               fontWeight: 500,
               textTransform: 'none',
-              color: '#6b7280',
-              borderColor: '#d1d5db',
+              color: 'var(--ls-color-muted)',
+              borderColor: 'var(--ls-color-border)',
               borderRadius: '8px',
               '&:hover': {
-                borderColor: '#9ca3af',
-                backgroundColor: '#f9fafb',
+                borderColor: 'var(--ls-color-disabled-text)',
+                backgroundColor: 'var(--ls-color-neutral-foreground)',
               },
             }}
           >
@@ -186,7 +186,7 @@ export function RosterTable(props: RosterTableProps) {
               fontSize: 14,
               fontWeight: 500,
               textTransform: 'none',
-              backgroundColor: '#31664a' /* TODO: Use design token */,
+              backgroundColor: 'var(--ls-color-brand)',
               color: '#ffffff',
               borderRadius: '8px',
               '&:hover': {
@@ -207,7 +207,7 @@ export function RosterTable(props: RosterTableProps) {
                 fontFamily,
                 borderRadius: 2,
                 boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                border: "1px solid #e5e7eb",
+                border: "1px solid var(--ls-color-muted-border)",
                 minWidth: 200,
               },
             }}
@@ -353,8 +353,8 @@ const fontFamily = `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Se
 
 const StyledContainer = styled(Box)(() => ({
   borderRadius: 16,
-  border: "1px solid #e5e7eb",
-  backgroundColor: "#ffffff",
+  border: "1px solid var(--ls-color-muted-border)",
+  backgroundColor: "var(--ls-color-bg-container)",
   overflow: "hidden",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
@@ -367,7 +367,7 @@ const StyledContainer = styled(Box)(() => ({
 const StyledTabs = styled(Tabs)(() => ({
   marginBottom: 16,
   '& .MuiTabs-indicator': {
-    backgroundColor: '#31664a' /* TODO: Use design token */,
+    backgroundColor: 'var(--ls-color-brand)',
     height: 3,
   },
 }));
@@ -390,18 +390,18 @@ const StyledTab = styled(Tab)(() => ({
   fontSize: 14,
   fontWeight: 500,
   textTransform: 'none',
-  color: '#6b7280',
+  color: 'var(--ls-color-muted)',
   '&.Mui-selected': {
-    color: '#31664a' /* TODO: Use design token */,
+    color: 'var(--ls-color-brand)',
     fontWeight: 600,
   },
 }));
 
 const BrandCheckbox = styled(Checkbox)(() => ({
-  color: "#9ca3af",
+  color: "var(--ls-color-disabled-text)",
   padding: 0,
   "&.Mui-checked": {
-    color: "#31664a" /* TODO: Use design token */,
+    color: "var(--ls-color-brand)",
   },
   "&:hover": {
     backgroundColor: "rgba(49, 102, 74, 0.08)",
@@ -412,11 +412,11 @@ const ActionsButton = styled(IconButton)(() => ({
   height: 28,
   width: 28,
   borderRadius: "50%",
-  color: "#9ca3af",
+  color: "var(--ls-color-disabled-text)",
   transition: "background-color 0.15s ease-in-out, color 0.15s ease-in-out",
   "&:hover": {
-    backgroundColor: "#f3f4f6",
-    color: "#4b5563",
+    backgroundColor: "var(--ls-color-muted-soft)",
+    color: "var(--ls-color-text-secondary)",
   },
 }));
 
@@ -428,13 +428,13 @@ const RoleMenuItem = styled(MenuItem)(() => ({
   margin: "2px 8px",
   borderRadius: 8,
   "&.Mui-selected": {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "var(--ls-color-muted-soft)",
     "&:hover": {
-      backgroundColor: "#e5e7eb",
+      backgroundColor: "var(--ls-color-muted-border)",
     },
   },
   "&:hover": {
-    backgroundColor: "#f9fafb",
+    backgroundColor: "var(--ls-color-neutral-foreground)",
   },
 }));
 
@@ -452,8 +452,8 @@ const AvailabilityChip = styled(Box)(() => ({
   fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
   cursor: "pointer",
   transition: "all 0.15s ease-in-out",
-  backgroundColor: "#f3f4f6",
-  color: "#111827",
+  backgroundColor: "var(--ls-color-muted-soft)",
+  color: "var(--ls-color-neutral-soft-foreground)",
   "&:hover": {
     opacity: 0.9,
     transform: "translateY(-1px)",
@@ -485,8 +485,8 @@ const CertificationChip = styled(Box)(() => ({
   fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
   cursor: "pointer",
   transition: "all 0.15s ease-in-out",
-  backgroundColor: "#f3f4f6",
-  color: "#374151",
+  backgroundColor: "var(--ls-color-muted-soft)",
+  color: "var(--ls-color-neutral)",
   border: "1px solid transparent",
   "&:hover": {
     opacity: 0.9,
@@ -497,15 +497,15 @@ const CertificationChip = styled(Box)(() => ({
   },
   "&.not-certified": {
     backgroundColor: "transparent",
-    color: "#31664a" /* TODO: Use design token */,
-    border: "1px solid #31664a", /* TODO: Use design token */
+    color: "var(--ls-color-brand)",
+    border: "1px solid var(--ls-color-brand)",
   },
   "&.pending": {
     backgroundColor: "#fef3c7",
     color: "#d97706",
   },
   "&.certified": {
-    backgroundColor: "#31664a" /* TODO: Use design token */,
+    backgroundColor: "var(--ls-color-brand)",
     color: "#ffffff",
   },
   "&.pip": {
@@ -1192,7 +1192,7 @@ function EmployeesTableView({
               fontFamily,
               fontSize: 13,
               fontWeight: 600,
-              color: "#111827",
+              color: "var(--ls-color-neutral-soft-foreground)",
               width: "100%",
               textAlign: "left",
             }}
@@ -1225,7 +1225,7 @@ function EmployeesTableView({
                   <RolePill
                     role={role}
                     colorKey={roleColorKey}
-                    endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
+                    endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "var(--ls-color-muted)" }} />}
                     onClick={(event) => handleRoleMenuOpen(event, employeeId)}
                   />
                   <Menu
@@ -1239,7 +1239,7 @@ function EmployeesTableView({
                         fontFamily,
                         borderRadius: 2,
                         boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                        border: "1px solid #e5e7eb",
+                        border: "1px solid var(--ls-color-muted-border)",
                       },
                     }}
                   >
@@ -1345,7 +1345,7 @@ function EmployeesTableView({
                     fontFamily,
                     borderRadius: 2,
                     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                    border: "1px solid #e5e7eb",
+                    border: "1px solid var(--ls-color-muted-border)",
                   },
                 }}
               >
@@ -1382,7 +1382,7 @@ function EmployeesTableView({
               sx={{
                 fontFamily,
                 fontWeight: 600,
-                color: pay ? "#166534" : "#9ca3af",
+                color: pay ? "#166534" : "var(--ls-color-disabled-text)",
                 fontSize: 14,
               }}
             >
@@ -1502,7 +1502,7 @@ function EmployeesTableView({
                     fontFamily,
                     borderRadius: 2,
                     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                    border: "1px solid #e5e7eb",
+                    border: "1px solid var(--ls-color-muted-border)",
                     minWidth: 180,
                   },
                 }}
@@ -1600,7 +1600,7 @@ function EmployeesTableView({
           justifyContent="center"
           sx={{ py: 6, px: 4 }}
         >
-          <Typography variant="body2" sx={{ color: "#6b7280", fontFamily }}>
+          <Typography variant="body2" sx={{ color: "var(--ls-color-muted)", fontFamily }}>
             No employees found.
           </Typography>
         </Stack>
@@ -1627,13 +1627,13 @@ function EmployeesTableView({
             border: "none",
             fontFamily,
             [`& .${gridClasses.columnHeaders}`]: {
-              borderBottom: "1px solid #e5e7eb",
+              borderBottom: "1px solid var(--ls-color-muted-border)",
             },
             [`& .${gridClasses.columnHeader}`]: {
-              backgroundColor: "#f9fafb",
+              backgroundColor: "var(--ls-color-neutral-foreground)",
               fontWeight: 600,
               fontSize: 14,
-              color: "#111827",
+              color: "var(--ls-color-neutral-soft-foreground)",
               '&:focus, &:focus-within': {
                 outline: 'none',
               },
@@ -1645,10 +1645,10 @@ function EmployeesTableView({
               display: 'none',
             },
             [`& .${gridClasses.cell}`]: {
-              borderBottom: '1px solid #f3f4f6',
+              borderBottom: '1px solid var(--ls-color-muted-soft)',
               fontSize: 13,
               fontWeight: 500,
-              color: '#111827',
+              color: 'var(--ls-color-neutral-soft-foreground)',
               '&:focus, &:focus-within': {
                 outline: 'none',
               },
@@ -1658,7 +1658,7 @@ function EmployeesTableView({
               padding: '0 16px',
             },
             [`& .${gridClasses.row}:hover`]: {
-              backgroundColor: '#f9fafb',
+              backgroundColor: 'var(--ls-color-neutral-foreground)',
             },
             '& .MuiDataGrid-overlay': {
               fontFamily,
@@ -1696,11 +1696,11 @@ function EmployeesTableView({
           },
         }}
       >
-        <DialogTitle sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827', pb: 1 }}>
+        <DialogTitle sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', pb: 1 }}>
           Terminate Employee
         </DialogTitle>
         <Box sx={{ px: 3, pb: 2 }}>
-          <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', mb: 2 }}>
+          <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', mb: 2 }}>
             Are you sure you want to terminate {employeeToTerminate?.name}? This will mark them as inactive in your roster.
           </Typography>
           <FormControl fullWidth sx={{ mb: 3 }}>
@@ -1747,10 +1747,10 @@ function EmployeesTableView({
                 fontSize: 14,
                 fontWeight: 500,
                 textTransform: 'none',
-                color: '#6b7280',
+                color: 'var(--ls-color-muted)',
                 borderRadius: '8px',
                 '&:hover': {
-                  backgroundColor: '#f3f4f6',
+                  backgroundColor: 'var(--ls-color-muted-soft)',
                 },
               }}
             >

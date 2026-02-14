@@ -306,7 +306,7 @@ export function timeAgo(dateString: string): string {
 // Status display helpers - matching FormFlow
 export const STATUS_CONFIG: Record<string, { label: string; bgColor: string; textColor: string; borderColor: string }> = {
   submitted: { label: 'Pending Review', bgColor: '#fef3c7', textColor: '#d97706', borderColor: '#fcd34d' },
-  idea: { label: 'Idea', bgColor: '#f3f4f6', textColor: '#374151', borderColor: '#e5e7eb' },
+  idea: { label: 'Idea', bgColor: 'var(--ls-color-muted-soft)', textColor: 'var(--ls-color-neutral)', borderColor: 'var(--ls-color-muted-border)' },
   planned: { label: 'Planned', bgColor: '#fef3c7', textColor: '#92400e', borderColor: '#fcd34d' },
   in_progress: { label: 'In Progress', bgColor: '#dbeafe', textColor: '#1e40af', borderColor: '#93c5fd' },
   completed: { label: 'Complete', bgColor: '#d1fae5', textColor: '#065f46', borderColor: '#6ee7b7' },

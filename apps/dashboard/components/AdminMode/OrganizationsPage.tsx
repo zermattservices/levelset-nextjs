@@ -177,7 +177,7 @@ export function OrganizationsPage() {
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <CircularProgress size={40} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={40} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -203,7 +203,7 @@ export function OrganizationsPage() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#9ca3af', fontSize: 20 }} />
+                <SearchIcon sx={{ color: 'var(--ls-color-disabled-text)', fontSize: 20 }} />
               </InputAdornment>
             ),
           }}
@@ -212,8 +212,8 @@ export function OrganizationsPage() {
               fontFamily: '"Satoshi", sans-serif',
               fontSize: 14,
               borderRadius: '8px',
-              '&:hover fieldset': { borderColor: '#31664a' /* TODO: Use design token */ },
-              '&.Mui-focused fieldset': { borderColor: '#31664a' /* TODO: Use design token */ },
+              '&:hover fieldset': { borderColor: 'var(--ls-color-brand)' },
+              '&.Mui-focused fieldset': { borderColor: 'var(--ls-color-brand)' },
             },
           }}
         />

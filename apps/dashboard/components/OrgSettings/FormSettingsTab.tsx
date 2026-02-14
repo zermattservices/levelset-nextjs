@@ -12,13 +12,13 @@ const fontFamily = '"Satoshi", sans-serif';
 
 const StyledSwitch = styled(Switch)(() => ({
   '& .MuiSwitch-switchBase.Mui-checked': {
-    color: '#31664a' /* TODO: Use design token */,
+    color: 'var(--ls-color-brand)',
     '&:hover': {
       backgroundColor: 'rgba(49, 102, 74, 0.08)',
     },
   },
   '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-    backgroundColor: '#31664a' /* TODO: Use design token */,
+    backgroundColor: 'var(--ls-color-brand)',
   },
 }));
 
@@ -112,7 +112,7 @@ export function FormSettingsTab({ orgId, disabled = false }: FormSettingsTabProp
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -135,9 +135,9 @@ export function FormSettingsTab({ orgId, disabled = false }: FormSettingsTabProp
             flexDirection: 'column',
             gap: 3,
             padding: 3,
-            backgroundColor: '#f9fafb',
+            backgroundColor: 'var(--ls-color-neutral-foreground)',
             borderRadius: '12px',
-            border: '1px solid #e5e7eb',
+            border: '1px solid var(--ls-color-muted-border)',
           }}
         >
           <Box>
@@ -151,10 +151,10 @@ export function FormSettingsTab({ orgId, disabled = false }: FormSettingsTabProp
               }
               label={
                 <Box sx={{ ml: 1 }}>
-                  <Box sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#111827' }}>
+                  <Box sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
                     Require Additional Comments
                   </Box>
-                  <Box sx={{ fontFamily, fontSize: 13, color: '#6b7280', mt: 0.5 }}>
+                  <Box sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)', mt: 0.5 }}>
                     When enabled, leaders must add comments when submitting positional ratings in the mobile app.
                   </Box>
                 </Box>
@@ -180,9 +180,9 @@ export function FormSettingsTab({ orgId, disabled = false }: FormSettingsTabProp
                 sx={{
                   fontFamily,
                   textTransform: 'none',
-                  backgroundColor: '#31664a' /* TODO: Use design token */,
+                  backgroundColor: 'var(--ls-color-brand)',
                   '&:hover': {
-                    backgroundColor: '#264d38',
+                    backgroundColor: 'var(--ls-color-brand-hover)',
                   },
                   '&.Mui-disabled': {
                     backgroundColor: '#e0e0e0',

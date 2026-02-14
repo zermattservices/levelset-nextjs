@@ -57,7 +57,7 @@ import PositionalRatingsPDF from './PositionalRatingsPDF';
 import { EmployeeModal } from './EmployeeModal';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 const fohColor = '#006391';
 const bohColor = '#ffcc5b';
 const fohColorLight = '#eaf9ff';
@@ -110,12 +110,12 @@ const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
   textTransform: 'none',
   border: 'none',
   boxShadow: 'none',
-  backgroundColor: selected ? levelsetGreen : '#f3f4f6',
-  color: selected ? '#ffffff !important' : '#6b7280',
+  backgroundColor: selected ? levelsetGreen : 'var(--ls-color-muted-soft)',
+  color: selected ? '#ffffff !important' : 'var(--ls-color-muted)',
   '&:hover': {
-    backgroundColor: selected ? levelsetGreen : '#e5e7eb',
+    backgroundColor: selected ? levelsetGreen : 'var(--ls-color-muted-border)',
     boxShadow: 'none',
-    color: selected ? '#ffffff !important' : '#6b7280',
+    color: selected ? '#ffffff !important' : 'var(--ls-color-muted)',
   },
 }));
 
@@ -190,7 +190,7 @@ const CustomBaseTextField = React.forwardRef((props: any, ref: any) => (
       '& .MuiInputLabel-root': {
         fontFamily,
         fontSize: 11,
-        color: '#6b7280',
+        color: 'var(--ls-color-muted)',
         '&.Mui-focused': {
           color: levelsetGreen,
         },
@@ -205,10 +205,10 @@ const CustomBaseTextField = React.forwardRef((props: any, ref: any) => (
         padding: '8.5px 14px',
       },
       '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#e5e7eb',
+        borderColor: 'var(--ls-color-muted-border)',
       },
       '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d1d5db',
+        borderColor: 'var(--ls-color-border)',
       },
       '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: levelsetGreen,
@@ -242,7 +242,7 @@ const CustomBaseCheckbox = React.forwardRef((props: any, ref: any) => (
     {...props}
     ref={ref}
     sx={{
-      color: '#6b7280',
+      color: 'var(--ls-color-muted)',
       '&.Mui-checked': {
         color: levelsetGreen,
       },
@@ -332,7 +332,7 @@ function SelectFilterInput(props: SelectFilterInputProps) {
           },
         }}
       >
-        <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: '#9ca3af' }}>
+        <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: 'var(--ls-color-disabled-text)' }}>
           Select value
         </MuiMenuItem>
         {options?.map((option: any) => (
@@ -407,7 +407,7 @@ function ColumnFilterInput(props: any) {
           },
         }}
       >
-        <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: '#9ca3af' }}>
+        <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: 'var(--ls-color-disabled-text)' }}>
           Select column
         </MuiMenuItem>
         {filterableColumns.map((column: any) => (
@@ -473,7 +473,7 @@ function OperatorFilterInput(props: any) {
           },
         }}
       >
-        <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: '#9ca3af' }}>
+        <MuiMenuItem value="" sx={{ fontFamily, fontSize: 12, fontStyle: 'italic', color: 'var(--ls-color-disabled-text)' }}>
           Select operator
         </MuiMenuItem>
         {operators?.map((operator: any) => (
@@ -504,10 +504,10 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
         fontSize: 11,
       },
       '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#e5e7eb',
+        borderColor: 'var(--ls-color-muted-border)',
       },
       '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d1d5db',
+        borderColor: 'var(--ls-color-border)',
       },
       '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: levelsetGreen,
@@ -1562,10 +1562,10 @@ export function PositionalRatings({
                     },
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
-                        borderColor: '#e5e7eb !important',
+                        borderColor: 'var(--ls-color-muted-border) !important',
                       },
                       '&:hover fieldset': {
-                        borderColor: '#d1d5db !important',
+                        borderColor: 'var(--ls-color-border) !important',
                       },
                       '&.Mui-focused fieldset': {
                         borderColor: `${levelsetGreen} !important`,
@@ -1573,7 +1573,7 @@ export function PositionalRatings({
                       },
                     },
                     '& .MuiInputAdornment-root .MuiIconButton-root': {
-                      color: '#6b7280 !important',
+                      color: 'var(--ls-color-muted) !important',
                       '&:hover': {
                         color: `${levelsetGreen} !important`,
                         backgroundColor: 'rgba(49, 102, 74, 0.04) !important',
@@ -1693,10 +1693,10 @@ export function PositionalRatings({
                     },
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
-                        borderColor: '#e5e7eb !important',
+                        borderColor: 'var(--ls-color-muted-border) !important',
                       },
                       '&:hover fieldset': {
-                        borderColor: '#d1d5db !important',
+                        borderColor: 'var(--ls-color-border) !important',
                       },
                       '&.Mui-focused fieldset': {
                         borderColor: `${levelsetGreen} !important`,
@@ -1704,7 +1704,7 @@ export function PositionalRatings({
                       },
                     },
                     '& .MuiInputAdornment-root .MuiIconButton-root': {
-                      color: '#6b7280 !important',
+                      color: 'var(--ls-color-muted) !important',
                       '&:hover': {
                         color: `${levelsetGreen} !important`,
                         backgroundColor: 'rgba(49, 102, 74, 0.04) !important',
@@ -1879,7 +1879,7 @@ export function PositionalRatings({
             onClick={() => handleViewDetail(row)}
             size="small"
             sx={{ 
-              color: '#6b7280',
+              color: 'var(--ls-color-muted)',
               padding: '4px',
               '&:hover': {
                 color: levelsetGreen,
@@ -1936,7 +1936,7 @@ export function PositionalRatings({
                 fontFamily,
                 fontSize: 13,
                 fontWeight: 500,
-                color: isClickable ? levelsetGreen : '#111827',
+                color: isClickable ? levelsetGreen : 'var(--ls-color-neutral-soft-foreground)',
                 cursor: isClickable ? 'pointer' : 'default',
                 textDecoration: 'none',
                 '&:hover': isClickable ? {
@@ -1957,8 +1957,8 @@ export function PositionalRatings({
                   fontWeight: 600,
                   height: '1.5em', // Match line height of text (13px * 1.5 = 19.5px)
                   lineHeight: 1.5,
-                  backgroundColor: '#f3f4f6',
-                  color: '#6b7280',
+                  backgroundColor: 'var(--ls-color-muted-soft)',
+                  color: 'var(--ls-color-muted)',
                   '& .MuiChip-label': {
                     padding: '0 6px',
                     lineHeight: 1.5,
@@ -2003,7 +2003,7 @@ export function PositionalRatings({
               fontFamily,
               fontSize: 13,
               fontWeight: 500,
-              color: isClickable ? levelsetGreen : '#111827',
+              color: isClickable ? levelsetGreen : 'var(--ls-color-neutral-soft-foreground)',
               cursor: isClickable ? 'pointer' : 'default',
               textDecoration: 'none',
               '&:hover': isClickable ? {
@@ -2084,7 +2084,7 @@ export function PositionalRatings({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: getRatingColor(rating, thresholds || undefined),
-                color: rating ? '#fff !important' : '#111827',
+                color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
               }}
@@ -2136,7 +2136,7 @@ export function PositionalRatings({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: getRatingColor(rating, thresholds || undefined),
-                color: rating ? '#fff !important' : '#111827',
+                color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
               }}
@@ -2188,7 +2188,7 @@ export function PositionalRatings({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: getRatingColor(rating, thresholds || undefined),
-                color: rating ? '#fff !important' : '#111827',
+                color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
               }}
@@ -2240,7 +2240,7 @@ export function PositionalRatings({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: getRatingColor(rating, thresholds || undefined),
-                color: rating ? '#fff !important' : '#111827',
+                color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
               }}
@@ -2292,7 +2292,7 @@ export function PositionalRatings({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: getRatingColor(rating, thresholds || undefined),
-                color: rating ? '#fff !important' : '#111827',
+                color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
               }}
@@ -2326,7 +2326,7 @@ export function PositionalRatings({
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: getRatingColor(rating),
-              color: rating ? '#fff !important' : '#111827',
+              color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
               fontWeight: rating ? 600 : 400,
               fontFamily,
             }}
@@ -2459,18 +2459,18 @@ export function PositionalRatings({
             sx={{
               // Base grid styling
               fontFamily,
-              border: '1px solid #e5e7eb',
+              border: '1px solid var(--ls-color-muted-border)',
               borderRadius: 2,
               
               // Column headers - Use gridClasses
               [`& .${gridClasses.columnHeaders}`]: {
-                borderBottom: '1px solid #e5e7eb',
+                borderBottom: '1px solid var(--ls-color-muted-border)',
               },
               [`& .${gridClasses.columnHeader}`]: {
-                backgroundColor: '#f9fafb',
+                backgroundColor: 'var(--ls-color-neutral-foreground)',
                 fontWeight: 600,
                 fontSize: 14,
-                color: '#111827',
+                color: 'var(--ls-color-neutral-soft-foreground)',
                 fontFamily,
                 '&:focus, &:focus-within': {
                   outline: 'none',
@@ -2484,10 +2484,10 @@ export function PositionalRatings({
               
               // Cells - Use gridClasses
               [`& .${gridClasses.cell}`]: {
-                borderBottom: '1px solid #f3f4f6',
+                borderBottom: '1px solid var(--ls-color-muted-soft)',
                 borderRight: 'none',
                 fontSize: 13,
-                color: '#111827',
+                color: 'var(--ls-color-neutral-soft-foreground)',
                 fontFamily,
                 '&:focus, &:focus-within': {
                   outline: 'none',
@@ -2516,17 +2516,17 @@ export function PositionalRatings({
               
               // Rows - Use gridClasses
               [`& .${gridClasses.row}:hover`]: {
-                backgroundColor: '#f9fafb',
+                backgroundColor: 'var(--ls-color-neutral-foreground)',
               },
               
               // Footer - Use gridClasses
               [`& .${gridClasses.footerContainer}`]: {
-                borderTop: '1px solid #e5e7eb',
+                borderTop: '1px solid var(--ls-color-muted-border)',
                 fontFamily,
               },
               '& .MuiTablePagination-root': {
                 fontFamily,
-                color: '#6b7280',
+                color: 'var(--ls-color-muted)',
               },
               '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
                 fontFamily,
@@ -2554,7 +2554,7 @@ export function PositionalRatings({
                 '& .MuiInputLabel-root': {
                   fontFamily: `${fontFamily} !important`,
                   fontSize: '11px !important',
-                  color: '#6b7280 !important',
+                  color: 'var(--ls-color-muted) !important',
                   '&.Mui-focused': {
                     color: `${levelsetGreen} !important`,
                   },
@@ -2565,10 +2565,10 @@ export function PositionalRatings({
                 },
                 '& .MuiOutlinedInput-root': {
                   '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#e5e7eb !important',
+                    borderColor: 'var(--ls-color-muted-border) !important',
                   },
                   '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#d1d5db !important',
+                    borderColor: 'var(--ls-color-border) !important',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                     borderColor: `${levelsetGreen} !important`,
@@ -2588,7 +2588,7 @@ export function PositionalRatings({
                 '& .MuiInputLabel-root': {
                   fontFamily: `${fontFamily} !important`,
                   fontSize: '11px !important',
-                  color: '#6b7280 !important',
+                  color: 'var(--ls-color-muted) !important',
                   '&.Mui-focused': {
                     color: `${levelsetGreen} !important`,
                   },
@@ -2599,10 +2599,10 @@ export function PositionalRatings({
                 },
                 '& .MuiOutlinedInput-root': {
                   '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#e5e7eb !important',
+                    borderColor: 'var(--ls-color-muted-border) !important',
                   },
                   '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#d1d5db !important',
+                    borderColor: 'var(--ls-color-border) !important',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                     borderColor: `${levelsetGreen} !important`,
@@ -2622,7 +2622,7 @@ export function PositionalRatings({
                 '& .MuiInputLabel-root': {
                   fontFamily: `${fontFamily} !important`,
                   fontSize: '11px !important',
-                  color: '#6b7280 !important',
+                  color: 'var(--ls-color-muted) !important',
                   '&.Mui-focused': {
                     color: `${levelsetGreen} !important`,
                   },
@@ -2633,10 +2633,10 @@ export function PositionalRatings({
                 },
                 '& .MuiOutlinedInput-root': {
                   '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#e5e7eb !important',
+                    borderColor: 'var(--ls-color-muted-border) !important',
                   },
                   '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#d1d5db !important',
+                    borderColor: 'var(--ls-color-border) !important',
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                     borderColor: `${levelsetGreen} !important`,
@@ -2657,7 +2657,7 @@ export function PositionalRatings({
               
               // Filter delete icon - Use gridClasses
               [`& .${gridClasses.filterFormDeleteIcon}`]: {
-                color: '#6b7280',
+                color: 'var(--ls-color-muted)',
                 '&:hover': {
                   color: '#dc2626',
                 },
@@ -2714,10 +2714,10 @@ export function PositionalRatings({
                   fontSize: 12,
                 },
                 '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#e5e7eb',
+                  borderColor: 'var(--ls-color-muted-border)',
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#d1d5db',
+                  borderColor: 'var(--ls-color-border)',
                 },
                 '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: levelsetGreen,
@@ -2728,7 +2728,7 @@ export function PositionalRatings({
                   fontSize: 12,
                 },
                 '& .MuiSvgIcon-root': {
-                  color: '#6b7280',
+                  color: 'var(--ls-color-muted)',
                 },
               },
               
@@ -2755,14 +2755,14 @@ export function PositionalRatings({
                   '& .MuiTypography-root': {
                     fontFamily: `${fontFamily} !important`,
                     fontSize: '13px !important',
-                    color: '#111827 !important',
+                    color: 'var(--ls-color-neutral-soft-foreground) !important',
                     marginLeft: '8px !important',
                     display: 'block !important',
                     visibility: 'visible !important',
                     opacity: '1 !important',
                   },
                   '& .MuiCheckbox-root': {
-                    color: '#6b7280 !important',
+                    color: 'var(--ls-color-muted) !important',
                     '&.Mui-checked': {
                       color: `${levelsetGreen} !important`,
                     },
@@ -2789,7 +2789,7 @@ export function PositionalRatings({
               '& .MuiDataGrid-columnsManagementFooter': {
                 fontFamily,
                 padding: '12px 16px',
-                borderTop: '1px solid #e5e7eb',
+                borderTop: '1px solid var(--ls-color-muted-border)',
                 '& .MuiFormControlLabel-root .MuiTypography-root': {
                   fontFamily,
                   fontSize: 13,
@@ -2816,7 +2816,7 @@ export function PositionalRatings({
                   },
                   '&:hover': {
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#d1d5db !important',
+                      borderColor: 'var(--ls-color-border) !important',
                     },
                   },
                 },
@@ -2825,7 +2825,7 @@ export function PositionalRatings({
                   fontSize: '12px !important',
                 },
                 '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#e5e7eb !important',
+                  borderColor: 'var(--ls-color-muted-border) !important',
                 },
                 '& .MuiInputLabel-root': {
                   fontFamily: `${fontFamily} !important`,
@@ -2887,7 +2887,7 @@ export function PositionalRatings({
             <Button
               onClick={handleDeleteCancel}
               disabled={deleting}
-              sx={{ fontFamily, color: '#6b7280' }}
+              sx={{ fontFamily, color: 'var(--ls-color-muted)' }}
             >
               Cancel
             </Button>
@@ -2940,11 +2940,11 @@ export function PositionalRatings({
             fontFamily,
             fontWeight: 600,
             fontSize: 18,
-            borderBottom: '1px solid #e5e7eb',
+            borderBottom: '1px solid var(--ls-color-muted-border)',
             pb: 2,
           }}>
             Rating for {selectedRatingForDetail?.employee_name || 'Employee'}
-            <IconButton onClick={handleDetailModalClose} size="small" sx={{ color: '#6b7280' }}>
+            <IconButton onClick={handleDetailModalClose} size="small" sx={{ color: 'var(--ls-color-muted)' }}>
               <CloseIcon />
             </IconButton>
           </DialogTitle>
@@ -2979,25 +2979,25 @@ export function PositionalRatings({
                     {/* Left Column - Metadata */}
                     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                       <Box>
-                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: 'var(--ls-color-muted)', mb: 0.5 }}>
                           Rater
                         </Typography>
-                        <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 600, color: '#111827' }}>
+                        <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
                           {rating.rater_name}
                         </Typography>
                       </Box>
                       
                       <Box>
-                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: 'var(--ls-color-muted)', mb: 0.5 }}>
                           Date
                         </Typography>
-                        <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 500, color: '#111827' }}>
+                        <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)' }}>
                           {rating.formatted_date}
                         </Typography>
                       </Box>
                       
                       <Box>
-                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: 'var(--ls-color-muted)', mb: 0.5 }}>
                           Position
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -3010,21 +3010,21 @@ export function PositionalRatings({
                       </Box>
                       
                       <Box>
-                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: 'var(--ls-color-muted)', mb: 0.5 }}>
                           Additional Details
                         </Typography>
                         <Box sx={{ 
-                          backgroundColor: '#f9fafb', 
+                          backgroundColor: 'var(--ls-color-neutral-foreground)', 
                           borderRadius: '8px', 
                           p: 1.5,
-                          border: '1px solid #e5e7eb',
+                          border: '1px solid var(--ls-color-muted-border)',
                           minHeight: 60,
                         }}>
                           <Typography sx={{ 
                             fontFamily, 
                             fontSize: 14, 
                             fontWeight: 400, 
-                            color: rating.notes ? '#374151' : '#9ca3af', 
+                            color: rating.notes ? 'var(--ls-color-neutral)' : 'var(--ls-color-disabled-text)', 
                             lineHeight: 1.5,
                             fontStyle: rating.notes ? 'normal' : 'italic',
                           }}>
@@ -3036,7 +3036,7 @@ export function PositionalRatings({
                     
                     {/* Right Column - Criteria Ratings */}
                     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                      <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', mb: 0.5 }}>
+                      <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: 'var(--ls-color-muted)', mb: 0.5 }}>
                         Criteria Ratings
                       </Typography>
                       
@@ -3052,13 +3052,13 @@ export function PositionalRatings({
                               display: 'flex', 
                               alignItems: 'center', 
                               justifyContent: 'space-between',
-                              backgroundColor: '#f9fafb',
+                              backgroundColor: 'var(--ls-color-neutral-foreground)',
                               borderRadius: '8px',
                               p: 1.5,
-                              border: '1px solid #e5e7eb',
+                              border: '1px solid var(--ls-color-muted-border)',
                             }}
                           >
-                            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: '#374151', flex: 1 }}>
+                            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: 'var(--ls-color-neutral)', flex: 1 }}>
                               {criteriaLabel}
                             </Typography>
                             <Box
@@ -3087,10 +3087,10 @@ export function PositionalRatings({
                   <Box sx={{ 
                     mt: 2, 
                     pt: 3, 
-                    borderTop: '1px solid #e5e7eb',
+                    borderTop: '1px solid var(--ls-color-muted-border)',
                   }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#374151' }}>
+                      <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral)' }}>
                         Overall Rating
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -3102,7 +3102,7 @@ export function PositionalRatings({
                         }}>
                           {overallRating.toFixed(2)}
                         </Typography>
-                        <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: '#9ca3af' }}>
+                        <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: 'var(--ls-color-disabled-text)' }}>
                           / 3.00
                         </Typography>
                       </Box>
@@ -3169,8 +3169,8 @@ export function PositionalRatings({
                         justifyContent: 'space-between',
                         mt: 0.5,
                       }}>
-                        <Typography sx={{ fontFamily, fontSize: 10, fontWeight: 500, color: '#9ca3af' }}>1</Typography>
-                        <Typography sx={{ fontFamily, fontSize: 10, fontWeight: 500, color: '#9ca3af' }}>3</Typography>
+                        <Typography sx={{ fontFamily, fontSize: 10, fontWeight: 500, color: 'var(--ls-color-disabled-text)' }}>1</Typography>
+                        <Typography sx={{ fontFamily, fontSize: 10, fontWeight: 500, color: 'var(--ls-color-disabled-text)' }}>3</Typography>
                       </Box>
                     </Box>
                   </Box>

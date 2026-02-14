@@ -25,7 +25,7 @@ import { pdf } from '@react-pdf/renderer';
 import PELeaderboardPDF from './PELeaderboardPDF';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 const fohColor = '#006391';
 const bohColor = '#ffcc5b';
 
@@ -73,10 +73,10 @@ const PillButton = styled(Box)<{ selected?: boolean }>(({ selected }) => ({
   borderRadius: 20,
   cursor: 'pointer',
   transition: 'all 0.15s ease',
-  backgroundColor: selected ? levelsetGreen : '#f3f4f6',
-  color: selected ? '#ffffff' : '#6b7280',
+  backgroundColor: selected ? levelsetGreen : 'var(--ls-color-muted-soft)',
+  color: selected ? '#ffffff' : 'var(--ls-color-muted)',
   '&:hover': {
-    backgroundColor: selected ? levelsetGreen : '#e5e7eb',
+    backgroundColor: selected ? levelsetGreen : 'var(--ls-color-muted-border)',
   },
 }));
 
@@ -85,7 +85,7 @@ const AreaToggle = styled(Box)({
   alignItems: 'center',
   gap: 8,
   padding: '4px 12px',
-  backgroundColor: '#f3f4f6',
+  backgroundColor: 'var(--ls-color-muted-soft)',
   borderRadius: 20,
 });
 
@@ -93,7 +93,7 @@ const AreaLabel = styled(Typography)<{ active?: boolean; area: 'FOH' | 'BOH' }>(
   fontFamily,
   fontSize: 13,
   fontWeight: 600,
-  color: active ? (area === 'FOH' ? fohColor : '#b8860b') : '#9ca3af',
+  color: active ? (area === 'FOH' ? fohColor : '#b8860b') : 'var(--ls-color-disabled-text)',
   transition: 'color 0.15s ease',
 }));
 
@@ -114,7 +114,7 @@ const StyledSwitch = styled(Switch)({
   '& .MuiSwitch-thumb': {
     width: 20,
     height: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--ls-color-bg-container)',
   },
   '& .MuiSwitch-track': {
     borderRadius: 12,
@@ -141,10 +141,10 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
         fontSize: 11,
       },
       '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#e5e7eb',
+        borderColor: 'var(--ls-color-muted-border)',
       },
       '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d1d5db',
+        borderColor: 'var(--ls-color-border)',
       },
       '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: levelsetGreen,
@@ -204,7 +204,7 @@ function RankBadge({ rank, size = 32 }: RankBadgeProps) {
     3: { bg: 'linear-gradient(135deg, #cd7f32 0%, #daa06d 100%)', text: '#7a4a00' },
   };
   
-  const colors = rankColors[rank] || { bg: '#e5e7eb', text: '#6b7280' };
+  const colors = rankColors[rank] || { bg: 'var(--ls-color-muted-border)', text: 'var(--ls-color-muted)' };
   
   return (
     <Box
@@ -245,8 +245,8 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
         alignItems: 'center',
         padding: '16px',
         borderRadius: '12px',
-        backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        backgroundColor: 'var(--ls-color-bg-container)',
+        border: '1px solid var(--ls-color-muted-border)',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
         flex: 1,
         minWidth: 280,
@@ -267,7 +267,7 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
             fontFamily,
             fontSize: 16,
             fontWeight: 700,
-            color: '#111827',
+            color: 'var(--ls-color-neutral-soft-foreground)',
             cursor: 'pointer',
             '&:hover': { color: levelsetGreen },
             marginBottom: '4px',
@@ -284,18 +284,18 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
         {/* Total Ratings and Tenure - same margin as name/role */}
         <Box sx={{ display: 'flex', gap: 3 }}>
           <Box>
-            <Typography sx={{ fontFamily, fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', marginBottom: '2px' }}>
+            <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '2px' }}>
               Total Ratings
             </Typography>
-            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#374151' }}>
+            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral)' }}>
               {entry.total_ratings}
             </Typography>
           </Box>
           <Box>
-            <Typography sx={{ fontFamily, fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', marginBottom: '2px' }}>
+            <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '2px' }}>
               Tenure
             </Typography>
-            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#374151' }}>
+            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral)' }}>
               {formatTenure(entry.tenure_months)}
             </Typography>
           </Box>
@@ -304,7 +304,7 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
       
       {/* Right section - Overall rating */}
       <Box sx={{ flexShrink: 0, textAlign: 'center', paddingLeft: 2 }}>
-        <Typography sx={{ fontFamily, fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', marginBottom: '4px' }}>
+        <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '4px' }}>
           Overall
         </Typography>
         {hasScore ? (
@@ -312,7 +312,7 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
             {entry.overall_rating?.toFixed(2)}
           </Typography>
         ) : (
-          <Typography sx={{ fontFamily, fontSize: 11, color: '#9ca3af', fontStyle: 'italic', textAlign: 'center' }}>
+          <Typography sx={{ fontFamily, fontSize: 11, color: 'var(--ls-color-disabled-text)', fontStyle: 'italic', textAlign: 'center' }}>
             Needs {Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more
           </Typography>
         )}
@@ -439,9 +439,9 @@ export function PELeaderboard() {
             flexWrap: 'wrap',
             gap: 2,
             padding: '12px 16px',
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--ls-color-bg-container)',
             borderRadius: '12px',
-            border: '1px solid #e5e7eb',
+            border: '1px solid var(--ls-color-muted-border)',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -487,7 +487,7 @@ export function PELeaderboard() {
                     '& .MuiInputLabel-root': {
                       fontFamily,
                       fontSize: 11,
-                      color: '#6b7280',
+                      color: 'var(--ls-color-muted)',
                       '&.Mui-focused': {
                         color: levelsetGreen,
                       },
@@ -515,7 +515,7 @@ export function PELeaderboard() {
                     '& .MuiInputLabel-root': {
                       fontFamily,
                       fontSize: 11,
-                      color: '#6b7280',
+                      color: 'var(--ls-color-muted)',
                       '&.Mui-focused': {
                         color: levelsetGreen,
                       },
@@ -549,8 +549,8 @@ export function PELeaderboard() {
             </Box>
           ) : entries.length === 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 4, gap: 2 }}>
-              <EmojiEventsIcon sx={{ fontSize: 48, color: '#d1d5db' }} />
-              <Typography sx={{ fontFamily, fontSize: 16, color: '#6b7280' }}>
+              <EmojiEventsIcon sx={{ fontSize: 48, color: 'var(--ls-color-border)' }} />
+              <Typography sx={{ fontFamily, fontSize: 16, color: 'var(--ls-color-muted)' }}>
                 No employees found for this area and date range.
               </Typography>
             </Box>
@@ -574,9 +574,9 @@ export function PELeaderboard() {
               {rest.length > 0 && (
                 <Box
                   sx={{
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'var(--ls-color-bg-container)',
                     borderRadius: '12px',
-                    border: '1px solid #e5e7eb',
+                    border: '1px solid var(--ls-color-muted-border)',
                     overflow: 'hidden',
                   }}
                 >
@@ -587,26 +587,26 @@ export function PELeaderboard() {
                       gridTemplateColumns: '60px 1.5fr 1fr 1fr 1fr 1fr',
                       gap: 2,
                       padding: '12px 20px',
-                      backgroundColor: '#f9fafb',
-                      borderBottom: '1px solid #e5e7eb',
+                      backgroundColor: 'var(--ls-color-neutral-foreground)',
+                      borderBottom: '1px solid var(--ls-color-muted-border)',
                     }}
                   >
-                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', textAlign: 'center' }}>
                       Rank
                     </Typography>
-                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase' }}>
                       Name
                     </Typography>
-                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', textAlign: 'center' }}>
                       Role
                     </Typography>
-                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', textAlign: 'center' }}>
                       Overall
                     </Typography>
-                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', textAlign: 'center' }}>
                       Total Ratings
                     </Typography>
-                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', textAlign: 'center' }}>
+                    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', textAlign: 'center' }}>
                       Tenure
                     </Typography>
                   </Box>
@@ -624,9 +624,9 @@ export function PELeaderboard() {
                           gap: 2,
                           padding: '12px 20px',
                           alignItems: 'center',
-                          borderBottom: '1px solid #f3f4f6',
+                          borderBottom: '1px solid var(--ls-color-muted-soft)',
                           '&:last-child': { borderBottom: 'none' },
-                          '&:hover': { backgroundColor: '#f9fafb' },
+                          '&:hover': { backgroundColor: 'var(--ls-color-neutral-foreground)' },
                         }}
                       >
                         {/* Rank with circle */}
@@ -634,7 +634,7 @@ export function PELeaderboard() {
                           {rank ? (
                             <RankBadge rank={rank} size={28} />
                           ) : (
-                            <Typography sx={{ fontFamily, fontSize: 14, color: '#9ca3af' }}>—</Typography>
+                            <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-disabled-text)' }}>—</Typography>
                           )}
                         </Box>
                         
@@ -645,7 +645,7 @@ export function PELeaderboard() {
                             fontFamily,
                             fontSize: 14,
                             fontWeight: 500,
-                            color: '#111827',
+                            color: 'var(--ls-color-neutral-soft-foreground)',
                             cursor: 'pointer',
                             '&:hover': { color: levelsetGreen },
                           }}
@@ -659,17 +659,17 @@ export function PELeaderboard() {
                         </Box>
                         
                         {/* Overall */}
-                        <Typography sx={{ fontFamily, fontSize: hasScore ? 14 : 11, fontWeight: hasScore ? 600 : 400, fontStyle: hasScore ? 'normal' : 'italic', color: hasScore ? levelsetGreen : '#9ca3af', textAlign: 'center' }}>
+                        <Typography sx={{ fontFamily, fontSize: hasScore ? 14 : 11, fontWeight: hasScore ? 600 : 400, fontStyle: hasScore ? 'normal' : 'italic', color: hasScore ? levelsetGreen : 'var(--ls-color-disabled-text)', textAlign: 'center' }}>
                           {hasScore ? entry.overall_rating?.toFixed(2) : `Needs ${Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more`}
                         </Typography>
                         
                         {/* Total Ratings */}
-                        <Typography sx={{ fontFamily, fontSize: 14, color: '#374151', textAlign: 'center' }}>
+                        <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-neutral)', textAlign: 'center' }}>
                           {entry.total_ratings}
                         </Typography>
                         
                         {/* Tenure */}
-                        <Typography sx={{ fontFamily, fontSize: 14, color: '#374151', textAlign: 'center' }}>
+                        <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-neutral)', textAlign: 'center' }}>
                           {formatTenure(entry.tenure_months)}
                         </Typography>
                       </Box>

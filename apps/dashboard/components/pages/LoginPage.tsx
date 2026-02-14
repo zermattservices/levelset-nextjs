@@ -108,18 +108,18 @@ export function LoginPage() {
             justifyContent: 'center',
             minHeight: '100vh',
             width: '100%',
-            backgroundColor: '#f3f4f6',
+            backgroundColor: 'var(--ls-color-muted-soft)',
             fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
           }}
         >
           <CircularProgress
             size={32}
             sx={{
-              color: '#31664a' /* TODO: Use design token */,
+              color: 'var(--ls-color-brand)',
               marginBottom: 2,
             }}
           />
-          <Box sx={{ color: '#6b7280', fontSize: 14 }}>Checking authentication...</Box>
+          <Box sx={{ color: 'var(--ls-color-muted)', fontSize: 14 }}>Checking authentication...</Box>
         </Box>
       </>
     );
@@ -147,7 +147,7 @@ export function LoginPage() {
           justifyContent: 'center',
           minHeight: '100vh',
           width: '100%',
-          backgroundColor: '#f3f4f6',
+          backgroundColor: 'var(--ls-color-muted-soft)',
           padding: 2,
           boxSizing: 'border-box',
         }}
@@ -156,7 +156,7 @@ export function LoginPage() {
           sx={{
             width: '100%',
             maxWidth: 420,
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--ls-color-bg-container)',
             borderRadius: 4,
             boxShadow: '0 4px 24px rgba(0, 0, 0, 0.08)',
             padding: { xs: 3, sm: 4 },

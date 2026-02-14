@@ -41,7 +41,7 @@ export interface SyncEmployeesModalProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 const warningColor = '#FACC15';
 const destructiveColor = '#dc2626';
 
@@ -54,13 +54,13 @@ const RoleMenuItem = styled(MenuItem)(() => ({
   margin: "2px 8px",
   borderRadius: 8,
   "&.Mui-selected": {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "var(--ls-color-muted-soft)",
     "&:hover": {
-      backgroundColor: "#e5e7eb",
+      backgroundColor: "var(--ls-color-muted-border)",
     },
   },
   "&:hover": {
-    backgroundColor: "#f9fafb",
+    backgroundColor: "var(--ls-color-neutral-foreground)",
   },
 }));
 
@@ -78,8 +78,8 @@ const AvailabilityChip = styled(Box)(() => ({
   fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
   cursor: "pointer",
   transition: "all 0.15s ease-in-out",
-  backgroundColor: "#f3f4f6",
-  color: "#111827",
+  backgroundColor: "var(--ls-color-muted-soft)",
+  color: "var(--ls-color-neutral-soft-foreground)",
   "&.available": {
     backgroundColor: "#dcfce7",
     color: "#166534",
@@ -237,7 +237,7 @@ function createEmployeeColumns(
                 fontFamily,
                 fontSize: 12,
                 borderRadius: 6,
-                border: matchedEmployee ? '2px solid #31664a' : '1px solid #d1d5db', /* TODO: Use design token */
+                border: matchedEmployee ? '2px solid var(--ls-color-brand)' : '1px solid var(--ls-color-border)',
                 backgroundColor: matchedEmployee ? '#f0fdf4' : '#ffffff',
                 cursor: 'pointer',
               }}
@@ -264,7 +264,7 @@ function createEmployeeColumns(
       headerAlign: "center",
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', width: '100%' }}>
-          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827' }}>
+          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
             {params.row.first_name} {params.row.last_name}
           </Typography>
         </Box>
@@ -287,7 +287,7 @@ function createEmployeeColumns(
               <>
                 <RolePill
                   role={currentRole}
-                  endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
+                  endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "var(--ls-color-muted)" }} />}
                   onClick={(event) => handleRoleMenuOpen(event, params.row.id)}
                 />
                 <Menu
@@ -301,7 +301,7 @@ function createEmployeeColumns(
                       fontFamily,
                       borderRadius: 2,
                       boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                      border: "1px solid #e5e7eb",
+                      border: "1px solid var(--ls-color-muted-border)",
                     },
                   }}
                 >
@@ -349,7 +349,7 @@ function createEmployeeColumns(
                 }
               }}
               sx={{
-                color: '#9ca3af',
+                color: 'var(--ls-color-disabled-text)',
                 '&.Mui-checked': {
                   color: levelsetGreen,
                 },
@@ -385,7 +385,7 @@ function createEmployeeColumns(
                 }
               }}
               sx={{
-                color: '#9ca3af',
+                color: 'var(--ls-color-disabled-text)',
                 '&.Mui-checked': {
                   color: levelsetGreen,
                 },
@@ -429,7 +429,7 @@ function createEmployeeColumns(
                       fontFamily,
                       borderRadius: 2,
                       boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                      border: "1px solid #e5e7eb",
+                      border: "1px solid var(--ls-color-muted-border)",
                     },
                   }}
                 >
@@ -466,7 +466,7 @@ function createEmployeeColumns(
       headerAlign: "center",
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: '#111827' }}>
+          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)' }}>
             {params.value ? new Date(params.value).toLocaleDateString() : '-'}
           </Typography>
         </Box>
@@ -536,8 +536,8 @@ const BookmarkletLink = styled(Link)(() => ({
 }));
 
 const InstructionBox = styled(Box)(() => ({
-  backgroundColor: '#f9fafb',
-  border: '1px solid #e5e7eb',
+  backgroundColor: 'var(--ls-color-neutral-foreground)',
+  border: '1px solid var(--ls-color-muted-border)',
   borderRadius: '8px',
   padding: '16px',
   margin: '12px 0',
@@ -557,7 +557,7 @@ const StickyHeader = styled(Box)(() => ({
   position: 'sticky',
   top: 0,
   zIndex: 10,
-  backgroundColor: '#ffffff',
+  backgroundColor: 'var(--ls-color-bg-container)',
   borderBottom: '1px solid #e9eaeb',
   padding: '24px',
   display: 'flex',
@@ -824,7 +824,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
         orientation="vertical"
         sx={{
           '& .MuiStepIcon-root': {
-            color: '#d1d5db',
+            color: 'var(--ls-color-border)',
             fontSize: '28px',
             '&.Mui-active': {
               color: levelsetGreen,
@@ -921,7 +921,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                 >
                   Levelset HS Sync
                 </BookmarkletLink>
-                <Typography variant="body2" sx={{ fontFamily, fontSize: 12, color: '#6b7280', mt: 1, textAlign: 'center' }}>
+                <Typography variant="body2" sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)', mt: 1, textAlign: 'center' }}>
                   Drag this link to your bookmarks bar
                 </Typography>
               </Box>
@@ -1206,10 +1206,10 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     if (!hasChanges) {
       return (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827', mb: 2 }}>
+          <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', mb: 2 }}>
             Your roster is up to date
           </Typography>
-          <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280' }}>
+          <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)' }}>
             No changes were made.
           </Typography>
         </Box>
@@ -1236,7 +1236,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               mb: 2,
             },
             '&.Mui-disabled': {
-              backgroundColor: '#f9fafb',
+              backgroundColor: 'var(--ls-color-neutral-foreground)',
             },
           }}
         >
@@ -1259,7 +1259,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: levelsetGreen }}>
               New Employees
             </Typography>
-            <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', ml: 1 }}>
+            <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', ml: 1 }}>
               {newEmployees.length > 0 ? `${newEmployees.length} employees` : 'No employees'}
             </Typography>
           </AccordionSummary>
@@ -1270,8 +1270,8 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                   height: 400, 
                   width: '100%',
                   borderRadius: '16px',
-                  border: "1px solid #e5e7eb",
-                  backgroundColor: "#ffffff",
+                  border: "1px solid var(--ls-color-muted-border)",
+                  backgroundColor: "var(--ls-color-bg-container)",
                   overflow: "hidden",
                   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
                 }}>
@@ -1288,10 +1288,10 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                       borderRadius: '16px',
                       overflow: 'hidden',
                       '& .MuiDataGrid-cell': {
-                        borderBottom: '1px solid #f3f4f6',
+                        borderBottom: '1px solid var(--ls-color-muted-soft)',
                         fontSize: 13,
                         fontWeight: 500,
-                        color: '#111827',
+                        color: 'var(--ls-color-neutral-soft-foreground)',
                         cursor: 'default',
                         '&:focus': {
                           outline: 'none',
@@ -1310,11 +1310,11 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                         },
                       },
                       '& .MuiDataGrid-columnHeaders': {
-                        backgroundColor: '#f9fafb',
-                        borderBottom: '2px solid #e5e7eb',
+                        backgroundColor: 'var(--ls-color-neutral-foreground)',
+                        borderBottom: '2px solid var(--ls-color-muted-border)',
                         fontSize: 13,
                         fontWeight: 600,
-                        color: '#111827',
+                        color: 'var(--ls-color-neutral-soft-foreground)',
                       },
                       '& .MuiDataGrid-columnHeaderTitleContainer': {
                         padding: '0 16px',
@@ -1342,7 +1342,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               mb: 2,
             },
             '&.Mui-disabled': {
-              backgroundColor: '#f9fafb',
+              backgroundColor: 'var(--ls-color-neutral-foreground)',
             },
           }}
         >
@@ -1365,7 +1365,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: warningColor }}>
               Modified Employees
             </Typography>
-            <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', ml: 1 }}>
+            <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', ml: 1 }}>
               No employees
             </Typography>
           </AccordionSummary>
@@ -1387,7 +1387,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               mb: 2,
             },
             '&.Mui-disabled': {
-              backgroundColor: '#f9fafb',
+              backgroundColor: 'var(--ls-color-neutral-foreground)',
             },
           }}
         >
@@ -1410,7 +1410,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: destructiveColor }}>
               Terminated Employees
             </Typography>
-            <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', ml: 1 }}>
+            <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', ml: 1 }}>
               {terminatedCount > 0 ? `${terminatedCount} employees` : 'No employees'}
             </Typography>
           </AccordionSummary>
@@ -1421,8 +1421,8 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                   height: 400, 
                   width: '100%',
                   borderRadius: '16px',
-                  border: "1px solid #e5e7eb",
-                  backgroundColor: "#ffffff",
+                  border: "1px solid var(--ls-color-muted-border)",
+                  backgroundColor: "var(--ls-color-bg-container)",
                   overflow: "hidden",
                   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
                 }}>
@@ -1442,14 +1442,14 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                       borderRadius: '16px',
                       overflow: 'hidden',
                       '& .MuiDataGrid-cell': {
-                        borderBottom: '1px solid #f3f4f6',
+                        borderBottom: '1px solid var(--ls-color-muted-soft)',
                         fontSize: 13,
                         fontWeight: 500,
-                        color: '#111827',
+                        color: 'var(--ls-color-neutral-soft-foreground)',
                       },
                       '& .MuiDataGrid-columnHeaders': {
-                        backgroundColor: '#f9fafb',
-                        borderBottom: '2px solid #e5e7eb',
+                        backgroundColor: 'var(--ls-color-neutral-foreground)',
+                        borderBottom: '2px solid var(--ls-color-muted-border)',
                       },
                       '& .terminated-row': {
                         backgroundColor: '#fee2e2 !important',
@@ -1462,12 +1462,12 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                   />
                 </Box>
                 {keptEmployees.size > 0 && (
-                  <Box sx={{ mt: 2, p: 2, backgroundColor: '#f9fafb', borderRadius: '8px' }}>
+                  <Box sx={{ mt: 2, p: 2, backgroundColor: 'var(--ls-color-neutral-foreground)', borderRadius: '8px' }}>
                     {Array.from(keptEmployees).map(hsId => {
                       const emp = terminatedEmployeesData.find(e => Number(e.hs_id) === hsId);
                       if (!emp) return null;
                       return (
-                        <Typography key={hsId} sx={{ fontFamily, fontSize: 12, color: '#6b7280', mb: 1 }}>
+                        <Typography key={hsId} sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)', mb: 1 }}>
                           {emp.first_name} {emp.last_name} will be kept on your Levelset roster. This has no impact on their status in HotSchedules or HR/Payroll.
                         </Typography>
                       );
@@ -1499,7 +1499,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                 backgroundColor: '#2d5a42',
               },
               '&:disabled': {
-                backgroundColor: '#9ca3af',
+                backgroundColor: 'var(--ls-color-disabled-text)',
               },
             }}
           >
@@ -1516,7 +1516,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
 
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
-        <Typography sx={{ fontFamily, fontSize: 24, fontWeight: 600, color: '#111827', mb: 4 }}>
+        <Typography sx={{ fontFamily, fontSize: 24, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', mb: 4 }}>
           Sync Complete!
         </Typography>
 
@@ -1596,9 +1596,9 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
           <IconButton
             onClick={handleClose}
             sx={{
-              color: "#6b7280",
+              color: "var(--ls-color-muted)",
               "&:hover": {
-                backgroundColor: "#f3f4f6",
+                backgroundColor: "var(--ls-color-muted-soft)",
               },
             }}
           >
@@ -1625,10 +1625,10 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
           },
         }}
       >
-        <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827', mb: 2 }}>
+        <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', mb: 2 }}>
           Are you sure you want to exit your HotSchedules sync?
         </Typography>
-        <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', mb: 3 }}>
+        <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', mb: 3 }}>
           All roster changes will be lost if you exit the sync right now
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
@@ -1639,10 +1639,10 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               fontSize: 14,
               fontWeight: 500,
               textTransform: 'none',
-              color: '#6b7280',
+              color: 'var(--ls-color-muted)',
               borderRadius: '8px', // 4px default + 4px = 8px
               '&:hover': {
-                backgroundColor: '#f3f4f6',
+                backgroundColor: 'var(--ls-color-muted-soft)',
               },
             }}
           >

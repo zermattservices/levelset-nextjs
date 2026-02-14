@@ -70,10 +70,10 @@ export function PositionButtons({
             onClick={() => handlePositionChange(position)}
             style={{
               padding: '8px 16px',
-              border: '1px solid #e5e7eb',
+              border: '1px solid var(--ls-color-muted-border)',
               borderRadius: '20px',
-              backgroundColor: isSelected ? '#111827' : '#f3f4f6',
-              color: isSelected ? '#ffffff' : '#374151',
+              backgroundColor: isSelected ? 'var(--ls-color-neutral-soft-foreground)' : 'var(--ls-color-muted-soft)',
+              color: isSelected ? '#ffffff' : 'var(--ls-color-neutral)',
               fontSize: '14px',
               fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
               fontWeight: isSelected ? '600' : '500',
@@ -85,12 +85,12 @@ export function PositionButtons({
             }}
             onMouseEnter={(e) => {
               if (!isSelected) {
-                e.currentTarget.style.backgroundColor = '#e5e7eb';
+                e.currentTarget.style.backgroundColor = 'var(--ls-color-muted-border)';
               }
             }}
             onMouseLeave={(e) => {
               if (!isSelected) {
-                e.currentTarget.style.backgroundColor = '#f3f4f6';
+                e.currentTarget.style.backgroundColor = 'var(--ls-color-muted-soft)';
               }
             }}
             aria-pressed={isSelected}

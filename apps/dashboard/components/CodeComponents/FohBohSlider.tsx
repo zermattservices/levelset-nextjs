@@ -79,10 +79,10 @@ export function FohBohSlider({
       data-selected={selectedValue}
       style={{
         display: 'inline-flex',
-        border: '1px solid #e5e7eb',
+        border: '1px solid var(--ls-color-muted-border)',
         borderRadius: '999px',
         overflow: 'hidden',
-        background: '#f3f4f6',
+        background: 'var(--ls-color-muted-soft)',
         boxShadow: '0 1px 2px rgba(0,0,0,.05)',
         margin: '10px 0'
       }}
@@ -114,12 +114,12 @@ export function FohBohSlider({
           userSelect: 'none',
           fontSize: '14px',
           fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
-          color: selectedValue === "FOH" ? '#fff' : '#6b7280',
+          color: selectedValue === "FOH" ? '#fff' : 'var(--ls-color-muted)',
           transition: 'all 0.15s ease',
           fontWeight: selectedValue === "FOH" ? '600' : '500',
           minWidth: '60px',
           textAlign: 'center',
-          background: selectedValue === "FOH" ? '#111827' : 'transparent'
+          background: selectedValue === "FOH" ? 'var(--ls-color-neutral-soft-foreground)' : 'transparent'
         }}
       >
         FOH
@@ -152,12 +152,12 @@ export function FohBohSlider({
           userSelect: 'none',
           fontSize: '14px',
           fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
-          color: selectedValue === "BOH" ? '#fff' : '#6b7280',
+          color: selectedValue === "BOH" ? '#fff' : 'var(--ls-color-muted)',
           transition: 'all 0.15s ease',
           fontWeight: selectedValue === "BOH" ? '600' : '500',
           minWidth: '60px',
           textAlign: 'center',
-          background: selectedValue === "BOH" ? '#111827' : 'transparent'
+          background: selectedValue === "BOH" ? 'var(--ls-color-neutral-soft-foreground)' : 'transparent'
         }}
       >
         BOH

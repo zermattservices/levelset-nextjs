@@ -49,13 +49,13 @@ const StyledSelect = styled(Select)(() => ({
   fontSize: 14,
   minWidth: 280,
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#e5e7eb',
+    borderColor: 'var(--ls-color-muted-border)',
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
 }));
 
@@ -64,10 +64,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
 }));
@@ -426,14 +426,14 @@ export function ModifyAccessTab({
   // Get pill color based on count
   const getPillColor = (enabled: number, total: number) => {
     if (enabled === total) return { bg: '#dcfce7', color: '#166534' }; // Green
-    if (enabled === 0) return { bg: '#f3f4f6', color: '#6b7280' }; // Grey
+    if (enabled === 0) return { bg: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-muted)' }; // Grey
     return { bg: '#fef3c7', color: '#92400e' }; // Yellow
   };
 
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -474,10 +474,10 @@ export function ModifyAccessTab({
                 fontFamily,
                 fontSize: 13,
                 textTransform: 'none',
-                borderColor: '#e5e7eb',
-                color: '#374151',
+                borderColor: 'var(--ls-color-muted-border)',
+                color: 'var(--ls-color-neutral)',
                 '&:hover': {
-                  borderColor: '#31664a' /* TODO: Use design token */,
+                  borderColor: 'var(--ls-color-brand)',
                   backgroundColor: 'rgba(49, 102, 74, 0.04)',
                 },
               }}
@@ -489,7 +489,7 @@ export function ModifyAccessTab({
 
         {saving && (
           <div className={sty.savingIndicator}>
-            <CircularProgress size={16} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+            <CircularProgress size={16} sx={{ color: 'var(--ls-color-brand)' }} />
             <span>Saving...</span>
           </div>
         )}
@@ -506,7 +506,7 @@ export function ModifyAccessTab({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#9ca3af' }} />
+                <SearchIcon sx={{ color: 'var(--ls-color-disabled-text)' }} />
               </InputAdornment>
             ),
           }}
@@ -520,7 +520,7 @@ export function ModifyAccessTab({
         </div>
       ) : loadingAccess ? (
         <div className={sty.loadingContainer}>
-          <CircularProgress size={24} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+          <CircularProgress size={24} sx={{ color: 'var(--ls-color-brand)' }} />
         </div>
       ) : (
         <div className={sty.modulesContainer}>
@@ -548,7 +548,7 @@ export function ModifyAccessTab({
                 sx={{
                   '&:before': { display: 'none' },
                   boxShadow: 'none',
-                  border: '1px solid #e5e7eb',
+                  border: '1px solid var(--ls-color-muted-border)',
                   borderRadius: '8px !important',
                   marginBottom: 1,
                   '&.Mui-expanded': {
@@ -602,9 +602,9 @@ export function ModifyAccessTab({
                             disabled={!canEdit}
                             sx={{
                               padding: '4px',
-                              color: '#d1d5db',
+                              color: 'var(--ls-color-border)',
                               '&.Mui-checked': {
-                                color: '#31664a' /* TODO: Use design token */,
+                                color: 'var(--ls-color-brand)',
                               },
                             }}
                           />
@@ -652,7 +652,7 @@ export function ModifyAccessTab({
         <DialogContent>
           {loadingEmployees ? (
             <div className={sty.loadingContainer}>
-              <CircularProgress size={24} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+              <CircularProgress size={24} sx={{ color: 'var(--ls-color-brand)' }} />
             </div>
           ) : assignedEmployees.length === 0 ? (
             <div className={sty.emptyState}>No users are assigned to this permission level.</div>

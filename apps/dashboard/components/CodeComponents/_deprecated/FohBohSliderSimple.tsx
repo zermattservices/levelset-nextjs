@@ -6,10 +6,10 @@ export function FohBohSliderSimple({
   className,
   size = "medium",
   variant = "default",
-  activeColor = "#111827",
-  inactiveColor = "#6b7280",
-  backgroundColor = "#f3f4f6",
-  borderColor = "#e5e7eb"
+  activeColor = "var(--ls-color-neutral-soft-foreground)",
+  inactiveColor = "var(--ls-color-muted)",
+  backgroundColor = "var(--ls-color-muted-soft)",
+  borderColor = "var(--ls-color-muted-border)"
 }: {
   value?: "FOH" | "BOH";
   onChange?: (value: "FOH" | "BOH") => void;

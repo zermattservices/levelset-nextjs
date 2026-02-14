@@ -47,29 +47,29 @@ export function LocationSelectDropdown({
         cursor: 'pointer',
         '& .MuiOutlinedInput-root': {
           borderRadius: '12px',
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--ls-color-bg-container)',
           fontFamily,
           fontSize: 14,
           fontWeight: 500,
-          color: '#111827',
+          color: 'var(--ls-color-neutral-soft-foreground)',
           paddingRight: '36px !important',
           transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
           cursor: 'pointer',
           width: 'auto',
         },
         '& .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#e5e7eb',
+          borderColor: 'var(--ls-color-muted-border)',
           borderWidth: '1px',
         },
         '&:hover .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#31664a' /* TODO: Use design token */,
+          borderColor: 'var(--ls-color-brand)',
         },
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#31664a' /* TODO: Use design token */,
+          borderColor: 'var(--ls-color-brand)',
           borderWidth: 2,
         },
         '& .MuiSelect-icon': {
-          color: '#31664a' /* TODO: Use design token */,
+          color: 'var(--ls-color-brand)',
           marginRight: 0,
           right: 12,
           pointerEvents: 'auto',
@@ -84,7 +84,7 @@ export function LocationSelectDropdown({
           cursor: 'pointer',
         },
         '& .MuiSelect-select.Mui-disabled': {
-          color: '#9ca3af',
+          color: 'var(--ls-color-disabled-text)',
         },
       }}
     >
@@ -94,7 +94,7 @@ export function LocationSelectDropdown({
         IconComponent={ExpandMoreIcon}
         renderValue={(value) => {
           if (!value) {
-            return <span style={{ color: '#9ca3af' }}>{placeholder}</span>;
+            return <span style={{ color: 'var(--ls-color-disabled-text)' }}>{placeholder}</span>;
           }
 
           const match = locations.find((loc) => loc.id === value);
@@ -120,12 +120,12 @@ export function LocationSelectDropdown({
                 fontFamily,
                 fontSize: 14,
                 fontWeight: 500,
-                color: '#111827',
+                color: 'var(--ls-color-neutral-soft-foreground)',
                 paddingY: 1,
                 paddingX: 2,
                 '&.Mui-selected': {
                   backgroundColor: '#eef5f0',
-                  color: '#31664a' /* TODO: Use design token */,
+                  color: 'var(--ls-color-brand)',
                 },
                 '&.Mui-selected:hover': {
                   backgroundColor: '#e3efe6',

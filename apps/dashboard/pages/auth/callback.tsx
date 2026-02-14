@@ -69,25 +69,25 @@ export default function AuthCallback() {
         justifyContent: 'center',
         minHeight: '100vh',
         width: '100%',
-        backgroundColor: '#f3f4f6',
+        backgroundColor: 'var(--ls-color-muted-soft)',
         fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
       }}
     >
       {error ? (
         <>
           <Box sx={{ color: '#dc2626', marginBottom: 2 }}>{error}</Box>
-          <Box sx={{ color: '#6b7280', fontSize: 14 }}>Redirecting to login...</Box>
+          <Box sx={{ color: 'var(--ls-color-muted)', fontSize: 14 }}>Redirecting to login...</Box>
         </>
       ) : (
         <>
           <CircularProgress
             size={32}
             sx={{
-              color: '#31664a' /* TODO: Use design token */,
+              color: 'var(--ls-color-brand)',
               marginBottom: 2,
             }}
           />
-          <Box sx={{ color: '#6b7280', fontSize: 14 }}>Completing sign in...</Box>
+          <Box sx={{ color: 'var(--ls-color-muted)', fontSize: 14 }}>Completing sign in...</Box>
         </>
       )}
     </Box>

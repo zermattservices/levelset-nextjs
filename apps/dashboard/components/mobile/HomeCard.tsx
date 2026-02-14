@@ -21,9 +21,9 @@ export function HomeCard({ title, description, onClick, children }: HomeCardProp
         }
       }}
       sx={{
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--ls-color-bg-container)',
         borderRadius: '16px',
-        border: '1px solid #e5e7eb',
+        border: '1px solid var(--ls-color-muted-border)',
         padding: '20px 24px',
         display: 'flex',
         flexDirection: 'column',
@@ -43,7 +43,7 @@ export function HomeCard({ title, description, onClick, children }: HomeCardProp
           fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           fontSize: 20,
           fontWeight: 700,
-          color: '#111827',
+          color: 'var(--ls-color-neutral-soft-foreground)',
         }}
       >
         {title}
@@ -53,7 +53,7 @@ export function HomeCard({ title, description, onClick, children }: HomeCardProp
           fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           fontSize: 15,
           fontWeight: 500,
-          color: '#4b5563',
+          color: 'var(--ls-color-text-secondary)',
         }}
       >
         {description}

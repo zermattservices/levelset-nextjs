@@ -13,7 +13,7 @@ interface SignatureCanvasProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 
 export function SignatureCanvas({
   label,
@@ -90,7 +90,7 @@ export function SignatureCanvas({
       </Typography>
       <Box
         sx={{
-          border: '1px solid #d1d5db',
+          border: '1px solid var(--ls-color-border)',
           borderRadius: '8px',
           backgroundColor: disabled ? '#f5f5f5' : '#ffffff',
           overflow: 'hidden',
@@ -119,7 +119,7 @@ export function SignatureCanvas({
             sx={{
               fontFamily,
               fontSize: '12px',
-              color: '#6b7280',
+              color: 'var(--ls-color-muted)',
             }}
           >
             {helperText}
@@ -133,13 +133,13 @@ export function SignatureCanvas({
             fontFamily,
             fontSize: '12px',
             textTransform: 'none',
-            color: '#6b7280',
+            color: 'var(--ls-color-muted)',
             ml: 'auto',
             minWidth: 'auto',
             padding: '4px 8px',
             '&:hover': {
               backgroundColor: 'rgba(0, 0, 0, 0.04)',
-              color: '#374151',
+              color: 'var(--ls-color-neutral)',
             },
           }}
         >

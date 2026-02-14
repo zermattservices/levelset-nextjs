@@ -172,7 +172,7 @@ export function RatingsAnalytics({
   // Show skeleton during analytics loading (not parent loading)
   if (analyticsLoading) {
     return (
-      <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap', borderRadius: '16px', mb: '12px' }}>
+      <Box sx={{ backgroundColor: 'var(--ls-color-neutral-foreground)', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap', borderRadius: '16px', mb: '12px' }}>
         <Skeleton 
           variant="rectangular" 
           animation="wave"
@@ -180,7 +180,7 @@ export function RatingsAnalytics({
             flex: 1, 
             height: 106, // Match actual card height (padding + title row + gap + metric row)
             borderRadius: 2,
-            backgroundColor: '#e5e7eb',
+            backgroundColor: 'var(--ls-color-muted-border)',
           }} 
         />
         <Skeleton 
@@ -190,7 +190,7 @@ export function RatingsAnalytics({
             flex: 1, 
             height: 106,
             borderRadius: 2,
-            backgroundColor: '#e5e7eb',
+            backgroundColor: 'var(--ls-color-muted-border)',
           }} 
         />
         <Skeleton 
@@ -200,7 +200,7 @@ export function RatingsAnalytics({
             flex: 1, 
             height: 106,
             borderRadius: 2,
-            backgroundColor: '#e5e7eb',
+            backgroundColor: 'var(--ls-color-muted-border)',
           }} 
         />
       </Box>
@@ -208,7 +208,7 @@ export function RatingsAnalytics({
   }
 
   return (
-    <Box sx={{ backgroundColor: '#f9fafb', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap', borderRadius: '16px', mb: '12px' }}>
+    <Box sx={{ backgroundColor: 'var(--ls-color-neutral-foreground)', p: 2, display: 'flex', gap: 2, flexWrap: 'nowrap', borderRadius: '16px', mb: '12px' }}>
       {/* Metric 1: # of Ratings */}
       <AnalyticsMetricCard
         metricName="# of Ratings"
@@ -221,8 +221,8 @@ export function RatingsAnalytics({
             />
           ) : (
             <Box sx={{ 
-              backgroundColor: '#e5e7eb', 
-              color: '#6b7280', 
+              backgroundColor: 'var(--ls-color-muted-border)', 
+              color: 'var(--ls-color-muted)', 
               padding: '4px 12px', 
               borderRadius: 2,
               fontSize: 12,
@@ -238,7 +238,7 @@ export function RatingsAnalytics({
               {formatChange(currentMetrics.count, priorMetrics.count)}
             </span>
           ) : (
-            <span style={{ color: '#6b7280', fontWeight: 600 }}>+0</span>
+            <span style={{ color: 'var(--ls-color-muted)', fontWeight: 600 }}>+0</span>
           )
         }
         periodText={hasPriorData ? `over prior ${periodText}` : 'over prior period'}
@@ -256,8 +256,8 @@ export function RatingsAnalytics({
             />
           ) : (
             <Box sx={{ 
-              backgroundColor: '#e5e7eb', 
-              color: '#6b7280', 
+              backgroundColor: 'var(--ls-color-muted-border)', 
+              color: 'var(--ls-color-muted)', 
               padding: '4px 12px', 
               borderRadius: 2,
               fontSize: 12,
@@ -273,7 +273,7 @@ export function RatingsAnalytics({
               {(currentMetrics.avgRating - priorMetrics.avgRating >= 0 ? '+' : '')}{(currentMetrics.avgRating - priorMetrics.avgRating).toFixed(2)}
             </span>
           ) : (
-            <span style={{ color: '#6b7280', fontWeight: 600 }}>+0.00</span>
+            <span style={{ color: 'var(--ls-color-muted)', fontWeight: 600 }}>+0.00</span>
           )
         }
         periodText={hasPriorData ? `over prior ${periodText}` : 'over prior period'}
@@ -291,8 +291,8 @@ export function RatingsAnalytics({
             />
           ) : (
             <Box sx={{ 
-              backgroundColor: '#e5e7eb', 
-              color: '#6b7280', 
+              backgroundColor: 'var(--ls-color-muted-border)', 
+              color: 'var(--ls-color-muted)', 
               padding: '4px 12px', 
               borderRadius: 2,
               fontSize: 12,
@@ -308,7 +308,7 @@ export function RatingsAnalytics({
               {(currentMetrics.ratingsPerDay - priorMetrics.ratingsPerDay >= 0 ? '+' : '')}{(currentMetrics.ratingsPerDay - priorMetrics.ratingsPerDay).toFixed(1)}
             </span>
           ) : (
-            <span style={{ color: '#6b7280', fontWeight: 600 }}>+0.0</span>
+            <span style={{ color: 'var(--ls-color-muted)', fontWeight: 600 }}>+0.0</span>
           )
         }
         periodText={hasPriorData ? `over prior ${periodText}` : 'over prior period'}

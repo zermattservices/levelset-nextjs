@@ -53,7 +53,7 @@ interface DisciplineInfractionFormProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 
 const InfractionDateTextField = React.forwardRef(function InfractionDateTextField(
   props: React.ComponentProps<typeof TextField>,
@@ -231,8 +231,8 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
       };
     }
     return {
-      backgroundColor: '#e5e7eb',
-      color: '#374151',
+      backgroundColor: 'var(--ls-color-muted-border)',
+      color: 'var(--ls-color-neutral)',
     };
   }, []);
 
@@ -571,7 +571,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
           InputProps={{ readOnly: true }}
           sx={{
             '& .MuiInputBase-root': {
-              backgroundColor: '#f3f4f6',
+              backgroundColor: 'var(--ls-color-muted-soft)',
             },
           }}
         />
@@ -585,9 +585,9 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                 markDirty();
               }}
               sx={{
-                color: '#31664a' /* TODO: Use design token */,
+                color: 'var(--ls-color-brand)',
                 '&.Mui-checked': {
-                  color: '#31664a' /* TODO: Use design token */,
+                  color: 'var(--ls-color-brand)',
                 },
               }}
             />
@@ -629,11 +629,11 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
         {/* File Attachments */}
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px', mb: '8px' }}>
-            <AttachFileIcon sx={{ fontSize: 16, color: '#6b7280', transform: 'rotate(45deg)' }} />
-            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#374151' }}>
+            <AttachFileIcon sx={{ fontSize: 16, color: 'var(--ls-color-muted)', transform: 'rotate(45deg)' }} />
+            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: 'var(--ls-color-neutral)' }}>
               {t('infraction.attachments', 'Attachments')}
             </Typography>
-            <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#9ca3af' }}>
+            <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: 'var(--ls-color-disabled-text)' }}>
               ({attachedFiles.length}/5)
             </Typography>
           </Box>
@@ -660,8 +660,8 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                     height: 72,
                     borderRadius: '8px',
                     overflow: 'hidden',
-                    border: '1px solid #e5e7eb',
-                    backgroundColor: '#f9fafb',
+                    border: '1px solid var(--ls-color-muted-border)',
+                    backgroundColor: 'var(--ls-color-neutral-foreground)',
                   }}
                 >
                   {file.type.startsWith('image/') ? (
@@ -686,7 +686,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                         sx={{
                           fontFamily,
                           fontSize: 8,
-                          color: '#6b7280',
+                          color: 'var(--ls-color-muted)',
                           textAlign: 'center',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',

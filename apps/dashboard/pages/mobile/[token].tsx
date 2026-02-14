@@ -240,7 +240,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
   const summaryCard = summary ? (
     <Box
       sx={{
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--ls-color-bg-container)',
         borderRadius: '16px',
         border: '1px solid #d1fae5',
         padding: '24px 28px',
@@ -256,7 +256,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           fontSize: 22,
           fontWeight: 700,
-          color: '#111827',
+          color: 'var(--ls-color-neutral-soft-foreground)',
         }}
       >
         {t('common:success.title')}
@@ -364,7 +364,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           sx={{
             fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             fontSize: 15,
-            color: '#4b5563',
+            color: 'var(--ls-color-text-secondary)',
           }}
         >
           {summary.detail}
@@ -378,8 +378,8 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
             borderRadius: '16px',
             padding: '16px 28px',
             backgroundColor:
-              summary.points < 0 ? '#d1fae5' : summary.points > 0 ? '#fee2e2' : '#f3f4f6',
-            color: summary.points < 0 ? '#065f46' : summary.points > 0 ? '#991b1b' : '#374151',
+              summary.points < 0 ? '#d1fae5' : summary.points > 0 ? '#fee2e2' : 'var(--ls-color-muted-soft)',
+            color: summary.points < 0 ? '#065f46' : summary.points > 0 ? '#991b1b' : 'var(--ls-color-neutral)',
             fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             fontWeight: 700,
             fontSize: 20,
@@ -393,12 +393,12 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         onClick={() => setSummary(null)}
         sx={{
           marginTop: '12px',
-          backgroundColor: '#31664a' /* TODO: Use design token */,
+          backgroundColor: 'var(--ls-color-brand)',
           textTransform: 'none',
           fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           fontWeight: 600,
           borderRadius: '8px',
-          '&:hover': { backgroundColor: '#264d38' },
+          '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
         }}
       >
         {t('common:success.backToHome')}
@@ -495,30 +495,30 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
               <IconButton
                 onClick={(e) => setLanguageMenuAnchor(e.currentTarget)}
                 sx={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e5e7eb',
+                  backgroundColor: 'var(--ls-color-bg-container)',
+                  border: '1px solid var(--ls-color-muted-border)',
                   borderRadius: 2,
                   padding: '8px 12px',
                   '&:hover': {
-                    backgroundColor: '#f9fafb',
+                    backgroundColor: 'var(--ls-color-neutral-foreground)',
                   },
                 }}
                 aria-label="Change language"
               >
-                <LanguageIcon sx={{ fontSize: 20, color: '#31664a' /* TODO: Use design token */, mr: 0.5 }} />
+                <LanguageIcon sx={{ fontSize: 20, color: 'var(--ls-color-brand)', mr: 0.5 }} />
                 <Typography
                   sx={{
                     fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                     fontSize: 13,
                     fontWeight: 600,
-                    color: '#111827',
+                    color: 'var(--ls-color-neutral-soft-foreground)',
                     textTransform: 'uppercase',
                     mr: 0.5,
                   }}
                 >
                   {language}
                 </Typography>
-                <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+                <ExpandMoreIcon sx={{ fontSize: 16, color: 'var(--ls-color-muted)' }} />
               </IconButton>
               <Menu
                 anchorEl={languageMenuAnchor}
@@ -547,11 +547,11 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                       fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                       fontSize: 14,
                       fontWeight: language === lang.code ? 600 : 500,
-                      color: language === lang.code ? '#31664a' /* TODO: Use design token */ : '#111827',
+                      color: language === lang.code ? 'var(--ls-color-brand)' : 'var(--ls-color-neutral-soft-foreground)',
                       '&.Mui-selected': {
-                        backgroundColor: '#f3f4f6',
+                        backgroundColor: 'var(--ls-color-muted-soft)',
                         '&:hover': {
-                          backgroundColor: '#e5e7eb',
+                          backgroundColor: 'var(--ls-color-muted-border)',
                         },
                       },
                     }}
@@ -570,7 +570,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                   fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                   fontSize: 24,
                   fontWeight: 700,
-                  color: '#111827',
+                  color: 'var(--ls-color-neutral-soft-foreground)',
                 }}
               >
                 {location.name ?? 'Levelset Mobile'}
@@ -620,16 +620,16 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                   textTransform: 'none',
                   padding: '14px 20px',
                   borderRadius: '16px',
-                  backgroundColor: '#ffffff',
-                  color: '#31664a' /* TODO: Use design token */,
-                  border: '4px solid #31664a', /* TODO: Use design token */
+                  backgroundColor: 'var(--ls-color-bg-container)',
+                  color: 'var(--ls-color-brand)',
+                  border: '4px solid var(--ls-color-brand)',
                   fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                   fontSize: 16,
                   fontWeight: 600,
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                   '&:hover': {
                     backgroundColor: '#f0fdf4',
-                    border: '4px solid #31664a', /* TODO: Use design token */
+                    border: '4px solid var(--ls-color-brand)',
                   },
                 }}
               >
@@ -655,7 +655,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
             sx={{
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               fontSize: 15,
-              color: '#4b5563',
+              color: 'var(--ls-color-text-secondary)',
             }}
           >
             {activeConfig.description}
@@ -684,8 +684,8 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
               alignItems: 'center',
               gap: 1,
               borderRadius: '999px',
-              border: '1px solid #e5e7eb',
-              backgroundColor: '#ffffff',
+              border: '1px solid var(--ls-color-muted-border)',
+              backgroundColor: 'var(--ls-color-bg-container)',
               boxShadow: '0 18px 30px rgba(17, 24, 39, 0.15)',
               padding: '8px 12px',
             }}
@@ -697,10 +697,10 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                 textTransform: 'none',
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 fontWeight: 600,
-                backgroundColor: '#31664a' /* TODO: Use design token */,
+                backgroundColor: 'var(--ls-color-brand)',
                 borderRadius: '999px',
                 padding: '10px 18px',
-                '&:hover': { backgroundColor: '#264d38' },
+                '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
               }}
             >
               Add to Home Screen
@@ -710,7 +710,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
               sx={{
                 textTransform: 'none',
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                color: '#31664a' /* TODO: Use design token */,
+                color: 'var(--ls-color-brand)',
                 borderRadius: '8px',
               }}
             >
@@ -735,7 +735,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
             sx={{
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               fontSize: 14,
-              color: '#4b5563',
+              color: 'var(--ls-color-text-secondary)',
             }}
           >
             In Safari, tap the share icon, then choose &ldquo;Add to Home Screen.&rdquo; This installs the Levelset portal on
@@ -748,7 +748,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
             sx={{
               textTransform: 'none',
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-              color: '#31664a' /* TODO: Use design token */,
+              color: 'var(--ls-color-brand)',
               fontWeight: 600,
             }}
           >

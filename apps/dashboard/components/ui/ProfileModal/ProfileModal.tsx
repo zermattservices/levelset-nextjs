@@ -26,7 +26,7 @@ import { createSupabaseClient } from '@/util/supabase/component';
 import { format, parseISO } from 'date-fns';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 
 export interface ProfileModalProps {
   open: boolean;
@@ -42,12 +42,12 @@ interface InfoRowProps {
 function InfoRow({ icon, label, value }: InfoRowProps) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-      <Box sx={{ color: '#6b7280', mt: 0.25 }}>{icon}</Box>
+      <Box sx={{ color: 'var(--ls-color-muted)', mt: 0.25 }}>{icon}</Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 500, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
           {label}
         </Typography>
-        <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 500, color: '#111827' }}>
+        <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)' }}>
           {value || '-'}
         </Typography>
       </Box>
@@ -153,14 +153,14 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '16px 24px',
-          borderBottom: '1px solid #e5e7eb',
-          backgroundColor: '#f9fafb',
+          borderBottom: '1px solid var(--ls-color-muted-border)',
+          backgroundColor: 'var(--ls-color-neutral-foreground)',
         }}
       >
-        <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
+        <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
           My Profile
         </Typography>
-        <IconButton onClick={onClose} size="small" sx={{ color: '#6b7280' }}>
+        <IconButton onClick={onClose} size="small" sx={{ color: 'var(--ls-color-muted)' }}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -182,7 +182,7 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
             {auth.first_name?.[0] || auth.email?.[0]?.toUpperCase() || '?'}
           </Avatar>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            <Typography sx={{ fontFamily, fontSize: 22, fontWeight: 600, color: '#111827' }}>
+            <Typography sx={{ fontFamily, fontSize: 22, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
               {auth.full_name || 'User'}
             </Typography>
             <Box
@@ -265,11 +265,11 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
                 sx={{
                   fontFamily,
                   textTransform: 'none',
-                  borderColor: '#e5e7eb',
-                  color: '#6b7280',
+                  borderColor: 'var(--ls-color-muted-border)',
+                  color: 'var(--ls-color-muted)',
                   '&:hover': {
-                    borderColor: '#d1d5db',
-                    backgroundColor: '#f9fafb',
+                    borderColor: 'var(--ls-color-border)',
+                    backgroundColor: 'var(--ls-color-neutral-foreground)',
                   },
                 }}
               >

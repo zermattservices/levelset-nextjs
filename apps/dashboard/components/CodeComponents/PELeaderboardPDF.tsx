@@ -3,7 +3,7 @@ import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/render
 import type { LeaderboardEntry } from '@/lib/ratings-data';
 import { formatTenure } from '@/lib/ratings-data';
 
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 
 const styles = StyleSheet.create({
   page: {
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: 'var(--ls-color-muted-border)',
   },
   logo: {
     width: 50,
@@ -32,19 +32,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#111827',
+    color: 'var(--ls-color-neutral-soft-foreground)',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 11,
-    color: '#6b7280',
+    color: 'var(--ls-color-muted)',
   },
   filterInfo: {
     flexDirection: 'row',
     gap: 20,
     marginBottom: 20,
     padding: 12,
-    backgroundColor: '#f9fafb',
+    backgroundColor: 'var(--ls-color-neutral-foreground)',
     borderRadius: 6,
   },
   filterItem: {
@@ -53,29 +53,29 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     fontSize: 9,
-    color: '#6b7280',
+    color: 'var(--ls-color-muted)',
     marginRight: 6,
     textTransform: 'uppercase',
   },
   filterValue: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#374151',
+    color: 'var(--ls-color-neutral)',
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: 'var(--ls-color-muted-soft)',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: 'var(--ls-color-muted-border)',
   },
   tableRow: {
     flexDirection: 'row',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: 'var(--ls-color-muted-soft)',
   },
   tableRowAlt: {
     backgroundColor: '#fafafa',
@@ -104,17 +104,17 @@ const styles = StyleSheet.create({
   headerCell: {
     fontSize: 8,
     fontWeight: 'bold',
-    color: '#6b7280',
+    color: 'var(--ls-color-muted)',
     textTransform: 'uppercase',
   },
   cell: {
     fontSize: 10,
-    color: '#374151',
+    color: 'var(--ls-color-neutral)',
   },
   cellBold: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#111827',
+    color: 'var(--ls-color-neutral-soft-foreground)',
   },
   cellGreen: {
     fontSize: 10,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   cellMuted: {
     fontSize: 10,
-    color: '#9ca3af',
+    color: 'var(--ls-color-disabled-text)',
     fontStyle: 'italic',
   },
   topThreeSection: {
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   topThreeTitle: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#111827',
+    color: 'var(--ls-color-neutral-soft-foreground)',
     marginBottom: 10,
   },
   topThreeCards: {
@@ -142,9 +142,9 @@ const styles = StyleSheet.create({
   topCard: {
     flex: 1,
     padding: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--ls-color-bg-container)',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: 'var(--ls-color-muted-border)',
     borderRadius: 8,
   },
   topCardRank: {
@@ -155,12 +155,12 @@ const styles = StyleSheet.create({
   topCardName: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#111827',
+    color: 'var(--ls-color-neutral-soft-foreground)',
     marginBottom: 2,
   },
   topCardRole: {
     fontSize: 9,
-    color: '#6b7280',
+    color: 'var(--ls-color-muted)',
     marginBottom: 8,
   },
   topCardMetric: {
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   },
   topCardMetricLabel: {
     fontSize: 7,
-    color: '#9ca3af',
+    color: 'var(--ls-color-disabled-text)',
     textTransform: 'uppercase',
   },
   topCardMetricValue: {
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     fontSize: 8,
-    color: '#9ca3af',
+    color: 'var(--ls-color-disabled-text)',
   },
 });
 

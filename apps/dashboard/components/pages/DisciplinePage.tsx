@@ -71,7 +71,7 @@ export function DisciplinePage() {
         <CenteredLoadingSpinner
           className={classNames("__wab_instance", sty.centeredLoadingSpinner)}
           backgroundColor="rgba(255, 255, 255, 0.8)"
-          color="#31664a" /* TODO: Use design token */
+          color="var(--ls-color-brand)"
           opacity={0.8}
           showChildren={true}
           size={48}
@@ -143,12 +143,12 @@ export function DisciplinePage() {
                           fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
                           fontSize: 12,
                           fontWeight: 500,
-                          color: '#9ca3af',
+                          color: 'var(--ls-color-disabled-text)',
                           textTransform: 'none',
                           padding: '4px 12px',
                           marginTop: '8px',
                           '&:hover': {
-                            color: '#6b7280',
+                            color: 'var(--ls-color-muted)',
                             backgroundColor: 'rgba(0, 0, 0, 0.04)',
                           },
                         }}

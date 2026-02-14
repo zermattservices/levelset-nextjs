@@ -18,7 +18,7 @@ import { DisciplineReportPDF } from './DisciplineReportPDF';
 import { pdf } from '@react-pdf/renderer';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 
 // Color gradient from lightest to darkest red (5 levels)
 const redGradient = [
@@ -57,7 +57,7 @@ interface DisciplineActions {
 const PointsBadge = ({ points, disciplineActions }: { points: number; disciplineActions: DisciplineActions[] }) => {
   const getBadgeColor = () => {
     if (points === 0) {
-      return { bg: '#f3f4f6', color: '#111827' };
+      return { bg: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-neutral-soft-foreground)' };
     }
     
     if (!disciplineActions || disciplineActions.length === 0) {
@@ -130,7 +130,7 @@ const ActiveEmployeeRow = ({
         gridTemplateColumns: '1fr 120px 100px 110px 100px 140px',
         alignItems: 'center',
         padding: '12px 16px',
-        borderBottom: '1px solid #f3f4f6',
+        borderBottom: '1px solid var(--ls-color-muted-soft)',
         '&:last-child': {
           borderBottom: 'none',
         },
@@ -139,16 +139,16 @@ const ActiveEmployeeRow = ({
         },
       }}
     >
-      <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#111827' }}>
+      <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
         {employee.full_name}
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <RolePill role={employee.role} />
       </Box>
-      <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', textAlign: 'center' }}>
+      <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)', textAlign: 'center' }}>
         {employee.hire_date ? format(parseISO(employee.hire_date), 'M/d/yyyy') : '-'}
       </Typography>
-      <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', textAlign: 'center' }}>
+      <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)', textAlign: 'center' }}>
         {employee.last_infraction ? format(parseISO(employee.last_infraction), 'M/d/yyyy') : '-'}
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -166,8 +166,8 @@ const ActiveEmployeeRow = ({
             fontSize: 12,
             fontWeight: 500,
             textTransform: 'none',
-            borderColor: '#e5e7eb',
-            color: '#374151',
+            borderColor: 'var(--ls-color-muted-border)',
+            color: 'var(--ls-color-neutral)',
             borderRadius: '8px',
             padding: '4px 12px',
             '&:hover': {
@@ -203,7 +203,7 @@ const InactiveEmployeeRow = ({
         gridTemplateColumns: '1fr 120px 100px 110px 100px 1fr 140px',
         alignItems: 'center',
         padding: '12px 16px',
-        borderBottom: '1px solid #f3f4f6',
+        borderBottom: '1px solid var(--ls-color-muted-soft)',
         '&:last-child': {
           borderBottom: 'none',
         },
@@ -212,22 +212,22 @@ const InactiveEmployeeRow = ({
         },
       }}
     >
-      <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#111827' }}>
+      <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
         {employee.full_name}
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <RolePill role={employee.role} />
       </Box>
-      <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', textAlign: 'center' }}>
+      <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)', textAlign: 'center' }}>
         {employee.hire_date ? format(parseISO(employee.hire_date), 'M/d/yyyy') : '-'}
       </Typography>
-      <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', textAlign: 'center' }}>
+      <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)', textAlign: 'center' }}>
         {employee.termination_date ? format(parseISO(employee.termination_date), 'M/d/yyyy') : '-'}
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <PointsBadge points={employee.last_points_total} disciplineActions={disciplineActions} />
       </Box>
-      <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {employee.termination_reason || '-'}
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -242,8 +242,8 @@ const InactiveEmployeeRow = ({
             fontSize: 12,
             fontWeight: 500,
             textTransform: 'none',
-            borderColor: '#e5e7eb',
-            color: '#374151',
+            borderColor: 'var(--ls-color-muted-border)',
+            color: 'var(--ls-color-neutral)',
             borderRadius: '8px',
             padding: '4px 12px',
             '&:hover': {
@@ -268,26 +268,26 @@ const ActiveHeaderRow = () => (
       gridTemplateColumns: '1fr 120px 100px 110px 100px 140px',
       alignItems: 'center',
       padding: '10px 16px',
-      backgroundColor: '#f9fafb',
-      borderBottom: '1px solid #e5e7eb',
+      backgroundColor: 'var(--ls-color-neutral-foreground)',
+      borderBottom: '1px solid var(--ls-color-muted-border)',
     }}
   >
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
       Employee
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
       Role
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
       Hire Date
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
       Last Infraction
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
       Points
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>
       Actions
     </Typography>
   </Box>
@@ -301,29 +301,29 @@ const InactiveHeaderRow = () => (
       gridTemplateColumns: '1fr 120px 100px 110px 100px 1fr 140px',
       alignItems: 'center',
       padding: '10px 16px',
-      backgroundColor: '#f9fafb',
-      borderBottom: '1px solid #e5e7eb',
+      backgroundColor: 'var(--ls-color-neutral-foreground)',
+      borderBottom: '1px solid var(--ls-color-muted-border)',
     }}
   >
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
       Employee
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
       Role
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
       Hire Date
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
       Term. Date
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
       Last Points
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
       Term. Reason
     </Typography>
-    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>
+    <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>
       Actions
     </Typography>
   </Box>
@@ -445,7 +445,7 @@ export function DisciplineReportTab() {
   if (!selectedLocationId) {
     return (
       <Box sx={{ textAlign: 'center', padding: 4 }}>
-        <Typography sx={{ fontFamily, color: '#6b7280' }}>Please select a location to view discipline reports.</Typography>
+        <Typography sx={{ fontFamily, color: 'var(--ls-color-muted)' }}>Please select a location to view discipline reports.</Typography>
       </Box>
     );
   }
@@ -457,7 +457,7 @@ export function DisciplineReportTab() {
         defaultExpanded={false}
         sx={{
           boxShadow: 'none',
-          border: '1px solid #e5e7eb',
+          border: '1px solid var(--ls-color-muted-border)',
           borderRadius: '12px !important',
           '&:before': { display: 'none' },
           '&.Mui-expanded': {
@@ -468,12 +468,12 @@ export function DisciplineReportTab() {
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           sx={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--ls-color-bg-container)',
             borderRadius: '12px',
             '&.Mui-expanded': {
               borderBottomLeftRadius: 0,
               borderBottomRightRadius: 0,
-              borderBottom: '1px solid #e5e7eb',
+              borderBottom: '1px solid var(--ls-color-muted-border)',
             },
             '& .MuiAccordionSummary-content': {
               margin: '12px 0',
@@ -481,17 +481,17 @@ export function DisciplineReportTab() {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography sx={{ fontFamily, fontSize: 16, fontWeight: 600, color: '#111827' }}>
+            <Typography sx={{ fontFamily, fontSize: 16, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
               Active Employees
             </Typography>
             <Box
               sx={{
-                backgroundColor: '#f3f4f6',
+                backgroundColor: 'var(--ls-color-muted-soft)',
                 borderRadius: '12px',
                 padding: '2px 10px',
                 fontSize: 13,
                 fontWeight: 500,
-                color: '#6b7280',
+                color: 'var(--ls-color-muted)',
                 fontFamily,
               }}
             >
@@ -502,7 +502,7 @@ export function DisciplineReportTab() {
         <AccordionDetails sx={{ padding: 0 }}>
           {activeEmployees.length === 0 ? (
             <Box sx={{ padding: 3, textAlign: 'center' }}>
-              <Typography sx={{ fontFamily, color: '#6b7280' }}>No active employees found.</Typography>
+              <Typography sx={{ fontFamily, color: 'var(--ls-color-muted)' }}>No active employees found.</Typography>
             </Box>
           ) : (
             <>
@@ -526,7 +526,7 @@ export function DisciplineReportTab() {
         defaultExpanded={false}
         sx={{
           boxShadow: 'none',
-          border: '1px solid #e5e7eb',
+          border: '1px solid var(--ls-color-muted-border)',
           borderRadius: '12px !important',
           '&:before': { display: 'none' },
           '&.Mui-expanded': {
@@ -537,12 +537,12 @@ export function DisciplineReportTab() {
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           sx={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--ls-color-bg-container)',
             borderRadius: '12px',
             '&.Mui-expanded': {
               borderBottomLeftRadius: 0,
               borderBottomRightRadius: 0,
-              borderBottom: '1px solid #e5e7eb',
+              borderBottom: '1px solid var(--ls-color-muted-border)',
             },
             '& .MuiAccordionSummary-content': {
               margin: '12px 0',
@@ -550,17 +550,17 @@ export function DisciplineReportTab() {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography sx={{ fontFamily, fontSize: 16, fontWeight: 600, color: '#111827' }}>
+            <Typography sx={{ fontFamily, fontSize: 16, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
               Inactive Employees
             </Typography>
             <Box
               sx={{
-                backgroundColor: '#f3f4f6',
+                backgroundColor: 'var(--ls-color-muted-soft)',
                 borderRadius: '12px',
                 padding: '2px 10px',
                 fontSize: 13,
                 fontWeight: 500,
-                color: '#6b7280',
+                color: 'var(--ls-color-muted)',
                 fontFamily,
               }}
             >
@@ -571,7 +571,7 @@ export function DisciplineReportTab() {
         <AccordionDetails sx={{ padding: 0 }}>
           {inactiveEmployees.length === 0 ? (
             <Box sx={{ padding: 3, textAlign: 'center' }}>
-              <Typography sx={{ fontFamily, color: '#6b7280' }}>No inactive employees found.</Typography>
+              <Typography sx={{ fontFamily, color: 'var(--ls-color-muted)' }}>No inactive employees found.</Typography>
             </Box>
           ) : (
             <>

@@ -18,7 +18,7 @@ import type { FormControlCallbacks } from '../types';
 const RATING_OPTIONS: Array<{ labelKey: string; value: RatingValue; color: string }> = [
   { labelKey: 'ratings.ratingLabels.notYet', value: 1, color: '#b91c1c' },
   { labelKey: 'ratings.ratingLabels.onTheRise', value: 2, color: '#f59e0b' },
-  { labelKey: 'ratings.ratingLabels.crushingIt', value: 3, color: '#31664a' /* TODO: Use design token */ },
+  { labelKey: 'ratings.ratingLabels.crushingIt', value: 3, color: 'var(--ls-color-brand)' },
 ];
 
 type RatingValue = 1 | 2 | 3;
@@ -437,8 +437,8 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                   fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                   fontSize: 13,
                   fontWeight: 500,
-                  color: '#4b5563',
-                  backgroundColor: '#f9fafb',
+                  color: 'var(--ls-color-text-secondary)',
+                  backgroundColor: 'var(--ls-color-neutral-foreground)',
                   borderRadius: '8px',
                   padding: '12px 16px',
                   lineHeight: 1.5,
@@ -464,9 +464,9 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
             <Box
               key={label ?? index}
               sx={{
-                backgroundColor: '#ffffff',
+                backgroundColor: 'var(--ls-color-bg-container)',
                 borderRadius: '12px',
-                border: '1px solid #e5e7eb',
+                border: '1px solid var(--ls-color-muted-border)',
                 padding: '16px 20px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -479,7 +479,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                     fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                     fontSize: 16,
                     fontWeight: 600,
-                    color: '#111827',
+                    color: 'var(--ls-color-neutral-soft-foreground)',
                   }}
                 >
                   {label}
@@ -490,7 +490,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                       fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                       fontSize: 13,
                       fontWeight: 500,
-                      color: '#6b7280',
+                      color: 'var(--ls-color-muted)',
                       lineHeight: 1.4,
                     }}
                   >
@@ -554,9 +554,9 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           {/* Additional Details (Notes) */}
           <Box
             sx={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--ls-color-bg-container)',
               borderRadius: '12px',
-              border: requireRatingComments && !notes.trim() ? '1px solid #f59e0b' : '1px solid #e5e7eb',
+              border: requireRatingComments && !notes.trim() ? '1px solid #f59e0b' : '1px solid var(--ls-color-muted-border)',
               padding: '16px 20px',
               display: 'flex',
               flexDirection: 'column',
@@ -568,7 +568,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 fontSize: 16,
                 fontWeight: 600,
-                color: '#111827',
+                color: 'var(--ls-color-neutral-soft-foreground)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.5,
@@ -584,7 +584,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 fontSize: 13,
                 fontWeight: 500,
-                color: requireRatingComments ? '#92400e' : '#6b7280',
+                color: requireRatingComments ? '#92400e' : 'var(--ls-color-muted)',
                 lineHeight: 1.4,
               }}
             >
@@ -618,9 +618,9 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
           {selectedEmployeeOption && (
             <Box
               sx={{
-                backgroundColor: '#ffffff',
+                backgroundColor: 'var(--ls-color-bg-container)',
                 borderRadius: '12px',
-                border: '1px solid #e5e7eb',
+                border: '1px solid var(--ls-color-muted-border)',
                 padding: '16px 20px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -632,7 +632,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                   fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                   fontSize: 16,
                   fontWeight: 600,
-                  color: '#111827',
+                  color: 'var(--ls-color-neutral-soft-foreground)',
                 }}
               >
                 {t('ratings.feedbackTitle')}
@@ -642,7 +642,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                   fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                   fontSize: 15,
                   fontWeight: 500,
-                  color: '#4b5563',
+                  color: 'var(--ls-color-text-secondary)',
                 }}
               >
                 {(() => {
@@ -657,7 +657,7 @@ export function PositionalRatingsForm({ controls }: PositionalRatingsFormProps) 
                           component="span"
                           sx={{
                             fontWeight: 600,
-                            color: '#31664a' /* TODO: Use design token */,
+                            color: 'var(--ls-color-brand)',
                           }}
                         >
                           {firstName}

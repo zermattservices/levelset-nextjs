@@ -37,7 +37,7 @@ export interface DisciplineNotificationsProps {
 export type RecommendedActionsProps = DisciplineNotificationsProps;
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 
 // Infraction Card Component - for Infractions This Week section
 function InfractionCard({ 
@@ -62,11 +62,11 @@ function InfractionCard({
         padding: "12px 16px",
         borderRadius: "12px",
         border: "1px solid #e9eaeb",
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--ls-color-bg-container)",
         minWidth: 0,
         cursor: onClick ? "pointer" : "default",
         "&:hover": onClick ? {
-          backgroundColor: "#f9fafb",
+          backgroundColor: "var(--ls-color-neutral-foreground)",
         } : undefined,
       }}
     >
@@ -78,7 +78,7 @@ function InfractionCard({
               fontFamily: "Satoshi",
               fontSize: "14px",
               fontWeight: 700,
-              color: "#111827",
+              color: "var(--ls-color-neutral-soft-foreground)",
               lineHeight: "20px",
             }}
           >
@@ -192,7 +192,7 @@ function InfractionCard({
 const PointsBadge = ({ points, disciplineActions }: { points: number; disciplineActions: any[] }) => {
   const getBadgeColor = () => {
     if (points === 0) {
-      return { bg: '#f3f4f6', color: '#111827' };
+      return { bg: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-neutral-soft-foreground)' };
     }
     
     const applicableAction = disciplineActions
@@ -601,7 +601,7 @@ export function DisciplineNotifications({
               },
             }}
           >
-            <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
+            <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
               Infractions This Week ({weeklyInfractions.length})
             </Typography>
             <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500, ml: 'auto', mr: 1 }}>
@@ -611,8 +611,8 @@ export function DisciplineNotifications({
           <AccordionDetails sx={{ padding: 0 }}>
             <Box
               sx={{
-                backgroundColor: "#f9fafb",
-                border: "1px solid #e5e7eb",
+                backgroundColor: "var(--ls-color-neutral-foreground)",
+                border: "1px solid var(--ls-color-muted-border)",
                 borderRadius: "12px",
                 padding: "16px",
                 display: "flex",
@@ -632,7 +632,7 @@ export function DisciplineNotifications({
                   />
                 ))
               ) : (
-                <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', textAlign: 'center', py: 2 }}>
+                <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', textAlign: 'center', py: 2 }}>
                   No infractions in the last 7 days
                 </Typography>
               )}
@@ -677,7 +677,7 @@ export function DisciplineNotifications({
             },
           }}
         >
-          <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
+          <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
             Missing Acknowledgements ({missingAcknowledgements.length})
           </Typography>
           <Typography sx={{ fontFamily, fontSize: 13, color: levelsetGreen, fontWeight: 500, ml: 'auto', mr: 1 }}>
@@ -687,8 +687,8 @@ export function DisciplineNotifications({
         <AccordionDetails sx={{ padding: 0 }}>
           <Box
             sx={{
-              backgroundColor: "#f9fafb",
-              border: "1px solid #e5e7eb",
+              backgroundColor: "var(--ls-color-neutral-foreground)",
+              border: "1px solid var(--ls-color-muted-border)",
               borderRadius: "12px",
               padding: "16px",
               display: "flex",
@@ -728,7 +728,7 @@ export function DisciplineNotifications({
                       flexShrink: 0,
                       borderRadius: '8px',
                       "&:hover": {
-                        backgroundColor: "#264d38",
+                        backgroundColor: "var(--ls-color-brand-hover)",
                       },
                     }}
                   >
@@ -737,7 +737,7 @@ export function DisciplineNotifications({
                 </Box>
               ))
             ) : (
-              <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', textAlign: 'center', py: 2 }}>
+              <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', textAlign: 'center', py: 2 }}>
                 No infractions with missing acknowledgements
               </Typography>
             )}
@@ -781,7 +781,7 @@ export function DisciplineNotifications({
             },
           }}
         >
-          <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827' }}>
+          <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
             Required Disciplinary Actions ({recommendations.length})
           </Typography>
           {recommendations.length > 0 && (
@@ -805,8 +805,8 @@ export function DisciplineNotifications({
         <AccordionDetails sx={{ padding: 0 }}>
           <Box
             sx={{
-              backgroundColor: "#f9fafb",
-              border: "1px solid #e5e7eb",
+              backgroundColor: "var(--ls-color-neutral-foreground)",
+              border: "1px solid var(--ls-color-muted-border)",
               borderRadius: "12px",
               padding: "16px",
               display: "flex",
@@ -819,7 +819,7 @@ export function DisciplineNotifications({
                 sx={{
                   fontFamily,
                   fontSize: 14,
-                  color: '#6b7280',
+                  color: 'var(--ls-color-muted)',
                   textAlign: 'center',
                   py: 2,
                 }}
@@ -831,7 +831,7 @@ export function DisciplineNotifications({
                 <Box
                   key={rec.employee_id}
                   sx={{
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "var(--ls-color-bg-container)",
                     border: "1px solid #e9eaeb",
                     borderRadius: "8px",
                     padding: "12px 16px",
@@ -848,7 +848,7 @@ export function DisciplineNotifications({
                         fontFamily,
                         fontSize: 14,
                         fontWeight: 600,
-                        color: '#111827',
+                        color: 'var(--ls-color-neutral-soft-foreground)',
                         lineHeight: 1.2,
                       }}
                     >
@@ -858,7 +858,7 @@ export function DisciplineNotifications({
                       sx={{
                         fontFamily,
                         fontSize: 12,
-                        color: '#6b7280',
+                        color: 'var(--ls-color-muted)',
                         lineHeight: 1.2,
                       }}
                     >
@@ -872,7 +872,7 @@ export function DisciplineNotifications({
                   {/* Recommended Action */}
                   <Box
                     sx={{
-                      backgroundColor: "#ffffff",
+                      backgroundColor: "var(--ls-color-bg-container)",
                       border: "1px solid #e9eaeb",
                       borderRadius: "8px",
                       padding: "8px 12px",
@@ -886,7 +886,7 @@ export function DisciplineNotifications({
                         fontFamily,
                         fontSize: 13,
                         fontWeight: 600,
-                        color: '#111827',
+                        color: 'var(--ls-color-neutral-soft-foreground)',
                         whiteSpace: 'nowrap',
                       }}
                     >
@@ -905,15 +905,15 @@ export function DisciplineNotifications({
                       fontFamily,
                       fontSize: 13,
                       textTransform: "none",
-                      color: "#6b7280",
-                      borderColor: "#d1d5db",
+                      color: "var(--ls-color-muted)",
+                      borderColor: "var(--ls-color-border)",
                       padding: "6px 16px",
                       minWidth: 100,
                       flexShrink: 0,
                       borderRadius: '8px',
                       "&:hover": {
-                        backgroundColor: "#f3f4f6",
-                        borderColor: "#9ca3af",
+                        backgroundColor: "var(--ls-color-muted-soft)",
+                        borderColor: "var(--ls-color-disabled-text)",
                       },
                     }}
                   >
@@ -934,7 +934,7 @@ export function DisciplineNotifications({
                       flexShrink: 0,
                       borderRadius: '8px',
                       "&:hover": {
-                        backgroundColor: "#264d38",
+                        backgroundColor: "var(--ls-color-brand-hover)",
                       },
                     }}
                   >

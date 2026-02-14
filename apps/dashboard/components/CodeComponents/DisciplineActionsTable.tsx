@@ -200,8 +200,8 @@ export function DisciplineActionsTable({
         <table className={`roster-table ${tableClass}`} data-plasmic-name="discipline-actions-table">
           <thead data-plasmic-name="table-header">
             <tr className={headerRowClass} data-plasmic-name="header-row">
-              <th className={headerCellClass} style={{ textAlign: 'left', padding: '16px', fontFamily, fontSize: 14, fontWeight: 600, color: '#111827' }} data-plasmic-name="action-header">Action</th>
-              <th className={headerCellClass} style={{ textAlign: 'center', padding: '16px', fontFamily, fontSize: 14, fontWeight: 600, color: '#111827' }} data-plasmic-name="points-header">Points</th>
+              <th className={headerCellClass} style={{ textAlign: 'left', padding: '16px', fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }} data-plasmic-name="action-header">Action</th>
+              <th className={headerCellClass} style={{ textAlign: 'center', padding: '16px', fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }} data-plasmic-name="points-header">Points</th>
               {showActions && <th className={headerCellClass} style={{ textAlign: 'center', padding: '16px' }} data-plasmic-name="actions-header"></th>}
             </tr>
           </thead>
@@ -265,7 +265,7 @@ export function DisciplineActionsTable({
                   fontFamily,
                   fontSize: 14,
                   fontWeight: 600,
-                  color: '#111827',
+                  color: 'var(--ls-color-neutral-soft-foreground)',
                   textTransform: 'none',
                 }} 
                 data-plasmic-name="action-header"
@@ -280,7 +280,7 @@ export function DisciplineActionsTable({
                   fontFamily,
                   fontSize: 14,
                   fontWeight: 600,
-                  color: '#111827',
+                  color: 'var(--ls-color-neutral-soft-foreground)',
                   textTransform: 'none',
                 }} 
                 data-plasmic-name="points-header"

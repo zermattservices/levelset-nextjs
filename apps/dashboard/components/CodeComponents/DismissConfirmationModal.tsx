@@ -46,7 +46,7 @@ export function DismissConfirmationModal({
           fontFamily,
           fontSize: "18px",
           fontWeight: 600,
-          color: "#111827",
+          color: "var(--ls-color-neutral-soft-foreground)",
           pb: 1,
         }}
       >
@@ -58,7 +58,7 @@ export function DismissConfirmationModal({
           sx={{
             fontFamily,
             fontSize: "14px",
-            color: "#6b7280",
+            color: "var(--ls-color-muted)",
             lineHeight: 1.5,
           }}
         >
@@ -73,14 +73,14 @@ export function DismissConfirmationModal({
             fontFamily,
             fontSize: 13,
             textTransform: "none",
-            color: "#6b7280",
-            borderColor: "#d1d5db",
+            color: "var(--ls-color-muted)",
+            borderColor: "var(--ls-color-border)",
             border: "1px solid",
             padding: "6px 16px",
             borderRadius: '8px',
             "&:hover": {
-              backgroundColor: "#f3f4f6",
-              borderColor: "#9ca3af",
+              backgroundColor: "var(--ls-color-muted-soft)",
+              borderColor: "var(--ls-color-disabled-text)",
             },
           }}
         >

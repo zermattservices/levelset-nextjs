@@ -79,7 +79,7 @@ export function MobileFormDrawer({
           sx: {
             width: { xs: '100%', sm: '480px' },
             maxWidth: '100%',
-            backgroundColor: '#f9fafb',
+            backgroundColor: 'var(--ls-color-neutral-foreground)',
             display: 'flex',
             flexDirection: 'column',
           },
@@ -95,8 +95,8 @@ export function MobileFormDrawer({
               alignItems: 'center',
               gap: 1.5,
               padding: '16px 20px',
-              borderBottom: '1px solid #e5e7eb',
-              backgroundColor: '#ffffff',
+              borderBottom: '1px solid var(--ls-color-muted-border)',
+              backgroundColor: 'var(--ls-color-bg-container)',
             }}
           >
             <IconButton
@@ -104,20 +104,20 @@ export function MobileFormDrawer({
               aria-label="Go back"
               sx={{
                 backgroundColor: '#f5f6f7',
-                color: '#111827',
+                color: 'var(--ls-color-neutral-soft-foreground)',
                 '&:hover': {
-                  backgroundColor: '#e5e7eb',
+                  backgroundColor: 'var(--ls-color-muted-border)',
                 },
               }}
             >
               <ArrowBackIcon />
             </IconButton>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontWeight: 600, fontSize: 18, color: '#111827' }}>
+              <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontWeight: 600, fontSize: 18, color: 'var(--ls-color-neutral-soft-foreground)' }}>
                 {title}
               </Typography>
               {subtitle ? (
-                <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontSize: 13, color: '#6b7280', marginTop: '2px' }}>
+                <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontSize: 13, color: 'var(--ls-color-muted)', marginTop: '2px' }}>
                   {subtitle}
                 </Typography>
               ) : null}
@@ -131,8 +131,8 @@ export function MobileFormDrawer({
           <Box
             sx={{
               padding: '16px 20px 24px',
-              borderTop: '1px solid #e5e7eb',
-              backgroundColor: '#ffffff',
+              borderTop: '1px solid var(--ls-color-muted-border)',
+              backgroundColor: 'var(--ls-color-bg-container)',
             }}
           >
             {footer}

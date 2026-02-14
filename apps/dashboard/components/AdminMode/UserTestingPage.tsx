@@ -27,12 +27,12 @@ const StyledTextField = styled(TextField)(() => ({
   '& .MuiOutlinedInput-root': {
     fontFamily,
     fontSize: 14,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--ls-color-bg-container)',
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
 }));
@@ -40,16 +40,16 @@ const StyledTextField = styled(TextField)(() => ({
 const StyledSelect = styled(Select)(() => ({
   fontFamily,
   fontSize: 14,
-  backgroundColor: '#ffffff',
+  backgroundColor: 'var(--ls-color-bg-container)',
   '& .MuiSelect-select': {
     display: 'flex',
     alignItems: 'center',
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
 }));
 
@@ -300,7 +300,7 @@ export function UserTestingPage() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#9ca3af', fontSize: 20 }} />
+                <SearchIcon sx={{ color: 'var(--ls-color-disabled-text)', fontSize: 20 }} />
               </InputAdornment>
             ),
           }}
@@ -314,7 +314,7 @@ export function UserTestingPage() {
           sx={{ minWidth: 200 }}
           renderValue={(value): React.ReactNode => {
             if (!value) {
-              return <span style={{ color: '#9ca3af' }}>Organization</span>;
+              return <span style={{ color: 'var(--ls-color-disabled-text)' }}>Organization</span>;
             }
             const org = orgs.find(o => o.id === value);
             return org?.name || String(value);
@@ -336,7 +336,7 @@ export function UserTestingPage() {
           sx={{ minWidth: 180 }}
           renderValue={(value): React.ReactNode => {
             if (!value) {
-              return <span style={{ color: '#9ca3af' }}>Location</span>;
+              return <span style={{ color: 'var(--ls-color-disabled-text)' }}>Location</span>;
             }
             const loc = filteredLocations.find(l => l.id === value);
             return loc ? `#${loc.location_number}` : String(value);
@@ -354,7 +354,7 @@ export function UserTestingPage() {
       {/* Users table */}
       {loading ? (
           <div className={styles.loadingContainer}>
-            <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+            <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className={styles.emptyState}>

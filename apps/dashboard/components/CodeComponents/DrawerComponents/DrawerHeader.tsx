@@ -30,7 +30,7 @@ export function DrawerHeader({ title, subtitle, className, style }: DrawerHeader
             fontSize: "18px",
             fontWeight: 600,
             lineHeight: "24px",
-            color: "#111827",
+            color: "var(--ls-color-neutral-soft-foreground)",
           }}
         >
           {title}
@@ -43,7 +43,7 @@ export function DrawerHeader({ title, subtitle, className, style }: DrawerHeader
           sx={{
             fontSize: "14px",
             lineHeight: "20px",
-            color: "#6b7280",
+            color: "var(--ls-color-muted)",
           }}
         >
           {subtitle}

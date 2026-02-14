@@ -29,7 +29,7 @@ export function MobileShell({ location }: MobileShellProps) {
     <Box
       sx={{
         minHeight: '100vh',
-        backgroundColor: '#f3f4f6',
+        backgroundColor: 'var(--ls-color-muted-soft)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -63,7 +63,7 @@ export function MobileShell({ location }: MobileShellProps) {
               fontFamily: 'Satoshi, sans-serif',
               fontWeight: 600,
               fontSize: 24,
-              color: '#111827',
+              color: 'var(--ls-color-neutral-soft-foreground)',
             }}
           >
             Mobile Submission Portal
@@ -72,7 +72,7 @@ export function MobileShell({ location }: MobileShellProps) {
             sx={{
               fontFamily: 'Satoshi, sans-serif',
               fontSize: 14,
-              color: '#4b5563',
+              color: 'var(--ls-color-text-secondary)',
               marginTop: '4px',
             }}
           >
@@ -114,12 +114,12 @@ export function MobileShell({ location }: MobileShellProps) {
               textTransform: 'none',
               padding: '20px 24px',
               borderRadius: '20px',
-              backgroundColor: '#ffffff',
-              color: '#111827',
-              border: '1px solid #e5e7eb',
+              backgroundColor: 'var(--ls-color-bg-container)',
+              color: 'var(--ls-color-neutral-soft-foreground)',
+              border: '1px solid var(--ls-color-muted-border)',
               boxShadow: '0 12px 24px rgba(17, 24, 39, 0.08)',
               '&:hover': {
-                backgroundColor: '#f9fafb',
+                backgroundColor: 'var(--ls-color-neutral-foreground)',
               },
             }}
           >
@@ -127,7 +127,7 @@ export function MobileShell({ location }: MobileShellProps) {
               <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontWeight: 600, fontSize: 18 }}>
                 Log a Discipline Infraction
               </Typography>
-              <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontSize: 13, color: '#4b5563' }}>
+              <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontSize: 13, color: 'var(--ls-color-text-secondary)' }}>
                 Capture infractions and acknowledgements on the floor.
               </Typography>
             </Box>
@@ -146,7 +146,7 @@ export function MobileShell({ location }: MobileShellProps) {
             disabled
             sx={{
               width: '100%',
-              backgroundColor: '#31664a' /* TODO: Use design token */,
+              backgroundColor: 'var(--ls-color-brand)',
               fontFamily: 'Satoshi, sans-serif',
               fontWeight: 600,
               textTransform: 'none',
@@ -161,7 +161,7 @@ export function MobileShell({ location }: MobileShellProps) {
           </Button>
         }
       >
-        <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontSize: 14, color: '#4b5563' }}>
+        <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontSize: 14, color: 'var(--ls-color-text-secondary)' }}>
           The positional excellence form will appear here. This placeholder ensures the drawer layout and navigation
           experience are in place.
         </Typography>
@@ -178,7 +178,7 @@ export function MobileShell({ location }: MobileShellProps) {
             disabled
             sx={{
               width: '100%',
-              backgroundColor: '#31664a' /* TODO: Use design token */,
+              backgroundColor: 'var(--ls-color-brand)',
               fontFamily: 'Satoshi, sans-serif',
               fontWeight: 600,
               textTransform: 'none',
@@ -193,7 +193,7 @@ export function MobileShell({ location }: MobileShellProps) {
           </Button>
         }
       >
-        <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontSize: 14, color: '#4b5563' }}>
+        <Typography sx={{ fontFamily: 'Satoshi, sans-serif', fontSize: 14, color: 'var(--ls-color-text-secondary)' }}>
           The discipline infraction form will appear here. This placeholder confirms the drawer interactions and guardrails.
         </Typography>
       </MobileFormDrawer>

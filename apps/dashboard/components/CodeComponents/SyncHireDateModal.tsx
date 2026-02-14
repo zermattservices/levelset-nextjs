@@ -48,7 +48,7 @@ export interface SyncHireDateModalProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 const warningColor = '#FACC15';
 const destructiveColor = '#dc2626';
 
@@ -88,13 +88,13 @@ const RoleMenuItem = styled(MenuItem)(() => ({
   margin: "2px 8px",
   borderRadius: 8,
   "&.Mui-selected": {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "var(--ls-color-muted-soft)",
     "&:hover": {
-      backgroundColor: "#e5e7eb",
+      backgroundColor: "var(--ls-color-muted-border)",
     },
   },
   "&:hover": {
-    backgroundColor: "#f9fafb",
+    backgroundColor: "var(--ls-color-neutral-foreground)",
   },
 }));
 
@@ -112,8 +112,8 @@ const AvailabilityChip = styled(Box)(() => ({
   fontFamily: `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
   cursor: "pointer",
   transition: "all 0.15s ease-in-out",
-  backgroundColor: "#f3f4f6",
-  color: "#111827",
+  backgroundColor: "var(--ls-color-muted-soft)",
+  color: "var(--ls-color-neutral-soft-foreground)",
   "&.available": {
     backgroundColor: "#dcfce7",
     color: "#166534",
@@ -142,7 +142,7 @@ const StickyHeader = styled(Box)(() => ({
   position: 'sticky',
   top: 0,
   zIndex: 10,
-  backgroundColor: '#ffffff',
+  backgroundColor: 'var(--ls-color-bg-container)',
   borderBottom: '1px solid #e9eaeb',
   padding: '24px',
   display: 'flex',
@@ -157,11 +157,11 @@ const ScrollableContent = styled(Box)(() => ({
 }));
 
 const UploadZone = styled(Box)<{ isDragging: boolean }>(({ isDragging }) => ({
-  border: `2px dashed ${isDragging ? levelsetGreen : '#d1d5db'}`,
+  border: `2px dashed ${isDragging ? levelsetGreen : 'var(--ls-color-border)'}`,
   borderRadius: '12px',
   padding: '48px 24px',
   textAlign: 'center',
-  backgroundColor: isDragging ? '#f0f9f4' : '#f9fafb',
+  backgroundColor: isDragging ? '#f0f9f4' : 'var(--ls-color-neutral-foreground)',
   cursor: 'pointer',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
@@ -443,7 +443,7 @@ export function SyncHireDateModal({
         orientation="vertical"
         sx={{
           '& .MuiStepIcon-root': {
-            color: '#d1d5db',
+            color: 'var(--ls-color-border)',
             fontSize: '28px',
             '&.Mui-active': {
               color: levelsetGreen,
@@ -484,10 +484,10 @@ export function SyncHireDateModal({
                 onClick={() => fileInputRef.current?.click()}
               >
                 <CloudUploadIcon sx={{ fontSize: 48, color: levelsetGreen, mb: 2 }} />
-                <Typography sx={{ fontFamily, fontSize: 16, fontWeight: 600, color: '#111827', mb: 1 }}>
+                <Typography sx={{ fontFamily, fontSize: 16, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', mb: 1 }}>
                   Drag & drop your Excel file here
                 </Typography>
-                <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', mb: 2 }}>
+                <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', mb: 2 }}>
                   or click to browse
                 </Typography>
                 <Button
@@ -597,7 +597,7 @@ export function SyncHireDateModal({
         headerAlign: "center",
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', width: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827' }}>
+            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
               {params.value}
             </Typography>
           </Box>
@@ -690,7 +690,7 @@ export function SyncHireDateModal({
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
               <RolePill
                 role={currentRole}
-                endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
+                endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "var(--ls-color-muted)" }} />}
                 onClick={(event) => handleRoleMenuOpen(event, params.row.payroll_name)}
               />
               <Menu
@@ -704,7 +704,7 @@ export function SyncHireDateModal({
                     fontFamily,
                     borderRadius: 2,
                     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                    border: "1px solid #e5e7eb",
+                    border: "1px solid var(--ls-color-muted-border)",
                   },
                 }}
               >
@@ -746,7 +746,7 @@ export function SyncHireDateModal({
                   setEditTrigger(prev => prev + 1);
                 }}
                 sx={{
-                  color: '#9ca3af',
+                  color: 'var(--ls-color-disabled-text)',
                   '&.Mui-checked': {
                     color: levelsetGreen,
                   },
@@ -780,7 +780,7 @@ export function SyncHireDateModal({
                   setEditTrigger(prev => prev + 1);
                 }}
                 sx={{
-                  color: '#9ca3af',
+                  color: 'var(--ls-color-disabled-text)',
                   '&.Mui-checked': {
                     color: levelsetGreen,
                   },
@@ -823,7 +823,7 @@ export function SyncHireDateModal({
                     fontFamily,
                     borderRadius: 2,
                     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                    border: "1px solid #e5e7eb",
+                    border: "1px solid var(--ls-color-muted-border)",
                   },
                 }}
               >
@@ -858,7 +858,7 @@ export function SyncHireDateModal({
         headerAlign: "center",
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280' }}>
+            <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)' }}>
               {params.value ? new Date(params.value).toLocaleDateString() : '—'}
             </Typography>
           </Box>
@@ -880,7 +880,7 @@ export function SyncHireDateModal({
         headerAlign: "center",
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', width: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827' }}>
+            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
               {params.value}
             </Typography>
           </Box>
@@ -894,7 +894,7 @@ export function SyncHireDateModal({
         headerAlign: "center",
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: '#111827' }}>
+            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)' }}>
               {params.row.first_name} {params.row.last_name}
             </Typography>
           </Box>
@@ -921,7 +921,7 @@ export function SyncHireDateModal({
         type: 'boolean',
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-            <Checkbox checked={params.value || false} disabled sx={{ color: '#9ca3af' }} />
+            <Checkbox checked={params.value || false} disabled sx={{ color: 'var(--ls-color-disabled-text)' }} />
           </Box>
         ),
       },
@@ -934,7 +934,7 @@ export function SyncHireDateModal({
         type: 'boolean',
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-            <Checkbox checked={params.value || false} disabled sx={{ color: '#9ca3af' }} />
+            <Checkbox checked={params.value || false} disabled sx={{ color: 'var(--ls-color-disabled-text)' }} />
           </Box>
         ),
       },
@@ -960,7 +960,7 @@ export function SyncHireDateModal({
         headerAlign: "center",
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280' }}>
+            <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)' }}>
               {params.value ? new Date(params.value).toLocaleDateString() : '—'}
             </Typography>
           </Box>
@@ -1032,10 +1032,10 @@ export function SyncHireDateModal({
     if (!hasChanges) {
       return (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827', mb: 2 }}>
+          <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', mb: 2 }}>
             Your roster is up to date
           </Typography>
-          <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280' }}>
+          <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)' }}>
             No changes were made.
           </Typography>
         </Box>
@@ -1080,7 +1080,7 @@ export function SyncHireDateModal({
               <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#000000' }}>
                 Unmatched Employees
               </Typography>
-              <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', ml: 1 }}>
+              <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', ml: 1 }}>
                 {unmatchedEmployees.length > 0 ? `${unmatchedEmployees.length} employees` : 'No employees'}
               </Typography>
             </AccordionSummary>
@@ -1088,8 +1088,8 @@ export function SyncHireDateModal({
               <Box sx={{ p: 2 }}>
                 <Box sx={{ 
                   borderRadius: '16px',
-                  border: "1px solid #e5e7eb",
-                  backgroundColor: "#ffffff",
+                  border: "1px solid var(--ls-color-muted-border)",
+                  backgroundColor: "var(--ls-color-bg-container)",
                   overflow: "hidden",
                   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
                 }}>
@@ -1099,17 +1099,17 @@ export function SyncHireDateModal({
                     alignItems: 'center', 
                     gap: 2, 
                     p: 2, 
-                    borderBottom: '2px solid #e5e7eb',
-                    backgroundColor: '#f9fafb',
+                    borderBottom: '2px solid var(--ls-color-muted-border)',
+                    backgroundColor: 'var(--ls-color-neutral-foreground)',
                   }}>
                     <Box sx={{ flex: 1 }}>
-                      <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827', textAlign: 'center' }}>
+                      <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', textAlign: 'center' }}>
                         HR/Payroll Name
                       </Typography>
                     </Box>
                     <Box sx={{ width: 24 }} /> {/* Spacer for arrow */}
                     <Box sx={{ flex: 1 }}>
-                      <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827', textAlign: 'center' }}>
+                      <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', textAlign: 'center' }}>
                         Employee
                       </Typography>
                     </Box>
@@ -1128,13 +1128,13 @@ export function SyncHireDateModal({
                         );
                       
                       return (
-                        <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, pb: 2, borderBottom: idx < unmatchedEmployees.length - 1 ? '1px solid #e5e7eb' : 'none' }}>
+                        <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, pb: 2, borderBottom: idx < unmatchedEmployees.length - 1 ? '1px solid var(--ls-color-muted-border)' : 'none' }}>
                           <Box sx={{ flex: 1 }}>
-                            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: '#111827' }}>
+                            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}>
                               {emp.payroll_name}
                             </Typography>
                           </Box>
-                          <ArrowForwardIcon sx={{ color: '#6b7280', fontSize: 20 }} />
+                          <ArrowForwardIcon sx={{ color: 'var(--ls-color-muted)', fontSize: 20 }} />
                           <FormControl size="small" sx={{ flex: 1, minWidth: 200 }} error={isDuplicate}>
                             <Select
                               value={currentSelection}
@@ -1245,7 +1245,7 @@ export function SyncHireDateModal({
               mb: 2,
             },
             '&.Mui-disabled': {
-              backgroundColor: '#f9fafb',
+              backgroundColor: 'var(--ls-color-neutral-foreground)',
             },
           }}
         >
@@ -1268,7 +1268,7 @@ export function SyncHireDateModal({
             <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: levelsetGreen }}>
               New Employees
             </Typography>
-            <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', ml: 1 }}>
+            <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', ml: 1 }}>
               {newEmployees.length > 0 ? `${newEmployees.length} employees` : 'No employees'}
             </Typography>
           </AccordionSummary>
@@ -1279,8 +1279,8 @@ export function SyncHireDateModal({
                   height: 400, 
                   width: '100%',
                   borderRadius: '16px',
-                  border: "1px solid #e5e7eb",
-                  backgroundColor: "#ffffff",
+                  border: "1px solid var(--ls-color-muted-border)",
+                  backgroundColor: "var(--ls-color-bg-container)",
                   overflow: "hidden",
                   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
                 }}>
@@ -1297,10 +1297,10 @@ export function SyncHireDateModal({
                       borderRadius: '16px',
                       overflow: 'hidden',
                       '& .MuiDataGrid-cell': {
-                        borderBottom: '1px solid #f3f4f6',
+                        borderBottom: '1px solid var(--ls-color-muted-soft)',
                         fontSize: 13,
                         fontWeight: 500,
-                        color: '#111827',
+                        color: 'var(--ls-color-neutral-soft-foreground)',
                         cursor: 'default',
                         '&:focus': {
                           outline: 'none',
@@ -1313,11 +1313,11 @@ export function SyncHireDateModal({
                         },
                       },
                       '& .MuiDataGrid-columnHeaders': {
-                        backgroundColor: '#f9fafb',
-                        borderBottom: '2px solid #e5e7eb',
+                        backgroundColor: 'var(--ls-color-neutral-foreground)',
+                        borderBottom: '2px solid var(--ls-color-muted-border)',
                         fontSize: 13,
                         fontWeight: 600,
-                        color: '#111827',
+                        color: 'var(--ls-color-neutral-soft-foreground)',
                       },
                     }}
                   />
@@ -1342,7 +1342,7 @@ export function SyncHireDateModal({
               mb: 2,
             },
             '&.Mui-disabled': {
-              backgroundColor: '#f9fafb',
+              backgroundColor: 'var(--ls-color-neutral-foreground)',
             },
           }}
         >
@@ -1365,7 +1365,7 @@ export function SyncHireDateModal({
             <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: warningColor }}>
               Modified Employees
             </Typography>
-            <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', ml: 1 }}>
+            <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', ml: 1 }}>
               {modifiedEmployees.length > 0 ? `${modifiedEmployees.length} employees` : 'No employees'}
             </Typography>
           </AccordionSummary>
@@ -1387,7 +1387,7 @@ export function SyncHireDateModal({
               mb: 2,
             },
             '&.Mui-disabled': {
-              backgroundColor: '#f9fafb',
+              backgroundColor: 'var(--ls-color-neutral-foreground)',
             },
           }}
         >
@@ -1410,7 +1410,7 @@ export function SyncHireDateModal({
             <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: destructiveColor }}>
               Terminated Employees
             </Typography>
-            <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', ml: 1 }}>
+            <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', ml: 1 }}>
               {terminatedCount > 0 ? `${terminatedCount} employees` : 'No employees'}
             </Typography>
           </AccordionSummary>
@@ -1421,8 +1421,8 @@ export function SyncHireDateModal({
                   height: 400, 
                   width: '100%',
                   borderRadius: '16px',
-                  border: "1px solid #e5e7eb",
-                  backgroundColor: "#ffffff",
+                  border: "1px solid var(--ls-color-muted-border)",
+                  backgroundColor: "var(--ls-color-bg-container)",
                   overflow: "hidden",
                   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
                 }}>
@@ -1442,10 +1442,10 @@ export function SyncHireDateModal({
                       borderRadius: '16px',
                       overflow: 'hidden',
                       '& .MuiDataGrid-cell': {
-                        borderBottom: '1px solid #f3f4f6',
+                        borderBottom: '1px solid var(--ls-color-muted-soft)',
                         fontSize: 13,
                         fontWeight: 500,
-                        color: '#111827',
+                        color: 'var(--ls-color-neutral-soft-foreground)',
                         cursor: 'default',
                         '&:focus': {
                           outline: 'none',
@@ -1458,11 +1458,11 @@ export function SyncHireDateModal({
                         },
                       },
                       '& .MuiDataGrid-columnHeaders': {
-                        backgroundColor: '#f9fafb',
-                        borderBottom: '2px solid #e5e7eb',
+                        backgroundColor: 'var(--ls-color-neutral-foreground)',
+                        borderBottom: '2px solid var(--ls-color-muted-border)',
                         fontSize: 13,
                         fontWeight: 600,
-                        color: '#111827',
+                        color: 'var(--ls-color-neutral-soft-foreground)',
                       },
                       '& .terminated-row': {
                         backgroundColor: '#fee2e2 !important',
@@ -1477,8 +1477,8 @@ export function SyncHireDateModal({
                   const emp = terminatedEmployeesData.find(e => e.id === empId);
                   if (!emp) return null;
                   return (
-                    <Box key={empId} sx={{ mt: 2, p: 2, backgroundColor: '#f9fafb', borderRadius: '8px' }}>
-                      <Typography sx={{ fontFamily, fontSize: 12, color: '#6b7280' }}>
+                    <Box key={empId} sx={{ mt: 2, p: 2, backgroundColor: 'var(--ls-color-neutral-foreground)', borderRadius: '8px' }}>
+                      <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)' }}>
                         {emp.first_name} {emp.last_name} will be kept on your Levelset roster. This has no impact on their status in HotSchedules or HR/Payroll.
                       </Typography>
                     </Box>
@@ -1509,7 +1509,7 @@ export function SyncHireDateModal({
                 backgroundColor: '#2d5a42',
               },
               '&:disabled': {
-                backgroundColor: '#9ca3af',
+                backgroundColor: 'var(--ls-color-disabled-text)',
               },
             }}
           >
@@ -1552,9 +1552,9 @@ export function SyncHireDateModal({
           <IconButton
             onClick={handleClose}
             sx={{
-              color: "#6b7280",
+              color: "var(--ls-color-muted)",
               "&:hover": {
-                backgroundColor: "#f3f4f6",
+                backgroundColor: "var(--ls-color-muted-soft)",
               },
             }}
           >
@@ -1567,7 +1567,7 @@ export function SyncHireDateModal({
           {currentPage === 'review' && processing && (
             <Box sx={{ textAlign: 'center', py: 8 }}>
               <CircularProgress sx={{ color: levelsetGreen, mb: 2 }} />
-              <Typography sx={{ fontFamily, fontSize: 16, color: '#6b7280' }}>
+              <Typography sx={{ fontFamily, fontSize: 16, color: 'var(--ls-color-muted)' }}>
                 Processing file...
               </Typography>
             </Box>
@@ -1575,7 +1575,7 @@ export function SyncHireDateModal({
           {currentPage === 'review' && !processing && notification && renderReviewPage()}
           {currentPage === 'confirmation' && confirmationStats && (
             <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Typography sx={{ fontFamily, fontSize: 24, fontWeight: 600, color: '#111827', mb: 4 }}>
+              <Typography sx={{ fontFamily, fontSize: 24, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', mb: 4 }}>
                 Sync Complete!
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
@@ -1632,10 +1632,10 @@ export function SyncHireDateModal({
           },
         }}
       >
-        <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#111827', mb: 2 }}>
+        <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', mb: 2 }}>
           Are you sure you want to exit your HR/Payroll sync?
         </Typography>
-        <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280', mb: 3 }}>
+        <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', mb: 3 }}>
           All roster changes will be lost if you exit the sync right now
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
@@ -1646,10 +1646,10 @@ export function SyncHireDateModal({
               fontSize: 14,
               fontWeight: 500,
               textTransform: 'none',
-              color: '#6b7280',
+              color: 'var(--ls-color-muted)',
               borderRadius: '8px',
               '&:hover': {
-                backgroundColor: '#f3f4f6',
+                backgroundColor: 'var(--ls-color-muted-soft)',
               },
             }}
           >

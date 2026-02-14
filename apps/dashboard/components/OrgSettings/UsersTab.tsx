@@ -47,10 +47,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
 }));
@@ -60,13 +60,13 @@ const StyledSelect = styled(Select)(() => ({
   fontSize: 13,
   minWidth: 160,
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#e5e7eb',
+    borderColor: 'var(--ls-color-muted-border)',
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
   '& .MuiSelect-select': {
     padding: '6px 32px 6px 12px',
@@ -592,7 +592,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -673,7 +673,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                               size="small"
                               onClick={() => handleSaveEmail(user.id)}
                               disabled={saving}
-                              sx={{ color: '#31664a' /* TODO: Use design token */ }}
+                              sx={{ color: 'var(--ls-color-brand)' }}
                             >
                               <CheckIcon fontSize="small" />
                             </IconButton>
@@ -769,7 +769,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                                   </MenuItem>
                                 ))}
                                 <Divider sx={{ my: 0.5 }} />
-                                <MenuItem value="__custom__" sx={{ fontFamily, fontSize: 13, color: '#31664a' /* TODO: Use design token */, fontWeight: 500 }}>
+                                <MenuItem value="__custom__" sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-brand)', fontWeight: 500 }}>
                                   + Custom Permissions
                                 </MenuItem>
                               </StyledSelect>
@@ -811,11 +811,11 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
               fontFamily,
               fontSize: 13,
               textTransform: 'none',
-              borderColor: '#31664a' /* TODO: Use design token */,
-              color: '#31664a' /* TODO: Use design token */,
+              borderColor: 'var(--ls-color-brand)',
+              color: 'var(--ls-color-brand)',
               marginTop: 2,
               '&:hover': {
-                borderColor: '#31664a' /* TODO: Use design token */,
+                borderColor: 'var(--ls-color-brand)',
                 backgroundColor: 'rgba(49, 102, 74, 0.08)',
               },
             }}
@@ -876,7 +876,7 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
                             size="small"
                             onClick={() => handleSaveEmail(user.id)}
                             disabled={saving}
-                            sx={{ color: '#31664a' /* TODO: Use design token */ }}
+                            sx={{ color: 'var(--ls-color-brand)' }}
                           >
                             <CheckIcon fontSize="small" />
                           </IconButton>
@@ -966,11 +966,11 @@ export function UsersTab({ orgId, currentUserRole, disabled = false }: UsersTabP
               fontFamily,
               fontSize: 13,
               textTransform: 'none',
-              borderColor: '#31664a' /* TODO: Use design token */,
-              color: '#31664a' /* TODO: Use design token */,
+              borderColor: 'var(--ls-color-brand)',
+              color: 'var(--ls-color-brand)',
               marginTop: 2,
               '&:hover': {
-                borderColor: '#31664a' /* TODO: Use design token */,
+                borderColor: 'var(--ls-color-brand)',
                 backgroundColor: 'rgba(49, 102, 74, 0.08)',
               },
             }}

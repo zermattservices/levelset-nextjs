@@ -10,8 +10,8 @@ export const DEFAULT_ROLE_COLORS = {
   purple: { bg: '#f3e8ff', text: '#7c3aed' },
   teal: { bg: '#ccfbf1', text: '#0d9488' },
   pink: { bg: '#fce7f3', text: '#db2777' },
-  grey: { bg: '#f3f4f6', text: '#4b5563' },
-  black: { bg: '#374151', text: '#ffffff' },
+  grey: { bg: 'var(--ls-color-muted-soft)', text: 'var(--ls-color-text-secondary)' },
+  black: { bg: 'var(--ls-color-neutral)', text: '#ffffff' },
   indigo: { bg: '#e0e7ff', text: '#4f46e5' },
 } as const;
 

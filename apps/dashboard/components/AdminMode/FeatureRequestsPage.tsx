@@ -396,7 +396,7 @@ export function FeatureRequestsPage() {
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
         <span>Loading feature requests...</span>
       </div>
     );
@@ -445,7 +445,7 @@ export function FeatureRequestsPage() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#9ca3af' }} />
+                <SearchIcon sx={{ color: 'var(--ls-color-disabled-text)' }} />
               </InputAdornment>
             ),
           }}
@@ -548,7 +548,7 @@ export function FeatureRequestsPage() {
                           <IconButton 
                             size="small" 
                             onClick={() => handleApproveClick(feature)}
-                            sx={{ color: '#31664a' /* TODO: Use design token */ }}
+                            sx={{ color: 'var(--ls-color-brand)' }}
                           >
                             <CheckCircleOutlineIcon fontSize="small" />
                           </IconButton>
@@ -558,7 +558,7 @@ export function FeatureRequestsPage() {
                         <IconButton 
                           size="small" 
                           onClick={() => handleEditClick(feature)}
-                          sx={{ color: '#6b7280' }}
+                          sx={{ color: 'var(--ls-color-muted)' }}
                         >
                           <EditOutlinedIcon fontSize="small" />
                         </IconButton>

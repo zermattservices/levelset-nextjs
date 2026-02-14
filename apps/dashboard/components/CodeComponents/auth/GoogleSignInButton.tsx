@@ -57,10 +57,10 @@ export function GoogleSignInButton({
         alignItems: 'center',
         justifyContent: 'center',
         padding: '12px 24px',
-        border: '1px solid #e5e7eb',
+        border: '1px solid var(--ls-color-muted-border)',
         borderRadius: '8px',
-        backgroundColor: '#ffffff',
-        color: '#374151',
+        backgroundColor: 'var(--ls-color-bg-container)',
+        color: 'var(--ls-color-neutral)',
         fontSize: '14px',
         fontWeight: '500',
         cursor: disabled || isLoading ? 'not-allowed' : 'pointer',
@@ -70,14 +70,14 @@ export function GoogleSignInButton({
       }}
       onMouseEnter={(e) => {
         if (!disabled && !isLoading) {
-          e.currentTarget.style.backgroundColor = '#f9fafb';
-          e.currentTarget.style.borderColor = '#d1d5db';
+          e.currentTarget.style.backgroundColor = 'var(--ls-color-neutral-foreground)';
+          e.currentTarget.style.borderColor = 'var(--ls-color-border)';
         }
       }}
       onMouseLeave={(e) => {
         if (!disabled && !isLoading) {
           e.currentTarget.style.backgroundColor = '#ffffff';
-          e.currentTarget.style.borderColor = '#e5e7eb';
+          e.currentTarget.style.borderColor = 'var(--ls-color-muted-border)';
         }
       }}
     >

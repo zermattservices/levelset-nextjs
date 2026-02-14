@@ -53,7 +53,7 @@ export function AreaManagerModal({
   const startEdit = (area: Position) => {
     setEditingId(area.id);
     setEditName(area.name);
-    setEditColor((area as any).color ?? '#6b7280');
+    setEditColor((area as any).color ?? 'var(--ls-color-muted)');
   };
 
   const handleUpdate = async () => {
@@ -124,7 +124,7 @@ export function AreaManagerModal({
                     ))}
                   </div>
                   <IconButton size="small" onClick={handleUpdate} disabled={saving}>
-                    <CheckIcon fontSize="small" sx={{ color: '#31664a' }} />
+                    <CheckIcon fontSize="small" sx={{ color: 'var(--ls-color-brand)' }} />
                   </IconButton>
                   <IconButton size="small" onClick={() => setEditingId(null)}>
                     <CloseIcon fontSize="small" />
@@ -132,7 +132,7 @@ export function AreaManagerModal({
                 </div>
               ) : (
                 <div className={sty.viewRow}>
-                  <span className={sty.colorDot} style={{ backgroundColor: (area as any).color ?? '#6b7280' }} />
+                  <span className={sty.colorDot} style={{ backgroundColor: (area as any).color ?? 'var(--ls-color-muted)' }} />
                   <span className={sty.areaName}>{area.name}</span>
                   <div className={sty.areaActions}>
                     <IconButton size="small" onClick={() => startEdit(area)}>

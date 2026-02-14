@@ -28,17 +28,17 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
   '& .MuiInputLabel-root': {
     fontFamily,
     fontSize: 14,
     '&.Mui-focused': {
-      color: '#31664a' /* TODO: Use design token */,
+      color: 'var(--ls-color-brand)',
     },
   },
 }));
@@ -47,13 +47,13 @@ const StyledSelect = styled(Select)(() => ({
   fontFamily,
   fontSize: 14,
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#e5e7eb',
+    borderColor: 'var(--ls-color-muted-border)',
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
 }));
 
@@ -193,7 +193,7 @@ export function AddPermissionLevelModal({
           fontFamily,
           fontSize: 18,
           fontWeight: 600,
-          borderBottom: '1px solid #e5e7eb',
+          borderBottom: '1px solid var(--ls-color-muted-border)',
           pb: 2,
         }}
       >
@@ -222,10 +222,10 @@ export function AddPermissionLevelModal({
               sx={{
                 fontFamily,
                 fontSize: 14,
-                backgroundColor: '#fff',
+                backgroundColor: 'var(--ls-color-bg-container)',
                 px: 0.5,
                 '&.Mui-focused': {
-                  color: '#31664a' /* TODO: Use design token */,
+                  color: 'var(--ls-color-brand)',
                 },
               }}
             >
@@ -252,7 +252,7 @@ export function AddPermissionLevelModal({
             style={{
               fontFamily,
               fontSize: 13,
-              color: '#6b7280',
+              color: 'var(--ls-color-muted)',
               margin: 0,
             }}
           >
@@ -262,7 +262,7 @@ export function AddPermissionLevelModal({
         </div>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e5e7eb' }}>
+      <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid var(--ls-color-muted-border)' }}>
         <Button
           onClick={onClose}
           disabled={saving}
@@ -270,7 +270,7 @@ export function AddPermissionLevelModal({
             fontFamily,
             fontSize: 14,
             textTransform: 'none',
-            color: '#6b7280',
+            color: 'var(--ls-color-muted)',
           }}
         >
           Cancel
@@ -283,7 +283,7 @@ export function AddPermissionLevelModal({
             fontFamily,
             fontSize: 14,
             textTransform: 'none',
-            backgroundColor: '#31664a' /* TODO: Use design token */,
+            backgroundColor: 'var(--ls-color-brand)',
             '&:hover': {
               backgroundColor: '#285540',
             },

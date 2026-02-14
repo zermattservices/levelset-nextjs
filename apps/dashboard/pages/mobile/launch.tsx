@@ -49,9 +49,9 @@ export default function MobileLaunchPage() {
         ) : (
           <Box
             sx={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--ls-color-bg-container)',
               borderRadius: '16px',
-              border: '1px solid #e5e7eb',
+              border: '1px solid var(--ls-color-muted-border)',
               padding: '32px 28px',
               maxWidth: 420,
               textAlign: 'center',
@@ -66,7 +66,7 @@ export default function MobileLaunchPage() {
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 fontSize: 22,
                 fontWeight: 700,
-                color: '#111827',
+                color: 'var(--ls-color-neutral-soft-foreground)',
               }}
             >
               Link Required
@@ -75,7 +75,7 @@ export default function MobileLaunchPage() {
               sx={{
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 fontSize: 15,
-                color: '#4b5563',
+                color: 'var(--ls-color-text-secondary)',
               }}
             >
               Open the Levelset mobile portal from the original location link to register your device for quick access.
@@ -85,9 +85,9 @@ export default function MobileLaunchPage() {
               onClick={() => router.push('/')}
               sx={{
                 textTransform: 'none',
-                backgroundColor: '#31664a' /* TODO: Use design token */,
+                backgroundColor: 'var(--ls-color-brand)',
                 borderRadius: '8px',
-                '&:hover': { backgroundColor: '#264d38' },
+                '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
                 fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               }}
             >

@@ -8,8 +8,8 @@ const fontFamily = `"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Se
 
 const StyledContainer = styled(TableContainer)(() => ({
   borderRadius: 16,
-  border: "1px solid #e5e7eb",
-  backgroundColor: "#ffffff",
+  border: "1px solid var(--ls-color-muted-border)",
+  backgroundColor: "var(--ls-color-bg-container)",
   overflow: "hidden",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
@@ -17,20 +17,20 @@ const StyledContainer = styled(TableContainer)(() => ({
 
 const StyledTable = styled(Table)(() => ({
   "& th": {
-    borderBottom: "1px solid #e5e7eb",
-    backgroundColor: "#f9fafb",
+    borderBottom: "1px solid var(--ls-color-muted-border)",
+    backgroundColor: "var(--ls-color-neutral-foreground)",
     fontWeight: 600,
     fontSize: 12,
     letterSpacing: "0.05em",
     textTransform: "uppercase",
-    color: "#111827",
+    color: "var(--ls-color-neutral-soft-foreground)",
     lineHeight: 1.2,
     fontFamily,
     padding: "12px",
   },
   "& td": {
-    borderBottom: "1px solid #e5e7eb",
-    color: "#111827",
+    borderBottom: "1px solid var(--ls-color-muted-border)",
+    color: "var(--ls-color-neutral-soft-foreground)",
     fontSize: 14,
     lineHeight: 1.2,
     fontFamily,

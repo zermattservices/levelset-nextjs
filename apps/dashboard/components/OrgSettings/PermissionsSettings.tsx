@@ -171,13 +171,13 @@ export function PermissionsSettings({ orgId, disabled = false, activeSubTab, onS
               fontSize: 14,
               fontWeight: 500,
               textTransform: 'none',
-              color: '#6b7280',
+              color: 'var(--ls-color-muted)',
               '&.Mui-selected': {
-                color: '#31664a' /* TODO: Use design token */,
+                color: 'var(--ls-color-brand)',
               },
             },
             '& .MuiTabs-indicator': {
-              backgroundColor: '#31664a' /* TODO: Use design token */,
+              backgroundColor: 'var(--ls-color-brand)',
             },
           }}
         >

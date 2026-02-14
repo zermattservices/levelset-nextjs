@@ -195,7 +195,7 @@ export function SchedulePage() {
 
             {data.isLoading ? (
               <div className={sty.loadingContainer}>
-                <CircularProgress size={32} sx={{ color: '#31664a' }} />
+                <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
               </div>
             ) : (
               <ScheduleGrid

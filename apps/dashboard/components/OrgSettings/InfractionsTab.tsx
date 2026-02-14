@@ -18,10 +18,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
 }));
@@ -283,7 +283,7 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -345,9 +345,9 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
                   disabled={disabled}
                   size="small"
                   sx={{
-                    color: '#9ca3af',
+                    color: 'var(--ls-color-disabled-text)',
                     '&.Mui-checked': {
-                      color: '#31664a' /* TODO: Use design token */,
+                      color: 'var(--ls-color-brand)',
                     },
                   }}
                 />
@@ -359,9 +359,9 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
                   disabled={disabled}
                   size="small"
                   sx={{
-                    color: '#9ca3af',
+                    color: 'var(--ls-color-disabled-text)',
                     '&.Mui-checked': {
-                      color: '#31664a' /* TODO: Use design token */,
+                      color: 'var(--ls-color-brand)',
                     },
                   }}
                 />
@@ -389,7 +389,7 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
               fontFamily,
               fontSize: 12,
               textTransform: 'none',
-              color: '#31664a' /* TODO: Use design token */,
+              color: 'var(--ls-color-brand)',
               alignSelf: 'flex-start',
               marginTop: 2,
               '&:hover': {
@@ -414,9 +414,9 @@ export function InfractionsTab({ orgId, disabled = false }: InfractionsTabProps)
                 sx={{
                   fontFamily,
                   textTransform: 'none',
-                  backgroundColor: '#31664a' /* TODO: Use design token */,
+                  backgroundColor: 'var(--ls-color-brand)',
                   '&:hover': {
-                    backgroundColor: '#264d38',
+                    backgroundColor: 'var(--ls-color-brand-hover)',
                   },
                   '&.Mui-disabled': {
                     backgroundColor: '#e0e0e0',

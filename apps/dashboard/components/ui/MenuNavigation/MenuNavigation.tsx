@@ -261,7 +261,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
                   <KeyboardArrowDownIcon 
                     sx={{ 
                       fontSize: 18, 
-                      color: activeMenu === type ? '#31664a' /* TODO: Use design token */ : '#6b7280',
+                      color: activeMenu === type ? 'var(--ls-color-brand)' : 'var(--ls-color-muted)',
                       transition: 'transform 0.2s ease, color 0.15s ease',
                       transform: activeMenu === type ? 'rotate(180deg)' : 'rotate(0deg)',
                     }} 
@@ -308,12 +308,12 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               <button 
                 className={classNames(sty.navButton, helpDropdownOpen && sty.navButtonActive)}
               >
-                <HelpOutlineIcon sx={{ fontSize: 18, color: helpDropdownOpen ? '#31664a' /* TODO: Use design token */ : '#6b7280' }} />
+                <HelpOutlineIcon sx={{ fontSize: 18, color: helpDropdownOpen ? 'var(--ls-color-brand)' : 'var(--ls-color-muted)' }} />
                 <span className={sty.navButtonText}>Need Help?</span>
                 <KeyboardArrowDownIcon 
                   sx={{ 
                     fontSize: 18, 
-                    color: helpDropdownOpen ? '#31664a' /* TODO: Use design token */ : '#6b7280',
+                    color: helpDropdownOpen ? 'var(--ls-color-brand)' : 'var(--ls-color-muted)',
                     transition: 'transform 0.2s ease, color 0.15s ease',
                     transform: helpDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                   }} 
@@ -381,7 +381,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
               ) : (
                 <AccountCircleIcon 
                   className={sty.accountIcon} 
-                  sx={{ fontSize: 32, color: '#31664a' /* TODO: Use design token */, cursor: 'pointer' }} 
+                  sx={{ fontSize: 32, color: 'var(--ls-color-brand)', cursor: 'pointer' }} 
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 />
               )}

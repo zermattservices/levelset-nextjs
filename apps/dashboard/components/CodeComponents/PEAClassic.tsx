@@ -79,8 +79,8 @@ const StyledContainer = styled(TableContainer)<{ componentwidth?: string | numbe
   width: componentwidth || '100%',
   maxWidth: componentmaxwidth || '100%',
   borderRadius: 16,
-  border: "1px solid #e5e7eb",
-  backgroundColor: "#ffffff",
+  border: "1px solid var(--ls-color-muted-border)",
+  backgroundColor: "var(--ls-color-bg-container)",
   overflowX: "auto",
   overflowY: "auto",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
@@ -103,13 +103,13 @@ const StyledTable = styled(Table)(() => ({
   fontFamily,
   tableLayout: 'auto',
   "& th": {
-    borderBottom: "1px solid #e5e7eb",
-    backgroundColor: "#f9fafb",
+    borderBottom: "1px solid var(--ls-color-muted-border)",
+    backgroundColor: "var(--ls-color-neutral-foreground)",
     fontWeight: 600,
     fontSize: 12,
     letterSpacing: "0.05em",
     textTransform: "none",
-    color: "#111827",
+    color: "var(--ls-color-neutral-soft-foreground)",
     lineHeight: 1.2,
     fontFamily,
     position: 'sticky',
@@ -117,14 +117,14 @@ const StyledTable = styled(Table)(() => ({
     zIndex: 10
   },
   "& td": {
-    borderBottom: "1px solid #e5e7eb",
-    color: "#111827",
+    borderBottom: "1px solid var(--ls-color-muted-border)",
+    color: "var(--ls-color-neutral-soft-foreground)",
     fontSize: 14,
     lineHeight: 1.2,
     fontFamily,
   },
   "& tbody tr:hover": {
-    backgroundColor: "#f9fafb",
+    backgroundColor: "var(--ls-color-neutral-foreground)",
   },
   // Mobile responsive styles
   '@media (max-width: 768px)': {
@@ -143,16 +143,16 @@ const StyledTable = styled(Table)(() => ({
       position: 'sticky',
       left: 0,
       zIndex: 5,
-      backgroundColor: '#f9fafb',
+      backgroundColor: 'var(--ls-color-neutral-foreground)',
       boxShadow: '2px 0 4px rgba(0,0,0,0.08)',
       minWidth: 100,
       maxWidth: 140,
     },
     "& td:nth-of-type(2)": {
-      backgroundColor: '#ffffff',
+      backgroundColor: 'var(--ls-color-bg-container)',
     },
     "& tbody tr:hover td:nth-of-type(2)": {
-      backgroundColor: '#f9fafb',
+      backgroundColor: 'var(--ls-color-neutral-foreground)',
     },
     // Top sticky header needs higher z-index
     "& th:nth-of-type(2)": {
@@ -173,14 +173,14 @@ const SecondStickyHeader = styled(TableRow)(() => ({
     position: 'sticky',
     top: 40, // below first header (adjust based on actual header height)
     zIndex: 9,
-    backgroundColor: '#f9fafb',
-    borderBottom: '1px solid #e5e7eb'
+    backgroundColor: 'var(--ls-color-neutral-foreground)',
+    borderBottom: '1px solid var(--ls-color-muted-border)'
   }
 }));
 
 const RatingCell = styled(TableCell)<{ $rating?: number | null; $greenThreshold?: number; $yellowThreshold?: number }>(({ $rating, $greenThreshold = 2.75, $yellowThreshold = 1.75 }) => {
   let bgColor = 'transparent';
-  let textColor = '#111827';
+  let textColor = 'var(--ls-color-neutral-soft-foreground)';
   let fontWeight = 400;
 
   if ($rating !== null && $rating !== undefined) {
@@ -210,7 +210,7 @@ const ExpandIcon = styled(IconButton)<{ $expanded: boolean }>(({ $expanded }) =>
   padding: 4,
   transition: 'transform 0.15s ease',
   transform: $expanded ? 'rotate(90deg)' : 'rotate(0deg)',
-  color: '#6b7280',
+  color: 'var(--ls-color-muted)',
   '& svg': {
     fontSize: 18
   },
@@ -223,10 +223,10 @@ const ExpandIcon = styled(IconButton)<{ $expanded: boolean }>(({ $expanded }) =>
 }));
 
 const StyledTabs = styled(Tabs)(() => ({
-  borderBottom: '1px solid #e5e7eb',
+  borderBottom: '1px solid var(--ls-color-muted-border)',
   marginBottom: 12,
   '& .MuiTabs-indicator': {
-    backgroundColor: '#31664a' /* TODO: Use design token */,
+    backgroundColor: 'var(--ls-color-brand)',
     height: 3
   },
   '@media (max-width: 768px)': {
@@ -243,9 +243,9 @@ const StyledTab = styled(Tab)(() => ({
   fontSize: 14,
   fontWeight: 500,
   textTransform: 'none',
-  color: '#6b7280',
+  color: 'var(--ls-color-muted)',
   '&.Mui-selected': {
-    color: '#31664a' /* TODO: Use design token */,
+    color: 'var(--ls-color-brand)',
     fontWeight: 600
   },
   '@media (max-width: 768px)': {
@@ -275,7 +275,7 @@ const ExpandedContentRow = styled(TableRow)(() => ({
   '& td': {
     paddingTop: 16,
     paddingBottom: 16,
-    borderBottom: '2px solid #e5e7eb'
+    borderBottom: '2px solid var(--ls-color-muted-border)'
   }
 }));
 
@@ -283,25 +283,25 @@ const ExpandedTableContainer = styled(Box)(() => ({
   overflowX: 'auto',
   width: '100%',
   borderRadius: 8,
-  border: '1px solid #e5e7eb',
+  border: '1px solid var(--ls-color-muted-border)',
 }));
 
 const ExpandedTable = styled(Table)(() => ({
   tableLayout: 'auto',
   minWidth: 500,
   '& th': {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: 'var(--ls-color-muted-soft)',
     padding: '4px 8px',
     fontSize: 10,
     fontWeight: 600,
-    borderBottom: '1px solid #d1d5db',
+    borderBottom: '1px solid var(--ls-color-border)',
     textTransform: 'none',
     whiteSpace: 'nowrap',
   },
   '& td': {
     padding: '4px 8px',
     fontSize: 11,
-    borderBottom: '1px solid #e5e7eb',
+    borderBottom: '1px solid var(--ls-color-muted-border)',
   },
   // First column (Leader/Employee name) - sticky with proper width
   '& thead th:first-of-type, & tbody td:first-of-type': {
@@ -315,7 +315,7 @@ const ExpandedTable = styled(Table)(() => ({
     wordBreak: 'break-word',
   },
   '& thead th:first-of-type': {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: 'var(--ls-color-muted-soft)',
   },
   '& tbody td:first-of-type': {
     backgroundColor: '#fafafa',
@@ -558,7 +558,7 @@ export function PEAClassic({
   if (isInitialLoad) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-        <CircularProgress sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress sx={{ color: 'var(--ls-color-brand)' }} />
       </Box>
     );
   }
@@ -633,7 +633,7 @@ export function PEAClassic({
                 fontFamily,
                 fontSize: compactControls ? 12 : 14,
                 fontWeight: 600,
-                backgroundColor: '#31664a' /* TODO: Use design token */,
+                backgroundColor: 'var(--ls-color-brand)',
                 color: '#ffffff',
                 borderRadius: '6px',
                 textTransform: 'none',
@@ -655,7 +655,7 @@ export function PEAClassic({
       <Box sx={{ position: 'relative', minHeight: 400, flex: fillHeight ? 1 : 'none', overflow: 'hidden' }}>
         {loading && (
           <LoadingOverlay>
-            <CircularProgress sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+            <CircularProgress sx={{ color: 'var(--ls-color-brand)' }} />
           </LoadingOverlay>
         )}
         
@@ -784,7 +784,7 @@ function OverviewTable({ data, area, positions, expandedRows, toggleRow, cellPad
                   >
                     {employee.employee_name}
                   </TableCell>
-                  <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: '#6b7280' }}>
+                  <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: 'var(--ls-color-muted)' }}>
                     {employee.last_rating_date ? formatRatingDate(employee.last_rating_date) : '—'}
                   </TableCell>
                   {positions.map(pos => {
@@ -927,7 +927,7 @@ function PositionTable({ data, position, big5Labels, expandedRows, toggleRow, ce
                   >
                     {employee.employee_name}
                   </TableCell>
-                  <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: '#6b7280' }}>
+                  <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: 'var(--ls-color-muted)' }}>
                     {employee.last_rating_date ? formatRatingDate(employee.last_rating_date) : '—'}
                   </TableCell>
                   
@@ -1070,7 +1070,7 @@ function LeadershipTable({ data, area, positions, expandedRows, toggleRow, cellP
                   >
                     {leader.leader_name}
                   </TableCell>
-                  <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: '#6b7280' }}>
+                  <TableCell align="center" sx={{ py: cellPadding, fontSize: 12, color: 'var(--ls-color-muted)' }}>
                     {leader.last_rating_date ? formatRatingDate(leader.last_rating_date) : '—'}
                   </TableCell>
                   {positions.map(pos => {

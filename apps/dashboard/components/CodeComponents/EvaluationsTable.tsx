@@ -11,7 +11,7 @@ import { RolePill } from './shared/RolePill';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 
 const STATUS_ORDER: Record<string, number> = {
   Planned: 0,
@@ -46,8 +46,8 @@ const MONTH_ORDER = [
 
 const StyledContainer = styled(Box)(() => ({
   borderRadius: 16,
-  border: "1px solid #e5e7eb",
-  backgroundColor: "#ffffff",
+  border: "1px solid var(--ls-color-muted-border)",
+  backgroundColor: "var(--ls-color-bg-container)",
   overflow: "hidden",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
@@ -114,24 +114,24 @@ const EvaluationDateTextField = React.forwardRef(function EvaluationDateTextFiel
           fontSize: 12,
         },
         '& .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#e5e7eb',
+          borderColor: 'var(--ls-color-muted-border)',
         },
         '&:hover .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#d1d5db',
+          borderColor: 'var(--ls-color-border)',
         },
         '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
           borderColor: levelsetGreen,
           borderWidth: '2px',
         },
         '& .MuiInputBase-input.Mui-disabled': {
-          color: '#9ca3af',
-          WebkitTextFillColor: '#9ca3af',
-          backgroundColor: '#f9fafb',
+          color: 'var(--ls-color-disabled-text)',
+          WebkitTextFillColor: 'var(--ls-color-disabled-text)',
+          backgroundColor: 'var(--ls-color-neutral-foreground)',
         },
         '& .MuiOutlinedInput-root.Mui-disabled': {
-          backgroundColor: '#f9fafb',
+          backgroundColor: 'var(--ls-color-neutral-foreground)',
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#e5e7eb',
+            borderColor: 'var(--ls-color-muted-border)',
           },
         },
         ...props.sx,
@@ -154,8 +154,8 @@ const InlineSelectChip = styled(Box)(() => ({
   fontFamily,
   cursor: 'pointer',
   transition: 'all 0.15s ease-in-out',
-  backgroundColor: '#f3f4f6',
-  color: '#111827',
+  backgroundColor: 'var(--ls-color-muted-soft)',
+  color: 'var(--ls-color-neutral-soft-foreground)',
   width: '100%',
   boxSizing: 'border-box',
   '&:hover': {
@@ -175,13 +175,13 @@ const DropdownMenuItem = styled(MenuItem)(() => ({
   margin: '2px 8px',
   borderRadius: 8,
   '&.Mui-selected': {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: 'var(--ls-color-muted-soft)',
     '&:hover': {
-      backgroundColor: '#e5e7eb',
+      backgroundColor: 'var(--ls-color-muted-border)',
     },
   },
   '&:hover': {
-    backgroundColor: '#f9fafb',
+    backgroundColor: 'var(--ls-color-neutral-foreground)',
   },
 }));
 
@@ -384,7 +384,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
         renderCell: (params) => (
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <Typography
-              sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: '#111827' }}
+              sx={{ fontFamily, fontSize: 13, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)' }}
             >
               {params.value ?? 'Unknown'}
             </Typography>
@@ -430,8 +430,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
                 <Box sx={{ width: '100%', px: 0.5 }}>
                   <InlineSelectChip
                     sx={{
-                      backgroundColor: '#f3f4f6',
-                      color: leaderId ? '#374151' : '#6b7280',
+                      backgroundColor: 'var(--ls-color-muted-soft)',
+                      color: leaderId ? 'var(--ls-color-neutral)' : 'var(--ls-color-muted)',
                       cursor: 'default',
                       justifyContent: 'center',
                       '&:hover': { transform: 'none', opacity: 1 },
@@ -465,8 +465,8 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
                     }
                   }}
                   sx={{
-                    backgroundColor: '#f3f4f6',
-                    color: leaderId ? '#374151' : '#6b7280',
+                    backgroundColor: 'var(--ls-color-muted-soft)',
+                    color: leaderId ? 'var(--ls-color-neutral)' : 'var(--ls-color-muted)',
                     opacity: disabled ? 0.6 : 1,
                     justifyContent: 'space-between',
                   }}
@@ -485,7 +485,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
                   >
                     {leaderName || 'Unassigned'}
                   </Typography>
-                  <ExpandMoreIcon sx={{ fontSize: 16, color: '#6b7280' }} />
+                  <ExpandMoreIcon sx={{ fontSize: 16, color: 'var(--ls-color-muted)' }} />
                 </InlineSelectChip>
               </Box>
               <Menu
@@ -499,7 +499,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
                     fontFamily,
                     borderRadius: 2,
                     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid #e5e7eb',
+                    border: '1px solid var(--ls-color-muted-border)',
                     minWidth: 220,
                     maxHeight: 320,
                   },
@@ -507,7 +507,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
               >
                 <DropdownMenuItem selected={!leaderId} onClick={() => handleLeaderSelect(row, null)}>
                   <InlineSelectChip
-                    sx={{ backgroundColor: '#f3f4f6', color: '#6b7280', cursor: 'default', justifyContent: 'center', '&:hover': { opacity: 1, transform: 'none' } }}
+                    sx={{ backgroundColor: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-muted)', cursor: 'default', justifyContent: 'center', '&:hover': { opacity: 1, transform: 'none' } }}
                   >
                     <Typography component="span" sx={{ fontSize: 13 }}>
                       Unassigned
@@ -521,7 +521,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
                     onClick={() => handleLeaderSelect(row, leader.id)}
                   >
                     <InlineSelectChip
-                      sx={{ backgroundColor: '#f3f4f6', color: '#374151', cursor: 'default', justifyContent: 'center', '&:hover': { opacity: 1, transform: 'none' } }}
+                      sx={{ backgroundColor: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-neutral)', cursor: 'default', justifyContent: 'center', '&:hover': { opacity: 1, transform: 'none' } }}
                     >
                       <Typography component="span" sx={{ fontSize: 13 }}>
                         {leader.name}
@@ -577,7 +577,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
               width: '100%',
             }}
           >
-            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: '#111827' }}>
+            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)' }}>
               {params.value}
             </Typography>
           </Box>
@@ -605,7 +605,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
                   paddingX: 1,
                 }}
               >
-                <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: '#111827' }}>
+                <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)' }}>
                   {dateValue ? format(dateValue, 'M/d/yyyy') : '—'}
                 </Typography>
               </Box>
@@ -764,7 +764,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
                     fontFamily,
                     borderRadius: 2,
                     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid #e5e7eb',
+                    border: '1px solid var(--ls-color-muted-border)',
                     minWidth: 180,
                   },
                 }}
@@ -831,7 +831,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
           <Typography
             component="button"
             onClick={fetchData}
-            sx={{ fontFamily, color: '#31664a' /* TODO: Use design token */, cursor: 'pointer', background: 'none', border: 'none' }}
+            sx={{ fontFamily, color: 'var(--ls-color-brand)', cursor: 'pointer', background: 'none', border: 'none' }}
           >
             Retry
           </Typography>
@@ -868,13 +868,13 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
           border: "none",
           fontFamily,
           [`& .${gridClasses.columnHeaders}`]: {
-            borderBottom: "1px solid #e5e7eb",
+            borderBottom: "1px solid var(--ls-color-muted-border)",
           },
           [`& .${gridClasses.columnHeader}`]: {
-            backgroundColor: "#f9fafb",
+            backgroundColor: "var(--ls-color-neutral-foreground)",
             fontWeight: 600,
             fontSize: 14,
-            color: "#111827",
+            color: "var(--ls-color-neutral-soft-foreground)",
             '&:focus, &:focus-within': {
               outline: 'none',
             },
@@ -886,10 +886,10 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
             display: 'none',
           },
           [`& .${gridClasses.cell}`]: {
-            borderBottom: '1px solid #f3f4f6',
+            borderBottom: '1px solid var(--ls-color-muted-soft)',
             fontSize: 13,
             fontWeight: 500,
-            color: '#111827',
+            color: 'var(--ls-color-neutral-soft-foreground)',
             '&:focus, &:focus-within': {
               outline: 'none',
             },
@@ -898,7 +898,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
             padding: '0 16px',
           },
           [`& .${gridClasses.row}:hover`]: {
-            backgroundColor: '#f9fafb',
+            backgroundColor: 'var(--ls-color-neutral-foreground)',
           },
           '& .MuiDataGrid-overlay': {
             fontFamily,

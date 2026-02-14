@@ -10,7 +10,7 @@ import type { InfractionDocument } from "@/lib/supabase.types";
 
 const fontFamily =
   '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = "#31664a"; // TODO: Use design token
+const levelsetGreen = "var(--ls-color-brand)";
 
 const ALLOWED_TYPES = [
   "image/jpeg",
@@ -171,14 +171,14 @@ export function InfractionFileUpload({
         }}
       >
         <AttachFileIcon
-          sx={{ fontSize: 16, color: "#6b7280", transform: "rotate(45deg)" }}
+          sx={{ fontSize: 16, color: "var(--ls-color-muted)", transform: "rotate(45deg)" }}
         />
         <Typography
           sx={{
             fontFamily,
             fontSize: 13,
             fontWeight: 600,
-            color: "#374151",
+            color: "var(--ls-color-neutral)",
           }}
         >
           Attachments
@@ -188,7 +188,7 @@ export function InfractionFileUpload({
             fontFamily,
             fontSize: 12,
             fontWeight: 500,
-            color: "#9ca3af",
+            color: "var(--ls-color-disabled-text)",
           }}
         >
           ({totalCount}/{maxFiles})
@@ -216,7 +216,7 @@ export function InfractionFileUpload({
                 paddingBottom: "100%",
                 borderRadius: "8px",
                 overflow: "hidden",
-                border: "1px solid #e5e7eb",
+                border: "1px solid var(--ls-color-muted-border)",
                 cursor: "pointer",
                 "&:hover": {
                   borderColor: levelsetGreen,
@@ -232,7 +232,7 @@ export function InfractionFileUpload({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "#f9fafb",
+                  backgroundColor: "var(--ls-color-neutral-foreground)",
                 }}
               >
                 {isImageType(doc.file_type) && doc.url ? (
@@ -262,7 +262,7 @@ export function InfractionFileUpload({
                       sx={{
                         fontFamily,
                         fontSize: 9,
-                        color: "#6b7280",
+                        color: "var(--ls-color-muted)",
                         textAlign: "center",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -315,7 +315,7 @@ export function InfractionFileUpload({
                 paddingBottom: "100%",
                 borderRadius: "8px",
                 overflow: "hidden",
-                border: "1px solid #e5e7eb",
+                border: "1px solid var(--ls-color-muted-border)",
                 cursor: "pointer",
                 "&:hover": {
                   borderColor: levelsetGreen,
@@ -331,7 +331,7 @@ export function InfractionFileUpload({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "#f9fafb",
+                  backgroundColor: "var(--ls-color-neutral-foreground)",
                 }}
               >
                 {isImageType(file.type) ? (
@@ -361,7 +361,7 @@ export function InfractionFileUpload({
                       sx={{
                         fontFamily,
                         fontSize: 9,
-                        color: "#6b7280",
+                        color: "var(--ls-color-muted)",
                         textAlign: "center",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -431,7 +431,7 @@ export function InfractionFileUpload({
           sx={{
             border: dragOver
               ? `2px dashed ${levelsetGreen}`
-              : "2px dashed #e5e7eb",
+              : "2px dashed var(--ls-color-muted-border)",
             borderRadius: "8px",
             padding: "12px",
             display: "flex",
@@ -450,7 +450,7 @@ export function InfractionFileUpload({
           <AddPhotoAlternateIcon
             sx={{
               fontSize: 18,
-              color: dragOver ? levelsetGreen : "#9ca3af",
+              color: dragOver ? levelsetGreen : "var(--ls-color-disabled-text)",
             }}
           />
           <Typography
@@ -458,7 +458,7 @@ export function InfractionFileUpload({
               fontFamily,
               fontSize: 13,
               fontWeight: 500,
-              color: dragOver ? levelsetGreen : "#9ca3af",
+              color: dragOver ? levelsetGreen : "var(--ls-color-disabled-text)",
             }}
           >
             {totalCount === 0

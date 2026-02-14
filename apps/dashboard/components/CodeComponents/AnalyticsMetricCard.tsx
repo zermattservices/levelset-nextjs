@@ -21,7 +21,7 @@ export function AnalyticsMetricCard({
   return (
     <Box
       sx={{
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--ls-color-bg-container)',
         borderRadius: 2,
         boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.06)',
         padding: 2,
@@ -39,7 +39,7 @@ export function AnalyticsMetricCard({
             fontFamily,
             fontSize: 14,
             fontWeight: 600,
-            color: '#111827',
+            color: 'var(--ls-color-neutral-soft-foreground)',
           }}
         >
           {metricName}
@@ -55,7 +55,7 @@ export function AnalyticsMetricCard({
             fontFamily,
             fontSize: 28,
             fontWeight: 700,
-            color: '#111827',
+            color: 'var(--ls-color-neutral-soft-foreground)',
             lineHeight: 1,
           }}
         >
@@ -67,7 +67,7 @@ export function AnalyticsMetricCard({
           sx={{
             fontFamily,
             fontSize: 12,
-            color: '#6b7280',
+            color: 'var(--ls-color-muted)',
             textAlign: 'right',
             lineHeight: 1.4,
           }}

@@ -153,7 +153,7 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
         "& .MuiDrawer-paper": {
           width: drawerWidth,
           height: drawerHeight,
-          backgroundColor: "#ffffff",
+          backgroundColor: "var(--ls-color-bg-container)",
           ...contentWrapperStyle,
         },
       }}
@@ -178,7 +178,7 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
           display: "flex",
           flexDirection: "column",
           height: "100%",
-          backgroundColor: "#ffffff",
+          backgroundColor: "var(--ls-color-bg-container)",
           ...style,
         }}
       >
@@ -192,7 +192,7 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
               justifyContent: "space-between",
               padding: "16px 24px",
               borderBottom: "1px solid #e9eaeb",
-              backgroundColor: "#ffffff",
+              backgroundColor: "var(--ls-color-bg-container)",
               flexShrink: 0,
               ...headerStyle,
             }}
@@ -230,7 +230,7 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
             sx={{
               flex: 1,
               overflow: "auto",
-              backgroundColor: "#ffffff",
+              backgroundColor: "var(--ls-color-bg-container)",
               // Remove default padding - let children control their own padding
               ...bodyStyle,
             }}
@@ -246,7 +246,7 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
             sx={{
               padding: "10px 16px",
               borderTop: "1px solid #e9eaeb",
-              backgroundColor: "#ffffff",
+              backgroundColor: "var(--ls-color-bg-container)",
               flexShrink: 0,
               ...footerStyle,
             }}

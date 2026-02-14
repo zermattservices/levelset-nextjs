@@ -133,7 +133,7 @@ export function DocumentPreviewModal({
                 fontFamily,
                 fontSize: 12,
                 fontWeight: 500,
-                color: "#9ca3af",
+                color: "var(--ls-color-disabled-text)",
                 flexShrink: 0,
               }}
             >
@@ -150,7 +150,7 @@ export function DocumentPreviewModal({
             target="_blank"
             rel="noopener noreferrer"
             size="small"
-            sx={{ color: "#9ca3af", "&:hover": { color: "#fff" } }}
+            sx={{ color: "var(--ls-color-disabled-text)", "&:hover": { color: "#fff" } }}
           >
             <DownloadIcon sx={{ fontSize: 18 }} />
           </IconButton>
@@ -158,7 +158,7 @@ export function DocumentPreviewModal({
           <IconButton
             onClick={onClose}
             size="small"
-            sx={{ color: "#9ca3af", "&:hover": { color: "#fff" } }}
+            sx={{ color: "var(--ls-color-disabled-text)", "&:hover": { color: "#fff" } }}
           >
             <CloseIcon sx={{ fontSize: 18 }} />
           </IconButton>
@@ -242,7 +242,7 @@ export function DocumentPreviewModal({
                 sx={{
                   fontFamily,
                   fontSize: 13,
-                  color: "#9ca3af",
+                  color: "var(--ls-color-disabled-text)",
                   textTransform: "none",
                   "&:hover": { color: "#fff" },
                 }}
@@ -262,7 +262,7 @@ export function DocumentPreviewModal({
             }}
           >
             <Typography
-              sx={{ fontFamily, fontSize: 14, color: "#9ca3af" }}
+              sx={{ fontFamily, fontSize: 14, color: "var(--ls-color-disabled-text)" }}
             >
               Preview not available for this file type
             </Typography>

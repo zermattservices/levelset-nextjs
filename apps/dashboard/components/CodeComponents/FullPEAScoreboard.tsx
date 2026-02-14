@@ -58,10 +58,10 @@ export function FullPEAScoreboard({
 
   /* ===== Light theme (always) ===== */
   :root{
-    --bg:#ffffff; --text:#101317; --muted:#6b7280; --border:#e5e7eb; --head:#f9fafb; --hover:#fafafa;
+    --bg:#ffffff; --text:#101317; --muted:var(--ls-color-muted); --border:var(--ls-color-muted-border); --head:var(--ls-color-neutral-foreground); --hover:#fafafa;
     --green:#249e6b; --yellow:#ffb549; --red:#ad2624;
-    --pill-bg:#f3f4f6; --pill-on:#111827; --pill-off:#6b7280; --pill-border:#e5e7eb;
-    --divider:#9ca3af;
+    --pill-bg:var(--ls-color-muted-soft); --pill-on:var(--ls-color-neutral-soft-foreground); --pill-off:var(--ls-color-muted); --pill-border:var(--ls-color-muted-border);
+    --divider:var(--ls-color-disabled-text);
     --row-h: 34px;
     --dashboard-width: ${typeof dashboardWidth === 'number' ? `${dashboardWidth}px` : dashboardWidth};
   }
@@ -704,7 +704,7 @@ export function FullPEAScoreboard({
         width: '100%',
         maxWidth: maxWidthValue,
         height: heightValue,
-        border: '1px solid #e5e7eb',
+        border: '1px solid var(--ls-color-muted-border)',
         borderRadius: '8px',
         overflow: 'hidden',
         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'

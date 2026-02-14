@@ -62,11 +62,11 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
         padding: "12px 16px",
         borderRadius: "12px",
         border: "1px solid #e9eaeb",
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--ls-color-bg-container)",
         minWidth: 0,
         cursor: onClick ? "pointer" : "default",
         "&:hover": onClick ? {
-          backgroundColor: "#f9fafb",
+          backgroundColor: "var(--ls-color-neutral-foreground)",
         } : undefined,
       }}
     >
@@ -217,11 +217,11 @@ function DisciplinaryActionListItem({ action, onClick }: DisciplinaryActionListI
         padding: "12px 16px",
         borderRadius: "12px",
         border: "1px solid #e9eaeb",
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--ls-color-bg-container)",
         minWidth: 0,
         cursor: onClick ? "pointer" : "default",
         "&:hover": onClick ? {
-          backgroundColor: "#f9fafb",
+          backgroundColor: "var(--ls-color-neutral-foreground)",
         } : undefined,
       }}
     >
@@ -503,7 +503,7 @@ export function EmployeeModal({
   const renderDisciplineTab = () => {
     if (loading) {
       return (
-        <Box sx={{ p: 3, backgroundColor: "#ffffff" }}>
+        <Box sx={{ p: 3, backgroundColor: "var(--ls-color-bg-container)" }}>
           <Skeleton variant="text" width="60%" height={24} sx={{ mb: 2 }} />
           <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
             <Skeleton variant="rounded" width="50%" height={100} />
@@ -524,7 +524,7 @@ export function EmployeeModal({
     }
 
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 3, backgroundColor: "#ffffff" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 3, backgroundColor: "var(--ls-color-bg-container)" }}>
         {/* Current Period Summary */}
         <Box>
           <Typography
@@ -543,7 +543,7 @@ export function EmployeeModal({
             <Box
               sx={{
                 flex: 1,
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--ls-color-bg-container)",
                 boxShadow: "inset 0px 0px 0px 1px rgba(233, 234, 235, 1)",
                 filter: "drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05))",
                 borderRadius: "12px",
@@ -586,7 +586,7 @@ export function EmployeeModal({
             <Box
               sx={{
                 flex: 1,
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--ls-color-bg-container)",
                 boxShadow: "inset 0px 0px 0px 1px rgba(233, 234, 235, 1)",
                 filter: "drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05))",
                 borderRadius: "12px",
@@ -650,7 +650,7 @@ export function EmployeeModal({
                   fontSize: "13px",
                   fontWeight: 500,
                   textTransform: "none",
-                  color: "#31664a" /* TODO: Use design token */,
+                  color: "var(--ls-color-brand)",
                   padding: "4px 12px",
                   minWidth: "auto",
                   borderRadius: '8px',
@@ -670,7 +670,7 @@ export function EmployeeModal({
                   padding: "12px 16px",
                   borderRadius: "12px",
                   border: "1px solid #e9eaeb",
-                  backgroundColor: "#ffffff",
+                  backgroundColor: "var(--ls-color-bg-container)",
                   alignItems: "center",
                   justifyContent: "center",
                   minHeight: "60px",
@@ -724,7 +724,7 @@ export function EmployeeModal({
                   fontSize: "13px",
                   fontWeight: 500,
                   textTransform: "none",
-                  color: "#31664a" /* TODO: Use design token */,
+                  color: "var(--ls-color-brand)",
                   padding: "4px 12px",
                   minWidth: "auto",
                   borderRadius: '8px',
@@ -741,14 +741,14 @@ export function EmployeeModal({
                   size="small"
                   onClick={onRecordAction}
                   sx={{
-                    backgroundColor: "#31664a" /* TODO: Use design token */,
+                    backgroundColor: "var(--ls-color-brand)",
                     textTransform: "none",
                     borderRadius: "8px",
                     fontSize: "13px",
                     fontWeight: 500,
                     fontFamily: "Satoshi",
                     "&:hover": {
-                      backgroundColor: "#264d38",
+                      backgroundColor: "var(--ls-color-brand-hover)",
                     },
                   }}
                 >
@@ -817,13 +817,13 @@ export function EmployeeModal({
                         fontFamily: "Satoshi",
                         fontSize: 13,
                         textTransform: "none",
-                        color: "#6b7280",
-                        borderColor: "#d1d5db",
+                        color: "var(--ls-color-muted)",
+                        borderColor: "var(--ls-color-border)",
                         padding: "6px 16px",
                         borderRadius: '8px',
                         "&:hover": {
-                          backgroundColor: "#f3f4f6",
-                          borderColor: "#9ca3af",
+                          backgroundColor: "var(--ls-color-muted-soft)",
+                          borderColor: "var(--ls-color-disabled-text)",
                         },
                       }}
                     >
@@ -839,7 +839,7 @@ export function EmployeeModal({
                         fontFamily: "Satoshi",
                         fontSize: 13,
                         textTransform: "none",
-                        backgroundColor: "#31664a" /* TODO: Use design token */,
+                        backgroundColor: "var(--ls-color-brand)",
                         padding: "6px 16px",
                         borderRadius: '8px',
                         "&:hover": {
@@ -862,7 +862,7 @@ export function EmployeeModal({
                     padding: "12px 16px",
                     borderRadius: "12px",
                     border: "1px solid #e9eaeb",
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "var(--ls-color-bg-container)",
                     alignItems: "center",
                     justifyContent: "center",
                     minHeight: "60px",
@@ -933,7 +933,7 @@ export function EmployeeModal({
               alignItems: "center",
               gap: 2,
               borderBottom: "1px solid #e9eaeb",
-              backgroundColor: "#ffffff",
+              backgroundColor: "var(--ls-color-bg-container)",
             }}
           >
             <Typography
@@ -950,7 +950,7 @@ export function EmployeeModal({
               sx={{
                 display: "flex",
                 gap: 0.5,
-                backgroundColor: "#f3f4f6",
+                backgroundColor: "var(--ls-color-muted-soft)",
                 borderRadius: "20px",
                 padding: "2px",
                 transition: "all 0.3s ease-in-out",
@@ -966,8 +966,8 @@ export function EmployeeModal({
                   borderRadius: "18px",
                   padding: "6px 16px",
                   minWidth: "auto",
-                  backgroundColor: peViewMode === 'employee' ? "#31664a" /* TODO: Use design token */ : "transparent",
-                  color: peViewMode === 'employee' ? "#ffffff" : "#6b7280",
+                  backgroundColor: peViewMode === 'employee' ? "var(--ls-color-brand)" : "transparent",
+                  color: peViewMode === 'employee' ? "#ffffff" : "var(--ls-color-muted)",
                   "&:hover": {
                     backgroundColor: peViewMode === 'employee' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
                   },
@@ -986,8 +986,8 @@ export function EmployeeModal({
                   borderRadius: "18px",
                   padding: "6px 16px",
                   minWidth: "auto",
-                  backgroundColor: peViewMode === 'rater' ? "#31664a" /* TODO: Use design token */ : "transparent",
-                  color: peViewMode === 'rater' ? "#ffffff" : "#6b7280",
+                  backgroundColor: peViewMode === 'rater' ? "var(--ls-color-brand)" : "transparent",
+                  color: peViewMode === 'rater' ? "#ffffff" : "var(--ls-color-muted)",
                   "&:hover": {
                     backgroundColor: peViewMode === 'rater' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
                   },
@@ -1045,7 +1045,7 @@ export function EmployeeModal({
           alignItems: "flex-start",
           padding: "24px",
           borderBottom: "1px solid #e9eaeb",
-          backgroundColor: "#ffffff",
+          backgroundColor: "var(--ls-color-bg-container)",
         }}
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
@@ -1078,9 +1078,9 @@ export function EmployeeModal({
         <IconButton
           onClick={onClose}
           sx={{
-            color: "#6b7280",
+            color: "var(--ls-color-muted)",
             "&:hover": {
-              backgroundColor: "#f3f4f6",
+              backgroundColor: "var(--ls-color-muted-soft)",
             },
           }}
         >
@@ -1089,27 +1089,27 @@ export function EmployeeModal({
       </DialogTitle>
 
       {/* Tabs */}
-      <Box sx={{ borderBottom: "1px solid #e9eaeb", backgroundColor: "#ffffff" }}>
+      <Box sx={{ borderBottom: "1px solid #e9eaeb", backgroundColor: "var(--ls-color-bg-container)" }}>
         <Tabs
           value={currentTab}
           onChange={(_, newValue) => setCurrentTab(newValue)}
           sx={{
             px: 1,
             minHeight: 48,
-            backgroundColor: "#ffffff",
+            backgroundColor: "var(--ls-color-bg-container)",
             "& .MuiTab-root": {
               textTransform: "none",
               fontSize: "14px",
               fontWeight: 500,
               fontFamily: "Satoshi",
               minHeight: 48,
-              color: "#6b7280",
+              color: "var(--ls-color-muted)",
               "&.Mui-selected": {
-                color: "#31664a" /* TODO: Use design token */,
+                color: "var(--ls-color-brand)",
               },
             },
             "& .MuiTabs-indicator": {
-              backgroundColor: "#31664a" /* TODO: Use design token */,
+              backgroundColor: "var(--ls-color-brand)",
               height: 2,
             },
           }}
@@ -1122,7 +1122,7 @@ export function EmployeeModal({
       </Box>
 
       {/* Tab Content */}
-      <Box sx={{ overflow: "auto", flex: 1, backgroundColor: "#ffffff" }}>
+      <Box sx={{ overflow: "auto", flex: 1, backgroundColor: "var(--ls-color-bg-container)" }}>
         {currentTab === "pathway" && renderPathwayTab()}
         {currentTab === "pe" && renderPETab()}
         {currentTab === "evaluations" && renderEvaluationsTab()}

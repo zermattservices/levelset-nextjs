@@ -31,7 +31,7 @@ export interface RecordActionModalProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 
 // Custom TextField matching PositionalRatings
 const CustomTextField = React.forwardRef((props: any, ref: any) => (
@@ -44,7 +44,7 @@ const CustomTextField = React.forwardRef((props: any, ref: any) => (
       '& .MuiInputLabel-root': {
         fontFamily,
         fontSize: 12,
-        color: '#6b7280',
+        color: 'var(--ls-color-muted)',
         '&.Mui-focused': {
           color: levelsetGreen,
         },
@@ -59,21 +59,21 @@ const CustomTextField = React.forwardRef((props: any, ref: any) => (
         padding: '10px 14px',
       },
       '& .MuiInputBase-input.Mui-disabled': {
-        color: '#9ca3af',
-        WebkitTextFillColor: '#9ca3af',
-        backgroundColor: '#f9fafb',
+        color: 'var(--ls-color-disabled-text)',
+        WebkitTextFillColor: 'var(--ls-color-disabled-text)',
+        backgroundColor: 'var(--ls-color-neutral-foreground)',
       },
       '& .MuiOutlinedInput-root.Mui-disabled': {
-        backgroundColor: '#f9fafb',
+        backgroundColor: 'var(--ls-color-neutral-foreground)',
         '& .MuiOutlinedInput-notchedOutline': {
-          borderColor: '#e5e7eb',
+          borderColor: 'var(--ls-color-muted-border)',
         },
       },
       '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#e5e7eb',
+        borderColor: 'var(--ls-color-muted-border)',
       },
       '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d1d5db',
+        borderColor: 'var(--ls-color-border)',
       },
       '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: levelsetGreen,
@@ -101,10 +101,10 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
         fontSize: 12,
       },
       '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#e5e7eb',
+        borderColor: 'var(--ls-color-muted-border)',
       },
       '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d1d5db',
+        borderColor: 'var(--ls-color-border)',
       },
       '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: levelsetGreen,
@@ -420,7 +420,7 @@ export function RecordActionModal({
             alignItems: "center",
             padding: "24px",
             borderBottom: "1px solid #e9eaeb",
-            backgroundColor: "#ffffff",
+            backgroundColor: "var(--ls-color-bg-container)",
           }}
         >
           <Box>
@@ -450,9 +450,9 @@ export function RecordActionModal({
           <IconButton
             onClick={onClose}
             sx={{
-              color: "#6b7280",
+              color: "var(--ls-color-muted)",
               "&:hover": {
-                backgroundColor: "#f3f4f6",
+                backgroundColor: "var(--ls-color-muted-soft)",
               },
             }}
           >
@@ -574,7 +574,7 @@ export function RecordActionModal({
               '& .MuiInputLabel-root': {
                 fontFamily,
                 fontSize: 12,
-                color: '#6b7280',
+                color: 'var(--ls-color-muted)',
                 '&.Mui-focused': {
                   color: levelsetGreen,
                 },
@@ -588,10 +588,10 @@ export function RecordActionModal({
                 fontSize: 14,
               },
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#e5e7eb',
+                borderColor: 'var(--ls-color-muted-border)',
               },
               '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#d1d5db',
+                borderColor: 'var(--ls-color-border)',
               },
               '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
                 borderColor: levelsetGreen,
@@ -609,10 +609,10 @@ export function RecordActionModal({
                 fontFamily,
                 fontSize: 13,
                 textTransform: "none",
-                color: "#6b7280",
+                color: "var(--ls-color-muted)",
                 borderRadius: '8px',
                 "&:hover": {
-                  backgroundColor: "#f3f4f6",
+                  backgroundColor: "var(--ls-color-muted-soft)",
                 },
               }}
             >
@@ -629,7 +629,7 @@ export function RecordActionModal({
                 backgroundColor: levelsetGreen,
                 borderRadius: '8px',
                 "&:hover": {
-                  backgroundColor: "#264d38",
+                  backgroundColor: "var(--ls-color-brand-hover)",
                 },
               }}
             >

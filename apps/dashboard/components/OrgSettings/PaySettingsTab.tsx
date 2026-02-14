@@ -34,10 +34,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
   '& .MuiInputBase-input': {
@@ -54,10 +54,10 @@ const DescriptionTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
 }));
@@ -364,7 +364,7 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={40} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={40} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -391,7 +391,7 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
                 size="small"
               />
             )}
-            {saving && <CircularProgress size={16} sx={{ color: '#31664a' /* TODO: Use design token */, ml: 1 }} />}
+            {saving && <CircularProgress size={16} sx={{ color: 'var(--ls-color-brand)', ml: 1 }} />}
           </div>
           <p className={sty.description}>
             Configure pay rules and rates for each role in your organization.
@@ -427,8 +427,8 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
                     onChange={() => handleRuleToggle(role.role_name, 'has_availability_rules')}
                     disabled={disabled}
                     sx={{
-                      color: '#31664a' /* TODO: Use design token */,
-                      '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
+                      color: 'var(--ls-color-brand)',
+                      '&.Mui-checked': { color: 'var(--ls-color-brand)' },
                     }}
                   />
                 </div>
@@ -438,8 +438,8 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
                     onChange={() => handleRuleToggle(role.role_name, 'has_zone_rules')}
                     disabled={disabled}
                     sx={{
-                      color: '#31664a' /* TODO: Use design token */,
-                      '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
+                      color: 'var(--ls-color-brand)',
+                      '&.Mui-checked': { color: 'var(--ls-color-brand)' },
                     }}
                   />
                 </div>
@@ -449,8 +449,8 @@ export function PaySettingsTab({ orgId, disabled = false }: PaySettingsTabProps)
                     onChange={() => handleRuleToggle(role.role_name, 'has_certification_rules')}
                     disabled={disabled}
                     sx={{
-                      color: '#31664a' /* TODO: Use design token */,
-                      '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
+                      color: 'var(--ls-color-brand)',
+                      '&.Mui-checked': { color: 'var(--ls-color-brand)' },
                     }}
                   />
                 </div>

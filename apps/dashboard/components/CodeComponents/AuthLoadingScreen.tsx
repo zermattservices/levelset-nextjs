@@ -14,7 +14,7 @@ export function AuthLoadingScreen() {
         justifyContent: 'center',
         minHeight: '100vh',
         width: '100%',
-        backgroundColor: '#f9fafb',
+        backgroundColor: 'var(--ls-color-neutral-foreground)',
         fontFamily,
       }}
     >
@@ -30,7 +30,7 @@ export function AuthLoadingScreen() {
         size={28}
         thickness={4}
         sx={{
-          color: '#31664a' /* TODO: Use design token */,
+          color: 'var(--ls-color-brand)',
         }}
       />
     </Box>

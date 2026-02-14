@@ -37,7 +37,7 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
         padding: "12px 16px",
         borderRadius: "12px",
         border: "1px solid #e9eaeb", // --token-bGw1ZBUIaR08
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--ls-color-bg-container)",
         width: "100%",
         maxWidth: "491px",
       }}
@@ -183,7 +183,7 @@ function DisciplinaryActionListItem({ action }: DisciplinaryActionListItemProps)
         padding: "12px 16px",
         borderRadius: "12px",
         border: "1px solid #e9eaeb",
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--ls-color-bg-container)",
         width: "100%",
         maxWidth: "491px",
       }}
@@ -344,7 +344,7 @@ export function DrawerTabContainer({
   const renderDisciplineTab = () => {
     if (loading) {
       return (
-        <Box sx={{ p: 2, backgroundColor: "#ffffff" }}>
+        <Box sx={{ p: 2, backgroundColor: "var(--ls-color-bg-container)" }}>
           <Skeleton variant="text" width="60%" height={24} sx={{ mb: 2 }} />
           <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
             <Skeleton variant="rounded" width="50%" height={100} />
@@ -357,7 +357,7 @@ export function DrawerTabContainer({
     }
 
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 2, backgroundColor: "#ffffff" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 2, backgroundColor: "var(--ls-color-bg-container)" }}>
         {/* Current Period Summary */}
         <Box>
           <Typography
@@ -376,7 +376,7 @@ export function DrawerTabContainer({
             <Box
               sx={{
                 flex: 1,
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--ls-color-bg-container)",
                 boxShadow: "inset 0px 0px 0px 1px rgba(233, 234, 235, 1)",
                 filter: "drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05))",
                 borderRadius: "12px",
@@ -417,7 +417,7 @@ export function DrawerTabContainer({
             <Box
               sx={{
                 flex: 1,
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--ls-color-bg-container)",
                 boxShadow: "inset 0px 0px 0px 1px rgba(233, 234, 235, 1)",
                 filter: "drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05))",
                 borderRadius: "12px",
@@ -477,7 +477,7 @@ export function DrawerTabContainer({
                 padding: "12px 16px",
                 borderRadius: "12px",
                 border: "1px solid #e9eaeb",
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--ls-color-bg-container)",
                 alignItems: "center",
                 justifyContent: "center",
                 minHeight: "60px",
@@ -522,14 +522,14 @@ export function DrawerTabContainer({
                 size="small"
                 onClick={onRecordAction}
                 sx={{
-                  backgroundColor: "#31664a" /* TODO: Use design token */,
+                  backgroundColor: "var(--ls-color-brand)",
                   textTransform: "none",
                   borderRadius: "8px",
                   fontSize: "13px",
                   fontWeight: 500,
                   fontFamily: "Satoshi",
                   "&:hover": {
-                    backgroundColor: "#264d38",
+                    backgroundColor: "var(--ls-color-brand-hover)",
                   },
                 }}
               >
@@ -545,7 +545,7 @@ export function DrawerTabContainer({
                 padding: "12px 16px",
                 borderRadius: "12px",
                 border: "1px solid #e9eaeb",
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--ls-color-bg-container)",
                 alignItems: "center",
                 justifyContent: "center",
                 minHeight: "60px",
@@ -611,32 +611,32 @@ export function DrawerTabContainer({
         display: "flex", 
         flexDirection: "column", 
         height: "100%",
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--ls-color-bg-container)",
       }} 
       data-plasmic-name="drawer-tab-container"
     >
       {/* Tabs */}
-      <Box sx={{ borderBottom: "1px solid #e9eaeb", backgroundColor: "#ffffff" }}>
+      <Box sx={{ borderBottom: "1px solid #e9eaeb", backgroundColor: "var(--ls-color-bg-container)" }}>
         <Tabs
           value={currentTab}
           onChange={(_, newValue) => setCurrentTab(newValue)}
           sx={{
             px: 1,
             minHeight: 48,
-            backgroundColor: "#ffffff",
+            backgroundColor: "var(--ls-color-bg-container)",
             "& .MuiTab-root": {
               textTransform: "none",
               fontSize: "14px",
               fontWeight: 500,
               fontFamily: "Satoshi",
               minHeight: 48,
-              color: "#6b7280",
+              color: "var(--ls-color-muted)",
               "&.Mui-selected": {
-                color: "#31664a" /* TODO: Use design token */,
+                color: "var(--ls-color-brand)",
               },
             },
             "& .MuiTabs-indicator": {
-              backgroundColor: "#31664a" /* TODO: Use design token */,
+              backgroundColor: "var(--ls-color-brand)",
               height: 2,
             },
           }}
@@ -649,7 +649,7 @@ export function DrawerTabContainer({
       </Box>
 
       {/* Tab Content */}
-      <Box sx={{ overflow: "auto", flex: 1, backgroundColor: "#ffffff" }}>
+      <Box sx={{ overflow: "auto", flex: 1, backgroundColor: "var(--ls-color-bg-container)" }}>
         {currentTab === "pathway" && renderPathwayTab()}
         {currentTab === "pe" && renderPETab()}
         {currentTab === "evaluations" && renderEvaluationsTab()}

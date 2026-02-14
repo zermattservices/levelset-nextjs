@@ -33,7 +33,7 @@ export function SlideoutListItem({
         cursor: onClick ? "pointer" : "default",
         transition: "background-color 0.15s ease",
         "&:hover": onClick ? {
-          backgroundColor: "#f9fafb",
+          backgroundColor: "var(--ls-color-neutral-foreground)",
         } : undefined,
         ...style,
       }}
@@ -41,7 +41,7 @@ export function SlideoutListItem({
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         {icon && (
-          <Box sx={{ display: "flex", alignItems: "center", color: "#6b7280" }}>
+          <Box sx={{ display: "flex", alignItems: "center", color: "var(--ls-color-muted)" }}>
             {icon}
           </Box>
         )}
@@ -50,7 +50,7 @@ export function SlideoutListItem({
           sx={{
             fontSize: "14px",
             fontWeight: 500,
-            color: "#111827",
+            color: "var(--ls-color-neutral-soft-foreground)",
           }}
         >
           {label}
@@ -61,7 +61,7 @@ export function SlideoutListItem({
           variant="body2"
           sx={{
             fontSize: "14px",
-            color: "#6b7280",
+            color: "var(--ls-color-muted)",
           }}
         >
           {value}

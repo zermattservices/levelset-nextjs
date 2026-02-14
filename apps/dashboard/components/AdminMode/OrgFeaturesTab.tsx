@@ -209,7 +209,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
       case 'ultimate':
         return { bg: '#f3e8ff', text: '#6b21a8', border: '#d8b4fe' };
       default:
-        return { bg: '#f3f4f6', text: '#374151', border: '#d1d5db' };
+        return { bg: 'var(--ls-color-muted-soft)', text: 'var(--ls-color-neutral)', border: 'var(--ls-color-border)' };
     }
   };
 
@@ -222,14 +222,14 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
   // Get pill color based on count
   const getPillColor = (enabled: number, total: number) => {
     if (enabled === total) return { bg: '#dcfce7', color: '#166534' }; // Green
-    if (enabled === 0) return { bg: '#f3f4f6', color: '#6b7280' }; // Grey
+    if (enabled === 0) return { bg: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-muted)' }; // Grey
     return { bg: '#fef3c7', color: '#92400e' }; // Yellow
   };
 
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -247,7 +247,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
           Configure which features this organization has access to.
         </Typography>
         {saving && (
-          <CircularProgress size={16} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+          <CircularProgress size={16} sx={{ color: 'var(--ls-color-brand)' }} />
         )}
       </div>
 
@@ -276,7 +276,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
               sx={{
                 '&:before': { display: 'none' },
                 boxShadow: 'none',
-                border: '1px solid #e5e7eb',
+                border: '1px solid var(--ls-color-muted-border)',
                 borderRadius: '8px !important',
                 marginBottom: 1,
                 '&.Mui-expanded': {
@@ -302,9 +302,9 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
                   onClick={(e) => e.stopPropagation()}
                   sx={{
                     padding: '4px',
-                    color: '#31664a' /* TODO: Use design token */,
-                    '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
-                    '&.MuiCheckbox-indeterminate': { color: '#31664a' /* TODO: Use design token */ },
+                    color: 'var(--ls-color-brand)',
+                    '&.Mui-checked': { color: 'var(--ls-color-brand)' },
+                    '&.MuiCheckbox-indeterminate': { color: 'var(--ls-color-brand)' },
                   }}
                 />
                 <Chip
@@ -348,8 +348,8 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
                           onChange={(e) => toggleFeature(feature.key, e.target.checked)}
                           sx={{
                             padding: '4px',
-                            color: '#d1d5db',
-                            '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
+                            color: 'var(--ls-color-border)',
+                            '&.Mui-checked': { color: 'var(--ls-color-brand)' },
                           }}
                         />
                         <div className={styles.permissionContent}>

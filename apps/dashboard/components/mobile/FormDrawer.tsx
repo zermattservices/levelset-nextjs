@@ -75,7 +75,7 @@ export function FormDrawer({
             borderRadius: 0,
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: '#f9fafb',
+            backgroundColor: 'var(--ls-color-neutral-foreground)',
           },
         }}
       >
@@ -85,17 +85,17 @@ export function FormDrawer({
             alignItems: 'center',
             gap: 1,
             padding: '24px 20px 16px',
-            backgroundColor: '#ffffff',
-            borderBottom: '1px solid #e5e7eb',
+            backgroundColor: 'var(--ls-color-bg-container)',
+            borderBottom: '1px solid var(--ls-color-muted-border)',
           }}
         >
           <IconButton
             aria-label="Go back"
             onClick={attemptClose}
             sx={{
-              backgroundColor: '#f3f4f6',
-              color: '#111827',
-              '&:hover': { backgroundColor: '#e5e7eb' },
+              backgroundColor: 'var(--ls-color-muted-soft)',
+              color: 'var(--ls-color-neutral-soft-foreground)',
+              '&:hover': { backgroundColor: 'var(--ls-color-muted-border)' },
             }}
           >
             <ArrowBackIcon />
@@ -106,7 +106,7 @@ export function FormDrawer({
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               fontSize: 20,
               fontWeight: 700,
-              color: '#111827',
+              color: 'var(--ls-color-neutral-soft-foreground)',
             }}
           >
             {title}
@@ -130,8 +130,8 @@ export function FormDrawer({
           sx={{
             position: 'sticky',
             bottom: 0,
-            backgroundColor: '#ffffff',
-            borderTop: '1px solid #e5e7eb',
+            backgroundColor: 'var(--ls-color-bg-container)',
+            borderTop: '1px solid var(--ls-color-muted-border)',
             padding: '16px 20px 24px',
           }}
         >
@@ -141,7 +141,7 @@ export function FormDrawer({
             disabled={disabled || submitting}
             sx={{
               width: '100%',
-              backgroundColor: '#31664a' /* TODO: Use design token */,
+              backgroundColor: 'var(--ls-color-brand)',
               textTransform: 'none',
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               fontSize: 16,
@@ -149,7 +149,7 @@ export function FormDrawer({
               padding: '12px 16px',
               borderRadius: '8px',
               '&:hover': {
-                backgroundColor: '#264d38',
+                backgroundColor: 'var(--ls-color-brand-hover)',
               },
             }}
           >
@@ -173,7 +173,7 @@ export function FormDrawer({
             sx={{
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               fontSize: 14,
-              color: '#4b5563',
+              color: 'var(--ls-color-text-secondary)',
             }}
           >
             {t('drawer.discardMessage')}
@@ -185,7 +185,7 @@ export function FormDrawer({
             sx={{
               textTransform: 'none',
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-              color: '#31664a' /* TODO: Use design token */,
+              color: 'var(--ls-color-brand)',
               fontWeight: 600,
               borderRadius: '8px',
             }}

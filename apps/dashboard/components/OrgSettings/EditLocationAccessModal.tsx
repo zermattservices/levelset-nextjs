@@ -139,7 +139,7 @@ export function EditLocationAccessModal({
       </DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-          <Typography sx={{ fontFamily, fontSize: 14, color: '#6b7280' }}>
+          <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)' }}>
             Configure which locations <strong>{userName}</strong> can access.
           </Typography>
 
@@ -150,10 +150,10 @@ export function EditLocationAccessModal({
           )}
 
           <FormGroup sx={{ 
-            backgroundColor: '#f9fafb', 
+            backgroundColor: 'var(--ls-color-neutral-foreground)', 
             borderRadius: 2, 
             p: 2,
-            border: '1px solid #e5e7eb',
+            border: '1px solid var(--ls-color-muted-border)',
           }}>
             {orgLocations.map(loc => (
               <FormControlLabel
@@ -164,8 +164,8 @@ export function EditLocationAccessModal({
                     onChange={() => handleLocationToggle(loc.id)}
                     disabled={disabled}
                     sx={{
-                      color: '#31664a' /* TODO: Use design token */,
-                      '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
+                      color: 'var(--ls-color-brand)',
+                      '&.Mui-checked': { color: 'var(--ls-color-brand)' },
                     }}
                   />
                 }
@@ -185,7 +185,7 @@ export function EditLocationAccessModal({
           sx={{
             fontFamily,
             textTransform: 'none',
-            color: '#6b7280',
+            color: 'var(--ls-color-muted)',
           }}
         >
           Cancel
@@ -197,12 +197,12 @@ export function EditLocationAccessModal({
           sx={{
             fontFamily,
             textTransform: 'none',
-            backgroundColor: '#31664a' /* TODO: Use design token */,
+            backgroundColor: 'var(--ls-color-brand)',
             '&:hover': {
-              backgroundColor: '#264d38',
+              backgroundColor: 'var(--ls-color-brand-hover)',
             },
             '&.Mui-disabled': {
-              backgroundColor: '#e5e7eb',
+              backgroundColor: 'var(--ls-color-muted-border)',
             },
           }}
         >

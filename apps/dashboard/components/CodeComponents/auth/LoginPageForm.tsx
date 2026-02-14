@@ -102,7 +102,7 @@ export function LoginPageForm({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--ls-color-bg-container)',
         fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
         padding: '40px 0',
       }}>
@@ -127,7 +127,7 @@ export function LoginPageForm({
           <h1 className="logo-fallback" style={{
             fontSize: '32px',
             fontWeight: '700',
-            color: '#31664A' /* TODO: Use design token */,
+            color: 'var(--ls-color-brand)',
             margin: 0,
             textAlign: 'center',
             position: 'relative',
@@ -143,7 +143,7 @@ export function LoginPageForm({
               transform: 'translateX(-50%)',
               width: '16px',
               height: '2px',
-              backgroundColor: '#31664A' /* TODO: Use design token */,
+              backgroundColor: 'var(--ls-color-brand)',
               borderRadius: '1px'
             }}></div>
             <div style={{
@@ -153,7 +153,7 @@ export function LoginPageForm({
               transform: 'translateX(-50%)',
               width: '20px',
               height: '2px',
-              backgroundColor: '#31664A' /* TODO: Use design token */,
+              backgroundColor: 'var(--ls-color-brand)',
               borderRadius: '1px'
             }}></div>
           </h1>
@@ -163,7 +163,7 @@ export function LoginPageForm({
         <h2 style={{
           fontSize: '28px',
           fontWeight: '700',
-          color: '#111827',
+          color: 'var(--ls-color-neutral-soft-foreground)',
           margin: '0 0 8px 0',
           textAlign: 'center',
           fontFamily: '"Mont", system-ui, -apple-system, sans-serif'
@@ -175,7 +175,7 @@ export function LoginPageForm({
         <p style={{
           fontSize: '16px',
           fontWeight: '400',
-          color: '#6b7280',
+          color: 'var(--ls-color-muted)',
           margin: '0 0 32px 0',
           textAlign: 'center',
           fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif'
@@ -217,10 +217,10 @@ export function LoginPageForm({
                 width: '100%',
                 padding: '12px 16px',
                 fontSize: '16px',
-                border: '1px solid ' + (errorMessage ? '#fca5a5' : '#e5e7eb'),
+                border: '1px solid ' + (errorMessage ? '#fca5a5' : 'var(--ls-color-muted-border)'),
                 borderRadius: '8px',
-                backgroundColor: '#ffffff',
-                color: '#111827',
+                backgroundColor: 'var(--ls-color-bg-container)',
+                color: 'var(--ls-color-neutral-soft-foreground)',
                 fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
                 outline: 'none',
                 boxSizing: 'border-box',
@@ -231,11 +231,11 @@ export function LoginPageForm({
                 alignItems: 'center'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#31664A' /* TODO: Use design token */;
+                e.target.style.borderColor = 'var(--ls-color-brand)';
                 e.target.style.boxShadow = '0 0 0 3px rgba(49, 102, 74, 0.1)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = errorMessage ? '#fca5a5' : '#e5e7eb';
+                e.target.style.borderColor = errorMessage ? '#fca5a5' : 'var(--ls-color-muted-border)';
                 e.target.style.boxShadow = 'none';
               }}
               data-plasmic-name="email-input"
@@ -254,10 +254,10 @@ export function LoginPageForm({
                 width: '100%',
                 padding: '12px 16px',
                 fontSize: '16px',
-                border: '1px solid ' + (errorMessage ? '#fca5a5' : '#e5e7eb'),
+                border: '1px solid ' + (errorMessage ? '#fca5a5' : 'var(--ls-color-muted-border)'),
                 borderRadius: '8px',
-                backgroundColor: '#ffffff',
-                color: '#111827',
+                backgroundColor: 'var(--ls-color-bg-container)',
+                color: 'var(--ls-color-neutral-soft-foreground)',
                 fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
                 outline: 'none',
                 boxSizing: 'border-box',
@@ -268,11 +268,11 @@ export function LoginPageForm({
                 alignItems: 'center'
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#31664A' /* TODO: Use design token */;
+                e.target.style.borderColor = 'var(--ls-color-brand)';
                 e.target.style.boxShadow = '0 0 0 3px rgba(49, 102, 74, 0.1)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = errorMessage ? '#fca5a5' : '#e5e7eb';
+                e.target.style.borderColor = errorMessage ? '#fca5a5' : 'var(--ls-color-muted-border)';
                 e.target.style.boxShadow = 'none';
               }}
               data-plasmic-name="password-input"
@@ -288,7 +288,7 @@ export function LoginPageForm({
               padding: '12px 16px',
               fontSize: '16px',
               fontWeight: '600',
-              backgroundColor: '#31664A' /* TODO: Use design token */,
+              backgroundColor: 'var(--ls-color-brand)',
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -305,7 +305,7 @@ export function LoginPageForm({
             }}
             onMouseLeave={(e) => {
               if (!isLoading) {
-                e.currentTarget.style.backgroundColor = '#31664A' /* TODO: Use design token */;
+                e.currentTarget.style.backgroundColor = 'var(--ls-color-brand)';
               }
             }}
             data-plasmic-name="signin-button"
@@ -326,9 +326,9 @@ export function LoginPageForm({
               padding: '12px 16px',
               fontSize: '16px',
               fontWeight: '500',
-              backgroundColor: '#ffffff',
-              color: '#111827',
-              border: '1px solid #e5e7eb',
+              backgroundColor: 'var(--ls-color-bg-container)',
+              color: 'var(--ls-color-neutral-soft-foreground)',
+              border: '1px solid var(--ls-color-muted-border)',
               borderRadius: '8px',
               cursor: googleLoading ? 'not-allowed' : 'pointer',
               fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
@@ -341,14 +341,14 @@ export function LoginPageForm({
             }}
             onMouseEnter={(e) => {
               if (!googleLoading) {
-                e.currentTarget.style.backgroundColor = '#f9fafb';
-                e.currentTarget.style.borderColor = '#d1d5db';
+                e.currentTarget.style.backgroundColor = 'var(--ls-color-neutral-foreground)';
+                e.currentTarget.style.borderColor = 'var(--ls-color-border)';
               }
             }}
             onMouseLeave={(e) => {
               if (!googleLoading) {
                 e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.borderColor = '#e5e7eb';
+                e.currentTarget.style.borderColor = 'var(--ls-color-muted-border)';
               }
             }}
             data-plasmic-name="google-signin-button"

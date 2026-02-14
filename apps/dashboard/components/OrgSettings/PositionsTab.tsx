@@ -18,10 +18,10 @@ import { createSupabaseClient } from '@/util/supabase/component';
 const fontFamily = '"Satoshi", sans-serif';
 
 const BrandCheckbox = styled(Checkbox)(() => ({
-  color: "#9ca3af",
+  color: "var(--ls-color-disabled-text)",
   padding: 4,
   "&.Mui-checked": {
-    color: "#31664a" /* TODO: Use design token */,
+    color: "var(--ls-color-brand)",
   },
   "&:hover": {
     backgroundColor: "rgba(49, 102, 74, 0.08)",
@@ -33,10 +33,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
 }));
@@ -47,24 +47,24 @@ const LanguageSelect = styled(Select)(() => ({
   height: 36,
   minWidth: 110,
   borderRadius: 8,
-  backgroundColor: '#ffffff',
+  backgroundColor: 'var(--ls-color-bg-container)',
   '& .MuiSelect-select': {
     padding: '8px 12px',
     paddingRight: '32px !important',
   },
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#e5e7eb',
+    borderColor: 'var(--ls-color-muted-border)',
     borderRadius: 8,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
     borderWidth: 1,
   },
   '& .MuiSvgIcon-root': {
-    color: '#6b7280',
+    color: 'var(--ls-color-muted)',
     right: 8,
   },
 }));
@@ -428,7 +428,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -450,7 +450,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
               fontFamily,
               fontSize: 12,
               textTransform: 'none',
-              color: '#31664a' /* TODO: Use design token */,
+              color: 'var(--ls-color-brand)',
               '&:hover': {
                 backgroundColor: 'rgba(49, 102, 74, 0.08)',
               },
@@ -483,7 +483,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
           >
             {!disabled && (
               <div className={sty.dragHandle}>
-                <DragIndicatorIcon sx={{ color: '#9ca3af', cursor: 'grab', fontSize: 20 }} />
+                <DragIndicatorIcon sx={{ color: 'var(--ls-color-disabled-text)', cursor: 'grab', fontSize: 20 }} />
               </div>
             )}
             <StyledTextField
@@ -513,7 +513,7 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
                     onClick={() => handleAutoTranslate(false, position.id)}
                     disabled={translating}
                     title="Translate this position"
-                    sx={{ color: '#6b7280', '&:hover': { color: '#31664a' /* TODO: Use design token */ } }}
+                    sx={{ color: 'var(--ls-color-muted)', '&:hover': { color: 'var(--ls-color-brand)' } }}
                   >
                     <TranslateIcon fontSize="small" />
                   </IconButton>
@@ -555,12 +555,12 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
                   height: 36,
                   minWidth: 110,
                   borderRadius: '8px',
-                  borderColor: '#e5e7eb',
-                  color: '#4b5563',
-                  backgroundColor: '#ffffff',
+                  borderColor: 'var(--ls-color-muted-border)',
+                  color: 'var(--ls-color-text-secondary)',
+                  backgroundColor: 'var(--ls-color-bg-container)',
                   padding: '8px 12px',
                   '&:hover': {
-                    borderColor: '#31664a' /* TODO: Use design token */,
+                    borderColor: 'var(--ls-color-brand)',
                     backgroundColor: 'rgba(49, 102, 74, 0.04)',
                   },
                 }}
@@ -604,10 +604,10 @@ export function PositionsTab({ orgId, disabled = false }: PositionsTabProps) {
                 sx={{
                   fontFamily,
                   textTransform: 'none',
-                  borderColor: '#31664a' /* TODO: Use design token */,
-                  color: '#31664a' /* TODO: Use design token */,
+                  borderColor: 'var(--ls-color-brand)',
+                  color: 'var(--ls-color-brand)',
                   '&:hover': {
-                    borderColor: '#31664a' /* TODO: Use design token */,
+                    borderColor: 'var(--ls-color-brand)',
                     backgroundColor: 'rgba(49, 102, 74, 0.08)',
                   },
                 }}

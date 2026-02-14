@@ -36,7 +36,7 @@ export interface AddEmployeeModalProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 
 // Custom TextField matching AddInfractionModal
 const CustomTextField = React.forwardRef((props: any, ref: any) => (
@@ -49,7 +49,7 @@ const CustomTextField = React.forwardRef((props: any, ref: any) => (
       '& .MuiInputLabel-root': {
         fontFamily,
         fontSize: 12,
-        color: '#6b7280',
+        color: 'var(--ls-color-muted)',
         '&.Mui-focused': {
           color: levelsetGreen,
         },
@@ -64,10 +64,10 @@ const CustomTextField = React.forwardRef((props: any, ref: any) => (
         padding: '10px 14px',
       },
       '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#e5e7eb',
+        borderColor: 'var(--ls-color-muted-border)',
       },
       '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d1d5db',
+        borderColor: 'var(--ls-color-border)',
       },
       '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: levelsetGreen,
@@ -80,7 +80,7 @@ const CustomTextField = React.forwardRef((props: any, ref: any) => (
 
 // BrandCheckbox matching RosterTable
 const BrandCheckbox = styled(Checkbox)(() => ({
-  color: "#9ca3af",
+  color: "var(--ls-color-disabled-text)",
   padding: 0,
   "&.Mui-checked": {
     color: levelsetGreen,
@@ -105,8 +105,8 @@ const AvailabilityChip = styled(Box)(() => ({
   fontFamily,
   cursor: "pointer",
   transition: "all 0.15s ease-in-out",
-  backgroundColor: "#f3f4f6",
-  color: "#111827",
+  backgroundColor: "var(--ls-color-muted-soft)",
+  color: "var(--ls-color-neutral-soft-foreground)",
   "&:hover": {
     opacity: 0.9,
     transform: "translateY(-1px)",
@@ -133,13 +133,13 @@ const RoleMenuItem = styled(MenuItem)(() => ({
   margin: "2px 8px",
   borderRadius: 8,
   "&.Mui-selected": {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "var(--ls-color-muted-soft)",
     "&:hover": {
-      backgroundColor: "#e5e7eb",
+      backgroundColor: "var(--ls-color-muted-border)",
     },
   },
   "&:hover": {
-    backgroundColor: "#f9fafb",
+    backgroundColor: "var(--ls-color-neutral-foreground)",
   },
 }));
 
@@ -372,9 +372,9 @@ export function AddEmployeeModal({
         <IconButton
           onClick={onClose}
           sx={{
-            color: "#6b7280",
+            color: "var(--ls-color-muted)",
             "&:hover": {
-              backgroundColor: "#f3f4f6",
+              backgroundColor: "var(--ls-color-muted-soft)",
             },
           }}
         >
@@ -421,7 +421,7 @@ export function AddEmployeeModal({
                 fontFamily,
                 fontSize: 12,
                 fontWeight: 500,
-                color: "#6b7280",
+                color: "var(--ls-color-muted)",
                 mb: 1,
               }}
             >
@@ -453,7 +453,7 @@ export function AddEmployeeModal({
                   fontFamily,
                   fontSize: 12,
                   fontWeight: 500,
-                  color: "#6b7280",
+                  color: "var(--ls-color-muted)",
                   mb: 1,
                 }}
               >
@@ -463,7 +463,7 @@ export function AddEmployeeModal({
                 <RolePill
                   role={role}
                   colorKey={getRoleColorKey(role)}
-                  endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "#6b7280" }} />}
+                  endIcon={<ExpandMoreIcon sx={{ fontSize: 16, color: "var(--ls-color-muted)" }} />}
                   onClick={handleRoleMenuOpen}
                 />
                 <Menu
@@ -477,7 +477,7 @@ export function AddEmployeeModal({
                       fontFamily,
                       borderRadius: 2,
                       boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                      border: "1px solid #e5e7eb",
+                      border: "1px solid var(--ls-color-muted-border)",
                     },
                   }}
                 >
@@ -499,7 +499,7 @@ export function AddEmployeeModal({
                   fontFamily,
                   fontSize: 12,
                   fontWeight: 500,
-                  color: "#6b7280",
+                  color: "var(--ls-color-muted)",
                   mb: 1,
                 }}
               >
@@ -524,7 +524,7 @@ export function AddEmployeeModal({
                       fontFamily,
                       borderRadius: 2,
                       boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                      border: "1px solid #e5e7eb",
+                      border: "1px solid var(--ls-color-muted-border)",
                     },
                   }}
                 >
@@ -565,7 +565,7 @@ export function AddEmployeeModal({
             fontSize: 14,
             fontWeight: 500,
             textTransform: "none",
-            color: "#6b7280",
+            color: "var(--ls-color-muted)",
             borderRadius: '8px',
           }}
         >
@@ -587,7 +587,7 @@ export function AddEmployeeModal({
               backgroundColor: "#2d5a42",
             },
             "&:disabled": {
-              backgroundColor: "#9ca3af",
+              backgroundColor: "var(--ls-color-disabled-text)",
             },
           }}
         >

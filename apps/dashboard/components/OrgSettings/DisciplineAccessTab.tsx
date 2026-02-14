@@ -19,10 +19,10 @@ import { useLocationContext } from '@/components/CodeComponents/LocationContext'
 const fontFamily = '"Satoshi", sans-serif';
 
 const BrandCheckbox = styled(Checkbox)(() => ({
-  color: "#9ca3af",
+  color: "var(--ls-color-disabled-text)",
   padding: 8,
   "&.Mui-checked": {
-    color: "#31664a" /* TODO: Use design token */,
+    color: "var(--ls-color-brand)",
   },
   "&:hover": {
     backgroundColor: "rgba(49, 102, 74, 0.08)",
@@ -34,10 +34,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
 }));
@@ -47,10 +47,10 @@ const PasswordTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
   '& input[type="password"]': {
@@ -262,7 +262,7 @@ export function DisciplineAccessTab({ orgId, locationId, onNavigate, disabled = 
   if (loading || passwordLoading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -355,9 +355,9 @@ export function DisciplineAccessTab({ orgId, locationId, onNavigate, disabled = 
               sx={{
                 fontFamily,
                 textTransform: 'none',
-                backgroundColor: '#31664a' /* TODO: Use design token */,
+                backgroundColor: 'var(--ls-color-brand)',
                 '&:hover': {
-                  backgroundColor: '#264d38',
+                  backgroundColor: 'var(--ls-color-brand-hover)',
                 },
               }}
             >
@@ -415,9 +415,9 @@ export function DisciplineAccessTab({ orgId, locationId, onNavigate, disabled = 
             sx={{
               fontFamily,
               textTransform: 'none',
-              backgroundColor: '#31664a' /* TODO: Use design token */,
+              backgroundColor: 'var(--ls-color-brand)',
               '&:hover': {
-                backgroundColor: '#264d38',
+                backgroundColor: 'var(--ls-color-brand-hover)',
               },
             }}
           >

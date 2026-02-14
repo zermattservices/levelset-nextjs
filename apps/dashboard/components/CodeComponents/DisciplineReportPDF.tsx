@@ -15,12 +15,12 @@ Font.register({
 
 // Colors
 const colors = {
-  levelsetGreen: '#31664a', // TODO: Use design token
-  grey100: '#f9fafb',
-  grey200: '#e5e7eb',
-  grey300: '#d1d5db',
-  grey600: '#6b7280',
-  grey900: '#111827',
+  levelsetGreen: 'var(--ls-color-brand)',
+  grey100: 'var(--ls-color-neutral-foreground)',
+  grey200: 'var(--ls-color-muted-border)',
+  grey300: 'var(--ls-color-border)',
+  grey600: 'var(--ls-color-muted)',
+  grey900: 'var(--ls-color-neutral-soft-foreground)',
   white: '#ffffff',
   red: '#dc2626',
   redLight: '#fee2e2',
@@ -33,7 +33,7 @@ const colors = {
 // Styles
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--ls-color-bg-container)',
     paddingTop: 20,
     paddingBottom: 40,
     paddingHorizontal: 30,

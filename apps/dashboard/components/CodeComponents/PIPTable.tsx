@@ -10,8 +10,8 @@ const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Se
 
 const StyledContainer = styled(Box)(() => ({
   borderRadius: 16,
-  border: "1px solid #e5e7eb",
-  backgroundColor: "#ffffff",
+  border: "1px solid var(--ls-color-muted-border)",
+  backgroundColor: "var(--ls-color-bg-container)",
   overflow: "hidden",
   boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
   fontFamily,
@@ -158,7 +158,7 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
             fontFamily,
             fontSize: 13,
             fontWeight: 600,
-            color: '#111827',
+            color: 'var(--ls-color-neutral-soft-foreground)',
             width: '100%',
             textAlign: 'left',
           }}
@@ -209,7 +209,7 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
               }}
             />
           ) : (
-            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: '#6b7280' }}>
+            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: 'var(--ls-color-muted)' }}>
               No evaluation
             </Typography>
           )}
@@ -233,7 +233,7 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
             width: '100%',
           }}
         >
-          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: '#111827' }}>
+          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)' }}>
             {params.value || '—'}
           </Typography>
         </Box>
@@ -273,7 +273,7 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
         data-plasmic-name="pip-table-container"
       >
         <Box sx={{ py: 6, px: 4, textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ color: '#6b7280', fontFamily }}>
+          <Typography variant="body2" sx={{ color: 'var(--ls-color-muted)', fontFamily }}>
             No employees with PIP status.
           </Typography>
         </Box>
@@ -299,13 +299,13 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
           border: 'none',
           fontFamily,
           [`& .${gridClasses.columnHeaders}`]: {
-            borderBottom: '1px solid #e5e7eb',
+            borderBottom: '1px solid var(--ls-color-muted-border)',
           },
           [`& .${gridClasses.columnHeader}`]: {
-            backgroundColor: '#f9fafb',
+            backgroundColor: 'var(--ls-color-neutral-foreground)',
             fontWeight: 600,
             fontSize: 14,
-            color: '#111827',
+            color: 'var(--ls-color-neutral-soft-foreground)',
             '&:focus, &:focus-within': {
               outline: 'none',
             },
@@ -317,10 +317,10 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
             display: 'none',
           },
           [`& .${gridClasses.cell}`]: {
-            borderBottom: '1px solid #f3f4f6',
+            borderBottom: '1px solid var(--ls-color-muted-soft)',
             fontSize: 13,
             fontWeight: 500,
-            color: '#111827',
+            color: 'var(--ls-color-neutral-soft-foreground)',
             '&:focus, &:focus-within': {
               outline: 'none',
             },
@@ -330,7 +330,7 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
             padding: '0 16px',
           },
           [`& .${gridClasses.row}:hover`]: {
-            backgroundColor: '#f9fafb',
+            backgroundColor: 'var(--ls-color-neutral-foreground)',
           },
           '& .MuiDataGrid-overlay': {
             fontFamily,

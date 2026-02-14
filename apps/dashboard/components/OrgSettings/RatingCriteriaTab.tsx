@@ -30,10 +30,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
 }));
@@ -51,10 +51,10 @@ const StyledSelect = styled(Select)(() => ({
     borderRadius: 12,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
 }));
 
@@ -64,24 +64,24 @@ const LanguageSelect = styled(Select)(() => ({
   height: 36,
   minWidth: 110,
   borderRadius: 8,
-  backgroundColor: '#ffffff',
+  backgroundColor: 'var(--ls-color-bg-container)',
   '& .MuiSelect-select': {
     padding: '8px 12px',
     paddingRight: '32px !important',
   },
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#e5e7eb',
+    borderColor: 'var(--ls-color-muted-border)',
     borderRadius: 8,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
     borderWidth: 1,
   },
   '& .MuiSvgIcon-root': {
-    color: '#6b7280',
+    color: 'var(--ls-color-muted)',
     right: 8,
   },
 }));
@@ -92,24 +92,24 @@ const PillarSelect = styled(Select)(() => ({
   height: 32,
   minWidth: 100,
   borderRadius: 6,
-  backgroundColor: '#ffffff',
+  backgroundColor: 'var(--ls-color-bg-container)',
   '& .MuiSelect-select': {
     padding: '4px 8px',
     paddingRight: '24px !important',
   },
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#e5e7eb',
+    borderColor: 'var(--ls-color-muted-border)',
     borderRadius: 6,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#31664a' /* TODO: Use design token */,
+    borderColor: 'var(--ls-color-brand)',
     borderWidth: 1,
   },
   '& .MuiSvgIcon-root': {
-    color: '#6b7280',
+    color: 'var(--ls-color-muted)',
     right: 4,
     fontSize: 18,
   },
@@ -540,7 +540,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -571,16 +571,16 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                     height: 36,
                     minWidth: 110,
                     borderRadius: '8px',
-                    borderColor: translateMenuAnchor ? '#31664a' /* TODO: Use design token */ : '#e5e7eb',
-                    color: '#4b5563',
-                    backgroundColor: '#ffffff',
+                    borderColor: translateMenuAnchor ? 'var(--ls-color-brand)' : 'var(--ls-color-muted-border)',
+                    color: 'var(--ls-color-text-secondary)',
+                    backgroundColor: 'var(--ls-color-bg-container)',
                     padding: '8px 12px',
                     '&:hover': {
-                      borderColor: '#31664a' /* TODO: Use design token */,
-                      backgroundColor: '#ffffff',
+                      borderColor: 'var(--ls-color-brand)',
+                      backgroundColor: 'var(--ls-color-bg-container)',
                     },
                     '&:active': {
-                      backgroundColor: '#ffffff',
+                      backgroundColor: 'var(--ls-color-bg-container)',
                     },
                   }}
                 >
@@ -609,7 +609,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                     sx={{ fontFamily, fontSize: 13, py: 1 }}
                   >
                     <ListItemIcon sx={{ minWidth: 32 }}>
-                      <CropSquareIcon sx={{ fontSize: 18, color: '#6b7280' }} />
+                      <CropSquareIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
                     </ListItemIcon>
                     This position
                   </MenuItem>
@@ -618,7 +618,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                     sx={{ fontFamily, fontSize: 13, py: 1 }}
                   >
                     <ListItemIcon sx={{ minWidth: 32 }}>
-                      <ViewModuleIcon sx={{ fontSize: 18, color: '#6b7280' }} />
+                      <ViewModuleIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted)' }} />
                     </ListItemIcon>
                     All positions
                   </MenuItem>
@@ -659,7 +659,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
               }}
             >
               {fohPositions.length > 0 && (
-                <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' /* TODO: Use design token */ }}>
+                <ListSubheader sx={{ fontFamily, fontWeight: 600, color: 'var(--ls-color-brand)' }}>
                   FOH Positions
                 </ListSubheader>
               )}
@@ -669,7 +669,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                 </MenuItem>
               ))}
               {bohPositions.length > 0 && (
-                <ListSubheader sx={{ fontFamily, fontWeight: 600, color: '#31664a' /* TODO: Use design token */ }}>
+                <ListSubheader sx={{ fontFamily, fontWeight: 600, color: 'var(--ls-color-brand)' }}>
                   BOH Positions
                 </ListSubheader>
               )}
@@ -694,16 +694,16 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
             height: 36,
             minWidth: 150,
             borderRadius: '8px',
-            borderColor: '#e5e7eb',
-            color: '#4b5563',
-            backgroundColor: '#ffffff',
+            borderColor: 'var(--ls-color-muted-border)',
+            color: 'var(--ls-color-text-secondary)',
+            backgroundColor: 'var(--ls-color-bg-container)',
             padding: '8px 12px',
             '&:hover': {
-              borderColor: '#31664a' /* TODO: Use design token */,
-              backgroundColor: '#ffffff',
+              borderColor: 'var(--ls-color-brand)',
+              backgroundColor: 'var(--ls-color-bg-container)',
             },
             '&:active': {
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--ls-color-bg-container)',
             },
           }}
         >
@@ -761,7 +761,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                       }
                     }}
                   >
-                    <MenuItem value="" sx={{ fontFamily, fontSize: 12, color: '#9ca3af' }}>
+                    <MenuItem value="" sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-disabled-text)' }}>
                       None
                     </MenuItem>
                     {pillars.map((pillar) => (
@@ -788,7 +788,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                       }
                     }}
                   >
-                    <MenuItem value="" sx={{ fontFamily, fontSize: 12, color: '#9ca3af' }}>
+                    <MenuItem value="" sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-disabled-text)' }}>
                       None
                     </MenuItem>
                     {pillars.map((pillar) => (
@@ -809,7 +809,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                     onClick={() => handleAutoTranslate('row', c.criteria_order)}
                     disabled={translating}
                     title="Translate this criteria"
-                    sx={{ color: '#6b7280', '&:hover': { color: '#31664a' /* TODO: Use design token */ } }}
+                    sx={{ color: 'var(--ls-color-muted)', '&:hover': { color: 'var(--ls-color-brand)' } }}
                   >
                     <TranslateIcon fontSize="small" />
                   </IconButton>
@@ -832,10 +832,10 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
                 sx={{
                   fontFamily,
                   textTransform: 'none',
-                  borderColor: '#31664a' /* TODO: Use design token */,
-                  color: '#31664a' /* TODO: Use design token */,
+                  borderColor: 'var(--ls-color-brand)',
+                  color: 'var(--ls-color-brand)',
                   '&:hover': {
-                    borderColor: '#31664a' /* TODO: Use design token */,
+                    borderColor: 'var(--ls-color-brand)',
                     backgroundColor: 'rgba(49, 102, 74, 0.08)',
                   },
                 }}
@@ -874,7 +874,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
           <IconButton
             onClick={() => setDescriptionsModalOpen(false)}
             size="small"
-            sx={{ color: '#6b7280' }}
+            sx={{ color: 'var(--ls-color-muted)' }}
           >
             <CloseIcon fontSize="small" />
           </IconButton>

@@ -14,7 +14,7 @@ Font.register({
 
 // Colors
 const colors = {
-  levelsetGreen: '#31664a', // TODO: Use design token
+  levelsetGreen: 'var(--ls-color-brand)',
   fohColor: '#006391',
   bohColor: '#ffcc5b',
   fohColorLight: '#eaf9ff',
@@ -22,10 +22,10 @@ const colors = {
   ratingGreen: '#249e6b',
   ratingOrange: '#ffb549',
   ratingRed: '#ad2624',
-  grey100: '#f9fafb',
-  grey200: '#e5e7eb',
-  grey600: '#6b7280',
-  grey900: '#111827',
+  grey100: 'var(--ls-color-neutral-foreground)',
+  grey200: 'var(--ls-color-muted-border)',
+  grey600: 'var(--ls-color-muted)',
+  grey900: 'var(--ls-color-neutral-soft-foreground)',
   trendGreen: '#38A169',
   trendRed: '#E53E3E',
   white: '#ffffff',
@@ -34,7 +34,7 @@ const colors = {
 // Styles
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--ls-color-bg-container)',
     paddingTop: 15, // 0.5 inch top margin
     paddingBottom: 30,
     paddingHorizontal: 30,
@@ -187,8 +187,8 @@ const styles = StyleSheet.create({
   locationTag: {
     fontSize: 7,
     fontWeight: 600,
-    backgroundColor: '#f3f4f6',
-    color: '#6b7280',
+    backgroundColor: 'var(--ls-color-muted-soft)',
+    color: 'var(--ls-color-muted)',
     paddingHorizontal: 4,
     paddingVertical: 1,
     borderRadius: 8,

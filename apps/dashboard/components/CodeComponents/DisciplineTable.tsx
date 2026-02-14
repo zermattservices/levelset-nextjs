@@ -49,7 +49,7 @@ export interface DisciplineTableProps {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#31664a'; // TODO: Use design token
+const levelsetGreen = 'var(--ls-color-brand)';
 
 // Color gradient from lightest to darkest red (5 levels)
 const redGradient = [
@@ -64,7 +64,7 @@ const redGradient = [
 const PointsBadge = ({ points, disciplineActions }: { points: number; disciplineActions: any[] }) => {
   const getBadgeColor = () => {
     if (points === 0) {
-      return { bg: '#f3f4f6', color: '#111827' }; // Light grey with black text for 0 points
+      return { bg: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-neutral-soft-foreground)' }; // Light grey with black text for 0 points
     }
     
     // If no actions defined, use fallback
@@ -402,7 +402,7 @@ export function DisciplineTable({
               fontFamily,
               fontSize: 13,
               fontWeight: 600,
-              color: '#111827',
+              color: 'var(--ls-color-neutral-soft-foreground)',
             }}
           >
             {params.value}
@@ -439,7 +439,7 @@ export function DisciplineTable({
               fontFamily,
               fontSize: 13,
               fontWeight: 500,
-              color: '#111827',
+              color: 'var(--ls-color-neutral-soft-foreground)',
             }}
           >
             {params.value ? format(parseISO(params.value), 'M/d/yyyy') : '-'}
@@ -484,7 +484,7 @@ export function DisciplineTable({
   if (data.length === 0 && !loading) {
     return (
       <Box className={className} sx={{ p: 3, textAlign: 'center' }}>
-        <Typography sx={{ fontFamily, color: '#6b7280' }}>No discipline data available</Typography>
+        <Typography sx={{ fontFamily, color: 'var(--ls-color-muted)' }}>No discipline data available</Typography>
       </Box>
     );
   }
@@ -558,18 +558,18 @@ export function DisciplineTable({
         }}
         sx={{
           fontFamily,
-          border: '1px solid #e5e7eb',
+          border: '1px solid var(--ls-color-muted-border)',
           borderRadius: '16px',
           
           // Column headers
           [`& .${gridClasses.columnHeaders}`]: {
-            borderBottom: '1px solid #e5e7eb',
+            borderBottom: '1px solid var(--ls-color-muted-border)',
           },
           [`& .${gridClasses.columnHeader}`]: {
-            backgroundColor: '#f9fafb',
+            backgroundColor: 'var(--ls-color-neutral-foreground)',
             fontWeight: 600,
             fontSize: 14,
-            color: '#111827',
+            color: 'var(--ls-color-neutral-soft-foreground)',
             fontFamily,
             '&:focus, &:focus-within': {
               outline: 'none',
@@ -586,11 +586,11 @@ export function DisciplineTable({
           
           // Cells
           [`& .${gridClasses.cell}`]: {
-            borderBottom: '1px solid #f3f4f6',
+            borderBottom: '1px solid var(--ls-color-muted-soft)',
             borderRight: 'none',
             fontSize: 13,
             fontWeight: 500,
-            color: '#111827',
+            color: 'var(--ls-color-neutral-soft-foreground)',
             fontFamily,
             '&:focus, &:focus-within': {
               outline: 'none',
@@ -602,18 +602,18 @@ export function DisciplineTable({
           
           // Rows
           [`& .${gridClasses.row}:hover`]: {
-            backgroundColor: '#f9fafb',
+            backgroundColor: 'var(--ls-color-neutral-foreground)',
             cursor: 'pointer',
           },
           
           // Footer
           [`& .${gridClasses.footerContainer}`]: {
-            borderTop: '1px solid #e5e7eb',
+            borderTop: '1px solid var(--ls-color-muted-border)',
             fontFamily,
           },
           '& .MuiTablePagination-root': {
             fontFamily,
-            color: '#6b7280',
+            color: 'var(--ls-color-muted)',
           },
           '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
             fontFamily,

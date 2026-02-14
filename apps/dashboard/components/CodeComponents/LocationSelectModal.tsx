@@ -61,14 +61,14 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
               fontFamily,
               fontSize: 24,
               fontWeight: 600,
-              color: '#111827',
+              color: 'var(--ls-color-neutral-soft-foreground)',
             }}
           >
             Select a Location
           </Typography>
 
           {loading && (
-            <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+            <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
           )}
 
           {!loading && error && (
@@ -97,7 +97,7 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
                     paddingX: 6,
                     width: "auto",
                     minWidth: 0,
-                    backgroundColor: '#31664a' /* TODO: Use design token */,
+                    backgroundColor: 'var(--ls-color-brand)',
                     whiteSpace: 'nowrap',
                     color: '#ffffff',
                     boxShadow: '0px 6px 16px rgba(49, 102, 74, 0.12)',
@@ -117,7 +117,7 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
               sx={{
                 fontFamily,
                 fontSize: 14,
-                color: '#6b7280',
+                color: 'var(--ls-color-muted)',
               }}
             >
               No locations available. Please contact an administrator.

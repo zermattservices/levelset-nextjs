@@ -113,7 +113,7 @@ export function RoadmapBoard({ sections }: RoadmapBoardProps) {
                 );
               })}
               {section.items.length === 0 && (
-                <div style={{ padding: '20px', textAlign: 'center', color: '#9ca3af', fontSize: '13px' }}>
+                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ls-color-disabled-text)', fontSize: '13px' }}>
                   No items yet
                 </div>
               )}
@@ -168,7 +168,7 @@ export function RoadmapBoard({ sections }: RoadmapBoardProps) {
               <p style={{ 
                 fontSize: '15px', 
                 lineHeight: '1.7', 
-                color: '#4b5563', 
+                color: 'var(--ls-color-text-secondary)', 
                 marginBottom: '20px',
                 whiteSpace: 'pre-wrap'
               }}>
@@ -180,8 +180,8 @@ export function RoadmapBoard({ sections }: RoadmapBoardProps) {
               display: 'flex', 
               gap: '20px', 
               paddingTop: '16px', 
-              borderTop: '1px solid #e5e7eb',
-              color: '#6b7280',
+              borderTop: '1px solid var(--ls-color-muted-border)',
+              color: 'var(--ls-color-muted)',
               fontSize: '14px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

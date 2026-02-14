@@ -26,10 +26,10 @@ const StyledTextField = styled(TextField)(() => ({
     fontFamily,
     fontSize: 14,
     '&:hover fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#31664a' /* TODO: Use design token */,
+      borderColor: 'var(--ls-color-brand)',
     },
   },
   '& .MuiInputLabel-root': {
@@ -93,9 +93,9 @@ function GoogleSignInButton() {
         padding: '12px 16px',
         fontSize: '14px',
         fontWeight: '500',
-        backgroundColor: '#ffffff',
-        color: '#111827',
-        border: '1px solid #e5e7eb',
+        backgroundColor: 'var(--ls-color-bg-container)',
+        color: 'var(--ls-color-neutral-soft-foreground)',
+        border: '1px solid var(--ls-color-muted-border)',
         borderRadius: '8px',
         cursor: 'default',
         fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
@@ -407,7 +407,7 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 1 }}>
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+                <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
               </Box>
             ) : (
               <>
@@ -480,17 +480,17 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
                     {/* Location access checkboxes - only for multi-location orgs */}
                     {isMultiLocation && (
                       <Box>
-                        <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: '#111827', mb: 1 }}>
+                        <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)', mb: 1 }}>
                           Location Access
                         </Typography>
-                        <Typography sx={{ fontFamily, fontSize: 13, color: '#6b7280', mb: 1.5 }}>
+                        <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)', mb: 1.5 }}>
                           Select which locations this user can access
                         </Typography>
                         <FormGroup sx={{ 
-                          backgroundColor: '#f9fafb', 
+                          backgroundColor: 'var(--ls-color-neutral-foreground)', 
                           borderRadius: 2, 
                           p: 2,
-                          border: '1px solid #e5e7eb',
+                          border: '1px solid var(--ls-color-muted-border)',
                         }}>
                           {orgLocations.map(loc => (
                             <FormControlLabel
@@ -500,8 +500,8 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
                                   checked={selectedLocationIds.has(loc.id)}
                                   onChange={() => handleLocationToggle(loc.id)}
                                   sx={{
-                                    color: '#31664a' /* TODO: Use design token */,
-                                    '&.Mui-checked': { color: '#31664a' /* TODO: Use design token */ },
+                                    color: 'var(--ls-color-brand)',
+                                    '&.Mui-checked': { color: 'var(--ls-color-brand)' },
                                   }}
                                 />
                               }
@@ -522,12 +522,12 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
           </Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 1 }}>
-            <Typography sx={{ fontFamily, fontSize: 14, color: '#4b5563' }}>
+            <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-text-secondary)' }}>
               The user account has been created. Share these login credentials with the new user:
             </Typography>
 
             <Box sx={{ 
-              backgroundColor: '#f9fafb', 
+              backgroundColor: 'var(--ls-color-neutral-foreground)', 
               borderRadius: 2, 
               p: 2,
               display: 'flex',
@@ -535,21 +535,21 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
               gap: 2,
             }}>
               <Box>
-                <Typography sx={{ fontFamily, fontSize: 12, color: '#6b7280', mb: 0.5 }}>
+                <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)', mb: 0.5 }}>
                   Email
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: '#111827', flex: 1 }}>
+                  <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)', flex: 1 }}>
                     {createdEmail}
                   </Typography>
                   <IconButton size="small" onClick={() => handleCopy(createdEmail, 'email')}>
-                    {copiedEmail ? <CheckIcon fontSize="small" sx={{ color: '#31664a' /* TODO: Use design token */ }} /> : <ContentCopyIcon fontSize="small" />}
+                    {copiedEmail ? <CheckIcon fontSize="small" sx={{ color: 'var(--ls-color-brand)' }} /> : <ContentCopyIcon fontSize="small" />}
                   </IconButton>
                 </Box>
               </Box>
 
               <Box>
-                <Typography sx={{ fontFamily, fontSize: 12, color: '#6b7280', mb: 0.5 }}>
+                <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)', mb: 0.5 }}>
                   Temporary Password
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -557,18 +557,18 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
                     fontFamily: 'monospace', 
                     fontSize: 14, 
                     fontWeight: 500, 
-                    color: '#111827',
-                    backgroundColor: '#ffffff',
+                    color: 'var(--ls-color-neutral-soft-foreground)',
+                    backgroundColor: 'var(--ls-color-bg-container)',
                     px: 1.5,
                     py: 0.5,
                     borderRadius: 1,
-                    border: '1px solid #e5e7eb',
+                    border: '1px solid var(--ls-color-muted-border)',
                     flex: 1,
                   }}>
                     {createdPassword}
                   </Typography>
                   <IconButton size="small" onClick={() => handleCopy(createdPassword, 'password')}>
-                    {copiedPassword ? <CheckIcon fontSize="small" sx={{ color: '#31664a' /* TODO: Use design token */ }} /> : <ContentCopyIcon fontSize="small" />}
+                    {copiedPassword ? <CheckIcon fontSize="small" sx={{ color: 'var(--ls-color-brand)' }} /> : <ContentCopyIcon fontSize="small" />}
                   </IconButton>
                 </Box>
               </Box>
@@ -616,7 +616,7 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
               </Box>
             )}
 
-            <Typography sx={{ fontFamily, fontSize: 13, color: '#9ca3af', fontStyle: 'italic' }}>
+            <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-disabled-text)', fontStyle: 'italic' }}>
               Note: Password reset functionality is not yet available. Please save these credentials securely.
             </Typography>
           </Box>
@@ -630,7 +630,7 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
               sx={{
                 fontFamily,
                 textTransform: 'none',
-                color: '#6b7280',
+                color: 'var(--ls-color-muted)',
               }}
             >
               Cancel
@@ -642,12 +642,12 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
               sx={{
                 fontFamily,
                 textTransform: 'none',
-                backgroundColor: '#31664a' /* TODO: Use design token */,
+                backgroundColor: 'var(--ls-color-brand)',
                 '&:hover': {
-                  backgroundColor: '#264d38',
+                  backgroundColor: 'var(--ls-color-brand-hover)',
                 },
                 '&.Mui-disabled': {
-                  backgroundColor: '#e5e7eb',
+                  backgroundColor: 'var(--ls-color-muted-border)',
                 },
               }}
             >
@@ -661,9 +661,9 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
             sx={{
               fontFamily,
               textTransform: 'none',
-              backgroundColor: '#31664a' /* TODO: Use design token */,
+              backgroundColor: 'var(--ls-color-brand)',
               '&:hover': {
-                backgroundColor: '#264d38',
+                backgroundColor: 'var(--ls-color-brand-hover)',
               },
             }}
           >

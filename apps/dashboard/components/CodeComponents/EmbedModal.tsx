@@ -89,7 +89,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
           fontFamily,
           fontWeight: 700,
           fontSize: 20,
-          borderBottom: '1px solid #e5e7eb',
+          borderBottom: '1px solid var(--ls-color-muted-border)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -107,8 +107,8 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
         <Box
           sx={{
             width: 180,
-            borderRight: '1px solid #e5e7eb',
-            backgroundColor: '#f9fafb',
+            borderRight: '1px solid var(--ls-color-muted-border)',
+            backgroundColor: 'var(--ls-color-neutral-foreground)',
             py: 2,
           }}
         >
@@ -124,14 +124,14 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                 py: 1.5,
                 cursor: 'pointer',
                 backgroundColor: selectedMenu === item.key ? '#ffffff' : 'transparent',
-                borderLeft: selectedMenu === item.key ? '3px solid #31664a' : '3px solid transparent', /* TODO: Use design token */
-                color: selectedMenu === item.key ? '#31664a' /* TODO: Use design token */ : '#4b5563',
+                borderLeft: selectedMenu === item.key ? '3px solid var(--ls-color-brand)' : '3px solid transparent',
+                color: selectedMenu === item.key ? 'var(--ls-color-brand)' : 'var(--ls-color-text-secondary)',
                 fontFamily,
                 fontSize: 14,
                 fontWeight: selectedMenu === item.key ? 600 : 500,
                 transition: 'all 0.15s ease',
                 '&:hover': {
-                  backgroundColor: selectedMenu === item.key ? '#ffffff' : '#f3f4f6',
+                  backgroundColor: selectedMenu === item.key ? '#ffffff' : 'var(--ls-color-muted-soft)',
                 },
               }}
             >
@@ -150,7 +150,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                   fontFamily,
                   fontSize: 16,
                   fontWeight: 600,
-                  color: '#111827',
+                  color: 'var(--ls-color-neutral-soft-foreground)',
                   mb: 1,
                 }}
               >
@@ -160,7 +160,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                 sx={{
                   fontFamily,
                   fontSize: 14,
-                  color: '#6b7280',
+                  color: 'var(--ls-color-muted)',
                   mb: 3,
                 }}
               >
@@ -172,9 +172,9 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                   <Box
                     sx={{
                       p: 2,
-                      backgroundColor: '#ffffff',
+                      backgroundColor: 'var(--ls-color-bg-container)',
                       borderRadius: 2,
-                      border: '1px solid #e5e7eb',
+                      border: '1px solid var(--ls-color-muted-border)',
                     }}
                   >
                     <QRCodeSVG
@@ -182,7 +182,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                       size={180}
                       level="H"
                       includeMargin={true}
-                      fgColor="#31664a" /* TODO: Use design token */
+                      fgColor="var(--ls-color-brand)"
                       imageSettings={{
                         src: '/Levelset Icon Non Trans.png',
                         x: undefined,
@@ -203,9 +203,9 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                       sx={{
                         fontFamily,
                         fontSize: 13,
-                        color: '#31664a' /* TODO: Use design token */,
+                        color: 'var(--ls-color-brand)',
                         textDecoration: 'underline',
-                        '&:hover': { color: '#264d38' },
+                        '&:hover': { color: 'var(--ls-color-brand-hover)' },
                       }}
                     >
                       {staticPageUrl}
@@ -213,14 +213,14 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                     <IconButton
                       size="small"
                       onClick={handleCopyUrl}
-                      sx={{ color: copiedUrl ? '#31664a' /* TODO: Use design token */ : '#6b7280' }}
+                      sx={{ color: copiedUrl ? 'var(--ls-color-brand)' : 'var(--ls-color-muted)' }}
                     >
                       {copiedUrl ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
                     </IconButton>
                   </Box>
                 </Box>
               ) : (
-                <Typography sx={{ fontFamily, color: '#6b7280', fontSize: 14 }}>
+                <Typography sx={{ fontFamily, color: 'var(--ls-color-muted)', fontSize: 14 }}>
                   No mobile token found for this location.
                 </Typography>
               )}
@@ -234,7 +234,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                   fontFamily,
                   fontSize: 16,
                   fontWeight: 600,
-                  color: '#111827',
+                  color: 'var(--ls-color-neutral-soft-foreground)',
                   mb: 1,
                 }}
               >
@@ -244,7 +244,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                 sx={{
                   fontFamily,
                   fontSize: 14,
-                  color: '#6b7280',
+                  color: 'var(--ls-color-muted)',
                   mb: 2,
                 }}
               >
@@ -258,7 +258,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                   minHeight: 36,
                   mb: 2,
                   '& .MuiTabs-indicator': {
-                    backgroundColor: '#31664a' /* TODO: Use design token */,
+                    backgroundColor: 'var(--ls-color-brand)',
                   },
                 }}
               >
@@ -272,8 +272,8 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                     textTransform: 'none',
                     minHeight: 36,
                     py: 0,
-                    color: embedTab === 'html' ? '#31664a' /* TODO: Use design token */ : '#6b7280',
-                    '&.Mui-selected': { color: '#31664a' /* TODO: Use design token */ },
+                    color: embedTab === 'html' ? 'var(--ls-color-brand)' : 'var(--ls-color-muted)',
+                    '&.Mui-selected': { color: 'var(--ls-color-brand)' },
                   }}
                 />
                 <Tab
@@ -286,8 +286,8 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                     textTransform: 'none',
                     minHeight: 36,
                     py: 0,
-                    color: embedTab === 'url' ? '#31664a' /* TODO: Use design token */ : '#6b7280',
-                    '&.Mui-selected': { color: '#31664a' /* TODO: Use design token */ },
+                    color: embedTab === 'url' ? 'var(--ls-color-brand)' : 'var(--ls-color-muted)',
+                    '&.Mui-selected': { color: 'var(--ls-color-brand)' },
                   }}
                 />
               </Tabs>
@@ -298,7 +298,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                     sx={{
                       fontFamily,
                       fontSize: 13,
-                      color: '#6b7280',
+                      color: 'var(--ls-color-muted)',
                       mb: 1.5,
                     }}
                   >
@@ -317,7 +317,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                       sx={{
                         fontFamily: 'monospace',
                         fontSize: 12,
-                        color: '#e5e7eb',
+                        color: 'var(--ls-color-muted-border)',
                         whiteSpace: 'pre-wrap',
                         wordBreak: 'break-all',
                         m: 0,
@@ -333,7 +333,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                         position: 'absolute',
                         top: 8,
                         right: 8,
-                        color: copiedEmbed ? '#10b981' : '#9ca3af',
+                        color: copiedEmbed ? '#10b981' : 'var(--ls-color-disabled-text)',
                         '&:hover': { color: '#ffffff' },
                       }}
                     >
@@ -349,7 +349,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                     sx={{
                       fontFamily,
                       fontSize: 13,
-                      color: '#6b7280',
+                      color: 'var(--ls-color-muted)',
                       mb: 1.5,
                     }}
                   >
@@ -368,7 +368,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                       sx={{
                         fontFamily: 'monospace',
                         fontSize: 12,
-                        color: '#e5e7eb',
+                        color: 'var(--ls-color-muted-border)',
                         whiteSpace: 'pre-wrap',
                         wordBreak: 'break-all',
                         m: 0,
@@ -384,7 +384,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                         position: 'absolute',
                         top: 8,
                         right: 8,
-                        color: copiedEmbed ? '#10b981' : '#9ca3af',
+                        color: copiedEmbed ? '#10b981' : 'var(--ls-color-disabled-text)',
                         '&:hover': { color: '#ffffff' },
                       }}
                     >

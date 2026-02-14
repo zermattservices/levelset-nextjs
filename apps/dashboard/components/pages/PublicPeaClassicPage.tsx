@@ -34,7 +34,7 @@ export function PublicPeaClassicPage({ location }: PublicPeaClassicPageProps) {
               fontFamily,
               fontSize: { xs: 16, sm: 18, md: 18 },
               fontWeight: 700,
-              color: '#111827',
+              color: 'var(--ls-color-neutral-soft-foreground)',
             }}
           >
             {location.name ?? 'Ratings Summary'}
@@ -64,7 +64,7 @@ export function PublicPeaClassicPage({ location }: PublicPeaClassicPageProps) {
           sx={{
             fontFamily,
             fontSize: 11,
-            color: '#9ca3af',
+            color: 'var(--ls-color-disabled-text)',
             textAlign: 'center',
           }}
         >

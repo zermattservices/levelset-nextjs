@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .from('shift_areas')
           .insert({
             name,
-            color: color || '#6b7280',
+            color: color || 'var(--ls-color-muted)',
             location_id,
             org_id,
             display_order: nextOrder,

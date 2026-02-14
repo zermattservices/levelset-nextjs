@@ -68,18 +68,18 @@ export function ClientLoginForm({
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--ls-color-bg-container)',
         fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
         padding: '20px'
       }}>
         <div style={{
           maxWidth: '400px',
           width: '100%',
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--ls-color-bg-container)',
           padding: '2rem',
           borderRadius: '12px',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          border: '1px solid #e5e7eb'
+          border: '1px solid var(--ls-color-muted-border)'
         }}>
           <img
             src="/logos/levelset-horizontal-lockup.png"
@@ -127,7 +127,7 @@ export function ClientLoginForm({
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: 'var(--ls-color-neutral)',
                 marginBottom: '6px'
               }}>
                 Email
@@ -140,7 +140,7 @@ export function ClientLoginForm({
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid var(--ls-color-border)',
                   borderRadius: '6px',
                   fontSize: '16px',
                   fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif'
@@ -153,7 +153,7 @@ export function ClientLoginForm({
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
+                color: 'var(--ls-color-neutral)',
                 marginBottom: '6px'
               }}>
                 Password
@@ -166,7 +166,7 @@ export function ClientLoginForm({
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #d1d5db',
+                  border: '1px solid var(--ls-color-border)',
                   borderRadius: '6px',
                   fontSize: '16px',
                   fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif'
@@ -180,7 +180,7 @@ export function ClientLoginForm({
               style={{
                 width: '100%',
                 padding: '12px',
-                backgroundColor: '#31664A' /* TODO: Use design token */,
+                backgroundColor: 'var(--ls-color-brand)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
@@ -216,9 +216,9 @@ export function ClientLoginForm({
                 justifyContent: 'center',
                 gap: '8px',
                 padding: '12px 24px',
-                backgroundColor: '#ffffff',
-                color: '#374151',
-                border: '1px solid #d1d5db',
+                backgroundColor: 'var(--ls-color-bg-container)',
+                color: 'var(--ls-color-neutral)',
+                border: '1px solid var(--ls-color-border)',
                 borderRadius: '6px',
                 fontWeight: '500',
                 fontSize: '14px',
@@ -229,7 +229,7 @@ export function ClientLoginForm({
               }}
               onMouseOver={(e) => {
                 if (!isLoading) {
-                  e.currentTarget.style.backgroundColor = '#f9fafb';
+                  e.currentTarget.style.backgroundColor = 'var(--ls-color-neutral-foreground)';
                 }
               }}
               onMouseOut={(e) => {

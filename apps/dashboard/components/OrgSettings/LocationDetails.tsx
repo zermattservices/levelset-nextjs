@@ -164,7 +164,7 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
   if (loading) {
     return (
       <div className={sty.loadingContainer}>
-        <CircularProgress size={32} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+        <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
       </div>
     );
   }
@@ -207,10 +207,10 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
                       fontFamily: '"Satoshi", sans-serif',
                       fontSize: 12,
                       textTransform: 'none',
-                      borderColor: '#31664a' /* TODO: Use design token */,
-                      color: '#31664a' /* TODO: Use design token */,
+                      borderColor: 'var(--ls-color-brand)',
+                      color: 'var(--ls-color-brand)',
                       '&:hover': {
-                        borderColor: '#31664a' /* TODO: Use design token */,
+                        borderColor: 'var(--ls-color-brand)',
                         backgroundColor: 'rgba(49, 102, 74, 0.08)',
                       },
                     }}
@@ -246,7 +246,7 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
               onClick={() => !disabled && fileInputRef.current?.click()}
               style={{ cursor: disabled ? 'default' : 'pointer' }}
             >
-              <CloudUploadIcon sx={{ fontSize: 32, color: '#9ca3af' }} />
+              <CloudUploadIcon sx={{ fontSize: 32, color: 'var(--ls-color-disabled-text)' }} />
               <span className={sty.uploadText}>
                 {disabled ? 'No logo uploaded' : 'Click to upload an image'}
               </span>
@@ -264,7 +264,7 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
 
           {uploading && (
             <div className={sty.uploadingOverlay}>
-              <CircularProgress size={24} sx={{ color: '#31664a' /* TODO: Use design token */ }} />
+              <CircularProgress size={24} sx={{ color: 'var(--ls-color-brand)' }} />
               <span>Uploading...</span>
             </div>
           )}

@@ -82,7 +82,7 @@ export function PasswordModal({
       PaperProps={{
         sx: {
           borderRadius: 3,
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--ls-color-bg-container)',
         },
       }}
     >
@@ -92,16 +92,16 @@ export function PasswordModal({
           alignItems: 'center',
           gap: 1,
           padding: '20px 24px 16px',
-          borderBottom: '1px solid #e5e7eb',
+          borderBottom: '1px solid var(--ls-color-muted-border)',
         }}
       >
         <IconButton
           aria-label="Go back"
           onClick={handleClose}
           sx={{
-            backgroundColor: '#f3f4f6',
-            color: '#111827',
-            '&:hover': { backgroundColor: '#e5e7eb' },
+            backgroundColor: 'var(--ls-color-muted-soft)',
+            color: 'var(--ls-color-neutral-soft-foreground)',
+            '&:hover': { backgroundColor: 'var(--ls-color-muted-border)' },
           }}
         >
           <ArrowBackIcon />
@@ -111,7 +111,7 @@ export function PasswordModal({
             fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             fontSize: 20,
             fontWeight: 700,
-            color: '#111827',
+            color: 'var(--ls-color-neutral-soft-foreground)',
             padding: 0,
             flex: 1,
           }}
@@ -125,7 +125,7 @@ export function PasswordModal({
           sx={{
             fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             fontSize: 14,
-            color: '#4b5563',
+            color: 'var(--ls-color-text-secondary)',
             marginBottom: 3,
           }}
         >
@@ -151,13 +151,13 @@ export function PasswordModal({
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             },
             '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: error ? '#dc2626' : '#e5e7eb',
+              borderColor: error ? '#dc2626' : 'var(--ls-color-muted-border)',
             },
             '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: error ? '#dc2626' : '#d1d5db',
+              borderColor: error ? '#dc2626' : 'var(--ls-color-border)',
             },
             '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: error ? '#dc2626' : '#31664a' /* TODO: Use design token */,
+              borderColor: error ? '#dc2626' : 'var(--ls-color-brand)',
               borderWidth: '2px',
             },
           }}
@@ -173,14 +173,14 @@ export function PasswordModal({
             textTransform: 'none',
             fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             fontWeight: 600,
-            backgroundColor: '#31664a' /* TODO: Use design token */,
+            backgroundColor: 'var(--ls-color-brand)',
             borderRadius: '8px',
             '&:hover': {
-              backgroundColor: '#264d38',
+              backgroundColor: 'var(--ls-color-brand-hover)',
             },
             '&.Mui-disabled': {
-              backgroundColor: '#d1d5db',
-              color: '#9ca3af',
+              backgroundColor: 'var(--ls-color-border)',
+              color: 'var(--ls-color-disabled-text)',
             },
           }}
         >
