@@ -32,6 +32,8 @@ export function SchedulePage() {
   const [prefillDate, setPrefillDate] = React.useState('');
   const [prefillPositionId, setPrefillPositionId] = React.useState('');
   const [prefillEmployeeId, setPrefillEmployeeId] = React.useState('');
+  const [prefillStartTime, setPrefillStartTime] = React.useState('');
+  const [prefillEndTime, setPrefillEndTime] = React.useState('');
 
   const data = useScheduleData();
 
@@ -91,6 +93,8 @@ export function SchedulePage() {
     if (isPublished) return;
     setEditingShift(null);
     setPrefillDate(date);
+    setPrefillStartTime('');
+    setPrefillEndTime('');
 
     if (data.gridViewMode === 'positions' && entityId && entityId !== '__none__') {
       setPrefillPositionId(entityId);
@@ -111,6 +115,8 @@ export function SchedulePage() {
     setPrefillDate('');
     setPrefillPositionId('');
     setPrefillEmployeeId('');
+    setPrefillStartTime('');
+    setPrefillEndTime('');
     setShiftModalOpen(true);
   };
 
@@ -122,6 +128,27 @@ export function SchedulePage() {
     } catch (err) {
       console.error('Failed to delete shift:', err);
     }
+  };
+
+  const handleDragCreate = (date: string, startTime: string, endTime: string, entityId?: string) => {
+    if (isPublished) return;
+    setEditingShift(null);
+    setPrefillDate(date);
+    setPrefillStartTime(startTime);
+    setPrefillEndTime(endTime);
+
+    if (data.gridViewMode === 'positions' && entityId && entityId !== '__none__') {
+      setPrefillPositionId(entityId);
+      setPrefillEmployeeId('');
+    } else if (data.gridViewMode === 'employees' && entityId) {
+      setPrefillEmployeeId(entityId);
+      setPrefillPositionId('');
+    } else {
+      setPrefillPositionId('');
+      setPrefillEmployeeId('');
+    }
+
+    setShiftModalOpen(true);
   };
 
   const handlePublish = async () => {
@@ -211,6 +238,7 @@ export function SchedulePage() {
                 onCellClick={handleCellClick}
                 onShiftClick={handleShiftClick}
                 onShiftDelete={handleShiftDelete}
+                onDragCreate={handleDragCreate}
               />
             )}
 
@@ -229,6 +257,8 @@ export function SchedulePage() {
         prefillDate={prefillDate}
         prefillPositionId={prefillPositionId}
         prefillEmployeeId={prefillEmployeeId}
+        prefillStartTime={prefillStartTime}
+        prefillEndTime={prefillEndTime}
         positions={data.allPositions}
         employees={data.employees}
         isPublished={isPublished}

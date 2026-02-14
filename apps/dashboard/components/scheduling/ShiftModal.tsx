@@ -6,6 +6,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import type { Shift, Position } from '@/lib/scheduling.types';
 
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
+
 interface Employee {
   id: string;
   full_name: string;
@@ -20,6 +24,8 @@ interface ShiftModalProps {
   prefillDate?: string;
   prefillPositionId?: string;
   prefillEmployeeId?: string;
+  prefillStartTime?: string;
+  prefillEndTime?: string;
   positions: Position[];
   employees: Employee[];
   isPublished: boolean;
@@ -45,12 +51,21 @@ interface ShiftModalProps {
   onUnassign: (shiftId: string, employeeId: string) => Promise<void>;
 }
 
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
 function parseTimeToInput(time?: string): string {
   if (!time) return '09:00';
   return time.slice(0, 5);
 }
 
-function calculateCost(employee: Employee | undefined, startTime: string, endTime: string, breakMinutes: number): number | null {
+function calculateCost(
+  employee: Employee | undefined,
+  startTime: string,
+  endTime: string,
+  breakMinutes: number,
+): number | null {
   if (!employee?.calculated_pay) return null;
   const [sh, sm] = startTime.split(':').map(Number);
   const [eh, em] = endTime.split(':').map(Number);
@@ -60,10 +75,43 @@ function calculateCost(employee: Employee | undefined, startTime: string, endTim
   return Math.round(employee.calculated_pay * netHours * 100) / 100;
 }
 
+function generateTimeOptions(): { value: string; label: string }[] {
+  const options: { value: string; label: string }[] = [];
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      const period = h >= 12 ? 'PM' : 'AM';
+      const displayHour = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      const label = `${displayHour}:${String(m).padStart(2, '0')} ${period}`;
+      options.push({ value, label });
+    }
+  }
+  return options;
+}
+
+const TIME_OPTIONS = generateTimeOptions();
+
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
+
 export function ShiftModal({
-  open, onClose, shift, prefillDate, prefillPositionId, prefillEmployeeId,
-  positions, employees, isPublished,
-  onSave, onUpdate, onDelete, onAssign, onUnassign,
+  open,
+  onClose,
+  shift,
+  prefillDate,
+  prefillPositionId,
+  prefillEmployeeId,
+  prefillStartTime,
+  prefillEndTime,
+  positions,
+  employees,
+  isPublished,
+  onSave,
+  onUpdate,
+  onDelete,
+  onAssign,
+  onUnassign,
 }: ShiftModalProps) {
   const isEdit = !!shift;
 
@@ -78,7 +126,7 @@ export function ShiftModal({
   const [error, setError] = React.useState('');
   const [employeeSearch, setEmployeeSearch] = React.useState('');
 
-  // Reset form when shift/open changes
+  /* Reset form when shift / open changes */
   React.useEffect(() => {
     if (open) {
       if (shift) {
@@ -91,8 +139,8 @@ export function ShiftModal({
         setNotes(shift.notes ?? '');
       } else {
         setDate(prefillDate ?? '');
-        setStartTime('09:00');
-        setEndTime('17:00');
+        setStartTime(prefillStartTime || '09:00');
+        setEndTime(prefillEndTime || '17:00');
         setBreakMin(0);
         setPositionId(prefillPositionId ?? '');
         setEmployeeId(prefillEmployeeId ?? '');
@@ -101,18 +149,24 @@ export function ShiftModal({
       setError('');
       setEmployeeSearch('');
     }
-  }, [open, shift, prefillDate, prefillPositionId, prefillEmployeeId]);
+  }, [open, shift, prefillDate, prefillPositionId, prefillEmployeeId, prefillStartTime, prefillEndTime]);
 
+  /* Derived values */
   const selectedEmployee = employees.find((e) => e.id === employeeId);
   const projectedCost = calculateCost(selectedEmployee, startTime, endTime, breakMin);
 
   const filteredEmployees = React.useMemo(() => {
     if (!employeeSearch) return employees;
     const q = employeeSearch.toLowerCase();
-    return employees.filter((e) =>
-      e.full_name.toLowerCase().includes(q) || e.role.toLowerCase().includes(q),
+    return employees.filter(
+      (e) =>
+        e.full_name.toLowerCase().includes(q) || e.role.toLowerCase().includes(q),
     );
   }, [employees, employeeSearch]);
+
+  /* ---------------------------------------------------------------- */
+  /*  Handlers                                                         */
+  /* ---------------------------------------------------------------- */
 
   const handleSave = async () => {
     if (!date || !startTime || !endTime) {
@@ -129,7 +183,6 @@ export function ShiftModal({
 
     try {
       if (isEdit && shift) {
-        // Update shift fields
         await onUpdate(shift.id, {
           shift_date: date,
           start_time: startTime,
@@ -139,7 +192,6 @@ export function ShiftModal({
           notes: notes || null,
         });
 
-        // Handle employee assignment changes
         const currentEmpId = shift.assignment?.employee_id;
         if (employeeId && employeeId !== currentEmpId) {
           if (currentEmpId) {
@@ -184,18 +236,22 @@ export function ShiftModal({
 
   const readOnly = isPublished && isEdit;
 
+  /* ---------------------------------------------------------------- */
+  /*  Render                                                           */
+  /* ---------------------------------------------------------------- */
+
   return (
     <Drawer
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{ sx: { width: 400, maxWidth: '100vw' } }}
+      PaperProps={{ sx: { width: 420, maxWidth: '100vw' } }}
     >
       <div className={sty.drawer}>
-        {/* Header */}
+        {/* ---------- Header ---------- */}
         <div className={sty.header}>
           <h2 className={sty.title}>{isEdit ? 'Edit Shift' : 'New Shift'}</h2>
-          <IconButton size="small" onClick={onClose}>
+          <IconButton size="small" onClick={onClose} aria-label="Close">
             <CloseIcon fontSize="small" />
           </IconButton>
         </div>
@@ -206,12 +262,15 @@ export function ShiftModal({
           </div>
         )}
 
-        {/* Form */}
+        {/* ---------- Form ---------- */}
         <div className={sty.form}>
           {/* Date */}
           <div className={sty.field}>
-            <label className={sty.label}>Date</label>
+            <label className={sty.label} htmlFor="shift-date">
+              Date
+            </label>
             <input
+              id="shift-date"
               type="date"
               className={sty.input}
               value={date}
@@ -223,31 +282,50 @@ export function ShiftModal({
           {/* Start / End time */}
           <div className={sty.row}>
             <div className={sty.field}>
-              <label className={sty.label}>Start</label>
-              <input
-                type="time"
-                className={sty.input}
+              <label className={sty.label} htmlFor="shift-start">
+                Start
+              </label>
+              <select
+                id="shift-start"
+                className={sty.timeSelect}
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
                 disabled={readOnly}
-              />
+              >
+                {TIME_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className={sty.field}>
-              <label className={sty.label}>End</label>
-              <input
-                type="time"
-                className={sty.input}
+              <label className={sty.label} htmlFor="shift-end">
+                End
+              </label>
+              <select
+                id="shift-end"
+                className={sty.timeSelect}
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
                 disabled={readOnly}
-              />
+              >
+                {TIME_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
           {/* Break */}
           <div className={sty.field}>
-            <label className={sty.label}>Break (minutes)</label>
+            <label className={sty.label} htmlFor="shift-break">
+              Break (minutes)
+            </label>
             <input
+              id="shift-break"
               type="number"
               className={sty.input}
               value={breakMin}
@@ -260,14 +338,17 @@ export function ShiftModal({
 
           {/* Position */}
           <div className={sty.field}>
-            <label className={sty.label}>Position</label>
+            <label className={sty.label} htmlFor="shift-position">
+              Position
+            </label>
             <select
+              id="shift-position"
               className={sty.select}
               value={positionId}
               onChange={(e) => setPositionId(e.target.value)}
               disabled={readOnly}
             >
-              <option value="">— No position —</option>
+              <option value="">-- No position --</option>
               {positions.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.zone} — {p.name}
@@ -288,13 +369,13 @@ export function ShiftModal({
               disabled={readOnly}
             />
             <select
-              className={sty.select}
+              className={sty.employeeSelect}
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
               disabled={readOnly}
               size={Math.min(5, filteredEmployees.length + 1)}
             >
-              <option value="">— Unassigned —</option>
+              <option value="">-- Unassigned --</option>
               {filteredEmployees.map((e) => (
                 <option key={e.id} value={e.id}>
                   {e.full_name} — {e.role}
@@ -316,22 +397,25 @@ export function ShiftModal({
 
           {/* Notes */}
           <div className={sty.field}>
-            <label className={sty.label}>Notes</label>
+            <label className={sty.label} htmlFor="shift-notes">
+              Notes
+            </label>
             <textarea
+              id="shift-notes"
               className={sty.textarea}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              rows={2}
+              rows={3}
               placeholder="Optional notes..."
               disabled={readOnly}
             />
           </div>
         </div>
 
-        {/* Error */}
+        {/* ---------- Error ---------- */}
         {error && <div className={sty.error}>{error}</div>}
 
-        {/* Actions */}
+        {/* ---------- Actions ---------- */}
         {!readOnly && (
           <div className={sty.actions}>
             {isEdit && (
@@ -339,16 +423,27 @@ export function ShiftModal({
                 className={sty.deleteBtn}
                 onClick={handleDelete}
                 disabled={saving}
+                type="button"
               >
                 <DeleteOutlineIcon sx={{ fontSize: 16 }} />
                 Delete
               </button>
             )}
             <div className={sty.actionSpacer} />
-            <button className={sty.cancelBtn} onClick={onClose} disabled={saving}>
+            <button
+              className={sty.cancelBtn}
+              onClick={onClose}
+              disabled={saving}
+              type="button"
+            >
               Cancel
             </button>
-            <button className={sty.saveBtn} onClick={handleSave} disabled={saving}>
+            <button
+              className={sty.saveBtn}
+              onClick={handleSave}
+              disabled={saving}
+              type="button"
+            >
               {saving ? 'Saving...' : 'Save'}
             </button>
           </div>

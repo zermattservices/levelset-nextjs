@@ -1,70 +1,63 @@
+/* ---------------------------------------------------------------
+ * ShiftBlock.module.css
+ *
+ * Styles for the compact shift block used in the weekly schedule grid.
+ * Each block is a small card with a colored left border, a tinted
+ * background, and three lines of text (position/employee, time, zone).
+ * --------------------------------------------------------------- */
+
+/* ---- Root block container ---- */
+
 .block {
   position: relative;
-  padding: 5px 8px;
-  border-radius: 5px;
+  padding: 3px 6px;
+  border-radius: 4px;
   border-left: 3px solid var(--ls-color-muted);
   cursor: pointer;
-  transition: box-shadow 0.15s ease, transform 0.1s ease;
-  min-height: 36px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0;
+  transition: box-shadow 0.15s ease;
+  overflow: hidden;
+  line-height: 1.35;
 }
+
 .block:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  transform: translateY(-1px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
+
+.block:focus-visible {
+  outline: 2px solid var(--ls-color-primary, #3b82f6);
+  outline-offset: 1px;
+}
+
+/* Show the delete button only on hover */
 .block:hover .deleteBtn {
   opacity: 1;
 }
 
+/* ---- Open (unassigned) shift variant ---- */
+
 .openShift {
-  border-left-style: dashed;
   border: 1px dashed var(--ls-color-disabled-text);
   border-left-width: 3px;
+  border-left-style: dashed;
   background-color: var(--ls-color-neutral-foreground) !important;
 }
 
-.timeRow {
+/* ---- Top-right action area (lock / delete) ---- */
+
+.actions {
+  position: absolute;
+  top: 2px;
+  right: 2px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
+  gap: 2px;
+  z-index: 1;
 }
 
-.time {
-  font-family: var(--ls-font-heading);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ls-color-neutral);
-  white-space: nowrap;
-}
-
-.label {
-  font-family: var(--ls-font-body);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--ls-color-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.openLabel {
-  font-family: var(--ls-font-body);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--ls-color-disabled-text);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.costHint {
-  font-family: var(--ls-font-heading);
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--ls-color-disabled-text);
-}
+/* ---- Delete button ---- */
 
 .deleteBtn {
   display: flex;
@@ -76,12 +69,59 @@
   cursor: pointer;
   color: var(--ls-color-disabled-text);
   opacity: 0;
-  transition: opacity 0.15s ease, color 0.15s ease;
-  border-radius: 3px;
-  width: 16px;
-  height: 16px;
+  transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  border-radius: 2px;
+  width: 14px;
+  height: 14px;
 }
+
 .deleteBtn:hover {
   color: var(--ls-color-destructive);
-  background: rgba(220, 38, 38, 0.08);
+  background-color: rgba(220, 38, 38, 0.1);
+}
+
+/* ---- Line 1: Primary label (position name or employee name) ---- */
+
+.primaryLabel {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ls-color-neutral);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 14px; /* clear the action icon area */
+}
+
+/* ---- Line 1 (open variant): "OPEN" label ---- */
+
+.openLabel {
+  font-family: var(--ls-font-body);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ls-color-disabled-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---- Line 2: Time range ---- */
+
+.time {
+  font-family: var(--ls-font-heading);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ls-color-neutral);
+  white-space: nowrap;
+}
+
+/* ---- Line 3: Zone label ---- */
+
+.zoneLabel {
+  font-family: var(--ls-font-body);
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--ls-color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

@@ -19,18 +19,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px 8px;
+  padding: 8px 6px;
   background: var(--ls-color-neutral-foreground);
   border-bottom: 2px solid var(--ls-color-muted-border);
   position: sticky;
   top: 0;
   z-index: 2;
-  gap: 2px;
+  gap: 1px;
 }
 .cornerCell {
   align-items: flex-start;
   justify-content: flex-end;
-  padding-left: 16px;
+  padding-left: 12px;
   position: sticky;
   left: 0;
   z-index: 3;
@@ -38,7 +38,7 @@
 }
 .cornerLabel {
   font-family: var(--ls-font-body);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--ls-color-disabled-text);
   text-transform: uppercase;
@@ -46,7 +46,7 @@
 }
 .dayLabel {
   font-family: var(--ls-font-body);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--ls-color-muted);
   text-transform: uppercase;
@@ -54,7 +54,7 @@
 }
 .dateHeaderLabel {
   font-family: var(--ls-font-heading);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--ls-color-neutral-soft-foreground);
 }
@@ -70,15 +70,15 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--ls-color-muted-soft);
   border-right: 1px solid var(--ls-color-muted-border);
   background: var(--ls-color-bg-container);
   position: sticky;
   left: 0;
   z-index: 1;
-  min-height: 54px;
-  gap: 2px;
+  min-height: 44px;
+  gap: 1px;
 }
 
 .empName {
@@ -89,29 +89,49 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.3;
 }
-.empRole {
+.empNameLink {
   font-family: var(--ls-font-body);
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--ls-color-disabled-text);
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a5276;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  cursor: default;
 }
-.empSummary {
+.empMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.2;
+}
+.empHours {
   font-family: var(--ls-font-heading);
   font-size: 11px;
   font-weight: 500;
   color: var(--ls-color-muted);
+  white-space: nowrap;
+}
+.empWage {
+  font-family: var(--ls-font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  white-space: nowrap;
 }
 
 .positionLabelRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .positionColorDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
   flex-shrink: 0;
 }
 
@@ -123,19 +143,19 @@
 .cell {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 4px;
+  gap: 2px;
+  padding: 3px;
   border-bottom: 1px solid var(--ls-color-muted-soft);
   border-right: 1px solid var(--ls-color-muted-soft);
-  min-height: 54px;
+  min-height: 44px;
   cursor: pointer;
   transition: background 0.1s ease;
 }
 .cell:hover {
-  background: rgba(49, 102, 74, 0.02);
+  background: rgba(49, 102, 74, 0.03);
 }
 .todayCol {
-  background: rgba(49, 102, 74, 0.03);
+  background: rgba(49, 102, 74, 0.025);
 }
 
 .addHint {
@@ -157,11 +177,18 @@
 }
 .summaryLabel {
   font-family: var(--ls-font-body);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--ls-color-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+.summaryCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
 }
 .summaryValue {
   font-family: var(--ls-font-heading);
@@ -171,9 +198,27 @@
 }
 .summaryCost {
   font-family: var(--ls-font-heading);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   color: var(--ls-color-disabled-text);
+}
+
+/* Zone section headers */
+.zoneSectionHeader {
+  min-height: 24px;
+  background: var(--ls-color-neutral-foreground);
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  display: flex;
+  align-items: center;
+}
+.zoneBadge {
+  font-family: var(--ls-font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--ls-radius-sm);
 }
 
 /* ══════════════════════════════════════════
@@ -193,15 +238,15 @@
   background: var(--ls-color-neutral-foreground);
 }
 .dayCornerCell {
-  width: 200px;
+  width: 180px;
   flex-shrink: 0;
-  padding: 10px 16px;
+  padding: 8px 12px;
 }
 
 .timelineHeader {
   flex: 1;
   position: relative;
-  height: 32px;
+  height: 28px;
 }
 .timeLabel {
   position: absolute;
@@ -210,8 +255,16 @@
   font-weight: 500;
   color: var(--ls-color-disabled-text);
   transform: translateX(-50%);
-  bottom: 6px;
+  bottom: 4px;
   white-space: nowrap;
+}
+.timeGridLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--ls-color-muted-soft);
+  pointer-events: none;
 }
 
 /* Day row */
@@ -219,10 +272,10 @@
   display: flex;
   align-items: stretch;
   border-bottom: 1px solid var(--ls-color-muted-soft);
-  min-height: 48px;
+  min-height: 42px;
 }
 .dayRow .rowLabel {
-  width: 200px;
+  width: 180px;
   flex-shrink: 0;
   position: static;
 }
@@ -230,24 +283,47 @@
 .timeline {
   flex: 1;
   position: relative;
-  cursor: pointer;
-  min-height: 48px;
-  padding: 4px 0;
+  cursor: crosshair;
+  min-height: 42px;
+  padding: 3px 0;
+  user-select: none;
 }
 .timeline:hover {
   background: rgba(49, 102, 74, 0.02);
 }
 
+/* Drag preview ghost */
+.dragPreview {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  background: rgba(49, 102, 74, 0.12);
+  border: 1px dashed var(--ls-color-brand);
+  border-radius: var(--ls-radius-sm);
+  pointer-events: none;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dragPreviewLabel {
+  font-family: var(--ls-font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  white-space: nowrap;
+}
+
 .timelineBlock {
   position: absolute;
-  top: 4px;
-  bottom: 4px;
+  top: 3px;
+  bottom: 3px;
   border-radius: var(--ls-radius-sm);
-  padding: 3px 6px;
+  padding: 2px 6px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1px;
+  gap: 0;
   cursor: pointer;
   transition: box-shadow 0.15s ease;
   overflow: hidden;
@@ -269,6 +345,7 @@
   font-weight: 600;
   color: var(--ls-color-neutral);
   white-space: nowrap;
+  line-height: 1.3;
 }
 .timelineBlockLabel {
   font-family: var(--ls-font-body);
@@ -278,6 +355,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 .timelineEmpty {
@@ -291,22 +369,6 @@
 }
 .timeline:hover .timelineEmpty {
   opacity: 1;
-}
-
-/* Zone section headers */
-.zoneSectionHeader {
-  min-height: 28px;
-  background: var(--ls-color-neutral-foreground);
-  border-bottom: 1px solid var(--ls-color-muted-border);
-}
-.zoneBadge {
-  font-family: var(--ls-font-body);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: var(--ls-radius-sm);
 }
 
 /* ── Empty state ── */
