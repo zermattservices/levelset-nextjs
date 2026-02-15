@@ -34,9 +34,7 @@ export default function ProfileScreen() {
     haptics.warning();
     Alert.alert(
       t("profile.signOut"),
-      language === "en"
-        ? "Are you sure you want to sign out?"
-        : "¿Estás seguro de que quieres cerrar sesión?",
+      t("profile.signOutConfirm"),
       [
         {
           text: t("common.cancel"),
@@ -49,7 +47,7 @@ export default function ProfileScreen() {
         },
       ]
     );
-  }, [signOut, t, language]);
+  }, [signOut, t]);
 
   // Get initials for avatar
   const getInitials = (name: string | null | undefined) => {
@@ -77,7 +75,7 @@ export default function ProfileScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.title}>
-          {language === "en" ? "Profile" : "Perfil"}
+          {t("profile.title")}
         </Text>
       </View>
 
@@ -110,7 +108,7 @@ export default function ProfileScreen() {
       {/* Settings Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          {language === "en" ? "Settings" : "Configuracion"}
+          {t("profile.settings")}
         </Text>
 
         {/* Language Toggle */}
@@ -118,9 +116,7 @@ export default function ProfileScreen() {
           <View style={styles.settingInfo}>
             <Text style={styles.settingLabel}>{t("profile.language")}</Text>
             <Text style={styles.settingDescription}>
-              {language === "en"
-                ? "App language preference"
-                : "Preferencia de idioma"}
+              {t("profile.languageDescription")}
             </Text>
           </View>
           <View style={styles.segmentedControl}>

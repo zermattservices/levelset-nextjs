@@ -3,7 +3,7 @@
  * Provides translation helpers for database content with English/Spanish fields
  */
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useForms } from "../context/FormsContext";
 
@@ -19,8 +19,8 @@ export function useTranslatedContent() {
   const { i18n, t } = useTranslation();
   const { language } = useForms();
 
-  // Sync i18n language with FormsContext
-  useMemo(() => {
+  // Sync i18n language with FormsContext — use useEffect, not useMemo
+  useEffect(() => {
     if (i18n.language !== language) {
       i18n.changeLanguage(language);
     }

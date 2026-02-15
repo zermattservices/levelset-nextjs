@@ -47,6 +47,8 @@ const SYMBOL_MAP: Record<string, string> = {
   "photo": "image-outline",
   "doc": "document-outline",
   "paperclip": "attach",
+  "arrow.counterclockwise": "refresh",
+  "mappin.slash": "location-outline",
 };
 
 interface AppIconProps {

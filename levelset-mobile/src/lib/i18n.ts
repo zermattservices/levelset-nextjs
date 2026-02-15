@@ -15,6 +15,7 @@ const en = {
     close: "Close",
     clear: "Clear",
     done: "Done",
+    discard: "Discard",
     loading: "Loading...",
     error: "Error",
     success: "Success",
@@ -25,11 +26,38 @@ const en = {
     noResults: "No results found",
     pullToRefresh: "Pull to refresh",
     tryAgain: "Try Again",
+    comingSoon: "Coming soon",
+    signHere: "Sign here",
+    signed: "Signed",
+  },
+  home: {
+    goodMorning: "Good morning",
+    goodAfternoon: "Good afternoon",
+    goodEvening: "Good evening",
+    loadingLocation: "Loading location data...",
+    submittedSuccess: "Submitted successfully",
+    submitRating: "Submit a Rating",
+    submitRatingDesc: "Record Big 5 competency scores",
+    submitInfraction: "Submit an Infraction",
+    submitInfractionDesc: "Log infractions and capture signatures",
+    manageTeam: "Manage Team",
+    noLocation: "No location selected",
+    noLocationDesc: "Select a location from the bar above to get started",
   },
   forms: {
     // Form titles
     positionalRatings: "Positional Ratings",
     disciplineInfraction: "Discipline Infraction",
+    title: "Forms",
+    subtitle: "Submit team evaluations and documentation",
+    selectLocationPrompt: "Select a location to access forms",
+    infoText: "Forms will be submitted to the Levelset system. Make sure you have an internet connection before submitting.",
+    ratingsDesc: "Record Big 5 competency scores for team members",
+    infractionsDesc: "Log infractions and capture acknowledgements",
+
+    // Discard dialog
+    discardTitle: "Discard Changes?",
+    discardMessage: "You have unsaved changes. Are you sure you want to close this form?",
 
     // Common
     submitSuccess: "Form submitted successfully!",
@@ -90,6 +118,25 @@ const en = {
       feedbackBody: "Take a moment to share this evaluation with {{name}} and discuss specific ways they can improve or continue excelling.",
     },
   },
+  resources: {
+    title: "Resources",
+    subtitle: "Quick access to web resources and documentation",
+    linksInfo: "Links will open in your default browser",
+    unableToOpen: "Unable to open this link",
+    somethingWrong: "Something went wrong. Please try again.",
+    // Resource items
+    dashboard: "Levelset Dashboard",
+    dashboardDesc: "Access the full Levelset web application",
+    training: "Training Materials",
+    trainingDesc: "View training guides and documentation",
+    reports: "Team Reports",
+    reportsDesc: "View team performance and metrics",
+    helpSupport: "Help & Support",
+    helpSupportDesc: "Get help with Levelset features",
+  },
+  location: {
+    changeLocation: "Change location",
+  },
   schedule: {
     mySchedule: "My Schedule",
     staff: "Staff",
@@ -100,11 +147,22 @@ const en = {
     noShiftsDescription: "Your schedule will appear here once available.",
   },
   profile: {
+    title: "Profile",
     signOut: "Sign Out",
+    signOutConfirm: "Are you sure you want to sign out?",
     language: "Language",
+    languageDescription: "App language preference",
     version: "Version",
+    settings: "Settings",
     notLoggedIn: "Not Logged In",
     signInPrompt: "Please sign in to continue",
+  },
+  tabs: {
+    home: "Home",
+    resources: "Resources",
+    forms: "Forms",
+    schedule: "Schedule",
+    profile: "Profile",
   },
 };
 
@@ -117,6 +175,7 @@ const es = {
     close: "Cerrar",
     clear: "Limpiar",
     done: "Listo",
+    discard: "Descartar",
     loading: "Cargando...",
     error: "Error",
     success: "Éxito",
@@ -127,11 +186,38 @@ const es = {
     noResults: "No se encontraron resultados",
     pullToRefresh: "Desliza para actualizar",
     tryAgain: "Intentar de nuevo",
+    comingSoon: "Próximamente",
+    signHere: "Firme aquí",
+    signed: "Firmado",
+  },
+  home: {
+    goodMorning: "Buenos días",
+    goodAfternoon: "Buenas tardes",
+    goodEvening: "Buenas noches",
+    loadingLocation: "Cargando datos de ubicación...",
+    submittedSuccess: "Enviado exitosamente",
+    submitRating: "Enviar una Calificación",
+    submitRatingDesc: "Registrar puntajes de competencias Big 5",
+    submitInfraction: "Enviar una Infracción",
+    submitInfractionDesc: "Registrar infracciones y capturar firmas",
+    manageTeam: "Gestionar Equipo",
+    noLocation: "Ninguna ubicación seleccionada",
+    noLocationDesc: "Selecciona una ubicación de la barra superior para comenzar",
   },
   forms: {
     // Form titles
     positionalRatings: "Calificaciones de Posición",
     disciplineInfraction: "Infracción Disciplinaria",
+    title: "Formularios",
+    subtitle: "Enviar evaluaciones de equipo y documentación",
+    selectLocationPrompt: "Selecciona una ubicación para acceder a los formularios",
+    infoText: "Los formularios se enviarán al sistema Levelset. Asegúrate de tener conexión a internet antes de enviar.",
+    ratingsDesc: "Registrar puntajes de competencias Big 5 para miembros del equipo",
+    infractionsDesc: "Registrar infracciones y capturar reconocimientos",
+
+    // Discard dialog
+    discardTitle: "¿Descartar cambios?",
+    discardMessage: "Tienes cambios sin guardar. ¿Estás seguro de que quieres cerrar este formulario?",
 
     // Common
     submitSuccess: "¡Formulario enviado exitosamente!",
@@ -192,6 +278,25 @@ const es = {
       feedbackBody: "Tómese un momento para compartir esta evaluación con {{name}} y discutir formas específicas en que pueden mejorar o seguir sobresaliendo.",
     },
   },
+  resources: {
+    title: "Recursos",
+    subtitle: "Acceso rápido a recursos web y documentación",
+    linksInfo: "Los enlaces se abrirán en su navegador predeterminado",
+    unableToOpen: "No se puede abrir este enlace",
+    somethingWrong: "Algo salió mal. Por favor intente de nuevo.",
+    // Resource items
+    dashboard: "Panel de Levelset",
+    dashboardDesc: "Accede a la aplicación web completa de Levelset",
+    training: "Materiales de Capacitación",
+    trainingDesc: "Ver guías de capacitación y documentación",
+    reports: "Informes del Equipo",
+    reportsDesc: "Ver rendimiento y métricas del equipo",
+    helpSupport: "Ayuda y Soporte",
+    helpSupportDesc: "Obtén ayuda con las funciones de Levelset",
+  },
+  location: {
+    changeLocation: "Cambiar ubicación",
+  },
   schedule: {
     mySchedule: "Mi Horario",
     staff: "Personal",
@@ -202,11 +307,22 @@ const es = {
     noShiftsDescription: "Su horario aparecerá aquí cuando esté disponible.",
   },
   profile: {
+    title: "Perfil",
     signOut: "Cerrar Sesión",
+    signOutConfirm: "¿Estás seguro de que quieres cerrar sesión?",
     language: "Idioma",
+    languageDescription: "Preferencia de idioma de la aplicación",
     version: "Versión",
+    settings: "Configuración",
     notLoggedIn: "No ha iniciado sesión",
     signInPrompt: "Por favor inicie sesión para continuar",
+  },
+  tabs: {
+    home: "Inicio",
+    resources: "Recursos",
+    forms: "Formularios",
+    schedule: "Horario",
+    profile: "Perfil",
   },
 };
 

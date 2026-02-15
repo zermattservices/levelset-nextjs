@@ -11,6 +11,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import i18n from "../lib/i18n";
 
 export type FormType = "ratings" | "infractions" | null;
 
@@ -76,6 +77,7 @@ export function FormsProvider({ children }: FormsProviderProps) {
 
   const setLanguage = useCallback((lang: "en" | "es") => {
     setLanguageState(lang);
+    i18n.changeLanguage(lang);
   }, []);
 
   const value = useMemo(

@@ -1,10 +1,19 @@
 /**
  * SignatureCanvas Component
- * Canvas-based signature capture using react-native-signature-canvas
+ * Canvas-based signature capture using react-native-signature-canvas.
+ *
+ * Handles touch conflicts with parent ScrollView by temporarily disabling
+ * scroll when the user is actively signing.
  */
 
-import React, { useRef, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useRef, useCallback, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { useTranslation } from "react-i18next";
 import SignatureScreen, {
   SignatureViewRef,
 } from "react-native-signature-canvas";
@@ -20,6 +29,10 @@ interface SignatureCanvasProps {
   onSignatureChange: (dataUrl: string) => void;
   disabled?: boolean;
   required?: boolean;
+  /** Callback to disable parent ScrollView while signing */
+  onSigningStart?: () => void;
+  /** Callback to re-enable parent ScrollView after signing */
+  onSigningEnd?: () => void;
 }
 
 export function SignatureCanvas({
@@ -29,8 +42,12 @@ export function SignatureCanvas({
   onSignatureChange,
   disabled = false,
   required = false,
+  onSigningStart,
+  onSigningEnd,
 }: SignatureCanvasProps) {
   const signatureRef = useRef<SignatureViewRef>(null);
+  const { t } = useTranslation();
+  const [isSigning, setIsSigning] = useState(false);
 
   const handleSignature = useCallback(
     (signature: string) => {
@@ -48,25 +65,45 @@ export function SignatureCanvas({
     onSignatureChange("");
   }, [onSignatureChange]);
 
+  const handleBegin = useCallback(() => {
+    setIsSigning(true);
+    onSigningStart?.();
+  }, [onSigningStart]);
+
+  const handleEnd = useCallback(() => {
+    setIsSigning(false);
+    onSigningEnd?.();
+    // Auto-save on end of stroke
+    signatureRef.current?.readSignature();
+  }, [onSigningEnd]);
+
   const webStyle = `
     .m-signature-pad {
       box-shadow: none;
       border: none;
       margin: 0;
-      border-radius: ${borderRadius.md}px;
+      width: 100%;
+      height: 100%;
     }
     .m-signature-pad--body {
       border: none;
-      border-radius: ${borderRadius.md}px;
+      width: 100%;
+      height: 100%;
     }
     .m-signature-pad--footer {
       display: none;
     }
-    body {
+    body, html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
       background-color: ${colors.surfaceVariant};
     }
     canvas {
-      border-radius: ${borderRadius.md}px;
+      width: 100% !important;
+      height: 100% !important;
+      touch-action: none;
     }
   `;
 
@@ -80,27 +117,31 @@ export function SignatureCanvas({
         {value && !disabled && (
           <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
             <AppIcon name="arrow.counterclockwise" size={16} tintColor={colors.primary} />
-            <Text style={styles.clearButtonText}>Clear</Text>
+            <Text style={styles.clearButtonText}>{t("common.clear")}</Text>
           </TouchableOpacity>
         )}
       </View>
 
       {helperText && <Text style={styles.helperText}>{helperText}</Text>}
 
-      <View style={[styles.canvasContainer, disabled && styles.canvasDisabled]}>
+      <View
+        style={[
+          styles.canvasContainer,
+          disabled && styles.canvasDisabled,
+          isSigning && styles.canvasActive,
+        ]}
+      >
         {disabled ? (
           <View style={styles.disabledOverlay}>
-            <Text style={styles.disabledText}>Signature disabled</Text>
+            <Text style={styles.disabledText}>{t("common.signHere")}</Text>
           </View>
         ) : (
           <SignatureScreen
             ref={signatureRef}
             onOK={handleSignature}
             onEmpty={handleEmpty}
-            onEnd={() => {
-              // Auto-save on end of stroke
-              signatureRef.current?.readSignature();
-            }}
+            onBegin={handleBegin}
+            onEnd={handleEnd}
             autoClear={false}
             descriptionText=""
             clearText=""
@@ -108,13 +149,17 @@ export function SignatureCanvas({
             webStyle={webStyle}
             backgroundColor={colors.surfaceVariant}
             penColor={colors.onSurface}
+            minWidth={1.5}
+            maxWidth={3}
             style={styles.signature}
+            androidLayerType="software"
+            scrollable={false}
           />
         )}
 
-        {!value && !disabled && (
+        {!value && !disabled && !isSigning && (
           <View style={styles.placeholder} pointerEvents="none">
-            <Text style={styles.placeholderText}>Sign here</Text>
+            <Text style={styles.placeholderText}>{t("common.signHere")}</Text>
           </View>
         )}
       </View>
@@ -122,7 +167,7 @@ export function SignatureCanvas({
       {value && (
         <View style={styles.signedIndicator}>
           <AppIcon name="checkmark.circle.fill" size={16} tintColor={colors.success} />
-          <Text style={styles.signedText}>Signed</Text>
+          <Text style={styles.signedText}>{t("common.signed")}</Text>
         </View>
       )}
     </View>
@@ -166,7 +211,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   canvasContainer: {
-    height: 150,
+    height: 160,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
     backgroundColor: colors.surfaceVariant,
@@ -175,11 +220,17 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
   },
+  canvasActive: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
   canvasDisabled: {
     backgroundColor: colors.surfaceDisabled,
   },
   signature: {
     flex: 1,
+    width: "100%",
+    height: "100%",
   },
   placeholder: {
     ...StyleSheet.absoluteFillObject,
