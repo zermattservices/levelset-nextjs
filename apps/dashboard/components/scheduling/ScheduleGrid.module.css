@@ -232,6 +232,14 @@
   padding: 2px 8px;
   border-radius: var(--ls-radius-sm);
 }
+.zoneSectionClickable {
+  cursor: pointer;
+  user-select: none;
+  gap: 6px;
+}
+.zoneSectionClickable:hover {
+  background: var(--ls-color-muted-soft);
+}
 
 /* ══════════════════════════════════════════
    DAY VIEW

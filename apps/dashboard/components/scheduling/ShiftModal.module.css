@@ -151,11 +151,6 @@
   line-height: 34px;
 }
 
-/* Fix date input icon spacing */
-.input[type='date'] {
-  padding-right: 8px;
-}
-
 .input[type='number'] {
   font-family: var(--ls-font-heading);
   font-weight: 600;

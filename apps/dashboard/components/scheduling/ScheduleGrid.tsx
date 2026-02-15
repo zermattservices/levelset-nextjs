@@ -3,7 +3,9 @@ import sty from './ScheduleGrid.module.css';
 import { ShiftBlock } from './ShiftBlock';
 import { ColumnConfigPopover } from './ColumnConfigPopover';
 import AddIcon from '@mui/icons-material/Add';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import type { Shift, Position, GridViewMode, TimeViewMode, LaborSummary } from '@/lib/scheduling.types';
+import { ZONE_COLORS, ZONE_TEXT_COLORS, ZONE_BG_COLORS } from '@/lib/zoneColors';
 import type { ColumnConfig } from './useColumnConfig';
 
 interface Employee {
@@ -35,11 +37,6 @@ interface ScheduleGridProps {
 }
 
 const DAY_LABELS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-const ZONE_COLORS: Record<string, string> = {
-  BOH: '#dc6843',
-  FOH: '#3b82f6',
-};
 
 function formatDateHeader(dateStr: string): { dayLabel: string; dateLabel: string } {
   const d = new Date(dateStr + 'T00:00:00');
@@ -250,6 +247,16 @@ function WeekPositionView({
   const bohPositions = rows.filter((p) => p.zone === 'BOH');
   const fohPositions = rows.filter((p) => p.zone === 'FOH');
 
+  const [collapsedZones, setCollapsedZones] = React.useState<Set<string>>(new Set());
+  const toggleZone = React.useCallback((zone: string) => {
+    setCollapsedZones(prev => {
+      const next = new Set(prev);
+      if (next.has(zone)) next.delete(zone);
+      else next.add(zone);
+      return next;
+    });
+  }, []);
+
   function renderPositionRows(positionList: Position[]) {
     return positionList.map((pos) => {
       const posDayMap = shiftMap.get(pos.id);
@@ -296,21 +303,23 @@ function WeekPositionView({
 
         {bohPositions.length > 0 && (
           <>
-            <div className={`${sty.rowLabel} ${sty.zoneSectionHeader}`}>
-              <span className={sty.zoneBadge} style={{ backgroundColor: '#dc684320', color: '#dc6843' }}>BOH</span>
+            <div className={`${sty.rowLabel} ${sty.zoneSectionHeader} ${sty.zoneSectionClickable}`} onClick={() => toggleZone('BOH')}>
+              <ExpandMoreIcon sx={{ fontSize: 16, color: ZONE_TEXT_COLORS['BOH'], transition: 'transform 0.2s ease', transform: collapsedZones.has('BOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
+              <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['BOH'], color: ZONE_TEXT_COLORS['BOH'] }}>BOH</span>
             </div>
             {days.map((day) => (<div key={day} className={`${sty.cell} ${sty.zoneSectionHeader}`} />))}
-            {renderPositionRows(bohPositions)}
+            {!collapsedZones.has('BOH') && renderPositionRows(bohPositions)}
           </>
         )}
 
         {fohPositions.length > 0 && (
           <>
-            <div className={`${sty.rowLabel} ${sty.zoneSectionHeader}`}>
-              <span className={sty.zoneBadge} style={{ backgroundColor: '#3b82f620', color: '#3b82f6' }}>FOH</span>
+            <div className={`${sty.rowLabel} ${sty.zoneSectionHeader} ${sty.zoneSectionClickable}`} onClick={() => toggleZone('FOH')}>
+              <ExpandMoreIcon sx={{ fontSize: 16, color: ZONE_TEXT_COLORS['FOH'], transition: 'transform 0.2s ease', transform: collapsedZones.has('FOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
+              <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['FOH'], color: ZONE_TEXT_COLORS['FOH'] }}>FOH</span>
             </div>
             {days.map((day) => (<div key={day} className={`${sty.cell} ${sty.zoneSectionHeader}`} />))}
-            {renderPositionRows(fohPositions)}
+            {!collapsedZones.has('FOH') && renderPositionRows(fohPositions)}
           </>
         )}
 
@@ -643,6 +652,19 @@ function DayPositionView({
     return result;
   }, [positions, shiftMap]);
 
+  const bohPositions = rows.filter((p) => p.zone === 'BOH');
+  const fohPositions = rows.filter((p) => p.zone === 'FOH');
+
+  const [collapsedZones, setCollapsedZones] = React.useState<Set<string>>(new Set());
+  const toggleZone = React.useCallback((zone: string) => {
+    setCollapsedZones(prev => {
+      const next = new Set(prev);
+      if (next.has(zone)) next.delete(zone);
+      else next.add(zone);
+      return next;
+    });
+  }, []);
+
   const timeRange = React.useMemo(() => {
     let minHour = 6;
     let maxHour = 23;
@@ -677,21 +699,60 @@ function DayPositionView({
             ))}
           </div>
         </div>
-        {rows.map((pos) => (
-          <DayPositionRow
-            key={pos.id}
-            pos={pos}
-            posShifts={shiftMap.get(pos.id) ?? []}
-            selectedDay={selectedDay}
-            timeRange={timeRange}
-            totalMinutes={totalMinutes}
-            shiftStyleFn={shiftStyle}
-            isPublished={isPublished}
-            onCellClick={onCellClick}
-            onShiftClick={onShiftClick}
-            onDragCreate={onDragCreate}
-          />
-        ))}
+
+        {bohPositions.length > 0 && (
+          <>
+            <div className={`${sty.dayRow} ${sty.zoneSectionHeader} ${sty.zoneSectionClickable}`} onClick={() => toggleZone('BOH')}>
+              <div className={sty.rowLabel}>
+                <ExpandMoreIcon sx={{ fontSize: 16, color: ZONE_TEXT_COLORS['BOH'], transition: 'transform 0.2s ease', transform: collapsedZones.has('BOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
+                <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['BOH'], color: ZONE_TEXT_COLORS['BOH'] }}>BOH</span>
+              </div>
+              <div className={sty.timeline} style={{ cursor: 'default' }} />
+            </div>
+            {!collapsedZones.has('BOH') && bohPositions.map((pos) => (
+              <DayPositionRow
+                key={pos.id}
+                pos={pos}
+                posShifts={shiftMap.get(pos.id) ?? []}
+                selectedDay={selectedDay}
+                timeRange={timeRange}
+                totalMinutes={totalMinutes}
+                shiftStyleFn={shiftStyle}
+                isPublished={isPublished}
+                onCellClick={onCellClick}
+                onShiftClick={onShiftClick}
+                onDragCreate={onDragCreate}
+              />
+            ))}
+          </>
+        )}
+
+        {fohPositions.length > 0 && (
+          <>
+            <div className={`${sty.dayRow} ${sty.zoneSectionHeader} ${sty.zoneSectionClickable}`} onClick={() => toggleZone('FOH')}>
+              <div className={sty.rowLabel}>
+                <ExpandMoreIcon sx={{ fontSize: 16, color: ZONE_TEXT_COLORS['FOH'], transition: 'transform 0.2s ease', transform: collapsedZones.has('FOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
+                <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['FOH'], color: ZONE_TEXT_COLORS['FOH'] }}>FOH</span>
+              </div>
+              <div className={sty.timeline} style={{ cursor: 'default' }} />
+            </div>
+            {!collapsedZones.has('FOH') && fohPositions.map((pos) => (
+              <DayPositionRow
+                key={pos.id}
+                pos={pos}
+                posShifts={shiftMap.get(pos.id) ?? []}
+                selectedDay={selectedDay}
+                timeRange={timeRange}
+                totalMinutes={totalMinutes}
+                shiftStyleFn={shiftStyle}
+                isPublished={isPublished}
+                onCellClick={onCellClick}
+                onShiftClick={onShiftClick}
+                onDragCreate={onDragCreate}
+              />
+            ))}
+          </>
+        )}
       </div>
     </div>
   );

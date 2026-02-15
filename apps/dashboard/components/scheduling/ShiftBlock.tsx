@@ -3,6 +3,7 @@ import sty from './ShiftBlock.module.css';
 import CloseIcon from '@mui/icons-material/Close';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import type { Shift, GridViewMode } from '@/lib/scheduling.types';
+import { ZONE_COLORS } from '@/lib/zoneColors';
 
 interface ShiftBlockProps {
   shift: Shift;
@@ -11,12 +12,6 @@ interface ShiftBlockProps {
   onClick: (shift: Shift) => void;
   onDelete?: (shiftId: string) => void;
 }
-
-/** Zone-based accent colors for shift block borders and tinted backgrounds. */
-const ZONE_COLORS: Record<string, string> = {
-  BOH: '#dc6843',
-  FOH: '#3b82f6',
-};
 
 /** Human-readable zone labels rendered on line 3 of the block. */
 const ZONE_LABELS: Record<string, string> = {

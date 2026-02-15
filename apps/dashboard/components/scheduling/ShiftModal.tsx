@@ -5,6 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import type { Shift, Position } from '@/lib/scheduling.types';
+import { LsDatePicker } from '@/components/shared/LsDatePicker';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -15,6 +16,8 @@ interface Employee {
   full_name: string;
   role: string;
   calculated_pay?: number;
+  is_foh: boolean;
+  is_boh: boolean;
 }
 
 interface ShiftModalProps {
@@ -171,6 +174,27 @@ export function ShiftModal({
     );
   }, [employees, employeeSearch]);
 
+  /* Filter positions based on selected employee's zone assignments */
+  const zoneFilteredPositions = React.useMemo(() => {
+    if (!employeeId) return positions;
+    const emp = employees.find((e) => e.id === employeeId);
+    if (!emp) return positions;
+    return positions.filter((p) => {
+      if (p.zone === 'BOH' && !emp.is_boh) return false;
+      if (p.zone === 'FOH' && !emp.is_foh) return false;
+      return true;
+    });
+  }, [positions, employeeId, employees]);
+
+  /* Clear position if it becomes invalid after employee zone filtering */
+  React.useEffect(() => {
+    if (positionId && zoneFilteredPositions.length > 0) {
+      if (!zoneFilteredPositions.some((p) => p.id === positionId)) {
+        setPositionId('');
+      }
+    }
+  }, [zoneFilteredPositions, positionId]);
+
   /* ---------------------------------------------------------------- */
   /*  Handlers                                                         */
   /* ---------------------------------------------------------------- */
@@ -182,6 +206,10 @@ export function ShiftModal({
     }
     if (startTime >= endTime) {
       setError('End time must be after start time.');
+      return;
+    }
+    if (!positionId) {
+      setError('A position is required.');
       return;
     }
 
@@ -275,16 +303,21 @@ export function ShiftModal({
         <div className={sty.form}>
           {/* Date */}
           <div className={sty.field}>
-            <label className={sty.label} htmlFor="shift-date">
-              Date
-            </label>
-            <input
-              id="shift-date"
-              type="date"
-              className={sty.input}
+            <LsDatePicker
+              label="Date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(newDate) => {
+                if (newDate) {
+                  const y = newDate.getFullYear();
+                  const m = String(newDate.getMonth() + 1).padStart(2, '0');
+                  const d = String(newDate.getDate()).padStart(2, '0');
+                  setDate(`${y}-${m}-${d}`);
+                } else {
+                  setDate('');
+                }
+              }}
               disabled={readOnly}
+              fullWidth
             />
           </div>
 
@@ -348,7 +381,7 @@ export function ShiftModal({
           {/* Position */}
           <div className={sty.field}>
             <label className={sty.label} htmlFor="shift-position">
-              Position
+              Position <span style={{ color: 'var(--ls-color-destructive)' }}>*</span>
             </label>
             <select
               id="shift-position"
@@ -357,8 +390,8 @@ export function ShiftModal({
               onChange={(e) => setPositionId(e.target.value)}
               disabled={readOnly}
             >
-              <option value="">-- No position --</option>
-              {positions.map((p) => (
+              <option value="">-- Select position --</option>
+              {zoneFilteredPositions.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.zone} — {p.name}
                 </option>
