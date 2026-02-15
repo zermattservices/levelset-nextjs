@@ -11,9 +11,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Dimensions,
   KeyboardAvoidingView,
-  Platform,
+  useWindowDimensions,
   ViewStyle,
   StyleProp,
 } from "react-native";
@@ -26,7 +25,7 @@ import ReAnimated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
 import { colors } from "../../lib/colors";
-import { borderRadius, spacing } from "../../lib/theme";
+import { borderRadius, spacing, haptics } from "../../lib/theme";
 import { typography } from "../../lib/fonts";
 
 interface GlassModalProps {
@@ -39,8 +38,6 @@ interface GlassModalProps {
   fullScreen?: boolean;
   style?: StyleProp<ViewStyle>;
 }
-
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export function GlassModal({
   visible,
@@ -55,6 +52,7 @@ export function GlassModal({
   const { GlassView } = useGlass();
   const useGlassEffect = isGlassAvailable();
   const insets = useSafeAreaInsets();
+  const { height: SCREEN_HEIGHT } = useWindowDimensions();
 
   const fadeAnim = useSharedValue(0);
   const slideAnim = useSharedValue(SCREEN_HEIGHT);
@@ -82,7 +80,7 @@ export function GlassModal({
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+        <TouchableOpacity onPress={() => { haptics.light(); onClose(); }} style={styles.closeButton}>
           <Text style={styles.closeText}>Close</Text>
         </TouchableOpacity>
       </View>
@@ -111,7 +109,7 @@ export function GlassModal({
 
   const containerStyle = fullScreen
     ? [styles.fullScreenContainer, { paddingTop: insets.top }]
-    : [styles.modalContainer, style];
+    : [styles.modalContainer, { maxHeight: SCREEN_HEIGHT * 0.85 }, style];
 
   return (
     <Modal
@@ -122,7 +120,7 @@ export function GlassModal({
       statusBarTranslucent
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={process.env.EXPO_OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
         {/* Backdrop */}
@@ -136,7 +134,7 @@ export function GlassModal({
 
         {/* Modal Content */}
         <ReAnimated.View
-          style={[styles.animatedContainer, contentAnimStyle]}
+          style={[styles.animatedContainer, { maxHeight: SCREEN_HEIGHT * 0.9 }, contentAnimStyle]}
         >
           {useGlassEffect && GlassView ? (
             <GlassView
@@ -164,17 +162,14 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    backgroundColor: colors.scrim,
   },
-  animatedContainer: {
-    maxHeight: SCREEN_HEIGHT * 0.9,
-  },
+  animatedContainer: {},
   modalContainer: {
     borderTopLeftRadius: borderRadius.lg,
     borderTopRightRadius: borderRadius.lg,
     borderCurve: "continuous",
     overflow: "hidden",
-    maxHeight: SCREEN_HEIGHT * 0.85,
   },
   fullScreenContainer: {
     flex: 1,

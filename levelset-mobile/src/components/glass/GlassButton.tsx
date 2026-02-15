@@ -247,10 +247,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 8,
   },
-  iconContainer: {
-    marginRight: 8,
-  },
+  iconContainer: {},
   label: {
     fontFamily: typography.button.fontFamily,
     fontWeight: "600",

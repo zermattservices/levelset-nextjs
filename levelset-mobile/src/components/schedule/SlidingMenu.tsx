@@ -9,7 +9,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
+  useWindowDimensions,
   Pressable,
 } from "react-native";
 import ReAnimated, {
@@ -28,13 +28,12 @@ import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const MENU_WIDTH = SCREEN_WIDTH * 0.75;
-
 export function SlidingMenu() {
   const { GlassView } = useGlass();
   const useGlassEffect = isGlassAvailable();
   const insets = useSafeAreaInsets();
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
+  const MENU_WIDTH = SCREEN_WIDTH * 0.75;
   const { isMenuOpen, closeMenu, activeTab, setActiveTab, menuTabs } =
     useSlidingMenu();
 
@@ -142,7 +141,7 @@ export function SlidingMenu() {
 
       {/* Menu */}
       <GestureDetector gesture={panGesture}>
-        <ReAnimated.View style={[styles.menuContainer, menuStyle]}>
+        <ReAnimated.View style={[styles.menuContainer, { width: MENU_WIDTH }, menuStyle]}>
           {useGlassEffect && GlassView ? (
             <GlassView
               style={styles.glassMenu}
@@ -163,7 +162,7 @@ export function SlidingMenu() {
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    backgroundColor: colors.scrim,
     zIndex: 100,
   },
   menuContainer: {
@@ -171,7 +170,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     bottom: 0,
-    width: MENU_WIDTH,
     zIndex: 101,
   },
   glassMenu: {
@@ -222,9 +220,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
+    gap: 14,
   },
   menuIcon: {
-    marginRight: 14,
     width: 22,
     height: 22,
   },

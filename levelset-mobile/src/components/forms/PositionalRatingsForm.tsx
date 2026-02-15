@@ -376,6 +376,7 @@ export function PositionalRatingsForm() {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
+      contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >

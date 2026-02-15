@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../src/context/AuthContext";
 import { useForms } from "../../src/context/FormsContext";
 import { colors } from "../../src/lib/colors";
-import { typography } from "../../src/lib/fonts";
+import { typography, fontWeights } from "../../src/lib/fonts";
 import { borderRadius, haptics } from "../../src/lib/theme";
 import { AppIcon } from "../../src/components/ui";
 import { GlassCard } from "../../src/components/glass";
@@ -83,8 +83,8 @@ export default function HomeScreen() {
           }}
         >
           <View style={styles.actionContent}>
-            <View style={[styles.iconBadge, { backgroundColor: "rgba(245, 158, 11, 0.12)" }]}>
-              <AppIcon name="star.fill" size={22} tintColor="#F59E0B" />
+            <View style={[styles.iconBadge, { backgroundColor: colors.warningTransparent }]}>
+              <AppIcon name="star.fill" size={22} tintColor={colors.warning} />
             </View>
             <View style={styles.actionInfo}>
               <Text style={styles.actionTitle}>{t("home.submitRating")}</Text>
@@ -105,8 +105,8 @@ export default function HomeScreen() {
           }}
         >
           <View style={styles.actionContent}>
-            <View style={[styles.iconBadge, { backgroundColor: "rgba(239, 68, 68, 0.12)" }]}>
-              <AppIcon name="exclamationmark.triangle" size={22} tintColor="#EF4444" />
+            <View style={[styles.iconBadge, { backgroundColor: colors.errorTransparent }]}>
+              <AppIcon name="exclamationmark.triangle" size={22} tintColor={colors.error} />
             </View>
             <View style={styles.actionInfo}>
               <Text style={styles.actionTitle}>{t("home.submitInfraction")}</Text>
@@ -122,8 +122,8 @@ export default function HomeScreen() {
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
           <GlassCard style={styles.actionCard}>
             <View style={styles.actionContent}>
-              <View style={[styles.iconBadge, { backgroundColor: "rgba(59, 130, 246, 0.12)" }]}>
-                <AppIcon name="person.2" size={22} tintColor="#3B82F6" />
+              <View style={[styles.iconBadge, { backgroundColor: colors.infoTransparent }]}>
+                <AppIcon name="person.2" size={22} tintColor={colors.info} />
               </View>
               <View style={styles.actionInfo}>
                 <Text style={styles.actionTitle}>{t("home.manageTeam")}</Text>
@@ -156,13 +156,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   greeting: {
-    fontSize: 24,
-    fontWeight: "600",
+    ...typography.h2,
+    fontWeight: fontWeights.semibold,
     color: colors.onSurfaceVariant,
     letterSpacing: -0.3,
   },
   userName: {
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
     color: colors.onBackground,
   },
   successBanner: {
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
     padding: 14,
     borderWidth: 1,
-    borderColor: "rgba(16, 185, 129, 0.2)",
+    borderColor: colors.successTransparent,
     gap: 12,
   },
   successInfo: {

@@ -43,7 +43,7 @@ export function ShiftCard({ shift, onPress, index }: ShiftCardProps) {
     <Animated.View entering={FadeIn.delay((index ?? 0) * 50)}>
       <GlassCard onPress={onPress} style={styles.card}>
         <View style={styles.header}>
-          <Text style={styles.date}>{formatDate(shift.date)}</Text>
+          <Text selectable style={styles.date}>{formatDate(shift.date)}</Text>
           <View
             style={[
               styles.hoursBadge,
@@ -61,15 +61,15 @@ export function ShiftCard({ shift, onPress, index }: ShiftCardProps) {
           </View>
         </View>
 
-        <Text style={styles.time}>
+        <Text selectable style={styles.time}>
           {shift.startTime} - {shift.endTime}
         </Text>
 
         {(shift.area || shift.role) && (
           <View style={styles.details}>
-            {shift.area && <Text style={styles.detail}>{shift.area}</Text>}
+            {shift.area && <Text selectable style={styles.detail}>{shift.area}</Text>}
             {shift.area && shift.role && <Text style={styles.separator}>•</Text>}
-            {shift.role && <Text style={styles.detail}>{shift.role}</Text>}
+            {shift.role && <Text selectable style={styles.detail}>{shift.role}</Text>}
           </View>
         )}
 

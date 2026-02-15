@@ -58,10 +58,23 @@ export const colors = {
   glassTint: glass.tint,
   glassTintLight: glass.tintLight,
 
+  // Scrim (modal/menu backdrop overlay)
+  scrim: "rgba(0, 0, 0, 0.4)",
+
   // Transparent variations - all exact matches
   primaryTransparent: glass.primaryTransparent,
   blackTransparent: glass.blackTransparent,
   whiteTransparent: glass.whiteTransparent,
+
+  // Status transparent backgrounds
+  warningTransparent: "rgba(245, 158, 11, 0.12)",
+  errorTransparent: "rgba(239, 68, 68, 0.12)",
+  infoTransparent: "rgba(59, 130, 246, 0.12)",
+  successTransparent: "rgba(16, 185, 129, 0.12)",
+  mutedTransparent: "rgba(107, 114, 128, 0.1)",
+
+  // Overlay
+  overlay: basic.overlayBg, // rgba(10, 10, 10, 0.5)
 } as const;
 
 export type ColorKey = keyof typeof colors;

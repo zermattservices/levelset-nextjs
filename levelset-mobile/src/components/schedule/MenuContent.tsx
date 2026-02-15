@@ -10,6 +10,7 @@ import { useSlidingMenu } from "../../context/SlidingMenuContext";
 import { AppIcon } from "../../components/ui";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
+import { haptics } from "../../lib/theme";
 
 // Import menu screens
 import MyScheduleScreen from "../../screens/menu/MyScheduleScreen";
@@ -53,7 +54,10 @@ export function MenuContent({ children }: MenuContentProps) {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.menuButton}
-          onPress={openMenu}
+          onPress={() => {
+            haptics.light();
+            openMenu();
+          }}
           activeOpacity={0.7}
         >
           <AppIcon
@@ -94,6 +98,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 22,
+    borderCurve: "continuous",
     backgroundColor: colors.surfaceVariant,
   },
   headerTitle: {

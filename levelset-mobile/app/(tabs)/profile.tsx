@@ -91,11 +91,11 @@ export default function ProfileScreen() {
               </View>
             )}
           </View>
-          <Text style={styles.userName}>
+          <Text selectable style={styles.userName}>
             {fullName || email || t("profile.notLoggedIn")}
           </Text>
           {email && fullName && (
-            <Text style={styles.userEmail}>{email}</Text>
+            <Text selectable style={styles.userEmail}>{email}</Text>
           )}
           {role && (
             <View style={styles.roleBadge}>

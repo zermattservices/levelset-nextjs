@@ -20,7 +20,7 @@ import SignatureScreen, {
 import { AppIcon } from "../ui";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
-import { borderRadius } from "../../lib/theme";
+import { borderRadius, haptics } from "../../lib/theme";
 
 interface SignatureCanvasProps {
   label: string;
@@ -61,6 +61,7 @@ export function SignatureCanvas({
   }, [onSignatureChange]);
 
   const handleClear = useCallback(() => {
+    haptics.light();
     signatureRef.current?.clearSignature();
     onSignatureChange("");
   }, [onSignatureChange]);
@@ -202,13 +203,13 @@ const styles = StyleSheet.create({
   clearButton: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   clearButtonText: {
     ...typography.labelSmall,
     color: colors.primary,
-    marginLeft: 4,
   },
   canvasContainer: {
     height: 160,
@@ -253,12 +254,12 @@ const styles = StyleSheet.create({
   signedIndicator: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
     marginTop: 8,
   },
   signedText: {
     ...typography.labelSmall,
     color: colors.success,
-    marginLeft: 4,
   },
 });
 

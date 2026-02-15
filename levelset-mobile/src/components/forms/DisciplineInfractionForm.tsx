@@ -14,7 +14,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Switch,
-  Platform,
   Alert,
   ActionSheetIOS,
 } from "react-native";
@@ -296,7 +295,7 @@ export function DisciplineInfractionForm() {
       t("common.cancel", "Cancel"),
     ];
 
-    if (Platform.OS === "ios") {
+    if (process.env.EXPO_OS === "ios") {
       ActionSheetIOS.showActionSheetWithOptions(
         {
           options,
@@ -433,6 +432,7 @@ export function DisciplineInfractionForm() {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
+      contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
@@ -762,13 +762,13 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
   },
   pointsPositive: {
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    backgroundColor: colors.errorTransparent,
   },
   pointsNegative: {
-    backgroundColor: "rgba(16, 185, 129, 0.1)",
+    backgroundColor: colors.successTransparent,
   },
   pointsZero: {
-    backgroundColor: "rgba(107, 114, 128, 0.1)",
+    backgroundColor: colors.mutedTransparent,
   },
   pointsValue: {
     ...typography.labelLarge,
@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
     minHeight: 100,
   },
   submitErrorContainer: {
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    backgroundColor: colors.errorTransparent,
     borderWidth: 1,
     borderColor: colors.error,
     borderRadius: borderRadius.md,
@@ -902,12 +902,12 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: colors.overlay,
     alignItems: "center",
     justifyContent: "center",
   },
   thumbnailRemoveText: {
-    color: "#fff",
+    color: colors.onPrimary,
     fontSize: 10,
     fontWeight: "700",
   },

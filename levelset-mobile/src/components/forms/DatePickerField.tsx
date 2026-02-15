@@ -9,7 +9,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Platform,
 } from "react-native";
 import DateTimePicker, {
   DateTimePickerEvent,
@@ -18,7 +17,7 @@ import { AppIcon } from "../ui";
 import { format } from "date-fns";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
-import { borderRadius } from "../../lib/theme";
+import { borderRadius, haptics } from "../../lib/theme";
 
 interface DatePickerFieldProps {
   label: string;
@@ -45,7 +44,7 @@ export function DatePickerField({
 
   const handleChange = useCallback(
     (event: DateTimePickerEvent, selectedDate?: Date) => {
-      if (Platform.OS === "android") {
+      if (process.env.EXPO_OS === "android") {
         setShowAndroidPicker(false);
       }
       if (event.type === "set" && selectedDate) {
@@ -57,6 +56,7 @@ export function DatePickerField({
 
   const handleAndroidPress = useCallback(() => {
     if (!disabled) {
+      haptics.light();
       setShowAndroidPicker(true);
     }
   }, [disabled]);
@@ -78,7 +78,7 @@ export function DatePickerField({
         ]}
       >
         <AppIcon name="calendar" size={20} tintColor={colors.onSurfaceVariant} style={styles.icon} />
-        {Platform.OS === "ios" ? (
+        {process.env.EXPO_OS === "ios" ? (
           <DateTimePicker
             value={value}
             mode="date"
@@ -104,7 +104,7 @@ export function DatePickerField({
       {error && <Text style={styles.errorText}>{error}</Text>}
 
       {/* Android Picker */}
-      {Platform.OS === "android" && showAndroidPicker && (
+      {process.env.EXPO_OS === "android" && showAndroidPicker && (
         <DateTimePicker
           value={value}
           mode="date"
@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
   trigger: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.outline,
@@ -148,9 +149,7 @@ const styles = StyleSheet.create({
   triggerError: {
     borderColor: colors.error,
   },
-  icon: {
-    marginRight: 12,
-  },
+  icon: {},
   compactPicker: {
     flex: 1,
   },

@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 8,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.outline,
@@ -192,6 +193,7 @@ const styles = StyleSheet.create({
   radioContainer: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
     flex: 1,
   },
   radioOuter: {
@@ -202,7 +204,6 @@ const styles = StyleSheet.create({
     borderColor: colors.outline,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
   },
   radioInner: {
     width: 12,
@@ -222,9 +223,7 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     marginTop: 2,
   },
-  checkmark: {
-    marginLeft: 8,
-  },
+  checkmark: {},
   errorText: {
     ...typography.bodySmall,
     color: colors.error,

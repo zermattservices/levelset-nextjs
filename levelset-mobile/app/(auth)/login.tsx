@@ -10,7 +10,6 @@ import {
   TextInput,
   StyleSheet,
   KeyboardAvoidingView,
-  Platform,
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
@@ -100,7 +99,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={process.env.EXPO_OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <ScrollView

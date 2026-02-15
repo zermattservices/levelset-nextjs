@@ -45,7 +45,7 @@ function FormsScreenContent() {
             onPress={clearLastSubmission}
           >
             <View style={styles.successContent}>
-              <AppIcon name="checkmark.circle.fill" size={20} tintColor="#10B981" />
+              <AppIcon name="checkmark.circle.fill" size={20} tintColor={colors.success} />
               <View style={styles.successInfo}>
                 <Text style={styles.successTitle}>
                   {t("forms.submitSuccess")}
@@ -158,10 +158,10 @@ const styles = StyleSheet.create({
   successContent: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
   },
   successInfo: {
     flex: 1,
-    marginLeft: 12,
   },
   successTitle: {
     ...typography.labelLarge,
@@ -178,17 +178,18 @@ const styles = StyleSheet.create({
   formCardContent: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 16,
   },
   iconContainer: {
     width: 48,
     height: 48,
     borderRadius: 12,
+    borderCurve: "continuous",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 16,
   },
   ratingsIcon: {
-    backgroundColor: "rgba(245, 158, 11, 0.15)",
+    backgroundColor: colors.warningTransparent,
   },
   infractionsIcon: {
     backgroundColor: colors.primaryTransparent,
