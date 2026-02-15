@@ -12,7 +12,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useSchedule } from "../../context/ScheduleContext";
-import { ShiftCard } from "../../components/schedule";
+import { ShiftCard } from "../../components/schedule/ShiftCard";
 import { GlassCard } from "../../components/glass";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";

@@ -18,9 +18,11 @@ import {
   Alert,
   ActionSheetIOS,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import * as DocumentPicker from "expo-document-picker";
 import { useRouter } from "expo-router";
+
+// Lazy-load native modules to prevent crashes if native build is stale
+const getImagePicker = () => require("expo-image-picker") as typeof import("expo-image-picker");
+const getDocumentPicker = () => require("expo-document-picker") as typeof import("expo-document-picker");
 import { useTranslation } from "react-i18next";
 
 import { colors } from "../../lib/colors";
@@ -198,6 +200,7 @@ export function DisciplineInfractionForm() {
     const remaining = 5 - attachedFiles.length;
     if (remaining <= 0) return;
 
+    const ImagePicker = getImagePicker();
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsMultipleSelection: true,
@@ -221,6 +224,7 @@ export function DisciplineInfractionForm() {
   const takePhoto = useCallback(async () => {
     if (attachedFiles.length >= 5) return;
 
+    const ImagePicker = getImagePicker();
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
@@ -256,6 +260,7 @@ export function DisciplineInfractionForm() {
   const pickDocument = useCallback(async () => {
     if (attachedFiles.length >= 5) return;
 
+    const DocumentPicker = getDocumentPicker();
     const result = await DocumentPicker.getDocumentAsync({
       type: "application/pdf",
       multiple: false,

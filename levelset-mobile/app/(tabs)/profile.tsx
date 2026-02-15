@@ -11,9 +11,9 @@ import {
   ScrollView,
   Alert,
   Image,
+  Pressable,
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../src/context/AuthContext";
 import { useForms } from "../../src/context/FormsContext";
@@ -123,16 +123,46 @@ export default function ProfileScreen() {
                 : "Preferencia de idioma"}
             </Text>
           </View>
-          <SegmentedControl
-            values={["English", "Espanol"]}
-            selectedIndex={language === "en" ? 0 : 1}
-            onChange={(event) => {
-              const newLang =
-                event.nativeEvent.selectedSegmentIndex === 0 ? "en" : "es";
-              setLanguage(newLang);
-            }}
-            style={styles.segmentedControl}
-          />
+          <View style={styles.segmentedControl}>
+            <Pressable
+              style={[
+                styles.segmentOption,
+                language === "en" && styles.segmentOptionSelected,
+              ]}
+              onPress={() => {
+                haptics.selection();
+                setLanguage("en");
+              }}
+            >
+              <Text
+                style={[
+                  styles.segmentText,
+                  language === "en" && styles.segmentTextSelected,
+                ]}
+              >
+                English
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.segmentOption,
+                language === "es" && styles.segmentOptionSelected,
+              ]}
+              onPress={() => {
+                haptics.selection();
+                setLanguage("es");
+              }}
+            >
+              <Text
+                style={[
+                  styles.segmentText,
+                  language === "es" && styles.segmentTextSelected,
+                ]}
+              >
+                Espanol
+              </Text>
+            </Pressable>
+          </View>
         </GlassCard>
 
         {/* Version Info */}
@@ -262,7 +292,31 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
   },
   segmentedControl: {
+    flexDirection: "row",
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: borderRadius.sm,
+    borderCurve: "continuous",
+    padding: 2,
     marginTop: 4,
+  },
+  segmentOption: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: "center",
+    borderRadius: borderRadius.sm - 2,
+    borderCurve: "continuous",
+  },
+  segmentOptionSelected: {
+    backgroundColor: colors.surface,
+    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+  },
+  segmentText: {
+    ...typography.labelMedium,
+    color: colors.onSurfaceVariant,
+  },
+  segmentTextSelected: {
+    color: colors.onSurface,
+    fontWeight: "600",
   },
   logoutSection: {
     marginTop: 8,

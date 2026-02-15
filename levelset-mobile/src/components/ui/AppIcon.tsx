@@ -81,7 +81,7 @@ export function AppIcon({ name, size = 24, tintColor, style }: AppIconProps) {
         name={ionName as keyof typeof Ionicons.glyphMap}
         size={size}
         color={tintColor}
-        style={style}
+        style={style as any}
       />
     );
   }
