@@ -4,6 +4,7 @@
  * Falls back gracefully on non-iOS or older iOS versions
  */
 
+import { useState, useEffect } from "react";
 import { Platform } from "react-native";
 
 // Dynamic imports for glass effect
@@ -42,9 +43,19 @@ export function isGlassAvailable(): boolean {
 
 /**
  * Hook to access glass effect components and availability
+ * Re-checks availability after mount to handle late native bridge initialization
  */
 export function useGlass() {
-  const available = isGlassAvailable();
+  const [available, setAvailable] = useState(() => isGlassAvailable());
+
+  useEffect(() => {
+    // Re-check availability after mount — the native bridge may not
+    // have been ready during the initial synchronous render pass
+    const checked = isGlassAvailable();
+    if (checked !== available) {
+      setAvailable(checked);
+    }
+  }, []);
 
   return {
     GlassView,

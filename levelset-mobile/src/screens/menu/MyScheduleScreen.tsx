@@ -16,6 +16,7 @@ import { ShiftCard } from "../../components/schedule/ShiftCard";
 import { GlassCard } from "../../components/glass";
 import { colors } from "../../lib/colors";
 import { typography } from "../../lib/fonts";
+import { spacing } from "../../lib/theme";
 
 export default function MyScheduleScreen() {
   const { shifts, isLoading, error, refreshSchedule } = useSchedule();
@@ -81,42 +82,42 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   scrollContent: {
-    padding: 16,
+    padding: spacing[4],
     flexGrow: 1,
   },
   centerContent: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 24,
+    padding: spacing[6],
   },
   sectionTitle: {
     ...typography.labelLarge,
     color: colors.onSurfaceVariant,
-    marginBottom: 12,
-    paddingHorizontal: 4,
+    marginBottom: spacing[3],
+    paddingHorizontal: spacing[1],
   },
   emptyCard: {
-    marginTop: 24,
+    marginTop: spacing[6],
   },
   emptyContent: {
     alignItems: "center",
-    paddingVertical: 40,
+    paddingVertical: spacing[10],
   },
   emptyIcon: {
     fontSize: 56,
-    marginBottom: 16,
+    marginBottom: spacing[4],
   },
   emptyTitle: {
     ...typography.h3,
     color: colors.onSurface,
-    marginBottom: 8,
+    marginBottom: spacing[2],
   },
   emptyDescription: {
     ...typography.bodyMedium,
     color: colors.onSurfaceVariant,
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: spacing[4],
   },
   emptyNote: {
     ...typography.bodySmall,
@@ -125,12 +126,12 @@ const styles = StyleSheet.create({
   },
   errorIcon: {
     fontSize: 48,
-    marginBottom: 16,
+    marginBottom: spacing[4],
   },
   errorTitle: {
     ...typography.h4,
     color: colors.error,
-    marginBottom: 8,
+    marginBottom: spacing[2],
   },
   errorMessage: {
     ...typography.bodyMedium,

@@ -25,8 +25,8 @@ import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
 import { useSlidingMenu, MenuTab } from "../../context/SlidingMenuContext";
 import { AppIcon } from "../../components/ui";
 import { colors } from "../../lib/colors";
-import { typography } from "../../lib/fonts";
-import { borderRadius, haptics } from "../../lib/theme";
+import { typography, fontWeights } from "../../lib/fonts";
+import { spacing, borderRadius, haptics } from "../../lib/theme";
 
 export function SlidingMenu() {
   const { GlassView } = useGlass();
@@ -42,8 +42,9 @@ export function SlidingMenu() {
 
   useEffect(() => {
     slideX.value = withSpring(isMenuOpen ? 0 : -MENU_WIDTH, {
-      damping: 20,
-      stiffness: 200,
+      damping: 28,
+      stiffness: 300,
+      mass: 0.8,
     });
     backdropOpacity.value = withTiming(isMenuOpen ? 1 : 0, { duration: 200 });
   }, [isMenuOpen]);
@@ -66,12 +67,13 @@ export function SlidingMenu() {
     .onEnd((e) => {
       if (e.translationX < -MENU_WIDTH * 0.3) {
         slideX.value = withSpring(-MENU_WIDTH, {
-          damping: 20,
-          stiffness: 200,
+          damping: 28,
+          stiffness: 300,
+          mass: 0.8,
         });
         runOnJS(closeMenu)();
       } else {
-        slideX.value = withSpring(0, { damping: 20, stiffness: 200 });
+        slideX.value = withSpring(0, { damping: 28, stiffness: 300, mass: 0.8 });
       }
     });
 
@@ -81,7 +83,7 @@ export function SlidingMenu() {
   };
 
   const menuContent = (
-    <View style={[styles.menuInner, { paddingTop: insets.top + 16 }]}>
+    <View style={[styles.menuInner, { paddingTop: insets.top + spacing[4] }]}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Schedule</Text>
@@ -190,11 +192,11 @@ const styles = StyleSheet.create({
   },
   menuInner: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing[4],
   },
   header: {
-    marginBottom: 24,
-    paddingHorizontal: 8,
+    marginBottom: spacing[6],
+    paddingHorizontal: spacing[2],
   },
   headerTitle: {
     ...typography.h3,
@@ -207,11 +209,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 14,
-    paddingHorizontal: 12,
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[3],
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
-    marginBottom: 4,
+    marginBottom: spacing[1],
   },
   menuItemActive: {
     backgroundColor: colors.primaryTransparent,
@@ -220,7 +222,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-    gap: 14,
+    gap: spacing[4],
   },
   menuIcon: {
     width: 22,
@@ -232,11 +234,11 @@ const styles = StyleSheet.create({
   },
   menuLabelActive: {
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
   activeIndicator: {
     width: 4,
-    height: 24,
+    height: spacing[6],
     backgroundColor: colors.primary,
     borderRadius: 2,
   },

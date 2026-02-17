@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "../src/context/AuthContext";
+import { FormsProvider } from "../src/context/FormsContext";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { colors } from "../src/lib/colors";
 import "react-native-reanimated";
@@ -98,8 +99,10 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AuthProvider>
-          <StatusBar style="auto" />
-          <RootLayoutNav />
+          <FormsProvider>
+            <StatusBar style="auto" />
+            <RootLayoutNav />
+          </FormsProvider>
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

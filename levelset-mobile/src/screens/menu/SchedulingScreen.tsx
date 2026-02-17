@@ -7,7 +7,8 @@ import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { GlassCard } from "../../components/glass";
 import { colors } from "../../lib/colors";
-import { typography } from "../../lib/fonts";
+import { typography, fontWeights } from "../../lib/fonts";
+import { spacing, borderRadius } from "../../lib/theme";
 
 export default function SchedulingScreen() {
   return (
@@ -54,55 +55,55 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   scrollContent: {
-    padding: 16,
+    padding: spacing[4],
     flexGrow: 1,
   },
   infoCard: {
-    marginBottom: 24,
+    marginBottom: spacing[6],
   },
   infoContent: {
     alignItems: "center",
-    paddingVertical: 24,
+    paddingVertical: spacing[6],
   },
   infoIcon: {
     fontSize: 48,
-    marginBottom: 12,
+    marginBottom: spacing[3],
   },
   infoTitle: {
     ...typography.h3,
     color: colors.onSurface,
-    marginBottom: 8,
+    marginBottom: spacing[2],
   },
   infoDescription: {
     ...typography.bodyMedium,
     color: colors.onSurfaceVariant,
     textAlign: "center",
-    marginBottom: 12,
+    marginBottom: spacing[3],
   },
   comingSoon: {
     ...typography.labelMedium,
     color: colors.primary,
     backgroundColor: colors.primaryTransparent,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1],
+    borderRadius: borderRadius.md,
     overflow: "hidden",
   },
   sectionTitle: {
     ...typography.labelLarge,
     color: colors.onSurfaceVariant,
-    marginBottom: 12,
-    paddingHorizontal: 4,
+    marginBottom: spacing[3],
+    paddingHorizontal: spacing[1],
   },
   actionCard: {
-    marginBottom: 12,
+    marginBottom: spacing[3],
     opacity: 0.6,
   },
   actionTitle: {
     ...typography.bodyLarge,
     color: colors.onSurface,
-    fontWeight: "600",
-    marginBottom: 4,
+    fontWeight: fontWeights.semibold,
+    marginBottom: spacing[1],
   },
   actionDescription: {
     ...typography.bodySmall,

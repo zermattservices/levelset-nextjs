@@ -7,7 +7,8 @@ import React from "react";
 import { View, Text, StyleSheet, ScrollView, Switch } from "react-native";
 import { GlassCard } from "../../components/glass";
 import { colors } from "../../lib/colors";
-import { typography } from "../../lib/fonts";
+import { typography, fontWeights } from "../../lib/fonts";
+import { spacing } from "../../lib/theme";
 
 export default function SettingsScreen() {
   return (
@@ -93,18 +94,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   scrollContent: {
-    padding: 16,
+    padding: spacing[4],
     flexGrow: 1,
   },
   sectionTitle: {
     ...typography.labelLarge,
     color: colors.onSurfaceVariant,
-    marginBottom: 12,
-    marginTop: 8,
-    paddingHorizontal: 4,
+    marginBottom: spacing[3],
+    marginTop: spacing[2],
+    paddingHorizontal: spacing[1],
   },
   settingCard: {
-    marginBottom: 8,
+    marginBottom: spacing[2],
     opacity: 0.6,
   },
   settingRow: {
@@ -114,12 +115,12 @@ const styles = StyleSheet.create({
   },
   settingInfo: {
     flex: 1,
-    marginRight: 16,
+    marginRight: spacing[4],
   },
   settingLabel: {
     ...typography.bodyMedium,
     color: colors.onSurface,
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
     marginBottom: 2,
   },
   settingDescription: {
@@ -131,8 +132,8 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
   },
   disabledNote: {
-    marginTop: 24,
-    paddingHorizontal: 16,
+    marginTop: spacing[6],
+    paddingHorizontal: spacing[4],
   },
   disabledNoteText: {
     ...typography.bodySmall,

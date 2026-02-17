@@ -16,8 +16,8 @@ import {
 } from "react-native";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
 import { colors } from "../../lib/colors";
-import { borderRadius, haptics } from "../../lib/theme";
-import { typography } from "../../lib/fonts";
+import { spacing, borderRadius, haptics } from "../../lib/theme";
+import { typography, fontWeights, fontSizes } from "../../lib/fonts";
 
 export type GlassButtonVariant = "default" | "primary" | "danger" | "outline";
 export type GlassButtonSize = "default" | "compact" | "small";
@@ -202,31 +202,31 @@ function getSizeStyles(size: GlassButtonSize) {
     case "compact":
       return {
         container: {
-          paddingVertical: 8,
-          paddingHorizontal: 16,
+          paddingVertical: spacing[2],
+          paddingHorizontal: spacing[4],
         } as ViewStyle,
         label: {
-          fontSize: 14,
+          fontSize: fontSizes.sm,
         } as TextStyle,
       };
     case "small":
       return {
         container: {
-          paddingVertical: 6,
-          paddingHorizontal: 12,
+          paddingVertical: spacing[2] - 2,
+          paddingHorizontal: spacing[3],
         } as ViewStyle,
         label: {
-          fontSize: 12,
+          fontSize: fontSizes.xs,
         } as TextStyle,
       };
     default:
       return {
         container: {
-          paddingVertical: 12,
-          paddingHorizontal: 20,
+          paddingVertical: spacing[3],
+          paddingHorizontal: spacing[5],
         } as ViewStyle,
         label: {
-          fontSize: 16,
+          fontSize: fontSizes.base,
         } as TextStyle,
       };
   }
@@ -247,12 +247,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: spacing[2],
   },
   iconContainer: {},
   label: {
     fontFamily: typography.button.fontFamily,
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
     textAlign: "center",
   },
   labelDisabled: {
