@@ -4,11 +4,12 @@ on:
   pull_request:
     paths:
       - 'apps/dashboard/**'
+      - 'apps/agent/**'
       - 'packages/**'
 
 jobs:
   build:
-    name: Build Dashboard
+    name: Build & Typecheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +25,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm typecheck
+        name: Type Check (Dashboard + Agent)
+
       - run: pnpm --filter dashboard build
+        name: Build Dashboard
         env:
           NODE_ENV: production
