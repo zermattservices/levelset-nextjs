@@ -55,6 +55,10 @@ interface ShiftModalProps {
   onDelete: (id: string) => Promise<void>;
   onAssign: (shiftId: string, employeeId: string) => Promise<void>;
   onUnassign: (shiftId: string, employeeId: string) => Promise<void>;
+  /** Called when position selection changes in the drawer, for live preview updates */
+  onPositionChange?: (positionId: string) => void;
+  /** Called when start/end time changes in the drawer, for live preview updates */
+  onTimeChange?: (startTime: string, endTime: string) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -119,6 +123,8 @@ export function ShiftModal({
   onDelete,
   onAssign,
   onUnassign,
+  onPositionChange,
+  onTimeChange,
 }: ShiftModalProps) {
   const isEdit = !!shift;
 
@@ -331,7 +337,7 @@ export function ShiftModal({
                 id="shift-start"
                 className={sty.timeSelect}
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                onChange={(e) => { setStartTime(e.target.value); onTimeChange?.(e.target.value, endTime); }}
                 disabled={readOnly}
               >
                 {TIME_OPTIONS.map((opt) => (
@@ -349,7 +355,7 @@ export function ShiftModal({
                 id="shift-end"
                 className={sty.timeSelect}
                 value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
+                onChange={(e) => { setEndTime(e.target.value); onTimeChange?.(startTime, e.target.value); }}
                 disabled={readOnly}
               >
                 {TIME_OPTIONS.map((opt) => (
@@ -387,7 +393,7 @@ export function ShiftModal({
               id="shift-position"
               className={sty.select}
               value={positionId}
-              onChange={(e) => setPositionId(e.target.value)}
+              onChange={(e) => { setPositionId(e.target.value); onPositionChange?.(e.target.value); }}
               disabled={readOnly}
             >
               <option value="">-- Select position --</option>
