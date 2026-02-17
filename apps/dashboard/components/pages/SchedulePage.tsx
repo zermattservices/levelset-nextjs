@@ -17,6 +17,7 @@ import { BottomPanel } from '@/components/scheduling/BottomPanel';
 import CircularProgress from '@mui/material/CircularProgress';
 import type { Shift } from '@/lib/scheduling.types';
 import type { PendingShiftPreview } from '@/components/scheduling/ScheduleGrid';
+import type { LocationBusinessHours } from '@/lib/supabase.types';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -43,6 +44,27 @@ export function SchedulePage() {
   const [pendingShift, setPendingShift] = React.useState<PendingShiftPreview | null>(null);
 
   const data = useScheduleData();
+
+  // Fetch business hours for the selected location
+  const [businessHours, setBusinessHours] = React.useState<LocationBusinessHours[]>([]);
+  React.useEffect(() => {
+    if (!selectedLocationId) {
+      setBusinessHours([]);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/locations/google-info?locationId=${selectedLocationId}`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (!cancelled && json.businessHours) {
+          setBusinessHours(json.businessHours);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setBusinessHours([]);
+      });
+    return () => { cancelled = true; };
+  }, [selectedLocationId]);
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -262,6 +284,7 @@ export function SchedulePage() {
                 onShiftDelete={handleShiftDelete}
                 onDragCreate={handleDragCreate}
                 pendingShift={shiftModalOpen && !editingShift ? pendingShift : null}
+                businessHours={businessHours}
               />
             )}
 

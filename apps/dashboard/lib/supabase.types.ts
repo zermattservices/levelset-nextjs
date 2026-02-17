@@ -166,6 +166,54 @@ export interface Location {
   image_url?: string;
   location_mobile_token?: string;
   has_synced_before?: boolean;
+  google_place_id?: string;
+  latitude?: number;
+  longitude?: number;
+  google_maps_url?: string;
+  google_rating?: number;
+  google_review_count?: number;
+  google_hours_display?: string[];
+  google_last_synced_at?: string;
   created_at?: string;
+}
+
+export interface LocationBusinessHours {
+  id: string;
+  location_id: string;
+  day_of_week: number; // 0=Sunday through 6=Saturday
+  open_hour: number;
+  open_minute: number;
+  close_hour: number;
+  close_minute: number;
+  period_index: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface GoogleReview {
+  id: string;
+  location_id: string;
+  org_id: string;
+  google_review_name: string;
+  author_name?: string;
+  author_photo_url?: string;
+  author_uri?: string;
+  rating: number;
+  review_text?: string;
+  review_language?: string;
+  original_text?: string;
+  original_language?: string;
+  publish_time: string;
+  relative_time_description?: string;
+  google_maps_uri?: string;
+  first_synced_at: string;
+  last_synced_at: string;
+  mentioned_employee_ids?: string[];
+  sentiment_score?: number;
+  ai_summary?: string;
+  ai_analyzed_at?: string;
+  ai_tags?: string[];
+  pillar_score_applied: boolean;
+  created_at: string;
 }
 

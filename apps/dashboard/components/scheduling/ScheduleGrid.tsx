@@ -7,6 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import type { Shift, Position, GridViewMode, TimeViewMode, LaborSummary } from '@/lib/scheduling.types';
 import { ZONE_COLORS, ZONE_TEXT_COLORS, ZONE_BG_COLORS } from '@/lib/zoneColors';
 import type { ColumnConfig } from './useColumnConfig';
+import type { LocationBusinessHours } from '@/lib/supabase.types';
 
 interface Employee {
   id: string;
@@ -37,6 +38,7 @@ interface ScheduleGridProps {
   laborSummary: LaborSummary;
   isPublished: boolean;
   canViewPay?: boolean;
+  businessHours?: LocationBusinessHours[];
   columnConfig?: ColumnConfig;
   onColumnConfigUpdate?: (partial: Partial<ColumnConfig>) => void;
   onCellClick: (date: string, entityId?: string) => void;
@@ -60,6 +62,10 @@ function formatCurrency(n: number): string {
   return '$' + n.toFixed(0);
 }
 
+function formatCurrencyDecimal(n: number): string {
+  return '$' + n.toFixed(2);
+}
+
 function isToday(dateStr: string): boolean {
   const today = new Date();
   const y = today.getFullYear();
@@ -79,6 +85,13 @@ function shiftNetHours(shift: Shift): number {
   return Math.max(0, (end - start) / 60 - (shift.break_minutes || 0) / 60);
 }
 
+/** Compute net hours from two HH:MM time strings */
+function computeNetHours(startTime: string, endTime: string): number {
+  const start = parseTime(startTime);
+  const end = parseTime(endTime);
+  return Math.max(0, (end - start) / 60);
+}
+
 function formatTimeShort(time: string): string {
   const [h, m] = time.split(':').map(Number);
   const period = h >= 12 ? 'p' : 'a';
@@ -96,17 +109,28 @@ function snapTo15(minutes: number): number {
   return Math.round(minutes / 15) * 15;
 }
 
-// ── Hover cursor hook for 15-min snap ──
-function useHoverCursor(
+/** Format a decimal hours value compactly, e.g. 4.5 -> "4.5h", 8 -> "8h" */
+function formatHoursCompact(h: number): string {
+  return h % 1 === 0 ? `${h}h` : `${h.toFixed(1)}h`;
+}
+
+// ── Grid-level hover cursor hook ──
+// Lifted to the grid level so the vertical line spans all rows
+function useGridHoverCursor(
   timeRange: { minHour: number; maxHour: number },
 ) {
   const [hoverPct, setHoverPct] = React.useState<number | null>(null);
   const totalMinutes = (timeRange.maxHour - timeRange.minHour) * 60;
 
   const handleMouseMove = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+    // Find the nearest .timeline element to compute correct pct
+    const timeline = (e.target as HTMLElement).closest(`.${sty.timeline}`) as HTMLElement | null;
+    if (!timeline) {
+      setHoverPct(null);
+      return;
+    }
+    const rect = timeline.getBoundingClientRect();
     const rawPct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-    // Snap to nearest 15 min
     const rawMinutes = timeRange.minHour * 60 + (rawPct / 100) * totalMinutes;
     const snapped = snapTo15(rawMinutes);
     const snappedPct = ((snapped - timeRange.minHour * 60) / totalMinutes) * 100;
@@ -391,7 +415,7 @@ function WeekPositionView({
   );
 }
 
-// ── Drag-to-create hook for timeline rows ──
+// ── Drag-to-create hook for timeline rows (snaps to 15-min during drag) ──
 function useDragToCreate(
   timeRange: { minHour: number; maxHour: number },
   isPublished: boolean,
@@ -408,14 +432,22 @@ function useDragToCreate(
     return timeRange.minHour * 60 + (pct / 100) * totalMinutes;
   }, [timeRange.minHour, totalMinutes]);
 
+  const minutesToPct = React.useCallback((min: number) => {
+    return ((min - timeRange.minHour * 60) / totalMinutes) * 100;
+  }, [timeRange.minHour, totalMinutes]);
+
   const handleMouseDown = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (isPublished || !onDragCreate) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-    setDragStartPct(pct);
-    setDragEndPct(pct);
+    const rawPct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    // Snap the start position to 15-min
+    const rawMin = pctToMinutes(rawPct);
+    const snappedMin = snapTo15(rawMin);
+    const snappedPct = minutesToPct(snappedMin);
+    setDragStartPct(Math.max(0, Math.min(100, snappedPct)));
+    setDragEndPct(Math.max(0, Math.min(100, snappedPct)));
     setIsDragging(true);
-  }, [isPublished, onDragCreate]);
+  }, [isPublished, onDragCreate, pctToMinutes, minutesToPct]);
 
   React.useEffect(() => {
     if (!isDragging) return;
@@ -423,8 +455,12 @@ function useDragToCreate(
     const handleMouseMove = (e: MouseEvent) => {
       if (!timelineRef.current) return;
       const rect = timelineRef.current.getBoundingClientRect();
-      const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-      setDragEndPct(pct);
+      const rawPct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      // Snap end position to 15-min during drag
+      const rawMin = timeRange.minHour * 60 + (rawPct / 100) * totalMinutes;
+      const snappedMin = snapTo15(rawMin);
+      const snappedPct = ((snappedMin - timeRange.minHour * 60) / totalMinutes) * 100;
+      setDragEndPct(Math.max(0, Math.min(100, snappedPct)));
     };
 
     const handleMouseUp = () => {
@@ -445,7 +481,7 @@ function useDragToCreate(
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, dragStartPct, dragEndPct, pctToMinutes, onDragCreate, timeRange.minHour, timeRange.maxHour]);
+  }, [isDragging, dragStartPct, dragEndPct, pctToMinutes, onDragCreate, timeRange.minHour, timeRange.maxHour, totalMinutes]);
 
   const dragPreview = React.useMemo(() => {
     if (!isDragging) return null;
@@ -454,10 +490,12 @@ function useDragToCreate(
     const startMin = snapTo15(pctToMinutes(left));
     const endMin = snapTo15(pctToMinutes(left + width));
     if (endMin - startMin < 15) return null;
+    const hours = computeNetHours(minutesToTimeStr(startMin), minutesToTimeStr(endMin));
     return {
       left: `${left}%`,
       width: `${width}%`,
       label: `${formatTimeShort(minutesToTimeStr(startMin))} – ${formatTimeShort(minutesToTimeStr(endMin))}`,
+      hours,
     };
   }, [isDragging, dragStartPct, dragEndPct, pctToMinutes]);
 
@@ -469,7 +507,7 @@ function DayEmployeeView({
   shifts, employees, selectedDay, isPublished,
   canViewPay, columnConfig, onColumnConfigUpdate,
   onCellClick, onShiftClick, onDragCreate,
-  pendingShift,
+  pendingShift, businessHours,
 }: {
   shifts: Shift[];
   employees: Employee[];
@@ -483,6 +521,7 @@ function DayEmployeeView({
   onShiftDelete: (shiftId: string) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
   pendingShift?: PendingShiftPreview | null;
+  businessHours?: LocationBusinessHours[];
 }) {
   const dayShifts = React.useMemo(() => shifts.filter((s) => s.shift_date === selectedDay), [shifts, selectedDay]);
 
@@ -509,6 +548,14 @@ function DayEmployeeView({
   const timeRange = React.useMemo(() => {
     let minHour = 6;
     let maxHour = 23;
+    if (businessHours && businessHours.length > 0) {
+      const dayOfWeek = new Date(selectedDay + 'T00:00:00').getDay();
+      const todayHours = businessHours.filter((h) => h.day_of_week === dayOfWeek);
+      if (todayHours.length > 0) {
+        minHour = Math.min(...todayHours.map((h) => h.open_hour));
+        maxHour = Math.max(...todayHours.map((h) => h.close_hour)) + 1;
+      }
+    }
     for (const s of dayShifts) {
       const startH = parseInt(s.start_time.split(':')[0], 10);
       const endH = parseInt(s.end_time.split(':')[0], 10);
@@ -518,7 +565,7 @@ function DayEmployeeView({
     const hours: number[] = [];
     for (let h = minHour; h <= maxHour; h++) hours.push(h);
     return { minHour, maxHour, hours };
-  }, [dayShifts]);
+  }, [dayShifts, businessHours, selectedDay]);
 
   const totalMinutes = (timeRange.maxHour - timeRange.minHour) * 60;
   function shiftStyle(shift: Shift) {
@@ -527,9 +574,12 @@ function DayEmployeeView({
     return { left: `${Math.max(0, (startMin / totalMinutes) * 100)}%`, width: `${Math.max(2, ((endMin - startMin) / totalMinutes) * 100)}%` };
   }
 
+  // Grid-level hover cursor that spans all rows
+  const { hoverPct, handleMouseMove: gridMouseMove, handleMouseLeave: gridMouseLeave } = useGridHoverCursor(timeRange);
+
   return (
     <div className={sty.gridWrapper}>
-      <div className={sty.dayGrid}>
+      <div className={sty.dayGrid} onMouseMove={gridMouseMove} onMouseLeave={gridMouseLeave}>
         <div className={sty.dayHeaderRow}>
           <div className={sty.dayCornerCell}>
             {columnConfig && onColumnConfigUpdate && (
@@ -574,6 +624,7 @@ function DayEmployeeView({
               onShiftClick={onShiftClick}
               onDragCreate={onDragCreate}
               pendingShift={empPending}
+              gridHoverPct={hoverPct}
             />
           );
         })}
@@ -587,6 +638,9 @@ function DayEmployeeView({
                   <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
                 </div>
               ))}
+              {hoverPct !== null && (
+                <div className={sty.hoverCursorLine} style={{ left: `${hoverPct}%` }} />
+              )}
             </div>
           </div>
         )}
@@ -600,7 +654,7 @@ function DayEmployeeRow({
   emp, empShifts, empHours, empCost, selectedDay, timeRange, totalMinutes, shiftStyleFn, isPublished,
   canViewPay, columnConfig,
   onCellClick, onShiftClick, onDragCreate,
-  pendingShift,
+  pendingShift, gridHoverPct,
 }: {
   emp: Employee;
   empShifts: Shift[];
@@ -617,6 +671,7 @@ function DayEmployeeRow({
   onShiftClick: (shift: Shift) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
   pendingShift?: PendingShiftPreview | null;
+  gridHoverPct: number | null;
 }) {
   const { timelineRef, isDragging, handleMouseDown, dragPreview } = useDragToCreate(
     timeRange,
@@ -624,20 +679,20 @@ function DayEmployeeRow({
     onDragCreate ? (startTime, endTime) => onDragCreate(selectedDay, startTime, endTime, emp.id) : undefined,
   );
 
-  const { hoverPct, handleMouseMove, handleMouseLeave } = useHoverCursor(timeRange);
-
   const handleTimelineClick = (e: React.MouseEvent) => {
-    // Don't open modal if we just finished dragging
     if (isDragging) return;
     onCellClick(selectedDay, emp.id);
   };
 
-  // Compute pending shift position
+  // Compute pending shift position and hours/cost
   const pendingStyle = React.useMemo(() => {
     if (!pendingShift) return null;
     const startMin = parseTime(pendingShift.startTime) - timeRange.minHour * 60;
     const endMin = parseTime(pendingShift.endTime) - timeRange.minHour * 60;
     const zoneColor = pendingShift.positionZone ? ZONE_COLORS[pendingShift.positionZone] : null;
+    const hours = computeNetHours(pendingShift.startTime, pendingShift.endTime);
+    const payRate = emp.calculated_pay ?? 0;
+    const cost = hours * payRate;
     return {
       left: `${Math.max(0, (startMin / totalMinutes) * 100)}%`,
       width: `${Math.max(2, ((endMin - startMin) / totalMinutes) * 100)}%`,
@@ -645,8 +700,22 @@ function DayEmployeeRow({
       background: zoneColor ? `${zoneColor}1a` : 'rgba(49, 102, 74, 0.08)',
       labelColor: zoneColor ?? 'var(--ls-color-brand)',
       label: `${formatTimeShort(pendingShift.startTime)} – ${formatTimeShort(pendingShift.endTime)}`,
+      hours,
+      cost,
+      payRate,
     };
-  }, [pendingShift, timeRange.minHour, totalMinutes]);
+  }, [pendingShift, timeRange.minHour, totalMinutes, emp.calculated_pay]);
+
+  // Compute drag preview cost
+  const dragCostInfo = React.useMemo(() => {
+    if (!dragPreview) return null;
+    const payRate = emp.calculated_pay ?? 0;
+    return {
+      hours: dragPreview.hours,
+      cost: dragPreview.hours * payRate,
+      payRate,
+    };
+  }, [dragPreview, emp.calculated_pay]);
 
   return (
     <div className={sty.dayRow}>
@@ -668,23 +737,27 @@ function DayEmployeeRow({
         ref={timelineRef}
         className={sty.timeline}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
         onClick={handleTimelineClick}
       >
         <TimelineGridLines timeRange={timeRange} />
         {empShifts.map((s) => {
           const posColor = s.position ? (ZONE_COLORS[s.position.zone] ?? 'var(--ls-color-muted)') : 'var(--ls-color-muted)';
+          const hours = shiftNetHours(s);
+          const cost = s.assignment?.projected_cost ?? 0;
           return (
             <div key={s.id} className={sty.timelineBlock} style={{ ...shiftStyleFn(s), backgroundColor: `${posColor}1f`, borderLeft: `3px solid ${posColor}` }} onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}>
               <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
               <span className={sty.timelineBlockLabel}>{s.position?.name ?? ''}</span>
+              <span className={sty.timelineBlockMeta}>{formatHoursCompact(hours)}{canViewPay && cost > 0 ? ` · ${formatCurrencyDecimal(cost)}` : ''}</span>
             </div>
           );
         })}
         {pendingStyle && !isDragging && (
           <div className={sty.pendingShiftPreview} style={{ left: pendingStyle.left, width: pendingStyle.width, borderColor: pendingStyle.borderColor, background: pendingStyle.background }}>
             <span className={sty.pendingShiftLabel} style={{ color: pendingStyle.labelColor }}>{pendingStyle.label}</span>
+            <span className={sty.pendingShiftMeta} style={{ color: pendingStyle.labelColor }}>
+              {formatHoursCompact(pendingStyle.hours)}{canViewPay && pendingStyle.payRate > 0 ? ` · ${formatCurrencyDecimal(pendingStyle.cost)}` : ''}
+            </span>
           </div>
         )}
         {empShifts.length === 0 && !isDragging && !pendingStyle && (
@@ -693,10 +766,15 @@ function DayEmployeeRow({
         {dragPreview && (
           <div className={sty.dragPreview} style={{ left: dragPreview.left, width: dragPreview.width }}>
             <span className={sty.dragPreviewLabel}>{dragPreview.label}</span>
+            {dragCostInfo && (
+              <span className={sty.dragPreviewMeta}>
+                {formatHoursCompact(dragCostInfo.hours)}{canViewPay && dragCostInfo.payRate > 0 ? ` · ${formatCurrencyDecimal(dragCostInfo.cost)}` : ''}
+              </span>
+            )}
           </div>
         )}
-        {hoverPct !== null && !isDragging && (
-          <div className={sty.hoverCursorLine} style={{ left: `${hoverPct}%` }} />
+        {gridHoverPct !== null && !isDragging && (
+          <div className={sty.hoverCursorLine} style={{ left: `${gridHoverPct}%` }} />
         )}
       </div>
     </div>
@@ -707,7 +785,7 @@ function DayEmployeeRow({
 function DayPositionView({
   shifts, positions, selectedDay, isPublished, canViewPay,
   onCellClick, onShiftClick, onDragCreate,
-  pendingShift,
+  pendingShift, businessHours,
 }: {
   shifts: Shift[];
   positions: Position[];
@@ -719,6 +797,7 @@ function DayPositionView({
   onShiftDelete: (shiftId: string) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
   pendingShift?: PendingShiftPreview | null;
+  businessHours?: LocationBusinessHours[];
 }) {
   const dayShifts = React.useMemo(() => shifts.filter((s) => s.shift_date === selectedDay), [shifts, selectedDay]);
 
@@ -756,6 +835,14 @@ function DayPositionView({
   const timeRange = React.useMemo(() => {
     let minHour = 6;
     let maxHour = 23;
+    if (businessHours && businessHours.length > 0) {
+      const dayOfWeek = new Date(selectedDay + 'T00:00:00').getDay();
+      const todayHours = businessHours.filter((h) => h.day_of_week === dayOfWeek);
+      if (todayHours.length > 0) {
+        minHour = Math.min(...todayHours.map((h) => h.open_hour));
+        maxHour = Math.max(...todayHours.map((h) => h.close_hour)) + 1;
+      }
+    }
     for (const s of dayShifts) {
       const startH = parseInt(s.start_time.split(':')[0], 10);
       const endH = parseInt(s.end_time.split(':')[0], 10);
@@ -765,7 +852,7 @@ function DayPositionView({
     const hours: number[] = [];
     for (let h = minHour; h <= maxHour; h++) hours.push(h);
     return { minHour, maxHour, hours };
-  }, [dayShifts]);
+  }, [dayShifts, businessHours, selectedDay]);
 
   const totalMinutes = (timeRange.maxHour - timeRange.minHour) * 60;
   function shiftStyle(shift: Shift) {
@@ -774,9 +861,12 @@ function DayPositionView({
     return { left: `${Math.max(0, (startMin / totalMinutes) * 100)}%`, width: `${Math.max(2, ((endMin - startMin) / totalMinutes) * 100)}%` };
   }
 
+  // Grid-level hover cursor that spans all rows
+  const { hoverPct, handleMouseMove: gridMouseMove, handleMouseLeave: gridMouseLeave } = useGridHoverCursor(timeRange);
+
   return (
     <div className={sty.gridWrapper}>
-      <div className={sty.dayGrid}>
+      <div className={sty.dayGrid} onMouseMove={gridMouseMove} onMouseLeave={gridMouseLeave}>
         <div className={sty.dayHeaderRow}>
           <div className={sty.dayCornerCell} />
           <div className={sty.timelineHeader}>
@@ -809,10 +899,12 @@ function DayPositionView({
                   totalMinutes={totalMinutes}
                   shiftStyleFn={shiftStyle}
                   isPublished={isPublished}
+                  canViewPay={canViewPay}
                   onCellClick={onCellClick}
                   onShiftClick={onShiftClick}
                   onDragCreate={onDragCreate}
                   pendingShift={posPending}
+                  gridHoverPct={hoverPct}
                 />
               );
             })}
@@ -840,10 +932,12 @@ function DayPositionView({
                   totalMinutes={totalMinutes}
                   shiftStyleFn={shiftStyle}
                   isPublished={isPublished}
+                  canViewPay={canViewPay}
                   onCellClick={onCellClick}
                   onShiftClick={onShiftClick}
                   onDragCreate={onDragCreate}
                   pendingShift={posPending}
+                  gridHoverPct={hoverPct}
                 />
               );
             })}
@@ -857,8 +951,9 @@ function DayPositionView({
 // Single position row with drag-to-create
 function DayPositionRow({
   pos, posShifts, selectedDay, timeRange, totalMinutes, shiftStyleFn, isPublished,
+  canViewPay,
   onCellClick, onShiftClick, onDragCreate,
-  pendingShift,
+  pendingShift, gridHoverPct,
 }: {
   pos: Position;
   posShifts: Shift[];
@@ -867,10 +962,12 @@ function DayPositionRow({
   totalMinutes: number;
   shiftStyleFn: (s: Shift) => { left: string; width: string };
   isPublished: boolean;
+  canViewPay?: boolean;
   onCellClick: (date: string, entityId?: string) => void;
   onShiftClick: (shift: Shift) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
   pendingShift?: PendingShiftPreview | null;
+  gridHoverPct: number | null;
 }) {
   const posColor = ZONE_COLORS[pos.zone] ?? 'var(--ls-color-muted)';
 
@@ -880,14 +977,13 @@ function DayPositionRow({
     onDragCreate ? (startTime, endTime) => onDragCreate(selectedDay, startTime, endTime, pos.id) : undefined,
   );
 
-  const { hoverPct, handleMouseMove, handleMouseLeave } = useHoverCursor(timeRange);
-
   // Compute pending shift position
   const pendingStyle = React.useMemo(() => {
     if (!pendingShift) return null;
     const startMin = parseTime(pendingShift.startTime) - timeRange.minHour * 60;
     const endMin = parseTime(pendingShift.endTime) - timeRange.minHour * 60;
     const zoneColor = pendingShift.positionZone ? ZONE_COLORS[pendingShift.positionZone] : null;
+    const hours = computeNetHours(pendingShift.startTime, pendingShift.endTime);
     return {
       left: `${Math.max(0, (startMin / totalMinutes) * 100)}%`,
       width: `${Math.max(2, ((endMin - startMin) / totalMinutes) * 100)}%`,
@@ -895,6 +991,7 @@ function DayPositionRow({
       background: zoneColor ? `${zoneColor}1a` : 'rgba(49, 102, 74, 0.08)',
       labelColor: zoneColor ?? 'var(--ls-color-brand)',
       label: `${formatTimeShort(pendingShift.startTime)} – ${formatTimeShort(pendingShift.endTime)}`,
+      hours,
     };
   }, [pendingShift, timeRange.minHour, totalMinutes]);
 
@@ -910,20 +1007,26 @@ function DayPositionRow({
         ref={timelineRef}
         className={sty.timeline}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
         onClick={() => !isDragging && onCellClick(selectedDay, pos.id)}
       >
         <TimelineGridLines timeRange={timeRange} />
-        {posShifts.map((s) => (
-          <div key={s.id} className={`${sty.timelineBlock} ${!s.assignment ? sty.timelineBlockOpen : ''}`} style={{ ...shiftStyleFn(s), backgroundColor: `${posColor}1f`, borderLeft: `3px solid ${posColor}` }} onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}>
-            <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
-            <span className={sty.timelineBlockLabel}>{s.assignment?.employee?.full_name ?? 'Open'}</span>
-          </div>
-        ))}
+        {posShifts.map((s) => {
+          const hours = shiftNetHours(s);
+          const cost = s.assignment?.projected_cost ?? 0;
+          return (
+            <div key={s.id} className={`${sty.timelineBlock} ${!s.assignment ? sty.timelineBlockOpen : ''}`} style={{ ...shiftStyleFn(s), backgroundColor: `${posColor}1f`, borderLeft: `3px solid ${posColor}` }} onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}>
+              <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
+              <span className={sty.timelineBlockLabel}>{s.assignment?.employee?.full_name ?? 'Open'}</span>
+              <span className={sty.timelineBlockMeta}>{formatHoursCompact(hours)}{canViewPay && cost > 0 ? ` · ${formatCurrencyDecimal(cost)}` : ''}</span>
+            </div>
+          );
+        })}
         {pendingStyle && !isDragging && (
           <div className={sty.pendingShiftPreview} style={{ left: pendingStyle.left, width: pendingStyle.width, borderColor: pendingStyle.borderColor, background: pendingStyle.background }}>
             <span className={sty.pendingShiftLabel} style={{ color: pendingStyle.labelColor }}>{pendingStyle.label}</span>
+            <span className={sty.pendingShiftMeta} style={{ color: pendingStyle.labelColor }}>
+              {formatHoursCompact(pendingStyle.hours)}
+            </span>
           </div>
         )}
         {posShifts.length === 0 && !isDragging && !pendingStyle && (
@@ -932,10 +1035,11 @@ function DayPositionRow({
         {dragPreview && (
           <div className={sty.dragPreview} style={{ left: dragPreview.left, width: dragPreview.width }}>
             <span className={sty.dragPreviewLabel}>{dragPreview.label}</span>
+            <span className={sty.dragPreviewMeta}>{formatHoursCompact(dragPreview.hours)}</span>
           </div>
         )}
-        {hoverPct !== null && !isDragging && (
-          <div className={sty.hoverCursorLine} style={{ left: `${hoverPct}%` }} />
+        {gridHoverPct !== null && !isDragging && (
+          <div className={sty.hoverCursorLine} style={{ left: `${gridHoverPct}%` }} />
         )}
       </div>
     </div>
@@ -949,14 +1053,14 @@ export function ScheduleGrid(props: ScheduleGridProps) {
     gridViewMode, timeViewMode, laborSummary, isPublished,
     canViewPay, columnConfig, onColumnConfigUpdate,
     onCellClick, onShiftClick, onShiftDelete, onDragCreate,
-    pendingShift,
+    pendingShift, businessHours,
   } = props;
 
   if (timeViewMode === 'day' && gridViewMode === 'employees') {
-    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} />;
+    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} businessHours={businessHours} />;
   }
   if (timeViewMode === 'day' && gridViewMode === 'positions') {
-    return <DayPositionView shifts={shifts} positions={positions} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} />;
+    return <DayPositionView shifts={shifts} positions={positions} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} businessHours={businessHours} />;
   }
   if (gridViewMode === 'positions') {
     return <WeekPositionView shifts={shifts} positions={positions} days={days} laborSummary={laborSummary} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
