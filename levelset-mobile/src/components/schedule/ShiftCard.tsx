@@ -9,8 +9,8 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { GlassCard } from "../glass";
 import { Shift } from "../../context/ScheduleContext";
 import { colors } from "../../lib/colors";
-import { typography } from "../../lib/fonts";
-import { borderRadius } from "../../lib/theme";
+import { typography, fontWeights } from "../../lib/fonts";
+import { spacing, borderRadius } from "../../lib/theme";
 
 interface ShiftCardProps {
   shift: Shift;
@@ -97,38 +97,38 @@ export function ShiftCard({ shift, onPress, index }: ShiftCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 12,
+    marginBottom: spacing[3],
     borderCurve: "continuous",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: spacing[2],
   },
   date: {
     ...typography.h4,
     color: colors.onSurface,
   },
   hoursBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1],
     borderRadius: borderRadius.full,
     borderCurve: "continuous",
   },
   hoursText: {
     ...typography.labelMedium,
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
   time: {
     ...typography.bodyLarge,
     color: colors.onSurface,
-    marginBottom: 4,
+    marginBottom: spacing[1],
   },
   details: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 4,
+    marginTop: spacing[1],
   },
   detail: {
     ...typography.bodySmall,
@@ -137,19 +137,19 @@ const styles = StyleSheet.create({
   separator: {
     ...typography.bodySmall,
     color: colors.onSurfaceVariant,
-    marginHorizontal: 8,
+    marginHorizontal: spacing[2],
   },
   statusBadge: {
     alignSelf: "flex-start",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1],
     borderRadius: borderRadius.sm,
     borderCurve: "continuous",
-    marginTop: 8,
+    marginTop: spacing[2],
   },
   statusText: {
     ...typography.labelSmall,
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
 });
 

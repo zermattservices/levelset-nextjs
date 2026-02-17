@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
 import { colors } from "../../lib/colors";
-import { borderRadius, haptics } from "../../lib/theme";
+import { spacing, borderRadius, haptics } from "../../lib/theme";
 
 export type GlassCardVariant = "default" | "elevated" | "outlined";
 
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     borderColor: colors.outline,
   },
   content: {
-    padding: 16,
+    padding: spacing[4],
   },
 });
 

@@ -14,14 +14,14 @@ import {
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../../src/context/AuthContext";
-import { useForms } from "../../src/context/FormsContext";
-import { colors } from "../../src/lib/colors";
-import { typography, fontWeights } from "../../src/lib/fonts";
-import { borderRadius, haptics } from "../../src/lib/theme";
-import { AppIcon } from "../../src/components/ui";
-import { GlassCard } from "../../src/components/glass";
-import "../../src/lib/i18n";
+import { useAuth } from "../../../src/context/AuthContext";
+import { useForms } from "../../../src/context/FormsContext";
+import { colors } from "../../../src/lib/colors";
+import { typography, fontWeights } from "../../../src/lib/fonts";
+import { spacing, borderRadius, haptics } from "../../../src/lib/theme";
+import { AppIcon } from "../../../src/components/ui";
+import { GlassCard } from "../../../src/components/glass";
+import "../../../src/lib/i18n";
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -35,7 +35,7 @@ export default function HomeScreen() {
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 20, gap: 16 }}
+      contentContainerStyle={{ padding: spacing[5], gap: spacing[4] }}
       style={styles.container}
       showsVerticalScrollIndicator={false}
     >
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   greetingSection: {
-    marginBottom: 4,
+    marginBottom: spacing[1],
   },
   greeting: {
     ...typography.h2,
@@ -171,10 +171,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.successContainer,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
-    padding: 14,
+    padding: spacing[4],
     borderWidth: 1,
     borderColor: colors.successTransparent,
-    gap: 12,
+    gap: spacing[3],
   },
   successInfo: {
     flex: 1,
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   actionsSection: {
-    gap: 10,
+    gap: spacing[3],
   },
   actionCard: {
     marginBottom: 0,
@@ -197,12 +197,12 @@ const styles = StyleSheet.create({
   actionContent: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
+    gap: spacing[4],
   },
   iconBadge: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: borderRadius.md,
     borderCurve: "continuous",
     alignItems: "center",
     justifyContent: "center",
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   },
   actionTitle: {
     ...typography.bodyMedium,
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
     color: colors.onSurface,
     marginBottom: 2,
   },
