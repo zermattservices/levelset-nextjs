@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const supabase = createServerSupabaseClient();
 
-    // Clear Google fields on location
+    // Clear Google + Yelp fields on location
     const { error: updateError } = await supabase
       .from('locations')
       .update({
@@ -41,6 +41,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         google_review_count: null,
         google_hours_display: null,
         google_last_synced_at: null,
+        yelp_biz_id: null,
+        yelp_business_url: null,
+        yelp_rating: null,
+        yelp_review_count: null,
+        yelp_last_synced_at: null,
       })
       .eq('id', locationId);
 

@@ -6,52 +6,54 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { GlassCard } from "../../components/glass";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { spacing, borderRadius } from "../../lib/theme";
 
 export default function TimeOffScreen() {
+  const colors = useColors();
+
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
       <GlassCard style={styles.infoCard}>
         <View style={styles.infoContent}>
           <Text style={styles.infoIcon}>✈️</Text>
-          <Text style={styles.infoTitle}>Time Off</Text>
-          <Text style={styles.infoDescription}>
+          <Text style={[styles.infoTitle, { color: colors.onSurface }]}>Time Off</Text>
+          <Text style={[styles.infoDescription, { color: colors.onSurfaceVariant }]}>
             Request time off, view your balances, and track pending requests.
           </Text>
-          <Text style={styles.comingSoon}>Coming Soon</Text>
+          <Text style={[styles.comingSoon, { color: colors.primary, backgroundColor: colors.primaryTransparent }]}>Coming Soon</Text>
         </View>
       </GlassCard>
 
       {/* Placeholder for time off balance */}
-      <Text style={styles.sectionTitle}>Balances</Text>
+      <Text style={[styles.sectionTitle, { color: colors.onSurfaceVariant }]}>Balances</Text>
 
       <View style={styles.balanceRow}>
         <GlassCard style={styles.balanceCard}>
-          <Text style={styles.balanceValue}>--</Text>
-          <Text style={styles.balanceLabel}>Vacation</Text>
+          <Text style={[styles.balanceValue, { color: colors.onSurface }]}>--</Text>
+          <Text style={[styles.balanceLabel, { color: colors.onSurfaceVariant }]}>Vacation</Text>
         </GlassCard>
 
         <GlassCard style={styles.balanceCard}>
-          <Text style={styles.balanceValue}>--</Text>
-          <Text style={styles.balanceLabel}>Sick</Text>
+          <Text style={[styles.balanceValue, { color: colors.onSurface }]}>--</Text>
+          <Text style={[styles.balanceLabel, { color: colors.onSurfaceVariant }]}>Sick</Text>
         </GlassCard>
 
         <GlassCard style={styles.balanceCard}>
-          <Text style={styles.balanceValue}>--</Text>
-          <Text style={styles.balanceLabel}>Personal</Text>
+          <Text style={[styles.balanceValue, { color: colors.onSurface }]}>--</Text>
+          <Text style={[styles.balanceLabel, { color: colors.onSurfaceVariant }]}>Personal</Text>
         </GlassCard>
       </View>
 
-      <Text style={styles.sectionTitle}>Recent Requests</Text>
+      <Text style={[styles.sectionTitle, { color: colors.onSurfaceVariant }]}>Recent Requests</Text>
 
       <GlassCard style={styles.emptyRequestsCard}>
-        <Text style={styles.emptyText}>No recent requests</Text>
+        <Text style={[styles.emptyText, { color: colors.onSurfaceVariant }]}>No recent requests</Text>
       </GlassCard>
     </ScrollView>
   );
@@ -60,7 +62,6 @@ export default function TimeOffScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scrollContent: {
     padding: spacing[4],
@@ -79,19 +80,15 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     ...typography.h3,
-    color: colors.onSurface,
     marginBottom: spacing[2],
   },
   infoDescription: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     textAlign: "center",
     marginBottom: spacing[3],
   },
   comingSoon: {
     ...typography.labelMedium,
-    color: colors.primary,
-    backgroundColor: colors.primaryTransparent,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
     borderRadius: borderRadius.md,
@@ -99,7 +96,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.labelLarge,
-    color: colors.onSurfaceVariant,
     marginBottom: spacing[3],
     paddingHorizontal: spacing[1],
   },
@@ -115,12 +111,10 @@ const styles = StyleSheet.create({
   },
   balanceValue: {
     ...typography.h2,
-    color: colors.onSurface,
     marginBottom: spacing[1],
   },
   balanceLabel: {
     ...typography.labelSmall,
-    color: colors.onSurfaceVariant,
   },
   emptyRequestsCard: {
     alignItems: "center",
@@ -129,6 +123,5 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
   },
 });

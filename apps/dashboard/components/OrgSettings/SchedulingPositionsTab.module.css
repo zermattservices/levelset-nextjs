@@ -1,0 +1,214 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.introTitle {
+  font-family: "Satoshi";
+  font-size: 16px;
+  font-weight: 600;
+  color: #0d1b14;
+  margin: 0;
+}
+
+.introDescription {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+}
+
+.errorMessage {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+.areasBar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e5e5;
+  align-items: center;
+}
+
+.scrollContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.sectionTitle {
+  font-family: "Satoshi";
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.positionCount {
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 500;
+  color: #999;
+}
+
+.positionsHeader {
+  display: grid;
+  grid-template-columns: 1fr 120px 80px 40px;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid #e5e5e5;
+  align-items: center;
+}
+
+.headerLabel {
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.positionRow {
+  display: grid;
+  grid-template-columns: 1fr 120px 80px 40px;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+}
+
+.positionName {
+  font-family: "Satoshi";
+  font-size: 14px;
+  font-weight: 500;
+  color: #0d1b14;
+  padding: 4px 0;
+}
+
+.nameField {
+  width: 100%;
+}
+
+.typeBadge {
+  display: flex;
+  align-items: center;
+}
+
+.standardBadge {
+  display: inline-flex;
+  align-items: center;
+  background: #f0fdf4;
+  color: #166534;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-family: "Satoshi";
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.schedulingBadge {
+  display: inline-flex;
+  align-items: center;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-family: "Satoshi";
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.toggleCell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.alwaysOn {
+  font-family: "Satoshi";
+  font-size: 11px;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.actionCell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.emptySection {
+  font-family: "Satoshi";
+  font-size: 14px;
+  color: #999;
+  padding: 16px;
+  text-align: center;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.deleteButton {
+  color: #9ca3af;
+}
+
+.deleteButton:hover {
+  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.08);
+}
+
+.actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.rightActions {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}

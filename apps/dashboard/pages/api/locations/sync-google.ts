@@ -44,6 +44,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Location is not connected to Google Maps' });
     }
 
+    const startMs = Date.now();
+    console.log(`[sync-google] Starting sync for location=${locationId}, placeId=${location.google_place_id}`);
+
     const result = await syncLocationFromGoogle(
       supabase,
       locationId,
@@ -51,9 +54,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       location.org_id
     );
 
+    const totalMs = Date.now() - startMs;
+    console.log(`[sync-google] Complete in ${totalMs}ms (${(totalMs / 1000).toFixed(1)}s) — reviewCount=${result.reviewCount}, newReviews=${result.newReviews}, updatedReviews=${result.updatedReviews}`);
+
     return res.status(200).json({
       success: true,
       message: 'Google Maps data synced',
+      durationMs: totalMs,
       ...result,
     });
   } catch (error: any) {

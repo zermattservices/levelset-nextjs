@@ -6,9 +6,15 @@ import {
   VectorIcon,
 } from "expo-router/unstable-native-tabs";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { colors } from "../../src/lib/colors";
+import { useColors } from "../../src/context/ThemeContext";
+
+export const unstable_settings = {
+  initialRouteName: "(home)",
+};
 
 export default function TabLayout() {
+  const colors = useColors();
+
   return (
     <NativeTabs tintColor={colors.primary} minimizeBehavior="onScrollDown">
       <NativeTabs.Trigger name="(home)">
@@ -19,11 +25,11 @@ export default function TabLayout() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="(resources)">
-        <Label>Resources</Label>
+      <NativeTabs.Trigger name="(levi)">
+        <Label>Levi</Label>
         <Icon
-          sf={{ default: "book", selected: "book.fill" }}
-          androidSrc={<VectorIcon family={Ionicons} name="book" />}
+          sf={{ default: "cpu", selected: "cpu.fill" }}
+          androidSrc={<VectorIcon family={Ionicons} name="hardware-chip" />}
         />
       </NativeTabs.Trigger>
 
@@ -42,14 +48,6 @@ export default function TabLayout() {
         <Icon
           sf={{ default: "calendar", selected: "calendar.circle.fill" }}
           androidSrc={<VectorIcon family={Ionicons} name="calendar" />}
-        />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="(profile)">
-        <Label>Profile</Label>
-        <Icon
-          sf={{ default: "person", selected: "person.fill" }}
-          androidSrc={<VectorIcon family={Ionicons} name="person" />}
         />
       </NativeTabs.Trigger>
     </NativeTabs>

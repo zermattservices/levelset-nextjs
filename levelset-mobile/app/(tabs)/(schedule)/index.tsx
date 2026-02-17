@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SlidingMenu } from "../../../src/components/schedule/SlidingMenu";
 import { useSlidingMenu } from "../../../src/context/SlidingMenuContext";
 import { AppIcon } from "../../../src/components/ui";
-import { colors } from "../../../src/lib/colors";
+import { useColors } from "../../../src/context/ThemeContext";
 import { typography, fontWeights } from "../../../src/lib/fonts";
 import { spacing, haptics } from "../../../src/lib/theme";
 
@@ -41,6 +41,7 @@ function ScheduleContent() {
 
 function ScheduleHeader() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
   const { openMenu, activeTab, menuTabs } = useSlidingMenu();
   const currentTab = menuTabs.find((tab) => tab.id === activeTab);
 
@@ -60,7 +61,7 @@ function ScheduleHeader() {
           tintColor={colors.onSurface}
         />
       </Pressable>
-      <Text style={styles.headerTitle}>
+      <Text style={[styles.headerTitle, { color: colors.onSurface }]}>
         {currentTab?.label || "Schedule"}
       </Text>
       <View style={styles.headerSpacer} />
@@ -69,8 +70,10 @@ function ScheduleHeader() {
 }
 
 export default function ScheduleTab() {
+  const colors = useColors();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScheduleHeader />
       <ScheduleContent />
       <SlidingMenu />
@@ -81,7 +84,6 @@ export default function ScheduleTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
@@ -98,7 +100,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.h4,
     fontWeight: fontWeights.semibold,
-    color: colors.onSurface,
     flex: 1,
     textAlign: "center",
   },

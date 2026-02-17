@@ -104,12 +104,8 @@ export function ScheduleToolbar({
         <button className={sty.todayBtn} onClick={onGoToToday}>Today</button>
       </div>
 
-      {/* Center: status + toggles + zone filter + summary */}
+      {/* Center: toggles + zone filter + summary */}
       <div className={sty.centerSection}>
-        <span className={`${sty.statusChip} ${isPublished ? sty.statusPublished : sty.statusDraft}`}>
-          {isPublished ? 'Published' : 'Draft'}
-        </span>
-
         <div className={sty.toggleGroup}>
           <button
             className={`${sty.toggleBtn} ${timeViewMode === 'week' ? sty.toggleActive : ''}`}
@@ -169,8 +165,11 @@ export function ScheduleToolbar({
         </div>
       </div>
 
-      {/* Right: actions */}
+      {/* Right: status + actions */}
       <div className={sty.actionSection}>
+        <span className={`${sty.statusChip} ${isPublished ? sty.statusPublished : sty.statusDraft}`}>
+          {isPublished ? 'Published' : 'Draft'}
+        </span>
         {isPublished ? (
           <button className={sty.unpublishBtn} onClick={onUnpublish}>Unpublish</button>
         ) : (

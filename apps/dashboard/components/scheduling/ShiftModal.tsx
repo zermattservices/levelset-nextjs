@@ -35,6 +35,7 @@ interface ShiftModalProps {
   isPublished: boolean;
   onSave: (data: {
     shift_date: string;
+    end_date?: string;
     start_time: string;
     end_time: string;
     position_id?: string;
@@ -45,6 +46,7 @@ interface ShiftModalProps {
   }) => Promise<void>;
   onUpdate: (id: string, data: {
     shift_date?: string;
+    end_date?: string;
     start_time?: string;
     end_time?: string;
     position_id?: string | null;
@@ -72,6 +74,8 @@ function parseTimeToInput(time?: string): string {
 
 function calculateCost(
   employee: Employee | undefined,
+  startDate: string,
+  endDate: string,
   startTime: string,
   endTime: string,
   breakMinutes: number,
@@ -80,7 +84,16 @@ function calculateCost(
   const [sh, sm] = startTime.split(':').map(Number);
   const [eh, em] = endTime.split(':').map(Number);
   const startMin = sh * 60 + sm;
-  const endMin = eh * 60 + em;
+  let endMin = eh * 60 + em;
+  // Add 24h for each day difference between start and end date
+  if (startDate && endDate && endDate > startDate) {
+    const sd = new Date(startDate + 'T00:00:00');
+    const ed = new Date(endDate + 'T00:00:00');
+    const dayDiff = Math.round((ed.getTime() - sd.getTime()) / (24 * 60 * 60 * 1000));
+    endMin += dayDiff * 24 * 60;
+  } else if (endMin <= startMin) {
+    endMin += 24 * 60; // fallback cross-day
+  }
   const netHours = Math.max(0, (endMin - startMin) / 60 - breakMinutes / 60);
   return Math.round(employee.calculated_pay * netHours * 100) / 100;
 }
@@ -100,6 +113,65 @@ function generateTimeOptions(): { value: string; label: string }[] {
 }
 
 const TIME_OPTIONS = generateTimeOptions();
+
+/**
+ * Build end-time options.
+ *
+ * Same date  → 96 slots starting 15 min after startTime, wrapping past midnight
+ *              with "(+1)" labels for next-day times.
+ * Diff date  → Full 24h range (all 96 slots) labeled with "(+N)".
+ *
+ * Each option carries a `nextDay` flag so the onChange handler can
+ * auto-bump endDate when a cross-midnight time is selected.
+ */
+function generateEndTimeOptions(
+  startTime: string,
+  startDate: string,
+  endDate: string,
+): { value: string; label: string; nextDay: boolean }[] {
+  const [sh, sm] = startTime.split(':').map(Number);
+  const startMin = sh * 60 + sm;
+
+  // Calculate day difference
+  let dayDiff = 0;
+  if (startDate && endDate && endDate > startDate) {
+    const sd = new Date(startDate + 'T00:00:00');
+    const ed = new Date(endDate + 'T00:00:00');
+    dayDiff = Math.round((ed.getTime() - sd.getTime()) / (24 * 60 * 60 * 1000));
+  }
+
+  const options: { value: string; label: string; nextDay: boolean }[] = [];
+
+  if (dayDiff === 0) {
+    // Same date selected: 96 slots starting 15 min after startTime, wrapping with (+1)
+    for (let i = 1; i <= 96; i++) {
+      const totalMin = startMin + i * 15;
+      const wrappedMin = totalMin % (24 * 60);
+      const h = Math.floor(wrappedMin / 60);
+      const m = wrappedMin % 60;
+      const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      const period = h >= 12 ? 'PM' : 'AM';
+      const displayHour = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      const label = `${displayHour}:${String(m).padStart(2, '0')} ${period}`;
+      const nextDay = totalMin >= 24 * 60;
+      options.push({ value, label: nextDay ? `${label} (+1)` : label, nextDay });
+    }
+  } else {
+    // Different date selected: full 24h range labeled with (+N)
+    const suffix = ` (+${dayDiff})`;
+    for (let h = 0; h < 24; h++) {
+      for (let m = 0; m < 60; m += 15) {
+        const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        const period = h >= 12 ? 'PM' : 'AM';
+        const displayHour = h === 0 ? 12 : h > 12 ? h - 12 : h;
+        const label = `${displayHour}:${String(m).padStart(2, '0')} ${period}${suffix}`;
+        options.push({ value, label, nextDay: false });
+      }
+    }
+  }
+
+  return options;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
@@ -128,7 +200,8 @@ export function ShiftModal({
 }: ShiftModalProps) {
   const isEdit = !!shift;
 
-  const [date, setDate] = React.useState('');
+  const [startDate, setStartDate] = React.useState('');
+  const [endDate, setEndDate] = React.useState('');
   const [startTime, setStartTime] = React.useState('09:00');
   const [endTime, setEndTime] = React.useState('17:00');
   const [breakMin, setBreakMin] = React.useState(0);
@@ -144,7 +217,8 @@ export function ShiftModal({
   React.useEffect(() => {
     if (open) {
       if (shift) {
-        setDate(shift.shift_date);
+        setStartDate(shift.shift_date);
+        setEndDate(shift.end_date || shift.shift_date);
         setStartTime(parseTimeToInput(shift.start_time));
         setEndTime(parseTimeToInput(shift.end_time));
         setBreakMin(shift.break_minutes || 0);
@@ -153,7 +227,8 @@ export function ShiftModal({
         setNotes(shift.notes ?? '');
         setIsHouseShift(shift.is_house_shift ?? false);
       } else {
-        setDate(prefillDate ?? '');
+        setStartDate(prefillDate ?? '');
+        setEndDate(prefillDate ?? '');
         setStartTime(prefillStartTime || '09:00');
         setEndTime(prefillEndTime || '17:00');
         setBreakMin(0);
@@ -168,8 +243,24 @@ export function ShiftModal({
   }, [open, shift, prefillDate, prefillPositionId, prefillEmployeeId, prefillStartTime, prefillEndTime]);
 
   /* Derived values */
+  const endTimeOptions = React.useMemo(
+    () => generateEndTimeOptions(startTime, startDate, endDate),
+    [startTime, startDate, endDate],
+  );
+
+  /* Snap endTime to nearest valid option when options change and current value is invalid */
+  React.useEffect(() => {
+    if (!endTimeOptions.length) return;
+    const validValues = endTimeOptions.map((o) => o.value);
+    if (!validValues.includes(endTime)) {
+      // Default to first option
+      setEndTime(validValues[0]);
+      onTimeChange?.(startTime, validValues[0]);
+    }
+  }, [endTimeOptions]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const selectedEmployee = employees.find((e) => e.id === employeeId);
-  const projectedCost = calculateCost(selectedEmployee, startTime, endTime, breakMin);
+  const projectedCost = calculateCost(selectedEmployee, startDate, endDate, startTime, endTime, breakMin);
 
   const filteredEmployees = React.useMemo(() => {
     if (!employeeSearch) return employees;
@@ -205,13 +296,24 @@ export function ShiftModal({
   /*  Handlers                                                         */
   /* ---------------------------------------------------------------- */
 
+  /** Keep endDate >= startDate (if user changes startDate past endDate, clamp) */
+  React.useEffect(() => {
+    if (startDate && endDate && endDate < startDate) {
+      setEndDate(startDate);
+    }
+  }, [startDate, endDate]);
+
   const handleSave = async () => {
-    if (!date || !startTime || !endTime) {
-      setError('Date, start time, and end time are required.');
+    if (!startDate || !endDate || !startTime || !endTime) {
+      setError('All date and time fields are required.');
       return;
     }
-    if (startTime >= endTime) {
-      setError('End time must be after start time.');
+    if (endDate < startDate) {
+      setError('End date cannot be before start date.');
+      return;
+    }
+    if (startTime === endTime && startDate === endDate) {
+      setError('Start and end time cannot be the same on the same day.');
       return;
     }
     if (!positionId) {
@@ -225,7 +327,8 @@ export function ShiftModal({
     try {
       if (isEdit && shift) {
         await onUpdate(shift.id, {
-          shift_date: date,
+          shift_date: startDate,
+          end_date: endDate,
           start_time: startTime,
           end_time: endTime,
           position_id: positionId || null,
@@ -245,7 +348,8 @@ export function ShiftModal({
         }
       } else {
         await onSave({
-          shift_date: date,
+          shift_date: startDate,
+          end_date: endDate,
           start_time: startTime,
           end_time: endTime,
           position_id: positionId || undefined,
@@ -307,31 +411,53 @@ export function ShiftModal({
 
         {/* ---------- Form ---------- */}
         <div className={sty.form}>
-          {/* Date */}
-          <div className={sty.field}>
-            <LsDatePicker
-              label="Date"
-              value={date}
-              onChange={(newDate) => {
-                if (newDate) {
-                  const y = newDate.getFullYear();
-                  const m = String(newDate.getMonth() + 1).padStart(2, '0');
-                  const d = String(newDate.getDate()).padStart(2, '0');
-                  setDate(`${y}-${m}-${d}`);
-                } else {
-                  setDate('');
-                }
-              }}
-              disabled={readOnly}
-              fullWidth
-            />
+          {/* Dates row: Start Date + End Date */}
+          <div className={sty.row}>
+            <div className={sty.field}>
+              <LsDatePicker
+                label="Start Date"
+                value={startDate}
+                onChange={(newDate) => {
+                  if (newDate) {
+                    const y = newDate.getFullYear();
+                    const m = String(newDate.getMonth() + 1).padStart(2, '0');
+                    const d = String(newDate.getDate()).padStart(2, '0');
+                    setStartDate(`${y}-${m}-${d}`);
+                  } else {
+                    setStartDate('');
+                  }
+                }}
+                disabled={readOnly}
+                fullWidth
+              />
+            </div>
+            <div className={sty.field}>
+              <LsDatePicker
+                label="End Date"
+                value={endDate}
+                onChange={(newDate) => {
+                  if (newDate) {
+                    const y = newDate.getFullYear();
+                    const m = String(newDate.getMonth() + 1).padStart(2, '0');
+                    const d = String(newDate.getDate()).padStart(2, '0');
+                    const val = `${y}-${m}-${d}`;
+                    // Don't allow end date before start date
+                    setEndDate(val < startDate ? startDate : val);
+                  } else {
+                    setEndDate(startDate);
+                  }
+                }}
+                disabled={readOnly}
+                fullWidth
+              />
+            </div>
           </div>
 
-          {/* Start / End time */}
+          {/* Times row: Start Time + End Time */}
           <div className={sty.row}>
             <div className={sty.field}>
               <label className={sty.label} htmlFor="shift-start">
-                Start
+                Start Time
               </label>
               <select
                 id="shift-start"
@@ -349,16 +475,36 @@ export function ShiftModal({
             </div>
             <div className={sty.field}>
               <label className={sty.label} htmlFor="shift-end">
-                End
+                End Time
               </label>
               <select
                 id="shift-end"
                 className={sty.timeSelect}
                 value={endTime}
-                onChange={(e) => { setEndTime(e.target.value); onTimeChange?.(startTime, e.target.value); }}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setEndTime(val);
+                  onTimeChange?.(startTime, val);
+                  // Auto-update endDate when selecting a (+1) next-day option
+                  const selected = endTimeOptions.find((o) => o.value === val);
+                  if (selected?.nextDay && startDate) {
+                    const d = new Date(startDate + 'T00:00:00');
+                    d.setDate(d.getDate() + 1);
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    setEndDate(`${y}-${m}-${day}`);
+                  } else if (selected && !selected.nextDay && startDate && endDate !== startDate) {
+                    // Only in same-day options mode (has nextDay flags): snap endDate back
+                    const hasNextDayOptions = endTimeOptions.some((o) => o.nextDay);
+                    if (hasNextDayOptions) {
+                      setEndDate(startDate);
+                    }
+                  }
+                }}
                 disabled={readOnly}
               >
-                {TIME_OPTIONS.map((opt) => (
+                {endTimeOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>

@@ -19,6 +19,7 @@ import { UsersTab } from '@/components/OrgSettings/UsersTab';
 import { RolesTab } from '@/components/OrgSettings/RolesTab';
 import { PermissionsSettings } from '@/components/OrgSettings/PermissionsSettings';
 import { PaySettingsTab } from '@/components/OrgSettings/PaySettingsTab';
+import { SchedulingSettings } from '@/components/OrgSettings/SchedulingSettings';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
@@ -33,6 +34,7 @@ const VALID_SECTIONS = [
   'roster-settings',
   'pathway',
   'evaluations',
+  'scheduling',
   'users',
   'roles',
   'permissions',
@@ -120,6 +122,9 @@ export function OrgSettingsPage() {
   
   // Check if user can view organization settings
   const canViewOrgSettings = has(P.ORG_VIEW_SETTINGS);
+
+  // Scheduling is restricted to Levelset Admin only (matches nav bar restriction)
+  const isLevelsetAdmin = auth.role === 'Levelset Admin';
   
   // Determine if user can edit settings
   // Uses permissions system - specific permissions are checked in child components
@@ -170,6 +175,8 @@ export function OrgSettingsPage() {
         { id: 'roster-settings', label: 'Roster', status: 'active' },
         { id: 'pathway', label: 'Pathway', status: 'coming-soon' },
         { id: 'evaluations', label: 'Evaluations', status: 'coming-soon' },
+        // Scheduling is restricted to Levelset Admin only
+        ...(isLevelsetAdmin ? [{ id: 'scheduling', label: 'Scheduling', status: 'active' as const }] : []),
       ],
     },
     {
@@ -208,6 +215,10 @@ export function OrgSettingsPage() {
         return <ComingSoonPlaceholder title="Pathway" description="Career pathway and development tracking coming soon." />;
       case 'evaluations':
         return <ComingSoonPlaceholder title="Evaluations" description="Performance evaluation scheduling and tracking coming soon." />;
+      case 'scheduling':
+        // Scheduling settings restricted to Levelset Admin only
+        if (!isLevelsetAdmin) return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
+        return <SchedulingSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
       case 'users':
         return <UsersTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'roles':

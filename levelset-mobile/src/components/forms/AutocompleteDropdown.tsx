@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppIcon } from "../ui";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 
@@ -49,6 +49,7 @@ export function AutocompleteDropdown({
   error,
   groupBy = false,
 }: AutocompleteDropdownProps) {
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -102,18 +103,28 @@ export function AutocompleteDropdown({
       const isSelected = item.value === value;
       return (
         <TouchableOpacity
-          style={[styles.option, isSelected && styles.optionSelected]}
+          style={[
+            styles.option,
+            { backgroundColor: colors.surface, borderColor: colors.outline },
+            isSelected && { backgroundColor: colors.primaryTransparent, borderColor: colors.primary },
+          ]}
           onPress={() => handleSelect(item)}
           activeOpacity={0.7}
         >
           <View style={styles.optionContent}>
             <Text
-              style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}
+              style={[
+                styles.optionLabel,
+                { color: colors.onSurface },
+                isSelected && { color: colors.primary, fontWeight: "600" },
+              ]}
             >
               {item.label}
             </Text>
             {item.subtitle && (
-              <Text style={styles.optionSubtitle}>{item.subtitle}</Text>
+              <Text style={[styles.optionSubtitle, { color: colors.onSurfaceVariant }]}>
+                {item.subtitle}
+              </Text>
             )}
           </View>
           {isSelected && (
@@ -122,7 +133,7 @@ export function AutocompleteDropdown({
         </TouchableOpacity>
       );
     },
-    [value, handleSelect]
+    [value, handleSelect, colors]
   );
 
   const renderGroupedList = () => {
@@ -135,7 +146,7 @@ export function AutocompleteDropdown({
         keyExtractor={([group]) => group}
         renderItem={({ item: [group, items] }) => (
           <View>
-            <Text style={styles.groupHeader}>{group}</Text>
+            <Text style={[styles.groupHeader, { color: colors.onSurfaceVariant }]}>{group}</Text>
             {items.map((item) => (
               <View key={item.value}>{renderOption({ item })}</View>
             ))}
@@ -149,16 +160,17 @@ export function AutocompleteDropdown({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>
+      <Text style={[styles.label, { color: colors.onSurface }]}>
         {label}
-        {required && <Text style={styles.required}> *</Text>}
+        {required && <Text style={{ color: colors.error }}> *</Text>}
       </Text>
 
       <TouchableOpacity
         style={[
           styles.trigger,
-          disabled && styles.triggerDisabled,
-          error && styles.triggerError,
+          { backgroundColor: colors.surface, borderColor: colors.outline },
+          disabled && { backgroundColor: colors.surfaceDisabled, opacity: 0.6 },
+          error && { borderColor: colors.error },
         ]}
         onPress={handleOpen}
         disabled={disabled}
@@ -167,7 +179,8 @@ export function AutocompleteDropdown({
         <Text
           style={[
             styles.triggerText,
-            !selectedOption && styles.triggerPlaceholder,
+            { color: colors.onSurface },
+            !selectedOption && { color: colors.onSurfaceDisabled },
           ]}
           numberOfLines={1}
         >
@@ -176,7 +189,7 @@ export function AutocompleteDropdown({
         <AppIcon name="chevron.down" size={16} tintColor={colors.onSurfaceVariant} />
       </TouchableOpacity>
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
 
       <Modal
         visible={isOpen}
@@ -184,18 +197,18 @@ export function AutocompleteDropdown({
         presentationStyle="pageSheet"
         onRequestClose={handleClose}
       >
-        <View style={[styles.modalContainer, { paddingTop: insets.top }]}>
-          <View style={styles.modalHeader}>
+        <View style={[styles.modalContainer, { backgroundColor: colors.background, paddingTop: insets.top }]}>
+          <View style={[styles.modalHeader, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
             <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
               <AppIcon name="xmark.circle.fill" size={24} tintColor={colors.onSurfaceVariant} />
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>{label}</Text>
+            <Text style={[styles.modalTitle, { color: colors.onSurface }]}>{label}</Text>
             <View style={styles.closeButton} />
           </View>
 
-          <View style={styles.searchContainer}>
+          <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { backgroundColor: colors.surfaceVariant, color: colors.onSurface }]}
               placeholder="Search..."
               placeholderTextColor={colors.onSurfaceDisabled}
               value={searchText}
@@ -216,7 +229,7 @@ export function AutocompleteDropdown({
               showsVerticalScrollIndicator={false}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>No results found</Text>
+                  <Text style={[styles.emptyText, { color: colors.onSurfaceVariant }]}>No results found</Text>
                 </View>
               }
             />
@@ -233,56 +246,35 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.labelLarge,
-    color: colors.onSurface,
     marginBottom: 6,
-  },
-  required: {
-    color: colors.error,
   },
   trigger: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
-  triggerDisabled: {
-    backgroundColor: colors.surfaceDisabled,
-    opacity: 0.6,
-  },
-  triggerError: {
-    borderColor: colors.error,
-  },
   triggerText: {
     ...typography.bodyMedium,
-    color: colors.onSurface,
     flex: 1,
-  },
-  triggerPlaceholder: {
-    color: colors.onSurfaceDisabled,
   },
   errorText: {
     ...typography.bodySmall,
-    color: colors.error,
     marginTop: 4,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   modalHeader: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colors.outline,
   },
   closeButton: {
     width: 40,
@@ -292,25 +284,20 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     ...typography.h4,
-    color: colors.onSurface,
     flex: 1,
     textAlign: "center",
   },
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colors.outline,
   },
   searchInput: {
     ...typography.bodyMedium,
-    backgroundColor: colors.surfaceVariant,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    color: colors.onSurface,
   },
   listContent: {
     padding: 16,
@@ -321,36 +308,23 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: colors.surface,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: colors.outline,
-  },
-  optionSelected: {
-    backgroundColor: colors.primaryTransparent,
-    borderColor: colors.primary,
   },
   optionContent: {
     flex: 1,
   },
   optionLabel: {
     ...typography.bodyMedium,
-    color: colors.onSurface,
-  },
-  optionLabelSelected: {
-    color: colors.primary,
-    fontWeight: "600",
   },
   optionSubtitle: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     marginTop: 2,
   },
   groupHeader: {
     ...typography.labelMedium,
-    color: colors.onSurfaceVariant,
     paddingVertical: 8,
     paddingHorizontal: 4,
     marginTop: 8,
@@ -361,7 +335,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
   },
 });
 

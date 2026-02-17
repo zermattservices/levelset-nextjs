@@ -1,6 +1,7 @@
 /**
  * Home Tab
  * Dashboard with greeting, quick actions that open form sheets
+ * Avatar bubble in top-left opens account modal
  */
 
 import React from "react";
@@ -10,13 +11,14 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
+  Image,
 } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../src/context/AuthContext";
 import { useForms } from "../../../src/context/FormsContext";
-import { colors } from "../../../src/lib/colors";
+import { useColors } from "../../../src/context/ThemeContext";
 import { typography, fontWeights } from "../../../src/lib/fonts";
 import { spacing, borderRadius, haptics } from "../../../src/lib/theme";
 import { AppIcon } from "../../../src/components/ui";
@@ -26,24 +28,52 @@ import "../../../src/lib/i18n";
 export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { fullName } = useAuth();
+  const colors = useColors();
+  const { fullName, profileImage, email } = useAuth();
   const { lastSubmission, clearLastSubmission } = useForms();
 
   const firstName = fullName?.split(" ")[0] || "there";
   const greeting = getGreeting(t);
 
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return email?.charAt(0)?.toUpperCase() || "U";
+    return name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ padding: spacing[5], gap: spacing[4] }}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       showsVerticalScrollIndicator={false}
     >
-      {/* Greeting */}
-      <Animated.View entering={FadeIn.duration(400)} style={styles.greetingSection}>
-        <Text style={styles.greeting}>
-          {greeting}, <Text style={styles.userName}>{firstName}</Text>
-        </Text>
+      {/* Top bar: Avatar bubble + greeting */}
+      <Animated.View entering={FadeIn.duration(400)} style={styles.topBar}>
+        <Pressable
+          onPress={() => {
+            haptics.light();
+            router.push("/(tabs)/(home)/account");
+          }}
+          style={styles.avatarBubble}
+        >
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+          ) : (
+            <View style={[styles.avatarFallback, { backgroundColor: colors.primary }]}>
+              <Text style={[styles.avatarText, { color: colors.onPrimary }]}>{getInitials(fullName)}</Text>
+            </View>
+          )}
+        </Pressable>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.greeting, { color: colors.onSurfaceVariant }]}>
+            {greeting}, <Text style={[styles.userName, { color: colors.onBackground }]}>{firstName}</Text>
+          </Text>
+        </View>
       </Animated.View>
 
       {/* Success banner */}
@@ -54,14 +84,14 @@ export default function HomeScreen() {
               haptics.light();
               clearLastSubmission();
             }}
-            style={styles.successBanner}
+            style={[styles.successBanner, { backgroundColor: colors.successContainer, borderColor: colors.successTransparent }]}
           >
             <AppIcon name="checkmark.circle.fill" size={20} tintColor={colors.success} />
             <View style={styles.successInfo}>
-              <Text selectable style={styles.successTitle}>
+              <Text selectable style={[styles.successTitle, { color: colors.success }]}>
                 {t("home.submittedSuccess")}
               </Text>
-              <Text selectable style={styles.successDetails}>
+              <Text selectable style={[styles.successDetails, { color: colors.onSurfaceVariant }]}>
                 {lastSubmission.employeeName} •{" "}
                 {lastSubmission.formType === "ratings"
                   ? t("forms.positionalRatings")
@@ -87,8 +117,8 @@ export default function HomeScreen() {
               <AppIcon name="star.fill" size={22} tintColor={colors.warning} />
             </View>
             <View style={styles.actionInfo}>
-              <Text style={styles.actionTitle}>{t("home.submitRating")}</Text>
-              <Text style={styles.actionDescription}>
+              <Text style={[styles.actionTitle, { color: colors.onSurface }]}>{t("home.submitRating")}</Text>
+              <Text style={[styles.actionDescription, { color: colors.onSurfaceVariant }]}>
                 {t("home.submitRatingDesc")}
               </Text>
             </View>
@@ -109,8 +139,8 @@ export default function HomeScreen() {
               <AppIcon name="exclamationmark.triangle" size={22} tintColor={colors.error} />
             </View>
             <View style={styles.actionInfo}>
-              <Text style={styles.actionTitle}>{t("home.submitInfraction")}</Text>
-              <Text style={styles.actionDescription}>
+              <Text style={[styles.actionTitle, { color: colors.onSurface }]}>{t("home.submitInfraction")}</Text>
+              <Text style={[styles.actionDescription, { color: colors.onSurfaceVariant }]}>
                 {t("home.submitInfractionDesc")}
               </Text>
             </View>
@@ -126,8 +156,8 @@ export default function HomeScreen() {
                 <AppIcon name="person.2" size={22} tintColor={colors.info} />
               </View>
               <View style={styles.actionInfo}>
-                <Text style={styles.actionTitle}>{t("home.manageTeam")}</Text>
-                <Text style={styles.actionDescription}>
+                <Text style={[styles.actionTitle, { color: colors.onSurface }]}>{t("home.manageTeam")}</Text>
+                <Text style={[styles.actionDescription, { color: colors.onSurfaceVariant }]}>
                   {t("common.comingSoon")}
                 </Text>
               </View>
@@ -150,30 +180,49 @@ function getGreeting(t: (key: string) => string): string {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
-  greetingSection: {
-    marginBottom: spacing[1],
+  topBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing[3],
+  },
+  avatarBubble: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  avatarImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  avatarFallback: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: {
+    fontSize: 16,
+    fontWeight: fontWeights.bold,
   },
   greeting: {
     ...typography.h2,
     fontWeight: fontWeights.semibold,
-    color: colors.onSurfaceVariant,
     letterSpacing: -0.3,
   },
   userName: {
     fontWeight: fontWeights.bold,
-    color: colors.onBackground,
   },
   successBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.successContainer,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
     padding: spacing[4],
     borderWidth: 1,
-    borderColor: colors.successTransparent,
     gap: spacing[3],
   },
   successInfo: {
@@ -181,11 +230,9 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     ...typography.labelMedium,
-    color: colors.success,
   },
   successDetails: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     marginTop: 1,
   },
   actionsSection: {
@@ -213,11 +260,9 @@ const styles = StyleSheet.create({
   actionTitle: {
     ...typography.bodyMedium,
     fontWeight: fontWeights.semibold,
-    color: colors.onSurface,
     marginBottom: 2,
   },
   actionDescription: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
   },
 });

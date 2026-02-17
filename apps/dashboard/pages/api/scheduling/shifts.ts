@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (intent === 'create') {
       const {
-        schedule_id, org_id, position_id, shift_date,
+        schedule_id, org_id, position_id, shift_date, end_date,
         start_time, end_time, break_minutes, notes, employee_id,
         is_house_shift,
       } = req.body;
@@ -36,6 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           org_id,
           position_id: position_id || null,
           shift_date,
+          end_date: end_date || shift_date,
           start_time,
           end_time,
           break_minutes: break_minutes || 0,
@@ -86,7 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (intent === 'update') {
-      const { id, position_id, shift_date, start_time, end_time, break_minutes, notes, is_house_shift } = req.body;
+      const { id, position_id, shift_date, end_date, start_time, end_time, break_minutes, notes, is_house_shift } = req.body;
 
       if (!id) {
         return res.status(400).json({ error: 'id is required' });
@@ -95,6 +96,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
       if (position_id !== undefined) updateData.position_id = position_id || null;
       if (shift_date !== undefined) updateData.shift_date = shift_date;
+      if (end_date !== undefined) updateData.end_date = end_date;
       if (start_time !== undefined) updateData.start_time = start_time;
       if (end_time !== undefined) updateData.end_time = end_time;
       if (break_minutes !== undefined) updateData.break_minutes = break_minutes;
@@ -227,7 +229,8 @@ async function calculateProjectedCost(
   if (!employee?.calculated_pay) return null;
 
   const startMinutes = parseTime(startTime);
-  const endMinutes = parseTime(endTime);
+  let endMinutes = parseTime(endTime);
+  if (endMinutes <= startMinutes) endMinutes += 24 * 60; // cross-day shift
   const netHours = Math.max(0, (endMinutes - startMinutes) / 60 - breakMinutes / 60);
 
   return Math.round(employee.calculated_pay * netHours * 100) / 100;

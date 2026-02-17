@@ -24,7 +24,7 @@ import ReAnimated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { borderRadius, spacing, haptics } from "../../lib/theme";
 import { typography } from "../../lib/fonts";
 
@@ -49,6 +49,7 @@ export function GlassModal({
   fullScreen = false,
   style,
 }: GlassModalProps) {
+  const colors = useColors();
   const { GlassView } = useGlass();
   const useGlassEffect = isGlassAvailable();
   const insets = useSafeAreaInsets();
@@ -78,10 +79,10 @@ export function GlassModal({
   const modalContent = (
     <>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
+      <View style={[styles.header, { borderBottomColor: colors.outline }]}>
+        <Text style={[styles.title, { color: colors.onSurface }]}>{title}</Text>
         <TouchableOpacity onPress={() => { haptics.light(); onClose(); }} style={styles.closeButton}>
-          <Text style={styles.closeText}>Close</Text>
+          <Text style={[styles.closeText, { color: colors.primary }]}>Close</Text>
         </TouchableOpacity>
       </View>
 
@@ -100,7 +101,7 @@ export function GlassModal({
 
       {/* Footer */}
       {footer && (
-        <View style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>
+        <View style={[styles.footer, { paddingBottom: insets.bottom || 16, borderTopColor: colors.outline }]}>
           {footer}
         </View>
       )}
@@ -124,7 +125,7 @@ export function GlassModal({
         style={styles.keyboardView}
       >
         {/* Backdrop */}
-        <ReAnimated.View style={[styles.backdrop, backdropAnimStyle]}>
+        <ReAnimated.View style={[styles.backdrop, { backgroundColor: colors.scrim }, backdropAnimStyle]}>
           <TouchableOpacity
             style={StyleSheet.absoluteFill}
             onPress={onClose}
@@ -145,7 +146,7 @@ export function GlassModal({
               {modalContent}
             </GlassView>
           ) : (
-            <View style={[styles.fallbackContainer, containerStyle]}>
+            <View style={[styles.fallbackContainer, { backgroundColor: colors.surface }, containerStyle]}>
               {modalContent}
             </View>
           )}
@@ -162,7 +163,6 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.scrim,
   },
   animatedContainer: {},
   modalContainer: {
@@ -175,7 +175,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   fallbackContainer: {
-    backgroundColor: colors.surface,
     borderTopLeftRadius: borderRadius.lg,
     borderTopRightRadius: borderRadius.lg,
     borderCurve: "continuous",
@@ -187,11 +186,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: colors.outline,
   },
   title: {
     ...typography.h4,
-    color: colors.onSurface,
     flex: 1,
   },
   closeButton: {
@@ -199,7 +196,6 @@ const styles = StyleSheet.create({
   },
   closeText: {
     ...typography.labelMedium,
-    color: colors.primary,
   },
   scrollContent: {
     flex: 1,
@@ -214,7 +210,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingTop: spacing[3],
     borderTopWidth: 1,
-    borderTopColor: colors.outline,
   },
 });
 

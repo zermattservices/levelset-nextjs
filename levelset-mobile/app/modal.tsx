@@ -1,14 +1,16 @@
 import { StatusBar } from "expo-status-bar";
 import { View, Text, StyleSheet } from "react-native";
-import { colors } from "../src/lib/colors";
+import { useColors } from "../src/context/ThemeContext";
 import { typography } from "../src/lib/fonts";
 
 export default function ModalScreen() {
+  const colors = useColors();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Modal</Text>
-      <View style={styles.separator} />
-      <Text style={styles.description}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.onSurface }]}>Modal</Text>
+      <View style={[styles.separator, { backgroundColor: colors.outline }]} />
+      <Text style={[styles.description, { color: colors.onSurfaceVariant }]}>
         This is a modal screen. You can present it from any route.
       </Text>
       <StatusBar style="auto" />
@@ -21,22 +23,18 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.background,
     padding: 20,
   },
   title: {
     ...typography.h3,
-    color: colors.onSurface,
   },
   separator: {
     marginVertical: 30,
     height: 1,
     width: "80%",
-    backgroundColor: colors.outline,
   },
   description: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     textAlign: "center",
   },
 });

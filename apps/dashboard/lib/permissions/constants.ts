@@ -15,6 +15,7 @@ export const PERMISSION_MODULES = {
   MOBILE_APP: 'mobile_app',
   HR_REPORTING: 'hr_reporting',
   BILLING: 'billing',
+  SCHEDULING: 'scheduling',
 } as const;
 
 // All permission keys as const for type safety
@@ -81,6 +82,11 @@ export const P = {
   // Billing
   BILLING_VIEW: 'billing.view_billing',
   BILLING_EDIT: 'billing.edit_billing',
+
+  // Scheduling
+  SCHED_VIEW: 'scheduling.view_schedule',
+  SCHED_MANAGE: 'scheduling.manage_schedule',
+  SCHED_MANAGE_SETTINGS: 'scheduling.manage_settings',
 } as const;
 
 // Type for any valid permission key
@@ -146,6 +152,11 @@ export const MODULE_METADATA: Record<string, ModuleMetadata> = {
     name: 'Billing',
     description: 'Billing and subscription management',
     order: 10,
+  },
+  [PERMISSION_MODULES.SCHEDULING]: {
+    name: 'Scheduling',
+    description: 'Schedule configuration, break rules, and position setup',
+    order: 11,
   },
 };
 
@@ -436,6 +447,26 @@ export const SUB_ITEM_METADATA: Record<PermissionKey, SubItemMetadata> = {
     description: 'Ability to manage billing settings, payment methods, and subscription plans',
     order: 2,
     module: PERMISSION_MODULES.BILLING,
+  },
+
+  // Scheduling
+  [P.SCHED_VIEW]: {
+    name: 'View Schedule',
+    description: 'Access to view the scheduling dashboard',
+    order: 1,
+    module: PERMISSION_MODULES.SCHEDULING,
+  },
+  [P.SCHED_MANAGE]: {
+    name: 'Manage Schedule',
+    description: 'Create, edit, and publish schedules',
+    order: 2,
+    module: PERMISSION_MODULES.SCHEDULING,
+  },
+  [P.SCHED_MANAGE_SETTINGS]: {
+    name: 'Manage Scheduling Settings',
+    description: 'Configure break rules, position setup, and scheduling preferences',
+    order: 3,
+    module: PERMISSION_MODULES.SCHEDULING,
   },
 };
 

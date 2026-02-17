@@ -20,7 +20,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useForms } from "../../context/FormsContext";
 import { AppIcon } from "../ui";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { borderRadius } from "../../lib/theme";
 
@@ -34,6 +34,7 @@ interface FormDrawerProps {
 
 /** @deprecated Use route-based form sheets instead (app/forms/) */
 export function FormDrawer({ title, formType, visible = false, children, footer }: FormDrawerProps) {
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const { isDirty, language, setLanguage } = useForms();
   const router = useRouter();
@@ -75,9 +76,9 @@ export function FormDrawer({ title, formType, visible = false, children, footer 
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+        style={[styles.container, { backgroundColor: colors.background }]}
       >
-        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.outline, paddingTop: insets.top + 8 }]}>
           {/* Close Button */}
           <TouchableOpacity
             onPress={handleClose}
@@ -92,16 +93,16 @@ export function FormDrawer({ title, formType, visible = false, children, footer 
           </TouchableOpacity>
 
           {/* Title */}
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={[styles.title, { color: colors.onSurface }]} numberOfLines={1}>
             {title}
           </Text>
 
           {/* Language Toggle */}
           <TouchableOpacity
             onPress={toggleLanguage}
-            style={styles.languageButton}
+            style={[styles.languageButton, { backgroundColor: colors.primaryTransparent }]}
           >
-            <Text style={styles.languageText}>
+            <Text style={[styles.languageText, { color: colors.primary }]}>
               {language === "en" ? "ES" : "EN"}
             </Text>
           </TouchableOpacity>
@@ -125,7 +126,7 @@ export function FormDrawer({ title, formType, visible = false, children, footer 
           <View
             style={[
               styles.footer,
-              { paddingBottom: insets.bottom > 0 ? insets.bottom : 16 },
+              { backgroundColor: colors.surface, borderTopColor: colors.outline, paddingBottom: insets.bottom > 0 ? insets.bottom : 16 },
             ]}
           >
             {footer}
@@ -139,16 +140,13 @@ export function FormDrawer({ title, formType, visible = false, children, footer 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colors.outline,
   },
   closeButton: {
     width: 40,
@@ -156,13 +154,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  closeText: {
-    fontSize: 20,
-    color: colors.onSurfaceVariant,
-  },
   title: {
     ...typography.h4,
-    color: colors.onSurface,
     flex: 1,
     textAlign: "center",
     marginHorizontal: 8,
@@ -170,12 +163,10 @@ const styles = StyleSheet.create({
   languageButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: colors.primaryTransparent,
     borderRadius: borderRadius.sm,
   },
   languageText: {
     ...typography.labelMedium,
-    color: colors.primary,
     fontWeight: "600",
   },
   content: {
@@ -191,9 +182,7 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 16,
     paddingTop: 12,
-    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: colors.outline,
   },
 });
 

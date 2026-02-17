@@ -24,11 +24,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
 import { useSlidingMenu, MenuTab } from "../../context/SlidingMenuContext";
 import { AppIcon } from "../../components/ui";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography, fontWeights } from "../../lib/fonts";
 import { spacing, borderRadius, haptics } from "../../lib/theme";
 
 export function SlidingMenu() {
+  const colors = useColors();
   const { GlassView } = useGlass();
   const useGlassEffect = isGlassAvailable();
   const insets = useSafeAreaInsets();
@@ -86,7 +87,7 @@ export function SlidingMenu() {
     <View style={[styles.menuInner, { paddingTop: insets.top + spacing[4] }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Schedule</Text>
+        <Text style={[styles.headerTitle, { color: colors.onSurface }]}>Schedule</Text>
       </View>
 
       {/* Menu Items */}
@@ -96,7 +97,7 @@ export function SlidingMenu() {
           return (
             <TouchableOpacity
               key={tab.id}
-              style={[styles.menuItem, isActive && styles.menuItemActive]}
+              style={[styles.menuItem, isActive && [styles.menuItemActive, { backgroundColor: colors.primaryTransparent }]]}
               onPress={() => handleTabPress(tab.id)}
               activeOpacity={0.7}
             >
@@ -112,13 +113,14 @@ export function SlidingMenu() {
                 <Text
                   style={[
                     styles.menuLabel,
-                    isActive && styles.menuLabelActive,
+                    { color: colors.onSurfaceVariant },
+                    isActive && { color: colors.primary, fontWeight: fontWeights.semibold },
                   ]}
                 >
                   {tab.label}
                 </Text>
               </View>
-              {isActive && <View style={styles.activeIndicator} />}
+              {isActive && <View style={[styles.activeIndicator, { backgroundColor: colors.primary }]} />}
             </TouchableOpacity>
           );
         })}
@@ -132,6 +134,7 @@ export function SlidingMenu() {
       <ReAnimated.View
         style={[
           styles.backdrop,
+          { backgroundColor: colors.scrim },
           backdropStyle,
           {
             pointerEvents: isMenuOpen ? "auto" : "none",
@@ -153,7 +156,7 @@ export function SlidingMenu() {
               {menuContent}
             </GlassView>
           ) : (
-            <View style={styles.fallbackMenu}>{menuContent}</View>
+            <View style={[styles.fallbackMenu, { backgroundColor: colors.surface, borderRightColor: colors.outline }]}>{menuContent}</View>
           )}
         </ReAnimated.View>
       </GestureDetector>
@@ -164,7 +167,6 @@ export function SlidingMenu() {
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.scrim,
     zIndex: 100,
   },
   menuContainer: {
@@ -183,12 +185,10 @@ const styles = StyleSheet.create({
   },
   fallbackMenu: {
     flex: 1,
-    backgroundColor: colors.surface,
     borderTopRightRadius: borderRadius.lg,
     borderBottomRightRadius: borderRadius.lg,
     borderCurve: "continuous",
     borderRightWidth: 1,
-    borderRightColor: colors.outline,
   },
   menuInner: {
     flex: 1,
@@ -200,7 +200,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...typography.h3,
-    color: colors.onSurface,
   },
   menuItems: {
     flex: 1,
@@ -215,9 +214,7 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
     marginBottom: spacing[1],
   },
-  menuItemActive: {
-    backgroundColor: colors.primaryTransparent,
-  },
+  menuItemActive: {},
   menuItemContent: {
     flexDirection: "row",
     alignItems: "center",
@@ -230,16 +227,10 @@ const styles = StyleSheet.create({
   },
   menuLabel: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
-  },
-  menuLabelActive: {
-    color: colors.primary,
-    fontWeight: fontWeights.semibold,
   },
   activeIndicator: {
     width: 4,
     height: spacing[6],
-    backgroundColor: colors.primary,
     borderRadius: 2,
   },
 });

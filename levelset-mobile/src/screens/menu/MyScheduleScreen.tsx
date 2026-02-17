@@ -14,11 +14,12 @@ import {
 import { useSchedule } from "../../context/ScheduleContext";
 import { ShiftCard } from "../../components/schedule/ShiftCard";
 import { GlassCard } from "../../components/glass";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { spacing } from "../../lib/theme";
 
 export default function MyScheduleScreen() {
+  const colors = useColors();
   const { shifts, isLoading, error, refreshSchedule } = useSchedule();
 
   const onRefresh = useCallback(() => {
@@ -27,11 +28,11 @@ export default function MyScheduleScreen() {
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.centerContent}>
           <Text style={styles.errorIcon}>⚠️</Text>
-          <Text style={styles.errorTitle}>Something went wrong</Text>
-          <Text style={styles.errorMessage}>{error}</Text>
+          <Text style={[styles.errorTitle, { color: colors.error }]}>Something went wrong</Text>
+          <Text style={[styles.errorMessage, { color: colors.onSurfaceVariant }]}>{error}</Text>
         </View>
       </View>
     );
@@ -39,7 +40,7 @@ export default function MyScheduleScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
       refreshControl={
@@ -55,18 +56,18 @@ export default function MyScheduleScreen() {
         <GlassCard style={styles.emptyCard}>
           <View style={styles.emptyContent}>
             <Text style={styles.emptyIcon}>📅</Text>
-            <Text style={styles.emptyTitle}>No Upcoming Shifts</Text>
-            <Text style={styles.emptyDescription}>
+            <Text style={[styles.emptyTitle, { color: colors.onSurface }]}>No Upcoming Shifts</Text>
+            <Text style={[styles.emptyDescription, { color: colors.onSurfaceVariant }]}>
               Your schedule will appear here once it's available.
             </Text>
-            <Text style={styles.emptyNote}>
+            <Text style={[styles.emptyNote, { color: colors.onSurfaceDisabled }]}>
               Pull down to refresh
             </Text>
           </View>
         </GlassCard>
       ) : (
         <>
-          <Text style={styles.sectionTitle}>Upcoming Shifts</Text>
+          <Text style={[styles.sectionTitle, { color: colors.onSurfaceVariant }]}>Upcoming Shifts</Text>
           {shifts.map((shift) => (
             <ShiftCard key={shift.id} shift={shift} />
           ))}
@@ -79,7 +80,6 @@ export default function MyScheduleScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scrollContent: {
     padding: spacing[4],
@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.labelLarge,
-    color: colors.onSurfaceVariant,
     marginBottom: spacing[3],
     paddingHorizontal: spacing[1],
   },
@@ -110,18 +109,15 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...typography.h3,
-    color: colors.onSurface,
     marginBottom: spacing[2],
   },
   emptyDescription: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     textAlign: "center",
     marginBottom: spacing[4],
   },
   emptyNote: {
     ...typography.bodySmall,
-    color: colors.onSurfaceDisabled,
     textAlign: "center",
   },
   errorIcon: {
@@ -130,12 +126,10 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     ...typography.h4,
-    color: colors.error,
     marginBottom: spacing[2],
   },
   errorMessage: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     textAlign: "center",
   },
 });

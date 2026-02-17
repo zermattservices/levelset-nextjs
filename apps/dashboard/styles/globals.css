@@ -183,3 +183,11 @@ svg {
   border-bottom-color: var(--ls-color-border); /* gray-300 */
   color: var(--ls-color-neutral); /* gray-700 */
 }
+
+/* ── Google Maps ── */
+/* Hide "This page can't load Google Maps correctly" dialog — we only use Places Autocomplete */
+.gm-err-container,
+.gm-style-pbc,
+div[style*="z-index: 2"][style*="background-color: gray"] {
+  display: none !important;
+}

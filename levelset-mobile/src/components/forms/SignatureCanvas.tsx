@@ -18,7 +18,7 @@ import SignatureScreen, {
   SignatureViewRef,
 } from "react-native-signature-canvas";
 import { AppIcon } from "../ui";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 
@@ -45,6 +45,7 @@ export function SignatureCanvas({
   onSigningStart,
   onSigningEnd,
 }: SignatureCanvasProps) {
+  const colors = useColors();
   const signatureRef = useRef<SignatureViewRef>(null);
   const { t } = useTranslation();
   const [isSigning, setIsSigning] = useState(false);
@@ -111,30 +112,31 @@ export function SignatureCanvas({
   return (
     <View style={[styles.container, disabled && styles.containerDisabled]}>
       <View style={styles.labelRow}>
-        <Text style={styles.label}>
+        <Text style={[styles.label, { color: colors.onSurface }]}>
           {label}
-          {required && <Text style={styles.required}> *</Text>}
+          {required && <Text style={{ color: colors.error }}> *</Text>}
         </Text>
         {value && !disabled && (
           <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
             <AppIcon name="arrow.counterclockwise" size={16} tintColor={colors.primary} />
-            <Text style={styles.clearButtonText}>{t("common.clear")}</Text>
+            <Text style={[styles.clearButtonText, { color: colors.primary }]}>{t("common.clear")}</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {helperText && <Text style={styles.helperText}>{helperText}</Text>}
+      {helperText && <Text style={[styles.helperText, { color: colors.onSurfaceVariant }]}>{helperText}</Text>}
 
       <View
         style={[
           styles.canvasContainer,
-          disabled && styles.canvasDisabled,
-          isSigning && styles.canvasActive,
+          { backgroundColor: colors.surfaceVariant, borderColor: colors.outline },
+          disabled && { backgroundColor: colors.surfaceDisabled },
+          isSigning && { borderColor: colors.primary, borderWidth: 2 },
         ]}
       >
         {disabled ? (
           <View style={styles.disabledOverlay}>
-            <Text style={styles.disabledText}>{t("common.signHere")}</Text>
+            <Text style={[styles.disabledText, { color: colors.onSurfaceDisabled }]}>{t("common.signHere")}</Text>
           </View>
         ) : (
           <SignatureScreen
@@ -160,7 +162,7 @@ export function SignatureCanvas({
 
         {!value && !disabled && !isSigning && (
           <View style={styles.placeholder} pointerEvents="none">
-            <Text style={styles.placeholderText}>{t("common.signHere")}</Text>
+            <Text style={[styles.placeholderText, { color: colors.onSurfaceDisabled }]}>{t("common.signHere")}</Text>
           </View>
         )}
       </View>
@@ -168,7 +170,7 @@ export function SignatureCanvas({
       {value && (
         <View style={styles.signedIndicator}>
           <AppIcon name="checkmark.circle.fill" size={16} tintColor={colors.success} />
-          <Text style={styles.signedText}>{t("common.signed")}</Text>
+          <Text style={[styles.signedText, { color: colors.success }]}>{t("common.signed")}</Text>
         </View>
       )}
     </View>
@@ -190,14 +192,9 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.labelLarge,
-    color: colors.onSurface,
-  },
-  required: {
-    color: colors.error,
   },
   helperText: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     marginBottom: 8,
   },
   clearButton: {
@@ -209,24 +206,14 @@ const styles = StyleSheet.create({
   },
   clearButtonText: {
     ...typography.labelSmall,
-    color: colors.primary,
   },
   canvasContainer: {
     height: 160,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
-    backgroundColor: colors.surfaceVariant,
     borderWidth: 1,
-    borderColor: colors.outline,
     overflow: "hidden",
     position: "relative",
-  },
-  canvasActive: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-  },
-  canvasDisabled: {
-    backgroundColor: colors.surfaceDisabled,
   },
   signature: {
     flex: 1,
@@ -240,7 +227,6 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceDisabled,
   },
   disabledOverlay: {
     flex: 1,
@@ -249,7 +235,6 @@ const styles = StyleSheet.create({
   },
   disabledText: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceDisabled,
   },
   signedIndicator: {
     flexDirection: "row",
@@ -259,7 +244,6 @@ const styles = StyleSheet.create({
   },
   signedText: {
     ...typography.labelSmall,
-    color: colors.success,
   },
 });
 

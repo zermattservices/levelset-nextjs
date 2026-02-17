@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, type ViewStyle } from "react-native";
 import { SymbolView, type SFSymbol } from "expo-symbols";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useColors } from "../../context/ThemeContext";
 
 const SYMBOL_MAP: Record<string, string> = {
   "house": "home-outline",
@@ -49,6 +50,29 @@ const SYMBOL_MAP: Record<string, string> = {
   "paperclip": "attach",
   "arrow.counterclockwise": "refresh",
   "mappin.slash": "location-outline",
+  "phone": "call-outline",
+  "phone.fill": "call",
+  "envelope": "mail-outline",
+  "envelope.fill": "mail",
+  "building.2": "business-outline",
+  "number": "keypad-outline",
+  "mappin": "location-outline",
+  "mappin.and.ellipse": "location-outline",
+  "briefcase": "briefcase-outline",
+  "briefcase.fill": "briefcase",
+  "cpu": "hardware-chip-outline",
+  "cpu.fill": "hardware-chip",
+  "bubble.left.and.bubble.right": "chatbubbles-outline",
+  "bubble.left.and.bubble.right.fill": "chatbubbles",
+  "checklist": "checkbox-outline",
+  "bell": "notifications-outline",
+  "bell.fill": "notifications",
+  "arrow.up": "arrow-up",
+  "arrow.up.circle.fill": "arrow-up-circle",
+  "paperplane": "send-outline",
+  "paperplane.fill": "send",
+  "microphone": "mic-outline",
+  "microphone.fill": "mic",
 };
 
 interface AppIconProps {
@@ -63,6 +87,8 @@ interface AppIconProps {
 }
 
 export function AppIcon({ name, size = 24, tintColor, style }: AppIconProps) {
+  const colors = useColors();
+
   if (process.env.EXPO_OS === "ios") {
     return (
       <SymbolView
@@ -96,7 +122,7 @@ export function AppIcon({ name, size = 24, tintColor, style }: AppIconProps) {
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: tintColor ?? "#999",
+          backgroundColor: tintColor ?? colors.onSurfaceDisabled,
           alignItems: "center",
           justifyContent: "center",
         },

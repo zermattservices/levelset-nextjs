@@ -174,6 +174,11 @@ export interface Location {
   google_review_count?: number;
   google_hours_display?: string[];
   google_last_synced_at?: string;
+  yelp_biz_id?: string;
+  yelp_business_url?: string;
+  yelp_rating?: number;
+  yelp_review_count?: number;
+  yelp_last_synced_at?: string;
   created_at?: string;
 }
 
@@ -188,6 +193,29 @@ export interface LocationBusinessHours {
   period_index: number;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface YelpReview {
+  id: string;
+  location_id: string;
+  org_id: string;
+  yelp_review_id: string;
+  author_name?: string;
+  rating: number;
+  review_text?: string;
+  review_photos?: any[];
+  review_tags?: string[];
+  owner_replies?: any[];
+  publish_time?: string;
+  first_synced_at: string;
+  last_synced_at: string;
+  mentioned_employee_ids?: string[];
+  sentiment_score?: number;
+  ai_summary?: string;
+  ai_analyzed_at?: string;
+  ai_tags?: string[];
+  pillar_score_applied: boolean;
+  created_at: string;
 }
 
 export interface GoogleReview {

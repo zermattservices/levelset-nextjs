@@ -7,16 +7,17 @@ import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useSchedule } from "../../context/ScheduleContext";
 import { GlassCard } from "../../components/glass";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography, fontWeights } from "../../lib/fonts";
 import { spacing } from "../../lib/theme";
 
 export default function StaffScreen() {
+  const colors = useColors();
   const { staff } = useSchedule();
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
@@ -24,26 +25,26 @@ export default function StaffScreen() {
         <GlassCard style={styles.emptyCard}>
           <View style={styles.emptyContent}>
             <Text style={styles.emptyIcon}>👥</Text>
-            <Text style={styles.emptyTitle}>No Staff Members</Text>
-            <Text style={styles.emptyDescription}>
+            <Text style={[styles.emptyTitle, { color: colors.onSurface }]}>No Staff Members</Text>
+            <Text style={[styles.emptyDescription, { color: colors.onSurfaceVariant }]}>
               Staff information will appear here once the system is connected.
             </Text>
           </View>
         </GlassCard>
       ) : (
         <>
-          <Text style={styles.sectionTitle}>Team Members</Text>
+          <Text style={[styles.sectionTitle, { color: colors.onSurfaceVariant }]}>Team Members</Text>
           {staff.map((member) => (
             <GlassCard key={member.id} style={styles.staffCard}>
               <View style={styles.staffRow}>
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
+                <View style={[styles.avatar, { backgroundColor: colors.primaryTransparent }]}>
+                  <Text style={[styles.avatarText, { color: colors.primary }]}>
                     {member.name.charAt(0).toUpperCase()}
                   </Text>
                 </View>
                 <View style={styles.staffInfo}>
-                  <Text style={styles.staffName}>{member.name}</Text>
-                  <Text style={styles.staffRole}>{member.role}</Text>
+                  <Text style={[styles.staffName, { color: colors.onSurface }]}>{member.name}</Text>
+                  <Text style={[styles.staffRole, { color: colors.onSurfaceVariant }]}>{member.role}</Text>
                 </View>
               </View>
             </GlassCard>
@@ -57,7 +58,6 @@ export default function StaffScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scrollContent: {
     padding: spacing[4],
@@ -65,7 +65,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.labelLarge,
-    color: colors.onSurfaceVariant,
     marginBottom: spacing[3],
     paddingHorizontal: spacing[1],
   },
@@ -82,12 +81,10 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...typography.h3,
-    color: colors.onSurface,
     marginBottom: spacing[2],
   },
   emptyDescription: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     textAlign: "center",
   },
   staffCard: {
@@ -102,24 +99,20 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.primaryTransparent,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
     ...typography.h4,
-    color: colors.primary,
   },
   staffInfo: {
     flex: 1,
   },
   staffName: {
     ...typography.bodyLarge,
-    color: colors.onSurface,
     fontWeight: fontWeights.semibold,
   },
   staffRole: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
   },
 });

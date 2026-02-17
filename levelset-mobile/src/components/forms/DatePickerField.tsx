@@ -15,7 +15,7 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import { AppIcon } from "../ui";
 import { format } from "date-fns";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 
@@ -40,6 +40,7 @@ export function DatePickerField({
   required = false,
   error,
 }: DatePickerFieldProps) {
+  const colors = useColors();
   const [showAndroidPicker, setShowAndroidPicker] = useState(false);
 
   const handleChange = useCallback(
@@ -65,16 +66,17 @@ export function DatePickerField({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>
+      <Text style={[styles.label, { color: colors.onSurface }]}>
         {label}
-        {required && <Text style={styles.required}> *</Text>}
+        {required && <Text style={{ color: colors.error }}> *</Text>}
       </Text>
 
       <View
         style={[
           styles.trigger,
-          disabled && styles.triggerDisabled,
-          error && styles.triggerError,
+          { backgroundColor: colors.surface, borderColor: colors.outline },
+          disabled && { backgroundColor: colors.surfaceDisabled, opacity: 0.6 },
+          error && { borderColor: colors.error },
         ]}
       >
         <AppIcon name="calendar" size={20} tintColor={colors.onSurfaceVariant} style={styles.icon} />
@@ -96,12 +98,12 @@ export function DatePickerField({
             activeOpacity={0.7}
             style={styles.androidTrigger}
           >
-            <Text style={styles.triggerText}>{formattedDate}</Text>
+            <Text style={[styles.triggerText, { color: colors.onSurface }]}>{formattedDate}</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
 
       {/* Android Picker */}
       {process.env.EXPO_OS === "android" && showAndroidPicker && (
@@ -124,30 +126,17 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.labelLarge,
-    color: colors.onSurface,
     marginBottom: 6,
-  },
-  required: {
-    color: colors.error,
   },
   trigger: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
     paddingHorizontal: 16,
     paddingVertical: 14,
-  },
-  triggerDisabled: {
-    backgroundColor: colors.surfaceDisabled,
-    opacity: 0.6,
-  },
-  triggerError: {
-    borderColor: colors.error,
   },
   icon: {},
   compactPicker: {
@@ -158,12 +147,10 @@ const styles = StyleSheet.create({
   },
   triggerText: {
     ...typography.bodyMedium,
-    color: colors.onSurface,
     flex: 1,
   },
   errorText: {
     ...typography.bodySmall,
-    color: colors.error,
     marginTop: 4,
   },
 });

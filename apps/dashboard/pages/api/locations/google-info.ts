@@ -20,11 +20,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const supabase = createServerSupabaseClient();
 
-    // Fetch location Google fields
+    // Fetch location Google + Yelp fields
     const { data: location, error: locError } = await supabase
       .from('locations')
       .select(
-        'id, google_place_id, latitude, longitude, google_maps_url, google_rating, google_review_count, google_hours_display, google_last_synced_at'
+        'id, google_place_id, latitude, longitude, google_maps_url, google_rating, google_review_count, google_hours_display, google_last_synced_at, yelp_biz_id, yelp_business_url, yelp_rating, yelp_review_count, yelp_last_synced_at'
       )
       .eq('id', locationId)
       .single();
@@ -50,18 +50,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .order('day_of_week', { ascending: true })
       .order('period_index', { ascending: true });
 
-    // Fetch reviews
+    // Fetch Google reviews
     const { data: reviews } = await supabase
       .from('google_reviews')
       .select('*')
       .eq('location_id', locationId)
       .order('publish_time', { ascending: false });
 
+    // Fetch Yelp reviews
+    const { data: yelpReviews } = await supabase
+      .from('yelp_reviews')
+      .select('*')
+      .eq('location_id', locationId)
+      .order('created_at', { ascending: false });
+
     return res.status(200).json({
       connected: true,
       location,
       businessHours: businessHours || [],
       reviews: reviews || [],
+      yelpReviews: yelpReviews || [],
     });
   } catch (error: any) {
     console.error('[google-info] Error:', error);

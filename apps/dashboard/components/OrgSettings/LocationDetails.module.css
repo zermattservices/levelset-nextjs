@@ -173,27 +173,115 @@
   padding: 8px 0;
 }
 
-.googleConnectedContainer {
+/* ── Connected state ── */
+
+.googleConnectedCard {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
-  border: 1px solid #e5e5e5;
+  gap: 0;
+  border: 1px solid var(--ls-color-muted-border, #e5e7eb);
   border-radius: 8px;
-  background: #fafafa;
+  overflow: hidden;
+  max-width: 600px;
 }
 
-.googleSummaryRow {
+.googleConnectedHeader {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f9fafb;
+  border-bottom: 1px solid var(--ls-color-muted-border, #e5e7eb);
+}
+
+.googleConnectedStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.googleStatusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ls-color-success, #16a34a);
+  flex-shrink: 0;
+}
+
+.googleStatusText {
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ls-color-success, #16a34a);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.googleRatingBadge {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: "Satoshi";
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.googleReviewCount {
+  font-weight: 400;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-left: 1px;
+}
+
+/* Business hours */
+
+.googleCardBody {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid var(--ls-color-muted-border, #e5e7eb);
+}
+
+.googleHoursCompact {
+  flex: 1;
+  padding: 10px 14px;
+  min-width: 0;
+}
+
+.googleHoursGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+}
+
+.googleHoursRow {
+  font-family: "Satoshi";
+  font-size: 12px;
+  color: #555;
+  line-height: 1.7;
+}
+
+/* Footer */
+
+.googleConnectedFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  gap: 8px;
   flex-wrap: wrap;
+}
+
+.googleFooterLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .googleMapsLink {
   font-family: "Satoshi";
-  font-size: 13px;
-  color: var(--ls-color-brand);
+  font-size: 12px;
+  color: var(--ls-color-brand, #31664a);
   text-decoration: none;
   font-weight: 500;
 }
@@ -202,110 +290,177 @@
   text-decoration: underline;
 }
 
-.googleRating {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: "Satoshi";
-  font-size: 13px;
-  color: #374151;
-  font-weight: 500;
-}
-
-.googleHours {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.googleHoursTitle {
-  font-family: "Satoshi";
-  font-size: 12px;
-  font-weight: 600;
-  color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.googleHoursGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.googleHoursRow {
-  font-family: "Satoshi";
-  font-size: 13px;
-  color: #555;
-  line-height: 1.6;
-}
-
-.googleActionsRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding-top: 8px;
-  border-top: 1px solid #e5e5e5;
-}
-
 .googleSyncInfo {
   font-family: "Satoshi";
-  font-size: 12px;
+  font-size: 11px;
   color: #9ca3af;
 }
 
 .googleActions {
   display: flex;
-  gap: 8px;
+  gap: 4px;
 }
+
+.googleActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ls-color-brand, #31664a);
+  background: none;
+  border: 1px solid var(--ls-color-muted-border, #e5e7eb);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.googleActionBtn:hover:not(:disabled) {
+  background: rgba(49, 102, 74, 0.06);
+  border-color: var(--ls-color-brand-border, #458461);
+}
+
+.googleActionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.googleActionBtnDanger {
+  color: var(--ls-color-destructive, #d23230);
+}
+
+.googleActionBtnDanger:hover:not(:disabled) {
+  background: rgba(210, 50, 48, 0.06);
+  border-color: var(--ls-color-destructive, #d23230);
+}
+
+/* ── Not connected state ── */
 
 .googleConnectContainer {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .googleAutocompleteWrapper {
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
+  position: relative;
 }
 
-.googleSearchInput {
+/* Dropdown */
+.googleDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--ls-color-bg-container, #fff);
+  border: 1px solid var(--ls-color-border, #D1D5DB);
+  border-radius: var(--ls-radius-md, 6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.googleDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: var(--ls-space-2-5, 10px);
   width: 100%;
-  padding: 10px 12px;
-  font-family: "Satoshi";
-  font-size: 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  outline: none;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
+  padding: var(--ls-space-2, 8px) var(--ls-space-3, 12px);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
 }
 
-.googleSearchInput:focus {
-  border-color: var(--ls-color-brand);
-  box-shadow: 0 0 0 2px rgba(49, 102, 74, 0.1);
+.googleDropdownItem:not(:last-of-type) {
+  border-bottom: 1px solid var(--ls-color-neutral-foreground, #f3f4f6);
+}
+
+.googleDropdownItem:hover,
+.googleDropdownItemHighlighted {
+  background: var(--ls-color-neutral-foreground, #f9fafb);
+}
+
+.googleDropdownItemText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.googleDropdownMain {
+  font-family: var(--ls-font-body, "Satoshi", sans-serif);
+  font-size: var(--ls-font-size-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--ls-color-text-primary, #181d27);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.googleDropdownSecondary {
+  font-family: var(--ls-font-body, "Satoshi", sans-serif);
+  font-size: var(--ls-font-size-xs, 0.75rem);
+  color: var(--ls-color-muted, #9ca3af);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.googleDropdownFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px var(--ls-space-3, 12px);
+  border-top: 1px solid var(--ls-color-neutral-foreground, #f3f4f6);
+  background: var(--ls-color-neutral-foreground, #fafafa);
+}
+
+.googleAttributionImg {
+  height: 12px;
+  opacity: 0.6;
 }
 
 .googleSelectedPlace {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  background: #f0fdf4;
+  gap: var(--ls-space-2-5, 10px);
+  padding: var(--ls-space-2, 8px) var(--ls-space-3, 12px);
+  background: var(--ls-color-success-foreground, #f0fdf4);
   border: 1px solid #bbf7d0;
-  border-radius: 8px;
-  max-width: 400px;
+  border-radius: var(--ls-radius-md, 6px);
+  max-width: 600px;
+}
+
+.googleSelectedInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
 }
 
 .googleSelectedName {
-  font-family: "Satoshi";
-  font-size: 13px;
-  color: #15803d;
+  font-family: var(--ls-font-body, "Satoshi", sans-serif);
+  font-size: var(--ls-font-size-sm, 0.875rem);
+  color: var(--ls-color-text-primary, #181d27);
   font-weight: 500;
-  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.googleSelectedAddress {
+  font-family: var(--ls-font-body, "Satoshi", sans-serif);
+  font-size: var(--ls-font-size-xs, 0.75rem);
+  color: var(--ls-color-muted, #9ca3af);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .googleNotConfigured {
@@ -313,4 +468,118 @@
   font-size: 13px;
   color: #9ca3af;
   font-style: italic;
+}
+
+/* Sync status during connect flow (not-connected state) */
+.connectSyncStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 600px;
+  padding: 4px 0;
+}
+
+/* ── Reviews sync column (inside connected card body) ── */
+
+.googleReviewsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px;
+  border-left: 1px solid var(--ls-color-muted-border, #e5e7eb);
+  min-width: 180px;
+}
+
+.googleReviewsHeader {
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ── Sync status rows ── */
+
+.syncStatusRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.syncStatusLabel {
+  font-family: "Satoshi";
+  font-size: 12px;
+  color: #555;
+  white-space: nowrap;
+}
+
+.syncStatusRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.syncProgressBarTrack {
+  width: 72px;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.syncProgressBarFill {
+  height: 100%;
+  background: var(--ls-color-brand, #31664a);
+  border-radius: 2px;
+  transition: width 0.3s ease-out;
+}
+
+.syncProgressPct {
+  font-family: "Satoshi";
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ls-color-brand, #31664a);
+  min-width: 28px;
+  text-align: right;
+}
+
+.syncStatusIdle {
+  font-family: "Satoshi";
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+/* ── Review info (idle state in connected card) ── */
+
+.reviewInfoInline {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.reviewInfoRating {
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.reviewInfoCount {
+  font-family: "Satoshi";
+  font-size: 11px;
+  font-weight: 400;
+  color: #9ca3af;
+}
+
+.reviewInfoNone {
+  font-family: "Satoshi";
+  font-size: 11px;
+  font-style: italic;
+  color: #d1d5db;
 }

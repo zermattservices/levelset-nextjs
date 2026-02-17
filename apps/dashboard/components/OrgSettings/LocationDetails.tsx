@@ -1,5 +1,8 @@
 import * as React from 'react';
+import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -7,9 +10,113 @@ import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
 import SyncIcon from '@mui/icons-material/Sync';
 import StarIcon from '@mui/icons-material/Star';
+import SearchIcon from '@mui/icons-material/Search';
+import PlaceIcon from '@mui/icons-material/Place';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 import sty from './LocationDetails.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
+
+// ── Sync progress indicator with accelerating % ──
+type SyncStatus = 'idle' | 'syncing' | 'success' | 'error';
+
+/**
+ * Animated progress that accelerates from 0→~92% over the expected
+ * duration, then holds until the real call completes. Uses an
+ * ease-out curve so early progress feels fast, then slows down
+ * to create the perception of "almost there."
+ *
+ * expectedMs: estimated total time (e.g. 4000 for place details,
+ * reviewCount * 3 for outscraper)
+ */
+function useSyncProgress(status: SyncStatus, expectedMs: number) {
+  const [pct, setPct] = React.useState(0);
+  const startRef = React.useRef(0);
+  const rafRef = React.useRef<number>(0);
+
+  React.useEffect(() => {
+    if (status === 'syncing') {
+      startRef.current = Date.now();
+      const tick = () => {
+        const elapsed = Date.now() - startRef.current;
+        const t = Math.min(elapsed / expectedMs, 1);
+        // ease-out cubic: fast start, slow finish — caps at 92%
+        const eased = 1 - Math.pow(1 - t, 3);
+        setPct(Math.round(eased * 100));
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      rafRef.current = requestAnimationFrame(tick);
+      return () => cancelAnimationFrame(rafRef.current);
+    }
+    if (status === 'success') { setPct(100); }
+    if (status === 'error') { setPct(0); }
+    if (status === 'idle') { setPct(0); }
+  }, [status, expectedMs]);
+
+  return pct;
+}
+
+function SyncStatusRow({
+  label,
+  status,
+  expectedMs,
+  idleContent,
+}: {
+  label: string;
+  status: SyncStatus;
+  expectedMs: number;
+  idleContent?: React.ReactNode;
+}) {
+  const pct = useSyncProgress(status, expectedMs);
+
+  return (
+    <div className={sty.syncStatusRow}>
+      <div className={sty.syncStatusLabel}>{label}</div>
+      <div className={sty.syncStatusRight}>
+        {status === 'syncing' && (
+          <>
+            <div className={sty.syncProgressBarTrack}>
+              <div
+                className={sty.syncProgressBarFill}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className={sty.syncProgressPct}>{pct}%</span>
+          </>
+        )}
+        {status === 'success' && (
+          <CheckCircleIcon sx={{ fontSize: 16, color: 'var(--ls-color-success, #16a34a)' }} />
+        )}
+        {status === 'error' && (
+          <ErrorIcon sx={{ fontSize: 16, color: 'var(--ls-color-destructive, #dc2626)' }} />
+        )}
+        {status === 'idle' && (
+          idleContent || <span className={sty.syncStatusIdle}>—</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const fontFamily = '"Satoshi", sans-serif';
+
+const StyledTextField = styled(TextField)(() => ({
+  '& .MuiOutlinedInput-root': {
+    fontFamily,
+    fontSize: 14,
+    borderRadius: 8,
+    '&:hover fieldset': {
+      borderColor: 'var(--ls-color-brand)',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: 'var(--ls-color-brand)',
+    },
+  },
+  '& .MuiInputLabel-root': {
+    fontFamily,
+  },
+}));
 
 interface LocationDetailsProps {
   locationId: string | null;
@@ -25,6 +132,11 @@ interface GoogleInfoData {
     google_review_count: number | null;
     google_hours_display: string[] | null;
     google_last_synced_at: string | null;
+    yelp_biz_id: string | null;
+    yelp_business_url: string | null;
+    yelp_rating: number | null;
+    yelp_review_count: number | null;
+    yelp_last_synced_at: string | null;
   } | null;
   businessHours: Array<{
     day_of_week: number;
@@ -41,9 +153,25 @@ interface GoogleInfoData {
     review_text: string;
     publish_time: string;
   }>;
+  yelpReviews?: Array<{
+    id: string;
+    author_name: string;
+    rating: number;
+    review_text: string;
+    publish_time: string;
+  }>;
 }
 
-// Load Google Maps JS API dynamically
+interface PlacePrediction {
+  place_id: string;
+  description: string;
+  structured_formatting: {
+    main_text: string;
+    secondary_text: string;
+  };
+}
+
+// Load Google Maps JS API with Places library
 function useGoogleMapsScript() {
   const [loaded, setLoaded] = React.useState(false);
 
@@ -51,16 +179,16 @@ function useGoogleMapsScript() {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) return;
 
-    // Check if already loaded
-    if ((window as any).google?.maps?.places) {
+    // Already loaded
+    if ((window as any).google?.maps?.places?.AutocompleteService) {
       setLoaded(true);
       return;
     }
 
-    // Check if script is already being loaded
+    // Check if script is already being loaded by another instance
     if (document.querySelector('script[src*="maps.googleapis.com"]')) {
       const checkLoaded = setInterval(() => {
-        if ((window as any).google?.maps?.places) {
+        if ((window as any).google?.maps?.places?.AutocompleteService) {
           setLoaded(true);
           clearInterval(checkLoaded);
         }
@@ -68,13 +196,13 @@ function useGoogleMapsScript() {
       return () => clearInterval(checkLoaded);
     }
 
+    // Load with libraries=places in the URL
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
     script.async = true;
     script.onload = () => {
-      // Wait for places library to be ready
       const checkReady = setInterval(() => {
-        if ((window as any).google?.maps?.places) {
+        if ((window as any).google?.maps?.places?.AutocompleteService) {
           setLoaded(true);
           clearInterval(checkReady);
         }
@@ -105,9 +233,26 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
   const [googleLoading, setGoogleLoading] = React.useState(false);
   const [connecting, setConnecting] = React.useState(false);
   const [syncing, setSyncing] = React.useState(false);
-  const autocompleteRef = React.useRef<HTMLDivElement>(null);
   const [selectedPlaceId, setSelectedPlaceId] = React.useState<string | null>(null);
   const [selectedPlaceName, setSelectedPlaceName] = React.useState<string | null>(null);
+  const [selectedPlaceAddress, setSelectedPlaceAddress] = React.useState<string | null>(null);
+
+  // Sync status for connect flow
+  const [googleSyncStatus, setGoogleSyncStatus] = React.useState<SyncStatus>('idle');
+  const [yelpSyncStatus, setYelpSyncStatus] = React.useState<SyncStatus>('idle');
+  const [expectedGoogleMs, setExpectedGoogleMs] = React.useState(8000);
+  const [expectedYelpMs, setExpectedYelpMs] = React.useState(10000);
+
+  // Custom autocomplete state
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [predictions, setPredictions] = React.useState<PlacePrediction[]>([]);
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const [highlightedIndex, setHighlightedIndex] = React.useState(-1);
+  const autocompleteServiceRef = React.useRef<any>(null);
+  const sessionTokenRef = React.useRef<any>(null);
+  const debounceRef = React.useRef<NodeJS.Timeout | null>(null);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
@@ -161,41 +306,100 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
     fetchGoogleInfo();
   }, [locationId]);
 
-  // Initialize Google Places Autocomplete
+  // Initialize AutocompleteService when maps load
   React.useEffect(() => {
-    if (!mapsLoaded || !autocompleteRef.current || isDisabled || googleInfo?.connected) return;
-
-    const container = autocompleteRef.current;
-    // Clear any previous autocomplete
-    container.innerHTML = '';
-
+    if (!mapsLoaded) return;
     try {
-      const autocomplete = new (window as any).google.maps.places.Autocomplete(
-        (() => {
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.placeholder = 'Search for your business on Google Maps...';
-          input.className = sty.googleSearchInput;
-          container.appendChild(input);
-          return input;
-        })(),
-        {
-          types: ['establishment'],
-          fields: ['place_id', 'name', 'formatted_address'],
-        }
-      );
-
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (place?.place_id) {
-          setSelectedPlaceId(place.place_id);
-          setSelectedPlaceName(place.name || place.formatted_address || place.place_id);
-        }
-      });
+      autocompleteServiceRef.current = new (window as any).google.maps.places.AutocompleteService();
+      sessionTokenRef.current = new (window as any).google.maps.places.AutocompleteSessionToken();
     } catch (err) {
-      console.error('Error initializing autocomplete:', err);
+      console.error('Error initializing AutocompleteService:', err);
     }
-  }, [mapsLoaded, isDisabled, googleInfo?.connected]);
+  }, [mapsLoaded]);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
+        inputRef.current && !inputRef.current.contains(e.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fetch predictions when search query changes
+  const fetchPredictions = React.useCallback((query: string) => {
+    if (!autocompleteServiceRef.current || query.length < 2) {
+      setPredictions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    autocompleteServiceRef.current.getPlacePredictions(
+      {
+        input: query,
+        types: ['establishment'],
+        sessionToken: sessionTokenRef.current,
+      },
+      (results: PlacePrediction[] | null, status: string) => {
+        if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && results) {
+          setPredictions(results);
+          setShowDropdown(true);
+          setHighlightedIndex(-1);
+        } else {
+          setPredictions([]);
+          setShowDropdown(false);
+        }
+      }
+    );
+  }, []);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    // Clear selection when user types
+    if (selectedPlaceId) {
+      setSelectedPlaceId(null);
+      setSelectedPlaceName(null);
+      setSelectedPlaceAddress(null);
+    }
+    // Debounce API calls
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchPredictions(val), 250);
+  };
+
+  const handleSelectPrediction = (prediction: PlacePrediction) => {
+    setSelectedPlaceId(prediction.place_id);
+    setSelectedPlaceName(prediction.structured_formatting.main_text);
+    setSelectedPlaceAddress(prediction.structured_formatting.secondary_text);
+    setSearchQuery(prediction.structured_formatting.main_text);
+    setPredictions([]);
+    setShowDropdown(false);
+    // Create a new session token for future searches
+    if ((window as any).google?.maps?.places?.AutocompleteSessionToken) {
+      sessionTokenRef.current = new (window as any).google.maps.places.AutocompleteSessionToken();
+    }
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showDropdown || predictions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex(prev => (prev < predictions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex(prev => (prev > 0 ? prev - 1 : predictions.length - 1));
+    } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+      e.preventDefault();
+      handleSelectPrediction(predictions[highlightedIndex]);
+    } else if (e.key === 'Escape') {
+      setShowDropdown(false);
+    }
+  };
 
   const handleConnect = async () => {
     if (!locationId || !selectedPlaceId) return;
@@ -204,6 +408,7 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
     setSuccess(null);
 
     try {
+      // Phase 1: Connect place details + hours (fast, ~1-2s)
       const resp = await fetch('/api/locations/connect-google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -213,16 +418,78 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || 'Failed to connect');
 
-      setSuccess('Connected to Google Maps');
-      setSelectedPlaceId(null);
-      setSelectedPlaceName(null);
-
-      // Refresh Google info
+      // Immediately show the connected card with hours
       const infoResp = await fetch(`/api/locations/google-info?locationId=${locationId}`);
       if (infoResp.ok) setGoogleInfo(await infoResp.json());
+
+      // Clean up search state
+      setSearchQuery('');
+      setSelectedPlaceId(null);
+      setSelectedPlaceName(null);
+      setSelectedPlaceAddress(null);
+      setConnecting(false);
+
+      // Phase 2: Sync reviews in parallel — each resolves independently
+      const googleReviewCount = data.reviewCount || 0;
+      const googleEstimatedMs = googleReviewCount * 38;
+      setGoogleSyncStatus('syncing');
+      setExpectedGoogleMs(googleEstimatedMs);
+
+      // Helper: refresh info + reset statuses after all syncs complete
+      let completedSyncs = 0;
+      let totalSyncs = 1; // Google always fires
+      const onSyncComplete = () => {
+        completedSyncs++;
+        if (completedSyncs >= totalSyncs) {
+          setTimeout(async () => {
+            const refreshResp = await fetch(`/api/locations/google-info?locationId=${locationId}`);
+            if (refreshResp.ok) setGoogleInfo(await refreshResp.json());
+            setGoogleSyncStatus('idle');
+            setYelpSyncStatus('idle');
+          }, 3000);
+        }
+      };
+
+      // Google review sync — updates status immediately when done
+      fetch('/api/locations/sync-google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locationId }),
+      }).then(async (r) => {
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Failed to sync Google reviews');
+        setGoogleSyncStatus('success');
+      }).catch((err) => {
+        console.error('[handleConnect] Google sync error:', err);
+        setGoogleSyncStatus('error');
+      }).finally(onSyncComplete);
+
+      // Yelp review sync (only if Yelp was found during connect)
+      const yelpFound = data.yelp?.found;
+      if (yelpFound) {
+        totalSyncs++;
+        const yelpReviewCount = data.yelp?.reviewCount || 0;
+        const yelpEstimatedMs = 15000 + yelpReviewCount * 100;
+        setYelpSyncStatus('syncing');
+        setExpectedYelpMs(yelpEstimatedMs);
+
+        fetch('/api/locations/sync-yelp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ locationId }),
+        }).then(async (r) => {
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.error || 'Failed to sync Yelp reviews');
+          setYelpSyncStatus('success');
+        }).catch((err) => {
+          console.error('[handleConnect] Yelp sync error:', err);
+          setYelpSyncStatus('error');
+        }).finally(onSyncComplete);
+      }
     } catch (err: any) {
+      setGoogleSyncStatus('error');
+      setYelpSyncStatus('error');
       setError(err.message || 'Failed to connect to Google Maps');
-    } finally {
       setConnecting(false);
     }
   };
@@ -244,7 +511,8 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
       if (!resp.ok) throw new Error(data.error || 'Failed to disconnect');
 
       setSuccess('Disconnected from Google Maps');
-      setGoogleInfo({ connected: false, location: null, businessHours: [], reviews: [] });
+      setGoogleInfo({ connected: false, location: null, businessHours: [], reviews: [], yelpReviews: [] });
+      setYelpSyncStatus('idle');
     } catch (err: any) {
       setError(err.message || 'Failed to disconnect from Google Maps');
     } finally {
@@ -257,26 +525,63 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
     setSyncing(true);
     setError(null);
 
-    try {
-      const resp = await fetch('/api/locations/sync-google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ locationId }),
-      });
+    // Track completion so we can refresh data after both finish
+    let completedSyncs = 0;
+    const totalSyncs = 2; // Google + Yelp always fire
+    const onSyncComplete = () => {
+      completedSyncs++;
+      if (completedSyncs >= totalSyncs) {
+        setSyncing(false);
+        setTimeout(async () => {
+          const infoResp = await fetch(`/api/locations/google-info?locationId=${locationId}`);
+          if (infoResp.ok) setGoogleInfo(await infoResp.json());
+          setGoogleSyncStatus('idle');
+          setYelpSyncStatus('idle');
+        }, 3000);
+      }
+    };
 
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || 'Failed to sync');
+    // Google sync — on resync, credit optimization usually skips Outscraper (~3s).
+    // Only use the full reviewCount * 38 estimate on first sync.
+    const googleReviewCount = googleInfo?.location?.google_review_count || 0;
+    const isGoogleResync = !!googleInfo?.location?.google_last_synced_at;
+    const googleEstimatedMs = isGoogleResync ? 5000 : googleReviewCount * 38;
+    setGoogleSyncStatus('syncing');
+    setExpectedGoogleMs(googleEstimatedMs);
 
-      setSuccess(`Synced: ${data.newReviews} new reviews, ${data.updatedReviews} updated`);
+    fetch('/api/locations/sync-google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locationId }),
+    }).then(async (r) => {
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Failed to sync Google reviews');
+      setGoogleSyncStatus('success');
+    }).catch((err) => {
+      console.error('[handleSync] Google sync error:', err);
+      setGoogleSyncStatus('error');
+    }).finally(onSyncComplete);
 
-      // Refresh Google info
-      const infoResp = await fetch(`/api/locations/google-info?locationId=${locationId}`);
-      if (infoResp.ok) setGoogleInfo(await infoResp.json());
-    } catch (err: any) {
-      setError(err.message || 'Failed to sync Google Maps data');
-    } finally {
-      setSyncing(false);
-    }
+    // Yelp sync — resync skips Outscraper (~200ms). First sync has high fixed
+    // overhead (~15-20s) from Google search + /yelp-biz + /yelp-reviews.
+    const yelpReviewCount = googleInfo?.location?.yelp_review_count || 0;
+    const isYelpResync = !!googleInfo?.location?.yelp_last_synced_at;
+    const yelpEstimatedMs = isYelpResync ? 2000 : (15000 + yelpReviewCount * 100);
+    setYelpSyncStatus('syncing');
+    setExpectedYelpMs(yelpEstimatedMs);
+
+    fetch('/api/locations/sync-yelp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locationId }),
+    }).then(async (r) => {
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Failed to sync Yelp reviews');
+      setYelpSyncStatus('success');
+    }).catch((err) => {
+      console.error('[handleSync] Yelp sync error:', err);
+      setYelpSyncStatus('error');
+    }).finally(onSyncComplete);
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -516,85 +821,117 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
             <span>Loading Google Maps info...</span>
           </div>
         ) : googleInfo?.connected && loc ? (
-          /* Connected state */
-          <div className={sty.googleConnectedContainer}>
-            {/* Rating & link row */}
-            <div className={sty.googleSummaryRow}>
-              <a
-                href={loc.google_maps_url || `https://www.google.com/maps/place/?q=place_id:${loc.google_place_id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={sty.googleMapsLink}
-              >
-                View on Google Maps
-              </a>
-              {loc.google_rating != null && (
-                <span className={sty.googleRating}>
-                  <StarIcon sx={{ fontSize: 16, color: '#f59e0b' }} />
-                  {loc.google_rating} ({loc.google_review_count || 0} reviews)
-                </span>
-              )}
+          /* Connected state — compact card */
+          <div className={sty.googleConnectedCard}>
+            <div className={sty.googleConnectedHeader}>
+              <div className={sty.googleConnectedStatus}>
+                <span className={sty.googleStatusDot} />
+                <span className={sty.googleStatusText}>Connected</span>
+              </div>
             </div>
 
-            {/* Business hours */}
-            {loc.google_hours_display && loc.google_hours_display.length > 0 && (
-              <div className={sty.googleHours}>
-                <span className={sty.googleHoursTitle}>Business Hours</span>
-                <div className={sty.googleHoursGrid}>
-                  {loc.google_hours_display.map((line, i) => (
-                    <div key={i} className={sty.googleHoursRow}>{line}</div>
-                  ))}
+            {/* Body: hours (left) + reviews sync (right) */}
+            <div className={sty.googleCardBody}>
+              {/* Hours column */}
+              {loc.google_hours_display && loc.google_hours_display.length > 0 && (
+                <div className={sty.googleHoursCompact}>
+                  <div className={sty.googleHoursGrid}>
+                    {loc.google_hours_display.map((line, i) => (
+                      <div key={i} className={sty.googleHoursRow}>{line}</div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Sync info & actions */}
-            <div className={sty.googleActionsRow}>
-              <span className={sty.googleSyncInfo}>
-                Last synced: {formatLastSynced(loc.google_last_synced_at)}
-              </span>
+              {/* Reviews sync column */}
+              <div className={sty.googleReviewsColumn}>
+                <span className={sty.googleReviewsHeader}>Reviews</span>
+                <SyncStatusRow
+                  label="Google"
+                  status={googleSyncStatus}
+                  expectedMs={expectedGoogleMs}
+                  idleContent={
+                    loc.google_rating != null ? (
+                      <span className={sty.reviewInfoInline}>
+                        <StarIcon sx={{ fontSize: 13, color: '#f59e0b' }} />
+                        <span className={sty.reviewInfoRating}>{loc.google_rating.toFixed(1)}</span>
+                        <span className={sty.reviewInfoCount}>({loc.google_review_count || 0})</span>
+                      </span>
+                    ) : (
+                      <span className={sty.reviewInfoNone}>No reviews</span>
+                    )
+                  }
+                />
+                <SyncStatusRow
+                  label="Yelp"
+                  status={yelpSyncStatus}
+                  expectedMs={expectedYelpMs}
+                  idleContent={
+                    loc.yelp_rating != null ? (
+                      <span className={sty.reviewInfoInline}>
+                        <StarIcon sx={{ fontSize: 13, color: '#e31837' }} />
+                        <span className={sty.reviewInfoRating}>{loc.yelp_rating.toFixed(1)}</span>
+                        <span className={sty.reviewInfoCount}>({loc.yelp_review_count || 0})</span>
+                      </span>
+                    ) : loc.yelp_biz_id ? (
+                      <span className={sty.reviewInfoNone}>No reviews</span>
+                    ) : (
+                      <span className={sty.reviewInfoNone}>Not found</span>
+                    )
+                  }
+                />
+                <SyncStatusRow
+                  label="Facebook"
+                  status={'idle'}
+                  expectedMs={10000}
+                  idleContent={
+                    <span className={sty.reviewInfoNone}>Coming soon</span>
+                  }
+                />
+                <SyncStatusRow
+                  label="Apple Maps"
+                  status={'idle'}
+                  expectedMs={10000}
+                  idleContent={
+                    <span className={sty.reviewInfoNone}>Coming soon</span>
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Footer: sync info + actions */}
+            <div className={sty.googleConnectedFooter}>
+              <div className={sty.googleFooterLeft}>
+                <a
+                  href={loc.google_maps_url || `https://www.google.com/maps/place/?q=place_id:${loc.google_place_id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={sty.googleMapsLink}
+                >
+                  View listing
+                </a>
+                <span className={sty.googleSyncInfo}>
+                  Synced {formatLastSynced(loc.google_last_synced_at)}
+                </span>
+              </div>
               {!isDisabled && (
                 <div className={sty.googleActions}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={syncing ? <CircularProgress size={14} /> : <SyncIcon />}
+                  <button
+                    className={sty.googleActionBtn}
                     onClick={handleSync}
                     disabled={syncing || connecting}
-                    sx={{
-                      fontFamily: '"Satoshi", sans-serif',
-                      fontSize: 12,
-                      textTransform: 'none',
-                      borderColor: 'var(--ls-color-brand)',
-                      color: 'var(--ls-color-brand)',
-                      '&:hover': {
-                        borderColor: 'var(--ls-color-brand)',
-                        backgroundColor: 'rgba(49, 102, 74, 0.08)',
-                      },
-                    }}
                   >
-                    Sync Now
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<LinkOffIcon />}
+                    {syncing ? <CircularProgress size={12} sx={{ color: 'var(--ls-color-brand)' }} /> : <SyncIcon sx={{ fontSize: 14 }} />}
+                    Sync
+                  </button>
+                  <button
+                    className={`${sty.googleActionBtn} ${sty.googleActionBtnDanger}`}
                     onClick={handleDisconnect}
                     disabled={syncing || connecting}
-                    sx={{
-                      fontFamily: '"Satoshi", sans-serif',
-                      fontSize: 12,
-                      textTransform: 'none',
-                      borderColor: '#dc2626',
-                      color: '#dc2626',
-                      '&:hover': {
-                        borderColor: '#dc2626',
-                        backgroundColor: 'rgba(220, 38, 38, 0.08)',
-                      },
-                    }}
                   >
+                    <LinkOffIcon sx={{ fontSize: 14 }} />
                     Disconnect
-                  </Button>
+                  </button>
                 </div>
               )}
             </div>
@@ -604,26 +941,80 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
           <div className={sty.googleConnectContainer}>
             {!isDisabled && process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
               <>
-                <div ref={autocompleteRef} className={sty.googleAutocompleteWrapper} />
+                <div className={sty.googleAutocompleteWrapper}>
+                  <StyledTextField
+                    inputRef={inputRef}
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onKeyDown={handleSearchKeyDown}
+                    onFocus={() => { if (predictions.length > 0) setShowDropdown(true); }}
+                    placeholder="Search for your restaurant..."
+                    size="small"
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon sx={{ fontSize: 18, color: 'var(--ls-color-muted, #9ca3af)' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  {showDropdown && predictions.length > 0 && (
+                    <div ref={dropdownRef} className={sty.googleDropdown}>
+                      {predictions.map((p, i) => (
+                        <button
+                          key={p.place_id}
+                          type="button"
+                          className={`${sty.googleDropdownItem} ${i === highlightedIndex ? sty.googleDropdownItemHighlighted : ''}`}
+                          onClick={() => handleSelectPrediction(p)}
+                          onMouseEnter={() => setHighlightedIndex(i)}
+                        >
+                          <PlaceIcon sx={{ fontSize: 16, color: '#9ca3af', flexShrink: 0 }} />
+                          <div className={sty.googleDropdownItemText}>
+                            <span className={sty.googleDropdownMain}>{p.structured_formatting.main_text}</span>
+                            <span className={sty.googleDropdownSecondary}>{p.structured_formatting.secondary_text}</span>
+                          </div>
+                        </button>
+                      ))}
+                      <div className={sty.googleDropdownFooter}>
+                        <img
+                          src="https://maps.gstatic.com/mapfiles/api-3/images/powered-by-google-on-white3.png"
+                          alt="Powered by Google"
+                          className={sty.googleAttributionImg}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
                 {selectedPlaceId && (
                   <div className={sty.googleSelectedPlace}>
-                    <span className={sty.googleSelectedName}>{selectedPlaceName}</span>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      startIcon={connecting ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <LinkIcon />}
-                      onClick={handleConnect}
-                      disabled={connecting}
-                      sx={{
-                        fontFamily: '"Satoshi", sans-serif',
-                        fontSize: 12,
-                        textTransform: 'none',
-                        backgroundColor: 'var(--ls-color-brand)',
-                        '&:hover': { backgroundColor: 'var(--ls-color-brand-dark, #254e39)' },
-                      }}
-                    >
-                      Connect
-                    </Button>
+                    <LinkIcon sx={{ fontSize: 16, color: 'var(--ls-color-brand)', flexShrink: 0, alignSelf: 'flex-start', marginTop: '2px' }} />
+                    <div className={sty.googleSelectedInfo}>
+                      <span className={sty.googleSelectedName}>{selectedPlaceName}</span>
+                      {selectedPlaceAddress && (
+                        <span className={sty.googleSelectedAddress}>{selectedPlaceAddress}</span>
+                      )}
+                    </div>
+                    {!connecting ? (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={handleConnect}
+                        sx={{
+                          fontFamily: '"Satoshi", sans-serif',
+                          fontSize: 12,
+                          textTransform: 'none',
+                          backgroundColor: 'var(--ls-color-brand)',
+                          borderRadius: '6px',
+                          boxShadow: 'none',
+                          '&:hover': { backgroundColor: 'var(--ls-color-brand-hover, #264D38)', boxShadow: 'none' },
+                        }}
+                      >
+                        Connect
+                      </Button>
+                    ) : (
+                      <CircularProgress size={18} sx={{ color: 'var(--ls-color-brand)' }} />
+                    )}
                   </div>
                 )}
               </>

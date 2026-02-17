@@ -17,7 +17,7 @@ import {
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../src/context/AuthContext";
-import { colors } from "../../src/lib/colors";
+import { useColors } from "../../src/context/ThemeContext";
 import { typography } from "../../src/lib/fonts";
 import { borderRadius, haptics } from "../../src/lib/theme";
 import { GlassCard } from "../../src/components/glass";
@@ -57,6 +57,7 @@ function GoogleLogo() {
 
 export default function LoginScreen() {
   const router = useRouter();
+  const colors = useColors();
   const { signInWithEmail, signInWithGoogle, isLoading, error, clearError } =
     useAuth();
 
@@ -100,7 +101,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={process.env.EXPO_OS === "ios" ? "padding" : "height"}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -111,24 +112,24 @@ export default function LoginScreen() {
         {/* Logo */}
         <Animated.View entering={FadeIn.duration(400)}>
           <View style={styles.logoContainer}>
-            <View style={styles.logoPlaceholder}>
-              <Text style={styles.logoText}>L</Text>
+            <View style={[styles.logoPlaceholder, { backgroundColor: colors.primary }]}>
+              <Text style={[styles.logoText, { color: colors.onPrimary }]}>L</Text>
             </View>
-            <Text style={styles.appName}>Levelset</Text>
+            <Text style={[styles.appName, { color: colors.onBackground }]}>Levelset</Text>
           </View>
         </Animated.View>
 
         {/* Login Card */}
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
           <GlassCard style={styles.card}>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.title, { color: colors.onSurface }]}>Welcome Back</Text>
+            <Text style={[styles.subtitle, { color: colors.onSurfaceVariant }]}>
               Sign in to access your team dashboard
             </Text>
 
             {/* Google Sign In Button */}
             <TouchableOpacity
-              style={styles.googleButton}
+              style={[styles.googleButton, { backgroundColor: colors.surface, borderColor: colors.outline }]}
               onPress={handleGoogleSignIn}
               disabled={isLoading || isGoogleLoading}
               activeOpacity={0.8}
@@ -138,7 +139,7 @@ export default function LoginScreen() {
               ) : (
                 <>
                   <GoogleLogo />
-                  <Text style={styles.googleButtonText}>
+                  <Text style={[styles.googleButtonText, { color: colors.onSurface }]}>
                     Continue with Google
                   </Text>
                 </>
@@ -147,16 +148,16 @@ export default function LoginScreen() {
 
             {/* Divider */}
             <View style={styles.dividerContainer}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or</Text>
-              <View style={styles.dividerLine} />
+              <View style={[styles.dividerLine, { backgroundColor: colors.outline }]} />
+              <Text style={[styles.dividerText, { color: colors.onSurfaceVariant }]}>or</Text>
+              <View style={[styles.dividerLine, { backgroundColor: colors.outline }]} />
             </View>
 
             {/* Email Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email</Text>
+              <Text style={[styles.inputLabel, { color: colors.onSurface }]}>Email</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.background, borderColor: colors.outline, color: colors.onSurface }]}
                 value={email}
                 onChangeText={handleInputChange(setEmail)}
                 placeholder="you@example.com"
@@ -172,9 +173,9 @@ export default function LoginScreen() {
 
             {/* Password Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Password</Text>
+              <Text style={[styles.inputLabel, { color: colors.onSurface }]}>Password</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.background, borderColor: colors.outline, color: colors.onSurface }]}
                 value={password}
                 onChangeText={handleInputChange(setPassword)}
                 placeholder="Enter your password"
@@ -190,8 +191,8 @@ export default function LoginScreen() {
 
             {/* Error Message */}
             {error && (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{error}</Text>
+              <View style={[styles.errorContainer, { backgroundColor: colors.errorContainer }]}>
+                <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
               </View>
             )}
 
@@ -199,6 +200,7 @@ export default function LoginScreen() {
             <TouchableOpacity
               style={[
                 styles.signInButton,
+                { backgroundColor: colors.primary },
                 !canSubmit && styles.signInButtonDisabled,
               ]}
               onPress={handleEmailSignIn}
@@ -208,7 +210,7 @@ export default function LoginScreen() {
               {isLoading && !isGoogleLoading ? (
                 <ActivityIndicator color={colors.onPrimary} />
               ) : (
-                <Text style={styles.signInButtonText}>Sign In</Text>
+                <Text style={[styles.signInButtonText, { color: colors.onPrimary }]}>Sign In</Text>
               )}
             </TouchableOpacity>
           </GlassCard>
@@ -216,7 +218,7 @@ export default function LoginScreen() {
 
         {/* Help Text */}
         <View style={styles.helpContainer}>
-          <Text style={styles.helpText}>
+          <Text style={[styles.helpText, { color: colors.onSurfaceDisabled }]}>
             Need an account? Contact your organization administrator to get
             started.
           </Text>
@@ -229,7 +231,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -246,7 +247,6 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 20,
     borderCurve: "continuous",
-    backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,
@@ -254,11 +254,9 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 40,
     fontWeight: "700",
-    color: colors.onPrimary,
   },
   appName: {
     ...typography.h2,
-    color: colors.onBackground,
   },
   card: {
     paddingVertical: 24,
@@ -267,13 +265,11 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.h3,
-    color: colors.onSurface,
     marginBottom: 8,
     textAlign: "center",
   },
   subtitle: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     textAlign: "center",
     marginBottom: 24,
     lineHeight: 22,
@@ -282,9 +278,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
     paddingVertical: 14,
@@ -304,7 +298,6 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     ...typography.labelLarge,
-    color: colors.onSurface,
   },
   dividerContainer: {
     flexDirection: "row",
@@ -314,11 +307,9 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.outline,
   },
   dividerText: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     marginHorizontal: 16,
   },
   inputContainer: {
@@ -326,22 +317,17 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     ...typography.labelLarge,
-    color: colors.onSurface,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
     paddingHorizontal: 16,
     paddingVertical: 14,
     ...typography.bodyMedium,
-    color: colors.onSurface,
   },
   errorContainer: {
-    backgroundColor: colors.errorContainer,
     borderRadius: borderRadius.sm,
     borderCurve: "continuous",
     padding: 12,
@@ -349,11 +335,9 @@ const styles = StyleSheet.create({
   },
   errorText: {
     ...typography.bodySmall,
-    color: colors.error,
     textAlign: "center",
   },
   signInButton: {
-    backgroundColor: colors.primary,
     borderRadius: borderRadius.full,
     borderCurve: "continuous",
     paddingVertical: 16,
@@ -365,7 +349,6 @@ const styles = StyleSheet.create({
   },
   signInButtonText: {
     ...typography.labelLarge,
-    color: colors.onPrimary,
   },
   helpContainer: {
     marginTop: 24,
@@ -373,7 +356,6 @@ const styles = StyleSheet.create({
   },
   helpText: {
     ...typography.bodySmall,
-    color: colors.onSurfaceDisabled,
     textAlign: "center",
     lineHeight: 20,
   },

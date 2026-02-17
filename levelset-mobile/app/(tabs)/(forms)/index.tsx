@@ -9,7 +9,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useForms } from "../../../src/context/FormsContext";
-import { colors } from "../../../src/lib/colors";
+import { useColors } from "../../../src/context/ThemeContext";
 import { typography } from "../../../src/lib/fonts";
 import { spacing, borderRadius, haptics } from "../../../src/lib/theme";
 import { GlassCard } from "../../../src/components/glass";
@@ -20,33 +20,34 @@ import "../../../src/lib/i18n";
 export default function FormsTab() {
   const router = useRouter();
   const { t } = useTranslation();
+  const colors = useColors();
   const { lastSubmission, clearLastSubmission } = useForms();
 
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={styles.scrollContent}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       showsVerticalScrollIndicator={false}
     >
       {/* Subtitle */}
-      <Text style={styles.subtitle}>
+      <Text style={[styles.subtitle, { color: colors.onSurfaceVariant }]}>
         Submit team evaluations and documentation
       </Text>
 
       {/* Success Message */}
       {lastSubmission && (
         <GlassCard
-          style={styles.successCard}
+          style={[styles.successCard, { backgroundColor: colors.successContainer, borderColor: colors.success }]}
           onPress={clearLastSubmission}
         >
           <View style={styles.successContent}>
             <AppIcon name="checkmark.circle.fill" size={20} tintColor={colors.success} />
             <View style={styles.successInfo}>
-              <Text style={styles.successTitle}>
+              <Text style={[styles.successTitle, { color: colors.success }]}>
                 {t("forms.submitSuccess")}
               </Text>
-              <Text style={styles.successDetails}>
+              <Text style={[styles.successDetails, { color: colors.onSurfaceVariant }]}>
                 {lastSubmission.employeeName} •{" "}
                 {lastSubmission.formType === "ratings"
                   ? t("forms.positionalRatings")
@@ -70,8 +71,8 @@ export default function FormsTab() {
               <AppIcon name="star.fill" size={24} tintColor={colors.primary} />
             </View>
             <View style={styles.formInfo}>
-              <Text style={styles.formTitle}>{t("forms.positionalRatings")}</Text>
-              <Text style={styles.formDescription}>
+              <Text style={[styles.formTitle, { color: colors.onSurface }]}>{t("forms.positionalRatings")}</Text>
+              <Text style={[styles.formDescription, { color: colors.onSurfaceVariant }]}>
                 Record Big 5 competency scores for team members
               </Text>
             </View>
@@ -93,10 +94,10 @@ export default function FormsTab() {
               <AppIcon name="doc.text.fill" size={24} tintColor={colors.primary} />
             </View>
             <View style={styles.formInfo}>
-              <Text style={styles.formTitle}>
+              <Text style={[styles.formTitle, { color: colors.onSurface }]}>
                 {t("forms.disciplineInfraction")}
               </Text>
-              <Text style={styles.formDescription}>
+              <Text style={[styles.formDescription, { color: colors.onSurfaceVariant }]}>
                 Log infractions and capture acknowledgements
               </Text>
             </View>
@@ -106,7 +107,7 @@ export default function FormsTab() {
       </Animated.View>
 
       {/* Info */}
-      <Text style={styles.infoText}>
+      <Text style={[styles.infoText, { color: colors.onSurfaceDisabled }]}>
         Forms will be submitted to the Levelset system. Make sure you have
         an internet connection before submitting.
       </Text>
@@ -117,7 +118,6 @@ export default function FormsTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scrollContent: {
     padding: spacing[4],
@@ -125,11 +125,9 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
   },
   successCard: {
-    backgroundColor: colors.successContainer,
-    borderColor: colors.success,
+    borderWidth: 1,
   },
   successContent: {
     flexDirection: "row",
@@ -141,12 +139,10 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     ...typography.labelLarge,
-    color: colors.success,
     marginBottom: 2,
   },
   successDetails: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
   },
   formCardContent: {
     flexDirection: "row",
@@ -166,16 +162,13 @@ const styles = StyleSheet.create({
   },
   formTitle: {
     ...typography.h4,
-    color: colors.onSurface,
     marginBottom: spacing[1],
   },
   formDescription: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
   },
   infoText: {
     ...typography.bodySmall,
-    color: colors.onSurfaceDisabled,
     textAlign: "center",
     paddingHorizontal: spacing[2],
     marginTop: spacing[2],

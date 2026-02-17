@@ -29,6 +29,7 @@ export interface AppUser {
   first_name?: string;
   last_name?: string;
   full_name?: string;
+  nickname?: string;
   role?: string;
   org_id?: string;
   location_id?: string;
@@ -39,6 +40,14 @@ export interface AppUser {
   created_at?: string;
   updated_at?: string;
   profile_image?: string;
+}
+
+// Employee data joined from employees table
+export interface EmployeeData {
+  birth_date?: string;
+  hire_date?: string;
+  phone?: string;
+  role?: string; // org-specific position (e.g. "Server", "Manager")
 }
 
 interface AuthContextType {
@@ -53,15 +62,28 @@ interface AuthContextType {
   // Computed properties
   email: string;
   fullName: string;
+  firstName: string;
+  lastName: string;
+  nickname: string;
   profileImage: string;
   role: string;
+  phone: string;
+  employeeId: string;
+  hireDate: string;
   orgId: string;
   locationId: string;
+
+  // Employee data (from employees table)
+  position: string;
+  birthDate: string;
+  startDate: string;
+  employeePhone: string;
 
   // Auth actions
   signInWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
+  updateNickname: (nickname: string) => Promise<{ success: boolean; error?: string }>;
   clearError: () => void;
 }
 
@@ -75,15 +97,44 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [appUser, setAppUser] = useState<AppUser | null>(null);
+  const [employeeData, setEmployeeData] = useState<EmployeeData | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isAuthenticated = user !== null && appUser !== null;
 
+  // Fetch employee record linked to app_user
+  const fetchEmployeeData = useCallback(async (employeeId: string | null | undefined) => {
+    if (!employeeId) {
+      setEmployeeData(null);
+      return;
+    }
+
+    try {
+      const { data, error: fetchError } = await supabase
+        .from("employees")
+        .select("birth_date, hire_date, phone, role")
+        .eq("id", employeeId)
+        .single();
+
+      if (fetchError) {
+        console.error("[Auth] Error fetching employee data:", fetchError);
+        setEmployeeData(null);
+        return;
+      }
+
+      setEmployeeData(data);
+    } catch (err) {
+      console.error("[Auth] Error fetching employee data:", err);
+      setEmployeeData(null);
+    }
+  }, []);
+
   // Fetch app_users data when auth user changes
   const fetchAppUserData = useCallback(async (authUser: User | null) => {
     if (!authUser?.id) {
       setAppUser(null);
+      setEmployeeData(null);
       return;
     }
 
@@ -114,11 +165,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       setAppUser(data);
+
+      // Fetch linked employee data
+      await fetchEmployeeData(data.employee_id);
     } catch (err) {
       console.error("[Auth] Error fetching app user data:", err);
       setAppUser(null);
     }
-  }, []);
+  }, [fetchEmployeeData]);
 
   // Initialize auth and listen for changes
   useEffect(() => {
@@ -301,12 +355,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
       setUser(null);
       setAppUser(null);
+      setEmployeeData(null);
       setSession(null);
       setError(null);
     } catch (err) {
       console.error("[Auth] Sign out error:", err);
     }
   }, []);
+
+  // Update nickname
+  const updateNickname = useCallback(async (newNickname: string) => {
+    if (!appUser?.id) return { success: false, error: "No user found" };
+
+    try {
+      const { error: updateError } = await supabase
+        .from("app_users")
+        .update({ nickname: newNickname })
+        .eq("id", appUser.id);
+
+      if (updateError) {
+        return { success: false, error: updateError.message };
+      }
+
+      setAppUser((prev) => prev ? { ...prev, nickname: newNickname } : prev);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Update failed";
+      return { success: false, error: errorMessage };
+    }
+  }, [appUser?.id]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -315,10 +392,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Computed properties
   const email = user?.email || "";
   const fullName = appUser?.full_name || appUser?.first_name || "";
+  const firstName = appUser?.first_name || "";
+  const lastName = appUser?.last_name || "";
+  const nickname = appUser?.nickname || "";
   const profileImage = appUser?.profile_image || user?.user_metadata?.avatar_url || user?.user_metadata?.picture || "";
   const role = appUser?.role || "";
+  const phone = appUser?.phone || "";
+  const employeeId = appUser?.employee_id || "";
+  const hireDate = appUser?.hire_date || "";
   const orgId = appUser?.org_id || "";
   const locationId = appUser?.location_id || "";
+
+  // Employee-sourced properties
+  const position = employeeData?.role || "";
+  const birthDate = employeeData?.birth_date || "";
+  const startDate = employeeData?.hire_date || "";
+  const employeePhone = employeeData?.phone || phone;
 
   const value = useMemo(
     () => ({
@@ -330,13 +419,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
       error,
       email,
       fullName,
+      firstName,
+      lastName,
+      nickname,
       profileImage,
       role,
+      phone,
+      employeeId,
+      hireDate,
       orgId,
       locationId,
+      position,
+      birthDate,
+      startDate,
+      employeePhone,
       signInWithEmail,
       signInWithGoogle,
       signOut,
+      updateNickname,
       clearError,
     }),
     [
@@ -348,13 +448,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
       error,
       email,
       fullName,
+      firstName,
+      lastName,
+      nickname,
       profileImage,
       role,
+      phone,
+      employeeId,
+      hireDate,
       orgId,
       locationId,
+      position,
+      birthDate,
+      startDate,
+      employeePhone,
       signInWithEmail,
       signInWithGoogle,
       signOut,
+      updateNickname,
       clearError,
     ]
   );

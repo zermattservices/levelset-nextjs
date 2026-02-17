@@ -7,7 +7,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { AppIcon } from "../ui";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 
@@ -41,14 +41,20 @@ export function RadioButtonGroup({
   error,
   horizontal = false,
 }: RadioButtonGroupProps) {
+  const colors = useColors();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>
+      <Text style={[styles.label, { color: colors.onSurface }]}>
         {label}
-        {required && <Text style={styles.required}> *</Text>}
+        {required && <Text style={{ color: colors.error }}> *</Text>}
       </Text>
 
-      {description && <Text style={styles.description}>{description}</Text>}
+      {description && (
+        <Text style={[styles.description, { color: colors.onSurfaceVariant }]}>
+          {description}
+        </Text>
+      )}
 
       <View style={[styles.optionsContainer, horizontal && styles.optionsHorizontal]}>
         {options.map((option) => {
@@ -60,9 +66,9 @@ export function RadioButtonGroup({
               key={String(option.value)}
               style={[
                 styles.option,
+                { backgroundColor: colors.surface, borderColor: colors.outline },
                 horizontal && styles.optionHorizontal,
-                isSelected && styles.optionSelected,
-                isSelected && { borderColor: optionColor },
+                isSelected && { backgroundColor: colors.primaryTransparent, borderColor: optionColor },
                 disabled && styles.optionDisabled,
               ]}
               onPress={() => {
@@ -78,6 +84,7 @@ export function RadioButtonGroup({
                 <View
                   style={[
                     styles.radioOuter,
+                    { borderColor: colors.outline },
                     isSelected && { borderColor: optionColor },
                   ]}
                 >
@@ -91,13 +98,14 @@ export function RadioButtonGroup({
                   <Text
                     style={[
                       styles.optionLabel,
+                      { color: colors.onSurface },
                       isSelected && { color: optionColor },
                     ]}
                   >
                     {option.label}
                   </Text>
                   {option.description && (
-                    <Text style={styles.optionDescription}>
+                    <Text style={[styles.optionDescription, { color: colors.onSurfaceVariant }]}>
                       {option.description}
                     </Text>
                   )}
@@ -116,30 +124,55 @@ export function RadioButtonGroup({
         })}
       </View>
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
     </View>
   );
 }
 
 // Preset options for positional ratings
+// Pass colors from useColors() to get theme-aware rating options
+export function getRatingOptions(colors: ReturnType<typeof useColors>): RadioOption[] {
+  return [
+    {
+      value: 1,
+      label: "Not Yet",
+      description: "Needs improvement",
+      color: colors.error,
+    },
+    {
+      value: 2,
+      label: "On the Rise",
+      description: "Making progress",
+      color: colors.warning,
+    },
+    {
+      value: 3,
+      label: "Crushing It",
+      description: "Exceeds expectations",
+      color: colors.success,
+    },
+  ];
+}
+
+/** @deprecated Use getRatingOptions(colors) instead for dark mode support */
 export const RATING_OPTIONS: RadioOption[] = [
   {
     value: 1,
     label: "Not Yet",
     description: "Needs improvement",
-    color: colors.error,
+    color: "#EF4444",
   },
   {
     value: 2,
     label: "On the Rise",
     description: "Making progress",
-    color: colors.warning,
+    color: "#F59E0B",
   },
   {
     value: 3,
     label: "Crushing It",
     description: "Exceeds expectations",
-    color: colors.success,
+    color: "#22C55E",
   },
 ];
 
@@ -149,15 +182,10 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.labelLarge,
-    color: colors.onSurface,
     marginBottom: 4,
-  },
-  required: {
-    color: colors.error,
   },
   description: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     marginBottom: 12,
   },
   optionsContainer: {
@@ -172,9 +200,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 8,
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.md,
     borderCurve: "continuous",
     paddingHorizontal: 16,
@@ -183,9 +209,6 @@ const styles = StyleSheet.create({
   optionHorizontal: {
     flex: 1,
     minWidth: 100,
-  },
-  optionSelected: {
-    backgroundColor: colors.primaryTransparent,
   },
   optionDisabled: {
     opacity: 0.5,
@@ -201,7 +224,6 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: colors.outline,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -215,18 +237,15 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     ...typography.bodyMedium,
-    color: colors.onSurface,
     fontWeight: "500",
   },
   optionDescription: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     marginTop: 2,
   },
   checkmark: {},
   errorText: {
     ...typography.bodySmall,
-    color: colors.error,
     marginTop: 8,
   },
 });

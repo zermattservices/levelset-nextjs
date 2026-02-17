@@ -6,6 +6,7 @@
 import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useForms } from "../context/FormsContext";
+import { useColors } from "../context/ThemeContext";
 
 interface TranslatableItem {
   [key: string]: any;
@@ -18,6 +19,7 @@ interface TranslatableItem {
 export function useTranslatedContent() {
   const { i18n, t } = useTranslation();
   const { language } = useForms();
+  const colors = useColors();
 
   // Sync i18n language with FormsContext — use useEffect, not useMemo
   useEffect(() => {
@@ -75,15 +77,15 @@ export function useTranslatedContent() {
   const getRatingColor = useCallback((value: number): string => {
     switch (value) {
       case 1:
-        return "#EF4444"; // error/red
+        return colors.error;
       case 2:
-        return "#F59E0B"; // warning/yellow
+        return colors.warning;
       case 3:
-        return "#10B981"; // success/green
+        return colors.success;
       default:
-        return "#6B7280"; // gray
+        return colors.onSurfaceVariant;
     }
-  }, []);
+  }, [colors]);
 
   /**
    * Format points display with sign

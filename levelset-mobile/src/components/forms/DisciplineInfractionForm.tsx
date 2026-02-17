@@ -24,7 +24,7 @@ const getImagePicker = () => require("expo-image-picker") as typeof import("expo
 const getDocumentPicker = () => require("expo-document-picker") as typeof import("expo-document-picker");
 import { useTranslation } from "react-i18next";
 
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 import { useAuth } from "../../context/AuthContext";
@@ -53,6 +53,7 @@ import { SignatureCanvas } from "./SignatureCanvas";
 // =============================================================================
 
 export function DisciplineInfractionForm() {
+  const colors = useColors();
   const { t } = useTranslation();
   const { translate } = useTranslatedContent();
   const { setDirty, completeSubmission } = useForms();
@@ -405,7 +406,7 @@ export function DisciplineInfractionForm() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>{t("common.loading")}</Text>
+        <Text style={[styles.loadingText, { color: colors.onSurfaceVariant }]}>{t("common.loading")}</Text>
       </View>
     );
   }
@@ -413,16 +414,16 @@ export function DisciplineInfractionForm() {
   if (loadError) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorTitle}>{t("common.error")}</Text>
-        <Text style={styles.errorMessage}>{loadError}</Text>
+        <Text style={[styles.errorTitle, { color: colors.error }]}>{t("common.error")}</Text>
+        <Text style={[styles.errorMessage, { color: colors.onSurfaceVariant }]}>{loadError}</Text>
         <TouchableOpacity
-          style={styles.retryButton}
+          style={[styles.retryButton, { backgroundColor: colors.primary }]}
           onPress={() => {
             setLoadError(null);
             setLoading(true);
           }}
         >
-          <Text style={styles.retryButtonText}>{t("common.tryAgain")}</Text>
+          <Text style={[styles.retryButtonText, { color: colors.onPrimary }]}>{t("common.tryAgain")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -487,26 +488,26 @@ export function DisciplineInfractionForm() {
       />
 
       {selectedInfraction && (
-        <View style={styles.pointsContainer}>
-          <Text style={styles.pointsLabel}>{t("forms.infraction.points")}</Text>
+        <View style={[styles.pointsContainer, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
+          <Text style={[styles.pointsLabel, { color: colors.onSurface }]}>{t("forms.infraction.points")}</Text>
           <View
             style={[
               styles.pointsBadge,
               selectedInfraction.points > 0
-                ? styles.pointsPositive
+                ? { backgroundColor: colors.errorTransparent }
                 : selectedInfraction.points < 0
-                  ? styles.pointsNegative
-                  : styles.pointsZero,
+                  ? { backgroundColor: colors.successTransparent }
+                  : { backgroundColor: colors.mutedTransparent },
             ]}
           >
             <Text
               style={[
                 styles.pointsValue,
                 selectedInfraction.points > 0
-                  ? styles.pointsValuePositive
+                  ? { color: colors.error }
                   : selectedInfraction.points < 0
-                    ? styles.pointsValueNegative
-                    : styles.pointsValueZero,
+                    ? { color: colors.success }
+                    : { color: colors.onSurfaceVariant },
               ]}
             >
               {selectedInfraction.points > 0
@@ -517,10 +518,10 @@ export function DisciplineInfractionForm() {
         </View>
       )}
 
-      <View style={styles.toggleContainer}>
+      <View style={[styles.toggleContainer, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
         <View style={styles.toggleInfo}>
-          <Text style={styles.toggleLabel}>{t("forms.infraction.acknowledged")}</Text>
-          <Text style={styles.toggleHelper}>
+          <Text style={[styles.toggleLabel, { color: colors.onSurface }]}>{t("forms.infraction.acknowledged")}</Text>
+          <Text style={[styles.toggleHelper, { color: colors.onSurfaceVariant }]}>
             {t("forms.infraction.acknowledgedHelper")}
           </Text>
         </View>
@@ -536,9 +537,9 @@ export function DisciplineInfractionForm() {
       </View>
 
       <View style={styles.fieldContainer}>
-        <Text style={styles.fieldLabel}>{t("forms.infraction.notes")}</Text>
+        <Text style={[styles.fieldLabel, { color: colors.onSurface }]}>{t("forms.infraction.notes")}</Text>
         <TextInput
-          style={styles.notesInput}
+          style={[styles.notesInput, { backgroundColor: colors.surface, borderColor: colors.outline, color: colors.onSurface }]}
           value={notes}
           onChangeText={(text) => {
             setNotes(text);
@@ -550,12 +551,12 @@ export function DisciplineInfractionForm() {
           numberOfLines={3}
           textAlignVertical="top"
         />
-        <Text style={styles.fieldHelper}>{t("forms.infraction.notesHelper")}</Text>
+        <Text style={[styles.fieldHelper, { color: colors.onSurfaceVariant }]}>{t("forms.infraction.notesHelper")}</Text>
       </View>
 
       {/* File Attachments */}
       <View style={styles.fieldContainer}>
-        <Text style={styles.fieldLabel}>
+        <Text style={[styles.fieldLabel, { color: colors.onSurface }]}>
           {t("forms.infraction.attachments", "Attachments")} ({attachedFiles.length}/5)
         </Text>
 
@@ -568,7 +569,7 @@ export function DisciplineInfractionForm() {
             contentContainerStyle={styles.thumbnailStripContent}
           >
             {attachedFiles.map((file, idx) => (
-              <View key={`file-${idx}`} style={styles.thumbnail}>
+              <View key={`file-${idx}`} style={[styles.thumbnail, { borderColor: colors.outline, backgroundColor: colors.surface }]}>
                 {file.type.startsWith("image/") ? (
                   <Image
                     source={{ uri: file.uri }}
@@ -576,18 +577,18 @@ export function DisciplineInfractionForm() {
                   />
                 ) : (
                   <View style={styles.thumbnailPdf}>
-                    <Text style={styles.thumbnailPdfLabel}>PDF</Text>
-                    <Text style={styles.thumbnailPdfName} numberOfLines={1}>
+                    <Text style={[styles.thumbnailPdfLabel, { color: colors.error }]}>PDF</Text>
+                    <Text style={[styles.thumbnailPdfName, { color: colors.onSurfaceVariant }]} numberOfLines={1}>
                       {file.name}
                     </Text>
                   </View>
                 )}
                 <TouchableOpacity
-                  style={styles.thumbnailRemove}
+                  style={[styles.thumbnailRemove, { backgroundColor: colors.overlay }]}
                   onPress={() => removeFile(idx)}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Text style={styles.thumbnailRemoveText}>✕</Text>
+                  <Text style={[styles.thumbnailRemoveText, { color: colors.onPrimary }]}>&#x2715;</Text>
                 </TouchableOpacity>
               </View>
             ))}
@@ -597,12 +598,12 @@ export function DisciplineInfractionForm() {
         {/* Attach Button */}
         {attachedFiles.length < 5 && (
           <TouchableOpacity
-            style={styles.pickerButton}
+            style={[styles.pickerButton, { backgroundColor: colors.surface, borderColor: colors.primary }]}
             onPress={openAttachmentMenu}
             activeOpacity={0.7}
           >
-            <Text style={styles.pickerButtonIcon}>📎</Text>
-            <Text style={styles.pickerButtonText}>
+            <Text style={styles.pickerButtonIcon}>{"\uD83D\uDCCE"}</Text>
+            <Text style={[styles.pickerButtonText, { color: colors.primary }]}>
               {t("forms.infraction.attachFile", "Attach Photo or Document")}
             </Text>
           </TouchableOpacity>
@@ -640,15 +641,16 @@ export function DisciplineInfractionForm() {
       />
 
       {submitError && (
-        <View style={styles.submitErrorContainer}>
-          <Text style={styles.submitErrorText}>{submitError}</Text>
+        <View style={[styles.submitErrorContainer, { backgroundColor: colors.errorTransparent, borderColor: colors.error }]}>
+          <Text style={[styles.submitErrorText, { color: colors.error }]}>{submitError}</Text>
         </View>
       )}
 
       <TouchableOpacity
         style={[
           styles.submitButton,
-          (!isComplete || submitting) && styles.submitButtonDisabled,
+          { backgroundColor: colors.primary },
+          (!isComplete || submitting) && { backgroundColor: colors.primaryTransparent, opacity: 0.6 },
         ]}
         onPress={handleSubmit}
         disabled={!isComplete || submitting}
@@ -664,7 +666,7 @@ export function DisciplineInfractionForm() {
               tintColor={colors.onPrimary}
               style={styles.submitIcon}
             />
-            <Text style={styles.submitButtonText}>{t("common.submit")}</Text>
+            <Text style={[styles.submitButtonText, { color: colors.onPrimary }]}>{t("common.submit")}</Text>
           </>
         )}
       </TouchableOpacity>
@@ -695,7 +697,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     marginTop: 12,
   },
   errorContainer: {
@@ -706,17 +707,14 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     ...typography.h4,
-    color: colors.error,
     marginBottom: 8,
   },
   errorMessage: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     textAlign: "center",
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: borderRadius.full,
@@ -724,28 +722,23 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     ...typography.labelLarge,
-    color: colors.onPrimary,
   },
   fieldContainer: {
     marginBottom: 4,
   },
   fieldLabel: {
     ...typography.labelLarge,
-    color: colors.onSurface,
     marginBottom: 6,
   },
   fieldHelper: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     marginTop: 4,
   },
   pointsContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.md,
     borderCurve: 'continuous',
     paddingHorizontal: 16,
@@ -753,7 +746,6 @@ const styles = StyleSheet.create({
   },
   pointsLabel: {
     ...typography.labelLarge,
-    color: colors.onSurface,
   },
   pointsBadge: {
     paddingHorizontal: 12,
@@ -761,35 +753,15 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     borderCurve: 'continuous',
   },
-  pointsPositive: {
-    backgroundColor: colors.errorTransparent,
-  },
-  pointsNegative: {
-    backgroundColor: colors.successTransparent,
-  },
-  pointsZero: {
-    backgroundColor: colors.mutedTransparent,
-  },
   pointsValue: {
     ...typography.labelLarge,
     fontWeight: "700",
-  },
-  pointsValuePositive: {
-    color: colors.error,
-  },
-  pointsValueNegative: {
-    color: colors.success,
-  },
-  pointsValueZero: {
-    color: colors.onSurfaceVariant,
   },
   toggleContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.md,
     borderCurve: 'continuous',
     paddingHorizontal: 16,
@@ -801,57 +773,43 @@ const styles = StyleSheet.create({
   },
   toggleLabel: {
     ...typography.labelLarge,
-    color: colors.onSurface,
     marginBottom: 2,
   },
   toggleHelper: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
   },
   notesInput: {
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.md,
     borderCurve: 'continuous',
     paddingHorizontal: 16,
     paddingVertical: 14,
     ...typography.bodyMedium,
-    color: colors.onSurface,
     minHeight: 100,
   },
   submitErrorContainer: {
-    backgroundColor: colors.errorTransparent,
     borderWidth: 1,
-    borderColor: colors.error,
     borderRadius: borderRadius.md,
     borderCurve: 'continuous',
     padding: 12,
   },
   submitErrorText: {
     ...typography.bodyMedium,
-    color: colors.error,
   },
   submitButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primary,
     borderRadius: borderRadius.full,
     borderCurve: 'continuous',
     paddingVertical: 16,
     marginTop: 8,
-  },
-  submitButtonDisabled: {
-    backgroundColor: colors.primaryTransparent,
-    opacity: 0.6,
   },
   submitIcon: {
     marginRight: 8,
   },
   submitButtonText: {
     ...typography.labelLarge,
-    color: colors.onPrimary,
     fontWeight: "600",
   },
   thumbnailStrip: {
@@ -868,8 +826,6 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: colors.outline,
-    backgroundColor: colors.surface,
     position: "relative",
   },
   thumbnailImage: {
@@ -885,14 +841,12 @@ const styles = StyleSheet.create({
   },
   thumbnailPdfLabel: {
     ...typography.labelLarge,
-    color: colors.error,
     fontWeight: "700",
     fontSize: 14,
   },
   thumbnailPdfName: {
     ...typography.bodySmall,
     fontSize: 8,
-    color: colors.onSurfaceVariant,
     textAlign: "center",
   },
   thumbnailRemove: {
@@ -902,12 +856,10 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: colors.overlay,
     alignItems: "center",
     justifyContent: "center",
   },
   thumbnailRemoveText: {
-    color: colors.onPrimary,
     fontSize: 10,
     fontWeight: "700",
   },
@@ -916,9 +868,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.primary,
     borderRadius: borderRadius.md,
     borderCurve: 'continuous',
     paddingVertical: 10,
@@ -929,7 +879,6 @@ const styles = StyleSheet.create({
   },
   pickerButtonText: {
     ...typography.labelLarge,
-    color: colors.primary,
     fontSize: 12,
   },
 });

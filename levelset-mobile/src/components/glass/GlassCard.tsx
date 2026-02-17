@@ -12,7 +12,7 @@ import {
   StyleProp,
 } from "react-native";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { spacing, borderRadius, haptics } from "../../lib/theme";
 
 export type GlassCardVariant = "default" | "elevated" | "outlined";
@@ -32,14 +32,16 @@ export function GlassCard({
   onPress,
   style,
   contentStyle,
-  tintColor = colors.glassTintLight,
+  tintColor,
   disabled = false,
   variant = "default",
 }: GlassCardProps) {
+  const colors = useColors();
   const { GlassView } = useGlass();
   const useGlassEffect = isGlassAvailable();
 
-  const variantStyles = getVariantStyles(variant);
+  const resolvedTintColor = tintColor ?? colors.glassTintLight;
+  const variantStyles = getVariantStyles(variant, colors);
 
   const handlePress = onPress
     ? () => {
@@ -54,7 +56,7 @@ export function GlassCard({
       <GlassView
         style={[styles.glassContainer, variantStyles.container, style]}
         glassEffectStyle="regular"
-        tintColor={tintColor}
+        tintColor={resolvedTintColor}
         isInteractive={!!onPress}
       >
         <View style={[styles.content, contentStyle]}>{children}</View>
@@ -78,7 +80,7 @@ export function GlassCard({
 
   // Fallback version (non-iOS or glass not available)
   const fallbackContent = (
-    <View style={[styles.fallbackContainer, variantStyles.container, style]}>
+    <View style={[styles.fallbackContainer, { backgroundColor: colors.surface, borderColor: colors.outline }, variantStyles.container, style]}>
       <View style={[styles.content, contentStyle]}>{children}</View>
     </View>
   );
@@ -98,7 +100,7 @@ export function GlassCard({
   return fallbackContent;
 }
 
-function getVariantStyles(variant: GlassCardVariant) {
+function getVariantStyles(variant: GlassCardVariant, colors: ReturnType<typeof useColors>) {
   switch (variant) {
     case "elevated":
       return {
@@ -127,11 +129,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   fallbackContainer: {
-    backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
     borderCurve: "continuous",
     borderWidth: 1,
-    borderColor: colors.outline,
   },
   content: {
     padding: spacing[4],

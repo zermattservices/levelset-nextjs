@@ -15,7 +15,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { spacing, borderRadius, haptics } from "../../lib/theme";
 import { typography, fontWeights, fontSizes } from "../../lib/fonts";
 
@@ -47,10 +47,11 @@ export function GlassButton({
   style,
   textStyle,
 }: GlassButtonProps) {
+  const colors = useColors();
   const { GlassView } = useGlass();
   const useGlassEffect = isGlassAvailable();
 
-  const { containerStyle, labelStyle, tintColor } = getVariantStyles(variant);
+  const { containerStyle, labelStyle, tintColor } = getVariantStyles(variant, colors);
   const sizeStyles = getSizeStyles(size);
 
   const isDisabled = disabled || loading;
@@ -78,7 +79,7 @@ export function GlassButton({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === "primary" ? colors.onPrimary : colors.primary}
+          color={variant === "primary" ? "#ffffff" : colors.primary}
         />
       ) : (
         <>
@@ -148,7 +149,7 @@ export function GlassButton({
   );
 }
 
-function getVariantStyles(variant: GlassButtonVariant) {
+function getVariantStyles(variant: GlassButtonVariant, colors: ReturnType<typeof useColors>) {
   switch (variant) {
     case "primary":
       return {
@@ -168,7 +169,7 @@ function getVariantStyles(variant: GlassButtonVariant) {
         labelStyle: {
           color: colors.onPrimary,
         } as TextStyle,
-        tintColor: "rgba(239, 68, 68, 0.25)",
+        tintColor: colors.errorTransparent,
       };
     case "outline":
       return {

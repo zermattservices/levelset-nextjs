@@ -8,7 +8,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSlidingMenu } from "../../context/SlidingMenuContext";
 import { AppIcon } from "../../components/ui";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { haptics } from "../../lib/theme";
 
@@ -24,6 +24,7 @@ interface MenuContentProps {
 }
 
 export function MenuContent({ children }: MenuContentProps) {
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const { activeTab, openMenu, menuTabs } = useSlidingMenu();
 
@@ -49,11 +50,11 @@ export function MenuContent({ children }: MenuContentProps) {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
       {/* Header with menu button */}
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: colors.outline, backgroundColor: colors.surface }]}>
         <TouchableOpacity
-          style={styles.menuButton}
+          style={[styles.menuButton, { backgroundColor: colors.surfaceVariant }]}
           onPress={() => {
             haptics.light();
             openMenu();
@@ -66,7 +67,7 @@ export function MenuContent({ children }: MenuContentProps) {
             tintColor={colors.onSurface}
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{currentTab?.label || "Schedule"}</Text>
+        <Text style={[styles.headerTitle, { color: colors.onSurface }]}>{currentTab?.label || "Schedule"}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -81,7 +82,6 @@ export function MenuContent({ children }: MenuContentProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
@@ -89,8 +89,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.outline,
-    backgroundColor: colors.surface,
   },
   menuButton: {
     width: 44,
@@ -99,11 +97,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 22,
     borderCurve: "continuous",
-    backgroundColor: colors.surfaceVariant,
   },
   headerTitle: {
     ...typography.h4,
-    color: colors.onSurface,
     flex: 1,
     textAlign: "center",
     marginHorizontal: 12,

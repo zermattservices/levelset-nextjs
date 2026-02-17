@@ -1,13 +1,15 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
-import { syncLocationFromGoogle } from '@/lib/google-places';
+import { syncPlaceDetailsFromGoogle } from '@/lib/google-places';
+import { findAndConnectYelpBusiness } from '@/lib/yelp-places';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /**
  * POST /api/locations/connect-google
  * Body: { locationId: string, placeId: string, googleMapsUrl?: string }
  *
- * Connects a location to a Google Maps Place by fetching place details,
- * syncing business hours, and importing reviews.
+ * Phase 1 only: Connects a location to a Google Maps Place by fetching
+ * place details and syncing business hours. Returns immediately (~1-2s).
+ * Reviews are synced separately via /api/locations/sync-google.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
@@ -47,7 +49,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const result = await syncLocationFromGoogle(
+    // Phase 1: place details + hours only (fast)
+    const result = await syncPlaceDetailsFromGoogle(
       supabase,
       locationId,
       placeId,
@@ -55,10 +58,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       googleMapsUrl
     );
 
+    // Phase 1b: Find matching Yelp business (non-blocking — failure doesn't break Google connect)
+    let yelp: { found: boolean; bizId: string | null; rating: number | null; reviewCount: number | null } = {
+      found: false, bizId: null, rating: null, reviewCount: null,
+    };
+
+    if (result.displayName && result.formattedAddress) {
+      try {
+        yelp = await findAndConnectYelpBusiness(
+          supabase,
+          locationId,
+          result.displayName,
+          result.formattedAddress,
+          location.org_id
+        );
+      } catch (yelpError: any) {
+        console.error('[connect-google] Yelp search failed (non-fatal):', yelpError.message);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: 'Location connected to Google Maps',
       ...result,
+      yelp,
     });
   } catch (error: any) {
     console.error('[connect-google] Error:', error);

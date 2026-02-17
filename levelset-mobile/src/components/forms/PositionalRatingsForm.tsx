@@ -17,7 +17,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 import { useAuth } from "../../context/AuthContext";
@@ -47,6 +47,7 @@ type RatingValue = 1 | 2 | 3;
 // =============================================================================
 
 export function PositionalRatingsForm() {
+  const colors = useColors();
   const { t } = useTranslation();
   const { translate, language, getRatingLabel, getRatingColor } = useTranslatedContent();
   const { setDirty, completeSubmission } = useForms();
@@ -349,7 +350,7 @@ export function PositionalRatingsForm() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>{t("common.loading")}</Text>
+        <Text style={[styles.loadingText, { color: colors.onSurfaceVariant }]}>{t("common.loading")}</Text>
       </View>
     );
   }
@@ -357,16 +358,16 @@ export function PositionalRatingsForm() {
   if (loadError) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorTitle}>{t("common.error")}</Text>
-        <Text style={styles.errorMessage}>{loadError}</Text>
+        <Text style={[styles.errorTitle, { color: colors.error }]}>{t("common.error")}</Text>
+        <Text style={[styles.errorMessage, { color: colors.onSurfaceVariant }]}>{loadError}</Text>
         <TouchableOpacity
-          style={styles.retryButton}
+          style={[styles.retryButton, { backgroundColor: colors.primary }]}
           onPress={() => {
             setLoadError(null);
             setLoading(true);
           }}
         >
-          <Text style={styles.retryButtonText}>{t("common.tryAgain")}</Text>
+          <Text style={[styles.retryButtonText, { color: colors.onPrimary }]}>{t("common.tryAgain")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -423,8 +424,8 @@ export function PositionalRatingsForm() {
 
       {/* Position Description */}
       {selectedPosition?.description && (
-        <View style={styles.descriptionContainer}>
-          <Text style={styles.descriptionText}>
+        <View style={[styles.descriptionContainer, { backgroundColor: colors.surfaceVariant }]}>
+          <Text style={[styles.descriptionText, { color: colors.onSurfaceVariant }]}>
             {translate(selectedPosition, "description", selectedPosition.description)}
           </Text>
         </View>
@@ -432,8 +433,8 @@ export function PositionalRatingsForm() {
 
       {/* Labels Error */}
       {labelsError && (
-        <View style={styles.errorBox}>
-          <Text style={styles.errorBoxText}>{labelsError}</Text>
+        <View style={[styles.errorBox, { backgroundColor: colors.errorTransparent, borderColor: colors.error }]}>
+          <Text style={[styles.errorBoxText, { color: colors.error }]}>{labelsError}</Text>
         </View>
       )}
 
@@ -441,7 +442,7 @@ export function PositionalRatingsForm() {
       {labelsLoading && (
         <View style={styles.labelsLoadingContainer}>
           <ActivityIndicator size="small" color={colors.primary} />
-          <Text style={styles.labelsLoadingText}>
+          <Text style={[styles.labelsLoadingText, { color: colors.onSurfaceVariant }]}>
             {t("forms.ratings.loadingCriteria")}
           </Text>
         </View>
@@ -450,15 +451,15 @@ export function PositionalRatingsForm() {
       {/* Rating Criteria */}
       {labels.length > 0 && (
         <View style={styles.ratingsSection}>
-          <Text style={styles.sectionTitle}>{t("forms.ratings.ratePerformance")}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.onSurface }]}>{t("forms.ratings.ratePerformance")}</Text>
 
           {labels.map((label, index) => (
             <Animated.View key={index} entering={FadeIn.delay(index * 60)}>
-              <View style={styles.ratingCard}>
+              <View style={[styles.ratingCard, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
                 <View style={styles.ratingHeader}>
-                  <Text style={styles.ratingLabel}>{label}</Text>
+                  <Text style={[styles.ratingLabel, { color: colors.onSurface }]}>{label}</Text>
                   {descriptions[index] && (
-                    <Text style={styles.ratingDescription}>{descriptions[index]}</Text>
+                    <Text style={[styles.ratingDescription, { color: colors.onSurfaceVariant }]}>{descriptions[index]}</Text>
                   )}
                 </View>
 
@@ -471,8 +472,8 @@ export function PositionalRatingsForm() {
                         key={value}
                         style={[
                           styles.ratingOption,
-                          isSelected && styles.ratingOptionSelected,
-                          isSelected && { borderColor: optionColor },
+                          { backgroundColor: colors.surface, borderColor: colors.outline },
+                          isSelected && { backgroundColor: colors.primaryTransparent, borderColor: optionColor },
                         ]}
                         onPress={() => handleRatingChange(index, value)}
                         activeOpacity={0.7}
@@ -487,6 +488,7 @@ export function PositionalRatingsForm() {
                         <Text
                           style={[
                             styles.ratingOptionLabel,
+                            { color: colors.onSurfaceVariant },
                             isSelected && { color: optionColor, fontWeight: "600" },
                           ]}
                         >
@@ -504,20 +506,22 @@ export function PositionalRatingsForm() {
           <View
             style={[
               styles.notesCard,
-              requireRatingComments && !notes.trim() && styles.notesCardRequired,
+              { backgroundColor: colors.surface, borderColor: colors.outline },
+              requireRatingComments && !notes.trim() && { borderColor: colors.warning },
             ]}
           >
             <View style={styles.notesHeader}>
-              <Text style={styles.notesLabel}>
+              <Text style={[styles.notesLabel, { color: colors.onSurface }]}>
                 {t("forms.ratings.additionalDetails")}
                 {requireRatingComments && (
-                  <Text style={styles.requiredStar}> *</Text>
+                  <Text style={{ color: colors.error }}> *</Text>
                 )}
               </Text>
               <Text
                 style={[
                   styles.notesHelper,
-                  requireRatingComments && styles.notesHelperRequired,
+                  { color: colors.onSurfaceVariant },
+                  requireRatingComments && { color: colors.warning },
                 ]}
               >
                 {requireRatingComments
@@ -526,7 +530,7 @@ export function PositionalRatingsForm() {
               </Text>
             </View>
             <TextInput
-              style={styles.notesInput}
+              style={[styles.notesInput, { backgroundColor: colors.surfaceVariant, color: colors.onSurface }]}
               value={notes}
               onChangeText={(text) => {
                 setNotes(text);
@@ -542,9 +546,9 @@ export function PositionalRatingsForm() {
 
           {/* Feedback Reminder */}
           {selectedEmployee && (
-            <View style={styles.feedbackCard}>
-              <Text style={styles.feedbackTitle}>{t("forms.ratings.feedbackTitle")}</Text>
-              <Text style={styles.feedbackBody}>
+            <View style={[styles.feedbackCard, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
+              <Text style={[styles.feedbackTitle, { color: colors.onSurface }]}>{t("forms.ratings.feedbackTitle")}</Text>
+              <Text style={[styles.feedbackBody, { color: colors.onSurfaceVariant }]}>
                 {t("forms.ratings.feedbackBody", {
                   name: selectedEmployee.name.split(" ")[0],
                 })}
@@ -556,8 +560,8 @@ export function PositionalRatingsForm() {
 
       {/* Submit Error */}
       {submitError && (
-        <View style={styles.submitErrorContainer}>
-          <Text style={styles.submitErrorText}>{submitError}</Text>
+        <View style={[styles.submitErrorContainer, { backgroundColor: colors.errorTransparent, borderColor: colors.error }]}>
+          <Text style={[styles.submitErrorText, { color: colors.error }]}>{submitError}</Text>
         </View>
       )}
 
@@ -565,7 +569,8 @@ export function PositionalRatingsForm() {
       <TouchableOpacity
         style={[
           styles.submitButton,
-          (!isComplete || submitting) && styles.submitButtonDisabled,
+          { backgroundColor: colors.primary },
+          (!isComplete || submitting) && { backgroundColor: colors.primaryTransparent, opacity: 0.6 },
         ]}
         onPress={handleSubmit}
         disabled={!isComplete || submitting}
@@ -581,7 +586,7 @@ export function PositionalRatingsForm() {
               tintColor={colors.onPrimary}
               style={styles.submitIcon}
             />
-            <Text style={styles.submitButtonText}>{t("common.submit")}</Text>
+            <Text style={[styles.submitButtonText, { color: colors.onPrimary }]}>{t("common.submit")}</Text>
           </>
         )}
       </TouchableOpacity>
@@ -610,7 +615,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     marginTop: 12,
   },
   errorContainer: {
@@ -621,47 +625,38 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     ...typography.h4,
-    color: colors.error,
     marginBottom: 8,
   },
   errorMessage: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     textAlign: "center",
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: borderRadius.full,
   },
   retryButtonText: {
     ...typography.labelLarge,
-    color: colors.onPrimary,
   },
   descriptionContainer: {
-    backgroundColor: colors.surfaceVariant,
     borderRadius: borderRadius.md,
     borderCurve: 'continuous',
     padding: 12,
   },
   descriptionText: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     lineHeight: 20,
   },
   errorBox: {
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
     borderWidth: 1,
-    borderColor: colors.error,
     borderRadius: borderRadius.md,
     borderCurve: 'continuous',
     padding: 12,
   },
   errorBoxText: {
     ...typography.bodyMedium,
-    color: colors.error,
   },
   labelsLoadingContainer: {
     flexDirection: "row",
@@ -672,19 +667,15 @@ const styles = StyleSheet.create({
   },
   labelsLoadingText: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
   },
   ratingsSection: {
     gap: 16,
   },
   sectionTitle: {
     ...typography.h4,
-    color: colors.onSurface,
   },
   ratingCard: {
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.lg,
     borderCurve: 'continuous',
     padding: 16,
@@ -695,12 +686,10 @@ const styles = StyleSheet.create({
   },
   ratingLabel: {
     ...typography.labelLarge,
-    color: colors.onSurface,
     fontWeight: "600",
   },
   ratingDescription: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     lineHeight: 18,
   },
   ratingOptionsContainer: {
@@ -712,17 +701,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.sm,
     borderCurve: 'continuous',
     paddingVertical: 10,
     paddingHorizontal: 8,
     gap: 6,
-  },
-  ratingOptionSelected: {
-    backgroundColor: colors.primaryTransparent,
   },
   ratingDot: {
     width: 14,
@@ -732,53 +716,35 @@ const styles = StyleSheet.create({
   },
   ratingOptionLabel: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     textAlign: "center",
   },
   notesCard: {
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.lg,
     borderCurve: 'continuous',
     padding: 16,
     gap: 12,
-  },
-  notesCardRequired: {
-    borderColor: colors.warning,
   },
   notesHeader: {
     gap: 4,
   },
   notesLabel: {
     ...typography.labelLarge,
-    color: colors.onSurface,
     fontWeight: "600",
-  },
-  requiredStar: {
-    color: colors.error,
   },
   notesHelper: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
-  },
-  notesHelperRequired: {
-    color: colors.warning,
   },
   notesInput: {
-    backgroundColor: colors.surfaceVariant,
     borderRadius: borderRadius.md,
     borderCurve: 'continuous',
     paddingHorizontal: 12,
     paddingVertical: 10,
     ...typography.bodyMedium,
-    color: colors.onSurface,
     minHeight: 100,
   },
   feedbackCard: {
-    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: borderRadius.lg,
     borderCurve: 'continuous',
     padding: 16,
@@ -786,46 +752,35 @@ const styles = StyleSheet.create({
   },
   feedbackTitle: {
     ...typography.labelLarge,
-    color: colors.onSurface,
     fontWeight: "600",
   },
   feedbackBody: {
     ...typography.bodyMedium,
-    color: colors.onSurfaceVariant,
     lineHeight: 22,
   },
   submitErrorContainer: {
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
     borderWidth: 1,
-    borderColor: colors.error,
     borderRadius: borderRadius.md,
     borderCurve: 'continuous',
     padding: 12,
   },
   submitErrorText: {
     ...typography.bodyMedium,
-    color: colors.error,
   },
   submitButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primary,
     borderRadius: borderRadius.full,
     borderCurve: 'continuous',
     paddingVertical: 16,
     marginTop: 8,
-  },
-  submitButtonDisabled: {
-    backgroundColor: colors.primaryTransparent,
-    opacity: 0.6,
   },
   submitIcon: {
     marginRight: 8,
   },
   submitButtonText: {
     ...typography.labelLarge,
-    color: colors.onPrimary,
     fontWeight: "600",
   },
 });

@@ -1,14 +1,15 @@
 import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as SystemUI from "expo-system-ui";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "../src/context/AuthContext";
 import { FormsProvider } from "../src/context/FormsContext";
+import { ThemeProvider, useColors, useTheme } from "../src/context/ThemeContext";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
-import { colors } from "../src/lib/colors";
 import "react-native-reanimated";
 
 export {
@@ -26,8 +27,15 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const { isLoading, isAuthenticated } = useAuth();
+  const colors = useColors();
+  const { isDark } = useTheme();
   const segments = useSegments();
   const router = useRouter();
+
+  // Sync native root background with theme so transitions/sheets don't flash white
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(colors.background);
+  }, [isDark, colors.background]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -45,7 +53,7 @@ function RootLayoutNav() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -98,12 +106,14 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <AuthProvider>
-          <FormsProvider>
-            <StatusBar style="auto" />
-            <RootLayoutNav />
-          </FormsProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <FormsProvider>
+              <StatusBar style="auto" />
+              <RootLayoutNav />
+            </FormsProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
@@ -114,6 +124,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.background,
   },
 });

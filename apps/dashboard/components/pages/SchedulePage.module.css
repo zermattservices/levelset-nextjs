@@ -5,7 +5,8 @@
   height: 100vh;
   align-content: flex-start;
   justify-items: center;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--ls-color-bg-container);
   min-width: 0;
   grid-template-columns:

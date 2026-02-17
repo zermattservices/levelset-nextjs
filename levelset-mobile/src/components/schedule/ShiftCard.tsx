@@ -8,7 +8,7 @@ import { View, Text, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { GlassCard } from "../glass";
 import { Shift } from "../../context/ScheduleContext";
-import { colors } from "../../lib/colors";
+import { useColors } from "../../context/ThemeContext";
 import { typography, fontWeights } from "../../lib/fonts";
 import { spacing, borderRadius } from "../../lib/theme";
 
@@ -19,6 +19,8 @@ interface ShiftCardProps {
 }
 
 export function ShiftCard({ shift, onPress, index }: ShiftCardProps) {
+  const colors = useColors();
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -43,7 +45,7 @@ export function ShiftCard({ shift, onPress, index }: ShiftCardProps) {
     <Animated.View entering={FadeIn.delay((index ?? 0) * 50)}>
       <GlassCard onPress={onPress} style={styles.card}>
         <View style={styles.header}>
-          <Text selectable style={styles.date}>{formatDate(shift.date)}</Text>
+          <Text selectable style={[styles.date, { color: colors.onSurface }]}>{formatDate(shift.date)}</Text>
           <View
             style={[
               styles.hoursBadge,
@@ -61,15 +63,15 @@ export function ShiftCard({ shift, onPress, index }: ShiftCardProps) {
           </View>
         </View>
 
-        <Text selectable style={styles.time}>
+        <Text selectable style={[styles.time, { color: colors.onSurface }]}>
           {shift.startTime} - {shift.endTime}
         </Text>
 
         {(shift.area || shift.role) && (
           <View style={styles.details}>
-            {shift.area && <Text selectable style={styles.detail}>{shift.area}</Text>}
-            {shift.area && shift.role && <Text style={styles.separator}>•</Text>}
-            {shift.role && <Text selectable style={styles.detail}>{shift.role}</Text>}
+            {shift.area && <Text selectable style={[styles.detail, { color: colors.onSurfaceVariant }]}>{shift.area}</Text>}
+            {shift.area && shift.role && <Text style={[styles.separator, { color: colors.onSurfaceVariant }]}>•</Text>}
+            {shift.role && <Text selectable style={[styles.detail, { color: colors.onSurfaceVariant }]}>{shift.role}</Text>}
           </View>
         )}
 
@@ -108,7 +110,6 @@ const styles = StyleSheet.create({
   },
   date: {
     ...typography.h4,
-    color: colors.onSurface,
   },
   hoursBadge: {
     paddingHorizontal: spacing[3],
@@ -122,7 +123,6 @@ const styles = StyleSheet.create({
   },
   time: {
     ...typography.bodyLarge,
-    color: colors.onSurface,
     marginBottom: spacing[1],
   },
   details: {
@@ -132,11 +132,9 @@ const styles = StyleSheet.create({
   },
   detail: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
   },
   separator: {
     ...typography.bodySmall,
-    color: colors.onSurfaceVariant,
     marginHorizontal: spacing[2],
   },
   statusBadge: {

@@ -48,7 +48,8 @@ function parseTime(time: string): number {
 
 function shiftNetHours(shift: Shift): number {
   const start = parseTime(shift.start_time);
-  const end = parseTime(shift.end_time);
+  let end = parseTime(shift.end_time);
+  if (end <= start) end += 24 * 60; // cross-day shift
   return Math.max(0, (end - start) / 60 - (shift.break_minutes || 0) / 60);
 }
 
@@ -227,6 +228,7 @@ export function useScheduleData() {
   // ── CRUD: Shifts ──
   const createShift = useCallback(async (params: {
     shift_date: string;
+    end_date?: string;
     start_time: string;
     end_time: string;
     position_id?: string;
@@ -257,6 +259,7 @@ export function useScheduleData() {
   const updateShift = useCallback(async (id: string, params: Partial<{
     position_id: string | null;
     shift_date: string;
+    end_date: string;
     start_time: string;
     end_time: string;
     break_minutes: number;

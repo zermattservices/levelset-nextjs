@@ -6,6 +6,9 @@ export interface Position {
   description?: string;
   display_order: number;
   is_active: boolean;
+  position_type?: 'standard' | 'scheduling_only';
+  area_id?: string;
+  scheduling_enabled?: boolean;
 }
 
 export type ScheduleStatus = 'draft' | 'published';
@@ -29,6 +32,7 @@ export interface Shift {
   schedule_id: string;
   position_id?: string;
   shift_date: string;
+  end_date?: string;
   start_time: string;
   end_time: string;
   break_minutes: number;
@@ -70,4 +74,23 @@ export interface LaborSummary {
   total_cost: number;
   by_day: Record<string, { hours: number; cost: number }>;
   by_position: Record<string, { hours: number; cost: number; position_name: string; zone: string }>;
+}
+
+export interface BreakRule {
+  id: string;
+  org_id: string;
+  break_duration_minutes: number;
+  trigger_hours: number;
+  is_active: boolean;
+  display_order: number;
+  isNew?: boolean; // client-side only
+}
+
+export interface SchedulingArea {
+  id: string;
+  org_id: string;
+  name: string;
+  display_order: number;
+  is_default: boolean;
+  is_active: boolean;
 }
