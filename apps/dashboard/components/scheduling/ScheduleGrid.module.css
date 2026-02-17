@@ -245,7 +245,7 @@
    DAY VIEW
    ══════════════════════════════════════════ */
 .dayGrid {
-  min-width: 700px;
+  min-width: 2400px;
 }
 
 .dayHeaderRow {
@@ -261,6 +261,10 @@
   width: 180px;
   flex-shrink: 0;
   padding: 8px 12px;
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: var(--ls-color-neutral-foreground);
 }
 
 .timelineHeader {
@@ -309,8 +313,10 @@
   pointer-events: none;
   z-index: 2;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0;
   background: rgba(49, 102, 74, 0.08);
   transition: background 0.2s ease, border-color 0.2s ease;
 }
@@ -321,6 +327,15 @@
   color: var(--ls-color-brand);
   white-space: nowrap;
   transition: color 0.2s ease;
+  line-height: 1.3;
+}
+.pendingShiftMeta {
+  font-family: var(--ls-font-heading);
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0.8;
+  line-height: 1.3;
 }
 
 /* Day row */
@@ -333,7 +348,10 @@
 .dayRow .rowLabel {
   width: 180px;
   flex-shrink: 0;
-  position: static;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--ls-color-bg-container);
 }
 
 .timeline {
@@ -359,8 +377,10 @@
   pointer-events: none;
   z-index: 2;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0;
 }
 .dragPreviewLabel {
   font-family: var(--ls-font-heading);
@@ -368,6 +388,16 @@
   font-weight: 600;
   color: var(--ls-color-brand);
   white-space: nowrap;
+  line-height: 1.3;
+}
+.dragPreviewMeta {
+  font-family: var(--ls-font-heading);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ls-color-brand);
+  white-space: nowrap;
+  opacity: 0.8;
+  line-height: 1.3;
 }
 
 .timelineBlock {
@@ -412,6 +442,23 @@
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3;
+}
+/* Hours & cost meta line – shown on hover */
+.timelineBlockMeta {
+  font-family: var(--ls-font-heading);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--ls-color-disabled-text);
+  white-space: nowrap;
+  line-height: 1.3;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.15s ease, opacity 0.15s ease;
+}
+.timelineBlock:hover .timelineBlockMeta {
+  max-height: 16px;
+  opacity: 1;
 }
 
 .timelineEmpty {

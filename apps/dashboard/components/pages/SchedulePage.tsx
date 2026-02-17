@@ -43,6 +43,10 @@ export function SchedulePage() {
   const [prefillEndTime, setPrefillEndTime] = React.useState('');
   const [pendingShift, setPendingShift] = React.useState<PendingShiftPreview | null>(null);
 
+  // Synchronized hover cursor between ScheduleGrid and LaborSpreadTab
+  const [gridHoverMinute, setGridHoverMinute] = React.useState<number | null>(null);
+  const [chartHoverMinute, setChartHoverMinute] = React.useState<number | null>(null);
+
   const data = useScheduleData();
 
   // Fetch business hours for the selected location
@@ -285,6 +289,8 @@ export function SchedulePage() {
                 onDragCreate={handleDragCreate}
                 pendingShift={shiftModalOpen && !editingShift ? pendingShift : null}
                 businessHours={businessHours}
+                externalHoverMinute={chartHoverMinute}
+                onHoverMinuteChange={setGridHoverMinute}
               />
             )}
 
@@ -296,7 +302,11 @@ export function SchedulePage() {
                 days={data.days}
                 canViewPay={canViewPay}
                 isPublished={isPublished}
+                timeViewMode={data.timeViewMode}
+                selectedDay={data.selectedDay}
                 onDeleteShift={data.deleteShift}
+                externalHoverMinute={gridHoverMinute}
+                onHoverMinuteChange={setChartHoverMinute}
               />
             )}
           </div>

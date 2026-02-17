@@ -46,6 +46,10 @@ interface ScheduleGridProps {
   onShiftDelete: (shiftId: string) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
   pendingShift?: PendingShiftPreview | null;
+  /** Hover time in minutes-of-day from LaborSpreadTab */
+  externalHoverMinute?: number | null;
+  /** Called when user hovers in the grid timeline — passes minutes-of-day */
+  onHoverMinuteChange?: (minute: number | null) => void;
 }
 
 const DAY_LABELS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -62,8 +66,8 @@ function formatCurrency(n: number): string {
   return '$' + n.toFixed(0);
 }
 
-function formatCurrencyDecimal(n: number): string {
-  return '$' + n.toFixed(2);
+function formatCurrencyWhole(n: number): string {
+  return '$' + Math.round(n);
 }
 
 function isToday(dateStr: string): boolean {
@@ -81,14 +85,16 @@ function parseTime(time: string): number {
 
 function shiftNetHours(shift: Shift): number {
   const start = parseTime(shift.start_time);
-  const end = parseTime(shift.end_time);
+  let end = parseTime(shift.end_time);
+  if (end <= start) end += 24 * 60; // cross-day shift
   return Math.max(0, (end - start) / 60 - (shift.break_minutes || 0) / 60);
 }
 
 /** Compute net hours from two HH:MM time strings */
 function computeNetHours(startTime: string, endTime: string): number {
   const start = parseTime(startTime);
-  const end = parseTime(endTime);
+  let end = parseTime(endTime);
+  if (end <= start) end += 24 * 60; // cross-day shift
   return Math.max(0, (end - start) / 60);
 }
 
@@ -109,15 +115,20 @@ function snapTo15(minutes: number): number {
   return Math.round(minutes / 15) * 15;
 }
 
-/** Format a decimal hours value compactly, e.g. 4.5 -> "4.5h", 8 -> "8h" */
+/** Format a decimal hours value compactly: 8 -> "8h", 4.5 -> "4.5h", 4.25 -> "4.25h" */
 function formatHoursCompact(h: number): string {
-  return h % 1 === 0 ? `${h}h` : `${h.toFixed(1)}h`;
+  if (h % 1 === 0) return `${h}h`;
+  // For quarter-hours (.25, .75) show 2 decimals; for half-hours (.5) show 1
+  const frac = h % 1;
+  if (Math.abs(frac - 0.5) < 0.001) return `${h.toFixed(1)}h`;
+  return `${h.toFixed(2)}h`;
 }
 
 // ── Grid-level hover cursor hook ──
 // Lifted to the grid level so the vertical line spans all rows
 function useGridHoverCursor(
   timeRange: { minHour: number; maxHour: number },
+  onHoverMinuteChange?: (minute: number | null) => void,
 ) {
   const [hoverPct, setHoverPct] = React.useState<number | null>(null);
   const totalMinutes = (timeRange.maxHour - timeRange.minHour) * 60;
@@ -127,6 +138,7 @@ function useGridHoverCursor(
     const timeline = (e.target as HTMLElement).closest(`.${sty.timeline}`) as HTMLElement | null;
     if (!timeline) {
       setHoverPct(null);
+      if (onHoverMinuteChange) onHoverMinuteChange(null);
       return;
     }
     const rect = timeline.getBoundingClientRect();
@@ -135,11 +147,13 @@ function useGridHoverCursor(
     const snapped = snapTo15(rawMinutes);
     const snappedPct = ((snapped - timeRange.minHour * 60) / totalMinutes) * 100;
     setHoverPct(Math.max(0, Math.min(100, snappedPct)));
-  }, [timeRange.minHour, totalMinutes]);
+    if (onHoverMinuteChange) onHoverMinuteChange(snapped);
+  }, [timeRange.minHour, totalMinutes, onHoverMinuteChange]);
 
   const handleMouseLeave = React.useCallback(() => {
     setHoverPct(null);
-  }, []);
+    if (onHoverMinuteChange) onHoverMinuteChange(null);
+  }, [onHoverMinuteChange]);
 
   return { hoverPct, handleMouseMove, handleMouseLeave };
 }
@@ -416,6 +430,11 @@ function WeekPositionView({
 }
 
 // ── Drag-to-create hook for timeline rows (snaps to 15-min during drag) ──
+// Includes edge-scroll: when the cursor nears the left/right edge of the
+// scrollable .gridWrapper during a drag, the container auto-scrolls.
+const EDGE_SCROLL_ZONE = 60; // px from viewport edge to start scrolling
+const EDGE_SCROLL_SPEED = 12; // px per animation frame
+
 function useDragToCreate(
   timeRange: { minHour: number; maxHour: number },
   isPublished: boolean,
@@ -425,6 +444,8 @@ function useDragToCreate(
   const [dragStartPct, setDragStartPct] = React.useState(0);
   const [dragEndPct, setDragEndPct] = React.useState(0);
   const timelineRef = React.useRef<HTMLDivElement>(null);
+  const scrollRafRef = React.useRef<number | null>(null);
+  const lastClientXRef = React.useRef(0);
 
   const totalMinutes = (timeRange.maxHour - timeRange.minHour) * 60;
 
@@ -435,6 +456,60 @@ function useDragToCreate(
   const minutesToPct = React.useCallback((min: number) => {
     return ((min - timeRange.minHour * 60) / totalMinutes) * 100;
   }, [timeRange.minHour, totalMinutes]);
+
+  /** Find the scrollable .gridWrapper ancestor */
+  const getScrollContainer = React.useCallback(() => {
+    if (!timelineRef.current) return null;
+    let el: HTMLElement | null = timelineRef.current;
+    while (el) {
+      if (el.classList.contains(sty.gridWrapper)) return el;
+      el = el.parentElement;
+    }
+    return null;
+  }, []);
+
+  /** Start a rAF loop that scrolls while the cursor stays in the edge zone */
+  const startEdgeScroll = React.useCallback(() => {
+    const tick = () => {
+      const container = getScrollContainer();
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const clientX = lastClientXRef.current;
+
+      const distFromRight = rect.right - clientX;
+      const distFromLeft = clientX - rect.left;
+
+      if (distFromRight < EDGE_SCROLL_ZONE && distFromRight > 0) {
+        // Scroll right — faster the closer to edge
+        const intensity = 1 - distFromRight / EDGE_SCROLL_ZONE;
+        container.scrollLeft += Math.ceil(EDGE_SCROLL_SPEED * intensity);
+      } else if (distFromLeft < EDGE_SCROLL_ZONE && distFromLeft > 0) {
+        // Scroll left
+        const intensity = 1 - distFromLeft / EDGE_SCROLL_ZONE;
+        container.scrollLeft -= Math.ceil(EDGE_SCROLL_SPEED * intensity);
+      }
+
+      // Also update the drag end position as the scroll changes the timeline rect
+      if (timelineRef.current) {
+        const tlRect = timelineRef.current.getBoundingClientRect();
+        const rawPct = Math.max(0, Math.min(100, ((clientX - tlRect.left) / tlRect.width) * 100));
+        const rawMin = timeRange.minHour * 60 + (rawPct / 100) * totalMinutes;
+        const snappedMin = snapTo15(rawMin);
+        const snappedPct = ((snappedMin - timeRange.minHour * 60) / totalMinutes) * 100;
+        setDragEndPct(Math.max(0, Math.min(100, snappedPct)));
+      }
+
+      scrollRafRef.current = requestAnimationFrame(tick);
+    };
+    scrollRafRef.current = requestAnimationFrame(tick);
+  }, [getScrollContainer, timeRange.minHour, totalMinutes]);
+
+  const stopEdgeScroll = React.useCallback(() => {
+    if (scrollRafRef.current !== null) {
+      cancelAnimationFrame(scrollRafRef.current);
+      scrollRafRef.current = null;
+    }
+  }, []);
 
   const handleMouseDown = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (isPublished || !onDragCreate) return;
@@ -447,13 +522,18 @@ function useDragToCreate(
     setDragStartPct(Math.max(0, Math.min(100, snappedPct)));
     setDragEndPct(Math.max(0, Math.min(100, snappedPct)));
     setIsDragging(true);
+    lastClientXRef.current = e.clientX;
   }, [isPublished, onDragCreate, pctToMinutes, minutesToPct]);
 
   React.useEffect(() => {
     if (!isDragging) return;
 
+    // Start the edge-scroll rAF loop
+    startEdgeScroll();
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!timelineRef.current) return;
+      lastClientXRef.current = e.clientX;
       const rect = timelineRef.current.getBoundingClientRect();
       const rawPct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
       // Snap end position to 15-min during drag
@@ -464,6 +544,7 @@ function useDragToCreate(
     };
 
     const handleMouseUp = () => {
+      stopEdgeScroll();
       setIsDragging(false);
       const startMin = snapTo15(pctToMinutes(Math.min(dragStartPct, dragEndPct)));
       const endMin = snapTo15(pctToMinutes(Math.max(dragStartPct, dragEndPct)));
@@ -478,10 +559,11 @@ function useDragToCreate(
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
     return () => {
+      stopEdgeScroll();
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, dragStartPct, dragEndPct, pctToMinutes, onDragCreate, timeRange.minHour, timeRange.maxHour, totalMinutes]);
+  }, [isDragging, dragStartPct, dragEndPct, pctToMinutes, onDragCreate, timeRange.minHour, timeRange.maxHour, totalMinutes, startEdgeScroll, stopEdgeScroll]);
 
   const dragPreview = React.useMemo(() => {
     if (!isDragging) return null;
@@ -508,6 +590,7 @@ function DayEmployeeView({
   canViewPay, columnConfig, onColumnConfigUpdate,
   onCellClick, onShiftClick, onDragCreate,
   pendingShift, businessHours,
+  externalHoverMinute, onHoverMinuteChange,
 }: {
   shifts: Shift[];
   employees: Employee[];
@@ -522,6 +605,8 @@ function DayEmployeeView({
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
   pendingShift?: PendingShiftPreview | null;
   businessHours?: LocationBusinessHours[];
+  externalHoverMinute?: number | null;
+  onHoverMinuteChange?: (minute: number | null) => void;
 }) {
   const dayShifts = React.useMemo(() => shifts.filter((s) => s.shift_date === selectedDay), [shifts, selectedDay]);
 
@@ -545,7 +630,15 @@ function DayEmployeeView({
     return [...withShifts, ...without];
   }, [employees, shiftMap]);
 
+  // Full 24h time range (always 0-24)
   const timeRange = React.useMemo(() => {
+    const hours: number[] = [];
+    for (let h = 0; h <= 24; h++) hours.push(h);
+    return { minHour: 0, maxHour: 24, hours };
+  }, []);
+
+  // Business range for auto-scroll positioning
+  const businessRange = React.useMemo(() => {
     let minHour = 6;
     let maxHour = 23;
     if (businessHours && businessHours.length > 0) {
@@ -556,29 +649,50 @@ function DayEmployeeView({
         maxHour = Math.max(...todayHours.map((h) => h.close_hour)) + 1;
       }
     }
-    for (const s of dayShifts) {
-      const startH = parseInt(s.start_time.split(':')[0], 10);
-      const endH = parseInt(s.end_time.split(':')[0], 10);
-      if (startH < minHour) minHour = startH;
-      if (endH >= maxHour) maxHour = endH + 1;
-    }
-    const hours: number[] = [];
-    for (let h = minHour; h <= maxHour; h++) hours.push(h);
-    return { minHour, maxHour, hours };
-  }, [dayShifts, businessHours, selectedDay]);
+    return { minHour, maxHour };
+  }, [businessHours, selectedDay]);
 
   const totalMinutes = (timeRange.maxHour - timeRange.minHour) * 60;
   function shiftStyle(shift: Shift) {
     const startMin = parseTime(shift.start_time) - timeRange.minHour * 60;
-    const endMin = parseTime(shift.end_time) - timeRange.minHour * 60;
+    let endMin = parseTime(shift.end_time) - timeRange.minHour * 60;
+    // Cross-day shift: clamp to end of timeline (24:00)
+    if (endMin <= startMin) endMin = totalMinutes;
     return { left: `${Math.max(0, (startMin / totalMinutes) * 100)}%`, width: `${Math.max(2, ((endMin - startMin) / totalMinutes) * 100)}%` };
   }
 
   // Grid-level hover cursor that spans all rows
-  const { hoverPct, handleMouseMove: gridMouseMove, handleMouseLeave: gridMouseLeave } = useGridHoverCursor(timeRange);
+  const { hoverPct, handleMouseMove: gridMouseMove, handleMouseLeave: gridMouseLeave } = useGridHoverCursor(timeRange, onHoverMinuteChange);
+
+  // Convert external hover minute (from LaborSpreadTab) to a percentage
+  const externalHoverPct = React.useMemo(() => {
+    if (externalHoverMinute == null) return null;
+    const totalMin = (timeRange.maxHour - timeRange.minHour) * 60;
+    const pct = ((externalHoverMinute - timeRange.minHour * 60) / totalMin) * 100;
+    if (pct < 0 || pct > 100) return null;
+    return pct;
+  }, [externalHoverMinute, timeRange.minHour, timeRange.maxHour]);
+
+  // Use internal hover if present, otherwise use external
+  const activeHoverPct = hoverPct ?? externalHoverPct;
+
+  // Auto-scroll to business hours on mount and day change
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (!scrollRef.current) return;
+    const el = scrollRef.current;
+    // Wait a frame for layout to settle
+    requestAnimationFrame(() => {
+      const scrollWidth = el.scrollWidth;
+      const nameColWidth = 180; // sticky name column width
+      const scrollableWidth = scrollWidth - nameColWidth;
+      const targetLeft = (businessRange.minHour / 24) * scrollableWidth;
+      el.scrollLeft = Math.max(0, targetLeft - 40);
+    });
+  }, [selectedDay, businessRange.minHour]);
 
   return (
-    <div className={sty.gridWrapper}>
+    <div className={sty.gridWrapper} ref={scrollRef}>
       <div className={sty.dayGrid} onMouseMove={gridMouseMove} onMouseLeave={gridMouseLeave}>
         <div className={sty.dayHeaderRow}>
           <div className={sty.dayCornerCell}>
@@ -624,7 +738,7 @@ function DayEmployeeView({
               onShiftClick={onShiftClick}
               onDragCreate={onDragCreate}
               pendingShift={empPending}
-              gridHoverPct={hoverPct}
+              gridHoverPct={activeHoverPct}
             />
           );
         })}
@@ -638,8 +752,8 @@ function DayEmployeeView({
                   <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
                 </div>
               ))}
-              {hoverPct !== null && (
-                <div className={sty.hoverCursorLine} style={{ left: `${hoverPct}%` }} />
+              {activeHoverPct !== null && (
+                <div className={sty.hoverCursorLine} style={{ left: `${activeHoverPct}%` }} />
               )}
             </div>
           </div>
@@ -688,7 +802,9 @@ function DayEmployeeRow({
   const pendingStyle = React.useMemo(() => {
     if (!pendingShift) return null;
     const startMin = parseTime(pendingShift.startTime) - timeRange.minHour * 60;
-    const endMin = parseTime(pendingShift.endTime) - timeRange.minHour * 60;
+    let endMin = parseTime(pendingShift.endTime) - timeRange.minHour * 60;
+    // Cross-day: clamp to end of timeline
+    if (endMin <= startMin) endMin = totalMinutes;
     const zoneColor = pendingShift.positionZone ? ZONE_COLORS[pendingShift.positionZone] : null;
     const hours = computeNetHours(pendingShift.startTime, pendingShift.endTime);
     const payRate = emp.calculated_pay ?? 0;
@@ -748,7 +864,7 @@ function DayEmployeeRow({
             <div key={s.id} className={sty.timelineBlock} style={{ ...shiftStyleFn(s), backgroundColor: `${posColor}1f`, borderLeft: `3px solid ${posColor}` }} onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}>
               <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
               <span className={sty.timelineBlockLabel}>{s.position?.name ?? ''}</span>
-              <span className={sty.timelineBlockMeta}>{formatHoursCompact(hours)}{canViewPay && cost > 0 ? ` · ${formatCurrencyDecimal(cost)}` : ''}</span>
+              <span className={sty.timelineBlockMeta}>{formatHoursCompact(hours)}{canViewPay && cost > 0 ? ` · ${formatCurrencyWhole(cost)}` : ''}</span>
             </div>
           );
         })}
@@ -756,7 +872,7 @@ function DayEmployeeRow({
           <div className={sty.pendingShiftPreview} style={{ left: pendingStyle.left, width: pendingStyle.width, borderColor: pendingStyle.borderColor, background: pendingStyle.background }}>
             <span className={sty.pendingShiftLabel} style={{ color: pendingStyle.labelColor }}>{pendingStyle.label}</span>
             <span className={sty.pendingShiftMeta} style={{ color: pendingStyle.labelColor }}>
-              {formatHoursCompact(pendingStyle.hours)}{canViewPay && pendingStyle.payRate > 0 ? ` · ${formatCurrencyDecimal(pendingStyle.cost)}` : ''}
+              {formatHoursCompact(pendingStyle.hours)}{canViewPay && pendingStyle.payRate > 0 ? ` · ${formatCurrencyWhole(pendingStyle.cost)}` : ''}
             </span>
           </div>
         )}
@@ -768,7 +884,7 @@ function DayEmployeeRow({
             <span className={sty.dragPreviewLabel}>{dragPreview.label}</span>
             {dragCostInfo && (
               <span className={sty.dragPreviewMeta}>
-                {formatHoursCompact(dragCostInfo.hours)}{canViewPay && dragCostInfo.payRate > 0 ? ` · ${formatCurrencyDecimal(dragCostInfo.cost)}` : ''}
+                {formatHoursCompact(dragCostInfo.hours)}{canViewPay && dragCostInfo.payRate > 0 ? ` · ${formatCurrencyWhole(dragCostInfo.cost)}` : ''}
               </span>
             )}
           </div>
@@ -786,6 +902,7 @@ function DayPositionView({
   shifts, positions, selectedDay, isPublished, canViewPay,
   onCellClick, onShiftClick, onDragCreate,
   pendingShift, businessHours,
+  externalHoverMinute, onHoverMinuteChange,
 }: {
   shifts: Shift[];
   positions: Position[];
@@ -798,6 +915,8 @@ function DayPositionView({
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
   pendingShift?: PendingShiftPreview | null;
   businessHours?: LocationBusinessHours[];
+  externalHoverMinute?: number | null;
+  onHoverMinuteChange?: (minute: number | null) => void;
 }) {
   const dayShifts = React.useMemo(() => shifts.filter((s) => s.shift_date === selectedDay), [shifts, selectedDay]);
 
@@ -832,7 +951,15 @@ function DayPositionView({
     });
   }, []);
 
+  // Full 24h time range (always 0-24)
   const timeRange = React.useMemo(() => {
+    const hours: number[] = [];
+    for (let h = 0; h <= 24; h++) hours.push(h);
+    return { minHour: 0, maxHour: 24, hours };
+  }, []);
+
+  // Business range for auto-scroll positioning
+  const businessRange = React.useMemo(() => {
     let minHour = 6;
     let maxHour = 23;
     if (businessHours && businessHours.length > 0) {
@@ -843,29 +970,49 @@ function DayPositionView({
         maxHour = Math.max(...todayHours.map((h) => h.close_hour)) + 1;
       }
     }
-    for (const s of dayShifts) {
-      const startH = parseInt(s.start_time.split(':')[0], 10);
-      const endH = parseInt(s.end_time.split(':')[0], 10);
-      if (startH < minHour) minHour = startH;
-      if (endH >= maxHour) maxHour = endH + 1;
-    }
-    const hours: number[] = [];
-    for (let h = minHour; h <= maxHour; h++) hours.push(h);
-    return { minHour, maxHour, hours };
-  }, [dayShifts, businessHours, selectedDay]);
+    return { minHour, maxHour };
+  }, [businessHours, selectedDay]);
 
   const totalMinutes = (timeRange.maxHour - timeRange.minHour) * 60;
   function shiftStyle(shift: Shift) {
     const startMin = parseTime(shift.start_time) - timeRange.minHour * 60;
-    const endMin = parseTime(shift.end_time) - timeRange.minHour * 60;
+    let endMin = parseTime(shift.end_time) - timeRange.minHour * 60;
+    // Cross-day shift: clamp to end of timeline (24:00)
+    if (endMin <= startMin) endMin = totalMinutes;
     return { left: `${Math.max(0, (startMin / totalMinutes) * 100)}%`, width: `${Math.max(2, ((endMin - startMin) / totalMinutes) * 100)}%` };
   }
 
   // Grid-level hover cursor that spans all rows
-  const { hoverPct, handleMouseMove: gridMouseMove, handleMouseLeave: gridMouseLeave } = useGridHoverCursor(timeRange);
+  const { hoverPct, handleMouseMove: gridMouseMove, handleMouseLeave: gridMouseLeave } = useGridHoverCursor(timeRange, onHoverMinuteChange);
+
+  // Convert external hover minute (from LaborSpreadTab) to a percentage
+  const externalHoverPct = React.useMemo(() => {
+    if (externalHoverMinute == null) return null;
+    const totalMin = (timeRange.maxHour - timeRange.minHour) * 60;
+    const pct = ((externalHoverMinute - timeRange.minHour * 60) / totalMin) * 100;
+    if (pct < 0 || pct > 100) return null;
+    return pct;
+  }, [externalHoverMinute, timeRange.minHour, timeRange.maxHour]);
+
+  // Use internal hover if present, otherwise use external
+  const activeHoverPct = hoverPct ?? externalHoverPct;
+
+  // Auto-scroll to business hours on mount and day change
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (!scrollRef.current) return;
+    const el = scrollRef.current;
+    requestAnimationFrame(() => {
+      const scrollWidth = el.scrollWidth;
+      const nameColWidth = 180;
+      const scrollableWidth = scrollWidth - nameColWidth;
+      const targetLeft = (businessRange.minHour / 24) * scrollableWidth;
+      el.scrollLeft = Math.max(0, targetLeft - 40);
+    });
+  }, [selectedDay, businessRange.minHour]);
 
   return (
-    <div className={sty.gridWrapper}>
+    <div className={sty.gridWrapper} ref={scrollRef}>
       <div className={sty.dayGrid} onMouseMove={gridMouseMove} onMouseLeave={gridMouseLeave}>
         <div className={sty.dayHeaderRow}>
           <div className={sty.dayCornerCell} />
@@ -904,7 +1051,7 @@ function DayPositionView({
                   onShiftClick={onShiftClick}
                   onDragCreate={onDragCreate}
                   pendingShift={posPending}
-                  gridHoverPct={hoverPct}
+                  gridHoverPct={activeHoverPct}
                 />
               );
             })}
@@ -937,7 +1084,7 @@ function DayPositionView({
                   onShiftClick={onShiftClick}
                   onDragCreate={onDragCreate}
                   pendingShift={posPending}
-                  gridHoverPct={hoverPct}
+                  gridHoverPct={activeHoverPct}
                 />
               );
             })}
@@ -981,7 +1128,9 @@ function DayPositionRow({
   const pendingStyle = React.useMemo(() => {
     if (!pendingShift) return null;
     const startMin = parseTime(pendingShift.startTime) - timeRange.minHour * 60;
-    const endMin = parseTime(pendingShift.endTime) - timeRange.minHour * 60;
+    let endMin = parseTime(pendingShift.endTime) - timeRange.minHour * 60;
+    // Cross-day: clamp to end of timeline
+    if (endMin <= startMin) endMin = totalMinutes;
     const zoneColor = pendingShift.positionZone ? ZONE_COLORS[pendingShift.positionZone] : null;
     const hours = computeNetHours(pendingShift.startTime, pendingShift.endTime);
     return {
@@ -1017,7 +1166,7 @@ function DayPositionRow({
             <div key={s.id} className={`${sty.timelineBlock} ${!s.assignment ? sty.timelineBlockOpen : ''}`} style={{ ...shiftStyleFn(s), backgroundColor: `${posColor}1f`, borderLeft: `3px solid ${posColor}` }} onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}>
               <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
               <span className={sty.timelineBlockLabel}>{s.assignment?.employee?.full_name ?? 'Open'}</span>
-              <span className={sty.timelineBlockMeta}>{formatHoursCompact(hours)}{canViewPay && cost > 0 ? ` · ${formatCurrencyDecimal(cost)}` : ''}</span>
+              <span className={sty.timelineBlockMeta}>{formatHoursCompact(hours)}{canViewPay && cost > 0 ? ` · ${formatCurrencyWhole(cost)}` : ''}</span>
             </div>
           );
         })}
@@ -1054,13 +1203,14 @@ export function ScheduleGrid(props: ScheduleGridProps) {
     canViewPay, columnConfig, onColumnConfigUpdate,
     onCellClick, onShiftClick, onShiftDelete, onDragCreate,
     pendingShift, businessHours,
+    externalHoverMinute, onHoverMinuteChange,
   } = props;
 
   if (timeViewMode === 'day' && gridViewMode === 'employees') {
-    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} businessHours={businessHours} />;
+    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} businessHours={businessHours} externalHoverMinute={externalHoverMinute} onHoverMinuteChange={onHoverMinuteChange} />;
   }
   if (timeViewMode === 'day' && gridViewMode === 'positions') {
-    return <DayPositionView shifts={shifts} positions={positions} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} businessHours={businessHours} />;
+    return <DayPositionView shifts={shifts} positions={positions} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} businessHours={businessHours} externalHoverMinute={externalHoverMinute} onHoverMinuteChange={onHoverMinuteChange} />;
   }
   if (gridViewMode === 'positions') {
     return <WeekPositionView shifts={shifts} positions={positions} days={days} laborSummary={laborSummary} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;

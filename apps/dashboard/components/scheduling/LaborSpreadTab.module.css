@@ -1,6 +1,162 @@
+/* ================================================================== */
+/*  LaborSpreadTab — HotSchedules-style interval chart                 */
+/* ================================================================== */
+
 .container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
   padding: 4px 0;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Chart row: legend sidebar + chart                                  */
+/* ------------------------------------------------------------------ */
+
+.chartRow {
+  display: flex;
+  gap: 0;
+  min-height: 280px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Legend sidebar (left)                                               */
+/* ------------------------------------------------------------------ */
+
+.legendSidebar {
+  flex-shrink: 0;
+  width: 120px;
+  padding: 8px 12px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-right: 1px solid var(--ls-color-muted-soft);
+}
+
+/* Kept for potential future use */
+.dataViewLabel {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Kept for potential future use */
+.dataViewSelect {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  background: var(--ls-color-bg-container);
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  padding: 4px 8px;
+  height: 30px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  padding-right: 22px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Legend items                                                        */
+/* ------------------------------------------------------------------ */
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ls-color-neutral-soft-foreground);
+  line-height: 1.2;
+}
+
+.legendItemMuted {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  line-height: 1.2;
+}
+
+.legendSwatch {
+  display: inline-block;
+  width: 18px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legendSwatchLine {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  border-top: 2px solid;
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Chart container                                                    */
+/* ------------------------------------------------------------------ */
+
+.chartContainer {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Tooltip                                                            */
+/* ------------------------------------------------------------------ */
+
+.tooltip {
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  background: var(--ls-color-bg-container);
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: var(--ls-radius-md);
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+}
+
+.tooltipHeader {
+  font-weight: 700;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin-bottom: 2px;
+  font-size: 12px;
+}
+
+.tooltipTime {
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ls-color-neutral-soft-foreground);
+  line-height: 1.6;
+}
+
+.tooltipDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }

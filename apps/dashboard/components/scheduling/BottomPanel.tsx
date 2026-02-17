@@ -8,7 +8,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { HouseShiftsTab } from './HouseShiftsTab';
 import { ScheduleSummaryTab } from './ScheduleSummaryTab';
-import type { Shift, Position, LaborSummary } from '@/lib/scheduling.types';
+import type { Shift, Position, LaborSummary, TimeViewMode } from '@/lib/scheduling.types';
 
 const LaborSpreadTab = dynamic(
   () => import('./LaborSpreadTab').then(mod => ({ default: mod.LaborSpreadTab })),
@@ -24,11 +24,20 @@ interface BottomPanelProps {
   days: string[];
   canViewPay: boolean;
   isPublished: boolean;
+  timeViewMode: TimeViewMode;
+  selectedDay: string;
   onDeleteShift: (id: string) => Promise<void>;
+  /** Hover time in minutes-of-day from ScheduleGrid */
+  externalHoverMinute?: number | null;
+  /** Called when the LaborSpreadTab hover changes */
+  onHoverMinuteChange?: (minute: number | null) => void;
 }
 
 export function BottomPanel({
-  shifts, positions, laborSummary, days, canViewPay, isPublished, onDeleteShift,
+  shifts, positions, laborSummary, days, canViewPay, isPublished,
+  timeViewMode, selectedDay,
+  onDeleteShift,
+  externalHoverMinute, onHoverMinuteChange,
 }: BottomPanelProps) {
   const [activeTab, setActiveTab] = React.useState<BottomTab>('house_shifts');
   const [expanded, setExpanded] = React.useState(true);
@@ -65,7 +74,7 @@ export function BottomPanel({
           <Tab label="Schedule Summary" value="summary" />
           <Tab label="Labor Spread" value="labor_spread" />
         </Tabs>
-        <IconButton size="small" onClick={() => setExpanded(!expanded)} sx={{ marginRight: '8px' }}>
+        <IconButton size="small" onClick={() => setExpanded(!expanded)} className={sty.collapseBtn}>
           {expanded ? <KeyboardArrowDownIcon fontSize="small" /> : <KeyboardArrowUpIcon fontSize="small" />}
         </IconButton>
       </div>
@@ -88,9 +97,14 @@ export function BottomPanel({
           )}
           {activeTab === 'labor_spread' && (
             <LaborSpreadTab
+              shifts={shifts}
               laborSummary={laborSummary}
               days={days}
               canViewPay={canViewPay}
+              timeViewMode={timeViewMode}
+              selectedDay={selectedDay}
+              externalHoverMinute={externalHoverMinute}
+              onHoverMinuteChange={onHoverMinuteChange}
             />
           )}
         </div>
