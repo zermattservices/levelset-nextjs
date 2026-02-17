@@ -15,15 +15,15 @@ import {
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../../src/context/AuthContext";
-import { useForms } from "../../src/context/FormsContext";
-import { colors } from "../../src/lib/colors";
-import { typography } from "../../src/lib/fonts";
-import { borderRadius, haptics } from "../../src/lib/theme";
-import { GlassCard, GlassButton } from "../../src/components/glass";
+import { useAuth } from "../../../src/context/AuthContext";
+import { useForms } from "../../../src/context/FormsContext";
+import { colors } from "../../../src/lib/colors";
+import { typography, fontWeights } from "../../../src/lib/fonts";
+import { spacing, borderRadius, haptics } from "../../../src/lib/theme";
+import { GlassCard, GlassButton } from "../../../src/components/glass";
 
 // Import i18n to ensure it's initialized
-import "../../src/lib/i18n";
+import "../../../src/lib/i18n";
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -69,16 +69,10 @@ export default function ProfileScreen() {
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 20, gap: 16 }}
+      contentContainerStyle={{ padding: spacing[5], gap: spacing[4] }}
       style={styles.container}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>
-          {t("profile.title")}
-        </Text>
-      </View>
-
       {/* User Info Card */}
       <Animated.View entering={FadeIn}>
         <GlassCard style={styles.profileCard}>
@@ -197,20 +191,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    paddingBottom: 8,
-  },
-  title: {
-    ...typography.h2,
-    color: colors.onBackground,
-  },
   profileCard: {
     alignItems: "center",
-    paddingVertical: 24,
+    paddingVertical: spacing[6],
     borderCurve: "continuous",
   },
   avatarContainer: {
-    marginBottom: 16,
+    marginBottom: spacing[4],
   },
   avatar: {
     width: 80,
@@ -228,40 +215,40 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
   },
   avatarText: {
-    fontSize: 32,
-    fontWeight: "700",
+    fontSize: spacing[8],
+    fontWeight: fontWeights.bold,
     color: colors.onPrimary,
   },
   userName: {
     ...typography.h3,
     color: colors.onSurface,
-    marginBottom: 4,
+    marginBottom: spacing[1],
     textAlign: "center",
   },
   userEmail: {
     ...typography.bodyMedium,
     color: colors.onSurfaceVariant,
-    marginBottom: 8,
+    marginBottom: spacing[2],
   },
   roleBadge: {
     backgroundColor: colors.primaryTransparent,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1],
     borderRadius: borderRadius.full,
     borderCurve: "continuous",
-    marginTop: 4,
+    marginTop: spacing[1],
   },
   roleText: {
     ...typography.labelMedium,
     color: colors.primary,
   },
   section: {
-    gap: 8,
+    gap: spacing[2],
   },
   sectionTitle: {
     ...typography.labelLarge,
     color: colors.onSurfaceVariant,
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing[1],
   },
   settingCard: {
     borderCurve: "continuous",
@@ -272,7 +259,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   settingInfo: {
-    marginBottom: 12,
+    marginBottom: spacing[3],
   },
   settingLabel: {
     ...typography.bodyMedium,
@@ -293,11 +280,11 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     borderCurve: "continuous",
     padding: 2,
-    marginTop: 4,
+    marginTop: spacing[1],
   },
   segmentOption: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: spacing[2],
     alignItems: "center",
     borderRadius: borderRadius.sm - 2,
     borderCurve: "continuous",
@@ -312,13 +299,13 @@ const styles = StyleSheet.create({
   },
   segmentTextSelected: {
     color: colors.onSurface,
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
   logoutSection: {
-    marginTop: 8,
+    marginTop: spacing[2],
   },
   debugSection: {
-    marginTop: 8,
+    marginTop: spacing[2],
     alignItems: "center",
   },
   debugText: {

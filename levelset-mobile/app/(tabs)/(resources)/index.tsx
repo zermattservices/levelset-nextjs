@@ -13,16 +13,15 @@ import {
   Alert,
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-import { useTranslation } from "react-i18next";
-import { useForms } from "../../src/context/FormsContext";
-import { colors } from "../../src/lib/colors";
-import { typography } from "../../src/lib/fonts";
-import { haptics } from "../../src/lib/theme";
-import { GlassCard } from "../../src/components/glass";
-import { AppIcon } from "../../src/components/ui";
+import { useForms } from "../../../src/context/FormsContext";
+import { colors } from "../../../src/lib/colors";
+import { typography } from "../../../src/lib/fonts";
+import { spacing, borderRadius, haptics } from "../../../src/lib/theme";
+import { GlassCard } from "../../../src/components/glass";
+import { AppIcon } from "../../../src/components/ui";
 
 // Import i18n to ensure it's initialized
-import "../../src/lib/i18n";
+import "../../../src/lib/i18n";
 
 interface ResourceItem {
   id: string;
@@ -112,20 +111,15 @@ export default function ResourcesScreen() {
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 20, gap: 16 }}
+      contentContainerStyle={{ padding: spacing[5], gap: spacing[4] }}
       style={styles.container}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>
-          {language === "en" ? "Resources" : "Recursos"}
-        </Text>
-        <Text style={styles.subtitle}>
-          {language === "en"
-            ? "Quick access to web resources and documentation"
-            : "Acceso rápido a recursos web y documentación"}
-        </Text>
-      </View>
+      <Text style={styles.subtitle}>
+        {language === "en"
+          ? "Quick access to web resources and documentation"
+          : "Acceso rápido a recursos web y documentación"}
+      </Text>
 
       {RESOURCES.map((resource, index) => (
         <Animated.View key={resource.id} entering={FadeIn.delay(index * 60)}>
@@ -173,14 +167,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    paddingBottom: 8,
-  },
-  title: {
-    ...typography.h2,
-    color: colors.onBackground,
-    marginBottom: 4,
-  },
   subtitle: {
     ...typography.bodyMedium,
     color: colors.onSurfaceVariant,
@@ -192,16 +178,16 @@ const styles = StyleSheet.create({
   resourceContent: {
     flexDirection: "row",
     alignItems: "center",
+    gap: spacing[3],
   },
   iconContainer: {
     width: 44,
     height: 44,
-    borderRadius: 10,
+    borderRadius: borderRadius.md,
     borderCurve: "continuous",
     backgroundColor: colors.primaryTransparent,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
   },
   resourceInfo: {
     flex: 1,
@@ -216,8 +202,8 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
   },
   infoSection: {
-    marginTop: 4,
-    paddingHorizontal: 8,
+    marginTop: spacing[1],
+    paddingHorizontal: spacing[2],
   },
   infoText: {
     ...typography.bodySmall,

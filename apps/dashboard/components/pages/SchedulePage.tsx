@@ -16,6 +16,8 @@ import { ShiftModal } from '@/components/scheduling/ShiftModal';
 import { BottomPanel } from '@/components/scheduling/BottomPanel';
 import CircularProgress from '@mui/material/CircularProgress';
 import type { Shift } from '@/lib/scheduling.types';
+import type { PendingShiftPreview } from '@/components/scheduling/ScheduleGrid';
+import type { LocationBusinessHours } from '@/lib/supabase.types';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -39,8 +41,30 @@ export function SchedulePage() {
   const [prefillEmployeeId, setPrefillEmployeeId] = React.useState('');
   const [prefillStartTime, setPrefillStartTime] = React.useState('');
   const [prefillEndTime, setPrefillEndTime] = React.useState('');
+  const [pendingShift, setPendingShift] = React.useState<PendingShiftPreview | null>(null);
 
   const data = useScheduleData();
+
+  // Fetch business hours for the selected location
+  const [businessHours, setBusinessHours] = React.useState<LocationBusinessHours[]>([]);
+  React.useEffect(() => {
+    if (!selectedLocationId) {
+      setBusinessHours([]);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/locations/google-info?locationId=${selectedLocationId}`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (!cancelled && json.businessHours) {
+          setBusinessHours(json.businessHours);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setBusinessHours([]);
+      });
+    return () => { cancelled = true; };
+  }, [selectedLocationId]);
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -142,9 +166,13 @@ export function SchedulePage() {
     setPrefillStartTime(startTime);
     setPrefillEndTime(endTime);
 
+    let posZone: 'FOH' | 'BOH' | null = null;
     if (data.gridViewMode === 'positions' && entityId && entityId !== '__none__') {
       setPrefillPositionId(entityId);
       setPrefillEmployeeId('');
+      // Look up the zone for this position
+      const pos = data.allPositions.find((p) => p.id === entityId);
+      posZone = pos?.zone ?? null;
     } else if (data.gridViewMode === 'employees' && entityId) {
       setPrefillEmployeeId(entityId);
       setPrefillPositionId('');
@@ -153,6 +181,13 @@ export function SchedulePage() {
       setPrefillEmployeeId('');
     }
 
+    setPendingShift({
+      date,
+      startTime,
+      endTime,
+      entityId,
+      positionZone: posZone,
+    });
     setShiftModalOpen(true);
   };
 
@@ -248,6 +283,8 @@ export function SchedulePage() {
                 onShiftClick={handleShiftClick}
                 onShiftDelete={handleShiftDelete}
                 onDragCreate={handleDragCreate}
+                pendingShift={shiftModalOpen && !editingShift ? pendingShift : null}
+                businessHours={businessHours}
               />
             )}
 
@@ -269,8 +306,17 @@ export function SchedulePage() {
       {/* Shift Modal */}
       <ShiftModal
         open={shiftModalOpen}
-        onClose={() => setShiftModalOpen(false)}
+        onClose={() => { setShiftModalOpen(false); setPendingShift(null); }}
         shift={editingShift}
+        onPositionChange={(posId) => {
+          if (!pendingShift) return;
+          const pos = data.allPositions.find((p) => p.id === posId);
+          setPendingShift((prev) => prev ? { ...prev, positionZone: pos?.zone ?? null } : null);
+        }}
+        onTimeChange={(startTime, endTime) => {
+          if (!pendingShift) return;
+          setPendingShift((prev) => prev ? { ...prev, startTime, endTime } : null);
+        }}
         prefillDate={prefillDate}
         prefillPositionId={prefillPositionId}
         prefillEmployeeId={prefillEmployeeId}

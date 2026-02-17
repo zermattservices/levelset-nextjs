@@ -3,6 +3,10 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
+import LinkIcon from '@mui/icons-material/Link';
+import LinkOffIcon from '@mui/icons-material/LinkOff';
+import SyncIcon from '@mui/icons-material/Sync';
+import StarIcon from '@mui/icons-material/Star';
 import sty from './LocationDetails.module.css';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
@@ -12,9 +16,80 @@ interface LocationDetailsProps {
   disabled?: boolean;
 }
 
+interface GoogleInfoData {
+  connected: boolean;
+  location: {
+    google_place_id: string;
+    google_maps_url: string | null;
+    google_rating: number | null;
+    google_review_count: number | null;
+    google_hours_display: string[] | null;
+    google_last_synced_at: string | null;
+  } | null;
+  businessHours: Array<{
+    day_of_week: number;
+    open_hour: number;
+    open_minute: number;
+    close_hour: number;
+    close_minute: number;
+    period_index: number;
+  }>;
+  reviews: Array<{
+    id: string;
+    author_name: string;
+    rating: number;
+    review_text: string;
+    publish_time: string;
+  }>;
+}
+
+// Load Google Maps JS API dynamically
+function useGoogleMapsScript() {
+  const [loaded, setLoaded] = React.useState(false);
+
+  React.useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) return;
+
+    // Check if already loaded
+    if ((window as any).google?.maps?.places) {
+      setLoaded(true);
+      return;
+    }
+
+    // Check if script is already being loaded
+    if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+      const checkLoaded = setInterval(() => {
+        if ((window as any).google?.maps?.places) {
+          setLoaded(true);
+          clearInterval(checkLoaded);
+        }
+      }, 100);
+      return () => clearInterval(checkLoaded);
+    }
+
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+    script.async = true;
+    script.onload = () => {
+      // Wait for places library to be ready
+      const checkReady = setInterval(() => {
+        if ((window as any).google?.maps?.places) {
+          setLoaded(true);
+          clearInterval(checkReady);
+        }
+      }, 50);
+    };
+    document.head.appendChild(script);
+  }, []);
+
+  return loaded;
+}
+
 export function LocationDetails({ locationId, disabled = false }: LocationDetailsProps) {
   const { has } = usePermissions();
-  
+  const mapsLoaded = useGoogleMapsScript();
+
   // Permission check
   const canManageLocation = has(P.ORG_MANAGE_LOCATION) && !disabled;
   const isDisabled = disabled || !canManageLocation;
@@ -25,9 +100,18 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
   const [success, setSuccess] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Google Maps state
+  const [googleInfo, setGoogleInfo] = React.useState<GoogleInfoData | null>(null);
+  const [googleLoading, setGoogleLoading] = React.useState(false);
+  const [connecting, setConnecting] = React.useState(false);
+  const [syncing, setSyncing] = React.useState(false);
+  const autocompleteRef = React.useRef<HTMLDivElement>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = React.useState<string | null>(null);
+  const [selectedPlaceName, setSelectedPlaceName] = React.useState<string | null>(null);
+
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
-  // Fetch current location logo
+  // Fetch current location data (logo + Google info)
   React.useEffect(() => {
     async function fetchLocation() {
       if (!locationId) {
@@ -55,6 +139,145 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
 
     fetchLocation();
   }, [locationId, supabase]);
+
+  // Fetch Google info separately
+  React.useEffect(() => {
+    async function fetchGoogleInfo() {
+      if (!locationId) return;
+      setGoogleLoading(true);
+      try {
+        const resp = await fetch(`/api/locations/google-info?locationId=${locationId}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          setGoogleInfo(data);
+        }
+      } catch (err) {
+        console.error('Error fetching Google info:', err);
+      } finally {
+        setGoogleLoading(false);
+      }
+    }
+
+    fetchGoogleInfo();
+  }, [locationId]);
+
+  // Initialize Google Places Autocomplete
+  React.useEffect(() => {
+    if (!mapsLoaded || !autocompleteRef.current || isDisabled || googleInfo?.connected) return;
+
+    const container = autocompleteRef.current;
+    // Clear any previous autocomplete
+    container.innerHTML = '';
+
+    try {
+      const autocomplete = new (window as any).google.maps.places.Autocomplete(
+        (() => {
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.placeholder = 'Search for your business on Google Maps...';
+          input.className = sty.googleSearchInput;
+          container.appendChild(input);
+          return input;
+        })(),
+        {
+          types: ['establishment'],
+          fields: ['place_id', 'name', 'formatted_address'],
+        }
+      );
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place?.place_id) {
+          setSelectedPlaceId(place.place_id);
+          setSelectedPlaceName(place.name || place.formatted_address || place.place_id);
+        }
+      });
+    } catch (err) {
+      console.error('Error initializing autocomplete:', err);
+    }
+  }, [mapsLoaded, isDisabled, googleInfo?.connected]);
+
+  const handleConnect = async () => {
+    if (!locationId || !selectedPlaceId) return;
+    setConnecting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const resp = await fetch('/api/locations/connect-google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locationId, placeId: selectedPlaceId }),
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Failed to connect');
+
+      setSuccess('Connected to Google Maps');
+      setSelectedPlaceId(null);
+      setSelectedPlaceName(null);
+
+      // Refresh Google info
+      const infoResp = await fetch(`/api/locations/google-info?locationId=${locationId}`);
+      if (infoResp.ok) setGoogleInfo(await infoResp.json());
+    } catch (err: any) {
+      setError(err.message || 'Failed to connect to Google Maps');
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (!locationId) return;
+    setConnecting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const resp = await fetch('/api/locations/disconnect-google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locationId }),
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Failed to disconnect');
+
+      setSuccess('Disconnected from Google Maps');
+      setGoogleInfo({ connected: false, location: null, businessHours: [], reviews: [] });
+    } catch (err: any) {
+      setError(err.message || 'Failed to disconnect from Google Maps');
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const handleSync = async () => {
+    if (!locationId) return;
+    setSyncing(true);
+    setError(null);
+
+    try {
+      const resp = await fetch('/api/locations/sync-google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locationId }),
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Failed to sync');
+
+      setSuccess(`Synced: ${data.newReviews} new reviews, ${data.updatedReviews} updated`);
+
+      // Refresh Google info
+      const infoResp = await fetch(`/api/locations/google-info?locationId=${locationId}`);
+      if (infoResp.ok) setGoogleInfo(await infoResp.json());
+    } catch (err: any) {
+      setError(err.message || 'Failed to sync Google Maps data');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -169,12 +392,19 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
     );
   }
 
+  const loc = googleInfo?.location;
+  const formatLastSynced = (ts: string | null | undefined) => {
+    if (!ts) return 'Never';
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+  };
+
   return (
     <div className={sty.container}>
       <div className={sty.intro}>
         <h3 className={sty.introTitle}>Location Details</h3>
         <p className={sty.introDescription}>
-          Configure details specific to this location, including the location logo 
+          Configure details specific to this location, including the location logo
           that appears throughout the app.
         </p>
       </div>
@@ -182,11 +412,12 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
       {error && <div className={sty.errorMessage}>{error}</div>}
       {success && <div className={sty.successMessage}>{success}</div>}
 
+      {/* Location Logo Section */}
       <div className={sty.section}>
         <label className={sty.fieldLabel}>Location Logo</label>
         <p className={sty.fieldDescription}>
           This image will be displayed in the dashboard and other areas of the app.
-          Recommended size: 600 × 400 pixels.
+          Recommended size: 600 x 400 pixels.
         </p>
 
         <div className={sty.imageUploadArea}>
@@ -269,6 +500,144 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
             </div>
           )}
         </div>
+      </div>
+
+      {/* Google Maps Section */}
+      <div className={sty.section}>
+        <label className={sty.fieldLabel}>Google Maps</label>
+        <p className={sty.fieldDescription}>
+          Connect this location to its Google Maps listing to sync business hours,
+          reviews, and location data.
+        </p>
+
+        {googleLoading ? (
+          <div className={sty.googleLoadingRow}>
+            <CircularProgress size={16} sx={{ color: 'var(--ls-color-brand)' }} />
+            <span>Loading Google Maps info...</span>
+          </div>
+        ) : googleInfo?.connected && loc ? (
+          /* Connected state */
+          <div className={sty.googleConnectedContainer}>
+            {/* Rating & link row */}
+            <div className={sty.googleSummaryRow}>
+              <a
+                href={loc.google_maps_url || `https://www.google.com/maps/place/?q=place_id:${loc.google_place_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={sty.googleMapsLink}
+              >
+                View on Google Maps
+              </a>
+              {loc.google_rating != null && (
+                <span className={sty.googleRating}>
+                  <StarIcon sx={{ fontSize: 16, color: '#f59e0b' }} />
+                  {loc.google_rating} ({loc.google_review_count || 0} reviews)
+                </span>
+              )}
+            </div>
+
+            {/* Business hours */}
+            {loc.google_hours_display && loc.google_hours_display.length > 0 && (
+              <div className={sty.googleHours}>
+                <span className={sty.googleHoursTitle}>Business Hours</span>
+                <div className={sty.googleHoursGrid}>
+                  {loc.google_hours_display.map((line, i) => (
+                    <div key={i} className={sty.googleHoursRow}>{line}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Sync info & actions */}
+            <div className={sty.googleActionsRow}>
+              <span className={sty.googleSyncInfo}>
+                Last synced: {formatLastSynced(loc.google_last_synced_at)}
+              </span>
+              {!isDisabled && (
+                <div className={sty.googleActions}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={syncing ? <CircularProgress size={14} /> : <SyncIcon />}
+                    onClick={handleSync}
+                    disabled={syncing || connecting}
+                    sx={{
+                      fontFamily: '"Satoshi", sans-serif',
+                      fontSize: 12,
+                      textTransform: 'none',
+                      borderColor: 'var(--ls-color-brand)',
+                      color: 'var(--ls-color-brand)',
+                      '&:hover': {
+                        borderColor: 'var(--ls-color-brand)',
+                        backgroundColor: 'rgba(49, 102, 74, 0.08)',
+                      },
+                    }}
+                  >
+                    Sync Now
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<LinkOffIcon />}
+                    onClick={handleDisconnect}
+                    disabled={syncing || connecting}
+                    sx={{
+                      fontFamily: '"Satoshi", sans-serif',
+                      fontSize: 12,
+                      textTransform: 'none',
+                      borderColor: '#dc2626',
+                      color: '#dc2626',
+                      '&:hover': {
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.08)',
+                      },
+                    }}
+                  >
+                    Disconnect
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Not connected state */
+          <div className={sty.googleConnectContainer}>
+            {!isDisabled && process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
+              <>
+                <div ref={autocompleteRef} className={sty.googleAutocompleteWrapper} />
+                {selectedPlaceId && (
+                  <div className={sty.googleSelectedPlace}>
+                    <span className={sty.googleSelectedName}>{selectedPlaceName}</span>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={connecting ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <LinkIcon />}
+                      onClick={handleConnect}
+                      disabled={connecting}
+                      sx={{
+                        fontFamily: '"Satoshi", sans-serif',
+                        fontSize: 12,
+                        textTransform: 'none',
+                        backgroundColor: 'var(--ls-color-brand)',
+                        '&:hover': { backgroundColor: 'var(--ls-color-brand-dark, #254e39)' },
+                      }}
+                    >
+                      Connect
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : !isDisabled ? (
+              <span className={sty.googleNotConfigured}>
+                Google Maps API key not configured. Contact your administrator.
+              </span>
+            ) : (
+              <span className={sty.googleNotConfigured}>
+                No Google Maps connection configured.
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

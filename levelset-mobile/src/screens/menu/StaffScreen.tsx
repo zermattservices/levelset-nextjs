@@ -8,7 +8,8 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useSchedule } from "../../context/ScheduleContext";
 import { GlassCard } from "../../components/glass";
 import { colors } from "../../lib/colors";
-import { typography } from "../../lib/fonts";
+import { typography, fontWeights } from "../../lib/fonts";
+import { spacing } from "../../lib/theme";
 
 export default function StaffScreen() {
   const { staff } = useSchedule();
@@ -59,30 +60,30 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   scrollContent: {
-    padding: 16,
+    padding: spacing[4],
     flexGrow: 1,
   },
   sectionTitle: {
     ...typography.labelLarge,
     color: colors.onSurfaceVariant,
-    marginBottom: 12,
-    paddingHorizontal: 4,
+    marginBottom: spacing[3],
+    paddingHorizontal: spacing[1],
   },
   emptyCard: {
-    marginTop: 24,
+    marginTop: spacing[6],
   },
   emptyContent: {
     alignItems: "center",
-    paddingVertical: 40,
+    paddingVertical: spacing[10],
   },
   emptyIcon: {
     fontSize: 56,
-    marginBottom: 16,
+    marginBottom: spacing[4],
   },
   emptyTitle: {
     ...typography.h3,
     color: colors.onSurface,
-    marginBottom: 8,
+    marginBottom: spacing[2],
   },
   emptyDescription: {
     ...typography.bodyMedium,
@@ -90,11 +91,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   staffCard: {
-    marginBottom: 12,
+    marginBottom: spacing[3],
   },
   staffRow: {
     flexDirection: "row",
     alignItems: "center",
+    gap: spacing[3],
   },
   avatar: {
     width: 48,
@@ -103,7 +105,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryTransparent,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
   },
   avatarText: {
     ...typography.h4,
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   staffName: {
     ...typography.bodyLarge,
     color: colors.onSurface,
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
   staffRole: {
     ...typography.bodySmall,

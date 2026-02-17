@@ -287,6 +287,42 @@
   pointer-events: none;
 }
 
+/* Hover cursor line that snaps to 15-min increments */
+.hoverCursorLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  z-index: 3;
+  transition: left 0.05s ease-out;
+}
+
+/* Persistent shift preview shown while drawer is open */
+.pendingShiftPreview {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  border: 2px dashed var(--ls-color-brand);
+  border-radius: var(--ls-radius-sm);
+  pointer-events: none;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(49, 102, 74, 0.08);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.pendingShiftLabel {
+  font-family: var(--ls-font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
 /* Day row */
 .dayRow {
   display: flex;

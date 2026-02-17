@@ -160,3 +160,157 @@
   font-size: 12px;
   color: var(--ls-color-brand);
 }
+
+/* Google Maps Section */
+
+.googleLoadingRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #666;
+  padding: 8px 0;
+}
+
+.googleConnectedContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.googleSummaryRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.googleMapsLink {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: var(--ls-color-brand);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.googleMapsLink:hover {
+  text-decoration: underline;
+}
+
+.googleRating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.googleHours {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.googleHoursTitle {
+  font-family: "Satoshi";
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.googleHoursGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.googleHoursRow {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.googleActionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.googleSyncInfo {
+  font-family: "Satoshi";
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.googleActions {
+  display: flex;
+  gap: 8px;
+}
+
+.googleConnectContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.googleAutocompleteWrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+.googleSearchInput {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: "Satoshi";
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.googleSearchInput:focus {
+  border-color: var(--ls-color-brand);
+  box-shadow: 0 0 0 2px rgba(49, 102, 74, 0.1);
+}
+
+.googleSelectedPlace {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  max-width: 400px;
+}
+
+.googleSelectedName {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #15803d;
+  font-weight: 500;
+  flex: 1;
+}
+
+.googleNotConfigured {
+  font-family: "Satoshi";
+  font-size: 13px;
+  color: #9ca3af;
+  font-style: italic;
+}
