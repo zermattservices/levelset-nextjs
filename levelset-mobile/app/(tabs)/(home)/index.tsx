@@ -21,7 +21,7 @@ import { useForms } from "../../../src/context/FormsContext";
 import { useColors } from "../../../src/context/ThemeContext";
 import { typography, fontWeights } from "../../../src/lib/fonts";
 import { spacing, borderRadius, haptics } from "../../../src/lib/theme";
-import { AppIcon } from "../../../src/components/ui";
+import { AppIcon, LocationSelector } from "../../../src/components/ui";
 import { GlassCard } from "../../../src/components/glass";
 import "../../../src/lib/i18n";
 
@@ -73,6 +73,7 @@ export default function HomeScreen() {
           <Text style={[styles.greeting, { color: colors.onSurfaceVariant }]}>
             {greeting}, <Text style={[styles.userName, { color: colors.onBackground }]}>{firstName}</Text>
           </Text>
+          <LocationSelector compact />
         </View>
       </Animated.View>
 

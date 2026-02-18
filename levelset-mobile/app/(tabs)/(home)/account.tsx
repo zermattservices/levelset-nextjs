@@ -22,6 +22,7 @@ import { useColors } from "../../../src/context/ThemeContext";
 import { typography, fontWeights } from "../../../src/lib/fonts";
 import { spacing, borderRadius, haptics } from "../../../src/lib/theme";
 import { AppIcon } from "../../../src/components/ui";
+import { LocationSelector } from "../../../src/components/ui/LocationSelector";
 import { GlassCard } from "../../../src/components/glass";
 import "../../../src/lib/i18n";
 
@@ -113,6 +114,9 @@ export default function AccountModal() {
           <AppIcon name="chevron.right" size={16} tintColor={colors.onSurfaceDisabled} />
         </View>
       </GlassCard>
+
+      {/* Location selector */}
+      <LocationSelector />
 
       {/* Settings section */}
       <GlassCard>
