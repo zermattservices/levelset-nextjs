@@ -123,9 +123,10 @@ chatRoute.get('/history', async (c) => {
     const user = c.get('user') as UserContext;
     const orgId = user.orgId || c.req.query('org_id');
     if (!orgId) return c.json({ messages: [], hasMore: false });
+    const locationId = c.req.query('location_id') ?? undefined;
 
     // Read-only: find existing conversation, don't create one
-    const conversationId = await findActiveConversation(user.appUserId, orgId);
+    const conversationId = await findActiveConversation(user.appUserId, orgId, locationId);
     if (!conversationId) return c.json({ messages: [], hasMore: false });
 
     const before = c.req.query('before') ?? undefined;
@@ -144,7 +145,7 @@ chatRoute.get('/history', async (c) => {
 chatRoute.post('/', async (c) => {
   try {
     // 1. Parse request body
-    const body = await c.req.json<{ message?: string; org_id?: string; stream?: boolean }>();
+    const body = await c.req.json<{ message?: string; org_id?: string; location_id?: string; stream?: boolean }>();
     const wantsStream = body.stream === true;
     const userMessage = body.message?.trim();
 
@@ -157,6 +158,7 @@ chatRoute.post('/', async (c) => {
     // For Levelset Admins (super-admins), org_id may be null — fall back to request body.
     const user = c.get('user') as UserContext;
     const orgId = user.orgId || body.org_id;
+    const locationId = body.location_id;
     const userId = user.appUserId;
 
     if (!orgId) {
@@ -176,8 +178,8 @@ chatRoute.post('/', async (c) => {
       );
     }
 
-    // 4. Get or create conversation
-    const conversationId = await getOrCreateConversation(userId, orgId);
+    // 4. Get or create conversation (scoped to user+org+location)
+    const conversationId = await getOrCreateConversation(userId, orgId, locationId);
 
     // 5. Persist user message
     await persistMessage(conversationId, {

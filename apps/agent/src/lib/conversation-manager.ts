@@ -1,8 +1,8 @@
 /**
  * Conversation manager — handles conversation lifecycle and message persistence.
  *
- * Uses one active conversation per user per org. Conversations are archived
- * after 24 hours of inactivity and a new one is created.
+ * Uses one active conversation per user per org per location. Conversations
+ * are archived after 24 hours of inactivity and a new one is created.
  */
 
 import { createServiceClient } from '@levelset/supabase-client';
@@ -18,23 +18,31 @@ const CONVERSATION_TTL_HOURS = 24;
  */
 export async function getOrCreateConversation(
   userId: string,
-  orgId: string
+  orgId: string,
+  locationId?: string,
 ): Promise<string> {
   const supabase = createServiceClient();
   const cutoff = new Date(
     Date.now() - CONVERSATION_TTL_HOURS * 60 * 60 * 1000
   ).toISOString();
 
-  // Find active conversation for this user+org
-  const { data: existing } = await supabase
+  // Find active conversation for this user+org+location
+  let findQuery = supabase
     .from('ai_conversations')
     .select('id, created_at')
     .eq('user_id', userId)
     .eq('org_id', orgId)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+
+  if (locationId) {
+    findQuery = findQuery.eq('location_id', locationId);
+  } else {
+    findQuery = findQuery.is('location_id', null);
+  }
+
+  const { data: existing } = await findQuery.maybeSingle();
 
   if (existing && existing.created_at > cutoff) {
     return existing.id as string;
@@ -51,7 +59,12 @@ export async function getOrCreateConversation(
   // Create new conversation
   const { data: newConv, error } = await supabase
     .from('ai_conversations')
-    .insert({ user_id: userId, org_id: orgId, status: 'active' })
+    .insert({
+      user_id: userId,
+      org_id: orgId,
+      location_id: locationId ?? null,
+      status: 'active',
+    })
     .select('id')
     .single();
 
@@ -147,22 +160,30 @@ export async function loadHistoryPage(
  */
 export async function findActiveConversation(
   userId: string,
-  orgId: string
+  orgId: string,
+  locationId?: string,
 ): Promise<string | null> {
   const supabase = createServiceClient();
   const cutoff = new Date(
     Date.now() - CONVERSATION_TTL_HOURS * 60 * 60 * 1000
   ).toISOString();
 
-  const { data: existing } = await supabase
+  let findQuery = supabase
     .from('ai_conversations')
     .select('id, created_at')
     .eq('user_id', userId)
     .eq('org_id', orgId)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+
+  if (locationId) {
+    findQuery = findQuery.eq('location_id', locationId);
+  } else {
+    findQuery = findQuery.is('location_id', null);
+  }
+
+  const { data: existing } = await findQuery.maybeSingle();
 
   if (existing && existing.created_at > cutoff) {
     return existing.id as string;

@@ -87,7 +87,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
   const { session } = useAuth();
   const { selectedLocation } = useLocation();
   const streamingIdRef = useRef<string | null>(null);
-  const lastLoadedOrgRef = useRef<string | null>(null);
+  const lastLoadedLocationRef = useRef<string | null>(null);
 
   // Combined messages: history first, then current session
   const messages = useMemo(
@@ -97,16 +97,17 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
 
   const hasNewMessages = sessionMessages.length > 0;
 
-  // Load initial page of history when location becomes available
+  // Load initial page of history when location changes
   useEffect(() => {
     const orgId = selectedLocation?.org_id;
-    if (!orgId || !session?.access_token) return;
-    if (lastLoadedOrgRef.current === orgId) return;
+    const locationId = selectedLocation?.id;
+    if (!orgId || !locationId || !session?.access_token) return;
+    if (lastLoadedLocationRef.current === locationId) return;
 
     const loadInitialHistory = async () => {
       try {
         const res = await fetch(
-          `${getAgentUrl()}/api/ai/chat/history?org_id=${orgId}&limit=${HISTORY_PAGE_SIZE}`,
+          `${getAgentUrl()}/api/ai/chat/history?org_id=${orgId}&location_id=${locationId}&limit=${HISTORY_PAGE_SIZE}`,
           {
             headers: { Authorization: `Bearer ${session.access_token}` },
           }
@@ -119,7 +120,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
       } catch (err) {
         console.warn("[LeviChat] Failed to load history:", err);
       } finally {
-        lastLoadedOrgRef.current = orgId;
+        lastLoadedLocationRef.current = locationId;
         setHistoryLoaded(true);
       }
     };
@@ -129,13 +130,14 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
     setHistoryLoaded(false);
     setHasMoreHistory(false);
     loadInitialHistory();
-  }, [selectedLocation?.org_id, session?.access_token]);
+  }, [selectedLocation?.id, session?.access_token]);
 
   // Load older messages (triggered by scrolling to top)
   const loadMoreHistory = useCallback(async () => {
     if (isLoadingMore || !hasMoreHistory) return;
     const orgId = selectedLocation?.org_id;
-    if (!orgId || !session?.access_token) return;
+    const locationId = selectedLocation?.id;
+    if (!orgId || !locationId || !session?.access_token) return;
 
     // Use the oldest history message's created_at as cursor
     const oldest = historyMessages[0];
@@ -144,7 +146,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
     setIsLoadingMore(true);
     try {
       const res = await fetch(
-        `${getAgentUrl()}/api/ai/chat/history?org_id=${orgId}&limit=${HISTORY_PAGE_SIZE}&before=${encodeURIComponent(oldest.created_at)}`,
+        `${getAgentUrl()}/api/ai/chat/history?org_id=${orgId}&location_id=${locationId}&limit=${HISTORY_PAGE_SIZE}&before=${encodeURIComponent(oldest.created_at)}`,
         {
           headers: { Authorization: `Bearer ${session.access_token}` },
         }
@@ -163,7 +165,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [isLoadingMore, hasMoreHistory, historyMessages, selectedLocation?.org_id, session?.access_token]);
+  }, [isLoadingMore, hasMoreHistory, historyMessages, selectedLocation?.id, session?.access_token]);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -192,6 +194,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
           body: JSON.stringify({
             message: trimmed,
             org_id: selectedLocation?.org_id,
+            location_id: selectedLocation?.id,
             stream: true,
           }),
         });
@@ -355,7 +358,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
         streamingIdRef.current = null;
       }
     },
-    [selectedLocation?.org_id, session?.access_token]
+    [selectedLocation?.id, session?.access_token]
   );
 
   const clearHistory = useCallback(() => {

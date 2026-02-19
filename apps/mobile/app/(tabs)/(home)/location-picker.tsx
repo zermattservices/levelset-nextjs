@@ -14,6 +14,7 @@ import {
   FlatList,
   StyleSheet,
   TextInput,
+  Keyboard,
   useWindowDimensions,
 } from "react-native";
 import { Image } from "expo-image";
@@ -147,7 +148,7 @@ export default function LocationPickerModal() {
             height: cardHeight,
           },
         ]}
-        onPress={() => {}}
+        onPress={() => Keyboard.dismiss()}
       >
         {/* Header */}
         <View style={styles.header}>
