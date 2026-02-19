@@ -214,125 +214,74 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
           return;
         }
 
+        // React Native's fetch doesn't support ReadableStream, so we
+        // read the full response as text and parse SSE lines from it.
+        const rawText = await response.text();
         const contentType = response.headers.get("content-type") || "";
 
-        if (contentType.includes("text/event-stream") && response.body) {
+        if (contentType.includes("text/event-stream")) {
           const assistantId = generateId();
           streamingIdRef.current = assistantId;
 
-          const streamingMessage: ChatMessage = {
-            id: assistantId,
-            role: "assistant",
-            content: "",
-            created_at: new Date().toISOString(),
-            toolCalls: [],
-            isStreaming: true,
-          };
-          setSessionMessages((prev) => [...prev, streamingMessage]);
-          // Tool cards take over visual feedback — hide the typing indicator
-          setIsSending(false);
+          // Parse all SSE events from the response body
+          let finalContent = "";
+          const toolCalls: ToolCallEvent[] = [];
 
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          let accumulated = "";
-          let lineBuffer = ""; // buffer for partial SSE lines across chunks
+          const lines = rawText.split("\n");
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const data = line.slice(6).trim();
+            if (!data) continue;
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+            try {
+              const parsed = JSON.parse(data);
 
-            const chunk = decoder.decode(value, { stream: true });
-            lineBuffer += chunk;
-            const lines = lineBuffer.split("\n");
-            // Keep the last (potentially incomplete) line in the buffer
-            lineBuffer = lines.pop() || "";
-
-            for (const line of lines) {
-              if (!line.startsWith("data: ")) continue;
-              const data = line.slice(6).trim();
-              if (!data) continue;
-
-              try {
-                const parsed = JSON.parse(data);
-
-                if (parsed.event === "tool_call") {
-                  // Add a new tool call with "calling" status
-                  const tc: ToolCallEvent = {
-                    id: parsed.id,
-                    name: parsed.name,
-                    label: parsed.label,
-                    status: "calling",
-                  };
-                  setSessionMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId
-                        ? { ...m, toolCalls: [...(m.toolCalls || []), tc] }
-                        : m
-                    )
-                  );
-                } else if (parsed.event === "tool_result") {
-                  // Update the matching tool call to "done"
-                  setSessionMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId
-                        ? {
-                            ...m,
-                            toolCalls: (m.toolCalls || []).map((tc) =>
-                              tc.id === parsed.id
-                                ? { ...tc, status: "done" as const, label: parsed.label }
-                                : tc
-                            ),
-                          }
-                        : m
-                    )
-                  );
-                } else if (parsed.event === "delta") {
-                  accumulated += parsed.text;
-                  const currentContent = accumulated;
-                  setSessionMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId
-                        ? { ...m, content: currentContent }
-                        : m
-                    )
-                  );
-                } else if (parsed.event === "done") {
-                  // Mark streaming as finished
-                  setSessionMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId
-                        ? { ...m, isStreaming: false }
-                        : m
-                    )
-                  );
-                } else if (parsed.event === "error") {
-                  setSessionMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId
-                        ? {
-                            ...m,
-                            content: parsed.message || "Something went wrong.",
-                            isStreaming: false,
-                          }
-                        : m
-                    )
-                  );
+              if (parsed.event === "tool_call") {
+                toolCalls.push({
+                  id: parsed.id,
+                  name: parsed.name,
+                  label: parsed.label,
+                  status: "calling",
+                });
+              } else if (parsed.event === "tool_result") {
+                const tc = toolCalls.find((t) => t.id === parsed.id);
+                if (tc) {
+                  tc.status = "done";
+                  tc.label = parsed.label;
                 }
-              } catch {
-                // Skip malformed SSE data
+              } else if (parsed.event === "delta") {
+                finalContent += parsed.text;
+              } else if (parsed.event === "error") {
+                finalContent = parsed.message || "Something went wrong.";
               }
+            } catch {
+              // Skip malformed SSE data
             }
           }
 
-          // Ensure streaming flag is cleared even if "done" event was missed
-          setSessionMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId ? { ...m, isStreaming: false } : m
-            )
-          );
+          // Mark all tool calls as done (response is complete)
+          for (const tc of toolCalls) {
+            tc.status = "done";
+          }
+
+          const assistantMessage: ChatMessage = {
+            id: assistantId,
+            role: "assistant",
+            content: finalContent || "...",
+            created_at: new Date().toISOString(),
+            toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+            isStreaming: false,
+          };
+          setSessionMessages((prev) => [...prev, assistantMessage]);
           streamingIdRef.current = null;
         } else {
-          const data = await response.json();
+          // Non-SSE JSON response
+          let data;
+          try {
+            data = JSON.parse(rawText);
+          } catch {
+            data = { message: rawText || "..." };
+          }
           const assistantMessage: ChatMessage = {
             id: generateId(),
             role: "assistant",

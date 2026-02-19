@@ -52,6 +52,7 @@ export function ChatScreen() {
   const {
     messages,
     hasNewMessages,
+    historyLoaded,
     isLoadingMore,
     hasMoreHistory,
     isSending,
@@ -159,8 +160,8 @@ export function ChatScreen() {
             onPress={() => Keyboard.dismiss()}
           >
             <EmptyState />
-            {/* Show history link if there are old messages */}
-            {messages.length > 0 && (
+            {/* Show history link once we know there are old messages */}
+            {historyLoaded && messages.length > 0 && (
               <Pressable
                 onPress={() => setShowingHistory(true)}
                 style={styles.historyLink}
