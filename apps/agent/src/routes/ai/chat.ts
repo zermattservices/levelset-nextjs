@@ -48,6 +48,8 @@ import { getEmployeeInfractions } from '../../tools/data/infractions.js';
 import { getEmployeeProfile } from '../../tools/data/profile.js';
 import { getTeamOverview } from '../../tools/data/team.js';
 import { getDisciplineSummary } from '../../tools/data/discipline.js';
+import { getPositionRankings } from '../../tools/data/rankings.js';
+import { toolResultToUIBlocks } from '../../lib/ui-blocks.js';
 
 const MAX_TOOL_STEPS = 3;
 
@@ -137,6 +139,10 @@ function getToolCallLabel(name: string, input: Record<string, unknown>): string 
       return 'Loading team overview';
     case 'get_discipline_summary':
       return input.employee_id ? 'Loading discipline details' : 'Loading discipline overview';
+    case 'get_position_rankings': {
+      const pos = input.position || '';
+      return pos ? `Ranking employees for ${pos}` : 'Ranking employees by position';
+    }
     default:
       return `Running ${name.replace(/_/g, ' ')}`;
   }
@@ -229,6 +235,26 @@ function buildTools(orgId: string, locationId?: string) {
       }),
       execute: async (input: Record<string, unknown>) => {
         return await getDisciplineSummary(input, orgId, locationId);
+      },
+    }),
+    get_position_rankings: tool({
+      description:
+        'Get employees ranked by their average rating for a specific position. Use this for questions like "who is the best bagger?", "top rated hosts", "ranking for iPOS", or any "best/worst at X" question. Returns a ranked list in one call — do NOT use multiple get_employee_ratings calls instead.',
+      inputSchema: z.object({
+        position: z
+          .string()
+          .describe('Position name to rank by (e.g., "Bagging", "iPOS", "Host", "Breader")'),
+        limit: z
+          .number()
+          .optional()
+          .describe('Maximum number of ranked employees to return (default: 10)'),
+        sort: z
+          .enum(['best', 'worst'])
+          .optional()
+          .describe('Sort order: "best" (highest first) or "worst" (lowest first). Default: "best"'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getPositionRankings(input, orgId, locationId);
       },
     }),
   };
@@ -402,13 +428,33 @@ chatRoute.post('/', async (c) => {
 
                   if (step.toolResults) {
                     for (const tr of step.toolResults as Array<{ toolCallId: string; output: unknown }>) {
+                      const outputStr = typeof tr.output === 'string'
+                        ? tr.output
+                        : JSON.stringify(tr.output);
+
                       await persistMessage(conversationId, {
                         role: 'tool',
-                        content: typeof tr.output === 'string'
-                          ? tr.output
-                          : JSON.stringify(tr.output),
+                        content: outputStr,
                         toolCallId: tr.toolCallId,
                       });
+
+                      // Emit UI blocks for this tool result
+                      const matchingCall = step.toolCalls.find(
+                        (tc: any) => tc.toolCallId === tr.toolCallId
+                      ) as { toolCallId: string; toolName: string; input: Record<string, unknown> } | undefined;
+                      if (matchingCall) {
+                        const uiBlocks = toolResultToUIBlocks(
+                          matchingCall.toolName,
+                          matchingCall.input,
+                          outputStr
+                        );
+                        for (const block of uiBlocks) {
+                          writer.write({
+                            type: 'data-ui-block' as any,
+                            data: block,
+                          });
+                        }
+                      }
                     }
                   }
                 }

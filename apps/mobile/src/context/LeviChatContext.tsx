@@ -35,12 +35,19 @@ export interface ToolCallEvent {
   status: "calling" | "done";
 }
 
+export interface UIBlock {
+  blockType: "employee-card" | "employee-list" | "rating-summary" | "infraction-card";
+  blockId: string;
+  payload: Record<string, any>;
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   created_at: string;
   toolCalls?: ToolCallEvent[];
+  uiBlocks?: UIBlock[];
   isStreaming?: boolean;
 }
 
@@ -157,6 +164,7 @@ function parseSSELine(
     onDelta: (text: string) => void;
     onToolCall: (event: ToolCallEvent) => void;
     onToolResult: (event: { id: string; label: string }) => void;
+    onUIBlock: (block: UIBlock) => void;
     onDone: () => void;
     onError: (message: string) => void;
   }
@@ -210,6 +218,19 @@ function parseSSELine(
           handlers.onToolResult({
             id: data.toolCallId,
             label: data.label,
+          });
+        }
+        break;
+      }
+
+      // ── Custom data: structured UI blocks for rich cards ──
+      case "data-ui-block": {
+        const blockData = event.data;
+        if (blockData?.blockType && blockData?.blockId) {
+          handlers.onUIBlock({
+            blockType: blockData.blockType,
+            blockId: blockData.blockId,
+            payload: blockData.payload || {},
           });
         }
         break;
@@ -395,6 +416,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
             content: "",
             created_at: new Date().toISOString(),
             toolCalls: [],
+            uiBlocks: [],
             isStreaming: true,
           };
           setSessionMessages((prev) => [...prev, initialMessage]);
@@ -402,12 +424,14 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
           // Mutable accumulators — we update the message in-place via setState
           let streamedContent = "";
           const toolCalls: ToolCallEvent[] = [];
+          const uiBlocks: UIBlock[] = [];
           let streamDone = false;
 
           // Helper to update the assistant message in the session
           const updateAssistantMessage = (
             contentUpdate: string,
             toolCallsUpdate: ToolCallEvent[],
+            uiBlocksUpdate: UIBlock[],
             isDone: boolean
           ) => {
             setSessionMessages((prev) =>
@@ -419,6 +443,10 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
                       toolCalls:
                         toolCallsUpdate.length > 0
                           ? [...toolCallsUpdate]
+                          : undefined,
+                      uiBlocks:
+                        uiBlocksUpdate.length > 0
+                          ? [...uiBlocksUpdate]
                           : undefined,
                       isStreaming: !isDone,
                     }
@@ -450,6 +478,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
                     updateAssistantMessage(
                       streamedContent,
                       toolCalls,
+                      uiBlocks,
                       false
                     );
                   },
@@ -460,6 +489,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
                       updateAssistantMessage(
                         streamedContent,
                         toolCalls,
+                        uiBlocks,
                         false
                       );
                     }
@@ -476,6 +506,19 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
                       updateAssistantMessage(
                         streamedContent,
                         toolCalls,
+                        uiBlocks,
+                        false
+                      );
+                    }
+                  },
+                  onUIBlock: (block) => {
+                    // Deduplicate by blockId
+                    if (!uiBlocks.some((b) => b.blockId === block.blockId)) {
+                      uiBlocks.push(block);
+                      updateAssistantMessage(
+                        streamedContent,
+                        toolCalls,
+                        uiBlocks,
                         false
                       );
                     }
@@ -516,6 +559,11 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
                   }
                 }
               },
+              onUIBlock: (block) => {
+                if (!uiBlocks.some((b) => b.blockId === block.blockId)) {
+                  uiBlocks.push(block);
+                }
+              },
               onDone: () => {
                 streamDone = true;
               },
@@ -535,6 +583,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
           updateAssistantMessage(
             streamedContent || "...",
             toolCalls,
+            uiBlocks,
             true
           );
         } else {

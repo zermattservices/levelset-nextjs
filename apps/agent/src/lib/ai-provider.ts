@@ -41,10 +41,10 @@ export const models = customProvider({
 /** Style instructions for the system prompt */
 export const STYLE_INSTRUCTIONS: Record<string, string> = {
   concise:
-    'Be concise. Prefer 1-3 sentence responses. Use bullet points for lists. Never repeat the question back.',
-  brief: 'Be extremely brief. One sentence max. No preamble.',
+    'Be concise. Prefer 1-3 sentence responses. Use bullet points for lists. Never repeat the question back. Only output the final answer — no preamble or thinking aloud.',
+  brief: 'Be extremely brief. One sentence max. No preamble. Only the final answer.',
   structured:
-    'Use structured output. Bullet points, headers where appropriate. No filler text.',
+    'Use structured output. Bullet points, headers where appropriate. No filler text. Only output the final answer.',
 };
 
 /** Get style instruction string to inject into system prompt */

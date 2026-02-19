@@ -17,6 +17,7 @@ import { spacing, borderRadius, haptics } from "../../lib/theme";
 import type { ChatMessage } from "../../context/LeviChatContext";
 import type { ColorPalette } from "../../lib/colors";
 import { ToolCallSummary } from "./ToolCallSummary";
+import { UIBlockRenderer } from "./cards";
 
 interface ChatBubbleProps {
   message: ChatMessage;
@@ -227,6 +228,7 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
 
   const mdStyles = buildMarkdownStyles(colors);
   const hasToolCalls = message.toolCalls && message.toolCalls.length > 0;
+  const hasUIBlocks = message.uiBlocks && message.uiBlocks.length > 0;
   const hasContent = message.content.length > 0;
   const showCopy = hasContent && !message.isStreaming;
 
@@ -256,6 +258,15 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
       {hasToolCalls && (
         <View style={styles.toolCallList}>
           <ToolCallSummary toolCalls={message.toolCalls!} />
+        </View>
+      )}
+
+      {/* Rich UI blocks — rendered inline between tools and text */}
+      {hasUIBlocks && (
+        <View style={styles.uiBlockList}>
+          {message.uiBlocks!.map((block) => (
+            <UIBlockRenderer key={block.blockId} block={block} />
+          ))}
         </View>
       )}
 
@@ -330,6 +341,10 @@ const styles = StyleSheet.create({
   },
   toolCallList: {
     gap: spacing[1],
+    paddingLeft: spacing[1],
+  },
+  uiBlockList: {
+    gap: spacing[2],
     paddingLeft: spacing[1],
   },
   markdownWrap: {
