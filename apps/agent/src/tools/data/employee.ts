@@ -35,7 +35,7 @@ export async function lookupEmployee(
   const { data, error } = await supabase
     .from('employees')
     .select(
-      'id, full_name, first_name, last_name, role, hire_date, certified_status, last_points_total, active, is_leader, is_trainer, is_boh, is_foh, position, location_id'
+      'id, full_name, first_name, last_name, role, hire_date, certified_status, last_points_total, active, is_leader, is_trainer, is_boh, is_foh, location_id'
     )
     .eq('org_id', orgId)
     .ilike('full_name', `%${name}%`)
@@ -104,7 +104,7 @@ export async function listEmployees(
   let query = supabase
     .from('employees')
     .select(
-      'id, full_name, role, position, hire_date, certified_status, last_points_total, active, is_leader, is_trainer, is_boh, is_foh'
+      'id, full_name, role, hire_date, certified_status, last_points_total, active, is_leader, is_trainer, is_boh, is_foh'
     )
     .eq('org_id', orgId)
     .order('full_name', { ascending: true })
