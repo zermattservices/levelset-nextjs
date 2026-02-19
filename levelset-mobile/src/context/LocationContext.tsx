@@ -110,17 +110,25 @@ export function LocationProvider({ children }: LocationProviderProps) {
 
           if (locError) throw locError;
           fetchedLocations = data ?? [];
-        } else if (appUser.org_id) {
-          // Fallback: all locations for the org
-          const { data, error: locError } = await supabase
-            .from("locations")
-            .select("id, name, location_number, org_id, location_mobile_token, image_url")
-            .eq("org_id", appUser.org_id)
-            .order("location_number", { ascending: true });
-
-          if (locError) throw locError;
-          fetchedLocations = data ?? [];
         }
+      }
+
+      // Fallback: if no locations found yet, fetch all accessible locations.
+      // For users with org_id, scoped to their org. For admins (no org_id), all locations.
+      // Mirrors dashboard LocationContext behavior.
+      if (fetchedLocations.length === 0) {
+        const fallbackQuery = supabase
+          .from("locations")
+          .select("id, name, location_number, org_id, location_mobile_token, image_url")
+          .order("location_number", { ascending: true });
+
+        if (appUser.org_id) {
+          fallbackQuery.eq("org_id", appUser.org_id);
+        }
+
+        const { data, error: locError } = await fallbackQuery;
+        if (locError) throw locError;
+        fetchedLocations = data ?? [];
       }
 
       setLocations(fetchedLocations);

@@ -5,6 +5,14 @@ import { cors } from 'hono/cors';
 import { healthRoute } from './routes/health.js';
 import { chatRoute } from './routes/ai/chat.js';
 import { authMiddleware } from './middleware/auth.js';
+import type { UserContext } from './lib/types.js';
+
+// Augment Hono's context so c.get('user') is typed correctly
+declare module 'hono' {
+  interface ContextVariableMap {
+    user: UserContext;
+  }
+}
 
 const app = new Hono();
 
@@ -24,6 +32,7 @@ const port = parseInt(process.env.PORT || '3000', 10);
 serve({
   fetch: app.fetch,
   port,
+  hostname: '0.0.0.0',
 }, (info) => {
-  console.log(`Levelset Agent listening on http://localhost:${info.port}`);
+  console.log(`Levelset Agent listening on http://0.0.0.0:${info.port}`);
 });

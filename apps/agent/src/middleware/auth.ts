@@ -23,7 +23,10 @@ export async function authMiddleware(c: Context, next: Next) {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseServiceKey,
+    });
     return c.json({ error: 'Server configuration error' }, 500);
   }
 
@@ -39,6 +42,7 @@ export async function authMiddleware(c: Context, next: Next) {
   const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
   if (authError || !user) {
+    console.error('[Auth] Token verification failed:', authError?.message);
     return c.json({ error: 'Invalid or expired token' }, 401);
   }
 

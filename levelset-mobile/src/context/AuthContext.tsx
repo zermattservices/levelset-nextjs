@@ -176,6 +176,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Initialize auth and listen for changes
   useEffect(() => {
+    let initialized = false;
+
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
@@ -186,34 +188,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setAppUser(null);
           setSession(null);
           setIsLoading(false);
+          initialized = true;
+        } else if (event === "TOKEN_REFRESHED" && !initialized) {
+          // Skip TOKEN_REFRESHED during initial load — INITIAL_SESSION will handle it.
+          // This prevents double-fetching app user data on startup.
+          setUser(currentSession!.user);
+          setSession(currentSession);
         } else if (["SIGNED_IN", "INITIAL_SESSION", "TOKEN_REFRESHED"].includes(event) && currentSession) {
           setUser(currentSession.user);
           setSession(currentSession);
           await fetchAppUserData(currentSession.user);
           setIsLoading(false);
+          initialized = true;
         }
       }
     );
-
-    // Check for existing session
-    const initializeAuth = async () => {
-      try {
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
-
-        if (existingSession) {
-          console.log("[Auth] Found existing session");
-          setUser(existingSession.user);
-          setSession(existingSession);
-          await fetchAppUserData(existingSession.user);
-        }
-      } catch (err) {
-        console.error("[Auth] Error initializing auth:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeAuth();
 
     return () => {
       subscription.unsubscribe();
