@@ -16,7 +16,7 @@ import { typography, fontWeights, fontFamilies, fontSizes } from "../../lib/font
 import { spacing, borderRadius, haptics } from "../../lib/theme";
 import type { ChatMessage } from "../../context/LeviChatContext";
 import type { ColorPalette } from "../../lib/colors";
-import { ToolCallCard } from "./ToolCallCard";
+import { ToolCallSummary } from "./ToolCallSummary";
 
 interface ChatBubbleProps {
   message: ChatMessage;
@@ -252,12 +252,10 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
         </Text>
       </View>
 
-      {/* Tool call cards */}
+      {/* Tool call summary — collapsible row */}
       {hasToolCalls && (
         <View style={styles.toolCallList}>
-          {message.toolCalls!.map((tc) => (
-            <ToolCallCard key={tc.id} toolCall={tc} />
-          ))}
+          <ToolCallSummary toolCalls={message.toolCalls!} />
         </View>
       )}
 

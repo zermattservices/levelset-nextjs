@@ -454,12 +454,15 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
                     );
                   },
                   onToolCall: (tc) => {
-                    toolCalls.push(tc);
-                    updateAssistantMessage(
-                      streamedContent,
-                      toolCalls,
-                      false
-                    );
+                    // Deduplicate: tool-input-start and tool-input-available both fire
+                    if (!toolCalls.some((t) => t.id === tc.id)) {
+                      toolCalls.push(tc);
+                      updateAssistantMessage(
+                        streamedContent,
+                        toolCalls,
+                        false
+                      );
+                    }
                   },
                   onToolResult: ({ id, label }) => {
                     const tc = toolCalls.find((t) => t.id === id);
@@ -500,7 +503,9 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
                 streamedContent += text;
               },
               onToolCall: (tc) => {
-                toolCalls.push(tc);
+                if (!toolCalls.some((t) => t.id === tc.id)) {
+                  toolCalls.push(tc);
+                }
               },
               onToolResult: ({ id, label }) => {
                 const tc = toolCalls.find((t) => t.id === id);

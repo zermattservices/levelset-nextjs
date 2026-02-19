@@ -1,6 +1,7 @@
 /**
  * TypingIndicator Component
- * Claude-style — avatar row + animated dots, no card wrapper
+ * Shows a "thinking" text with a pulsing skeleton animation
+ * while waiting for the assistant's first response.
  */
 
 import React, { useEffect } from "react";
@@ -11,7 +12,6 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
-  withDelay,
   FadeIn,
 } from "react-native-reanimated";
 import { useColors } from "../../context/ThemeContext";
@@ -19,41 +19,24 @@ import { spacing } from "../../lib/theme";
 import { AppIcon } from "../../components/ui";
 import { typography, fontWeights } from "../../lib/fonts";
 
-function Dot({ delay }: { delay: number }) {
+export function TypingIndicator() {
   const colors = useColors();
-  const opacity = useSharedValue(0.3);
+  const opacity = useSharedValue(0.4);
 
   useEffect(() => {
-    opacity.value = withDelay(
-      delay,
-      withRepeat(
-        withSequence(
-          withTiming(1, { duration: 400 }),
-          withTiming(0.3, { duration: 400 })
-        ),
-        -1,
-        false
-      )
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 800 }),
+        withTiming(0.4, { duration: 800 })
+      ),
+      -1,
+      false
     );
   }, []);
 
-  const animStyle = useAnimatedStyle(() => ({
+  const pulseStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
   }));
-
-  return (
-    <Animated.View
-      style={[
-        styles.dot,
-        { backgroundColor: colors.onSurfaceVariant },
-        animStyle,
-      ]}
-    />
-  );
-}
-
-export function TypingIndicator() {
-  const colors = useColors();
 
   return (
     <Animated.View entering={FadeIn.duration(200)} style={styles.container}>
@@ -66,17 +49,15 @@ export function TypingIndicator() {
         >
           <AppIcon name="cpu" size={14} tintColor={colors.primary} />
         </View>
-        <Text
-          style={[styles.name, { color: colors.onSurfaceVariant }]}
-        >
+        <Text style={[styles.name, { color: colors.onSurfaceVariant }]}>
           Levi
         </Text>
       </View>
-      <View style={styles.dotsRow}>
-        <Dot delay={0} />
-        <Dot delay={200} />
-        <Dot delay={400} />
-      </View>
+      <Animated.Text
+        style={[styles.thinkingText, { color: colors.onSurfaceVariant }, pulseStyle]}
+      >
+        Thinking...
+      </Animated.Text>
     </Animated.View>
   );
 }
@@ -84,7 +65,7 @@ export function TypingIndicator() {
 const styles = StyleSheet.create({
   container: {
     alignSelf: "flex-start",
-    gap: spacing[2],
+    gap: spacing[1],
   },
   avatarLine: {
     flexDirection: "row",
@@ -102,17 +83,10 @@ const styles = StyleSheet.create({
     ...typography.labelSmall,
     fontWeight: fontWeights.medium,
   },
-  dotsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing[2],
+  thinkingText: {
+    ...typography.bodySmall,
+    fontStyle: "italic",
     paddingLeft: spacing[1],
-    paddingVertical: spacing[2],
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
   },
 });
 

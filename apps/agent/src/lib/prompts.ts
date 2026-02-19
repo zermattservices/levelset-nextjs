@@ -27,9 +27,16 @@ function formatOrgContext(ctx: OrgContext): string {
 
   // Roles (high → low)
   if (ctx.roles.length > 0) {
-    const roleNames = ctx.roles.map((r) => r.role_name).join(' → ');
+    const roleNames = ctx.roles.map((r) => {
+      if (r.hierarchy_level === 0) return `${r.role_name} (Operator, level 0)`;
+      return r.role_name;
+    }).join(' → ');
     const leaderNames = ctx.roles.filter((r) => r.is_leader).map((r) => r.role_name).join(', ');
+    const operatorRole = ctx.roles.find((r) => r.hierarchy_level === 0);
     parts.push(`Roles (high→low): ${roleNames}`);
+    if (operatorRole) {
+      parts.push(`Operator role: "${operatorRole.role_name}" — use this to filter when asked "who is the operator"`);
+    }
     if (leaderNames) {
       parts.push(`Leaders: ${leaderNames}`);
     }
@@ -94,13 +101,27 @@ export function buildSystemPrompt(params: {
 ${styleInstruction}
 
 Guidelines:
-- When asked about a specific employee, use the lookup tools first before answering.
+- Be concise. Only include data directly relevant to the user's question.
 - All data is scoped to the current organization. Never fabricate data.
 - If you cannot find information, say so directly.
 - Respond in the same language the user writes in (English or Spanish).
-- For ratings, show the average and note any trends if multiple ratings exist.
-- For infractions, show total points and recent incidents.
-- When multiple tools are needed, call them in sequence — e.g. lookup_employee first, then get_employee_ratings.`;
+
+Tool usage — be efficient:
+- NEVER call the same tool multiple times with the same or similar parameters.
+- Use list_employees with filters (role, is_leader, is_foh, is_boh) instead of multiple lookup calls.
+- For questions about a specific employee, use lookup_employee first, then get_employee_profile (which includes ratings + discipline in one call). Do NOT also call get_employee_ratings or get_employee_infractions separately.
+- For team-wide questions ("who is the best at X", "team overview"), prefer get_team_overview or list_employees over multiple individual tool calls.
+- Aim for 1-2 tool calls for simple questions, 3 max for complex queries.
+
+Role hierarchy:
+- The Owner/Operator (hierarchy_level 0) is the highest rank — there is exactly one per organization. When asked "who is the operator", filter employees by the level 0 role name.
+- Roles are ranked by hierarchy_level (0 = highest). Leaders have is_leader = true.
+
+Response style:
+- Only include hire dates, contact info, or other metadata when explicitly requested.
+- For ratings, show the average and note trends if relevant.
+- For infractions, show active points (last 90 days) and recent incidents.
+- Format employee names in bold.`;
 
   // Section 2: Org Context (optional — included when loaded)
   let orgSection = '';

@@ -34,7 +34,7 @@ export async function getEmployeeProfile(
       supabase
         .from('ratings')
         .select(
-          'id, position, rating_1, rating_2, rating_3, rating_4, rating_5, rating_avg, notes, created_at, rater_name'
+          'id, position, rating_1, rating_2, rating_3, rating_4, rating_5, rating_avg, notes, created_at, rater_user_id'
         )
         .eq('employee_id', employeeId)
         .eq('org_id', orgId)

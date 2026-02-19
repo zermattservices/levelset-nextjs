@@ -49,7 +49,7 @@ import { getEmployeeProfile } from '../../tools/data/profile.js';
 import { getTeamOverview } from '../../tools/data/team.js';
 import { getDisciplineSummary } from '../../tools/data/discipline.js';
 
-const MAX_TOOL_STEPS = 5;
+const MAX_TOOL_STEPS = 3;
 
 /* ── Convert DB ChatMessages to AI SDK ModelMessages ──────── */
 
@@ -175,7 +175,7 @@ function buildTools(orgId: string, locationId?: string) {
     }),
     get_employee_ratings: tool({
       description:
-        'Get rating history for a specific employee. Returns their ratings (rating_1 through rating_5, rating_avg) with dates, positions rated, and rater name. Use lookup_employee first to get the employee ID.',
+        'Get rating history for a specific employee. Returns their ratings (rating_1 through rating_5, rating_avg) with dates and positions rated. Use lookup_employee first to get the employee ID. Prefer get_employee_profile instead if you also need discipline data.',
       inputSchema: z.object({
         employee_id: z.string().describe('The UUID of the employee'),
         limit: z.number().optional().describe('Maximum number of ratings to return (default: 10)'),
