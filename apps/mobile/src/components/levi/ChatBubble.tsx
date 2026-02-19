@@ -14,7 +14,7 @@ import { useColors } from "../../context/ThemeContext";
 import { AppIcon } from "../../components/ui";
 import { typography, fontWeights, fontFamilies, fontSizes } from "../../lib/fonts";
 import { spacing, borderRadius, haptics } from "../../lib/theme";
-import type { ChatMessage } from "../../context/LeviChatContext";
+import type { ChatMessage, MessagePart } from "../../context/LeviChatContext";
 import type { ColorPalette } from "../../lib/colors";
 import { ToolCallSummary } from "./ToolCallSummary";
 import { UIBlockRenderer } from "./cards";
@@ -228,7 +228,7 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
 
   const mdStyles = buildMarkdownStyles(colors);
   const hasToolCalls = message.toolCalls && message.toolCalls.length > 0;
-  const hasUIBlocks = message.uiBlocks && message.uiBlocks.length > 0;
+  const hasParts = message.parts && message.parts.length > 0;
   const hasContent = message.content.length > 0;
   const showCopy = hasContent && !message.isStreaming;
 
@@ -244,23 +244,26 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
         </View>
       )}
 
-      {/* Markdown content — text analysis comes first */}
-      {hasContent && (
-        <View style={styles.markdownWrap}>
-          <Markdown style={mdStyles}>
-            {message.content}
-          </Markdown>
-        </View>
-      )}
-
-      {/* Rich UI blocks — supporting data cards after analysis */}
-      {hasUIBlocks && (
-        <View style={styles.uiBlockList}>
-          {message.uiBlocks!.map((block) => (
-            <UIBlockRenderer key={block.blockId} block={block} />
-          ))}
-        </View>
-      )}
+      {/* Interleaved parts: text and UI blocks rendered in order */}
+      {hasParts
+        ? message.parts!.map((part, index) =>
+            part.type === "text" ? (
+              part.text.length > 0 ? (
+                <View key={`text-${index}`} style={styles.markdownWrap}>
+                  <Markdown style={mdStyles}>{part.text}</Markdown>
+                </View>
+              ) : null
+            ) : (
+              <View key={part.block.blockId} style={styles.uiBlockInline}>
+                <UIBlockRenderer block={part.block} />
+              </View>
+            )
+          )
+        : hasContent && (
+            <View style={styles.markdownWrap}>
+              <Markdown style={mdStyles}>{message.content}</Markdown>
+            </View>
+          )}
 
       {/* Copy button — hidden while streaming */}
       {showCopy && (
@@ -310,8 +313,7 @@ const styles = StyleSheet.create({
     gap: spacing[1],
     paddingLeft: spacing[1],
   },
-  uiBlockList: {
-    gap: spacing[2],
+  uiBlockInline: {
     paddingLeft: spacing[1],
   },
   markdownWrap: {
