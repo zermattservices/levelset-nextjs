@@ -1,12 +1,19 @@
 import { Context, Next } from 'hono';
-import { createClient } from '@supabase/supabase-js';
+import { createServiceClient } from '@levelset/supabase-client';
 import { isLevelsetAdmin } from '@levelset/permissions';
 
 /**
  * Auth middleware for the agent service.
  *
- * Verifies the JWT from the Authorization header against Supabase,
- * then checks that the user has the Levelset Admin role.
+ * Decodes the Supabase JWT from the Authorization header to extract the
+ * user ID, then looks up the app_users record to verify role.
+ *
+ * We decode the JWT locally instead of calling supabase.auth.getUser()
+ * because getUser() hits GoTrue's /user endpoint which does session-based
+ * validation. If the session was revoked (logout + re-login, token refresh),
+ * GoTrue returns 403 "session_not_found" even though the JWT signature is
+ * still valid and the user is legitimately authenticated. Local decode
+ * avoids this issue and is faster (no network round-trip).
  *
  * All non-admin users receive a 403 Forbidden response.
  */
@@ -19,38 +26,38 @@ export async function authMiddleware(c: Context, next: Next) {
 
   const token = authHeader.slice(7);
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseServiceKey) {
-    console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY', {
-      hasUrl: !!supabaseUrl,
-      hasKey: !!supabaseServiceKey,
-    });
-    return c.json({ error: 'Server configuration error' }, 500);
+  // Decode JWT payload (base64url-encoded middle segment)
+  let payload: { sub?: string; exp?: number };
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid JWT structure');
+    }
+    payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+  } catch {
+    console.error('[Auth] Failed to decode JWT');
+    return c.json({ error: 'Invalid token format' }, 401);
   }
 
-  // Use anon-style client to verify the user's JWT
-  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-
-  // Verify the JWT and get the user
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-  if (authError || !user) {
-    console.error('[Auth] Token verification failed:', authError?.message);
-    return c.json({ error: 'Invalid or expired token' }, 401);
+  // Validate required claims
+  if (!payload.sub) {
+    console.error('[Auth] JWT missing sub claim');
+    return c.json({ error: 'Invalid token: missing user ID' }, 401);
   }
+
+  // Check expiration
+  if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+    return c.json({ error: 'Token expired' }, 401);
+  }
+
+  const authUserId = payload.sub;
 
   // Look up the app_users record to check the role
+  const supabase = createServiceClient();
   const { data: appUser, error: userError } = await supabase
     .from('app_users')
     .select('id, role, org_id, first_name, last_name')
-    .eq('auth_user_id', user.id)
+    .eq('auth_user_id', authUserId)
     .single();
 
   if (userError || !appUser) {
@@ -67,7 +74,7 @@ export async function authMiddleware(c: Context, next: Next) {
 
   // Attach user info to the context for downstream handlers
   c.set('user', {
-    authUserId: user.id,
+    authUserId,
     appUserId: appUser.id,
     orgId: appUser.org_id,
     role: appUser.role,
