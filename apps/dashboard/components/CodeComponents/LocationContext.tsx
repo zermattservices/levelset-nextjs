@@ -122,13 +122,14 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
     }
   }
 
-  // Fallback: fetch all locations for the org (for users without location_access records)
+  // Fallback: fetch locations for the org (or ALL locations for Levelset Admins)
   const query = supabase
     .from('locations')
     .select('id, location_number, name, org_id, location_mobile_token, image_url')
     .order('location_number', { ascending: true });
 
-  if (appUser?.org_id) {
+  // Levelset Admins can access all locations across all orgs
+  if (appUser?.role !== 'Levelset Admin' && appUser?.org_id) {
     query.eq('org_id', appUser.org_id);
   }
 
