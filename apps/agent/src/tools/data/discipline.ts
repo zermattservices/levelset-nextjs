@@ -46,16 +46,16 @@ export async function getDisciplineSummary(
         // Discipline actions taken
         supabase
           .from('disc_actions')
-          .select('id, action, points_at_time, date, leader_name, notes')
+          .select('id, action, action_date, leader_name, employee_name, notes')
           .eq('employee_id', employeeId)
           .eq('org_id', orgId)
-          .order('date', { ascending: false })
+          .order('action_date', { ascending: false })
           .limit(10),
 
         // Recommended (pending) discipline actions
         supabase
           .from('recommended_disc_actions')
-          .select('id, action, points_at_time, created_at, completed')
+          .select('id, recommended_action, points_when_recommended, created_at, action_taken, action_taken_at')
           .eq('employee_id', employeeId)
           .eq('org_id', orgId)
           .order('created_at', { ascending: false })
@@ -82,7 +82,7 @@ export async function getDisciplineSummary(
     );
 
     // Pending discipline actions
-    const pendingActions = recommended.filter((r: any) => !r.completed);
+    const pendingActions = recommended.filter((r: any) => !r.action_taken);
 
     return JSON.stringify({
       employee: {
@@ -137,9 +137,9 @@ export async function getDisciplineSummary(
   // Get recent discipline actions across the location
   let discQuery = supabase
     .from('disc_actions')
-    .select('id, employee_id, action, date, points_at_time')
+    .select('id, employee_id, action, action_date, employee_name')
     .eq('org_id', orgId)
-    .order('date', { ascending: false })
+    .order('action_date', { ascending: false })
     .limit(20);
 
   if (locationId) {
@@ -190,8 +190,8 @@ export async function getDisciplineSummary(
     })),
     recent_discipline_actions: discActions.slice(0, 5).map((d: any) => ({
       action: d.action,
-      date: d.date,
-      points_at_time: d.points_at_time,
+      date: d.action_date,
+      employee_name: d.employee_name,
     })),
   });
 }

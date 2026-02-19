@@ -55,10 +55,10 @@ export async function getEmployeeProfile(
       // 4. Discipline actions
       supabase
         .from('disc_actions')
-        .select('id, action, points_at_time, date, leader_name, notes')
+        .select('id, action, action_date, leader_name, employee_name, notes')
         .eq('employee_id', employeeId)
         .eq('org_id', orgId)
-        .order('date', { ascending: false })
+        .order('action_date', { ascending: false })
         .limit(5),
     ]);
 

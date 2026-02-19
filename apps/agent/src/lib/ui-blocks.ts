@@ -8,7 +8,7 @@
  */
 
 export interface UIBlock {
-  blockType: 'employee-card' | 'employee-list' | 'rating-summary' | 'infraction-card';
+  blockType: 'employee-card' | 'employee-list' | 'rating-summary' | 'infraction-card' | 'disc-action-card';
   blockId: string;
   payload: Record<string, unknown>;
 }
@@ -206,6 +206,23 @@ function employeeProfileBlocks(data: any): UIBlock[] {
     }
   }
 
+  // Discipline action cards
+  if (data.discipline?.disc_actions && Array.isArray(data.discipline.disc_actions)) {
+    for (const da of data.discipline.disc_actions.slice(0, 3)) {
+      blocks.push({
+        blockType: 'disc-action-card',
+        blockId: `da-${da.id}`,
+        payload: {
+          id: da.id,
+          action: da.action,
+          date: da.action_date,
+          employee_name: data.employee?.full_name || '',
+          leader_name: da.leader_name,
+        },
+      });
+    }
+  }
+
   return blocks;
 }
 
@@ -260,7 +277,7 @@ function teamOverviewBlocks(data: any): UIBlock[] {
 function disciplineSummaryBlocks(data: any): UIBlock[] {
   const blocks: UIBlock[] = [];
 
-  // Individual employee discipline
+  // Individual employee infractions
   if (data.infractions?.recent && Array.isArray(data.infractions.recent)) {
     for (const inf of data.infractions.recent.slice(0, 5)) {
       blocks.push({
@@ -273,6 +290,39 @@ function disciplineSummaryBlocks(data: any): UIBlock[] {
           date: inf.infraction_date,
           points: inf.points,
           leader_name: inf.leader_name,
+        },
+      });
+    }
+  }
+
+  // Individual employee discipline actions
+  if (data.discipline_actions?.recent && Array.isArray(data.discipline_actions.recent)) {
+    for (const da of data.discipline_actions.recent.slice(0, 5)) {
+      blocks.push({
+        blockType: 'disc-action-card',
+        blockId: `da-${da.id}`,
+        payload: {
+          id: da.id,
+          action: da.action,
+          date: da.action_date,
+          employee_name: da.employee_name || data.employee?.name || '',
+          leader_name: da.leader_name,
+        },
+      });
+    }
+  }
+
+  // Location-wide recent discipline actions
+  if (data.recent_discipline_actions && Array.isArray(data.recent_discipline_actions)) {
+    for (const da of data.recent_discipline_actions.slice(0, 5)) {
+      blocks.push({
+        blockType: 'disc-action-card',
+        blockId: `da-loc-${Date.now()}-${da.action}`,
+        payload: {
+          id: '',
+          action: da.action,
+          date: da.date,
+          employee_name: da.employee_name || '',
         },
       });
     }

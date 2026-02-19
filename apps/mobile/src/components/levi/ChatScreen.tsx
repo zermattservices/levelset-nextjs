@@ -63,6 +63,7 @@ export function ChatScreen() {
   const { flashLocationWarning } = useLocationWarning();
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
   const [showingHistory, setShowingHistory] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(0);
 
   // Reset to empty state when location changes
   useEffect(() => {
@@ -78,10 +79,14 @@ export function ChatScreen() {
 
   const handleContentSizeChange = useCallback(() => {
     if (!hasNewMessages) return;
+    // During streaming, use non-animated scroll to stay pinned without lag.
+    // For new messages (non-streaming), animate the scroll.
+    const lastMsg = messages[messages.length - 1];
+    const isStreaming = lastMsg?.isStreaming;
     requestAnimationFrame(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
+      flatListRef.current?.scrollToEnd({ animated: !isStreaming });
     });
-  }, [hasNewMessages]);
+  }, [hasNewMessages, messages]);
 
   const renderItem = useCallback(
     ({ item, index }: { item: ChatMessage; index: number }) => (
@@ -137,14 +142,23 @@ export function ChatScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={0}
     >
-      <View style={styles.chatArea}>
+      <View
+        style={styles.chatArea}
+        onLayout={(e) => setViewportHeight(e.nativeEvent.layout.height)}
+      >
         {showList && (
           <FlatList
             ref={flatListRef}
             data={messages}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[
+              styles.listContent,
+              // Dynamic bottom padding: scrollToEnd pushes the last user message
+              // to near the top of the viewport, leaving space below for the
+              // assistant response to fill in.
+              viewportHeight > 0 && { paddingBottom: viewportHeight * 0.7 },
+            ]}
             showsVerticalScrollIndicator={false}
             keyboardDismissMode="interactive"
             keyboardShouldPersistTaps="handled"
@@ -224,7 +238,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing[2],
     paddingBottom: spacing[2],
     gap: spacing[5],
-    flexGrow: 1,
   },
   loadingMore: {
     paddingVertical: spacing[4],

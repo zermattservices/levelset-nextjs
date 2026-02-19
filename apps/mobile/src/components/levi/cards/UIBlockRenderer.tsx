@@ -8,9 +8,10 @@ import { EmployeeCard } from "./EmployeeCard";
 import { EmployeeListCard } from "./EmployeeListCard";
 import { RatingSummaryCard } from "./RatingSummaryCard";
 import { InfractionCard } from "./InfractionCard";
+import { DiscActionCard } from "./DiscActionCard";
 
 export interface UIBlock {
-  blockType: "employee-card" | "employee-list" | "rating-summary" | "infraction-card";
+  blockType: "employee-card" | "employee-list" | "rating-summary" | "infraction-card" | "disc-action-card";
   blockId: string;
   payload: Record<string, any>;
 }
@@ -29,6 +30,8 @@ export function UIBlockRenderer({ block }: UIBlockRendererProps) {
       return <RatingSummaryCard payload={block.payload as any} />;
     case "infraction-card":
       return <InfractionCard payload={block.payload as any} />;
+    case "disc-action-card":
+      return <DiscActionCard payload={block.payload as any} />;
     default:
       return null;
   }
