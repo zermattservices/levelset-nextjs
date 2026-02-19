@@ -21,9 +21,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       let query = supabase
         .from('org_positions')
-        .select('id, org_id, name, zone, description, display_order, is_active')
+        .select('id, org_id, name, zone, description, display_order, is_active, scheduling_enabled')
         .eq('org_id', org_id)
         .eq('is_active', true)
+        .eq('scheduling_enabled', true)
         .order('zone')
         .order('display_order');
 

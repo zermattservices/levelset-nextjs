@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/router';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import type {
@@ -53,16 +54,50 @@ function shiftNetHours(shift: Shift): number {
   return Math.max(0, (end - start) / 60 - (shift.break_minutes || 0) / 60);
 }
 
+const VALID_GRID_MODES: GridViewMode[] = ['employees', 'positions', 'setup'];
+
 export function useScheduleData() {
+  const router = useRouter();
   const { selectedLocationId, selectedLocationOrgId } = useLocationContext();
   const auth = useAuth();
+
+  // Read initial grid view mode from URL query param
+  const urlMode = typeof router.query.mode === 'string' ? router.query.mode : '';
+  const initialMode: GridViewMode = VALID_GRID_MODES.includes(urlMode as GridViewMode)
+    ? (urlMode as GridViewMode) : 'employees';
 
   // Navigation state
   const [weekStart, setWeekStartRaw] = useState<Date>(() => toSunday(new Date()));
   const [selectedDay, setSelectedDay] = useState<string>(() => formatDate(new Date()));
-  const [gridViewMode, setGridViewMode] = useState<GridViewMode>('employees');
-  const [timeViewMode, setTimeViewMode] = useState<TimeViewMode>('week');
+  const [gridViewMode, setGridViewModeRaw] = useState<GridViewMode>(initialMode);
+  const [timeViewMode, setTimeViewMode] = useState<TimeViewMode>(initialMode === 'setup' ? 'day' : 'week');
   const [zoneFilter, setZoneFilter] = useState<ZoneFilter>('all');
+
+  // Sync gridViewMode with URL
+  const setGridViewMode = useCallback((mode: GridViewMode) => {
+    setGridViewModeRaw(mode);
+    // Force day view when entering setup mode
+    if (mode === 'setup') {
+      setTimeViewMode('day');
+    }
+    // Update URL query param (shallow to avoid refetch)
+    const query = { ...router.query };
+    if (mode === 'employees') {
+      delete query.mode;
+    } else {
+      query.mode = mode;
+    }
+    router.replace({ pathname: router.pathname, query }, undefined, { shallow: true });
+  }, [router]);
+
+  // Sync from URL on initial load / back-forward navigation
+  useEffect(() => {
+    const mode = typeof router.query.mode === 'string' ? router.query.mode : 'employees';
+    if (VALID_GRID_MODES.includes(mode as GridViewMode) && mode !== gridViewMode) {
+      setGridViewModeRaw(mode as GridViewMode);
+      if (mode === 'setup') setTimeViewMode('day');
+    }
+  }, [router.query.mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Data state
   const [schedule, setSchedule] = useState<Schedule | null>(null);

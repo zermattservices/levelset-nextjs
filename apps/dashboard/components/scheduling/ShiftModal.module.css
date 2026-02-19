@@ -251,29 +251,58 @@
 }
 
 /* ------------------------------------------------------------------ */
-/*  Checkbox row (house shift)                                         */
+/*  Switch row (house shift)                                           */
 /* ------------------------------------------------------------------ */
 
-.checkboxRow {
+.switchRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   cursor: pointer;
   padding: 4px 0;
 }
 
-.checkboxRow input[type='checkbox'] {
-  accent-color: var(--ls-color-brand);
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-.checkboxLabel {
+.switchLabel {
   font-family: var(--ls-font-body);
   font-size: 13px;
   font-weight: 500;
   color: var(--ls-color-neutral-soft-foreground);
+}
+
+.switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background: var(--ls-color-neutral-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--ls-color-brand);
+  outline-offset: 2px;
+}
+
+.switchOn {
+  background: var(--ls-color-brand);
+}
+
+.switchThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.switchOn .switchThumb {
+  transform: translateX(16px);
 }
 
 /* ------------------------------------------------------------------ */

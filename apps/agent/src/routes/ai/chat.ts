@@ -25,6 +25,8 @@ import {
   getOrCreateConversation,
   loadConversationHistory,
   persistMessage,
+  findActiveConversation,
+  loadHistoryPage,
 } from '../../lib/conversation-manager.js';
 import { logUsage, checkRateLimit } from '../../lib/usage-tracker.js';
 import { TOOL_DEFINITIONS, executeTool } from '../../tools/index.js';
@@ -32,6 +34,40 @@ import { TOOL_DEFINITIONS, executeTool } from '../../tools/index.js';
 const MAX_TOOL_ITERATIONS = 5;
 
 export const chatRoute = new Hono();
+
+/**
+ * GET /history — paginated chat history for the mobile app.
+ *
+ * Query params:
+ *   org_id  — org context (required if user has no org_id)
+ *   before  — ISO timestamp cursor; returns messages before this time
+ *   limit   — page size (default 10, max 50)
+ *
+ * Returns { messages, hasMore }.
+ * Read-only — does NOT create a conversation if none exists.
+ */
+chatRoute.get('/history', async (c) => {
+  try {
+    const user = c.get('user') as UserContext;
+    const orgId = user.orgId || c.req.query('org_id');
+    if (!orgId) return c.json({ messages: [], hasMore: false });
+
+    // Read-only: find existing conversation, don't create one
+    const conversationId = await findActiveConversation(user.appUserId, orgId);
+    if (!conversationId) return c.json({ messages: [], hasMore: false });
+
+    const before = c.req.query('before') ?? undefined;
+    const limitParam = parseInt(c.req.query('limit') ?? '10', 10);
+    const limit = Math.min(Math.max(limitParam, 1), 50);
+
+    const result = await loadHistoryPage(conversationId, { limit, before });
+
+    return c.json(result);
+  } catch (err) {
+    console.error('History endpoint error:', err);
+    return c.json({ messages: [], hasMore: false });
+  }
+});
 
 chatRoute.post('/', async (c) => {
   try {

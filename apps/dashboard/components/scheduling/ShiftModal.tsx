@@ -551,6 +551,34 @@ export function ShiftModal({
             </select>
           </div>
 
+          {/* House Shift toggle */}
+          <label className={sty.switchRow}>
+            <span className={sty.switchLabel}>House shift</span>
+            <div
+              className={`${sty.switch} ${isHouseShift ? sty.switchOn : ''}`}
+              role="switch"
+              aria-checked={isHouseShift}
+              tabIndex={readOnly ? -1 : 0}
+              onClick={() => {
+                if (readOnly) return;
+                const next = !isHouseShift;
+                setIsHouseShift(next);
+                if (next) { setEmployeeId(''); setEmployeeSearch(''); }
+              }}
+              onKeyDown={(e) => {
+                if (readOnly) return;
+                if (e.key === ' ' || e.key === 'Enter') {
+                  e.preventDefault();
+                  const next = !isHouseShift;
+                  setIsHouseShift(next);
+                  if (next) { setEmployeeId(''); setEmployeeSearch(''); }
+                }
+              }}
+            >
+              <div className={sty.switchThumb} />
+            </div>
+          </label>
+
           {/* Employee */}
           <div className={sty.field}>
             <label className={sty.label}>Assigned Employee</label>
@@ -560,13 +588,13 @@ export function ShiftModal({
               placeholder="Search employees..."
               value={employeeSearch}
               onChange={(e) => setEmployeeSearch(e.target.value)}
-              disabled={readOnly}
+              disabled={readOnly || isHouseShift}
             />
             <select
               className={sty.employeeSelect}
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              disabled={readOnly}
+              disabled={readOnly || isHouseShift}
               size={Math.min(5, filteredEmployees.length + 1)}
             >
               <option value="">-- Unassigned --</option>
@@ -605,16 +633,6 @@ export function ShiftModal({
             />
           </div>
 
-          {/* House Shift */}
-          <label className={sty.checkboxRow}>
-            <input
-              type="checkbox"
-              checked={isHouseShift}
-              onChange={(e) => setIsHouseShift(e.target.checked)}
-              disabled={readOnly}
-            />
-            <span className={sty.checkboxLabel}>Make available as house shift</span>
-          </label>
         </div>
 
         {/* ---------- Error ---------- */}

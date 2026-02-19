@@ -33,6 +33,10 @@ interface BottomPanelProps {
   onHoverMinuteChange?: (minute: number | null) => void;
 }
 
+const MIN_CONTENT_HEIGHT = 100;
+const MAX_CONTENT_HEIGHT = 600;
+const DEFAULT_CONTENT_HEIGHT = 280;
+
 export function BottomPanel({
   shifts, positions, laborSummary, days, canViewPay, isPublished,
   timeViewMode, selectedDay,
@@ -41,11 +45,43 @@ export function BottomPanel({
 }: BottomPanelProps) {
   const [activeTab, setActiveTab] = React.useState<BottomTab>('house_shifts');
   const [expanded, setExpanded] = React.useState(true);
+  const [contentHeight, setContentHeight] = React.useState(DEFAULT_CONTENT_HEIGHT);
+  const draggingRef = React.useRef(false);
+  const startYRef = React.useRef(0);
+  const startHeightRef = React.useRef(0);
 
   const houseShifts = React.useMemo(() => shifts.filter(s => s.is_house_shift), [shifts]);
 
+  const handleDragStart = React.useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    draggingRef.current = true;
+    startYRef.current = e.clientY;
+    startHeightRef.current = contentHeight;
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+
+    const handleMouseMove = (ev: MouseEvent) => {
+      if (!draggingRef.current) return;
+      const delta = startYRef.current - ev.clientY;
+      const next = Math.min(MAX_CONTENT_HEIGHT, Math.max(MIN_CONTENT_HEIGHT, startHeightRef.current + delta));
+      setContentHeight(next);
+    };
+
+    const handleMouseUp = () => {
+      draggingRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [contentHeight]);
+
   return (
     <div className={sty.panel}>
+      {expanded && <div className={sty.dragHandle} onMouseDown={handleDragStart}><div className={sty.dragGrip} /></div>}
       <div className={sty.tabBar}>
         <Tabs
           value={activeTab}
@@ -79,7 +115,7 @@ export function BottomPanel({
         </IconButton>
       </div>
       {expanded && (
-        <div className={sty.content}>
+        <div className={sty.content} style={{ height: contentHeight }}>
           {activeTab === 'house_shifts' && (
             <HouseShiftsTab
               houseShifts={houseShifts}

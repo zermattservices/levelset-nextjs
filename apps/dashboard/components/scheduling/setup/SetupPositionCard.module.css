@@ -1,0 +1,61 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--ls-color-bg-container);
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-left: 3px solid;
+  background: var(--ls-color-muted-soft);
+}
+
+.positionName {
+  font-family: var(--ls-font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slotIndicator {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.slotFilled {
+  font-weight: 600;
+  color: var(--ls-color-brand);
+}
+
+.slotSeparator {
+  color: var(--ls-color-muted);
+}
+
+.slotTotal {
+  color: var(--ls-color-muted);
+}
+
+.slotsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+}

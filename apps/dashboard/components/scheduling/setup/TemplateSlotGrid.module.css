@@ -1,0 +1,154 @@
+.gridWrapper {
+  overflow-x: auto;
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: var(--ls-radius-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.grid {
+  display: grid;
+  min-width: max-content;
+}
+
+/* ── Shared cell base ── */
+.headerCell,
+.bodyCell {
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* ── Header cells ── */
+.headerCell {
+  background: #fafbfc;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.positionHeader {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  border-right: 1px solid var(--ls-color-muted-border);
+}
+
+.timeHeader {
+  font-family: var(--ls-font-body);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ── Body cells ── */
+.positionCell {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-right: 1px solid var(--ls-color-muted-border);
+}
+
+.positionName {
+  font-family: var(--ls-font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Slot cells ── */
+.cell {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  font-family: var(--ls-font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  transition: background 0.1s ease;
+  user-select: none;
+  padding: 0;
+}
+
+.cellFilled {
+  background: rgba(49, 102, 74, 0.1);
+  color: var(--ls-color-brand);
+}
+
+/* +/- buttons hidden by default, visible on hover */
+.cellBtn {
+  width: 18px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  font-family: var(--ls-font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.1s ease, background 0.1s ease, color 0.1s ease;
+  border-radius: 4px;
+  padding: 0;
+  line-height: 1;
+}
+
+.cell:hover .cellBtn {
+  opacity: 1;
+}
+
+.cellBtn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.cellFilled .cellBtn {
+  color: var(--ls-color-brand);
+}
+
+.cellFilled .cellBtn:hover {
+  background: rgba(49, 102, 74, 0.15);
+  color: var(--ls-color-brand);
+}
+
+.cellBtn:disabled {
+  cursor: default;
+  opacity: 0 !important;
+}
+
+.cell:hover .cellBtn:disabled {
+  opacity: 0.3 !important;
+}
+
+.cellCount {
+  min-width: 14px;
+  text-align: center;
+  font-family: var(--ls-font-heading);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Empty state ── */
+.empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  color: var(--ls-color-muted);
+}

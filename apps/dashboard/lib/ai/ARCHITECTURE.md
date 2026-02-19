@@ -2,6 +2,68 @@
 
 > An autonomous AI team member modeled after the [OpenClaw](https://github.com/openclaw/openclaw) agent architecture, sandboxed per organization.
 
+> **Last updated:** February 2026
+
+---
+
+## Implementation Progress
+
+| Phase | Status | What's Done | What Remains |
+|-------|--------|-------------|--------------|
+| **Phase 1: Monorepo** | **Complete** | pnpm workspaces, Turborepo, `apps/agent` on Fly.io, `packages/shared`, `packages/permissions`, `packages/supabase-client`, `packages/design-tokens` | — |
+| **Phase 2: Agentic Foundation** | **In Progress** | Agent skeleton (Hono, auth middleware, health check, CORS), chat route stub | LLM integration, conversation DB tables, tools, dashboard chat UI, conversation persistence, streaming |
+| **Phase 3: Doc Intelligence** | Not Started | — | PageIndex integration, hybrid RAG |
+| **Phase 4-5: Meetings** | Not Started | — | All meeting functionality |
+| **Phase 6: Memory** | Not Started | — | Memory tables, feedback, learning |
+| **Phase 7: Autonomy** | Not Started | — | Heartbeat, escalation, channels |
+| **Phase 8: Mobile** | **Partially Done** | Full chat UI (ChatScreen, ChatInput, ChatBubble, TypingIndicator), drawer nav (LeviSlidingMenu), settings modal, LeviChatContext + LeviMenuContext, tab integration with animated drawer | Backend integration (connects to unimplemented agent), Tasks/Meetings/Alerts screens are stubs |
+| **Phase 9: Polish** | Not Started | — | — |
+
+**Key deviation from original plan:** Mobile chat UI was built ahead of the backend (Phase 8 before Phase 2). The mobile app has a complete Levi interface that currently displays a fallback message ("I'm still being set up. Check back soon!"). The mobile app lives at `apps/mobile/` as a separate npm workspace (excluded from pnpm).
+
+### Current Architecture (What Exists)
+
+```
+apps/agent/src/
+├── index.ts                 # Hono server setup, CORS, routing
+├── middleware/
+│   └── auth.ts             # JWT verification via Supabase, role checks (Levelset Admin only)
+└── routes/
+    ├── health.ts           # GET /health — public health check
+    └── ai/
+        └── chat.ts         # POST /api/ai/chat — returns 501 (not yet implemented)
+
+apps/mobile/src/
+├── components/levi/
+│   ├── ChatScreen.tsx      # Main chat interface with message list + input
+│   ├── ChatInput.tsx       # Claude-style input with +, send, microphone buttons
+│   ├── ChatBubble.tsx      # User (right) and assistant (left, with Levi avatar) bubbles
+│   ├── TypingIndicator.tsx # Animated "Levi is typing..." dots
+│   ├── LeviSettingsModal.tsx  # Notifications, language toggle, clear history
+│   └── LeviSlidingMenu.tsx    # Drawer sidebar with Chat/Tasks/Meetings/Alerts tabs
+├── screens/levi/
+│   ├── TasksScreen.tsx     # Stub — "Coming soon"
+│   ├── MeetingsScreen.tsx  # Stub — "Coming soon"
+│   └── AlertsScreen.tsx    # Stub — "Coming soon"
+├── context/
+│   ├── LeviChatContext.tsx  # Chat state management, sends to EXPO_PUBLIC_AGENT_URL/api/ai/chat
+│   └── LeviMenuContext.tsx  # Drawer navigation state
+└── app/(tabs)/(levi)/
+    ├── _layout.tsx         # Wraps with LeviMenuProvider + LeviChatProvider
+    └── index.tsx           # Animated drawer layout with gesture support
+```
+
+### Next Priority: Functional Chat (Phase 2 Completion)
+
+The immediate next step is getting the chat pipeline working end-to-end:
+1. LLM integration in the agent (MiniMax M2.5 via OpenRouter as primary model)
+2. Database migrations for `ai_conversations` and `ai_messages` tables
+3. Basic structured data tools (employee lookup, ratings, discipline)
+4. Streaming responses via SSE to both mobile and dashboard
+5. Conversation persistence and history management
+
+---
+
 ## Vision: Levi as a Digital Employee
 
 Unlike a simple assistant, Levi is designed to evolve into a proactive participant in each organization:
@@ -1408,86 +1470,195 @@ const shouldEscalateToHuman = (context: ConversationContext): boolean => {
 
 ### LLM Strategy
 
-**Tiered Routing via OpenRouter**
+**Tiered Routing via OpenRouter + Direct Anthropic**
 
-OpenRouter provides a unified API for multiple LLM providers with automatic fallback and cost optimization.
+OpenRouter provides a unified API for multiple LLM providers with automatic fallback and cost optimization. Direct Anthropic API is reserved for latency-critical paths only.
 
-| Tier | Models | Use Case | Latency Priority |
-|------|--------|----------|------------------|
-| **Critical** | Claude 3.5 Sonnet (direct Anthropic) | Real-time meeting interventions, complex tool orchestration | Lowest latency required |
-| **Standard** | Claude 3.5 Sonnet (via OpenRouter) | User chat, tool calls, summaries | Normal |
-| **Fast** | Claude 3.5 Haiku, Gemini Flash | Meeting processor NLP, simple queries | Fast response |
-| **Batch** | Llama 3.1 70B, Mistral Large | Heartbeat checks, batch analytics, learning engine | Cost optimized |
+#### Model Selection (February 2026)
 
-**Routing Logic:**
+Based on SWE-bench and Berkeley Function Calling Leaderboard (BFCL) benchmarks:
+
+| Model | SWE-bench Score | BFCL Tool Calling | Avg Cost/Task | Avg Runtime |
+|-------|----------------|-------------------|---------------|-------------|
+| Claude Opus 4.6 | 63.84 | 63.3 | $1.44 | 366s |
+| GPT-5.2-Codex | 61.12 | — | $1.75 | 770s |
+| Claude Opus 4.5 | 60.58 | — | $2.19 | 371s |
+| **MiniMax M2.5** | **52.72** | **76.8** | **$0.11** | 509s |
+| GPT-5.2 | 52.60 | — | $1.08 | 596s |
+| Claude Sonnet 4.5 | 50.22 | — | $1.42 | 536s |
+| Kimi-K2.5 | 49.18 | — | $0.76 | 686s |
+
+**Key insight:** MiniMax M2.5 scores above Claude Sonnet 4.5 and GPT-5.2 at ~1/10th the cost, and leads all models on the Berkeley Function Calling Leaderboard (76.8). It is open-weight (self-hostable) and purpose-built for agentic tool-use workflows.
+
+#### Tiered Architecture
+
+| Tier | Model | Input $/1M | Output $/1M | % of Requests | Use Case |
+|------|-------|-----------|-------------|---------------|----------|
+| **Primary** | MiniMax M2.5 (OpenRouter) | $0.30 | $1.20 | ~85% | User chat, tool calls, action item extraction, heartbeat checks, meeting NLP, summaries |
+| **Escalation** | Claude Sonnet 4.5 (OpenRouter) | $3.00 | $15.00 | ~10-12% | Complex multi-step tool chains, sensitive conversations, when M2.5 fails or returns low confidence |
+| **Critical** | Claude Opus 4.6 (direct Anthropic) | $5.00 | $25.00 | ~3-5% | Real-time meeting interventions requiring highest accuracy + lowest latency |
+| **Batch/Large Context** | Gemini 2.5 Flash (OpenRouter) | $0.30 | $2.50 | As needed | Batch analytics, learning engine, document RAG over large docs (1M context window) |
+
+**Escalation triggers** (auto-promote from Primary to Escalation tier):
+- Tool chain fails after 2 attempts on M2.5
+- Conversation flagged as sensitive (HR, complaints, legal)
+- User explicitly requests higher quality ("think harder about this")
+- Task requires >3 sequential tool calls with dependencies
+
+**Models explicitly excluded:**
+- **DeepSeek V3/R1** — Cheapest available but tool calling is unreliable/unstable in production. No official function calling template. Unsuitable for agentic systems despite strong reasoning scores.
+- **Kimi-K2.5** — Outperformed by MiniMax M2.5 on both score (52.72 vs 49.18) and cost ($0.11 vs $0.76).
+
+#### Routing Logic
 
 ```typescript
-// lib/ai/llm-router.ts
+// apps/agent/src/lib/llm-router.ts
 type TaskType =
-  | 'meeting_intervention'    // Real-time, latency critical
-  | 'user_chat'               // Interactive, needs quality
-  | 'tool_orchestration'      // Complex reasoning
+  | 'meeting_intervention'    // Real-time, latency + accuracy critical
+  | 'user_chat'               // Interactive, needs quality tool use
+  | 'tool_orchestration'      // Complex multi-step reasoning
   | 'meeting_processor'       // Continuous NLP, high volume
-  | 'heartbeat_check'         // Batch, cost sensitive
+  | 'heartbeat_check'         // Background, cost sensitive
   | 'summary_generation'      // Quality matters, not latency
   | 'action_item_extraction'  // Structured output
-  | 'simple_query';           // FAQ-style questions
+  | 'simple_query'            // FAQ-style questions
+  | 'batch_analytics';        // Large-scale data processing
 
-const routeToModel = (task: TaskType) => {
-  switch (task) {
-    // Direct Anthropic - bypass OpenRouter for lowest latency
-    case 'meeting_intervention':
-      return { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' };
-
-    // OpenRouter - quality + fallback
-    case 'user_chat':
-    case 'tool_orchestration':
-    case 'summary_generation':
-      return {
-        provider: 'openrouter',
-        model: 'anthropic/claude-3.5-sonnet',
-        fallback: ['openai/gpt-4o', 'google/gemini-pro-1.5']
-      };
-
-    // OpenRouter - fast + cheap
-    case 'meeting_processor':
-    case 'action_item_extraction':
-    case 'simple_query':
-      return {
-        provider: 'openrouter',
-        model: 'anthropic/claude-3-haiku',
-        fallback: ['google/gemini-flash-1.5', 'meta-llama/llama-3.1-8b-instruct']
-      };
-
-    // OpenRouter - batch + cheapest
-    case 'heartbeat_check':
-      return {
-        provider: 'openrouter',
-        model: 'meta-llama/llama-3.1-70b-instruct',
-        fallback: ['mistralai/mistral-large']
-      };
+const routeToModel = (task: TaskType, escalated: boolean = false) => {
+  // Critical tier — direct Anthropic for lowest latency
+  if (task === 'meeting_intervention') {
+    return { provider: 'anthropic', model: 'claude-opus-4-6' };
   }
+
+  // Escalation tier — Claude Sonnet for complex/sensitive tasks
+  if (escalated || task === 'tool_orchestration') {
+    return {
+      provider: 'openrouter',
+      model: 'anthropic/claude-sonnet-4.5',
+      fallback: ['openai/gpt-5.2', 'google/gemini-2.5-pro']
+    };
+  }
+
+  // Batch tier — Gemini Flash for large-context tasks
+  if (task === 'batch_analytics') {
+    return {
+      provider: 'openrouter',
+      model: 'google/gemini-2.5-flash',
+      fallback: ['minimax/minimax-m2.5']
+    };
+  }
+
+  // Primary tier — MiniMax M2.5 for everything else (85%+ of requests)
+  return {
+    provider: 'openrouter',
+    model: 'minimax/minimax-m2.5',
+    fallback: ['google/gemini-2.5-flash', 'anthropic/claude-haiku-4.5']
+  };
 };
 ```
 
-**Why OpenRouter:**
-- **Single API** - One integration for 100+ models
-- **Automatic fallback** - If Claude is down, routes to GPT-4 or Gemini
-- **Cost tracking** - Built-in usage monitoring across all models
-- **No vendor lock-in** - Switch models without code changes
+#### Response Style Controls
 
-**Cost Impact (estimated per org, 500 queries/day):**
+Since customers are billed on token usage, controlling output verbosity is critical for both UX and cost:
+
+```typescript
+// Per-task-type response constraints
+const RESPONSE_LIMITS: Record<TaskType, { max_tokens: number; style: string }> = {
+  user_chat:              { max_tokens: 500,  style: 'concise' },
+  simple_query:           { max_tokens: 300,  style: 'concise' },
+  meeting_intervention:   { max_tokens: 100,  style: 'brief' },
+  action_item_extraction: { max_tokens: 1000, style: 'structured' },
+  summary_generation:     { max_tokens: 800,  style: 'structured' },
+  heartbeat_check:        { max_tokens: 200,  style: 'internal' },
+  meeting_processor:      { max_tokens: 200,  style: 'internal' },
+  tool_orchestration:     { max_tokens: 1000, style: 'concise' },
+  batch_analytics:        { max_tokens: 2000, style: 'structured' },
+};
+
+// System prompt verbosity instructions (injected per request)
+const STYLE_INSTRUCTIONS = {
+  concise: 'Be concise. Prefer 1-3 sentence responses. Use bullet points for lists. Never repeat the question back.',
+  brief: 'Be extremely brief. One sentence max. No preamble.',
+  structured: 'Use structured output. Bullet points, headers where appropriate. No filler text.',
+  internal: 'Internal processing only. Return structured data, not prose.',
+};
+```
+
+#### Self-Hosting Path (Future Option)
+
+MiniMax M2.5 is open-weight and can be self-hosted. At current OpenRouter pricing ($0.30/$1.20 per 1M tokens), self-hosting only makes economic sense at high volume:
+
+| Scenario | OpenRouter Cost | Self-Hosted (est.) | When to Switch |
+|----------|----------------|--------------------|--------------------|
+| 1-5 orgs (low volume) | $5-50/mo | $720-2,160/mo (GPU) | Never — OpenRouter is cheaper |
+| 10-25 orgs (moderate) | $50-250/mo | $720-2,160/mo (GPU) | Break-even around 15-20 active orgs |
+| 50+ orgs (high volume) | $250-1,250/mo | $720-2,160/mo (GPU) | Self-host saves 50%+ |
+
+**Recommendation:** Start with OpenRouter. Evaluate self-hosting when monthly LLM spend exceeds ~$500/mo consistently.
+
+#### Why OpenRouter
+
+- **Single API** — One integration for MiniMax, Claude, Gemini, GPT, and 100+ models
+- **Automatic fallback** — If MiniMax is down, routes to Gemini Flash or Haiku automatically
+- **Cost tracking** — Built-in per-model usage monitoring (essential for customer billing)
+- **No vendor lock-in** — Switch primary model without code changes (just update router config)
+- **OpenRouter supports MiniMax M2.5** — Model ID: `minimax/minimax-m2.5`
+
+#### Cost Estimates (per org, 500 queries/day)
 
 | Scenario | Monthly LLM Cost |
 |----------|------------------|
-| All Claude Sonnet (direct) | $45-150 |
-| Tiered routing (OpenRouter) | $15-50 |
-| **Savings** | **60-70%** |
+| All Claude Sonnet 4.5 | $45-150 |
+| All Claude Opus 4.6 | $150-500 |
+| **MiniMax M2.5 primary + Claude escalation** | **$5-20** |
+| **Savings vs all-Sonnet** | **85-90%** |
+
+Additional cost optimization levers:
+- **Prompt caching** (Anthropic: 90% off cached reads, Google: 75% off) — system prompt + tool definitions are consistent per session
+- **Batch API** (Anthropic/OpenAI: 50% off) — for heartbeat and learning engine tasks
+- **`max_tokens` caps** — prevents runaway responses from inflating bills
+
+#### Usage Tracking & Billing
+
+Every LLM call is logged for billing purposes:
+
+```sql
+CREATE TABLE levi_usage_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id UUID NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES app_users(id),
+  conversation_id UUID REFERENCES ai_conversations(id),
+  model TEXT NOT NULL,           -- 'minimax/minimax-m2.5', 'anthropic/claude-sonnet-4.5', etc.
+  tier TEXT NOT NULL,            -- 'primary', 'escalation', 'critical', 'batch'
+  task_type TEXT NOT NULL,       -- Maps to TaskType enum
+  input_tokens INTEGER NOT NULL,
+  output_tokens INTEGER NOT NULL,
+  cost_usd NUMERIC(10,6),       -- Calculated from model pricing
+  latency_ms INTEGER,
+  escalated BOOLEAN DEFAULT false,
+  escalation_reason TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_usage_log_org_date ON levi_usage_log(org_id, created_at);
+CREATE INDEX idx_usage_log_billing ON levi_usage_log(org_id, created_at, cost_usd);
+```
+
+Per-org rate limiting:
+
+```typescript
+interface OrgRateLimits {
+  queries_per_minute: number;    // Default: 30
+  queries_per_day: number;       // Default: 1000
+  tokens_per_day: number;        // Default: 500,000
+  escalation_per_day: number;    // Default: 50 (limit expensive Claude calls)
+}
+```
 
 **Environment Variables:**
 ```
-ANTHROPIC_API_KEY=sk-ant-...     # Direct for critical path
-OPENROUTER_API_KEY=sk-or-...     # Routed for everything else
+ANTHROPIC_API_KEY=sk-ant-...     # Direct for critical path (Opus)
+OPENROUTER_API_KEY=sk-or-...     # Routed for primary + escalation + batch tiers
 ```
 
 ### Hybrid RAG
@@ -1496,6 +1667,78 @@ OPENROUTER_API_KEY=sk-or-...     # Routed for everything else
 |-----------|--------|-----|
 | Structured (employees, ratings, discipline) | **pgvector** | SQL joins, RLS, real-time, free |
 | Documents (transcripts, SOPs, policies) | **PageIndex** | Reasoning-based, handles cross-refs, 98.7% accuracy |
+
+### Streaming Architecture
+
+All chat responses are streamed via Server-Sent Events (SSE) to provide real-time token-by-token output:
+
+```
+Client (Mobile/Dashboard)
+       │
+       │  POST /api/ai/chat
+       │  Accept: text/event-stream
+       ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    AGENT (Fly.io)                                    │
+│                                                                     │
+│  1. Validate auth, load user context                               │
+│  2. Route to appropriate model (MiniMax M2.5 / Claude / Gemini)    │
+│  3. Stream response via SSE:                                       │
+│                                                                     │
+│     data: {"type":"token","content":"Hi"}                          │
+│     data: {"type":"token","content":" there"}                      │
+│     data: {"type":"tool_call","name":"employee_lookup",...}         │
+│     data: {"type":"tool_result","content":"..."}                   │
+│     data: {"type":"token","content":"Sarah's rating is..."}        │
+│     data: {"type":"done","usage":{"input":234,"output":89}}        │
+│                                                                     │
+│  4. On stream complete: persist messages, log usage                │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**SSE Event Types:**
+
+| Event | Purpose |
+|-------|---------|
+| `token` | Streamed text content (display immediately) |
+| `tool_call` | Levi is calling a tool (show "Looking up..." indicator) |
+| `tool_result` | Tool returned data (can show inline or hide) |
+| `done` | Stream complete, includes token usage for billing |
+| `error` | Error occurred, includes message |
+| `escalated` | Request was escalated to a higher-tier model |
+
+**Why SSE over WebSocket for chat:**
+- Simpler — unidirectional (server → client), no connection management
+- Works through Vercel proxy without special config
+- HTTP/2 multiplexing eliminates the need for persistent connections
+- WebSocket reserved for meeting streaming (bidirectional audio required)
+
+### Conversation History Management
+
+To control costs and stay within context windows, conversations use a sliding window with summarization:
+
+```typescript
+interface ConversationWindowConfig {
+  max_messages: number;          // Keep last N messages in full (default: 20)
+  max_tokens: number;            // Total token budget for history (default: 8000)
+  summarize_after: number;       // Summarize messages older than N turns (default: 10)
+  summary_model: string;         // Use cheap model for summarization (Gemini 2.5 Flash)
+}
+
+// On each new message:
+// 1. If history exceeds max_messages or max_tokens:
+//    a. Take oldest messages beyond the window
+//    b. Summarize them into a single "conversation so far" message
+//    c. Replace them with the summary
+// 2. Inject: system prompt + summary + recent messages + new message
+// 3. Send to LLM
+```
+
+This ensures:
+- Conversations can run indefinitely without hitting context limits
+- Older context is preserved in compressed form
+- Cost stays bounded regardless of conversation length
+- Summarization uses Gemini 2.5 Flash ($0.30/$2.50) — cheapest option with good quality
 
 ### Communication Services
 
@@ -1742,140 +1985,175 @@ export const LEVI_TOOLS = {
 
 ## 11. Phased Implementation
 
-### Phase 1: Infrastructure & Monorepo (Weeks 1-2)
-- Initialize pnpm workspaces + Turborepo
-- Move current code to `apps/dashboard`
-- Extract `packages/shared`, `packages/permissions`, `packages/supabase-client`
-- Create `apps/agent` skeleton with Hono
-- Deploy agent to Fly.io
-- Verify Vercel still deploys dashboard
-- Set up Vercel rewrites to proxy `/api/ai/*` to agent
+### Phase 1: Infrastructure & Monorepo — COMPLETE
+- [x] Initialize pnpm workspaces + Turborepo
+- [x] Move current code to `apps/dashboard`
+- [x] Extract `packages/shared`, `packages/permissions`, `packages/supabase-client`, `packages/design-tokens`
+- [x] Create `apps/agent` skeleton with Hono
+- [x] Deploy agent to Fly.io
+- [x] Verify Vercel still deploys dashboard
+- [ ] Set up Vercel rewrites to proxy `/api/ai/*` to agent
 
 **Deliverables:** Monorepo structure with dashboard + agent deployed independently
 
-### Phase 2: Agentic Foundation (Weeks 3-5)
-- Database migrations for core tables (levi_config, ai_conversations, ai_messages)
-- Levi Gateway API on agent
-- Session manager (user chat sessions)
-- LLM client abstraction (Claude)
-- Basic tools: employee, ratings, discipline, evaluation
-- Chat UI: AI page + FAB modal on dashboard
-- WebSocket connection for real-time chat
-- Conversation persistence
-- Bilingual support (EN/ES)
+### Phase 2: Agentic Foundation — IN PROGRESS
+- [x] Agent skeleton with Hono, auth middleware, health check
+- [x] Mobile chat UI (built ahead of schedule — see Phase 8)
+- [ ] Database migrations for core tables (`levi_config`, `ai_conversations`, `ai_messages`, `levi_usage_log`)
+- [ ] LLM client abstraction with tiered routing (MiniMax M2.5 primary, Claude escalation)
+- [ ] OpenRouter integration with automatic fallback
+- [ ] Streaming responses via SSE (Server-Sent Events) to both mobile and dashboard
+- [ ] Basic tools: employee, ratings, discipline, evaluation
+- [ ] Chat UI on dashboard (AI page + FAB modal)
+- [ ] Conversation persistence and history management
+- [ ] Context window management (sliding window + summarization for long conversations)
+- [ ] Per-org usage tracking and rate limiting
+- [ ] Bilingual support (EN/ES) via system prompt + language detection
+- [ ] Response verbosity controls (`max_tokens` per task type, concise system prompts)
 
-**Deliverables:** Functional chat assistant with structured data tools
+**Deliverables:** Functional chat assistant with structured data tools, streaming, and usage tracking
 
-### Phase 3: Document Intelligence (Weeks 6-7)
-- PageIndex integration
-- Document and meeting tools
-- Hybrid retrieval (pgvector for structured, PageIndex for documents)
-- Operational overview document indexing
+### Phase 3: Document Intelligence
+- [ ] PageIndex integration
+- [ ] Document and meeting tools
+- [ ] Hybrid retrieval (pgvector for structured, PageIndex for documents)
+- [ ] Operational overview document indexing
 
 **Deliverables:** AI can intelligently search documents and transcripts
 
-### Phase 4: Meeting System - Listen Mode (Weeks 8-10)
-- Audio recording component (Expo + Dashboard)
-- AssemblyAI real-time streaming integration
-- WebSocket: Client → Agent → AssemblyAI pipeline
-- Meeting processor (continuous transcript processing)
-- Entity extraction (employee name matching)
-- Action item detection (pattern-based)
-- Post-meeting summary generation
-- Meeting transcripts stored with action items
-- Listen mode: Silent observation + direct address response
+### Phase 4: Meeting System - Listen Mode
+- [ ] Audio recording component (Expo + Dashboard)
+- [ ] AssemblyAI real-time streaming integration
+- [ ] WebSocket: Client → Agent → AssemblyAI pipeline
+- [ ] Meeting processor (continuous transcript processing)
+- [ ] Entity extraction (employee name matching)
+- [ ] Action item detection (pattern-based)
+- [ ] Post-meeting summary generation
+- [ ] Meeting transcripts stored with action items
+- [ ] Listen mode: Silent observation + direct address response
 
 **Deliverables:** Levi participates in meetings (Listen mode)
 
-### Phase 5: Meeting System - Participate Mode (Weeks 11-13)
-- Voice Activity Detection (VAD) for pause detection
-- Intervention decision engine
-- Clarifying question generation
-- Action item confirmation flow
-- Data conflict detection
-- Meeting presets (team_sync, one_on_one, training, etc.)
-- Real-time action item creation/updates
-- Text sidebar UI for interventions
+### Phase 5: Meeting System - Participate Mode
+- [ ] Voice Activity Detection (VAD) for pause detection
+- [ ] Intervention decision engine
+- [ ] Clarifying question generation
+- [ ] Action item confirmation flow
+- [ ] Data conflict detection
+- [ ] Meeting presets (team_sync, one_on_one, training, etc.)
+- [ ] Real-time action item creation/updates
+- [ ] Text sidebar UI for interventions
 
 **Deliverables:** Levi actively participates in meetings with intelligent interventions
 
-### Phase 6: Memory & Learning (Weeks 14-15)
-- Memory tables (levi_org_memory, levi_user_memory, levi_feedback)
-- Feedback collection UI (thumbs up/down, corrections)
-- Learning engine (batch processing)
-- Memory injection in queries
-- Preference adaptation
-- Org terminology learning
+### Phase 6: Memory & Learning
+- [ ] Memory tables (levi_org_memory, levi_user_memory, levi_feedback)
+- [ ] Feedback collection UI (thumbs up/down, corrections)
+- [ ] Learning engine (batch processing via Gemini 2.5 Flash)
+- [ ] Memory injection in queries
+- [ ] Preference adaptation
+- [ ] Org terminology learning
 
 **Deliverables:** Levi remembers and improves over time
 
-### Phase 7: Autonomy & Proactive Operations (Weeks 16-18)
-- Autonomy config tables
-- Action tools (reminder, notify, escalate)
-- Pending approvals workflow
-- Channel router (in-app, email, SMS)
-- Heartbeat daemon (pg_cron or Inngest scheduled)
-- Escalation engine
-- Proactive recommendation engine
+### Phase 7: Autonomy & Proactive Operations
+- [ ] Autonomy config tables
+- [ ] Action tools (reminder, notify, escalate)
+- [ ] Pending approvals workflow
+- [ ] Channel router (in-app, email, SMS)
+- [ ] Heartbeat daemon (pg_cron or Inngest scheduled)
+- [ ] Escalation engine
+- [ ] Proactive recommendation engine
 
 **Deliverables:** Levi operates autonomously with configurable trust levels
 
-### Phase 8: Voice & Mobile (Weeks 19-22)
-- Create `apps/mobile` with Expo
-- Mobile auth flow with Supabase
-- Mobile chat interface
-- Mobile meeting recording
-- TTS integration (ElevenLabs) for voice responses
-- Voice output during meetings
-- Dashboard widgets for insights
+### Phase 8: Mobile — PARTIALLY COMPLETE
+- [x] Mobile app with Expo Router + NativeTabs (`apps/mobile/`)
+- [x] Mobile auth flow with Supabase
+- [x] Mobile chat interface (full Claude-style UI with 6 components)
+- [x] Animated drawer navigation (Chat/Tasks/Meetings/Alerts)
+- [x] Settings modal (language toggle, notifications, clear history)
+- [x] LeviChatContext (state management, API integration)
+- [ ] Connect to working backend (currently shows fallback message)
+- [ ] Mobile meeting recording
+- [ ] TTS integration (ElevenLabs) for voice responses
+- [ ] Voice output during meetings
+- [ ] Dashboard widgets for insights
+- [ ] Tasks, Meetings, Alerts screens (currently stubs)
 
 **Deliverables:** Full mobile app + voice interaction
 
-### Phase 9: Polish & Advanced Features (Weeks 23+)
-- Voice input processing
-- Advanced intervention tuning per org/manager
-- Analytics dashboard for Levi usage
-- Performance optimization
-- Documentation
+### Phase 9: Polish & Advanced Features
+- [ ] Voice input processing
+- [ ] Advanced intervention tuning per org/manager
+- [ ] Analytics dashboard for Levi usage and billing
+- [ ] Self-hosting evaluation for MiniMax M2.5 (if volume justifies)
+- [ ] Performance optimization
+- [ ] Documentation
 
 ---
 
 ## 12. File Structure
 
+### Agent Service (apps/agent/src/)
+
 ```
-lib/ai/
-├── ARCHITECTURE.md           # This document
-├── gateway.ts                # Central control plane
-├── session-manager.ts        # Session lifecycle
-├── llm/
-│   ├── router.ts             # Task → model routing logic
-│   ├── anthropic.ts          # Direct Anthropic client (critical path)
-│   ├── openrouter.ts         # OpenRouter client (routed queries)
-│   └── types.ts              # Shared types
-├── agent.ts                  # ReAct orchestration
-├── context-builder.ts        # Permission-aware context
-├── prompts.ts                # System prompts
-├── memory/
-│   ├── store.ts              # Memory CRUD
-│   └── learning.ts           # Adaptive learning
-├── heartbeat/
-│   ├── daemon.ts             # Heartbeat execution
-│   ├── checks/               # Individual check implementations
-│   └── actions/              # Autonomous action handlers
-├── channels/
-│   ├── router.ts             # Channel routing logic
-│   ├── email.ts              # SendGrid/Resend
-│   ├── sms.ts                # Twilio
-│   └── push.ts               # Supabase Realtime
+apps/agent/src/
+├── index.ts                     # Hono server setup, CORS, routing
+├── middleware/
+│   └── auth.ts                  # JWT verification, role checks
+├── routes/
+│   ├── health.ts                # GET /health
+│   └── ai/
+│       └── chat.ts              # POST /api/ai/chat
+├── lib/
+│   ├── llm-router.ts            # Task → model routing (MiniMax/Claude/Gemini)
+│   ├── llm-clients/
+│   │   ├── anthropic.ts         # Direct Anthropic client (critical path)
+│   │   ├── openrouter.ts        # OpenRouter client (primary + escalation + batch)
+│   │   └── types.ts             # Shared LLM types
+│   ├── streaming.ts             # SSE streaming response handler
+│   ├── context-builder.ts       # Permission-aware context assembly
+│   ├── prompts.ts               # System prompts (EN/ES, verbosity controls)
+│   ├── usage-tracker.ts         # Per-org token usage logging and rate limiting
+│   └── conversation-manager.ts  # History management, sliding window, summarization
 ├── tools/
-│   ├── index.ts              # Tool registry
-│   ├── data/                 # Data access tools
-│   ├── document/             # Document tools
-│   ├── workflow/             # Workflow tools
-│   └── action/               # Autonomy tools
+│   ├── index.ts                 # Tool registry
+│   ├── data/                    # Structured data tools (employee, ratings, discipline, evaluation)
+│   ├── document/                # Document tools (PageIndex)
+│   ├── workflow/                # Workflow tools (form prefill, guided processes)
+│   └── action/                  # Autonomy tools (reminder, notify, escalate)
+├── memory/
+│   ├── store.ts                 # Memory CRUD
+│   └── learning.ts              # Adaptive learning (batch via Gemini 2.5 Flash)
+├── heartbeat/
+│   ├── daemon.ts                # Heartbeat execution
+│   ├── checks/                  # Individual check implementations
+│   └── actions/                 # Autonomous action handlers
+├── channels/
+│   ├── router.ts                # Channel routing logic
+│   ├── email.ts                 # SendGrid/Resend
+│   ├── sms.ts                   # Twilio
+│   └── push.ts                  # Supabase Realtime
+├── meeting/
+│   ├── processor.ts             # Continuous transcript processing
+│   ├── intervention.ts          # Decide when to speak
+│   └── vad.ts                   # Voice activity detection
 ├── pageindex/
-│   └── client.ts             # PageIndex API wrapper
-└── embeddings.ts             # pgvector operations
+│   └── client.ts                # PageIndex API wrapper
+└── embeddings.ts                # pgvector operations
+```
+
+### Dashboard AI Integration (apps/dashboard/)
+
+```
+apps/dashboard/
+├── lib/ai/
+│   └── ARCHITECTURE.md          # This document
+├── components/
+│   └── ai/                      # (planned) Chat UI, FAB modal, dashboard widgets
+└── pages/
+    └── api/                     # Dashboard API routes proxy to agent, not AI logic here
 ```
 
 ---
@@ -1884,10 +2162,10 @@ lib/ai/
 
 ### Per Organization (500 queries/day)
 
-**Without OpenRouter Tiering:**
+**Baseline (all Claude Sonnet 4.5):**
 | Service | Usage | Monthly Cost |
 |---------|-------|--------------|
-| Claude 3.5 Sonnet (all queries) | ~15M tokens | $45-150 |
+| Claude Sonnet 4.5 (all queries) | ~15M tokens | $45-150 |
 | PageIndex | ~300 queries | $10-30 |
 | OpenAI Embeddings | ~2M tokens | $0.04 |
 | AssemblyAI | ~20 hours | $7.40 |
@@ -1895,31 +2173,35 @@ lib/ai/
 | Twilio SMS | ~100 messages | $8 |
 | **Total/org** | | **$85-210** |
 
-**With OpenRouter Tiered Routing:**
+**With MiniMax M2.5 Primary + Claude Escalation:**
 | Service | Usage | Monthly Cost |
 |---------|-------|--------------|
-| Claude Sonnet (direct, critical) | ~2M tokens | $6-20 |
-| Claude Sonnet (OpenRouter, standard) | ~5M tokens | $15-50 |
-| Haiku/Gemini Flash (fast tier) | ~5M tokens | $1-3 |
-| Llama 3.1 70B (batch tier) | ~3M tokens | $2-5 |
+| MiniMax M2.5 (85% of queries, OpenRouter) | ~12M tokens | $4-15 |
+| Claude Sonnet 4.5 (10-12% escalation, OpenRouter) | ~2M tokens | $6-20 |
+| Claude Opus 4.6 (3-5% critical, direct Anthropic) | ~0.5M tokens | $3-10 |
+| Gemini 2.5 Flash (batch, as needed) | ~1M tokens | $0.30-2 |
 | PageIndex | ~300 queries | $10-30 |
 | OpenAI Embeddings | ~2M tokens | $0.04 |
 | AssemblyAI | ~20 hours | $7.40 |
 | SendGrid | ~1000 emails | $15 |
 | Twilio SMS | ~100 messages | $8 |
-| **Total/org** | | **$65-140** |
+| **Total/org** | | **$54-108** |
 
 ### Cost Savings Summary
 
-| Scenario | LLM Cost | Savings |
-|----------|----------|---------|
-| All Claude Sonnet | $45-150 | - |
-| OpenRouter tiered | $24-78 | **45-50%** |
+| Scenario | LLM Cost | Total Cost | Savings |
+|----------|----------|------------|---------|
+| All Claude Sonnet 4.5 | $45-150 | $85-210 | — |
+| All Claude Opus 4.6 | $150-500 | $190-560 | — |
+| **MiniMax M2.5 primary + Claude escalation** | **$13-47** | **$54-108** | **85-90% LLM savings** |
 
-OpenRouter also provides:
-- Built-in cost tracking dashboard
-- Per-model usage breakdown
-- Automatic fallback (no failed requests = no retries)
+### Token-Based Customer Billing
+
+Since customers are billed on token usage, the `levi_usage_log` table (see Section 8) tracks every LLM call with cost. This enables:
+- Per-org monthly billing based on actual consumption
+- Tier breakdown reports (how much was primary vs escalation vs critical)
+- Usage alerts when approaching plan limits
+- Cost transparency — customers can see exactly what they're paying for
 
 ---
 
@@ -1955,66 +2237,73 @@ The Levi agent requires capabilities beyond Vercel's limits:
 ### Monorepo Structure (pnpm + Turborepo)
 
 ```
-levelset/
+levelset-nextjs/
 ├── package.json                 # Root workspace config
 ├── pnpm-workspace.yaml          # pnpm workspace definition
 ├── turbo.json                   # Turborepo pipeline config
 ├── .github/workflows/           # CI/CD per service
 │
 ├── apps/
-│   ├── dashboard/               # Next.js (current code) → Vercel
+│   ├── dashboard/               # Next.js 14 Pages Router → Vercel
 │   │   ├── package.json
 │   │   ├── vercel.json
 │   │   ├── pages/
-│   │   └── components/
+│   │   ├── components/
+│   │   └── lib/ai/
+│   │       └── ARCHITECTURE.md  # This document
 │   │
-│   ├── mobile/                  # Expo React Native → EAS
-│   │   ├── package.json
-│   │   ├── app.json
-│   │   ├── eas.json
-│   │   └── app/                 # Expo Router
-│   │
-│   └── agent/                   # Levi Agent → Fly.io
+│   └── agent/                   # Levi Agent → Fly.io (Hono.js, TS strict)
 │       ├── package.json
 │       ├── Dockerfile
 │       ├── fly.toml
 │       └── src/
-│           ├── index.ts         # Hono server
-│           ├── gateway.ts       # Levi Gateway
-│           ├── websocket.ts     # Real-time chat + meeting streams
-│           ├── meeting/
-│           │   ├── processor.ts # Continuous transcript processing
-│           │   ├── intervention.ts # Decide when to speak
-│           │   └── vad.ts       # Voice activity detection
-│           └── heartbeat/       # Autonomous daemon
+│           ├── index.ts         # Hono server, CORS, routing
+│           ├── middleware/
+│           │   └── auth.ts      # JWT verification, role checks
+│           ├── routes/
+│           │   ├── health.ts    # GET /health
+│           │   └── ai/
+│           │       └── chat.ts  # POST /api/ai/chat (currently 501)
+│           ├── lib/             # (planned) LLM router, tools, etc.
+│           ├── meeting/         # (planned) transcript processing
+│           └── heartbeat/       # (planned) autonomous daemon
+│
+├── apps/mobile/             # Expo 54 / React Native — SEPARATE npm workspace
+│   ├── package.json             # Uses npm (NOT pnpm)
+│   ├── app.json
+│   ├── eas.json
+│   ├── app/                     # Expo Router (NativeTabs)
+│   │   └── (tabs)/(levi)/      # Levi chat tab with animated drawer
+│   └── src/
+│       ├── components/levi/     # Chat UI components (6 files, complete)
+│       ├── screens/levi/        # Task/Meeting/Alert stubs
+│       └── context/             # LeviChatContext, LeviMenuContext
 │
 ├── packages/
-│   ├── shared/                  # Types, constants, utils
+│   ├── design-tokens/           # CSS vars (web) + raw values (native)
+│   ├── shared/                  # Generated Supabase types
 │   │   └── src/
-│   │       ├── types/           # Supabase types
+│   │       ├── types/           # Supabase types (auto-generated)
 │   │       ├── constants/
 │   │       └── utils/
 │   │
-│   ├── supabase-client/         # Supabase wrapper
+│   ├── supabase-client/         # Supabase client factory for agent
 │   │   └── src/
 │   │       ├── browser.ts
 │   │       └── server.ts
 │   │
-│   ├── permissions/             # Permission system
-│   │   └── src/
-│   │       ├── constants.ts
-│   │       ├── defaults.ts
-│   │       └── service.ts
-│   │
-│   └── ai-tools/                # LLM tool definitions
+│   └── permissions/             # Shared permission constants (@levelset/permissions)
 │       └── src/
-│           ├── employee-tool.ts
-│           ├── ratings-tool.ts
+│           ├── constants.ts
 │           └── index.ts
 │
-└── supabase/
-    └── migrations/              # Single source of truth
+├── supabase/
+│   └── migrations/              # SQL migrations (YYYYMMDD_description.sql)
+│
+└── docs/                        # Mintlify documentation (docs.levelset.io)
 ```
+
+> **Note:** `apps/mobile/` is at the repo root as a separate npm workspace. It is NOT part of the pnpm workspace and uses `npm` for package management. Do not run `pnpm` commands inside it.
 
 ### Service Hosting
 
@@ -2099,10 +2388,12 @@ wss://agent.levelset.io/ws/meeting/{session_id}
 
 | Package | Dashboard | Mobile | Agent |
 |---------|-----------|--------|-------|
-| `@levelset/shared` | ✓ | ✓ | ✓ |
-| `@levelset/supabase-client` | ✓ | ✓ | ✓ |
-| `@levelset/permissions` | ✓ | ✓ | ✓ |
-| `@levelset/ai-tools` | ✗ | ✗ | ✓ |
+| `@levelset/shared` | ✓ | ✗* | ✓ |
+| `@levelset/supabase-client` | ✗ | ✗ | ✓ |
+| `@levelset/permissions` | ✓ | ✗* | ✓ |
+| `@levelset/design-tokens` | ✓ | ✗* | ✗ |
+
+> *Mobile is a separate npm workspace and does not consume pnpm workspace packages directly. Shared code for mobile should go in `packages/` and be published or linked separately.
 
 ### Heartbeat Daemon
 
@@ -2159,19 +2450,20 @@ User sees "Transcript ready!" in real-time
 
 | Secret | Dashboard | Agent | Mobile |
 |--------|-----------|-------|--------|
-| `SUPABASE_URL` | ✓ | ✓ | ✓ |
-| `SUPABASE_ANON_KEY` | ✓ | ✗ | ✓ |
-| `SUPABASE_SERVICE_KEY` | ✓ | ✓ | ✗ |
+| `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL` | ✓ | ✓ | ✓ (`EXPO_PUBLIC_`) |
+| `SUPABASE_ANON_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✓ | ✗ | ✓ (`EXPO_PUBLIC_`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✓ | ✓ | ✗ |
 | `ANTHROPIC_API_KEY` | ✗ | ✓ | ✗ |
 | `OPENROUTER_API_KEY` | ✗ | ✓ | ✗ |
 | `ASSEMBLYAI_API_KEY` | ✗ | ✓ | ✗ |
 | `INNGEST_EVENT_KEY` | ✓ | ✓ | ✗ |
 | `AGENT_SERVICE_SECRET` | ✓ | ✓ | ✗ |
 | `HEARTBEAT_SECRET` | ✗ | ✓ | ✗ |
+| `EXPO_PUBLIC_AGENT_URL` | ✗ | ✗ | ✓ |
 
 **LLM Keys:**
-- `ANTHROPIC_API_KEY` - Direct Anthropic access for latency-critical paths (meeting interventions)
-- `OPENROUTER_API_KEY` - Routed access for standard/fast/batch tiers with automatic fallback
+- `ANTHROPIC_API_KEY` — Direct Anthropic access for critical path only (Claude Opus 4.6 for meeting interventions)
+- `OPENROUTER_API_KEY` — Routes to MiniMax M2.5 (primary), Claude Sonnet 4.5 (escalation), Gemini 2.5 Flash (batch) with automatic fallback
 
 ### Fly.io Configuration
 
@@ -2248,66 +2540,83 @@ jobs:
 
 **Mobile (EAS Build)**
 ```yaml
-# .github/workflows/mobile.yml
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/mobile/**'
-      - 'packages/shared/**'
+# Manual — run `eas build` from apps/mobile/
+# Mobile is a separate npm workspace, not part of the pnpm monorepo CI
 ```
 
 ### Local Development
 
 ```bash
-# Development commands
-pnpm dev                    # All services
+# Monorepo commands (from repo root, uses pnpm)
+pnpm dev                    # All apps in parallel
 pnpm dev:dashboard          # Dashboard only (localhost:3000)
-pnpm dev:agent              # Agent only (localhost:3001)
-pnpm dev:mobile             # Expo DevTools
-
-# Database
-pnpm db:gen-types           # Generate Supabase types
-pnpm db:migrate             # Push migrations
+pnpm dev:agent              # Agent only
+pnpm build                  # Build all (turbo-cached)
+pnpm typecheck              # Type-check all
+pnpm db:gen-types           # Regenerate Supabase TS types
 
 # Agent-specific
 pnpm --filter agent dev     # Run agent with hot reload
 pnpm --filter agent tunnel  # Expose local agent via ngrok (for mobile testing)
+
+# Mobile (from apps/mobile/ — uses npm, NOT pnpm)
+cd apps/mobile
+npm start                   # Expo dev server
+npm run ios                 # iOS simulator
 ```
 
-### Migration Strategy
+### Implementation Status
 
-See **Section 8: Phased Implementation** for detailed timeline. High-level:
+See **Section 11: Phased Implementation** for detailed checklist and the **Implementation Progress** table at the top of this document for current status.
 
-1. **Weeks 1-2**: Monorepo setup, agent deployed to Fly.io
-2. **Weeks 3-7**: Core chat + document intelligence
-3. **Weeks 8-13**: Meeting system (Listen → Participate modes)
-4. **Weeks 14-18**: Memory, learning, autonomy
-5. **Weeks 19+**: Mobile app, voice, polish
+**Completed:**
+1. Monorepo setup, agent deployed to Fly.io
+2. Mobile chat UI (built ahead of schedule)
+
+**Next up:**
+3. Core chat pipeline (LLM integration, tools, streaming, persistence)
+4. Document intelligence (PageIndex + hybrid RAG)
+5. Meeting system (Listen → Participate modes)
+6. Memory, learning, autonomy
+7. Voice, polish, self-hosting evaluation
 
 ### Infrastructure Costs
 
-| Service | Monthly Cost |
-|---------|--------------|
-| Vercel Pro | $20 |
-| Fly.io (1 shared CPU, always-on) | $5-15 |
-| Inngest | $0-25 |
-| Supabase Pro | $25 |
-| EAS Build | $0-99 |
-| AssemblyAI Real-time (~20 hrs/mo) | $10 |
-| **Total** | **$60-194** |
+| Service | Monthly Cost | Notes |
+|---------|--------------|-------|
+| Vercel Pro | $20 | Dashboard hosting |
+| Fly.io (1 shared CPU, always-on) | $5-15 | Agent service |
+| Inngest | $0-25 | Background jobs |
+| Supabase Pro | $25 | Database + auth |
+| EAS Build | $0-99 | Mobile builds |
+| AssemblyAI Real-time (~20 hrs/mo) | $10 | Meeting transcription |
+| OpenRouter | Pass-through | LLM costs billed per token (see Section 13) |
+| **Total infrastructure** | **$60-194** |
+| **+ LLM costs per org** | **$5-20/org/mo** | With MiniMax M2.5 primary tier |
 
 ---
 
 ## Sources
 
+**Architecture & Patterns:**
 - [OpenClaw Architecture](https://github.com/openclaw/openclaw) - Gateway, heartbeat, session isolation patterns
 - [OpenClaw Guide - Milvus](https://milvus.io/blog/openclaw-formerly-clawdbot-moltbot-explained-a-complete-guide-to-the-autonomous-ai-agent.md)
-- [PageIndex RAG](https://pageindex.ai/blog/pageindex-intro) - Reasoning-based document retrieval
-- [Agentic RAG - Weaviate](https://weaviate.io/blog/what-is-agentic-rag) - Tool orchestration patterns
 - [Writing Tools for Agents - Anthropic](https://www.anthropic.com/engineering/writing-tools-for-agents)
+- [Agentic RAG - Weaviate](https://weaviate.io/blog/what-is-agentic-rag) - Tool orchestration patterns
+
+**LLM Models & Routing:**
+- [MiniMax M2.5 on OpenRouter](https://openrouter.ai/minimax/minimax-m2.5) - Primary model, open-weight, BFCL leader
+- [MiniMax M2.5 Announcement](https://www.minimax.io/news/minimax-m25) - Benchmarks, architecture details
+- [Berkeley Function Calling Leaderboard (BFCL)](https://gorilla.cs.berkeley.edu/leaderboard.html) - Tool calling benchmarks
 - [OpenRouter API](https://openrouter.ai/docs) - Multi-model routing with automatic fallback
-- [Inngest Documentation](https://www.inngest.com/docs) - Background job orchestration
+- [Anthropic Claude API](https://docs.anthropic.com) - Direct API for critical-path Claude Opus/Sonnet
+- [Google Gemini API](https://ai.google.dev/gemini-api/docs) - Gemini 2.5 Flash for batch/large context
+
+**RAG & Document Intelligence:**
+- [PageIndex RAG](https://pageindex.ai/blog/pageindex-intro) - Reasoning-based document retrieval
+
+**Infrastructure:**
 - [Fly.io Documentation](https://fly.io/docs) - Agent service hosting
+- [Inngest Documentation](https://www.inngest.com/docs) - Background job orchestration
 - [AssemblyAI Real-time API](https://www.assemblyai.com/docs/speech-to-text/streaming) - Real-time transcription streaming
 - [ElevenLabs API](https://elevenlabs.io/docs) - Text-to-speech for voice responses

@@ -106,21 +106,25 @@ export function ScheduleToolbar({
 
       {/* Center: toggles + zone filter + summary */}
       <div className={sty.centerSection}>
-        <div className={sty.toggleGroup}>
-          <button
-            className={`${sty.toggleBtn} ${timeViewMode === 'week' ? sty.toggleActive : ''}`}
-            onClick={() => onTimeViewChange('week')}
-          >
-            Week
-          </button>
-          <button
-            className={`${sty.toggleBtn} ${timeViewMode === 'day' ? sty.toggleActive : ''}`}
-            onClick={() => onTimeViewChange('day')}
-          >
-            Day
-          </button>
-        </div>
+        {/* Week / Day toggle — hidden in setup mode (setup is always day) */}
+        {gridViewMode !== 'setup' && (
+          <div className={sty.toggleGroup}>
+            <button
+              className={`${sty.toggleBtn} ${timeViewMode === 'week' ? sty.toggleActive : ''}`}
+              onClick={() => onTimeViewChange('week')}
+            >
+              Week
+            </button>
+            <button
+              className={`${sty.toggleBtn} ${timeViewMode === 'day' ? sty.toggleActive : ''}`}
+              onClick={() => onTimeViewChange('day')}
+            >
+              Day
+            </button>
+          </div>
+        )}
 
+        {/* Employees / Positions / Setup toggle */}
         <div className={sty.toggleGroup}>
           <button
             className={`${sty.toggleBtn} ${gridViewMode === 'employees' ? sty.toggleActive : ''}`}
@@ -134,8 +138,15 @@ export function ScheduleToolbar({
           >
             Positions
           </button>
+          <button
+            className={`${sty.toggleBtn} ${gridViewMode === 'setup' ? sty.toggleActive : ''}`}
+            onClick={() => onGridViewChange('setup')}
+          >
+            Setup
+          </button>
         </div>
 
+        {/* Zone filter */}
         <div className={sty.toggleGroup}>
           <button
             className={`${sty.toggleBtn} ${zoneFilter === 'all' ? sty.toggleActive : ''}`}
@@ -157,12 +168,15 @@ export function ScheduleToolbar({
           </button>
         </div>
 
-        <div className={sty.summaryChips}>
-          <span className={sty.summaryChip}>{formatHours(laborSummary.total_hours)}</span>
-          {canViewPay && (
-            <span className={sty.summaryChip}>{formatCurrency(laborSummary.total_cost)}</span>
-          )}
-        </div>
+        {/* Summary chips — hidden in setup mode */}
+        {gridViewMode !== 'setup' && (
+          <div className={sty.summaryChips}>
+            <span className={sty.summaryChip}>{formatHours(laborSummary.total_hours)}</span>
+            {canViewPay && (
+              <span className={sty.summaryChip}>{formatCurrency(laborSummary.total_cost)}</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Right: status + actions */}

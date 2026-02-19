@@ -9,6 +9,7 @@ import { createServiceClient } from '@levelset/supabase-client';
 import type { ChatMessage } from './types.js';
 
 const MAX_HISTORY_MESSAGES = 20;
+const DEFAULT_PAGE_SIZE = 10;
 const CONVERSATION_TTL_HOURS = 24;
 
 /**
@@ -72,7 +73,7 @@ export async function loadConversationHistory(
 
   const { data: messages, error } = await supabase
     .from('ai_messages')
-    .select('role, content, tool_calls, tool_call_id')
+    .select('id, role, content, tool_calls, tool_call_id, created_at')
     .eq('conversation_id', conversationId)
     .order('created_at', { ascending: false })
     .limit(MAX_HISTORY_MESSAGES);
@@ -88,7 +89,86 @@ export async function loadConversationHistory(
     content: m.content as string,
     ...(m.tool_calls ? { tool_calls: m.tool_calls as ChatMessage['tool_calls'] } : {}),
     ...(m.tool_call_id ? { tool_call_id: m.tool_call_id as string } : {}),
+    ...(m.id ? { id: m.id as string } : {}),
+    ...(m.created_at ? { created_at: m.created_at as string } : {}),
   }));
+}
+
+/**
+ * Load a page of user+assistant messages for mobile display.
+ * Supports cursor pagination via `before` (ISO timestamp).
+ * Returns messages in chronological order (oldest first).
+ */
+export async function loadHistoryPage(
+  conversationId: string,
+  options: { limit?: number; before?: string } = {}
+): Promise<{ messages: Array<{ id: string; role: string; content: string; created_at: string }>; hasMore: boolean }> {
+  const supabase = createServiceClient();
+  const limit = options.limit ?? DEFAULT_PAGE_SIZE;
+
+  let query = supabase
+    .from('ai_messages')
+    .select('id, role, content, created_at')
+    .eq('conversation_id', conversationId)
+    .in('role', ['user', 'assistant'])
+    .order('created_at', { ascending: false })
+    .limit(limit + 1); // Fetch one extra to check if there are more
+
+  if (options.before) {
+    query = query.lt('created_at', options.before);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Failed to load history page:', error);
+    return { messages: [], hasMore: false };
+  }
+
+  const rows = data ?? [];
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows;
+
+  // Reverse to chronological order
+  return {
+    messages: page.reverse().map((m) => ({
+      id: m.id as string,
+      role: m.role as string,
+      content: m.content as string,
+      created_at: m.created_at as string,
+    })),
+    hasMore,
+  };
+}
+
+/**
+ * Find active conversation ID without creating one.
+ * Returns null if no active conversation exists.
+ */
+export async function findActiveConversation(
+  userId: string,
+  orgId: string
+): Promise<string | null> {
+  const supabase = createServiceClient();
+  const cutoff = new Date(
+    Date.now() - CONVERSATION_TTL_HOURS * 60 * 60 * 1000
+  ).toISOString();
+
+  const { data: existing } = await supabase
+    .from('ai_conversations')
+    .select('id, created_at')
+    .eq('user_id', userId)
+    .eq('org_id', orgId)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (existing && existing.created_at > cutoff) {
+    return existing.id as string;
+  }
+
+  return null;
 }
 
 /**

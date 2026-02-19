@@ -44,9 +44,10 @@ export interface MenuNavigationProps {
   className?: string;
   firstName?: string;
   userRole?: string;
+  fullWidth?: boolean;
 }
 
-export function MenuNavigation({ className, firstName, userRole }: MenuNavigationProps) {
+export function MenuNavigation({ className, firstName, userRole, fullWidth }: MenuNavigationProps) {
   const auth = useAuth();
   const { isImpersonating, impersonatedUser } = useImpersonation();
   const { userHierarchyLevel, selectedLocationId } = useLocationContext();
@@ -217,7 +218,7 @@ export function MenuNavigation({ className, firstName, userRole }: MenuNavigatio
     >
       {/* Main navigation bar */}
       <div className={sty.navBar}>
-        <div className={sty.navContent} ref={navContentRef}>
+        <div className={classNames(sty.navContent, fullWidth && sty.navContentFullWidth)} ref={navContentRef}>
           {/* Logo */}
           {isRoadmapSubdomain ? (
             <a href={getAppLink('/')} className={sty.logoLink}>

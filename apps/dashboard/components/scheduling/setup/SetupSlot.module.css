@@ -1,0 +1,41 @@
+.slot {
+  border-radius: var(--ls-radius-md);
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.slotFilled {
+  background: transparent;
+}
+
+.slotEmpty {
+  border: 1.5px dashed;
+  justify-content: center;
+  padding: 0 8px;
+}
+
+.slotRequired {
+  border-color: var(--ls-color-muted-border);
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.slotOptional {
+  border-color: var(--ls-color-muted-border);
+  background: transparent;
+  opacity: 0.6;
+}
+
+.slotOver {
+  border-color: var(--ls-color-brand) !important;
+  background: rgba(49, 102, 74, 0.06) !important;
+  opacity: 1 !important;
+}
+
+.emptyLabel {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  color: var(--ls-color-muted);
+  user-select: none;
+}

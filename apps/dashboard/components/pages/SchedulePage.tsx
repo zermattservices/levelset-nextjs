@@ -14,6 +14,9 @@ import { ScheduleToolbar } from '@/components/scheduling/ScheduleToolbar';
 import { ScheduleGrid } from '@/components/scheduling/ScheduleGrid';
 import { ShiftModal } from '@/components/scheduling/ShiftModal';
 import { BottomPanel } from '@/components/scheduling/BottomPanel';
+import { SetupBoardView } from '@/components/scheduling/setup/SetupBoardView';
+import { SetupTemplateManager } from '@/components/scheduling/setup/SetupTemplateManager';
+import { useSetupBoardData } from '@/components/scheduling/setup/useSetupBoardData';
 import CircularProgress from '@mui/material/CircularProgress';
 import type { Shift } from '@/lib/scheduling.types';
 import type { PendingShiftPreview } from '@/components/scheduling/ScheduleGrid';
@@ -26,7 +29,7 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
 export function SchedulePage() {
   const router = useRouter();
   const auth = useAuth();
-  const { selectedLocationId } = useLocationContext();
+  const { selectedLocationId, selectedLocationOrgId } = useLocationContext();
 
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
   const { has } = usePermissions();
@@ -69,6 +72,16 @@ export function SchedulePage() {
       });
     return () => { cancelled = true; };
   }, [selectedLocationId]);
+
+  // Setup board data hook — only active when in setup view mode
+  const setupData = useSetupBoardData({
+    selectedDay: data.selectedDay,
+    shifts: data.shifts,
+    positions: data.allPositions,
+    employees: data.employees,
+    businessHours,
+    zoneFilter: data.zoneFilter,
+  });
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -236,6 +249,7 @@ export function SchedulePage() {
           className={classNames("__wab_instance", sty.menuNavigation)}
           firstName={auth.first_name}
           userRole={auth.role}
+          fullWidth
         />
 
         {!selectedLocationId ? (
@@ -265,53 +279,102 @@ export function SchedulePage() {
               onUnpublish={handleUnpublish}
             />
 
-            {data.isLoading ? (
-              <div className={sty.loadingContainer}>
-                <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
-              </div>
+            {data.gridViewMode === 'setup' ? (
+              <SetupBoardView
+                resolvedDayparts={setupData.resolvedDayparts}
+                activeDaypartId={setupData.activeDaypartId}
+                onDaypartChange={setupData.setActiveDaypartId}
+                positionSlots={setupData.positionSlots}
+                availableEmployees={setupData.availableEmployees}
+                onAssign={setupData.assignEmployee}
+                onUnassign={setupData.unassignEmployee}
+                onReassign={setupData.reassignEmployee}
+                onManageTemplates={() => setupData.setTemplateManagerOpen(true)}
+                isLoading={setupData.isLoading}
+              />
             ) : (
-              <ScheduleGrid
-                shifts={data.shifts}
-                positions={data.positions}
-                employees={data.employees}
-                days={data.days}
-                selectedDay={data.selectedDay}
-                gridViewMode={data.gridViewMode}
-                timeViewMode={data.timeViewMode}
-                laborSummary={data.laborSummary}
-                isPublished={isPublished}
-                canViewPay={canViewPay}
-                columnConfig={columnConfig}
-                onColumnConfigUpdate={updateColumnConfig}
-                onCellClick={handleCellClick}
-                onShiftClick={handleShiftClick}
-                onShiftDelete={handleShiftDelete}
-                onDragCreate={handleDragCreate}
-                pendingShift={shiftModalOpen && !editingShift ? pendingShift : null}
-                businessHours={businessHours}
-                externalHoverMinute={chartHoverMinute}
-                onHoverMinuteChange={setGridHoverMinute}
-              />
-            )}
+              <>
+                {data.isLoading ? (
+                  <div className={sty.loadingContainer}>
+                    <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
+                  </div>
+                ) : (
+                  <ScheduleGrid
+                    shifts={data.shifts}
+                    positions={data.positions}
+                    employees={data.employees}
+                    days={data.days}
+                    selectedDay={data.selectedDay}
+                    gridViewMode={data.gridViewMode}
+                    timeViewMode={data.timeViewMode}
+                    laborSummary={data.laborSummary}
+                    isPublished={isPublished}
+                    canViewPay={canViewPay}
+                    columnConfig={columnConfig}
+                    onColumnConfigUpdate={updateColumnConfig}
+                    onCellClick={handleCellClick}
+                    onShiftClick={handleShiftClick}
+                    onShiftDelete={handleShiftDelete}
+                    onDragCreate={handleDragCreate}
+                    pendingShift={shiftModalOpen && !editingShift ? pendingShift : null}
+                    businessHours={businessHours}
+                    externalHoverMinute={chartHoverMinute}
+                    onHoverMinuteChange={setGridHoverMinute}
+                  />
+                )}
 
-            {!data.isLoading && (
-              <BottomPanel
-                shifts={data.shifts}
-                positions={data.allPositions}
-                laborSummary={data.laborSummary}
-                days={data.days}
-                canViewPay={canViewPay}
-                isPublished={isPublished}
-                timeViewMode={data.timeViewMode}
-                selectedDay={data.selectedDay}
-                onDeleteShift={data.deleteShift}
-                externalHoverMinute={gridHoverMinute}
-                onHoverMinuteChange={setChartHoverMinute}
-              />
+                {!data.isLoading && (
+                  <BottomPanel
+                    shifts={data.shifts}
+                    positions={data.allPositions}
+                    laborSummary={data.laborSummary}
+                    days={data.days}
+                    canViewPay={canViewPay}
+                    isPublished={isPublished}
+                    timeViewMode={data.timeViewMode}
+                    selectedDay={data.selectedDay}
+                    onDeleteShift={data.deleteShift}
+                    externalHoverMinute={gridHoverMinute}
+                    onHoverMinuteChange={setChartHoverMinute}
+                  />
+                )}
+              </>
             )}
           </div>
         )}
       </div>
+
+      {/* Template Manager Modal */}
+      <SetupTemplateManager
+        open={setupData.templateManagerOpen}
+        onClose={() => setupData.setTemplateManagerOpen(false)}
+        templates={setupData.templates}
+        positions={data.allPositions}
+        onSave={async (templateData) => {
+          const orgId = selectedLocationOrgId ?? auth.org_id;
+          const res = await fetch('/api/scheduling/setup-templates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...templateData,
+              org_id: orgId,
+            }),
+          });
+          if (!res.ok) throw new Error('Failed to save template');
+        }}
+        onDelete={async (templateId) => {
+          const res = await fetch('/api/scheduling/setup-templates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ intent: 'delete', id: templateId }),
+          });
+          if (!res.ok) throw new Error('Failed to delete template');
+        }}
+        onRefetch={() => {
+          setupData.fetchTemplates();
+          setupData.refetchResolvedSlots();
+        }}
+      />
 
       {/* Shift Modal */}
       <ShiftModal

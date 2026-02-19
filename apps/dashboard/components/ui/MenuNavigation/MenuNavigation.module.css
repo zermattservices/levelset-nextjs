@@ -38,6 +38,11 @@
   gap: 16px;
 }
 
+.navContentFullWidth {
+  max-width: none;
+  padding: 0 12px;
+}
+
 .logoLink {
   display: flex;
   align-items: center;

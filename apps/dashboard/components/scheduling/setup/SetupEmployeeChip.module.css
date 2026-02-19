@@ -1,0 +1,41 @@
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: var(--ls-color-brand);
+  border-radius: var(--ls-radius-md);
+  cursor: grab;
+  user-select: none;
+  transition: opacity 0.12s ease, box-shadow 0.12s ease;
+  width: 100%;
+}
+
+.chip:hover {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.chip:active {
+  cursor: grabbing;
+}
+
+.chipDragging {
+  opacity: 0.4;
+}
+
+.chipOverlay {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  cursor: grabbing;
+  width: auto;
+  min-width: 120px;
+}
+
+.chipName {
+  font-family: var(--ls-font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

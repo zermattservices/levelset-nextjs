@@ -391,8 +391,10 @@ function WeekPositionView({
         {bohPositions.length > 0 && (
           <>
             <div className={`${sty.rowLabel} ${sty.zoneSectionHeader} ${sty.zoneSectionClickable}`} onClick={() => toggleZone('BOH')}>
-              <ExpandMoreIcon sx={{ fontSize: 16, color: ZONE_TEXT_COLORS['BOH'], transition: 'transform 0.2s ease', transform: collapsedZones.has('BOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
-              <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['BOH'], color: ZONE_TEXT_COLORS['BOH'] }}>BOH</span>
+              <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['BOH'], color: ZONE_TEXT_COLORS['BOH'], border: `2px solid ${ZONE_COLORS['BOH']}` }}>
+                <ExpandMoreIcon sx={{ fontSize: 14, transition: 'transform 0.2s ease', transform: collapsedZones.has('BOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
+                BOH
+              </span>
             </div>
             {days.map((day) => (<div key={day} className={`${sty.cell} ${sty.zoneSectionHeader}`} />))}
             {!collapsedZones.has('BOH') && renderPositionRows(bohPositions)}
@@ -402,8 +404,10 @@ function WeekPositionView({
         {fohPositions.length > 0 && (
           <>
             <div className={`${sty.rowLabel} ${sty.zoneSectionHeader} ${sty.zoneSectionClickable}`} onClick={() => toggleZone('FOH')}>
-              <ExpandMoreIcon sx={{ fontSize: 16, color: ZONE_TEXT_COLORS['FOH'], transition: 'transform 0.2s ease', transform: collapsedZones.has('FOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
-              <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['FOH'], color: ZONE_TEXT_COLORS['FOH'] }}>FOH</span>
+              <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['FOH'], color: ZONE_TEXT_COLORS['FOH'], border: `2px solid ${ZONE_COLORS['FOH']}` }}>
+                <ExpandMoreIcon sx={{ fontSize: 14, transition: 'transform 0.2s ease', transform: collapsedZones.has('FOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
+                FOH
+              </span>
             </div>
             {days.map((day) => (<div key={day} className={`${sty.cell} ${sty.zoneSectionHeader}`} />))}
             {!collapsedZones.has('FOH') && renderPositionRows(fohPositions)}
@@ -1029,10 +1033,12 @@ function DayPositionView({
           <>
             <div className={`${sty.dayRow} ${sty.zoneSectionHeader} ${sty.zoneSectionClickable}`} onClick={() => toggleZone('BOH')}>
               <div className={sty.rowLabel}>
-                <ExpandMoreIcon sx={{ fontSize: 16, color: ZONE_TEXT_COLORS['BOH'], transition: 'transform 0.2s ease', transform: collapsedZones.has('BOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
-                <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['BOH'], color: ZONE_TEXT_COLORS['BOH'] }}>BOH</span>
+                <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['BOH'], color: ZONE_TEXT_COLORS['BOH'], border: `2px solid ${ZONE_COLORS['BOH']}` }}>
+                  <ExpandMoreIcon sx={{ fontSize: 14, transition: 'transform 0.2s ease', transform: collapsedZones.has('BOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
+                  BOH
+                </span>
               </div>
-              <div className={sty.timeline} style={{ cursor: 'default' }} />
+              <div className={`${sty.timeline} ${sty.zoneSectionTimeline}`} />
             </div>
             {!collapsedZones.has('BOH') && bohPositions.map((pos) => {
               const posPending = pendingShift?.date === selectedDay && pendingShift?.entityId === pos.id ? pendingShift : null;
@@ -1062,10 +1068,12 @@ function DayPositionView({
           <>
             <div className={`${sty.dayRow} ${sty.zoneSectionHeader} ${sty.zoneSectionClickable}`} onClick={() => toggleZone('FOH')}>
               <div className={sty.rowLabel}>
-                <ExpandMoreIcon sx={{ fontSize: 16, color: ZONE_TEXT_COLORS['FOH'], transition: 'transform 0.2s ease', transform: collapsedZones.has('FOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
-                <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['FOH'], color: ZONE_TEXT_COLORS['FOH'] }}>FOH</span>
+                <span className={sty.zoneBadge} style={{ backgroundColor: ZONE_BG_COLORS['FOH'], color: ZONE_TEXT_COLORS['FOH'], border: `2px solid ${ZONE_COLORS['FOH']}` }}>
+                  <ExpandMoreIcon sx={{ fontSize: 14, transition: 'transform 0.2s ease', transform: collapsedZones.has('FOH') ? 'rotate(-90deg)' : 'rotate(0deg)' }} />
+                  FOH
+                </span>
               </div>
-              <div className={sty.timeline} style={{ cursor: 'default' }} />
+              <div className={`${sty.timeline} ${sty.zoneSectionTimeline}`} />
             </div>
             {!collapsedZones.has('FOH') && fohPositions.map((pos) => {
               const posPending = pendingShift?.date === selectedDay && pendingShift?.entityId === pos.id ? pendingShift : null;
@@ -1093,6 +1101,139 @@ function DayPositionView({
       </div>
     </div>
   );
+}
+
+/**
+ * Assign each shift a "lane" so overlapping shifts stack vertically.
+ * Returns a Map from shift id → { lane, totalLanes }.
+ */
+function computeShiftLanes(shifts: Shift[]): Map<string, { lane: number; totalLanes: number }> {
+  if (shifts.length <= 1) {
+    const result = new Map<string, { lane: number; totalLanes: number }>();
+    for (const s of shifts) result.set(s.id, { lane: 0, totalLanes: 1 });
+    return result;
+  }
+
+  // Sort by start time, then by end time
+  const sorted = [...shifts].sort((a, b) => {
+    const aStart = parseTime(a.start_time);
+    const bStart = parseTime(b.start_time);
+    if (aStart !== bStart) return aStart - bStart;
+    return parseTime(a.end_time) - parseTime(b.end_time);
+  });
+
+  // Greedy lane assignment
+  const lanes: { endMin: number }[] = [];
+  const laneMap = new Map<string, number>();
+
+  for (const s of sorted) {
+    const sStart = parseTime(s.start_time);
+    let sEnd = parseTime(s.end_time);
+    if (sEnd <= sStart) sEnd += 24 * 60;
+
+    // Find the first lane where the shift fits (no overlap)
+    let assigned = -1;
+    for (let i = 0; i < lanes.length; i++) {
+      if (lanes[i].endMin <= sStart) {
+        assigned = i;
+        lanes[i].endMin = sEnd;
+        break;
+      }
+    }
+    if (assigned === -1) {
+      assigned = lanes.length;
+      lanes.push({ endMin: sEnd });
+    }
+    laneMap.set(s.id, assigned);
+  }
+
+  // Build overlap groups to determine totalLanes per group
+  // Two shifts overlap if their time ranges intersect
+  const intervals = sorted.map(s => {
+    const start = parseTime(s.start_time);
+    let end = parseTime(s.end_time);
+    if (end <= start) end += 24 * 60;
+    return { id: s.id, start, end };
+  });
+
+  // Find connected components of overlapping shifts
+  const visited = new Set<number>();
+  const groups: number[][] = [];
+
+  for (let i = 0; i < intervals.length; i++) {
+    if (visited.has(i)) continue;
+    const group: number[] = [i];
+    visited.add(i);
+    const stack = [i];
+    while (stack.length > 0) {
+      const cur = stack.pop()!;
+      for (let j = 0; j < intervals.length; j++) {
+        if (visited.has(j)) continue;
+        // Check overlap
+        if (intervals[cur].start < intervals[j].end && intervals[j].start < intervals[cur].end) {
+          visited.add(j);
+          group.push(j);
+          stack.push(j);
+        }
+      }
+    }
+    groups.push(group);
+  }
+
+  const result = new Map<string, { lane: number; totalLanes: number }>();
+  for (const group of groups) {
+    const maxLane = Math.max(...group.map(i => laneMap.get(intervals[i].id)!));
+    const totalLanes = maxLane + 1;
+    for (const i of group) {
+      const id = intervals[i].id;
+      result.set(id, { lane: laneMap.get(id)!, totalLanes });
+    }
+  }
+  return result;
+}
+
+const LANE_HEIGHT = 30; // px per stacked shift lane
+const LANE_GAP = 4; // px gap between lanes
+const LANE_PAD = 4; // px padding top/bottom of the timeline
+
+/** Find the first available lane for a new time range given existing lane assignments. */
+function findAvailableLane(
+  existingShifts: Shift[],
+  laneInfo: Map<string, { lane: number; totalLanes: number }>,
+  newStart: number,
+  newEnd: number,
+): number {
+  // Build a map of lane -> end times of shifts in that lane
+  const laneEnds = new Map<number, number[]>();
+  for (const s of existingShifts) {
+    const info = laneInfo.get(s.id);
+    if (!info) continue;
+    let sStart = parseTime(s.start_time);
+    let sEnd = parseTime(s.end_time);
+    if (sEnd <= sStart) sEnd += 24 * 60;
+    if (!laneEnds.has(info.lane)) laneEnds.set(info.lane, []);
+    laneEnds.get(info.lane)!.push(sStart, sEnd);
+  }
+
+  // Check each lane starting from 0
+  for (let lane = 0; ; lane++) {
+    const ends = laneEnds.get(lane);
+    if (!ends) return lane; // empty lane
+    // Check if any shift in this lane overlaps with newStart..newEnd
+    let hasOverlap = false;
+    for (const s of existingShifts) {
+      const info = laneInfo.get(s.id);
+      if (!info || info.lane !== lane) continue;
+      let sStart = parseTime(s.start_time);
+      let sEnd = parseTime(s.end_time);
+      if (sEnd <= sStart) sEnd += 24 * 60;
+      if (newStart < sEnd && sStart < newEnd) {
+        hasOverlap = true;
+        break;
+      }
+    }
+    if (!hasOverlap) return lane;
+  }
 }
 
 // Single position row with drag-to-create
@@ -1124,15 +1265,28 @@ function DayPositionRow({
     onDragCreate ? (startTime, endTime) => onDragCreate(selectedDay, startTime, endTime, pos.id) : undefined,
   );
 
-  // Compute pending shift position
+  // Compute lane assignments for stacking
+  const laneInfo = React.useMemo(() => computeShiftLanes(posShifts), [posShifts]);
+  const shiftMaxLanes = React.useMemo(() => {
+    let max = 1;
+    for (const v of Array.from(laneInfo.values())) {
+      if (v.totalLanes > max) max = v.totalLanes;
+    }
+    return max;
+  }, [laneInfo]);
+
+  // Compute pending shift position + lane
   const pendingStyle = React.useMemo(() => {
     if (!pendingShift) return null;
-    const startMin = parseTime(pendingShift.startTime) - timeRange.minHour * 60;
-    let endMin = parseTime(pendingShift.endTime) - timeRange.minHour * 60;
-    // Cross-day: clamp to end of timeline
+    const pStart = parseTime(pendingShift.startTime);
+    let pEnd = parseTime(pendingShift.endTime);
+    if (pEnd <= pStart) pEnd += 24 * 60;
+    const startMin = pStart - timeRange.minHour * 60;
+    let endMin = pEnd - timeRange.minHour * 60;
     if (endMin <= startMin) endMin = totalMinutes;
     const zoneColor = pendingShift.positionZone ? ZONE_COLORS[pendingShift.positionZone] : null;
     const hours = computeNetHours(pendingShift.startTime, pendingShift.endTime);
+    const lane = findAvailableLane(posShifts, laneInfo, pStart, pEnd);
     return {
       left: `${Math.max(0, (startMin / totalMinutes) * 100)}%`,
       width: `${Math.max(2, ((endMin - startMin) / totalMinutes) * 100)}%`,
@@ -1141,8 +1295,31 @@ function DayPositionRow({
       labelColor: zoneColor ?? 'var(--ls-color-brand)',
       label: `${formatTimeShort(pendingShift.startTime)} – ${formatTimeShort(pendingShift.endTime)}`,
       hours,
+      lane,
     };
-  }, [pendingShift, timeRange.minHour, totalMinutes]);
+  }, [pendingShift, timeRange.minHour, totalMinutes, posShifts, laneInfo]);
+
+  // Compute drag preview lane
+  const dragLane = React.useMemo(() => {
+    if (!dragPreview) return 0;
+    // Parse start/end from the drag preview label (format: "9a – 5p")
+    // Easier: use pctToMinutes from the drag percentages
+    const leftPct = parseFloat(dragPreview.left);
+    const widthPct = parseFloat(dragPreview.width);
+    const dragStart = timeRange.minHour * 60 + (leftPct / 100) * totalMinutes;
+    const dragEnd = timeRange.minHour * 60 + ((leftPct + widthPct) / 100) * totalMinutes;
+    return findAvailableLane(posShifts, laneInfo, dragStart, dragEnd);
+  }, [dragPreview, posShifts, laneInfo, timeRange.minHour, totalMinutes]);
+
+  // Dynamic row height: account for existing shifts, pending, and drag preview
+  const maxLanes = React.useMemo(() => {
+    let max = shiftMaxLanes;
+    if (pendingStyle) max = Math.max(max, pendingStyle.lane + 1);
+    if (dragPreview) max = Math.max(max, dragLane + 1);
+    return max;
+  }, [shiftMaxLanes, pendingStyle, dragPreview, dragLane]);
+
+  const timelineHeight = Math.max(42, maxLanes * LANE_HEIGHT + (maxLanes - 1) * LANE_GAP + LANE_PAD * 2);
 
   return (
     <div className={sty.dayRow}>
@@ -1155,6 +1332,7 @@ function DayPositionRow({
       <div
         ref={timelineRef}
         className={sty.timeline}
+        style={{ minHeight: timelineHeight }}
         onMouseDown={handleMouseDown}
         onClick={() => !isDragging && onCellClick(selectedDay, pos.id)}
       >
@@ -1162,16 +1340,32 @@ function DayPositionRow({
         {posShifts.map((s) => {
           const hours = shiftNetHours(s);
           const cost = s.assignment?.projected_cost ?? 0;
+          const lane = laneInfo.get(s.id) ?? { lane: 0, totalLanes: 1 };
+          const top = LANE_PAD + lane.lane * (LANE_HEIGHT + LANE_GAP);
           return (
-            <div key={s.id} className={`${sty.timelineBlock} ${!s.assignment ? sty.timelineBlockOpen : ''}`} style={{ ...shiftStyleFn(s), backgroundColor: `${posColor}1f`, borderLeft: `3px solid ${posColor}` }} onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}>
-              <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
+            <div
+              key={s.id}
+              className={`${sty.timelineBlock} ${sty.timelineBlockStacked} ${!s.assignment ? sty.timelineBlockOpen : ''}`}
+              style={{
+                ...shiftStyleFn(s),
+                top,
+                height: LANE_HEIGHT,
+                bottom: 'auto',
+                backgroundColor: `${posColor}1f`,
+                borderLeft: `3px solid ${posColor}`,
+              }}
+              onClick={(e) => { e.stopPropagation(); onShiftClick(s); }}
+            >
+              <div className={sty.timelineBlockTopRow}>
+                <span className={sty.timelineBlockTime}>{formatTimeShort(s.start_time)}–{formatTimeShort(s.end_time)}</span>
+                <span className={sty.timelineBlockMeta}>{formatHoursCompact(hours)}{canViewPay && cost > 0 ? ` · ${formatCurrencyWhole(cost)}` : ''}</span>
+              </div>
               <span className={sty.timelineBlockLabel}>{s.assignment?.employee?.full_name ?? 'Open'}</span>
-              <span className={sty.timelineBlockMeta}>{formatHoursCompact(hours)}{canViewPay && cost > 0 ? ` · ${formatCurrencyWhole(cost)}` : ''}</span>
             </div>
           );
         })}
         {pendingStyle && !isDragging && (
-          <div className={sty.pendingShiftPreview} style={{ left: pendingStyle.left, width: pendingStyle.width, borderColor: pendingStyle.borderColor, background: pendingStyle.background }}>
+          <div className={sty.pendingShiftPreview} style={{ left: pendingStyle.left, width: pendingStyle.width, borderColor: pendingStyle.borderColor, background: pendingStyle.background, top: LANE_PAD + pendingStyle.lane * (LANE_HEIGHT + LANE_GAP), height: LANE_HEIGHT, bottom: 'auto' }}>
             <span className={sty.pendingShiftLabel} style={{ color: pendingStyle.labelColor }}>{pendingStyle.label}</span>
             <span className={sty.pendingShiftMeta} style={{ color: pendingStyle.labelColor }}>
               {formatHoursCompact(pendingStyle.hours)}
@@ -1182,7 +1376,7 @@ function DayPositionRow({
           <div className={sty.timelineEmpty}><AddIcon sx={{ fontSize: 14, color: 'var(--ls-color-border)' }} /></div>
         )}
         {dragPreview && (
-          <div className={sty.dragPreview} style={{ left: dragPreview.left, width: dragPreview.width }}>
+          <div className={sty.dragPreview} style={{ left: dragPreview.left, width: dragPreview.width, top: LANE_PAD + dragLane * (LANE_HEIGHT + LANE_GAP), height: LANE_HEIGHT, bottom: 'auto' }}>
             <span className={sty.dragPreviewLabel}>{dragPreview.label}</span>
             <span className={sty.dragPreviewMeta}>{formatHoursCompact(dragPreview.hours)}</span>
           </div>

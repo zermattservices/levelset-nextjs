@@ -217,13 +217,20 @@
 
 /* Zone section headers */
 .zoneSectionHeader {
-  min-height: 24px;
+  min-height: 0;
   background: var(--ls-color-neutral-foreground);
   border-bottom: 1px solid var(--ls-color-muted-border);
   display: flex;
   align-items: center;
 }
+.dayRow.zoneSectionHeader {
+  min-height: 0;
+}
 .zoneBadge {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
   font-family: var(--ls-font-body);
   font-size: 10px;
   font-weight: 700;
@@ -236,6 +243,14 @@
   cursor: pointer;
   user-select: none;
   gap: 6px;
+}
+.zoneSectionClickable .rowLabel {
+  min-height: auto;
+  padding: 4px 12px;
+}
+.zoneSectionTimeline {
+  min-height: auto !important;
+  cursor: default !important;
 }
 .zoneSectionClickable:hover {
   background: var(--ls-color-muted-soft);
@@ -308,6 +323,7 @@
   position: absolute;
   top: 3px;
   bottom: 3px;
+  box-sizing: border-box;
   border: 2px dashed var(--ls-color-brand);
   border-radius: var(--ls-radius-sm);
   pointer-events: none;
@@ -359,7 +375,7 @@
   position: relative;
   cursor: crosshair;
   min-height: 42px;
-  padding: 3px 0;
+  padding: 0;
   user-select: none;
 }
 .timeline:hover {
@@ -371,6 +387,7 @@
   position: absolute;
   top: 3px;
   bottom: 3px;
+  box-sizing: border-box;
   background: rgba(49, 102, 74, 0.12);
   border: 1px dashed var(--ls-color-brand);
   border-radius: var(--ls-radius-sm);
@@ -404,6 +421,7 @@
   position: absolute;
   top: 3px;
   bottom: 3px;
+  box-sizing: border-box;
   border-radius: var(--ls-radius-sm);
   padding: 2px 6px;
   display: flex;
@@ -417,6 +435,33 @@
 .timelineBlock:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   z-index: 1;
+}
+
+.timelineBlockTopRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+/* Stacked variant: fixed height, tighter text for overlapping shifts */
+.timelineBlockStacked {
+  padding: 1px 6px;
+}
+.timelineBlockStacked .timelineBlockTime {
+  font-size: 10px;
+  line-height: 1.25;
+}
+.timelineBlockStacked .timelineBlockLabel {
+  font-size: 9px;
+  line-height: 1.25;
+}
+.timelineBlockStacked .timelineBlockMeta {
+  font-size: 9px;
+  line-height: 1.25;
+  /* Override the hide-on-hover animation — always visible inline */
+  max-height: none;
+  overflow: visible;
+  opacity: 0.7;
 }
 
 .timelineBlockOpen {

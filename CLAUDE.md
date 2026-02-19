@@ -12,13 +12,13 @@ levelset-nextjs/               pnpm workspaces + Turborepo
 │   ├── permissions/           Shared permission constants (@levelset/permissions)
 │   ├── shared/                Generated Supabase types
 │   └── supabase-client/       Supabase client factory for agent
-├── levelset-mobile/           Expo 54 / React Native 0.81 — SEPARATE npm workspace
+│   └── mobile/                Expo 54 / React Native 0.81 — uses npm, excluded from pnpm workspace
 ├── supabase/migrations/       SQL migrations (YYYYMMDD_description.sql)
 ├── scripts/                   Ad-hoc TypeScript scripts (run via npx tsx scripts/<name>.ts)
 └── docs/                      Mintlify documentation (docs.levelset.io)
 ```
 
-> `levelset-mobile/` uses **npm** (not pnpm) and is NOT in the pnpm workspace.
+> `apps/mobile/` uses **npm** (not pnpm) and is excluded from the pnpm workspace via `!apps/mobile` in `pnpm-workspace.yaml`.
 
 ## Commands
 
@@ -34,7 +34,7 @@ pnpm db:gen-types                 # Regenerate Supabase TS types -> packages/sha
 pnpm --filter dashboard build     # Dashboard only
 pnpm --filter @levelset/design-tokens build   # Must build before dashboard when tokens change
 
-# Mobile (from levelset-mobile/ — uses npm)
+# Mobile (from apps/mobile/ — uses npm)
 npm start                         # Expo dev server
 npm run ios                       # iOS simulator
 
@@ -215,7 +215,7 @@ Validate org_id from the authenticated user's session, NOT from the request body
 - Never call `createClient` from `@supabase/supabase-js` directly — use factory functions
 - Never add columns without a migration file in `supabase/migrations/`
 - Never edit `packages/shared/src/types/supabase.ts` manually — regenerate with `pnpm db:gen-types`
-- Never run `pnpm` commands in `levelset-mobile/` — it uses npm
+- Never run `pnpm` commands in `apps/mobile/` — it uses npm
 - Never import from `apps/dashboard/` in mobile code — shared code goes in `packages/`
 - Never hardcode hex color values in dashboard — use CSS variables from design tokens
 
