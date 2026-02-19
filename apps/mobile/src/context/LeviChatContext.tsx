@@ -24,11 +24,20 @@ import React, {
 import { useAuth } from "./AuthContext";
 import { useLocation } from "./LocationContext";
 
+export interface ToolCallEvent {
+  id: string;
+  name: string;
+  label: string;
+  status: "calling" | "done";
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   created_at: string;
+  toolCalls?: ToolCallEvent[];
+  isStreaming?: boolean;
 }
 
 interface LeviChatContextType {
@@ -213,19 +222,27 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
             role: "assistant",
             content: "",
             created_at: new Date().toISOString(),
+            toolCalls: [],
+            isStreaming: true,
           };
           setSessionMessages((prev) => [...prev, streamingMessage]);
+          // Tool cards take over visual feedback — hide the typing indicator
+          setIsSending(false);
 
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
           let accumulated = "";
+          let lineBuffer = ""; // buffer for partial SSE lines across chunks
 
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
             const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split("\n");
+            lineBuffer += chunk;
+            const lines = lineBuffer.split("\n");
+            // Keep the last (potentially incomplete) line in the buffer
+            lineBuffer = lines.pop() || "";
 
             for (const line of lines) {
               if (!line.startsWith("data: ")) continue;
@@ -234,14 +251,66 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
 
               try {
                 const parsed = JSON.parse(data);
-                if (parsed.done) continue;
-                if (parsed.delta) {
-                  accumulated += parsed.delta;
+
+                if (parsed.event === "tool_call") {
+                  // Add a new tool call with "calling" status
+                  const tc: ToolCallEvent = {
+                    id: parsed.id,
+                    name: parsed.name,
+                    label: parsed.label,
+                    status: "calling",
+                  };
+                  setSessionMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === assistantId
+                        ? { ...m, toolCalls: [...(m.toolCalls || []), tc] }
+                        : m
+                    )
+                  );
+                } else if (parsed.event === "tool_result") {
+                  // Update the matching tool call to "done"
+                  setSessionMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === assistantId
+                        ? {
+                            ...m,
+                            toolCalls: (m.toolCalls || []).map((tc) =>
+                              tc.id === parsed.id
+                                ? { ...tc, status: "done" as const, label: parsed.label }
+                                : tc
+                            ),
+                          }
+                        : m
+                    )
+                  );
+                } else if (parsed.event === "delta") {
+                  accumulated += parsed.text;
                   const currentContent = accumulated;
                   setSessionMessages((prev) =>
                     prev.map((m) =>
                       m.id === assistantId
                         ? { ...m, content: currentContent }
+                        : m
+                    )
+                  );
+                } else if (parsed.event === "done") {
+                  // Mark streaming as finished
+                  setSessionMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === assistantId
+                        ? { ...m, isStreaming: false }
+                        : m
+                    )
+                  );
+                } else if (parsed.event === "error") {
+                  setSessionMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === assistantId
+                        ? {
+                            ...m,
+                            content: parsed.message || "Something went wrong.",
+                            isStreaming: false,
+                          }
                         : m
                     )
                   );
@@ -252,6 +321,12 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
             }
           }
 
+          // Ensure streaming flag is cleared even if "done" event was missed
+          setSessionMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId ? { ...m, isStreaming: false } : m
+            )
+          );
           streamingIdRef.current = null;
         } else {
           const data = await response.json();

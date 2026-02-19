@@ -90,9 +90,14 @@ export function ChatScreen() {
   const keyExtractor = useCallback((item: ChatMessage) => item.id, []);
 
   const ListFooter = useCallback(() => {
+    // Hide typing indicator once SSE opens (tool cards / streaming take over)
     if (!isSending) return null;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.isStreaming || (lastMsg?.toolCalls && lastMsg.toolCalls.length > 0)) {
+      return null;
+    }
     return <TypingIndicator />;
-  }, [isSending]);
+  }, [isSending, messages]);
 
   const ListHeader = useCallback(() => {
     if (!isLoadingMore) return null;

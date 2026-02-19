@@ -17,9 +17,8 @@ export default function HomeLayout() {
       <Stack.Screen
         name="location-picker"
         options={{
-          presentation: "formSheet",
-          sheetGrabberVisible: true,
-          sheetAllowedDetents: [0.55],
+          presentation: "transparentModal",
+          animation: "fade",
           contentStyle: { backgroundColor: "transparent" },
           headerShown: false,
         }}

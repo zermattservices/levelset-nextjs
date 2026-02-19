@@ -13,6 +13,9 @@
  * 9. Persist assistant response
  * 10. Log usage
  * 11. Return { message } matching mobile contract
+ *
+ * Streaming (stream: true):
+ *   Returns SSE with structured events: tool_call, tool_result, delta, done
  */
 
 import { Hono } from 'hono';
@@ -32,6 +35,75 @@ import { logUsage, checkRateLimit } from '../../lib/usage-tracker.js';
 import { TOOL_DEFINITIONS, executeTool } from '../../tools/index.js';
 
 const MAX_TOOL_ITERATIONS = 5;
+
+/* ── SSE helpers ─────────────────────────────────────────────── */
+
+function emitSSE(
+  controller: ReadableStreamDefaultController,
+  encoder: TextEncoder,
+  data: Record<string, unknown>,
+): void {
+  controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+}
+
+/** Split text into chunks at word boundaries, roughly `size` chars each */
+function chunkText(text: string, size = 12): string[] {
+  const chunks: string[] = [];
+  let remaining = text;
+  while (remaining.length > 0) {
+    if (remaining.length <= size) {
+      chunks.push(remaining);
+      break;
+    }
+    // Find the last space at or before `size`
+    let end = remaining.lastIndexOf(' ', size);
+    if (end <= 0) end = size; // no space found, hard-cut
+    chunks.push(remaining.slice(0, end + 1));
+    remaining = remaining.slice(end + 1);
+  }
+  return chunks;
+}
+
+/** Human-readable label for a tool call (shown in UI) */
+function getToolCallLabel(name: string, args: Record<string, unknown>): string {
+  switch (name) {
+    case 'lookup_employee': {
+      const q = args.query || args.name || '';
+      return q ? `Looking up ${q}` : 'Looking up employee';
+    }
+    case 'list_employees':
+      return 'Listing employees';
+    case 'get_employee_ratings': {
+      const empName = args.employee_name || '';
+      return empName ? `Checking ratings for ${empName}` : 'Checking employee ratings';
+    }
+    case 'get_employee_infractions': {
+      const empName = args.employee_name || '';
+      return empName ? `Checking infractions for ${empName}` : 'Checking employee infractions';
+    }
+    default:
+      return `Running ${name.replace(/_/g, ' ')}`;
+  }
+}
+
+/** Human-readable label for a tool result */
+function getToolResultLabel(name: string, result: string): string {
+  try {
+    const parsed = JSON.parse(result);
+    if (parsed.error) return `Error: ${parsed.error}`;
+    if (Array.isArray(parsed)) return `Found ${parsed.length} result${parsed.length === 1 ? '' : 's'}`;
+    if (parsed.employees && Array.isArray(parsed.employees))
+      return `Found ${parsed.employees.length} employee${parsed.employees.length === 1 ? '' : 's'}`;
+    if (parsed.ratings && Array.isArray(parsed.ratings))
+      return `Found ${parsed.ratings.length} rating${parsed.ratings.length === 1 ? '' : 's'}`;
+    if (parsed.infractions && Array.isArray(parsed.infractions))
+      return `Found ${parsed.infractions.length} infraction${parsed.infractions.length === 1 ? '' : 's'}`;
+    if (parsed.full_name || parsed.first_name) return `Found ${parsed.full_name || parsed.first_name}`;
+    return 'Done';
+  } catch {
+    return 'Done';
+  }
+}
 
 export const chatRoute = new Hono();
 
@@ -128,7 +200,182 @@ chatRoute.post('/', async (c) => {
       ...history,
     ];
 
-    // 8. Call LLM with tools + tool call loop
+    // 8. Streaming vs non-streaming path
+    if (wantsStream) {
+      // ── SSE streaming path ──────────────────────────────────
+      // Create the SSE response immediately so the client gets
+      // tool_call / tool_result / delta / done events in real time.
+      const startMs = Date.now();
+
+      return new Response(
+        new ReadableStream({
+          async start(controller) {
+            const encoder = new TextEncoder();
+            let totalInputTokens = 0;
+            let totalOutputTokens = 0;
+            let finalModel = '';
+            let escalated = false;
+            let totalLatencyMs = 0;
+            let toolCallCount = 0;
+            let assistantContent: string | null = null;
+
+            try {
+              for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
+                const llmResponse = await callWithEscalation({
+                  messages,
+                  tools: TOOL_DEFINITIONS,
+                  maxTokens: responseConfig.maxTokens,
+                  taskType: 'user_chat',
+                });
+
+                totalInputTokens += llmResponse.usage.inputTokens;
+                totalOutputTokens += llmResponse.usage.outputTokens;
+                finalModel = llmResponse.model;
+                escalated = escalated || llmResponse.escalated;
+                totalLatencyMs += llmResponse.latencyMs;
+
+                // No tool calls → final response
+                if (!llmResponse.toolCalls || llmResponse.toolCalls.length === 0) {
+                  assistantContent = llmResponse.content;
+                  break;
+                }
+
+                toolCallCount += llmResponse.toolCalls.length;
+
+                // Append assistant message with tool_calls to context
+                const assistantMsg: ChatMessage = {
+                  role: 'assistant',
+                  content: llmResponse.content,
+                  tool_calls: llmResponse.toolCalls,
+                };
+                messages.push(assistantMsg);
+
+                await persistMessage(conversationId, {
+                  role: 'assistant',
+                  content: llmResponse.content ?? '',
+                  toolCalls: llmResponse.toolCalls,
+                });
+
+                // Execute each tool — emit SSE events before/after
+                for (const toolCall of llmResponse.toolCalls) {
+                  let args: Record<string, unknown> = {};
+                  try {
+                    args = JSON.parse(toolCall.function.arguments);
+                  } catch {
+                    args = {};
+                  }
+
+                  // Emit tool_call event → client shows spinner
+                  emitSSE(controller, encoder, {
+                    event: 'tool_call',
+                    id: toolCall.id,
+                    name: toolCall.function.name,
+                    label: getToolCallLabel(toolCall.function.name, args),
+                  });
+
+                  const toolResult = await executeTool(
+                    toolCall.function.name,
+                    args,
+                    orgId,
+                  );
+
+                  // Emit tool_result event → client shows checkmark
+                  emitSSE(controller, encoder, {
+                    event: 'tool_result',
+                    id: toolCall.id,
+                    name: toolCall.function.name,
+                    label: getToolResultLabel(toolCall.function.name, toolResult),
+                  });
+
+                  const toolMsg: ChatMessage = {
+                    role: 'tool',
+                    content: toolResult,
+                    tool_call_id: toolCall.id,
+                  };
+                  messages.push(toolMsg);
+
+                  await persistMessage(conversationId, {
+                    role: 'tool',
+                    content: toolResult,
+                    toolCallId: toolCall.id,
+                  });
+                }
+
+                // Last iteration safety — force a text response
+                if (iteration === MAX_TOOL_ITERATIONS - 1) {
+                  const finalResponse = await callWithEscalation({
+                    messages,
+                    maxTokens: responseConfig.maxTokens,
+                    taskType: 'user_chat',
+                  });
+                  totalInputTokens += finalResponse.usage.inputTokens;
+                  totalOutputTokens += finalResponse.usage.outputTokens;
+                  totalLatencyMs += finalResponse.latencyMs;
+                  assistantContent = finalResponse.content;
+                }
+              }
+
+              // Fallback
+              if (!assistantContent) {
+                assistantContent = "I wasn't able to generate a response. Please try again.";
+              }
+
+              // Emit content as delta chunks (simulates token streaming)
+              const chunks = chunkText(assistantContent, 12);
+              for (const chunk of chunks) {
+                emitSSE(controller, encoder, { event: 'delta', text: chunk });
+              }
+
+              // Done
+              emitSSE(controller, encoder, { event: 'done' });
+              controller.close();
+
+              // Persist + log (non-blocking, after stream closes)
+              persistMessage(conversationId, {
+                role: 'assistant',
+                content: assistantContent,
+                metadata: {
+                  model: finalModel,
+                  escalated,
+                  tool_call_count: toolCallCount,
+                  input_tokens: totalInputTokens,
+                  output_tokens: totalOutputTokens,
+                },
+              }).catch(() => {});
+
+              logUsage({
+                orgId: billingOrgId,
+                userId,
+                conversationId,
+                model: finalModel,
+                tier: escalated ? 'escalation' : 'primary',
+                taskType: 'user_chat',
+                inputTokens: totalInputTokens,
+                outputTokens: totalOutputTokens,
+                latencyMs: Date.now() - startMs,
+                escalated,
+              }).catch(() => {});
+            } catch (err) {
+              console.error('Streaming error:', err);
+              emitSSE(controller, encoder, {
+                event: 'error',
+                message: "I'm having trouble right now. Please try again.",
+              });
+              controller.close();
+            }
+          },
+        }),
+        {
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        },
+      );
+    }
+
+    // ── Non-streaming path (unchanged) ──────────────────────
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
     let finalModel = '';
@@ -151,16 +398,13 @@ chatRoute.post('/', async (c) => {
       escalated = escalated || llmResponse.escalated;
       totalLatencyMs += llmResponse.latencyMs;
 
-      // If no tool calls, we have the final response
       if (!llmResponse.toolCalls || llmResponse.toolCalls.length === 0) {
         assistantContent = llmResponse.content;
         break;
       }
 
-      // Process tool calls
       toolCallCount += llmResponse.toolCalls.length;
 
-      // Append assistant message with tool_calls to context
       const assistantMsg: ChatMessage = {
         role: 'assistant',
         content: llmResponse.content,
@@ -168,14 +412,12 @@ chatRoute.post('/', async (c) => {
       };
       messages.push(assistantMsg);
 
-      // Persist the assistant's tool-calling message
       await persistMessage(conversationId, {
         role: 'assistant',
         content: llmResponse.content ?? '',
         toolCalls: llmResponse.toolCalls,
       });
 
-      // Execute each tool and append results
       for (const toolCall of llmResponse.toolCalls) {
         let args: Record<string, unknown> = {};
         try {
@@ -187,10 +429,9 @@ chatRoute.post('/', async (c) => {
         const toolResult = await executeTool(
           toolCall.function.name,
           args,
-          orgId
+          orgId,
         );
 
-        // Append tool result to messages for next LLM call
         const toolMsg: ChatMessage = {
           role: 'tool',
           content: toolResult,
@@ -198,7 +439,6 @@ chatRoute.post('/', async (c) => {
         };
         messages.push(toolMsg);
 
-        // Persist tool result
         await persistMessage(conversationId, {
           role: 'tool',
           content: toolResult,
@@ -206,8 +446,6 @@ chatRoute.post('/', async (c) => {
         });
       }
 
-      // If this is the last iteration and we still have tool calls,
-      // force a final call without tools to get a text response
       if (iteration === MAX_TOOL_ITERATIONS - 1) {
         const finalResponse = await callWithEscalation({
           messages,
@@ -221,78 +459,6 @@ chatRoute.post('/', async (c) => {
       }
     }
 
-    // Default fallback content
-    if (!assistantContent && !wantsStream) {
-      assistantContent = "I wasn't able to generate a response. Please try again.";
-    }
-
-    // 9. Streaming response path
-    if (wantsStream && !assistantContent) {
-      // Stream the final response via SSE
-      const model = routeToModel('user_chat', false);
-      const stream = await streamOpenRouter({
-        model,
-        messages,
-        maxTokens: responseConfig.maxTokens,
-      });
-
-      let fullContent = '';
-
-      return new Response(
-        new ReadableStream({
-          async start(controller) {
-            const encoder = new TextEncoder();
-            const reader = stream.getReader();
-
-            try {
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                fullContent += value;
-                controller.enqueue(
-                  encoder.encode(`data: ${JSON.stringify({ delta: value })}\n\n`)
-                );
-              }
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`)
-              );
-              controller.close();
-            } catch (err) {
-              controller.error(err);
-            }
-
-            // Persist and log after stream completes (non-blocking)
-            persistMessage(conversationId, {
-              role: 'assistant',
-              content: fullContent,
-              metadata: { model, escalated, tool_call_count: toolCallCount },
-            }).catch(() => {});
-
-            logUsage({
-              orgId: billingOrgId,
-              userId,
-              conversationId,
-              model,
-              tier: 'primary',
-              taskType: 'user_chat',
-              inputTokens: totalInputTokens,
-              outputTokens: 0,
-              latencyMs: Date.now() - Date.now(),
-              escalated,
-            }).catch(() => {});
-          },
-        }),
-        {
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-          },
-        }
-      );
-    }
-
-    // Non-streaming fallback
     if (!assistantContent) {
       assistantContent = "I wasn't able to generate a response. Please try again.";
     }

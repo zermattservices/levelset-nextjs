@@ -11,15 +11,15 @@
 | Phase | Status | What's Done | What Remains |
 |-------|--------|-------------|--------------|
 | **Phase 1: Monorepo** | **Complete** | pnpm workspaces, Turborepo, `apps/agent` on Fly.io, `packages/shared`, `packages/permissions`, `packages/supabase-client`, `packages/design-tokens` | — |
-| **Phase 2: Agentic Foundation** | **In Progress** | Agent skeleton (Hono, auth middleware, health check, CORS), chat route stub | LLM integration, conversation DB tables, tools, dashboard chat UI, conversation persistence, streaming |
+| **Phase 2: Agentic Foundation** | **In Progress** | Agent skeleton (Hono, auth middleware, health check, CORS), chat endpoint with tool loop, LLM integration (MiniMax M2.5 + Claude Sonnet escalation via OpenRouter), conversation DB tables (`ai_conversations`, `ai_messages`), conversation persistence + history pagination, structured data tools (employee lookup/list, ratings, infractions), SSE streaming with tool call events, usage tracking + rate limiting | Dashboard chat UI |
 | **Phase 3: Doc Intelligence** | Not Started | — | PageIndex integration, hybrid RAG |
 | **Phase 4-5: Meetings** | Not Started | — | All meeting functionality |
 | **Phase 6: Memory** | Not Started | — | Memory tables, feedback, learning |
 | **Phase 7: Autonomy** | Not Started | — | Heartbeat, escalation, channels |
-| **Phase 8: Mobile** | **Partially Done** | Full chat UI (ChatScreen, ChatInput, ChatBubble, TypingIndicator), drawer nav (LeviSlidingMenu), settings modal, LeviChatContext + LeviMenuContext, tab integration with animated drawer | Backend integration (connects to unimplemented agent), Tasks/Meetings/Alerts screens are stubs |
+| **Phase 8: Mobile** | **Partially Done** | Full chat UI (ChatScreen, ChatInput, ChatBubble, TypingIndicator, ToolCallCard), drawer nav (LeviSlidingMenu), settings modal, LeviChatContext + LeviMenuContext, tab integration with animated drawer, SSE streaming with tool call visuals (spinner → checkmark), token-by-token text rendering, conversation history with pagination | Tasks/Meetings/Alerts screens are stubs |
 | **Phase 9: Polish** | Not Started | — | — |
 
-**Key deviation from original plan:** Mobile chat UI was built ahead of the backend (Phase 8 before Phase 2). The mobile app has a complete Levi interface that currently displays a fallback message ("I'm still being set up. Check back soon!"). The mobile app lives at `apps/mobile/` as a separate npm workspace (excluded from pnpm).
+**Key deviation from original plan:** Mobile chat UI was built ahead of the backend (Phase 8 before Phase 2). The mobile app now has a fully functional Levi chat interface with SSE streaming, tool call visuals, and conversation history. The mobile app lives at `apps/mobile/` as a separate npm workspace (excluded from pnpm).
 
 ### Current Architecture (What Exists)
 
@@ -27,17 +27,33 @@
 apps/agent/src/
 ├── index.ts                 # Hono server setup, CORS, routing
 ├── middleware/
-│   └── auth.ts             # JWT verification via Supabase, role checks (Levelset Admin only)
+│   └── auth.ts             # JWT verification via Supabase, role checks
+├── lib/
+│   ├── llm-clients/
+│   │   └── openrouter.ts   # callWithEscalation() + streamOpenRouter()
+│   ├── llm-router.ts       # Tiered model routing (MiniMax primary, Claude escalation)
+│   ├── conversation-manager.ts  # Conversation CRUD + history pagination
+│   ├── prompts.ts          # System prompt builder
+│   ├── usage-tracker.ts    # Usage logging + rate limiting
+│   └── types.ts            # ChatMessage, UserContext, ToolDefinition
+├── tools/
+│   ├── index.ts            # Tool registry + dispatcher
+│   └── data/
+│       ├── employee.ts     # lookup_employee, list_employees
+│       ├── ratings.ts      # get_employee_ratings
+│       └── infractions.ts  # get_employee_infractions
 └── routes/
-    ├── health.ts           # GET /health — public health check
+    ├── health.ts           # GET /health
     └── ai/
-        └── chat.ts         # POST /api/ai/chat — returns 501 (not yet implemented)
+        └── chat.ts         # POST /api/ai/chat — SSE streaming with tool call events
+                            # GET /api/ai/chat/history — paginated chat history
 
 apps/mobile/src/
 ├── components/levi/
 │   ├── ChatScreen.tsx      # Main chat interface with message list + input
 │   ├── ChatInput.tsx       # Claude-style input with +, send, microphone buttons
-│   ├── ChatBubble.tsx      # User (right) and assistant (left, with Levi avatar) bubbles
+│   ├── ChatBubble.tsx      # User (right) and assistant (left, with markdown + tool calls) bubbles
+│   ├── ToolCallCard.tsx    # Tool call indicator card (spinner → checkmark)
 │   ├── TypingIndicator.tsx # Animated "Levi is typing..." dots
 │   ├── LeviSettingsModal.tsx  # Notifications, language toggle, clear history
 │   └── LeviSlidingMenu.tsx    # Drawer sidebar with Chat/Tasks/Meetings/Alerts tabs
@@ -46,21 +62,19 @@ apps/mobile/src/
 │   ├── MeetingsScreen.tsx  # Stub — "Coming soon"
 │   └── AlertsScreen.tsx    # Stub — "Coming soon"
 ├── context/
-│   ├── LeviChatContext.tsx  # Chat state management, sends to EXPO_PUBLIC_AGENT_URL/api/ai/chat
+│   ├── LeviChatContext.tsx  # Chat state, SSE event parser (tool_call/tool_result/delta/done)
 │   └── LeviMenuContext.tsx  # Drawer navigation state
 └── app/(tabs)/(levi)/
     ├── _layout.tsx         # Wraps with LeviMenuProvider + LeviChatProvider
     └── index.tsx           # Animated drawer layout with gesture support
 ```
 
-### Next Priority: Functional Chat (Phase 2 Completion)
+### Next Priority: Dashboard Chat UI + Phase 3
 
-The immediate next step is getting the chat pipeline working end-to-end:
-1. LLM integration in the agent (MiniMax M2.5 via OpenRouter as primary model)
-2. Database migrations for `ai_conversations` and `ai_messages` tables
-3. Basic structured data tools (employee lookup, ratings, discipline)
-4. Streaming responses via SSE to both mobile and dashboard
-5. Conversation persistence and history management
+Phase 2 backend is functional — LLM integration, tools, SSE streaming, and conversation persistence are all working. Remaining work:
+1. Dashboard chat UI (web-based Levi interface for desktop users)
+2. Phase 3: Document intelligence (PageIndex integration, hybrid RAG)
+3. Additional tools (scheduling, location data, review summaries)
 
 ---
 
@@ -1670,42 +1684,47 @@ OPENROUTER_API_KEY=sk-or-...     # Routed for primary + escalation + batch tiers
 
 ### Streaming Architecture
 
-All chat responses are streamed via Server-Sent Events (SSE) to provide real-time token-by-token output:
+All chat responses are streamed via Server-Sent Events (SSE) to provide real-time feedback during tool execution and token-by-token text output:
 
 ```
 Client (Mobile/Dashboard)
        │
-       │  POST /api/ai/chat
-       │  Accept: text/event-stream
+       │  POST /api/ai/chat { message, org_id, stream: true }
        ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    AGENT (Fly.io)                                    │
 │                                                                     │
 │  1. Validate auth, load user context                               │
-│  2. Route to appropriate model (MiniMax M2.5 / Claude / Gemini)    │
-│  3. Stream response via SSE:                                       │
+│  2. Open SSE response immediately                                  │
+│  3. Tool call loop (max 5 iterations):                             │
+│     → Emit tool_call event (client shows spinner card)             │
+│     → Execute tool                                                  │
+│     → Emit tool_result event (client shows checkmark)              │
+│     → Re-call LLM with tool results                               │
+│  4. Chunk final text into ~12-char pieces, emit as delta events    │
+│  5. Emit done event                                                │
+│  6. Persist messages + log usage (non-blocking)                    │
 │                                                                     │
-│     data: {"type":"token","content":"Hi"}                          │
-│     data: {"type":"token","content":" there"}                      │
-│     data: {"type":"tool_call","name":"employee_lookup",...}         │
-│     data: {"type":"tool_result","content":"..."}                   │
-│     data: {"type":"token","content":"Sarah's rating is..."}        │
-│     data: {"type":"done","usage":{"input":234,"output":89}}        │
-│                                                                     │
-│  4. On stream complete: persist messages, log usage                │
+│  Example SSE stream:                                                │
+│  data: {"event":"tool_call","id":"tc_1","name":"lookup_employee",  │
+│          "label":"Looking up Sarah Johnson"}                        │
+│  data: {"event":"tool_result","id":"tc_1","name":"lookup_employee",│
+│          "label":"Found Sarah Johnson"}                             │
+│  data: {"event":"delta","text":"Based on "}                        │
+│  data: {"event":"delta","text":"the records, "}                    │
+│  data: {"event":"done"}                                            │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**SSE Event Types:**
+**SSE Event Types (implemented):**
 
-| Event | Purpose |
-|-------|---------|
-| `token` | Streamed text content (display immediately) |
-| `tool_call` | Levi is calling a tool (show "Looking up..." indicator) |
-| `tool_result` | Tool returned data (can show inline or hide) |
-| `done` | Stream complete, includes token usage for billing |
-| `error` | Error occurred, includes message |
-| `escalated` | Request was escalated to a higher-tier model |
+| Event | Fields | Purpose |
+|-------|--------|---------|
+| `tool_call` | `id`, `name`, `label` | Tool execution starting (show spinner card with label) |
+| `tool_result` | `id`, `name`, `label` | Tool execution complete (show checkmark, update label) |
+| `delta` | `text` | Streamed text chunk (append to message content) |
+| `done` | — | Stream complete |
+| `error` | `message` | Error occurred, includes user-facing message |
 
 **Why SSE over WebSocket for chat:**
 - Simpler — unidirectional (server → client), no connection management
@@ -1999,15 +2018,16 @@ export const LEVI_TOOLS = {
 ### Phase 2: Agentic Foundation — IN PROGRESS
 - [x] Agent skeleton with Hono, auth middleware, health check
 - [x] Mobile chat UI (built ahead of schedule — see Phase 8)
-- [ ] Database migrations for core tables (`levi_config`, `ai_conversations`, `ai_messages`, `levi_usage_log`)
-- [ ] LLM client abstraction with tiered routing (MiniMax M2.5 primary, Claude escalation)
-- [ ] OpenRouter integration with automatic fallback
-- [ ] Streaming responses via SSE (Server-Sent Events) to both mobile and dashboard
-- [ ] Basic tools: employee, ratings, discipline, evaluation
+- [x] Database migrations for core tables (`ai_conversations`, `ai_messages`, `levi_usage_log`)
+- [x] LLM client abstraction with tiered routing (MiniMax M2.5 primary, Claude Sonnet escalation)
+- [x] OpenRouter integration with automatic fallback
+- [x] SSE streaming with structured events (tool_call, tool_result, delta, done)
+- [x] Basic tools: employee lookup/list, ratings, infractions
+- [x] Conversation persistence and history management (pagination)
+- [x] Per-org usage tracking and rate limiting
 - [ ] Chat UI on dashboard (AI page + FAB modal)
-- [ ] Conversation persistence and history management
 - [ ] Context window management (sliding window + summarization for long conversations)
-- [ ] Per-org usage tracking and rate limiting
+- [ ] Additional tools: evaluation, scheduling, location data
 - [ ] Bilingual support (EN/ES) via system prompt + language detection
 - [ ] Response verbosity controls (`max_tokens` per task type, concise system prompts)
 
@@ -2070,11 +2090,14 @@ export const LEVI_TOOLS = {
 ### Phase 8: Mobile — PARTIALLY COMPLETE
 - [x] Mobile app with Expo Router + NativeTabs (`apps/mobile/`)
 - [x] Mobile auth flow with Supabase
-- [x] Mobile chat interface (full Claude-style UI with 6 components)
+- [x] Mobile chat interface (full Claude-style UI with 7 components)
 - [x] Animated drawer navigation (Chat/Tasks/Meetings/Alerts)
 - [x] Settings modal (language toggle, notifications, clear history)
-- [x] LeviChatContext (state management, API integration)
-- [ ] Connect to working backend (currently shows fallback message)
+- [x] LeviChatContext (state management, SSE event parser, history pagination)
+- [x] Connected to working agent backend with SSE streaming
+- [x] Tool call visuals (ToolCallCard with spinner → checkmark transitions)
+- [x] Token-by-token text streaming with markdown rendering
+- [x] Conversation history with scroll-up pagination
 - [ ] Mobile meeting recording
 - [ ] TTS integration (ElevenLabs) for voice responses
 - [ ] Voice output during meetings

@@ -142,6 +142,7 @@ const en = {
   },
   location: {
     changeLocation: "Change location",
+    searchLocations: "Search locations...",
   },
   schedule: {
     mySchedule: "My Schedule",
@@ -326,6 +327,7 @@ const es = {
   },
   location: {
     changeLocation: "Cambiar ubicación",
+    searchLocations: "Buscar ubicaciones...",
   },
   schedule: {
     mySchedule: "Mi Horario",

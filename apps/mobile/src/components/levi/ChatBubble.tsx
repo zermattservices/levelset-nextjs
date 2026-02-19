@@ -16,6 +16,7 @@ import { typography, fontWeights, fontFamilies, fontSizes } from "../../lib/font
 import { spacing, borderRadius, haptics } from "../../lib/theme";
 import type { ChatMessage } from "../../context/LeviChatContext";
 import type { ColorPalette } from "../../lib/colors";
+import { ToolCallCard } from "./ToolCallCard";
 
 interface ChatBubbleProps {
   message: ChatMessage;
@@ -225,6 +226,9 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
   }
 
   const mdStyles = buildMarkdownStyles(colors);
+  const hasToolCalls = message.toolCalls && message.toolCalls.length > 0;
+  const hasContent = message.content.length > 0;
+  const showCopy = hasContent && !message.isStreaming;
 
   return (
     <Animated.View
@@ -248,27 +252,40 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
         </Text>
       </View>
 
-      {/* Markdown content */}
-      <View style={styles.markdownWrap}>
-        <Markdown style={mdStyles}>
-          {message.content}
-        </Markdown>
-      </View>
+      {/* Tool call cards */}
+      {hasToolCalls && (
+        <View style={styles.toolCallList}>
+          {message.toolCalls!.map((tc) => (
+            <ToolCallCard key={tc.id} toolCall={tc} />
+          ))}
+        </View>
+      )}
 
-      {/* Copy button */}
-      <View style={styles.actionsRow}>
-        <Pressable
-          onPress={handleCopy}
-          hitSlop={8}
-          style={styles.actionButton}
-        >
-          <AppIcon
-            name="doc.on.doc"
-            size={16}
-            tintColor={colors.onSurfaceDisabled}
-          />
-        </Pressable>
-      </View>
+      {/* Markdown content — only render when we have text */}
+      {hasContent && (
+        <View style={styles.markdownWrap}>
+          <Markdown style={mdStyles}>
+            {message.content}
+          </Markdown>
+        </View>
+      )}
+
+      {/* Copy button — hidden while streaming */}
+      {showCopy && (
+        <View style={styles.actionsRow}>
+          <Pressable
+            onPress={handleCopy}
+            hitSlop={8}
+            style={styles.actionButton}
+          >
+            <AppIcon
+              name="doc.on.doc"
+              size={16}
+              tintColor={colors.onSurfaceDisabled}
+            />
+          </Pressable>
+        </View>
+      )}
     </Animated.View>
   );
 }
@@ -312,6 +329,10 @@ const styles = StyleSheet.create({
   assistantName: {
     ...typography.labelSmall,
     fontWeight: fontWeights.medium,
+  },
+  toolCallList: {
+    gap: spacing[1],
+    paddingLeft: spacing[1],
   },
   markdownWrap: {
     paddingLeft: spacing[1],
