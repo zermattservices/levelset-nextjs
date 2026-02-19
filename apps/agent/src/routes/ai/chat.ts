@@ -374,6 +374,7 @@ chatRoute.post('/', async (c) => {
           let escalated = false;
           let toolCallCount = 0;
           let assistantContent = '';
+          const allUIBlocks: Array<{ blockType: string; blockId: string; payload: Record<string, unknown> }> = [];
 
           try {
             const result = streamText({
@@ -449,6 +450,7 @@ chatRoute.post('/', async (c) => {
                           outputStr
                         );
                         for (const block of uiBlocks) {
+                          allUIBlocks.push(block);
                           writer.write({
                             type: 'data-ui-block' as any,
                             data: block,
@@ -528,6 +530,7 @@ chatRoute.post('/', async (c) => {
                 input_tokens: totalInputTokens,
                 output_tokens: totalOutputTokens,
               },
+              uiBlocks: allUIBlocks.length > 0 ? allUIBlocks : undefined,
             }).catch(() => {});
           }
 

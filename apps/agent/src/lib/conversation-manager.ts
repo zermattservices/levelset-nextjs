@@ -122,6 +122,7 @@ export async function loadHistoryPage(
     content: string;
     created_at: string;
     tool_calls?: unknown;
+    ui_blocks?: unknown;
     metadata?: Record<string, unknown>;
   }>;
   hasMore: boolean;
@@ -131,7 +132,7 @@ export async function loadHistoryPage(
 
   let query = supabase
     .from('ai_messages')
-    .select('id, role, content, tool_calls, metadata, created_at')
+    .select('id, role, content, tool_calls, ui_blocks, metadata, created_at')
     .eq('conversation_id', conversationId)
     .in('role', ['user', 'assistant'])
     .order('created_at', { ascending: false })
@@ -160,6 +161,7 @@ export async function loadHistoryPage(
       content: m.content as string,
       created_at: m.created_at as string,
       ...(m.tool_calls ? { tool_calls: m.tool_calls } : {}),
+      ...((m as any).ui_blocks ? { ui_blocks: (m as any).ui_blocks } : {}),
       ...(m.metadata ? { metadata: m.metadata as Record<string, unknown> } : {}),
     })),
     hasMore,
@@ -215,6 +217,7 @@ export async function persistMessage(
     toolCalls?: unknown;
     toolCallId?: string;
     metadata?: Record<string, unknown>;
+    uiBlocks?: unknown;
   }
 ): Promise<string> {
   const supabase = createServiceClient();
@@ -228,6 +231,7 @@ export async function persistMessage(
       tool_calls: message.toolCalls ?? null,
       tool_call_id: message.toolCallId ?? null,
       metadata: message.metadata ?? {},
+      ui_blocks: message.uiBlocks ?? null,
     })
     .select('id')
     .single();

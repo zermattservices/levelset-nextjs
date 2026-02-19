@@ -237,23 +237,6 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
       entering={FadeIn.duration(200)}
       style={styles.assistantRow}
     >
-      {/* Avatar + name */}
-      <View style={styles.avatarLine}>
-        <View
-          style={[
-            styles.avatarCircle,
-            { backgroundColor: colors.primaryTransparent },
-          ]}
-        >
-          <AppIcon name="cpu" size={14} tintColor={colors.primary} />
-        </View>
-        <Text
-          style={[styles.assistantName, { color: colors.onSurfaceVariant }]}
-        >
-          Levi
-        </Text>
-      </View>
-
       {/* Tool call summary — collapsible row */}
       {hasToolCalls && (
         <View style={styles.toolCallList}>
@@ -322,22 +305,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     width: "100%",
     gap: spacing[1],
-  },
-  avatarLine: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing[2],
-  },
-  avatarCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  assistantName: {
-    ...typography.labelSmall,
-    fontWeight: fontWeights.medium,
   },
   toolCallList: {
     gap: spacing[1],

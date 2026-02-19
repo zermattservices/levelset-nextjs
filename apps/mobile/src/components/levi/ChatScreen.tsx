@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: spacing[4],
-    paddingTop: spacing[2],
+    paddingTop: spacing[4],
     paddingBottom: spacing[2],
     gap: spacing[5],
   },

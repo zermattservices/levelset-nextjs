@@ -36,7 +36,7 @@ export interface ToolCallEvent {
 }
 
 export interface UIBlock {
-  blockType: "employee-card" | "employee-list" | "rating-summary" | "infraction-card";
+  blockType: "employee-card" | "employee-list" | "rating-summary" | "infraction-card" | "disc-action-card";
   blockId: string;
   payload: Record<string, any>;
 }
@@ -141,10 +141,16 @@ function mapHistoryMessage(msg: any): ChatMessage {
     content: msg.content ?? "",
     created_at: msg.created_at,
   };
-  if (msg.role === "assistant" && msg.tool_calls) {
-    const toolCalls = parseHistoryToolCalls(msg.tool_calls);
-    if (toolCalls && toolCalls.length > 0) {
-      base.toolCalls = toolCalls;
+  if (msg.role === "assistant") {
+    if (msg.tool_calls) {
+      const toolCalls = parseHistoryToolCalls(msg.tool_calls);
+      if (toolCalls && toolCalls.length > 0) {
+        base.toolCalls = toolCalls;
+      }
+    }
+    // Restore persisted UI blocks from history
+    if (msg.ui_blocks && Array.isArray(msg.ui_blocks) && msg.ui_blocks.length > 0) {
+      base.uiBlocks = msg.ui_blocks as UIBlock[];
     }
   }
   return base;
