@@ -16,11 +16,16 @@ export interface UIBlock {
 /**
  * Convert a tool's output into UI blocks for the mobile client.
  * Returns an empty array if no blocks should be shown.
+ *
+ * The optional `userMessage` parameter is the original user question, used
+ * to avoid emitting irrelevant blocks (e.g. rating cards for a discipline
+ * question). When omitted, all block types are emitted as a fallback.
  */
 export function toolResultToUIBlocks(
   toolName: string,
   toolInput: Record<string, unknown>,
-  toolOutput: string
+  toolOutput: string,
+  userMessage?: string
 ): UIBlock[] {
   try {
     const data = JSON.parse(toolOutput);
@@ -38,7 +43,7 @@ export function toolResultToUIBlocks(
       case 'get_employee_infractions':
         return employeeInfractionsBlocks(data);
       case 'get_employee_profile':
-        return employeeProfileBlocks(data);
+        return employeeProfileBlocks(data, userMessage);
       case 'get_position_rankings':
         return positionRankingsBlocks(data);
       case 'get_team_overview':
@@ -59,14 +64,13 @@ function lookupEmployeeBlocks(data: any[]): UIBlock[] {
   if (!Array.isArray(data)) return [];
   return data.slice(0, 5).map((emp) => ({
     blockType: 'employee-card' as const,
-    blockId: `emp-${emp.id}`,
+    blockId: `lookup-emp-${emp.id}`,
     payload: {
       employee_id: emp.id,
       name: emp.full_name,
       role: emp.role,
       hire_date: emp.hire_date,
       certified_status: emp.certified_status,
-      current_points: emp.last_points_total,
       is_leader: emp.is_leader,
       is_trainer: emp.is_trainer,
     },
@@ -127,7 +131,7 @@ function employeeInfractionsBlocks(data: any): UIBlock[] {
 
   return infractions.slice(0, 5).map((inf: any) => ({
     blockType: 'infraction-card' as const,
-    blockId: `inf-${inf.id}`,
+    blockId: `tool-inf-${inf.id}`,
     payload: {
       id: inf.id,
       employee_name: '', // Not available from infractions tool alone
@@ -139,30 +143,64 @@ function employeeInfractionsBlocks(data: any): UIBlock[] {
   }));
 }
 
-function employeeProfileBlocks(data: any): UIBlock[] {
-  const blocks: UIBlock[] = [];
+/**
+ * Detect which data domains the user's question is about so we only emit
+ * relevant UI blocks. Falls back to 'general' (employee card only) when
+ * the intent is unclear.
+ */
+function detectQueryIntent(userMessage?: string): Set<'ratings' | 'discipline' | 'general'> {
+  if (!userMessage) return new Set(['ratings', 'discipline', 'general']);
 
-  // Employee card
+  const msg = userMessage.toLowerCase();
+  const intents = new Set<'ratings' | 'discipline' | 'general'>();
+
+  // Ratings keywords
+  if (/\b(rat(e|ing|ings|ed)|score|rank|best|worst|top|bottom|average|avg|performance|position|eval)/i.test(msg)) {
+    intents.add('ratings');
+  }
+
+  // Discipline keywords
+  if (/\b(disciplin|infraction|point|write[- ]?up|warning|termina|fired|suspend|probation|pip|coach|counsel)/i.test(msg)) {
+    intents.add('discipline');
+  }
+
+  // If nothing specific detected, just show the employee card
+  if (intents.size === 0) {
+    intents.add('general');
+  }
+
+  return intents;
+}
+
+function employeeProfileBlocks(data: any, userMessage?: string): UIBlock[] {
+  const blocks: UIBlock[] = [];
+  const intents = detectQueryIntent(userMessage);
+  const showRatings = intents.has('ratings');
+  const showDiscipline = intents.has('discipline');
+
+  // Employee card — always shown (it's a compact summary)
   if (data.employee) {
     blocks.push({
       blockType: 'employee-card',
-      blockId: `emp-${data.employee.id}`,
+      blockId: `profile-emp-${data.employee.id}`,
       payload: {
         employee_id: data.employee.id,
         name: data.employee.full_name,
         role: data.employee.role,
         hire_date: data.employee.hire_date,
         certified_status: data.employee.certified_status,
-        current_points: data.discipline?.current_points,
+        current_points: showDiscipline ? data.discipline?.current_points : undefined,
         is_leader: data.employee.is_leader,
         is_trainer: data.employee.is_trainer,
-        rating_avg: data.ratings?.overall_avg ? parseFloat(data.ratings.overall_avg) : undefined,
+        rating_avg: showRatings && data.ratings?.overall_avg
+          ? parseFloat(data.ratings.overall_avg)
+          : undefined,
       },
     });
   }
 
-  // Rating summaries per position
-  if (data.ratings?.latest && Array.isArray(data.ratings.latest)) {
+  // Rating summaries per position — only when user asked about ratings
+  if (showRatings && data.ratings?.latest && Array.isArray(data.ratings.latest)) {
     const byPosition = new Map<string, { sum: number; count: number }>();
     for (const r of data.ratings.latest) {
       const pos = r.position;
@@ -188,12 +226,12 @@ function employeeProfileBlocks(data: any): UIBlock[] {
     }
   }
 
-  // Infraction cards
-  if (data.discipline?.infractions && Array.isArray(data.discipline.infractions)) {
+  // Infraction cards — only when user asked about discipline
+  if (showDiscipline && data.discipline?.infractions && Array.isArray(data.discipline.infractions)) {
     for (const inf of data.discipline.infractions.slice(0, 3)) {
       blocks.push({
         blockType: 'infraction-card',
-        blockId: `inf-${inf.id}`,
+        blockId: `profile-inf-${inf.id}`,
         payload: {
           id: inf.id,
           employee_name: data.employee?.full_name || '',
@@ -206,12 +244,12 @@ function employeeProfileBlocks(data: any): UIBlock[] {
     }
   }
 
-  // Discipline action cards
-  if (data.discipline?.disc_actions && Array.isArray(data.discipline.disc_actions)) {
+  // Discipline action cards — only when user asked about discipline
+  if (showDiscipline && data.discipline?.disc_actions && Array.isArray(data.discipline.disc_actions)) {
     for (const da of data.discipline.disc_actions.slice(0, 3)) {
       blocks.push({
         blockType: 'disc-action-card',
-        blockId: `da-${da.id}`,
+        blockId: `profile-da-${da.id}`,
         payload: {
           id: da.id,
           action: da.action,
@@ -282,7 +320,7 @@ function disciplineSummaryBlocks(data: any): UIBlock[] {
     for (const inf of data.infractions.recent.slice(0, 5)) {
       blocks.push({
         blockType: 'infraction-card',
-        blockId: `inf-${inf.id}`,
+        blockId: `disc-inf-${inf.id}`,
         payload: {
           id: inf.id,
           employee_name: data.employee?.name || '',
@@ -300,7 +338,7 @@ function disciplineSummaryBlocks(data: any): UIBlock[] {
     for (const da of data.discipline_actions.recent.slice(0, 5)) {
       blocks.push({
         blockType: 'disc-action-card',
-        blockId: `da-${da.id}`,
+        blockId: `disc-da-${da.id}`,
         payload: {
           id: da.id,
           action: da.action,
@@ -314,10 +352,10 @@ function disciplineSummaryBlocks(data: any): UIBlock[] {
 
   // Location-wide recent discipline actions
   if (data.recent_discipline_actions && Array.isArray(data.recent_discipline_actions)) {
-    for (const da of data.recent_discipline_actions.slice(0, 5)) {
+    data.recent_discipline_actions.slice(0, 5).forEach((da: any, idx: number) => {
       blocks.push({
         blockType: 'disc-action-card',
-        blockId: `da-loc-${Date.now()}-${da.action}`,
+        blockId: `loc-da-${idx}-${da.action}`,
         payload: {
           id: '',
           action: da.action,
@@ -325,7 +363,7 @@ function disciplineSummaryBlocks(data: any): UIBlock[] {
           employee_name: da.employee_name || '',
         },
       });
-    }
+    });
   }
 
   // Location-wide top point holders

@@ -226,7 +226,7 @@ function buildTools(orgId: string, locationId?: string) {
     }),
     get_employee_profile: tool({
       description:
-        'Get a comprehensive one-shot profile for an employee including their details, recent ratings with trends, infractions with active points, and discipline actions. More efficient than calling individual tools separately. Use lookup_employee first to get the employee ID.',
+        'Get a comprehensive one-shot profile for an employee including their details, recent ratings with trends, infractions with current points, and discipline actions. More efficient than calling individual tools separately. Use lookup_employee first to get the employee ID. After calling this, do NOT also call get_employee_ratings or get_employee_infractions.',
       inputSchema: z.object({
         employee_id: z.string().describe('The UUID of the employee'),
       }),
@@ -470,7 +470,8 @@ chatRoute.post('/', async (c) => {
                         const uiBlocks = toolResultToUIBlocks(
                           matchingCall.toolName,
                           matchingCall.input,
-                          outputStr
+                          outputStr,
+                          userMessage
                         );
                         for (const block of uiBlocks) {
                           allUIBlocks.push(block);
