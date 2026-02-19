@@ -107,6 +107,8 @@ function getToolLabel(toolName: string): string {
       return "Loading team overview";
     case "get_discipline_summary":
       return "Loading discipline overview";
+    case "get_position_rankings":
+      return "Ranking by position";
     default:
       return `Running ${toolName.replace(/_/g, " ")}`;
   }
@@ -148,9 +150,15 @@ function mapHistoryMessage(msg: any): ChatMessage {
         base.toolCalls = toolCalls;
       }
     }
-    // Restore persisted UI blocks from history
+    // Restore persisted UI blocks from history, deduplicating by blockId
+    // (older messages may have duplicate blockIds from before prefix fix)
     if (msg.ui_blocks && Array.isArray(msg.ui_blocks) && msg.ui_blocks.length > 0) {
-      base.uiBlocks = msg.ui_blocks as UIBlock[];
+      const seen = new Set<string>();
+      base.uiBlocks = (msg.ui_blocks as UIBlock[]).filter((b) => {
+        if (seen.has(b.blockId)) return false;
+        seen.add(b.blockId);
+        return true;
+      });
     }
   }
   return base;

@@ -32,6 +32,8 @@ function getToolIcon(name: string): string {
       return "person.3";
     case "get_discipline_summary":
       return "doc.plaintext";
+    case "get_position_rankings":
+      return "chart.bar";
     default:
       return "wrench";
   }
@@ -60,6 +62,7 @@ function summarizeToolCalls(toolCalls: ToolCallEvent[]): string {
   const profile = toolCalls.filter((tc) => tc.name === "get_employee_profile");
   const team = toolCalls.filter((tc) => tc.name === "get_team_overview");
   const discipline = toolCalls.filter((tc) => tc.name === "get_discipline_summary");
+  const rankings = toolCalls.filter((tc) => tc.name === "get_position_rankings");
 
   if (lookup.length > 0) actions.push(lookup.length === 1 ? "looked up employee" : `looked up ${lookup.length} employees`);
   if (list.length > 0) actions.push("listed employees");
@@ -68,6 +71,7 @@ function summarizeToolCalls(toolCalls: ToolCallEvent[]): string {
   if (profile.length > 0) actions.push(profile.length === 1 ? "loaded profile" : `loaded ${profile.length} profiles`);
   if (team.length > 0) actions.push("loaded team overview");
   if (discipline.length > 0) actions.push("checked discipline");
+  if (rankings.length > 0) actions.push("ranked by position");
 
   if (actions.length === 0) {
     return `Used ${toolCalls.length} tool${toolCalls.length > 1 ? "s" : ""}`;

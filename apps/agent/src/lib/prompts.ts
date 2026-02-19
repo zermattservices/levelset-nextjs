@@ -102,11 +102,11 @@ ${styleInstruction}
 
 Output rules:
 - NEVER include internal reasoning, planning thoughts, or tool commentary in your response.
-- NEVER say "Let me check...", "I should search for...", "Let me try...", "I found that...", or similar thinking-aloud phrases.
+- NEVER narrate what you are doing. No "Let me check...", "Now let me get...", "I'll look up...", "I found that...", or similar phrases. Just provide the answer.
 - Only output the FINAL polished answer. The tool call UI already shows the user what you're doing behind the scenes.
-- Tool results automatically generate visual cards in the chat. These cards are useful and can be part of your answer, but they should NEVER be the entire response.
-- Always include a substantive text answer that directly addresses the user's question. Use cards to support your explanation, not replace it.
-- Analyze the data: explain what it means, highlight key takeaways, note patterns, or give recommendations. Don't just say "Here are the results."
+- Tool results automatically generate visual cards (employee cards, infraction cards, lists, etc.) in the chat. The cards are already visible to the user — do not describe or restate what the cards show. Instead, add analysis, insight, and recommendations that go beyond what the cards display.
+- Always include a substantive text answer that directly addresses the user's question. Cards support your explanation, not replace it.
+- Use standard markdown formatting: regular text for most content, **bold** only for key emphasis like names or important numbers. Do NOT bold entire paragraphs or sentences.
 
 Guidelines:
 - Be concise. Only include data directly relevant to the user's question.
@@ -132,7 +132,8 @@ Response style:
 - Only include hire dates, contact info, or other metadata when explicitly requested.
 - For ratings, show the average and note trends if relevant.
 - For infractions, show current points (within the 90-day discipline cutoff) and recent incidents. Never say "active points" or "stored points" — use "current points" for points within the cutoff and "archived points" for older ones.
-- Format employee names in bold.
+- Use **bold** sparingly — only for employee names and key numbers. Everything else should be regular text weight.
+- Use bullet points and line breaks to structure longer responses.
 - For multi-faceted questions, provide a clear, opinionated answer first, then briefly explain the reasoning.`;
 
   // Section 2: Org Context (optional — included when loaded)

@@ -244,21 +244,21 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
         </View>
       )}
 
-      {/* Rich UI blocks — rendered inline between tools and text */}
-      {hasUIBlocks && (
-        <View style={styles.uiBlockList}>
-          {message.uiBlocks!.map((block) => (
-            <UIBlockRenderer key={block.blockId} block={block} />
-          ))}
-        </View>
-      )}
-
-      {/* Markdown content — only render when we have text */}
+      {/* Markdown content — text analysis comes first */}
       {hasContent && (
         <View style={styles.markdownWrap}>
           <Markdown style={mdStyles}>
             {message.content}
           </Markdown>
+        </View>
+      )}
+
+      {/* Rich UI blocks — supporting data cards after analysis */}
+      {hasUIBlocks && (
+        <View style={styles.uiBlockList}>
+          {message.uiBlocks!.map((block) => (
+            <UIBlockRenderer key={block.blockId} block={block} />
+          ))}
         </View>
       )}
 
