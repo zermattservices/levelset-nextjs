@@ -56,9 +56,28 @@ const MAX_TOOL_STEPS = 3;
 /* ── Convert DB ChatMessages to AI SDK ModelMessages ──────── */
 
 function toModelMessages(messages: ChatMessage[]): ModelMessage[] {
+  // Collect all tool_call IDs from assistant messages so we can validate
+  // that every tool result has a matching tool_call in the history.
+  const toolCallIds = new Set<string>();
+  for (const msg of messages) {
+    if (msg.role === 'assistant' && msg.tool_calls) {
+      for (const tc of msg.tool_calls) {
+        toolCallIds.add(tc.id);
+      }
+    }
+  }
+
+  // Drop leading tool messages (can happen when the 20-message limit cuts
+  // off mid-sequence, leaving orphaned tool results at the start).
+  let startIdx = 0;
+  while (startIdx < messages.length && messages[startIdx].role === 'tool') {
+    startIdx++;
+  }
+
   const result: ModelMessage[] = [];
 
-  for (const msg of messages) {
+  for (let i = startIdx; i < messages.length; i++) {
+    const msg = messages[i];
     switch (msg.role) {
       case 'system':
         result.push({ role: 'system', content: msg.content ?? '' });
@@ -95,18 +114,22 @@ function toModelMessages(messages: ChatMessage[]): ModelMessage[] {
       }
 
       case 'tool': {
-        // Tool result messages — each has a tool_call_id linking back to the tool call.
-        result.push({
-          role: 'tool',
-          content: [
-            {
-              type: 'tool-result',
-              toolCallId: msg.tool_call_id ?? '',
-              toolName: '',
-              output: { type: 'text' as const, value: msg.content ?? '' },
-            },
-          ],
-        });
+        // Only include tool results that have a matching tool_call in history.
+        // Orphaned tool results (from truncated history) cause Anthropic API errors:
+        // "unexpected tool_use_id found in tool_result blocks"
+        if (msg.tool_call_id && toolCallIds.has(msg.tool_call_id)) {
+          result.push({
+            role: 'tool',
+            content: [
+              {
+                type: 'tool-result',
+                toolCallId: msg.tool_call_id,
+                toolName: '',
+                output: { type: 'text' as const, value: msg.content ?? '' },
+              },
+            ],
+          });
+        }
         break;
       }
     }
