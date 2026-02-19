@@ -119,6 +119,81 @@ export async function callOpenRouter(params: {
   };
 }
 
+/** Stream OpenRouter response as SSE chunks. Yields content deltas. */
+export async function streamOpenRouter(params: {
+  model: string;
+  messages: ChatMessage[];
+  maxTokens: number;
+  temperature?: number;
+}): Promise<ReadableStream<string>> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw new Error('Missing OPENROUTER_API_KEY environment variable');
+  }
+
+  const body = {
+    model: params.model,
+    messages: params.messages,
+    max_tokens: params.maxTokens,
+    temperature: params.temperature ?? 0.3,
+    stream: true,
+  };
+
+  const response = await fetch(OPENROUTER_BASE_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://levelset.io',
+      'X-Title': 'Levelset Levi',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenRouter error (${response.status}): ${errorText}`);
+  }
+
+  if (!response.body) {
+    throw new Error('OpenRouter returned no body for stream');
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  return new ReadableStream<string>({
+    async pull(controller) {
+      const { done, value } = await reader.read();
+      if (done) {
+        controller.close();
+        return;
+      }
+
+      const text = decoder.decode(value, { stream: true });
+      const lines = text.split('\n');
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') {
+          controller.close();
+          return;
+        }
+        try {
+          const parsed = JSON.parse(data);
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (delta) {
+            controller.enqueue(delta);
+          }
+        } catch {
+          // Skip malformed JSON chunks
+        }
+      }
+    },
+  });
+}
+
 /**
  * Call with automatic escalation.
  *

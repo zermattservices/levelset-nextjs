@@ -18,8 +18,8 @@
 import { Hono } from 'hono';
 import { isLevelsetAdmin } from '@levelset/permissions';
 import type { UserContext, ChatMessage } from '../../lib/types.js';
-import { callWithEscalation } from '../../lib/llm-clients/openrouter.js';
-import { getResponseConfig } from '../../lib/llm-router.js';
+import { callWithEscalation, streamOpenRouter } from '../../lib/llm-clients/openrouter.js';
+import { getResponseConfig, routeToModel } from '../../lib/llm-router.js';
 import { buildSystemPrompt } from '../../lib/prompts.js';
 import {
   getOrCreateConversation,
@@ -36,7 +36,8 @@ export const chatRoute = new Hono();
 chatRoute.post('/', async (c) => {
   try {
     // 1. Parse request body
-    const body = await c.req.json<{ message?: string; org_id?: string }>();
+    const body = await c.req.json<{ message?: string; org_id?: string; stream?: boolean }>();
+    const wantsStream = body.stream === true;
     const userMessage = body.message?.trim();
 
     if (!userMessage) {
@@ -54,8 +55,9 @@ chatRoute.post('/', async (c) => {
       return c.json({ error: 'No organization context available' }, 400);
     }
 
-    // Levelset Admin usage is billed to 'levelset-internal', not the customer org
-    const billingOrgId = isLevelsetAdmin(user.role) ? 'levelset-internal' : orgId;
+    // Levelset Admin usage is billed to their own org (Levelset), not the customer org
+    // user.orgId is the admin's own org; orgId may be the customer org from the request body
+    const billingOrgId = isLevelsetAdmin(user.role) && user.orgId ? user.orgId : orgId;
 
     // 3. Rate limit check (scoped to billing org, not context org)
     const allowed = await checkRateLimit(billingOrgId);
@@ -184,11 +186,82 @@ chatRoute.post('/', async (c) => {
     }
 
     // Default fallback content
+    if (!assistantContent && !wantsStream) {
+      assistantContent = "I wasn't able to generate a response. Please try again.";
+    }
+
+    // 9. Streaming response path
+    if (wantsStream && !assistantContent) {
+      // Stream the final response via SSE
+      const model = routeToModel('user_chat', false);
+      const stream = await streamOpenRouter({
+        model,
+        messages,
+        maxTokens: responseConfig.maxTokens,
+      });
+
+      let fullContent = '';
+
+      return new Response(
+        new ReadableStream({
+          async start(controller) {
+            const encoder = new TextEncoder();
+            const reader = stream.getReader();
+
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                fullContent += value;
+                controller.enqueue(
+                  encoder.encode(`data: ${JSON.stringify({ delta: value })}\n\n`)
+                );
+              }
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`)
+              );
+              controller.close();
+            } catch (err) {
+              controller.error(err);
+            }
+
+            // Persist and log after stream completes (non-blocking)
+            persistMessage(conversationId, {
+              role: 'assistant',
+              content: fullContent,
+              metadata: { model, escalated, tool_call_count: toolCallCount },
+            }).catch(() => {});
+
+            logUsage({
+              orgId: billingOrgId,
+              userId,
+              conversationId,
+              model,
+              tier: 'primary',
+              taskType: 'user_chat',
+              inputTokens: totalInputTokens,
+              outputTokens: 0,
+              latencyMs: Date.now() - Date.now(),
+              escalated,
+            }).catch(() => {});
+          },
+        }),
+        {
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        }
+      );
+    }
+
+    // Non-streaming fallback
     if (!assistantContent) {
       assistantContent = "I wasn't able to generate a response. Please try again.";
     }
 
-    // 9. Persist final assistant message
+    // 10. Persist final assistant message
     await persistMessage(conversationId, {
       role: 'assistant',
       content: assistantContent,
@@ -201,8 +274,7 @@ chatRoute.post('/', async (c) => {
       },
     });
 
-    // 10. Log usage (non-blocking — fire and forget)
-    // billingOrgId ensures Levelset Admin usage is billed internally
+    // 11. Log usage (non-blocking — fire and forget)
     logUsage({
       orgId: billingOrgId,
       userId,
@@ -218,7 +290,7 @@ chatRoute.post('/', async (c) => {
       console.error('Usage logging failed:', err);
     });
 
-    // 11. Return response matching mobile contract
+    // 12. Return response matching mobile contract
     return c.json({ message: assistantContent });
   } catch (err) {
     console.error('Chat endpoint error:', err);

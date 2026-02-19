@@ -1,27 +1,194 @@
 /**
  * ChatBubble Component
- * Claude-style message rendering:
- *   User → right-aligned, colored bubble
- *   Assistant → left-aligned, avatar + plain text (no card border)
+ * Claude-style message rendering with full markdown support:
+ *   User → right-aligned, colored bubble, plain text
+ *   Assistant → left-aligned, avatar + markdown rendered content + copy button
  */
 
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useCallback } from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import * as Clipboard from "expo-clipboard";
 import Animated, { FadeIn } from "react-native-reanimated";
+import Markdown from "react-native-markdown-display";
 import { useColors } from "../../context/ThemeContext";
 import { AppIcon } from "../../components/ui";
-import { typography, fontWeights } from "../../lib/fonts";
-import { spacing, borderRadius } from "../../lib/theme";
+import { typography, fontWeights, fontFamilies, fontSizes } from "../../lib/fonts";
+import { spacing, borderRadius, haptics } from "../../lib/theme";
 import type { ChatMessage } from "../../context/LeviChatContext";
+import type { ColorPalette } from "../../lib/colors";
 
 interface ChatBubbleProps {
   message: ChatMessage;
   isLast?: boolean;
 }
 
+/** Build markdown styles that respond to the current color palette */
+function buildMarkdownStyles(colors: ColorPalette) {
+  return StyleSheet.create({
+    body: {
+      fontFamily: fontFamilies.body,
+      fontSize: fontSizes.base,
+      lineHeight: 26,
+      color: colors.onSurface,
+    },
+    heading1: {
+      fontFamily: fontFamilies.heading,
+      fontSize: fontSizes["2xl"],
+      fontWeight: fontWeights.bold,
+      lineHeight: 32,
+      color: colors.onSurface,
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    heading2: {
+      fontFamily: fontFamilies.heading,
+      fontSize: fontSizes.xl,
+      fontWeight: fontWeights.bold,
+      lineHeight: 28,
+      color: colors.onSurface,
+      marginTop: 14,
+      marginBottom: 6,
+    },
+    heading3: {
+      fontFamily: fontFamilies.heading,
+      fontSize: fontSizes.lg,
+      fontWeight: fontWeights.semibold,
+      lineHeight: 26,
+      color: colors.onSurface,
+      marginTop: 12,
+      marginBottom: 4,
+    },
+    strong: {
+      fontWeight: fontWeights.bold,
+    },
+    em: {
+      fontStyle: "italic",
+    },
+    // Inline code
+    code_inline: {
+      fontFamily: fontFamilies.mono,
+      fontSize: fontSizes.sm,
+      color: colors.onSurface,
+      backgroundColor: colors.surfaceVariant,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    // Fenced code blocks
+    fence: {
+      fontFamily: fontFamilies.mono,
+      fontSize: fontSizes.sm,
+      lineHeight: 22,
+      color: colors.onSurface,
+      backgroundColor: colors.surfaceVariant,
+      borderColor: colors.outline,
+      borderWidth: 1,
+      borderRadius: 12,
+      padding: 16,
+      marginVertical: 8,
+    },
+    code_block: {
+      fontFamily: fontFamilies.mono,
+      fontSize: fontSizes.sm,
+      lineHeight: 22,
+      color: colors.onSurface,
+      backgroundColor: colors.surfaceVariant,
+      borderColor: colors.outline,
+      borderWidth: 1,
+      borderRadius: 12,
+      padding: 16,
+      marginVertical: 8,
+    },
+    // Block quotes
+    blockquote: {
+      borderLeftWidth: 3,
+      borderLeftColor: colors.primary,
+      paddingLeft: 12,
+      marginVertical: 8,
+      opacity: 0.9,
+    },
+    // Lists
+    bullet_list: {
+      marginVertical: 4,
+    },
+    ordered_list: {
+      marginVertical: 4,
+    },
+    list_item: {
+      flexDirection: "row",
+      marginVertical: 3,
+    },
+    bullet_list_icon: {
+      fontSize: fontSizes.base,
+      lineHeight: 26,
+      marginRight: 8,
+      color: colors.onSurfaceVariant,
+    },
+    ordered_list_icon: {
+      fontSize: fontSizes.base,
+      lineHeight: 26,
+      marginRight: 8,
+      color: colors.onSurfaceVariant,
+    },
+    bullet_list_content: {
+      flex: 1,
+    },
+    ordered_list_content: {
+      flex: 1,
+    },
+    // Links
+    link: {
+      color: colors.primary,
+      textDecorationLine: "underline",
+    },
+    // Horizontal rule
+    hr: {
+      backgroundColor: colors.outline,
+      height: 1,
+      marginVertical: 12,
+    },
+    // Tables
+    table: {
+      borderWidth: 1,
+      borderColor: colors.outline,
+      borderRadius: 8,
+      marginVertical: 8,
+      overflow: "hidden",
+    },
+    thead: {
+      backgroundColor: colors.surfaceVariant,
+    },
+    th: {
+      fontWeight: fontWeights.semibold,
+      padding: 10,
+      borderBottomWidth: 1,
+      borderRightWidth: 1,
+      borderColor: colors.outline,
+    },
+    tr: {
+      borderBottomWidth: 1,
+      borderColor: colors.outline,
+    },
+    td: {
+      padding: 10,
+      borderRightWidth: 1,
+      borderColor: colors.outline,
+    },
+    // Paragraph spacing
+    paragraph: {
+      marginVertical: 4,
+    },
+  });
+}
+
 export function ChatBubble({ message, isLast }: ChatBubbleProps) {
   const colors = useColors();
   const isUser = message.role === "user";
+
+  const handleCopy = useCallback(() => {
+    haptics.light();
+    Clipboard.setStringAsync(message.content);
+  }, [message.content]);
 
   if (isUser) {
     return (
@@ -46,12 +213,14 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
     );
   }
 
-  // Claude-style assistant: small avatar circle + name, then plain text below
+  const mdStyles = buildMarkdownStyles(colors);
+
   return (
     <Animated.View
       entering={FadeIn.duration(200)}
       style={styles.assistantRow}
     >
+      {/* Avatar + name */}
       <View style={styles.avatarLine}>
         <View
           style={[
@@ -67,12 +236,28 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
           Levi
         </Text>
       </View>
-      <Text
-        selectable
-        style={[styles.assistantText, { color: colors.onSurface }]}
-      >
-        {message.content}
-      </Text>
+
+      {/* Markdown content */}
+      <View style={styles.markdownWrap}>
+        <Markdown style={mdStyles}>
+          {message.content}
+        </Markdown>
+      </View>
+
+      {/* Copy button */}
+      <View style={styles.actionsRow}>
+        <Pressable
+          onPress={handleCopy}
+          hitSlop={8}
+          style={styles.actionButton}
+        >
+          <AppIcon
+            name="doc.on.doc"
+            size={16}
+            tintColor={colors.onSurfaceDisabled}
+          />
+        </Pressable>
+      </View>
     </Animated.View>
   );
 }
@@ -94,11 +279,12 @@ const styles = StyleSheet.create({
     ...typography.bodyMedium,
     lineHeight: 22,
   },
-  // Assistant: left-aligned, plain text (Claude-style)
+
+  // Assistant: left-aligned, full-width markdown
   assistantRow: {
     alignSelf: "flex-start",
-    maxWidth: "90%",
-    gap: spacing[2],
+    width: "100%",
+    gap: spacing[1],
   },
   avatarLine: {
     flexDirection: "row",
@@ -116,10 +302,23 @@ const styles = StyleSheet.create({
     ...typography.labelSmall,
     fontWeight: fontWeights.medium,
   },
-  assistantText: {
-    ...typography.bodyMedium,
-    lineHeight: 24,
+  markdownWrap: {
     paddingLeft: spacing[1],
+  },
+
+  // Actions row (copy)
+  actionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: spacing[1],
+    paddingTop: spacing[1],
+    gap: spacing[3],
+  },
+  actionButton: {
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

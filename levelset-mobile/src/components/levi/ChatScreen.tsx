@@ -1,6 +1,6 @@
 /**
  * ChatScreen Component
- * Claude-style chat — centered greeting when empty, message list when active.
+ * Claude-style chat — centered prompt when empty, message list when active.
  * Input sits above the tab bar, keyboard handling included.
  */
 
@@ -24,13 +24,13 @@ import { useColors } from "../../context/ThemeContext";
 import { typography, fontWeights } from "../../lib/fonts";
 import { spacing } from "../../lib/theme";
 
-function EmptyGreeting() {
+function EmptyState() {
   const colors = useColors();
 
   return (
-    <View style={styles.greetingCenter}>
+    <View style={styles.emptyCenter}>
       <AppIcon name="cpu" size={36} tintColor={colors.primary} />
-      <Text style={[styles.greetingText, { color: colors.onSurfaceVariant }]}>
+      <Text style={[styles.emptyText, { color: colors.onSurfaceVariant }]}>
         How can I help you{"\n"}today?
       </Text>
     </View>
@@ -42,8 +42,7 @@ export function ChatScreen() {
   const { messages, isSending, sendMessage } = useLeviChat();
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
 
-  // Show centered greeting when only the initial greeting message exists
-  const hasConversation = messages.length > 1;
+  const hasMessages = messages.length > 0;
 
   const scrollToEnd = useCallback(() => {
     setTimeout(() => {
@@ -71,12 +70,12 @@ export function ChatScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={0}
     >
-      {!hasConversation ? (
+      {!hasMessages ? (
         <Pressable
           style={styles.emptyFlex}
           onPress={() => Keyboard.dismiss()}
         >
-          <EmptyGreeting />
+          <EmptyState />
         </Pressable>
       ) : (
         <FlatList
@@ -106,12 +105,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  greetingCenter: {
+  emptyCenter: {
     alignItems: "center",
     gap: spacing[4],
     paddingBottom: spacing[16],
   },
-  greetingText: {
+  emptyText: {
     ...typography.h2,
     fontWeight: fontWeights.medium,
     textAlign: "center",
@@ -121,7 +120,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingTop: spacing[2],
     paddingBottom: spacing[2],
-    gap: spacing[4],
+    gap: spacing[5],
   },
 });
 
