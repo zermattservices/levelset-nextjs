@@ -7,6 +7,7 @@ export interface UserContext {
   authUserId: string;
   appUserId: string;
   orgId: string;
+  locationId?: string;
   role: string;
   name: string;
 }

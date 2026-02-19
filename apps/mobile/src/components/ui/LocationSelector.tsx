@@ -54,7 +54,7 @@ export function LocationSelector() {
       )}
 
       {/* Inline logo for selected location */}
-      {selectedLocation?.image_url ? (
+      {selectedLocation?.image_url && (
         <View
           style={{
             width: 24,
@@ -73,8 +73,6 @@ export function LocationSelector() {
             cachePolicy="disk"
           />
         </View>
-      ) : (
-        <AppIcon name="mappin" size={16} tintColor={colors.primary} />
       )}
 
       <Text

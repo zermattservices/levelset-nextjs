@@ -9,8 +9,10 @@
  *
  * Streaming:
  *   Uses `expo/fetch` which provides ReadableStream support on native.
- *   SSE events (tool_call, tool_result, delta, done) are parsed in real-time
- *   and the assistant message is updated incrementally as tokens arrive.
+ *   The agent uses the Vercel AI SDK's UI Message Stream Protocol.
+ *   SSE events (text-delta, tool-input-available, tool-output-available,
+ *   data-tool-status, finish) are parsed in real-time and the assistant
+ *   message is updated incrementally as tokens arrive.
  */
 
 import React, {
@@ -79,7 +81,75 @@ interface LeviChatProviderProps {
 }
 
 /**
- * Parse a single SSE data line and dispatch to the appropriate handler.
+ * Human-readable labels for tool names.
+ * Matches the server-side getToolCallLabel logic.
+ */
+function getToolLabel(toolName: string): string {
+  switch (toolName) {
+    case "lookup_employee":
+      return "Looking up employee";
+    case "list_employees":
+      return "Listing employees";
+    case "get_employee_ratings":
+      return "Checking employee ratings";
+    case "get_employee_infractions":
+      return "Checking employee infractions";
+    case "get_employee_profile":
+      return "Loading employee profile";
+    case "get_team_overview":
+      return "Loading team overview";
+    case "get_discipline_summary":
+      return "Loading discipline overview";
+    default:
+      return `Running ${toolName.replace(/_/g, " ")}`;
+  }
+}
+
+/**
+ * Convert DB-format tool_calls from history into ToolCallEvent[] for display.
+ * DB format: [{ id, type, function: { name, arguments } }]
+ */
+function parseHistoryToolCalls(
+  toolCalls: unknown
+): ToolCallEvent[] | undefined {
+  if (!Array.isArray(toolCalls) || toolCalls.length === 0) return undefined;
+  return toolCalls
+    .filter((tc: any) => tc?.function?.name)
+    .map((tc: any) => ({
+      id: tc.id ?? tc.toolCallId ?? "",
+      name: tc.function.name,
+      label: getToolLabel(tc.function.name),
+      status: "done" as const,
+    }));
+}
+
+/**
+ * Map a raw history message from the server to a ChatMessage.
+ * Attaches parsed tool calls for assistant messages.
+ */
+function mapHistoryMessage(msg: any): ChatMessage {
+  const base: ChatMessage = {
+    id: msg.id,
+    role: msg.role,
+    content: msg.content ?? "",
+    created_at: msg.created_at,
+  };
+  if (msg.role === "assistant" && msg.tool_calls) {
+    const toolCalls = parseHistoryToolCalls(msg.tool_calls);
+    if (toolCalls && toolCalls.length > 0) {
+      base.toolCalls = toolCalls;
+    }
+  }
+  return base;
+}
+
+/**
+ * Parse a single SSE data line (AI SDK UI Message Stream Protocol)
+ * and dispatch to the appropriate handler.
+ *
+ * The AI SDK streams JSON objects with a `type` field:
+ *   text-delta, tool-input-start, tool-input-available,
+ *   tool-output-available, data-tool-status, finish, error
  */
 function parseSSELine(
   line: string,
@@ -97,27 +167,66 @@ function parseSSELine(
 
   try {
     const event = JSON.parse(jsonStr);
-    switch (event.event) {
-      case "delta":
-        handlers.onDelta(event.text ?? "");
+
+    switch (event.type) {
+      // ── Text streaming ──
+      case "text-delta":
+        handlers.onDelta(event.delta ?? "");
         break;
-      case "tool_call":
+
+      // ── Tool call started (streaming args) ──
+      case "tool-input-start":
         handlers.onToolCall({
-          id: event.id,
-          name: event.name,
-          label: event.label,
+          id: event.toolCallId,
+          name: event.toolName ?? "",
+          label: getToolLabel(event.toolName ?? ""),
           status: "calling",
         });
         break;
-      case "tool_result":
-        handlers.onToolResult({ id: event.id, label: event.label });
+
+      // ── Tool call args available (non-streaming fallback) ──
+      case "tool-input-available":
+        // If we haven't seen the start event, create the tool call now
+        handlers.onToolCall({
+          id: event.toolCallId,
+          name: event.toolName ?? "",
+          label: getToolLabel(event.toolName ?? ""),
+          status: "calling",
+        });
         break;
-      case "done":
+
+      // ── Tool result available ──
+      case "tool-output-available":
+        handlers.onToolResult({
+          id: event.toolCallId,
+          label: "Done",
+        });
+        break;
+
+      // ── Custom data: tool status labels from server ──
+      case "data-tool-status": {
+        const data = event.data;
+        if (data?.toolCallId && data?.label) {
+          handlers.onToolResult({
+            id: data.toolCallId,
+            label: data.label,
+          });
+        }
+        break;
+      }
+
+      // ── Stream finished ──
+      case "finish":
         handlers.onDone();
         break;
+
+      // ── Error ──
       case "error":
-        handlers.onError(event.message || "Something went wrong.");
+        handlers.onError(event.errorText || "Something went wrong.");
         break;
+
+      // Ignore: start, text-start, text-end, start-step, finish-step,
+      //         reasoning-*, source-*, tool-input-delta, tool-input-error, etc.
     }
   } catch {
     // Skip malformed SSE JSON
@@ -162,7 +271,8 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
         );
         if (res.ok) {
           const data = await res.json();
-          setHistoryMessages(data.messages ?? []);
+          const mapped = (data.messages ?? []).map(mapHistoryMessage);
+          setHistoryMessages(mapped);
           setHasMoreHistory(data.hasMore ?? false);
         }
       } catch (err) {
@@ -200,7 +310,7 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
       );
       if (res.ok) {
         const data = await res.json();
-        const olderMessages: ChatMessage[] = data.messages ?? [];
+        const olderMessages: ChatMessage[] = (data.messages ?? []).map(mapHistoryMessage);
         if (olderMessages.length > 0) {
           setHistoryMessages((prev) => [...olderMessages, ...prev]);
         }

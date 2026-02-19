@@ -115,13 +115,23 @@ export async function loadConversationHistory(
 export async function loadHistoryPage(
   conversationId: string,
   options: { limit?: number; before?: string } = {}
-): Promise<{ messages: Array<{ id: string; role: string; content: string; created_at: string }>; hasMore: boolean }> {
+): Promise<{
+  messages: Array<{
+    id: string;
+    role: string;
+    content: string;
+    created_at: string;
+    tool_calls?: unknown;
+    metadata?: Record<string, unknown>;
+  }>;
+  hasMore: boolean;
+}> {
   const supabase = createServiceClient();
   const limit = options.limit ?? DEFAULT_PAGE_SIZE;
 
   let query = supabase
     .from('ai_messages')
-    .select('id, role, content, created_at')
+    .select('id, role, content, tool_calls, metadata, created_at')
     .eq('conversation_id', conversationId)
     .in('role', ['user', 'assistant'])
     .order('created_at', { ascending: false })
@@ -149,6 +159,8 @@ export async function loadHistoryPage(
       role: m.role as string,
       content: m.content as string,
       created_at: m.created_at as string,
+      ...(m.tool_calls ? { tool_calls: m.tool_calls } : {}),
+      ...(m.metadata ? { metadata: m.metadata as Record<string, unknown> } : {}),
     })),
     hasMore,
   };

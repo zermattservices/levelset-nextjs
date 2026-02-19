@@ -8,7 +8,7 @@
  * and the edge swipe gestures via the shared `progress` value from context.
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback, createContext, useContext } from "react";
 import {
   View,
   Text,
@@ -28,12 +28,15 @@ import {
   GestureDetector,
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { LeviSlidingMenu } from "../../../src/components/levi/LeviSlidingMenu";
 import { LeviSettingsModal } from "../../../src/components/levi/LeviSettingsModal";
 import { useLeviMenu } from "../../../src/context/LeviMenuContext";
+import { useLocation } from "../../../src/context/LocationContext";
 import { AppIcon } from "../../../src/components/ui";
 import { useColors } from "../../../src/context/ThemeContext";
-import { typography, fontWeights } from "../../../src/lib/fonts";
+import { typography, fontWeights, fontSizes } from "../../../src/lib/fonts";
 import { spacing, haptics } from "../../../src/lib/theme";
 import { useTranslation } from "react-i18next";
 import { useGlass, isGlassAvailable } from "../../../src/hooks/useGlass";
@@ -53,6 +56,26 @@ const SPRING_CONFIG = {
 
 // Corner radius when content panel is shifted
 const PANEL_RADIUS = 64;
+
+/* ── Location warning context ──────────────────────────────────
+ * Lets ChatScreen signal the header to flash red when the user
+ * tries to send a message without selecting a location.
+ */
+interface LocationWarningContextType {
+  locationWarning: boolean;
+  flashLocationWarning: () => void;
+}
+
+const LocationWarningContext = createContext<LocationWarningContextType>({
+  locationWarning: false,
+  flashLocationWarning: () => {},
+});
+
+export function useLocationWarning() {
+  return useContext(LocationWarningContext);
+}
+
+/* ── LeviContent ────────────────────────────────────────────── */
 
 function LeviContent() {
   const { activeTab } = useLeviMenu();
@@ -74,7 +97,7 @@ function LeviContent() {
 /**
  * Claude-style header:
  *   Left  — sidebar toggle (circle with lines icon)
- *   Center — "Levi" title
+ *   Center — location selector (same as home screen)
  *   Right — spacer (could hold new-chat later)
  */
 function LeviHeader({
@@ -85,8 +108,17 @@ function LeviHeader({
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const colors = useColors();
+  const router = useRouter();
   const { GlassView } = useGlass();
   const glassAvail = isGlassAvailable();
+  const { locationWarning } = useLocationWarning();
+  const {
+    selectedLocation,
+    selectedLocationName,
+    hasMultipleLocations,
+    isLoading,
+    locations,
+  } = useLocation();
 
   const menuIcon = (
     <Pressable
@@ -101,6 +133,18 @@ function LeviHeader({
       />
     </Pressable>
   );
+
+  const handleLocationPress = () => {
+    if (hasMultipleLocations || !selectedLocation) {
+      haptics.light();
+      router.push("/(tabs)/(levi)/location-picker");
+    }
+  };
+
+  // Determine the location name text color
+  const locationTextColor = locationWarning
+    ? colors.error
+    : colors.onSurface;
 
   return (
     <View style={[styles.header, { paddingTop: insets.top + spacing[1] }]}>
@@ -120,10 +164,45 @@ function LeviHeader({
         </View>
       )}
 
-      {/* Center title */}
-      <Text style={[styles.headerTitle, { color: colors.onSurface }]}>
-        Levi
-      </Text>
+      {/* Center — location selector */}
+      {!isLoading && locations.length > 0 ? (
+        <Pressable
+          onPress={handleLocationPress}
+          disabled={!hasMultipleLocations && !!selectedLocation}
+          style={styles.locationSelector}
+        >
+          {hasMultipleLocations && (
+            <AppIcon
+              name="chevron.down"
+              size={12}
+              tintColor={locationWarning ? colors.error : colors.onSurfaceDisabled}
+            />
+          )}
+          {selectedLocation?.image_url && (
+            <View style={styles.locationLogo}>
+              <Image
+                source={{ uri: selectedLocation.image_url }}
+                style={styles.locationLogoImage}
+                contentFit="contain"
+                cachePolicy="disk"
+              />
+            </View>
+          )}
+          <Text
+            style={[
+              styles.locationName,
+              { color: locationTextColor },
+            ]}
+            numberOfLines={1}
+          >
+            {selectedLocationName || t("home.noLocation")}
+          </Text>
+        </Pressable>
+      ) : (
+        <Text style={[styles.headerTitle, { color: colors.onSurface }]}>
+          Levi
+        </Text>
+      )}
 
       {/* Right spacer (matching width of left button for centering) */}
       <View style={styles.headerButtonSpacer} />
@@ -135,12 +214,30 @@ export default function LeviTab() {
   const colors = useColors();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const { isMenuOpen, openMenu, closeMenu } = useLeviMenu();
+  const { selectedLocation } = useLocation();
 
   // How far the content panel slides right (50% of screen)
   const DRAWER_WIDTH = SCREEN_WIDTH * 0.5;
 
   // Shared value 0 → 1 (closed → open)
   const progress = useSharedValue(0);
+
+  // ── Location warning state ──
+  const [locationWarning, setLocationWarning] = useState(false);
+
+  const flashLocationWarning = useCallback(() => {
+    haptics.error();
+    setLocationWarning(true);
+    // Auto-clear after 2 seconds
+    setTimeout(() => setLocationWarning(false), 2000);
+  }, []);
+
+  // Clear warning when a location is selected
+  useEffect(() => {
+    if (selectedLocation) {
+      setLocationWarning(false);
+    }
+  }, [selectedLocation?.id]);
 
   // Sync React state → shared value
   useEffect(() => {
@@ -209,47 +306,51 @@ export default function LeviTab() {
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.surfaceVariant }]}>
-      {/* ── Sidebar layer (sits BEHIND, always mounted) ── */}
-      <View
-        style={[
-          styles.sidebarContainer,
-          {
-            width: DRAWER_WIDTH,
-          },
-        ]}
-      >
-        <LeviSlidingMenu />
-      </View>
-
-      {/* ── Main content panel (slides RIGHT to reveal sidebar) ── */}
-      <GestureDetector gesture={panGesture}>
-        <Animated.View
+    <LocationWarningContext.Provider
+      value={{ locationWarning, flashLocationWarning }}
+    >
+      <View style={[styles.root, { backgroundColor: colors.surfaceVariant }]}>
+        {/* ── Sidebar layer (sits BEHIND, always mounted) ── */}
+        <View
           style={[
-            styles.contentPanel,
+            styles.sidebarContainer,
             {
-              backgroundColor: colors.background,
-              boxShadow: "-4px 0px 24px rgba(0, 0, 0, 0.2)",
+              width: DRAWER_WIDTH,
             },
-            contentAnimatedStyle,
           ]}
         >
-          <LeviHeader onToggle={handleToggle} />
-          <LeviContent />
+          <LeviSlidingMenu />
+        </View>
 
-          {/* Tap overlay when menu is open */}
-          {isMenuOpen && (
-            <Pressable
-              style={styles.tapOverlay}
-              onPress={handleOverlayPress}
-            />
-          )}
-        </Animated.View>
-      </GestureDetector>
+        {/* ── Main content panel (slides RIGHT to reveal sidebar) ── */}
+        <GestureDetector gesture={panGesture}>
+          <Animated.View
+            style={[
+              styles.contentPanel,
+              {
+                backgroundColor: colors.background,
+                boxShadow: "-4px 0px 24px rgba(0, 0, 0, 0.2)",
+              },
+              contentAnimatedStyle,
+            ]}
+          >
+            <LeviHeader onToggle={handleToggle} />
+            <LeviContent />
 
-      {/* Settings modal (floats above everything) */}
-      <LeviSettingsModal />
-    </View>
+            {/* Tap overlay when menu is open */}
+            {isMenuOpen && (
+              <Pressable
+                style={styles.tapOverlay}
+                onPress={handleOverlayPress}
+              />
+            )}
+          </Animated.View>
+        </GestureDetector>
+
+        {/* Settings modal (floats above everything) */}
+        <LeviSettingsModal />
+      </View>
+    </LocationWarningContext.Provider>
   );
 }
 
@@ -292,6 +393,32 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.labelLarge,
     fontWeight: fontWeights.semibold,
+  },
+  locationSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing[2],
+    flex: 1,
+    paddingVertical: spacing[1],
+  },
+  locationLogo: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    backgroundColor: "#FFFFFF",
+  },
+  locationLogoImage: {
+    width: 18,
+    height: 18,
+  },
+  locationName: {
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.semibold,
+    maxWidth: 200,
   },
   headerButtonSpacer: {
     width: 36,

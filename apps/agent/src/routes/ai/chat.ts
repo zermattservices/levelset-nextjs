@@ -1,29 +1,36 @@
 /**
  * Chat endpoint — main orchestrator for Levi AI conversations.
  *
- * Flow:
- * 1. Validate & parse request
- * 2. Rate limit check
- * 3. Get or create conversation
- * 4. Persist user message
- * 5. Load conversation history
- * 6. Build LLM message array (system prompt + history)
- * 7. Call LLM with tools via OpenRouter
- * 8. Tool call loop (max 5 iterations)
- * 9. Persist assistant response
- * 10. Log usage
- * 11. Return { message } matching mobile contract
+ * Built on the Vercel AI SDK:
+ *   - streamText() for LLM calls with automatic multi-step tool execution
+ *   - createUIMessageStream for structured SSE streaming
+ *   - smoothStream for word-by-word streaming effect
+ *   - tool() + Zod for type-safe tool definitions
  *
- * Streaming (stream: true):
- *   Returns SSE with structured events: tool_call, tool_result, delta, done
+ * Streaming events follow the AI SDK UI Message Stream Protocol:
+ *   start, text-start, text-delta, text-end, tool-call, tool-result, finish
+ *
+ * Custom data parts:
+ *   data-tool-status — human-readable labels for tool call progress
  */
 
 import { Hono } from 'hono';
+import {
+  streamText,
+  generateText,
+  tool,
+  smoothStream,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  stepCountIs,
+} from 'ai';
+import type { ModelMessage } from 'ai';
+import { z } from 'zod';
 import { isLevelsetAdmin } from '@levelset/permissions';
 import type { UserContext, ChatMessage } from '../../lib/types.js';
-import { callWithEscalation, streamOpenRouter } from '../../lib/llm-clients/openrouter.js';
-import { getResponseConfig, routeToModel } from '../../lib/llm-router.js';
+import { models } from '../../lib/ai-provider.js';
 import { buildSystemPrompt } from '../../lib/prompts.js';
+import { loadOrgContext } from '../../lib/org-context.js';
 import {
   getOrCreateConversation,
   loadConversationHistory,
@@ -32,105 +39,216 @@ import {
   loadHistoryPage,
 } from '../../lib/conversation-manager.js';
 import { logUsage, checkRateLimit } from '../../lib/usage-tracker.js';
-import { TOOL_DEFINITIONS, executeTool } from '../../tools/index.js';
+import {
+  lookupEmployee,
+  listEmployees,
+} from '../../tools/data/employee.js';
+import { getEmployeeRatings } from '../../tools/data/ratings.js';
+import { getEmployeeInfractions } from '../../tools/data/infractions.js';
+import { getEmployeeProfile } from '../../tools/data/profile.js';
+import { getTeamOverview } from '../../tools/data/team.js';
+import { getDisciplineSummary } from '../../tools/data/discipline.js';
 
-const MAX_TOOL_ITERATIONS = 5;
+const MAX_TOOL_STEPS = 5;
 
-/* ── SSE helpers ─────────────────────────────────────────────── */
+/* ── Convert DB ChatMessages to AI SDK ModelMessages ──────── */
 
-function emitSSE(
-  controller: ReadableStreamDefaultController,
-  encoder: TextEncoder,
-  data: Record<string, unknown>,
-): void {
-  controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
-}
+function toModelMessages(messages: ChatMessage[]): ModelMessage[] {
+  const result: ModelMessage[] = [];
 
-/** Split text into chunks at word boundaries, roughly `size` chars each */
-function chunkText(text: string, size = 12): string[] {
-  const chunks: string[] = [];
-  let remaining = text;
-  while (remaining.length > 0) {
-    if (remaining.length <= size) {
-      chunks.push(remaining);
-      break;
+  for (const msg of messages) {
+    switch (msg.role) {
+      case 'system':
+        result.push({ role: 'system', content: msg.content ?? '' });
+        break;
+
+      case 'user':
+        result.push({ role: 'user', content: msg.content ?? '' });
+        break;
+
+      case 'assistant': {
+        // Assistant messages may include tool_calls in the DB format.
+        // For the AI SDK, we need to convert them to ToolCallPart content parts.
+        if (msg.tool_calls && msg.tool_calls.length > 0) {
+          const parts: Array<
+            | { type: 'text'; text: string }
+            | { type: 'tool-call'; toolCallId: string; toolName: string; input: unknown }
+          > = [];
+          if (msg.content) {
+            parts.push({ type: 'text', text: msg.content });
+          }
+          for (const tc of msg.tool_calls) {
+            parts.push({
+              type: 'tool-call',
+              toolCallId: tc.id,
+              toolName: tc.function.name,
+              input: JSON.parse(tc.function.arguments),
+            });
+          }
+          result.push({ role: 'assistant', content: parts as any });
+        } else {
+          result.push({ role: 'assistant', content: msg.content ?? '' });
+        }
+        break;
+      }
+
+      case 'tool': {
+        // Tool result messages — each has a tool_call_id linking back to the tool call.
+        result.push({
+          role: 'tool',
+          content: [
+            {
+              type: 'tool-result',
+              toolCallId: msg.tool_call_id ?? '',
+              toolName: '',
+              output: { type: 'text' as const, value: msg.content ?? '' },
+            },
+          ],
+        });
+        break;
+      }
     }
-    // Find the last space at or before `size`
-    let end = remaining.lastIndexOf(' ', size);
-    if (end <= 0) end = size; // no space found, hard-cut
-    chunks.push(remaining.slice(0, end + 1));
-    remaining = remaining.slice(end + 1);
   }
-  return chunks;
+
+  return result;
 }
 
-/** Human-readable label for a tool call (shown in UI) */
-function getToolCallLabel(name: string, args: Record<string, unknown>): string {
+/* ── Human-readable tool labels ─────────────────────────────── */
+
+function getToolCallLabel(name: string, input: Record<string, unknown>): string {
   switch (name) {
     case 'lookup_employee': {
-      const q = args.query || args.name || '';
+      const q = input.name || input.query || '';
       return q ? `Looking up ${q}` : 'Looking up employee';
     }
     case 'list_employees':
       return 'Listing employees';
     case 'get_employee_ratings': {
-      const empName = args.employee_name || '';
+      const empName = input.employee_name || '';
       return empName ? `Checking ratings for ${empName}` : 'Checking employee ratings';
     }
     case 'get_employee_infractions': {
-      const empName = args.employee_name || '';
+      const empName = input.employee_name || '';
       return empName ? `Checking infractions for ${empName}` : 'Checking employee infractions';
     }
+    case 'get_employee_profile':
+      return 'Loading employee profile';
+    case 'get_team_overview':
+      return 'Loading team overview';
+    case 'get_discipline_summary':
+      return input.employee_id ? 'Loading discipline details' : 'Loading discipline overview';
     default:
       return `Running ${name.replace(/_/g, ' ')}`;
   }
 }
 
-/** Human-readable label for a tool result */
-function getToolResultLabel(name: string, result: string): string {
-  try {
-    const parsed = JSON.parse(result);
-    if (parsed.error) return `Error: ${parsed.error}`;
-    if (parsed.message) return parsed.message; // "No active employee found matching ..."
-    if (Array.isArray(parsed)) return `Found ${parsed.length} result${parsed.length === 1 ? '' : 's'}`;
-    if (parsed.employees && Array.isArray(parsed.employees))
-      return `Found ${parsed.employees.length} employee${parsed.employees.length === 1 ? '' : 's'}`;
-    if (parsed.ratings && Array.isArray(parsed.ratings))
-      return `Found ${parsed.ratings.length} rating${parsed.ratings.length === 1 ? '' : 's'}`;
-    if (parsed.infractions && Array.isArray(parsed.infractions))
-      return `Found ${parsed.infractions.length} infraction${parsed.infractions.length === 1 ? '' : 's'}`;
-    if (parsed.full_name || parsed.first_name) return `Found ${parsed.full_name || parsed.first_name}`;
-    return 'Done';
-  } catch {
-    return 'Done';
-  }
+/* ── Build tool definitions ─────────────────────────────────── */
+
+function buildTools(orgId: string, locationId?: string) {
+  return {
+    lookup_employee: tool({
+      description:
+        'Search for an employee by name and return their details including role, hire date, certification status, and current discipline points.',
+      inputSchema: z.object({
+        name: z.string().describe('Full or partial name of the employee to search for'),
+        role: z.string().optional().describe('Filter by role name (e.g. "Team Leader")'),
+      }),
+      execute: async ({ name, role }: { name: string; role?: string }) => {
+        return await lookupEmployee({ name, role }, orgId, locationId);
+      },
+    }),
+    list_employees: tool({
+      description:
+        'List employees in the organization. Can filter by active status, position type (FOH/BOH), leaders, trainers, or role.',
+      inputSchema: z.object({
+        active_only: z.boolean().optional().describe('Only return active employees (default: true)'),
+        is_leader: z.boolean().optional().describe('Filter for leaders only'),
+        is_boh: z.boolean().optional().describe('Filter for back-of-house employees'),
+        is_foh: z.boolean().optional().describe('Filter for front-of-house employees'),
+        is_trainer: z.boolean().optional().describe('Filter for trainers only'),
+        role: z.string().optional().describe('Filter by role name'),
+        limit: z.number().optional().describe('Maximum number of employees to return (default: 20, max: 50)'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await listEmployees(input, orgId, locationId);
+      },
+    }),
+    get_employee_ratings: tool({
+      description:
+        'Get rating history for a specific employee. Returns their ratings (rating_1 through rating_5, rating_avg) with dates, positions rated, and rater name. Use lookup_employee first to get the employee ID.',
+      inputSchema: z.object({
+        employee_id: z.string().describe('The UUID of the employee'),
+        limit: z.number().optional().describe('Maximum number of ratings to return (default: 10)'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getEmployeeRatings(input, orgId, locationId);
+      },
+    }),
+    get_employee_infractions: tool({
+      description:
+        'Get infraction and discipline history for a specific employee. Returns infraction type, points, date, leader who documented, and notes. Use lookup_employee first to get the employee ID.',
+      inputSchema: z.object({
+        employee_id: z.string().describe('The UUID of the employee'),
+        limit: z.number().optional().describe('Maximum number of infractions to return (default: 10)'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getEmployeeInfractions(input, orgId, locationId);
+      },
+    }),
+    get_employee_profile: tool({
+      description:
+        'Get a comprehensive one-shot profile for an employee including their details, recent ratings with trends, infractions with active points, and discipline actions. More efficient than calling individual tools separately. Use lookup_employee first to get the employee ID.',
+      inputSchema: z.object({
+        employee_id: z.string().describe('The UUID of the employee'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getEmployeeProfile(input, orgId, locationId);
+      },
+    }),
+    get_team_overview: tool({
+      description:
+        'Get a location-level team snapshot including role breakdown, FOH/BOH zone split, certification stats, leadership counts, employees needing attention (high points), and recent hires. Great for "how is the team doing?" questions.',
+      inputSchema: z.object({
+        zone: z
+          .enum(['FOH', 'BOH'])
+          .optional()
+          .describe('Filter to front-of-house or back-of-house employees only'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getTeamOverview(input, orgId, locationId);
+      },
+    }),
+    get_discipline_summary: tool({
+      description:
+        'Get a discipline overview. When employee_id is provided, returns detailed discipline history for that person including infractions, actions taken, and pending recommendations. When omitted, returns a location-wide discipline overview with point holders, infraction breakdown, and recent actions.',
+      inputSchema: z.object({
+        employee_id: z
+          .string()
+          .optional()
+          .describe('Optional UUID of a specific employee. Omit for location-wide overview.'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getDisciplineSummary(input, orgId, locationId);
+      },
+    }),
+  };
 }
 
 export const chatRoute = new Hono();
 
 /**
  * GET /history — paginated chat history for the mobile app.
- *
- * Query params:
- *   org_id  — org context (required if user has no org_id)
- *   before  — ISO timestamp cursor; returns messages before this time
- *   limit   — page size (default 10, max 50)
- *
- * Returns { messages, hasMore }.
- * Read-only — does NOT create a conversation if none exists.
  */
 chatRoute.get('/history', async (c) => {
   try {
     const user = c.get('user') as UserContext;
     const isAdmin = isLevelsetAdmin(user.role);
-    // Admins pass customer org_id as query param; regular users use their own
     const orgId = isAdmin
       ? (c.req.query('org_id') || user.orgId)
       : (user.orgId || c.req.query('org_id'));
     if (!orgId) return c.json({ messages: [], hasMore: false });
     const locationId = c.req.query('location_id') ?? undefined;
 
-    // Read-only: find existing conversation, don't create one
     const conversationId = await findActiveConversation(user.appUserId, orgId, locationId);
     if (!conversationId) return c.json({ messages: [], hasMore: false });
 
@@ -139,7 +257,6 @@ chatRoute.get('/history', async (c) => {
     const limit = Math.min(Math.max(limitParam, 1), 50);
 
     const result = await loadHistoryPage(conversationId, { limit, before });
-
     return c.json(result);
   } catch (err) {
     console.error('History endpoint error:', err);
@@ -147,11 +264,19 @@ chatRoute.get('/history', async (c) => {
   }
 });
 
+/**
+ * POST / — Main chat endpoint with AI SDK streaming.
+ */
 chatRoute.post('/', async (c) => {
   try {
     // 1. Parse request body
-    const body = await c.req.json<{ message?: string; org_id?: string; location_id?: string; stream?: boolean }>();
-    const wantsStream = body.stream === true;
+    const body = await c.req.json<{
+      message?: string;
+      org_id?: string;
+      location_id?: string;
+      stream?: boolean;
+    }>();
+    const wantsStream = body.stream !== false; // Default to streaming
     const userMessage = body.message?.trim();
 
     if (!userMessage) {
@@ -159,14 +284,11 @@ chatRoute.post('/', async (c) => {
     }
 
     // 2. Get user context from auth middleware
-    // For Levelset Admins: prefer body.org_id (the customer org they're browsing)
-    //   over user.orgId (Levelset HQ org) so tool queries return customer data.
-    // For regular users: org_id comes from their app_users record.
     const user = c.get('user') as UserContext;
     const isAdmin = isLevelsetAdmin(user.role);
     const orgId = isAdmin
-      ? (body.org_id || user.orgId)   // Admin: prefer customer org from request
-      : (user.orgId || body.org_id);  // Regular: prefer user's own org
+      ? (body.org_id || user.orgId)
+      : (user.orgId || body.org_id);
     const locationId = body.location_id;
     const userId = user.appUserId;
 
@@ -174,10 +296,9 @@ chatRoute.post('/', async (c) => {
       return c.json({ error: 'No organization context available' }, 400);
     }
 
-    // Levelset Admin usage is billed to their own org (Levelset), not the customer org
     const billingOrgId = isAdmin && user.orgId ? user.orgId : orgId;
 
-    // 3. Rate limit check (scoped to billing org, not context org)
+    // 3. Rate limit check
     const allowed = await checkRateLimit(billingOrgId);
     if (!allowed) {
       return c.json(
@@ -186,8 +307,14 @@ chatRoute.post('/', async (c) => {
       );
     }
 
-    // 4. Get or create conversation (scoped to user+org+location)
-    const conversationId = await getOrCreateConversation(userId, orgId, locationId);
+    // 4. Get or create conversation + load org context in parallel
+    const [conversationId, orgContext] = await Promise.all([
+      getOrCreateConversation(userId, orgId, locationId),
+      loadOrgContext(orgId, locationId).catch((err) => {
+        console.warn('Org context load failed (non-fatal):', err);
+        return undefined;
+      }),
+    ]);
 
     // 5. Persist user message
     await persistMessage(conversationId, {
@@ -195,300 +322,244 @@ chatRoute.post('/', async (c) => {
       content: userMessage,
     });
 
-    // 6. Load conversation history (last 20 messages)
+    // 6. Load conversation history and convert to AI SDK format
     const history = await loadConversationHistory(conversationId);
+    const llmMessages = toModelMessages(history);
 
-    // 7. Build LLM message array
-    const responseConfig = getResponseConfig('user_chat');
+    // 7. Build system prompt (with org context if loaded)
     const systemPrompt = buildSystemPrompt({
       userName: user.name,
-      style: responseConfig.style,
+      style: 'concise',
+      orgContext,
     });
 
-    const messages: ChatMessage[] = [
-      { role: 'system', content: systemPrompt },
-      ...history,
-    ];
+    // 8. Build tools (location-scoped when available)
+    const leviTools = buildTools(orgId, locationId);
 
-    // 8. Streaming vs non-streaming path
+    // 9. Streaming path (default)
     if (wantsStream) {
-      // ── SSE streaming path ──────────────────────────────────
-      // Create the SSE response immediately so the client gets
-      // tool_call / tool_result / delta / done events in real time.
       const startMs = Date.now();
 
-      return new Response(
-        new ReadableStream({
-          async start(controller) {
-            const encoder = new TextEncoder();
-            let totalInputTokens = 0;
-            let totalOutputTokens = 0;
-            let finalModel = '';
-            let escalated = false;
-            let totalLatencyMs = 0;
-            let toolCallCount = 0;
-            let assistantContent: string | null = null;
+      const stream = createUIMessageStream({
+        execute: async ({ writer }) => {
+          let totalInputTokens = 0;
+          let totalOutputTokens = 0;
+          let finalModel = '';
+          let escalated = false;
+          let toolCallCount = 0;
+          let assistantContent = '';
 
-            try {
-              for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
-                const llmResponse = await callWithEscalation({
-                  messages,
-                  tools: TOOL_DEFINITIONS,
-                  maxTokens: responseConfig.maxTokens,
-                  taskType: 'user_chat',
-                });
-
-                totalInputTokens += llmResponse.usage.inputTokens;
-                totalOutputTokens += llmResponse.usage.outputTokens;
-                finalModel = llmResponse.model;
-                escalated = escalated || llmResponse.escalated;
-                totalLatencyMs += llmResponse.latencyMs;
-
-                // No tool calls → final response
-                if (!llmResponse.toolCalls || llmResponse.toolCalls.length === 0) {
-                  assistantContent = llmResponse.content;
-                  break;
+          try {
+            const result = streamText({
+              model: models.languageModel('primary'),
+              system: systemPrompt,
+              messages: llmMessages,
+              tools: leviTools,
+              stopWhen: stepCountIs(MAX_TOOL_STEPS),
+              experimental_transform: smoothStream({ delayInMs: 15, chunking: 'word' }),
+              onStepFinish: async (step) => {
+                // Track usage from each step
+                if (step.usage) {
+                  totalInputTokens += step.usage.inputTokens ?? 0;
+                  totalOutputTokens += step.usage.outputTokens ?? 0;
                 }
 
-                toolCallCount += llmResponse.toolCalls.length;
+                // Emit custom tool status labels
+                if (step.toolCalls && step.toolCalls.length > 0) {
+                  toolCallCount += step.toolCalls.length;
 
-                // Append assistant message with tool_calls to context
-                const assistantMsg: ChatMessage = {
-                  role: 'assistant',
-                  content: llmResponse.content,
-                  tool_calls: llmResponse.toolCalls,
-                };
-                messages.push(assistantMsg);
+                  for (let i = 0; i < step.toolCalls.length; i++) {
+                    const tc = step.toolCalls[i] as { toolCallId: string; toolName: string; input: Record<string, unknown> };
 
-                await persistMessage(conversationId, {
-                  role: 'assistant',
-                  content: llmResponse.content ?? '',
-                  toolCalls: llmResponse.toolCalls,
-                });
-
-                // Execute each tool — emit SSE events before/after
-                for (const toolCall of llmResponse.toolCalls) {
-                  let args: Record<string, unknown> = {};
-                  try {
-                    args = JSON.parse(toolCall.function.arguments);
-                  } catch {
-                    args = {};
+                    writer.write({
+                      type: 'data-tool-status' as any,
+                      data: {
+                        toolCallId: tc.toolCallId,
+                        toolName: tc.toolName,
+                        status: 'done',
+                        label: getToolCallLabel(tc.toolName, tc.input),
+                      },
+                    });
                   }
+                }
 
-                  // Emit tool_call event → client shows spinner
-                  emitSSE(controller, encoder, {
-                    event: 'tool_call',
-                    id: toolCall.id,
-                    name: toolCall.function.name,
-                    label: getToolCallLabel(toolCall.function.name, args),
-                  });
-
-                  const toolResult = await executeTool(
-                    toolCall.function.name,
-                    args,
-                    orgId,
-                  );
-
-                  // Emit tool_result event → client shows checkmark
-                  emitSSE(controller, encoder, {
-                    event: 'tool_result',
-                    id: toolCall.id,
-                    name: toolCall.function.name,
-                    label: getToolResultLabel(toolCall.function.name, toolResult),
-                  });
-
-                  const toolMsg: ChatMessage = {
-                    role: 'tool',
-                    content: toolResult,
-                    tool_call_id: toolCall.id,
-                  };
-                  messages.push(toolMsg);
+                // Persist tool messages from this step
+                if (step.toolCalls && step.toolCalls.length > 0) {
+                  const toolCalls = step.toolCalls.map((tc: any) => ({
+                    id: tc.toolCallId,
+                    type: 'function' as const,
+                    function: {
+                      name: tc.toolName,
+                      arguments: JSON.stringify(tc.input),
+                    },
+                  }));
 
                   await persistMessage(conversationId, {
-                    role: 'tool',
-                    content: toolResult,
-                    toolCallId: toolCall.id,
+                    role: 'assistant',
+                    content: step.text || '',
+                    toolCalls,
                   });
+
+                  if (step.toolResults) {
+                    for (const tr of step.toolResults as Array<{ toolCallId: string; output: unknown }>) {
+                      await persistMessage(conversationId, {
+                        role: 'tool',
+                        content: typeof tr.output === 'string'
+                          ? tr.output
+                          : JSON.stringify(tr.output),
+                        toolCallId: tr.toolCallId,
+                      });
+                    }
+                  }
                 }
+              },
+            });
 
-                // Last iteration safety — force a text response
-                if (iteration === MAX_TOOL_ITERATIONS - 1) {
-                  const finalResponse = await callWithEscalation({
-                    messages,
-                    maxTokens: responseConfig.maxTokens,
-                    taskType: 'user_chat',
-                  });
-                  totalInputTokens += finalResponse.usage.inputTokens;
-                  totalOutputTokens += finalResponse.usage.outputTokens;
-                  totalLatencyMs += finalResponse.latencyMs;
-                  assistantContent = finalResponse.content;
-                }
-              }
+            // Merge the AI SDK stream into our UI message stream
+            writer.merge(result.toUIMessageStream({
+              sendStart: false,
+              onError: (error) => {
+                console.error('Stream error:', error);
+                return error instanceof Error ? error.message : String(error);
+              },
+            }));
 
-              // Fallback
-              if (!assistantContent) {
-                assistantContent = "I wasn't able to generate a response. Please try again.";
-              }
+            // Wait for the stream to complete to get final data
+            // streamText returns StreamTextResult where properties are PromiseLike
+            assistantContent = await result.text;
+            const response = await result.response;
+            finalModel = response?.modelId || 'minimax/minimax-m2.5';
 
-              // Emit content as delta chunks with small delays for streaming effect
-              const chunks = chunkText(assistantContent, 12);
-              for (const chunk of chunks) {
-                emitSSE(controller, encoder, { event: 'delta', text: chunk });
-                // Small delay so the client receives chunks incrementally
-                await new Promise((r) => setTimeout(r, 15));
-              }
-
-              // Done
-              emitSSE(controller, encoder, { event: 'done' });
-              controller.close();
-
-              // Persist + log (non-blocking, after stream closes)
-              persistMessage(conversationId, {
-                role: 'assistant',
-                content: assistantContent,
-                metadata: {
-                  model: finalModel,
-                  escalated,
-                  tool_call_count: toolCallCount,
-                  input_tokens: totalInputTokens,
-                  output_tokens: totalOutputTokens,
-                },
-              }).catch(() => {});
-
-              logUsage({
-                orgId: billingOrgId,
-                userId,
-                conversationId,
-                model: finalModel,
-                tier: escalated ? 'escalation' : 'primary',
-                taskType: 'user_chat',
-                inputTokens: totalInputTokens,
-                outputTokens: totalOutputTokens,
-                latencyMs: Date.now() - startMs,
-                escalated,
-              }).catch(() => {});
-            } catch (err) {
-              console.error('Streaming error:', err);
-              emitSSE(controller, encoder, {
-                event: 'error',
-                message: "I'm having trouble right now. Please try again.",
-              });
-              controller.close();
+            // Only set usage from final result if onStepFinish didn't fire
+            if (totalInputTokens === 0) {
+              const usage = await result.usage;
+              totalInputTokens = usage?.inputTokens ?? 0;
+              totalOutputTokens = usage?.outputTokens ?? 0;
             }
-          },
-        }),
-        {
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-          },
+          } catch (primaryError) {
+            console.warn('Primary model failed, escalating:', primaryError);
+            escalated = true;
+
+            try {
+              const escalationResult = streamText({
+                model: models.languageModel('escalation'),
+                system: systemPrompt,
+                messages: llmMessages,
+                tools: leviTools,
+                stopWhen: stepCountIs(MAX_TOOL_STEPS),
+                experimental_transform: smoothStream({ delayInMs: 15, chunking: 'word' }),
+              });
+
+              writer.merge(escalationResult.toUIMessageStream({
+                sendStart: false,
+                onError: (error) => {
+                  return error instanceof Error ? error.message : String(error);
+                },
+              }));
+
+              assistantContent = await escalationResult.text;
+              const escalationResponse = await escalationResult.response;
+              finalModel = escalationResponse?.modelId || 'anthropic/claude-sonnet-4.5';
+
+              const escalationUsage = await escalationResult.usage;
+              totalInputTokens = escalationUsage?.inputTokens ?? 0;
+              totalOutputTokens = escalationUsage?.outputTokens ?? 0;
+            } catch (escalationError) {
+              console.error('Escalation model failed:', escalationError);
+              assistantContent = "I'm having trouble right now. Please try again.";
+            }
+          }
+
+          // Persist final assistant message (non-blocking)
+          if (assistantContent) {
+            persistMessage(conversationId, {
+              role: 'assistant',
+              content: assistantContent,
+              metadata: {
+                model: finalModel,
+                escalated,
+                tool_call_count: toolCallCount,
+                input_tokens: totalInputTokens,
+                output_tokens: totalOutputTokens,
+              },
+            }).catch(() => {});
+          }
+
+          // Log usage (non-blocking)
+          logUsage({
+            orgId: billingOrgId,
+            userId,
+            conversationId,
+            model: finalModel,
+            tier: escalated ? 'escalation' : 'primary',
+            taskType: 'user_chat',
+            inputTokens: totalInputTokens,
+            outputTokens: totalOutputTokens,
+            latencyMs: Date.now() - startMs,
+            escalated,
+          }).catch(() => {});
         },
-      );
+      });
+
+      return createUIMessageStreamResponse({ stream });
     }
 
-    // ── Non-streaming path (unchanged) ──────────────────────
+    // ── Non-streaming path ──────────────────────────────────
+    const startMs = Date.now();
+    let assistantContent = '';
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
     let finalModel = '';
     let escalated = false;
-    let totalLatencyMs = 0;
-    let toolCallCount = 0;
-    let assistantContent: string | null = null;
 
-    for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
-      const llmResponse = await callWithEscalation({
-        messages,
-        tools: TOOL_DEFINITIONS,
-        maxTokens: responseConfig.maxTokens,
-        taskType: 'user_chat',
+    try {
+      const result = await generateText({
+        model: models.languageModel('primary'),
+        system: systemPrompt,
+        messages: llmMessages,
+        tools: leviTools,
+        stopWhen: stepCountIs(MAX_TOOL_STEPS),
       });
 
-      totalInputTokens += llmResponse.usage.inputTokens;
-      totalOutputTokens += llmResponse.usage.outputTokens;
-      finalModel = llmResponse.model;
-      escalated = escalated || llmResponse.escalated;
-      totalLatencyMs += llmResponse.latencyMs;
+      assistantContent = result.text;
+      finalModel = result.response?.modelId || 'minimax/minimax-m2.5';
+      totalInputTokens = result.usage?.inputTokens ?? 0;
+      totalOutputTokens = result.usage?.outputTokens ?? 0;
+    } catch (primaryError) {
+      console.warn('Primary model failed, escalating:', primaryError);
+      escalated = true;
 
-      if (!llmResponse.toolCalls || llmResponse.toolCalls.length === 0) {
-        assistantContent = llmResponse.content;
-        break;
-      }
-
-      toolCallCount += llmResponse.toolCalls.length;
-
-      const assistantMsg: ChatMessage = {
-        role: 'assistant',
-        content: llmResponse.content,
-        tool_calls: llmResponse.toolCalls,
-      };
-      messages.push(assistantMsg);
-
-      await persistMessage(conversationId, {
-        role: 'assistant',
-        content: llmResponse.content ?? '',
-        toolCalls: llmResponse.toolCalls,
+      const result = await generateText({
+        model: models.languageModel('escalation'),
+        system: systemPrompt,
+        messages: llmMessages,
+        tools: leviTools,
+        stopWhen: stepCountIs(MAX_TOOL_STEPS),
       });
 
-      for (const toolCall of llmResponse.toolCalls) {
-        let args: Record<string, unknown> = {};
-        try {
-          args = JSON.parse(toolCall.function.arguments);
-        } catch {
-          args = {};
-        }
-
-        const toolResult = await executeTool(
-          toolCall.function.name,
-          args,
-          orgId,
-        );
-
-        const toolMsg: ChatMessage = {
-          role: 'tool',
-          content: toolResult,
-          tool_call_id: toolCall.id,
-        };
-        messages.push(toolMsg);
-
-        await persistMessage(conversationId, {
-          role: 'tool',
-          content: toolResult,
-          toolCallId: toolCall.id,
-        });
-      }
-
-      if (iteration === MAX_TOOL_ITERATIONS - 1) {
-        const finalResponse = await callWithEscalation({
-          messages,
-          maxTokens: responseConfig.maxTokens,
-          taskType: 'user_chat',
-        });
-        totalInputTokens += finalResponse.usage.inputTokens;
-        totalOutputTokens += finalResponse.usage.outputTokens;
-        totalLatencyMs += finalResponse.latencyMs;
-        assistantContent = finalResponse.content;
-      }
+      assistantContent = result.text;
+      finalModel = result.response?.modelId || 'anthropic/claude-sonnet-4.5';
+      totalInputTokens = result.usage?.inputTokens ?? 0;
+      totalOutputTokens = result.usage?.outputTokens ?? 0;
     }
 
     if (!assistantContent) {
       assistantContent = "I wasn't able to generate a response. Please try again.";
     }
 
-    // 10. Persist final assistant message
+    // Persist final assistant message
     await persistMessage(conversationId, {
       role: 'assistant',
       content: assistantContent,
       metadata: {
         model: finalModel,
         escalated,
-        tool_call_count: toolCallCount,
         input_tokens: totalInputTokens,
         output_tokens: totalOutputTokens,
       },
     });
 
-    // 11. Log usage (non-blocking — fire and forget)
+    // Log usage (non-blocking)
     logUsage({
       orgId: billingOrgId,
       userId,
@@ -498,13 +569,12 @@ chatRoute.post('/', async (c) => {
       taskType: 'user_chat',
       inputTokens: totalInputTokens,
       outputTokens: totalOutputTokens,
-      latencyMs: totalLatencyMs,
+      latencyMs: Date.now() - startMs,
       escalated,
     }).catch((err) => {
       console.error('Usage logging failed:', err);
     });
 
-    // 12. Return response matching mobile contract
     return c.json({ message: assistantContent });
   } catch (err) {
     console.error('Chat endpoint error:', err);

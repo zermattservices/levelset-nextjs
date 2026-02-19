@@ -25,6 +25,7 @@ import {
 } from "react-native";
 import { useLocation } from "../../context/LocationContext";
 import { useLeviChat, type ChatMessage } from "../../context/LeviChatContext";
+import { useLocationWarning } from "../../../app/(tabs)/(levi)/index";
 import { ChatBubble } from "./ChatBubble";
 import { ChatInput } from "./ChatInput";
 import { TypingIndicator } from "./TypingIndicator";
@@ -59,6 +60,7 @@ export function ChatScreen() {
     sendMessage,
     loadMoreHistory,
   } = useLeviChat();
+  const { flashLocationWarning } = useLocationWarning();
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
   const [showingHistory, setShowingHistory] = useState(false);
 
@@ -120,9 +122,13 @@ export function ChatScreen() {
 
   const handleSend = useCallback(
     async (content: string) => {
+      if (!selectedLocation) {
+        flashLocationWarning();
+        return;
+      }
       await sendMessage(content);
     },
-    [sendMessage]
+    [sendMessage, selectedLocation, flashLocationWarning]
   );
 
   return (

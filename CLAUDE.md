@@ -42,6 +42,56 @@ npm run ios                       # iOS simulator
 npx tsx scripts/<script-name>.ts  # Reads .env.local
 ```
 
+### Key Scripts
+
+```bash
+npx tsx scripts/seed-demo-organization.ts    # Create full demo org with employees, ratings, etc.
+npx tsx scripts/seed-permission-modules.ts   # Seed/update permission modules and sub-items
+npx tsx scripts/seed-default-profiles.ts     # Create default permission profiles per org
+npx tsx scripts/recalculate-all-pay.ts       # Recalculate pay for all employees
+npx tsx scripts/reset-demo-user.ts           # Reset demo user to clean state
+npx tsx scripts/run-sql.ts                   # Run arbitrary SQL from a file
+```
+
+One-time import scripts (e.g., `import-ratings-from-csv.ts`) are also in `scripts/` but rarely rerun.
+
+## Architecture — Agent (Levi AI)
+
+Hono.js service deployed to Fly.io. Handles AI chat for the mobile app.
+
+### Routes
+
+- `GET /health` — public health check
+- `POST /api/ai/chat` — main chat endpoint (streaming SSE or JSON)
+- `GET /api/ai/chat/history` — paginated conversation history
+
+All `/api/*` routes require JWT auth via middleware (Levelset Admin only).
+
+### LLM Routing
+
+Uses OpenRouter for all LLM calls:
+- **Primary**: MiniMax M2.5 (~85% of requests)
+- **Escalation**: Claude Sonnet 4.5 (complex tasks or primary failure)
+- Max 5 tool iterations per request. SSE events: `tool_call`, `tool_result`, `delta`, `done`
+
+### Agent Tools
+
+Tools registered in `apps/agent/src/tools/index.ts`. All executors receive `(args, orgId)` — org_id comes from auth context, never user input.
+
+- `lookup_employee` — find employee by query
+- `list_employees` — list all employees
+- `get_employee_ratings` — get employee ratings
+- `get_employee_infractions` — get employee infractions
+
+### Agent Key Files
+
+- `src/index.ts` — Hono app setup, route registration
+- `src/middleware/auth.ts` — JWT verification + Levelset Admin check
+- `src/lib/llm-router.ts` — model selection and response config
+- `src/lib/llm-clients/openrouter.ts` — OpenRouter API client
+- `src/lib/conversation-manager.ts` — conversation lifecycle (24h TTL)
+- `src/lib/usage-tracker.ts` — per-org rate limiting (30/min) and cost logging
+
 ## Architecture — Dashboard
 
 ### Pages Router Only
@@ -126,6 +176,21 @@ Types live in `apps/dashboard/lib/supabase.types.ts`. Regenerate with `pnpm db:g
 ### Migrations
 
 Files in `supabase/migrations/` use `YYYYMMDD_description.sql` naming. Check existing migrations before adding columns.
+
+### Key Table Groups
+
+| Domain | Core Tables |
+|--------|-------------|
+| Employees & Org | `orgs`, `locations`, `employees`, `app_users`, `user_location_access` |
+| Ratings (PEA) | `ratings`, `daily_position_averages`, `rating_thresholds`, `evaluations` |
+| Discipline | `infractions`, `infractions_rubric`, `disc_actions`, `recommended_disc_actions` |
+| Scheduling | `shifts`, `shift_assignments`, `setup_templates`, `setup_assignments`, `break_rules` |
+| AI / Chat | `ai_conversations`, `ai_messages`, `levi_usage_log` |
+| Pay | `org_pay_config`, `org_pay_rates` |
+| Permissions | `permission_modules`, `permission_sub_items`, `permission_profiles`, `permission_profile_access` |
+| Reviews | `google_reviews`, `yelp_reviews`, `location_business_hours` |
+
+All tenant tables are scoped by `org_id` and often `location_id`. Check migrations for exact schemas.
 
 ## Permission System
 
@@ -218,6 +283,7 @@ Validate org_id from the authenticated user's session, NOT from the request body
 - Never run `pnpm` commands in `apps/mobile/` — it uses npm
 - Never import from `apps/dashboard/` in mobile code — shared code goes in `packages/`
 - Never hardcode hex color values in dashboard — use CSS variables from design tokens
+- Never commit `.env`, `.env.local`, or files containing API keys
 
 ## File Organization
 
@@ -233,18 +299,54 @@ Validate org_id from the authenticated user's session, NOT from the request body
 | Script | `scripts/my-script.ts` (run via `npx tsx`) |
 | Locale strings | `locales/{en,es}/{common,forms,errors}.json` (both languages) |
 
-## Deployment
+## CI/CD & Deployment
 
-| App | Platform | Trigger |
-|-----|----------|---------|
-| Dashboard | Vercel | Push to any branch (preview), push to main (production) |
-| Agent | Fly.io | Push to develop (dev instance), push to main (production) |
-| Mobile | EAS Build | Manual (`eas build`) |
+### PR Validation (GitHub Actions)
+
+`build-dashboard.yml` runs on PRs touching `apps/dashboard/**`, `apps/agent/**`, or `packages/**`:
+1. `pnpm typecheck` (dashboard + agent)
+2. `pnpm --filter dashboard build` (production build)
+
+Must pass before merge.
+
+### Dashboard (Vercel)
+
+- **Any branch push** → preview deployment
+- **Push to main** → production deployment (app.levelset.io)
+- Build: `pnpm install --frozen-lockfile && next build`
+
+**Cron jobs** (defined in `apps/dashboard/vercel.json`, production only):
+- `evaluate-certifications` — daily 8am UTC (`0 8 * * *`) — evaluates PEA certification status on audit days
+- `sync-google-reviews` — Sunday 6am UTC (`0 6 * * 0`) — syncs Google reviews for connected locations
+
+Both cron endpoints require `CRON_SECRET` Bearer token and only execute when `VERCEL_ENV === 'production'`.
+
+### Agent (Fly.io via GitHub Actions)
+
+`deploy-agent.yml` triggers on push to `main` or `develop` when files change in:
+- `apps/agent/**`, `packages/shared/**`, `packages/supabase-client/**`, `packages/permissions/**`
+
+| Branch | Target App | URL |
+|--------|-----------|-----|
+| main | `levelset-agent` | https://levelset-agent.fly.dev |
+| develop | `levelset-agent-dev` | https://levelset-agent-dev.fly.dev |
+
+Also supports manual `workflow_dispatch` with environment selector (dev/production). Health check verified at `/health` post-deploy.
+
+### Plasmic (GitHub Actions)
+
+`plasmic.yml` triggered by `repository_dispatch` (type: `plasmic`) from Plasmic webhook. Syncs codegen and auto-creates PRs for component changes.
+
+### Mobile (EAS Build)
+
+Manual only: `eas build` from `apps/mobile/`. No CI trigger — builds are run on-demand.
 
 ## Environment Variables
 
-**Dashboard**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_MUI_X_LICENSE_KEY`
+**Dashboard**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_MUI_X_LICENSE_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `GOOGLE_MAPS_API_KEY`, `OUTSCRAPER_API_KEY`, `CRON_SECRET`
 
-**Agent**: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `PORT`
+**Agent**: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENROUTER_API_KEY`, `PORT`
 
 **Mobile**: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+
+See `.env.example` for the complete list with descriptions.

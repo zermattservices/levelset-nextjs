@@ -1,46 +1,41 @@
 /**
  * Employee tools — lookup and list employees.
- * All queries are scoped by org_id from the authenticated user context.
+ * All queries are scoped by org_id (and optionally location_id) from auth context.
  */
 
 import { createServiceClient } from '@levelset/supabase-client';
-import type { ToolDefinition } from '../../lib/types.js';
 
-export const lookupEmployeeTool: ToolDefinition = {
-  type: 'function',
-  function: {
-    name: 'lookup_employee',
-    description:
-      'Search for an employee by name and return their details including role, hire date, certification status, and current discipline points.',
-    parameters: {
-      type: 'object',
-      properties: {
-        name: {
-          type: 'string',
-          description: 'Full or partial name of the employee to search for',
-        },
-      },
-      required: ['name'],
-    },
-  },
-};
-
+/**
+ * Search for an employee by name. Searches across full_name, first_name, and last_name.
+ * Optionally filters by location_id and role.
+ */
 export async function lookupEmployee(
   args: Record<string, unknown>,
-  orgId: string
+  orgId: string,
+  locationId?: string
 ): Promise<string> {
   const supabase = createServiceClient();
   const name = args.name as string;
+  const role = args.role as string | undefined;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('employees')
     .select(
-      'id, full_name, first_name, last_name, role, hire_date, certified_status, last_points_total, active, is_leader, is_trainer, is_boh, is_foh, location_id'
+      'id, full_name, first_name, last_name, role, hire_date, certified_status, last_points_total, active, is_leader, is_trainer, is_boh, is_foh, location_id, email, phone'
     )
     .eq('org_id', orgId)
-    .ilike('full_name', `%${name}%`)
     .eq('active', true)
-    .limit(5);
+    .or(`full_name.ilike.%${name}%,first_name.ilike.%${name}%,last_name.ilike.%${name}%`)
+    .limit(10);
+
+  if (locationId) {
+    query = query.eq('location_id', locationId);
+  }
+  if (role) {
+    query = query.ilike('role', `%${role}%`);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return JSON.stringify({ error: error.message });
@@ -48,58 +43,25 @@ export async function lookupEmployee(
 
   if (!data || data.length === 0) {
     return JSON.stringify({
-      message: `No active employee found matching "${name}"`,
+      message: `No active employee found matching "${name}"${locationId ? ' at this location' : ''}`,
     });
   }
 
   return JSON.stringify(data);
 }
 
-export const listEmployeesTool: ToolDefinition = {
-  type: 'function',
-  function: {
-    name: 'list_employees',
-    description:
-      'List employees in the organization. Can filter by active status, position type (FOH/BOH), leaders, or trainers.',
-    parameters: {
-      type: 'object',
-      properties: {
-        active_only: {
-          type: 'boolean',
-          description: 'Only return active employees (default: true)',
-        },
-        is_leader: {
-          type: 'boolean',
-          description: 'Filter for leaders only',
-        },
-        is_boh: {
-          type: 'boolean',
-          description: 'Filter for back-of-house employees',
-        },
-        is_foh: {
-          type: 'boolean',
-          description: 'Filter for front-of-house employees',
-        },
-        is_trainer: {
-          type: 'boolean',
-          description: 'Filter for trainers only',
-        },
-        limit: {
-          type: 'number',
-          description: 'Maximum number of employees to return (default: 20)',
-        },
-      },
-    },
-  },
-};
-
+/**
+ * List employees in the organization with optional filters.
+ * Returns employees sorted by name with role/zone summary counts.
+ */
 export async function listEmployees(
   args: Record<string, unknown>,
-  orgId: string
+  orgId: string,
+  locationId?: string
 ): Promise<string> {
   const supabase = createServiceClient();
   const activeOnly = args.active_only !== false; // default true
-  const limit = (args.limit as number) || 20;
+  const limit = Math.min((args.limit as number) || 20, 50);
 
   let query = supabase
     .from('employees')
@@ -110,6 +72,9 @@ export async function listEmployees(
     .order('full_name', { ascending: true })
     .limit(limit);
 
+  if (locationId) {
+    query = query.eq('location_id', locationId);
+  }
   if (activeOnly) {
     query = query.eq('active', true);
   }
@@ -124,6 +89,9 @@ export async function listEmployees(
   }
   if (typeof args.is_trainer === 'boolean') {
     query = query.eq('is_trainer', args.is_trainer);
+  }
+  if (typeof args.role === 'string') {
+    query = query.ilike('role', `%${args.role}%`);
   }
 
   const { data, error } = await query;

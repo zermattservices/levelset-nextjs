@@ -9,6 +9,15 @@ export default function LeviLayout() {
       <LeviChatProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
+          <Stack.Screen
+            name="location-picker"
+            options={{
+              presentation: "transparentModal",
+              animation: "fade",
+              contentStyle: { backgroundColor: "transparent" },
+              headerShown: false,
+            }}
+          />
         </Stack>
       </LeviChatProvider>
     </LeviMenuProvider>

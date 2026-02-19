@@ -33,7 +33,7 @@ export default function TabLayout() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="(forms)">
+      <NativeTabs.Trigger name="(iforms)">
         <Label>Forms</Label>
         <Icon
           sf={{ default: "doc.text", selected: "doc.text.fill" }}
