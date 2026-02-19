@@ -73,14 +73,23 @@ export async function getEmployeeProfile(
   const infractions = infractionsResult.data ?? [];
   const discActions = discActionsResult.data ?? [];
 
-  // Calculate 90-day active points
+  // Calculate current points (within the 90-day discipline cutoff)
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
     .toISOString()
     .split('T')[0];
-  const activeInfractions = infractions.filter(
+  const currentInfractions = infractions.filter(
     (inf: any) => inf.infraction_date >= ninetyDaysAgo
   );
-  const activePoints = activeInfractions.reduce(
+  const currentPoints = currentInfractions.reduce(
+    (sum: number, inf: any) => sum + (inf.points ?? 0),
+    0
+  );
+
+  // Archived points (older than the 90-day cutoff)
+  const archivedInfractions = infractions.filter(
+    (inf: any) => inf.infraction_date < ninetyDaysAgo
+  );
+  const archivedPoints = archivedInfractions.reduce(
     (sum: number, inf: any) => sum + (inf.points ?? 0),
     0
   );
@@ -117,9 +126,9 @@ export async function getEmployeeProfile(
           : null,
     },
     discipline: {
-      active_points: activePoints,
-      stored_points: employee.last_points_total ?? 0,
-      recent_infractions: activeInfractions.length,
+      current_points: currentPoints,
+      archived_points: archivedPoints,
+      current_infraction_count: currentInfractions.length,
       total_infractions: infractions.length,
       infractions: infractions.slice(0, 5),
       disc_actions: discActions,

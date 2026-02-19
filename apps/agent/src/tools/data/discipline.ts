@@ -29,7 +29,7 @@ export async function getDisciplineSummary(
         // Employee details
         supabase
           .from('employees')
-          .select('id, full_name, role, last_points_total, active')
+          .select('id, full_name, role, active')
           .eq('id', employeeId)
           .eq('org_id', orgId)
           .maybeSingle(),
@@ -72,11 +72,20 @@ export async function getDisciplineSummary(
     const discActions = discActionsResult.data ?? [];
     const recommended = recommendedResult.data ?? [];
 
-    // Active points (last 90 days)
-    const activeInfractions = infractions.filter(
+    // Current points (within the 90-day discipline cutoff)
+    const currentInfractions = infractions.filter(
       (inf: any) => inf.infraction_date >= ninetyDaysAgo
     );
-    const activePoints = activeInfractions.reduce(
+    const currentPoints = currentInfractions.reduce(
+      (sum: number, inf: any) => sum + (inf.points ?? 0),
+      0
+    );
+
+    // Archived points (older than the 90-day cutoff)
+    const archivedInfractions = infractions.filter(
+      (inf: any) => inf.infraction_date < ninetyDaysAgo
+    );
+    const archivedPoints = archivedInfractions.reduce(
       (sum: number, inf: any) => sum + (inf.points ?? 0),
       0
     );
@@ -88,16 +97,15 @@ export async function getDisciplineSummary(
       employee: {
         name: employeeResult.data.full_name,
         role: employeeResult.data.role,
-        stored_points: employeeResult.data.last_points_total ?? 0,
         active: employeeResult.data.active,
       },
       points: {
-        active_90_day: activePoints,
-        stored: employeeResult.data.last_points_total ?? 0,
+        current: currentPoints,
+        archived: archivedPoints,
       },
       infractions: {
         total: infractions.length,
-        active_count: activeInfractions.length,
+        current_count: currentInfractions.length,
         recent: infractions.slice(0, 5),
       },
       discipline_actions: {
@@ -110,10 +118,10 @@ export async function getDisciplineSummary(
 
   // ── Location-wide discipline overview ──
 
-  // Get all active employees with points
+  // Get all active employees
   let empQuery = supabase
     .from('employees')
-    .select('id, full_name, role, last_points_total, is_leader')
+    .select('id, full_name, role, is_leader')
     .eq('org_id', orgId)
     .eq('active', true);
 
@@ -121,14 +129,14 @@ export async function getDisciplineSummary(
     empQuery = empQuery.eq('location_id', locationId);
   }
 
-  // Get recent infractions across the location
+  // Get infractions from last 90 days (used for current points calculation)
   let infQuery = supabase
     .from('infractions')
     .select('id, employee_id, infraction, infraction_date, points')
     .eq('org_id', orgId)
     .gte('infraction_date', ninetyDaysAgo)
     .order('infraction_date', { ascending: false })
-    .limit(50);
+    .limit(200);
 
   if (locationId) {
     infQuery = infQuery.eq('location_id', locationId);
@@ -156,10 +164,21 @@ export async function getDisciplineSummary(
   const infractions = infResult.data ?? [];
   const discActions = discResult.data ?? [];
 
-  // Employees with active points
+  // Calculate current points per employee from infractions (90-day cutoff)
+  const pointsByEmployee = new Map<string, number>();
+  for (const inf of infractions) {
+    const empId = (inf as any).employee_id;
+    pointsByEmployee.set(empId, (pointsByEmployee.get(empId) || 0) + ((inf as any).points ?? 0));
+  }
+
+  // Build ranked employee list with calculated current points
   const employeesWithPoints = employees
-    .filter((e: any) => (e.last_points_total ?? 0) > 0)
-    .sort((a: any, b: any) => (b.last_points_total ?? 0) - (a.last_points_total ?? 0));
+    .map((e: any) => ({
+      ...e,
+      current_points: pointsByEmployee.get(e.id) || 0,
+    }))
+    .filter((e: any) => e.current_points > 0)
+    .sort((a: any, b: any) => b.current_points - a.current_points);
 
   // Infraction type breakdown
   const infractionTypes: Record<string, number> = {};
@@ -168,9 +187,9 @@ export async function getDisciplineSummary(
     infractionTypes[type] = (infractionTypes[type] || 0) + 1;
   }
 
-  // Total active points across team
-  const totalActivePoints = employeesWithPoints.reduce(
-    (sum: number, e: any) => sum + (e.last_points_total ?? 0),
+  // Total current points across team
+  const totalCurrentPoints = employeesWithPoints.reduce(
+    (sum: number, e: any) => sum + e.current_points,
     0
   );
 
@@ -178,7 +197,7 @@ export async function getDisciplineSummary(
     overview: {
       total_employees: employees.length,
       employees_with_points: employeesWithPoints.length,
-      total_active_points: totalActivePoints,
+      total_current_points: totalCurrentPoints,
       infractions_last_90_days: infractions.length,
       discipline_actions_recent: discActions.length,
     },
@@ -186,7 +205,7 @@ export async function getDisciplineSummary(
     top_point_holders: employeesWithPoints.slice(0, 10).map((e: any) => ({
       name: e.full_name,
       role: e.role,
-      points: e.last_points_total,
+      current_points: e.current_points,
     })),
     recent_discipline_actions: discActions.slice(0, 5).map((d: any) => ({
       action: d.action,

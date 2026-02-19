@@ -20,7 +20,7 @@ interface EmployeeCardProps {
     certified_status?: string;
     rating_avg?: number;
     rating_position?: string;
-    active_points?: number;
+    current_points?: number;
     is_leader?: boolean;
     is_trainer?: boolean;
   };
@@ -36,7 +36,7 @@ export function EmployeeCard({ payload }: EmployeeCardProps) {
   const colors = useColors();
   const initial = payload.name.charAt(0).toUpperCase();
   const hasRating = payload.rating_avg !== undefined && payload.rating_avg !== null;
-  const hasPoints = payload.active_points !== undefined && payload.active_points > 0;
+  const hasPoints = payload.current_points !== undefined && payload.current_points > 0;
 
   return (
     <Animated.View entering={FadeIn.duration(200)}>
@@ -103,7 +103,7 @@ export function EmployeeCard({ payload }: EmployeeCardProps) {
           {hasPoints && !hasRating && (
             <View style={[styles.pointsBadge, { backgroundColor: colors.errorTransparent }]}>
               <Text style={[styles.pointsText, { color: colors.error }]}>
-                {payload.active_points} pts
+                {payload.current_points} pts
               </Text>
             </View>
           )}

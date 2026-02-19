@@ -467,8 +467,9 @@ chatRoute.post('/', async (c) => {
             writer.merge(result.toUIMessageStream({
               sendStart: false,
               onError: (error) => {
-                console.error('Stream error:', error);
-                return error instanceof Error ? error.message : String(error);
+                const errMsg = error instanceof Error ? error.message : String(error);
+                console.error('[Chat] Primary stream error:', { error: errMsg, model: 'primary' });
+                return "I'm having trouble right now. Please try again.";
               },
             }));
 
@@ -501,7 +502,9 @@ chatRoute.post('/', async (c) => {
               writer.merge(escalationResult.toUIMessageStream({
                 sendStart: false,
                 onError: (error) => {
-                  return error instanceof Error ? error.message : String(error);
+                  const errMsg = error instanceof Error ? error.message : String(error);
+                  console.error('[Chat] Escalation stream error:', { error: errMsg, model: 'escalation' });
+                  return "I'm having trouble right now. Please try again.";
                 },
               }));
 

@@ -127,7 +127,7 @@ Role hierarchy:
 Response style:
 - Only include hire dates, contact info, or other metadata when explicitly requested.
 - For ratings, show the average and note trends if relevant.
-- For infractions, show active points (last 90 days) and recent incidents.
+- For infractions, show current points (within the 90-day discipline cutoff) and recent incidents. Never say "active points" or "stored points" — use "current points" for points within the cutoff and "archived points" for older ones.
 - Format employee names in bold.`;
 
   // Section 2: Org Context (optional — included when loaded)
