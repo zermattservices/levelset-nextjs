@@ -91,6 +91,7 @@ function getToolResultLabel(name: string, result: string): string {
   try {
     const parsed = JSON.parse(result);
     if (parsed.error) return `Error: ${parsed.error}`;
+    if (parsed.message) return parsed.message; // "No active employee found matching ..."
     if (Array.isArray(parsed)) return `Found ${parsed.length} result${parsed.length === 1 ? '' : 's'}`;
     if (parsed.employees && Array.isArray(parsed.employees))
       return `Found ${parsed.employees.length} employee${parsed.employees.length === 1 ? '' : 's'}`;
@@ -121,7 +122,11 @@ export const chatRoute = new Hono();
 chatRoute.get('/history', async (c) => {
   try {
     const user = c.get('user') as UserContext;
-    const orgId = user.orgId || c.req.query('org_id');
+    const isAdmin = isLevelsetAdmin(user.role);
+    // Admins pass customer org_id as query param; regular users use their own
+    const orgId = isAdmin
+      ? (c.req.query('org_id') || user.orgId)
+      : (user.orgId || c.req.query('org_id'));
     if (!orgId) return c.json({ messages: [], hasMore: false });
     const locationId = c.req.query('location_id') ?? undefined;
 
@@ -154,10 +159,14 @@ chatRoute.post('/', async (c) => {
     }
 
     // 2. Get user context from auth middleware
-    // For regular users, org_id comes from their app_users record.
-    // For Levelset Admins (super-admins), org_id may be null — fall back to request body.
+    // For Levelset Admins: prefer body.org_id (the customer org they're browsing)
+    //   over user.orgId (Levelset HQ org) so tool queries return customer data.
+    // For regular users: org_id comes from their app_users record.
     const user = c.get('user') as UserContext;
-    const orgId = user.orgId || body.org_id;
+    const isAdmin = isLevelsetAdmin(user.role);
+    const orgId = isAdmin
+      ? (body.org_id || user.orgId)   // Admin: prefer customer org from request
+      : (user.orgId || body.org_id);  // Regular: prefer user's own org
     const locationId = body.location_id;
     const userId = user.appUserId;
 
@@ -166,8 +175,7 @@ chatRoute.post('/', async (c) => {
     }
 
     // Levelset Admin usage is billed to their own org (Levelset), not the customer org
-    // user.orgId is the admin's own org; orgId may be the customer org from the request body
-    const billingOrgId = isLevelsetAdmin(user.role) && user.orgId ? user.orgId : orgId;
+    const billingOrgId = isAdmin && user.orgId ? user.orgId : orgId;
 
     // 3. Rate limit check (scoped to billing org, not context org)
     const allowed = await checkRateLimit(billingOrgId);
@@ -322,10 +330,12 @@ chatRoute.post('/', async (c) => {
                 assistantContent = "I wasn't able to generate a response. Please try again.";
               }
 
-              // Emit content as delta chunks (simulates token streaming)
+              // Emit content as delta chunks with small delays for streaming effect
               const chunks = chunkText(assistantContent, 12);
               for (const chunk of chunks) {
                 emitSSE(controller, encoder, { event: 'delta', text: chunk });
+                // Small delay so the client receives chunks incrementally
+                await new Promise((r) => setTimeout(r, 15));
               }
 
               // Done

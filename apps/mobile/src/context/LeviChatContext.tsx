@@ -355,7 +355,11 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
                     const tc = toolCalls.find((t) => t.id === id);
                     if (tc) {
                       tc.status = "done";
-                      tc.label = label;
+                      // Keep the descriptive action label (e.g. "Listing employees")
+                      // unless the result has a more informative one (e.g. "Found 5 employees")
+                      if (label && label !== "Done") {
+                        tc.label = label;
+                      }
                       updateAssistantMessage(
                         streamedContent,
                         toolCalls,
@@ -392,7 +396,9 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
                 const tc = toolCalls.find((t) => t.id === id);
                 if (tc) {
                   tc.status = "done";
-                  tc.label = label;
+                  if (label && label !== "Done") {
+                    tc.label = label;
+                  }
                 }
               },
               onDone: () => {
