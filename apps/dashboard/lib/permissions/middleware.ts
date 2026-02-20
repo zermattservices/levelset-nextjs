@@ -17,6 +17,36 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 type PermissionCheck = PermissionKey | PermissionKey[];
 
 /**
+ * Check if the user has a Levelset Admin app_user record in any org.
+ * Cached per-request via a simple in-memory map keyed by auth_user_id.
+ */
+const adminCache = new Map<string, boolean>();
+const ADMIN_CACHE_TTL = 5 * 60 * 1000;
+const adminCacheTimestamps = new Map<string, number>();
+
+async function isLevelsetAdmin(
+  supabase: ReturnType<typeof createServerSupabaseClient>,
+  authUserId: string
+): Promise<boolean> {
+  const cached = adminCache.get(authUserId);
+  const ts = adminCacheTimestamps.get(authUserId);
+  if (cached !== undefined && ts && Date.now() - ts < ADMIN_CACHE_TTL) {
+    return cached;
+  }
+
+  const { count } = await supabase
+    .from('app_users')
+    .select('id', { count: 'exact', head: true })
+    .eq('auth_user_id', authUserId)
+    .eq('role', 'Levelset Admin');
+
+  const result = (count ?? 0) > 0;
+  adminCache.set(authUserId, result);
+  adminCacheTimestamps.set(authUserId, Date.now());
+  return result;
+}
+
+/**
  * Decode a Supabase JWT and extract the user ID (sub claim).
  * Returns null if the token is malformed or expired.
  */
@@ -85,6 +115,11 @@ export function withPermission(
 
       if (!orgId) {
         return res.status(400).json({ error: 'org_id or location_id required' });
+      }
+
+      // Levelset Admin bypasses all permission checks
+      if (await isLevelsetAdmin(supabase, userId)) {
+        return handler(req, res);
       }
 
       // Check permission(s)
@@ -175,6 +210,14 @@ export function withPermissionAndContext(
 
       if (!orgId) {
         return res.status(400).json({ error: 'org_id or location_id required' });
+      }
+
+      // Levelset Admin bypasses all permission checks
+      if (await isLevelsetAdmin(supabase, userId)) {
+        const authenticatedReq = req as AuthenticatedRequest;
+        authenticatedReq.user = { id: userId };
+        authenticatedReq.orgId = orgId as string;
+        return handler(authenticatedReq, res, { userId, orgId: orgId as string });
       }
 
       // Check permission(s)
