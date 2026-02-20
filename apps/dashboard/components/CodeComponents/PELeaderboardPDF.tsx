@@ -3,13 +3,28 @@ import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/render
 import type { LeaderboardEntry } from '@/lib/ratings-data';
 import { formatTenure } from '@/lib/ratings-data';
 
-const levelsetGreen = 'var(--ls-color-brand)';
+/**
+ * Resolved design token values for @react-pdf/renderer.
+ * react-pdf uses its own layout engine and cannot resolve CSS custom properties.
+ */
+const TOKEN = {
+  brand: '#31664A',
+  mutedBorder: '#E5E7EB',
+  muted: '#6B7280',
+  mutedSoft: '#F3F4F6',
+  neutral: '#374151',
+  neutralForeground: '#F9FAFB',
+  neutralSoftForeground: '#111827',
+  bgContainer: '#FFFFFF',
+  disabledText: '#9CA3AF',
+} as const;
 
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontFamily: 'Helvetica',
     fontSize: 10,
+    backgroundColor: TOKEN.bgContainer,
   },
   header: {
     flexDirection: 'row',
@@ -18,7 +33,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: 'var(--ls-color-muted-border)',
+    borderBottomColor: TOKEN.mutedBorder,
   },
   logo: {
     width: 50,
@@ -32,19 +47,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'var(--ls-color-neutral-soft-foreground)',
+    color: TOKEN.neutralSoftForeground,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 11,
-    color: 'var(--ls-color-muted)',
+    color: TOKEN.muted,
   },
   filterInfo: {
     flexDirection: 'row',
     gap: 20,
     marginBottom: 20,
     padding: 12,
-    backgroundColor: 'var(--ls-color-neutral-foreground)',
+    backgroundColor: TOKEN.neutralForeground,
     borderRadius: 6,
   },
   filterItem: {
@@ -53,29 +68,29 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     fontSize: 9,
-    color: 'var(--ls-color-muted)',
+    color: TOKEN.muted,
     marginRight: 6,
     textTransform: 'uppercase',
   },
   filterValue: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: 'var(--ls-color-neutral)',
+    color: TOKEN.neutral,
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: 'var(--ls-color-muted-soft)',
+    backgroundColor: TOKEN.mutedSoft,
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'var(--ls-color-muted-border)',
+    borderBottomColor: TOKEN.mutedBorder,
   },
   tableRow: {
     flexDirection: 'row',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'var(--ls-color-muted-soft)',
+    borderBottomColor: TOKEN.mutedSoft,
   },
   tableRowAlt: {
     backgroundColor: '#fafafa',
@@ -104,26 +119,26 @@ const styles = StyleSheet.create({
   headerCell: {
     fontSize: 8,
     fontWeight: 'bold',
-    color: 'var(--ls-color-muted)',
+    color: TOKEN.muted,
     textTransform: 'uppercase',
   },
   cell: {
     fontSize: 10,
-    color: 'var(--ls-color-neutral)',
+    color: TOKEN.neutral,
   },
   cellBold: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: 'var(--ls-color-neutral-soft-foreground)',
+    color: TOKEN.neutralSoftForeground,
   },
   cellGreen: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: levelsetGreen,
+    color: TOKEN.brand,
   },
   cellMuted: {
     fontSize: 10,
-    color: 'var(--ls-color-disabled-text)',
+    color: TOKEN.disabledText,
     fontStyle: 'italic',
   },
   topThreeSection: {
@@ -132,7 +147,7 @@ const styles = StyleSheet.create({
   topThreeTitle: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: 'var(--ls-color-neutral-soft-foreground)',
+    color: TOKEN.neutralSoftForeground,
     marginBottom: 10,
   },
   topThreeCards: {
@@ -142,9 +157,9 @@ const styles = StyleSheet.create({
   topCard: {
     flex: 1,
     padding: 12,
-    backgroundColor: 'var(--ls-color-bg-container)',
+    backgroundColor: TOKEN.bgContainer,
     borderWidth: 1,
-    borderColor: 'var(--ls-color-muted-border)',
+    borderColor: TOKEN.mutedBorder,
     borderRadius: 8,
   },
   topCardRank: {
@@ -155,12 +170,12 @@ const styles = StyleSheet.create({
   topCardName: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: 'var(--ls-color-neutral-soft-foreground)',
+    color: TOKEN.neutralSoftForeground,
     marginBottom: 2,
   },
   topCardRole: {
     fontSize: 9,
-    color: 'var(--ls-color-muted)',
+    color: TOKEN.muted,
     marginBottom: 8,
   },
   topCardMetric: {
@@ -168,13 +183,13 @@ const styles = StyleSheet.create({
   },
   topCardMetricLabel: {
     fontSize: 7,
-    color: 'var(--ls-color-disabled-text)',
+    color: TOKEN.disabledText,
     textTransform: 'uppercase',
   },
   topCardMetricValue: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: levelsetGreen,
+    color: TOKEN.brand,
   },
   footer: {
     position: 'absolute',
@@ -184,7 +199,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     fontSize: 8,
-    color: 'var(--ls-color-disabled-text)',
+    color: TOKEN.disabledText,
   },
 });
 
