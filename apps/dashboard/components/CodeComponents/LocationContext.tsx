@@ -64,15 +64,21 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
     return { userId: null, userRole: null, locations: [] as LocationRecord[] };
   }
 
-  const { data: appUser, error: appUserError } = await supabase
+  // Use limit(1) instead of .maybeSingle() to handle users with app_user
+  // records in multiple orgs. Order by created_at so the primary
+  // (earliest-created) record is returned.
+  const { data: appUserRows, error: appUserError } = await supabase
     .from('app_users')
     .select('id, org_id, location_id, role')
     .eq('auth_user_id', user.id)
-    .maybeSingle();
+    .order('created_at', { ascending: true })
+    .limit(1);
 
   if (appUserError) {
     throw appUserError;
   }
+
+  const appUser = appUserRows?.[0] ?? null;
 
   // If a specific location is assigned, fetch just that one
   if (appUser?.location_id) {
