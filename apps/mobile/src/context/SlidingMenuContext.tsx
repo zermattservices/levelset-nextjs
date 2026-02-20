@@ -9,7 +9,7 @@ import React, { createContext, useContext, useState, useCallback } from "react";
 // Note: "timesheets" removed from scope
 export type MenuTab =
   | "my-schedule"
-  | "staff"
+  | "employees"
   | "scheduling"
   | "time-off"
   | "settings";
@@ -22,7 +22,7 @@ export interface MenuTabConfig {
 
 export const MENU_TABS: MenuTabConfig[] = [
   { id: "my-schedule", label: "My Schedule", icon: "calendar" },
-  { id: "staff", label: "Staff", icon: "person.2" },
+  { id: "employees", label: "Employees", icon: "person.2" },
   { id: "scheduling", label: "Scheduling", icon: "calendar.badge.clock" },
   { id: "time-off", label: "Time Off", icon: "airplane" },
   { id: "settings", label: "Settings", icon: "gear" },

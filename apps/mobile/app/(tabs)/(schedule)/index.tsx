@@ -34,7 +34,7 @@ import { useGlass, isGlassAvailable } from "../../../src/hooks/useGlass";
 
 // Import menu screens directly
 import MyScheduleScreen from "../../../src/screens/menu/MyScheduleScreen";
-import StaffScreen from "../../../src/screens/menu/StaffScreen";
+import EmployeesScreen from "../../../src/screens/menu/EmployeesScreen";
 import SchedulingScreen from "../../../src/screens/menu/SchedulingScreen";
 import TimeOffScreen from "../../../src/screens/menu/TimeOffScreen";
 import SettingsScreen from "../../../src/screens/menu/SettingsScreen";
@@ -57,8 +57,8 @@ function ScheduleContent() {
   switch (activeTab) {
     case "my-schedule":
       return <MyScheduleScreen />;
-    case "staff":
-      return <StaffScreen />;
+    case "employees":
+      return <EmployeesScreen />;
     case "scheduling":
       return <SchedulingScreen />;
     case "time-off":

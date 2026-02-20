@@ -397,6 +397,73 @@ export async function uploadInfractionDocumentAuth(
 }
 
 // =============================================================================
+// Employee API Types (JWT-based, authenticated)
+// =============================================================================
+
+export interface EmployeeListItem {
+  id: string;
+  full_name: string;
+  role: string | null;
+  hire_date: string | null;
+  profile_image: string | null;
+  works_today: boolean;
+  is_leader: boolean;
+}
+
+export interface EmployeeProfileInfraction {
+  id: string;
+  infraction: string;
+  description: string | null;
+  infraction_date: string;
+  points: number;
+  leader_name: string | null;
+  ack_bool: boolean;
+}
+
+export interface EmployeeProfileDiscAction {
+  id: string;
+  action: string;
+  action_date: string;
+  leader_name: string | null;
+}
+
+export interface EmployeeProfileRating {
+  id: string;
+  position: string;
+  rating_1: number | null;
+  rating_2: number | null;
+  rating_3: number | null;
+  rating_4: number | null;
+  rating_5: number | null;
+  rating_avg: number | null;
+  notes: string | null;
+  created_at: string;
+  rater_name: string | null;
+}
+
+export interface EmployeeProfileResponse {
+  employee: {
+    id: string;
+    full_name: string;
+    role: string | null;
+    hire_date: string | null;
+    profile_image: string | null;
+    phone: string | null;
+    email: string | null;
+    position: string | null;
+  };
+  infractions: EmployeeProfileInfraction[];
+  disc_actions: EmployeeProfileDiscAction[];
+  ratings: EmployeeProfileRating[];
+  schedule: WeekSchedule | null;
+  summary: {
+    infraction_count: number;
+    total_points: number;
+    avg_rating: number | null;
+  };
+}
+
+// =============================================================================
 // Schedule API (JWT-based, authenticated)
 // =============================================================================
 
@@ -438,6 +505,40 @@ export async function fetchMyScheduleAuth(
 }
 
 // =============================================================================
+// Employee API (JWT-based, authenticated)
+// =============================================================================
+
+/**
+ * Fetch all active employees for a location
+ */
+export async function fetchEmployeesAuth(
+  accessToken: string,
+  locationId: string
+): Promise<{ employees: EmployeeListItem[] }> {
+  const params = new URLSearchParams({ location_id: locationId });
+  const url = `${API_BASE_URL}/api/native/forms/employees?${params}`;
+  const response = await fetch(url, { headers: authHeaders(accessToken) });
+  return handleResponse<{ employees: EmployeeListItem[] }>(response);
+}
+
+/**
+ * Fetch detailed profile data for a single employee
+ */
+export async function fetchEmployeeProfileAuth(
+  accessToken: string,
+  locationId: string,
+  employeeId: string
+): Promise<EmployeeProfileResponse> {
+  const params = new URLSearchParams({
+    location_id: locationId,
+    employee_id: employeeId,
+  });
+  const url = `${API_BASE_URL}/api/native/forms/employee-profile?${params}`;
+  const response = await fetch(url, { headers: authHeaders(accessToken) });
+  return handleResponse<EmployeeProfileResponse>(response);
+}
+
+// =============================================================================
 // Export all
 // =============================================================================
 
@@ -463,4 +564,7 @@ export default {
   uploadInfractionDocumentAuth,
   // Schedule API (JWT-based, authenticated)
   fetchMyScheduleAuth,
+  // Employee API (JWT-based, authenticated)
+  fetchEmployeesAuth,
+  fetchEmployeeProfileAuth,
 };

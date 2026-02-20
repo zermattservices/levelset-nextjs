@@ -64,6 +64,8 @@ const SYMBOL_MAP: Record<string, string> = {
   "cpu.fill": "hardware-chip",
   "bubble.left.and.bubble.right": "chatbubbles-outline",
   "bubble.left.and.bubble.right.fill": "chatbubbles",
+  "line.3.horizontal.decrease": "filter-outline",
+  "ellipsis": "ellipsis-horizontal",
   "checklist": "checkbox-outline",
   "bell": "notifications-outline",
   "bell.fill": "notifications",

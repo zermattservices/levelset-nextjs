@@ -14,7 +14,7 @@ import { haptics } from "../../lib/theme";
 
 // Import menu screens
 import MyScheduleScreen from "../../screens/menu/MyScheduleScreen";
-import StaffScreen from "../../screens/menu/StaffScreen";
+import EmployeesScreen from "../../screens/menu/EmployeesScreen";
 import SchedulingScreen from "../../screens/menu/SchedulingScreen";
 import TimeOffScreen from "../../screens/menu/TimeOffScreen";
 import SettingsScreen from "../../screens/menu/SettingsScreen";
@@ -36,8 +36,8 @@ export function MenuContent({ children }: MenuContentProps) {
     switch (activeTab) {
       case "my-schedule":
         return <MyScheduleScreen />;
-      case "staff":
-        return <StaffScreen />;
+      case "employees":
+        return <EmployeesScreen />;
       case "scheduling":
         return <SchedulingScreen />;
       case "time-off":
