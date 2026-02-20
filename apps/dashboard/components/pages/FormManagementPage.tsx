@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { Tab, Tabs } from '@mui/material';
+import { Tab, Tabs, Snackbar, Alert } from '@mui/material';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
 import sty from './FormManagementPage.module.css';
@@ -9,6 +9,13 @@ import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { FormManagementToolbar } from '@/components/forms/FormManagementToolbar';
+import { FormGroupsList } from '@/components/forms/FormGroupsList';
+import { CreateFormDialog } from '@/components/forms/CreateFormDialog';
+import { CreateGroupDialog } from '@/components/forms/CreateGroupDialog';
+import type { FormGroup, FormTemplate, FormType } from '@/lib/forms/types';
+
+const fontFamily = '"Satoshi", sans-serif';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -19,12 +26,128 @@ export function FormManagementPage() {
   const auth = useAuth();
   const [activeTab, setActiveTab] = React.useState(0);
 
+  // Data state
+  const [groups, setGroups] = React.useState<FormGroup[]>([]);
+  const [templates, setTemplates] = React.useState<FormTemplate[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  // Filter state
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [typeFilter, setTypeFilter] = React.useState<FormType | null>(null);
+
+  // Dialog state
+  const [createFormOpen, setCreateFormOpen] = React.useState(false);
+  const [createGroupOpen, setCreateGroupOpen] = React.useState(false);
+
+  // Snackbar
+  const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
+
   // Redirect unauthenticated users
   React.useEffect(() => {
     if (auth.isLoaded && !auth.authUser) {
       router.push(`/auth/login?redirect=${encodeURIComponent(router.asPath)}`);
     }
   }, [auth.isLoaded, auth.authUser, router]);
+
+  const getAccessToken = React.useCallback(async (): Promise<string | null> => {
+    try {
+      const { createSupabaseClient } = await import('@/util/supabase/component');
+      const supabase = createSupabaseClient();
+      const { data } = await supabase.auth.getSession();
+      return data.session?.access_token || null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // Fetch data
+  const fetchData = React.useCallback(async () => {
+    try {
+      const token = await getAccessToken();
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const [groupsRes, templatesRes] = await Promise.all([
+        fetch('/api/forms/groups', { headers }),
+        fetch('/api/forms', { headers }),
+      ]);
+
+      if (groupsRes.ok) {
+        const groupsData = await groupsRes.json();
+        setGroups(groupsData);
+      }
+
+      if (templatesRes.ok) {
+        const templatesData = await templatesRes.json();
+        setTemplates(templatesData);
+      }
+    } catch {
+      // Silently handle fetch errors
+    } finally {
+      setLoading(false);
+    }
+  }, [getAccessToken]);
+
+  React.useEffect(() => {
+    if (!auth.isLoaded || !auth.authUser || auth.role !== 'Levelset Admin') return;
+    fetchData();
+  }, [auth.isLoaded, auth.authUser, auth.role, fetchData]);
+
+  const handleDuplicateTemplate = async (template: FormTemplate) => {
+    try {
+      const token = await getAccessToken();
+      const res = await fetch('/api/forms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          intent: 'create_template',
+          name: `${template.name} (Copy)`,
+          description: template.description,
+          group_id: template.group_id,
+          form_type: template.form_type,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to duplicate');
+      }
+
+      setSnackbar({ open: true, message: 'Form duplicated', severity: 'success' });
+      fetchData();
+    } catch (err: any) {
+      setSnackbar({ open: true, message: err.message || 'Failed to duplicate', severity: 'error' });
+    }
+  };
+
+  const handleArchiveTemplate = async (template: FormTemplate) => {
+    try {
+      const token = await getAccessToken();
+      const res = await fetch(`/api/forms/${template.id}`, {
+        method: 'DELETE',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to archive');
+      }
+
+      setSnackbar({ open: true, message: 'Form archived', severity: 'success' });
+      fetchData();
+    } catch (err: any) {
+      setSnackbar({ open: true, message: err.message || 'Failed to archive', severity: 'error' });
+    }
+  };
 
   // Show loading screen while auth is loading or redirecting
   if (!auth.isLoaded || !auth.authUser) {
@@ -90,7 +213,7 @@ export function FormManagementPage() {
                         backgroundColor: 'var(--ls-color-brand)',
                       },
                       '& .MuiTab-root': {
-                        fontFamily: '"Satoshi", sans-serif',
+                        fontFamily,
                         fontSize: 14,
                         fontWeight: 500,
                         textTransform: 'none',
@@ -109,13 +232,39 @@ export function FormManagementPage() {
 
                 <div className={sty.tabContent}>
                   {activeTab === 0 && (
-                    <div className={sty.emptyState}>
-                      <DescriptionOutlinedIcon className={sty.emptyStateIcon} />
-                      <h3 className={sty.emptyStateTitle}>No forms yet</h3>
-                      <p className={sty.emptyStateDescription}>
-                        Create your first form to get started. Forms are organized into groups like Positional Excellence, Discipline, and Evaluations.
-                      </p>
-                    </div>
+                    <>
+                      <FormManagementToolbar
+                        searchQuery={searchQuery}
+                        onSearchChange={setSearchQuery}
+                        activeTypeFilter={typeFilter}
+                        onTypeFilterChange={setTypeFilter}
+                        onCreateForm={() => setCreateFormOpen(true)}
+                        onCreateGroup={() => setCreateGroupOpen(true)}
+                      />
+
+                      {loading ? (
+                        <div className={sty.loadingState}>
+                          <span className={sty.loadingText}>Loading forms...</span>
+                        </div>
+                      ) : groups.length === 0 ? (
+                        <div className={sty.emptyState}>
+                          <DescriptionOutlinedIcon className={sty.emptyStateIcon} />
+                          <h3 className={sty.emptyStateTitle}>No forms yet</h3>
+                          <p className={sty.emptyStateDescription}>
+                            Create your first form to get started. Forms are organized into groups like Positional Excellence, Discipline, and Evaluations.
+                          </p>
+                        </div>
+                      ) : (
+                        <FormGroupsList
+                          groups={groups}
+                          templates={templates}
+                          searchQuery={searchQuery}
+                          typeFilter={typeFilter}
+                          onDuplicateTemplate={handleDuplicateTemplate}
+                          onArchiveTemplate={handleArchiveTemplate}
+                        />
+                      )}
+                    </>
                   )}
 
                   {activeTab === 1 && (
@@ -133,6 +282,43 @@ export function FormManagementPage() {
           </div>
         </div>
       </div>
+
+      {/* Dialogs */}
+      <CreateFormDialog
+        open={createFormOpen}
+        onClose={() => setCreateFormOpen(false)}
+        onCreated={() => {
+          setSnackbar({ open: true, message: 'Form created', severity: 'success' });
+          fetchData();
+        }}
+        groups={groups}
+        getAccessToken={getAccessToken}
+      />
+
+      <CreateGroupDialog
+        open={createGroupOpen}
+        onClose={() => setCreateGroupOpen(false)}
+        onCreated={() => {
+          setSnackbar({ open: true, message: 'Group created', severity: 'success' });
+          fetchData();
+        }}
+        getAccessToken={getAccessToken}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ fontFamily, fontSize: 13, borderRadius: '8px' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

@@ -1,0 +1,92 @@
+.palette {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  width: 220px;
+  min-width: 220px;
+  border-right: 1px solid var(--ls-color-muted-border);
+  overflow-y: auto;
+  height: 100%;
+}
+
+.paletteTitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ls-color-text-primary);
+  margin: 0;
+}
+
+.paletteHint {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  margin: 0;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.categoryLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.categoryFields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldChip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--ls-color-muted-border);
+  background: #ffffff;
+  cursor: grab;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+}
+
+.fieldChip:hover {
+  border-color: var(--ls-color-brand);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.fieldChip:active {
+  cursor: grabbing;
+}
+
+.fieldChipDragging {
+  opacity: 0.4;
+}
+
+.fieldChipIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ls-color-muted);
+  flex-shrink: 0;
+}
+
+.fieldChipLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ls-color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

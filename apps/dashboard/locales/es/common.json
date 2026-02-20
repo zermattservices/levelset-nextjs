@@ -67,6 +67,15 @@
       "create": "Crear",
       "cancel": "Cancelar"
     },
+    "toolbar": {
+      "search": "Buscar formularios...",
+      "allFilter": "Todos",
+      "loading": "Cargando formularios...",
+      "noResults": "Ningún formulario coincide con tu búsqueda",
+      "noFormsInGroup": "Aún no hay formularios en este grupo",
+      "formsCount": "{{count}} formulario",
+      "formsCount_plural": "{{count}} formularios"
+    },
     "formDetail": {
       "settings": "Configuración",
       "editor": "Editor",
@@ -78,10 +87,61 @@
       "saving": "Guardando...",
       "unsaved": "Cambios sin guardar"
     },
+    "settingsPanel": {
+      "general": "General",
+      "configuration": "Configuración",
+      "nameEn": "Nombre del Formulario (Inglés)",
+      "nameEs": "Nombre del Formulario (Español)",
+      "descriptionEn": "Descripción (Inglés)",
+      "descriptionEs": "Descripción (Español)",
+      "formGroup": "Grupo de Formulario",
+      "formType": "Tipo de Formulario",
+      "typeReadOnly": "El tipo no se puede cambiar para formularios del sistema",
+      "active": "Activo",
+      "archiveForm": "Archivar Formulario",
+      "settingsSaved": "Configuración guardada exitosamente",
+      "formArchived": "Formulario archivado",
+      "formDuplicated": "Formulario duplicado",
+      "formCreated": "Formulario creado",
+      "groupCreated": "Grupo creado"
+    },
     "status": {
       "active": "Activo",
       "inactive": "Inactivo",
       "system": "Sistema"
+    },
+    "actions": {
+      "edit": "Editar",
+      "duplicate": "Duplicar",
+      "archive": "Archivar"
+    },
+    "editor": {
+      "fields": "Campos",
+      "dragHint": "Arrastra campos al lienzo",
+      "dropHere": "Suelta campos aquí",
+      "dropDescription": "Arrastra campos desde la paleta para construir tu formulario",
+      "selectToConfig": "Selecciona un campo para configurar",
+      "fieldSettings": "Configuración del Campo",
+      "sectionSettings": "Configuración de Sección",
+      "saved": "Guardado",
+      "saving": "Guardando...",
+      "unsaved": "Sin guardar",
+      "required": "Obligatorio",
+      "label": "Etiqueta",
+      "helpText": "Texto de Ayuda",
+      "options": "Opciones",
+      "addOption": "Agregar Opción",
+      "range": "Rango",
+      "min": "Mín",
+      "max": "Máx",
+      "display": "Visualización",
+      "rows": "Filas",
+      "categories": {
+        "basic": "Básico",
+        "selection": "Selección",
+        "advanced": "Avanzado",
+        "levelset": "Levelset"
+      }
     }
   }
 }

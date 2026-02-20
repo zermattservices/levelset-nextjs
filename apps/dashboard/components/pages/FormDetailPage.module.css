@@ -59,16 +59,27 @@
   align-items: stretch;
   min-width: 0;
   padding: 16px 8px;
-  gap: 24px;
+  gap: 16px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
 }
 
 .pageHeader {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   width: 100%;
-  padding: 0;
+  gap: 16px;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .pageTitle {
@@ -79,109 +90,46 @@
   margin: 0;
 }
 
+.headerBadges {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .tabsContainer {
   width: 100%;
   border-bottom: 1px solid var(--ls-color-muted-border);
 }
 
 .tabContent {
-  display: flex;
-  flex-direction: column;
   width: 100%;
   padding-top: 24px;
-  gap: 20px;
 }
 
-/* Loading state */
-.loadingState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 24px;
-}
-
-.loadingText {
-  font-family: "Satoshi", sans-serif;
-  font-size: 14px;
-  color: var(--ls-color-muted);
-}
-
-/* Coming Soon state */
-.comingSoonContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 24px;
-  text-align: center;
-  gap: 16px;
-}
-
-.comingSoonIcon {
-  font-size: 64px;
-  color: var(--ls-color-muted);
-  opacity: 0.5;
-}
-
-.comingSoonTitle {
-  font-family: "Mont", sans-serif;
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--ls-color-text-primary);
-  margin: 0;
-}
-
-.comingSoonDescription {
-  font-family: "Satoshi", sans-serif;
-  font-size: 16px;
-  color: var(--ls-color-muted);
-  max-width: 400px;
-  margin: 0;
-}
-
-.comingSoonBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 16px;
-  background: var(--ls-color-brand-soft);
-  color: var(--ls-color-brand);
-  font-family: "Satoshi", sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* Empty state */
-.emptyState {
+/* Coming Soon state for tabs */
+.comingSoonTab {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 60px 24px;
   text-align: center;
-  gap: 12px;
+  gap: 8px;
   border: 2px dashed var(--ls-color-muted-border);
   border-radius: 12px;
   background: var(--ls-color-neutral-foreground);
 }
 
-.emptyStateIcon {
-  font-size: 48px;
-  color: var(--ls-color-muted);
-  opacity: 0.5;
-}
-
-.emptyStateTitle {
+.comingSoonTabTitle {
   font-family: "Satoshi", sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: var(--ls-color-text-primary);
-  margin: 0;
 }
 
-.emptyStateDescription {
+.comingSoonTabDescription {
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
   color: var(--ls-color-muted);
-  margin: 0;
 }

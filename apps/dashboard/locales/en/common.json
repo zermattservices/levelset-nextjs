@@ -67,6 +67,15 @@
       "create": "Create",
       "cancel": "Cancel"
     },
+    "toolbar": {
+      "search": "Search forms...",
+      "allFilter": "All",
+      "loading": "Loading forms...",
+      "noResults": "No forms match your search",
+      "noFormsInGroup": "No forms in this group yet",
+      "formsCount": "{{count}} form",
+      "formsCount_plural": "{{count}} forms"
+    },
     "formDetail": {
       "settings": "Settings",
       "editor": "Editor",
@@ -78,10 +87,61 @@
       "saving": "Saving...",
       "unsaved": "Unsaved changes"
     },
+    "settingsPanel": {
+      "general": "General",
+      "configuration": "Configuration",
+      "nameEn": "Form Name (English)",
+      "nameEs": "Form Name (Spanish)",
+      "descriptionEn": "Description (English)",
+      "descriptionEs": "Description (Spanish)",
+      "formGroup": "Form Group",
+      "formType": "Form Type",
+      "typeReadOnly": "Type cannot be changed for system forms",
+      "active": "Active",
+      "archiveForm": "Archive Form",
+      "settingsSaved": "Settings saved successfully",
+      "formArchived": "Form archived",
+      "formDuplicated": "Form duplicated",
+      "formCreated": "Form created",
+      "groupCreated": "Group created"
+    },
     "status": {
       "active": "Active",
       "inactive": "Inactive",
       "system": "System"
+    },
+    "actions": {
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "archive": "Archive"
+    },
+    "editor": {
+      "fields": "Fields",
+      "dragHint": "Drag fields onto the canvas",
+      "dropHere": "Drop fields here",
+      "dropDescription": "Drag fields from the palette to build your form",
+      "selectToConfig": "Select a field to configure",
+      "fieldSettings": "Field Settings",
+      "sectionSettings": "Section Settings",
+      "saved": "Saved",
+      "saving": "Saving...",
+      "unsaved": "Unsaved",
+      "required": "Required",
+      "label": "Label",
+      "helpText": "Help Text",
+      "options": "Options",
+      "addOption": "Add Option",
+      "range": "Range",
+      "min": "Min",
+      "max": "Max",
+      "display": "Display",
+      "rows": "Rows",
+      "categories": {
+        "basic": "Basic",
+        "selection": "Selection",
+        "advanced": "Advanced",
+        "levelset": "Levelset"
+      }
     }
   }
 }

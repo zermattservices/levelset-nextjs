@@ -1,0 +1,39 @@
+.editorWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.statusBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  background: #ffffff;
+}
+
+.fieldCount {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  color: var(--ls-color-muted);
+}
+
+.editorBody {
+  display: flex;
+  flex-direction: row;
+  height: 600px;
+  min-height: 600px;
+}
+
+@media (max-width: 900px) {
+  .editorBody {
+    flex-direction: column;
+    height: auto;
+  }
+}

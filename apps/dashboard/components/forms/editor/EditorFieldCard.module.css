@@ -1,0 +1,87 @@
+.card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--ls-color-border);
+}
+
+.cardSelected {
+  border-color: var(--ls-color-brand);
+  box-shadow: 0 0 0 1px var(--ls-color-brand);
+}
+
+.cardSection {
+  background: var(--ls-color-neutral-foreground);
+  border-style: dashed;
+}
+
+.cardOverlay {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-color: var(--ls-color-brand);
+  opacity: 0.95;
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  cursor: grab;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardTop {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sectionLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ls-color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.fieldDescription {
+  font-family: "Satoshi", sans-serif;
+  font-size: 11px;
+  color: var(--ls-color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
