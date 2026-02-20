@@ -1,0 +1,80 @@
+.previewWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.previewToolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  background: var(--ls-color-neutral-foreground);
+}
+
+.toolbarLeft {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.previewHint {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  color: var(--ls-color-muted);
+}
+
+.formContainer {
+  padding: 24px;
+  min-height: 400px;
+}
+
+.formContent {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.formTitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ls-color-text-primary);
+  margin: 0 0 4px;
+}
+
+.formDescription {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-muted);
+  margin: 0 0 24px;
+}
+
+.submittedState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  gap: 8px;
+}
+
+.submittedTitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ls-color-text-primary);
+}
+
+.submittedDescription {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-muted);
+}

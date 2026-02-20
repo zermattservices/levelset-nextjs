@@ -14,7 +14,9 @@ import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { FormSettingsPanel } from '@/components/forms/FormSettingsPanel';
 import { FormEditorPanel } from '@/components/forms/editor/FormEditorPanel';
-import type { FormTemplate, FormGroup, FormType } from '@/lib/forms/types';
+import { FormPreviewPanel } from '@/components/forms/FormPreviewPanel';
+import { FormSubmissionsTable } from '@/components/forms/FormSubmissionsTable';
+import type { FormTemplate, FormGroup, FormType, FormSubmission } from '@/lib/forms/types';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -45,6 +47,8 @@ export function FormDetailPage() {
   const [groups, setGroups] = React.useState<FormGroup[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  const [submissions, setSubmissions] = React.useState<FormSubmission[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -113,6 +117,34 @@ export function FormDetailPage() {
 
     fetchData();
   }, [formId, auth.isLoaded, auth.authUser, getAccessToken, router]);
+
+  // Fetch submissions for this template
+  const fetchSubmissions = React.useCallback(async () => {
+    if (!formId) return;
+    setSubmissionsLoading(true);
+    try {
+      const token = await getAccessToken();
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`/api/forms/submissions?template_id=${formId}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setSubmissions(data);
+      }
+    } catch {
+      // Silently handle
+    } finally {
+      setSubmissionsLoading(false);
+    }
+  }, [formId, getAccessToken]);
+
+  // Load submissions when switching to submissions tab
+  React.useEffect(() => {
+    if (activeTab === 3 && template) {
+      fetchSubmissions();
+    }
+  }, [activeTab, template, fetchSubmissions]);
 
   const handleSaveSettings = async (updates: Partial<FormTemplate>) => {
     if (!template) return;
@@ -392,23 +424,18 @@ export function FormDetailPage() {
               )}
 
               {activeTab === 2 && (
-                <div className={sty.comingSoonTab}>
-                  <PreviewOutlinedIcon sx={{ fontSize: 40, color: 'var(--ls-color-muted)', opacity: 0.5 }} />
-                  <span className={sty.comingSoonTabTitle}>Form Preview</span>
-                  <span className={sty.comingSoonTabDescription}>
-                    Live form preview coming in Sprint 4
-                  </span>
-                </div>
+                <FormPreviewPanel template={template} />
               )}
 
               {activeTab === 3 && (
-                <div className={sty.comingSoonTab}>
-                  <InboxOutlinedIcon sx={{ fontSize: 40, color: 'var(--ls-color-muted)', opacity: 0.5 }} />
-                  <span className={sty.comingSoonTabTitle}>Form Submissions</span>
-                  <span className={sty.comingSoonTabDescription}>
-                    Submissions dashboard coming in Sprint 4
-                  </span>
-                </div>
+                <FormSubmissionsTable
+                  submissions={submissions}
+                  loading={submissionsLoading}
+                  templateId={template.id}
+                  showFormName={false}
+                  onRefresh={fetchSubmissions}
+                  getAccessToken={getAccessToken}
+                />
               )}
             </div>
           </div>

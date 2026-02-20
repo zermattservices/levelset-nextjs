@@ -142,6 +142,39 @@
         "advanced": "Avanzado",
         "levelset": "Levelset"
       }
+    },
+    "preview": {
+      "previewMode": "Modo Vista Previa",
+      "previewHint": "Prueba el formulario a continuación. Los envíos no se guardan.",
+      "reset": "Reiniciar",
+      "noFields": "Sin Campos",
+      "noFieldsDescription": "Este formulario aún no tiene campos. Usa la pestaña Editor para agregar campos.",
+      "submitPreview": "Enviar (Vista Previa)",
+      "submittedTitle": "Formulario Enviado Exitosamente",
+      "submittedDescription": "Esta es una vista previa — no se guardaron datos.",
+      "fillOutAgain": "Llenar de Nuevo",
+      "previewSuccess": "Envío de vista previa exitoso — no se guardaron datos"
+    },
+    "submissions": {
+      "title": "Detalle del Envío",
+      "form": "Formulario",
+      "submittedBy": "Enviado Por",
+      "employee": "Empleado",
+      "date": "Fecha",
+      "type": "Tipo",
+      "status": "Estado",
+      "score": "Puntuación",
+      "filterStatus": "Estado",
+      "filterType": "Tipo",
+      "all": "Todos",
+      "submissionCount": "{{count}} envío",
+      "submissionCount_plural": "{{count}} envíos",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "statusSubmitted": "Enviado",
+      "statusApproved": "Aprobado",
+      "statusRejected": "Rechazado",
+      "statusDraft": "Borrador"
     }
   }
 }

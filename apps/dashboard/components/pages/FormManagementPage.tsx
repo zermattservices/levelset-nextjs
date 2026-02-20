@@ -13,7 +13,8 @@ import { FormManagementToolbar } from '@/components/forms/FormManagementToolbar'
 import { FormGroupsList } from '@/components/forms/FormGroupsList';
 import { CreateFormDialog } from '@/components/forms/CreateFormDialog';
 import { CreateGroupDialog } from '@/components/forms/CreateGroupDialog';
-import type { FormGroup, FormTemplate, FormType } from '@/lib/forms/types';
+import { FormSubmissionsTable } from '@/components/forms/FormSubmissionsTable';
+import type { FormGroup, FormTemplate, FormType, FormSubmission } from '@/lib/forms/types';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -30,6 +31,8 @@ export function FormManagementPage() {
   const [groups, setGroups] = React.useState<FormGroup[]>([]);
   const [templates, setTemplates] = React.useState<FormTemplate[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [submissions, setSubmissions] = React.useState<FormSubmission[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = React.useState(false);
 
   // Filter state
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -96,6 +99,33 @@ export function FormManagementPage() {
     if (!auth.isLoaded || !auth.authUser || auth.role !== 'Levelset Admin') return;
     fetchData();
   }, [auth.isLoaded, auth.authUser, auth.role, fetchData]);
+
+  // Fetch all submissions for org
+  const fetchSubmissions = React.useCallback(async () => {
+    setSubmissionsLoading(true);
+    try {
+      const token = await getAccessToken();
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/forms/submissions', { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setSubmissions(data);
+      }
+    } catch {
+      // Silently handle
+    } finally {
+      setSubmissionsLoading(false);
+    }
+  }, [getAccessToken]);
+
+  // Load submissions when switching to submissions tab
+  React.useEffect(() => {
+    if (activeTab === 1 && auth.role === 'Levelset Admin') {
+      fetchSubmissions();
+    }
+  }, [activeTab, auth.role, fetchSubmissions]);
 
   const handleDuplicateTemplate = async (template: FormTemplate) => {
     try {
@@ -268,13 +298,23 @@ export function FormManagementPage() {
                   )}
 
                   {activeTab === 1 && (
-                    <div className={sty.emptyState}>
-                      <InboxOutlinedIcon className={sty.emptyStateIcon} />
-                      <h3 className={sty.emptyStateTitle}>No submissions yet</h3>
-                      <p className={sty.emptyStateDescription}>
-                        Form submissions will appear here once forms are created and submitted.
-                      </p>
-                    </div>
+                    submissions.length === 0 && !submissionsLoading ? (
+                      <div className={sty.emptyState}>
+                        <InboxOutlinedIcon className={sty.emptyStateIcon} />
+                        <h3 className={sty.emptyStateTitle}>No submissions yet</h3>
+                        <p className={sty.emptyStateDescription}>
+                          Form submissions will appear here once forms are created and submitted.
+                        </p>
+                      </div>
+                    ) : (
+                      <FormSubmissionsTable
+                        submissions={submissions}
+                        loading={submissionsLoading}
+                        showFormName
+                        onRefresh={fetchSubmissions}
+                        getAccessToken={getAccessToken}
+                      />
+                    )
                   )}
                 </div>
               </>

@@ -39,20 +39,44 @@ interface ScheduleProviderProps {
 }
 
 export function ScheduleProvider({ children }: ScheduleProviderProps) {
-  const { session, appUser } = useAuth();
-  const { selectedLocationId } = useLocation();
+  const { session, appUser, getAppUserForOrg } = useAuth();
+  const { selectedLocationId, selectedLocation } = useLocation();
 
   const [thisWeek, setThisWeek] = useState<WeekSchedule | null>(null);
   const [nextWeek, setNextWeek] = useState<WeekSchedule | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Resolve the correct employee_id for the selected location's org.
+  // Multi-org users may have different app_user records (and employee_ids)
+  // per org. The primary appUser from AuthContext may not match the
+  // currently selected location's org.
+  const [resolvedEmployeeId, setResolvedEmployeeId] = useState<string>("");
+
+  useEffect(() => {
+    const orgId = selectedLocation?.org_id;
+    if (!orgId || !session) {
+      setResolvedEmployeeId("");
+      return;
+    }
+
+    // If primary appUser matches this org, use it directly
+    if (appUser?.org_id === orgId) {
+      setResolvedEmployeeId(appUser.employee_id || "");
+      return;
+    }
+
+    // Otherwise, look up the app_user for this org
+    getAppUserForOrg(orgId).then((orgAppUser) => {
+      setResolvedEmployeeId(orgAppUser?.employee_id || "");
+    });
+  }, [selectedLocation?.org_id, appUser, session, getAppUserForOrg]);
+
   const accessToken = session?.access_token ?? "";
   const locationId = selectedLocationId ?? "";
-  const employeeId = appUser?.employee_id ?? "";
 
   const refreshSchedule = useCallback(async () => {
-    if (!accessToken || !locationId || !employeeId) {
+    if (!accessToken || !locationId || !resolvedEmployeeId) {
       setThisWeek(null);
       setNextWeek(null);
       return;
@@ -62,7 +86,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
     setError(null);
 
     try {
-      const data = await fetchMyScheduleAuth(accessToken, locationId, employeeId);
+      const data = await fetchMyScheduleAuth(accessToken, locationId, resolvedEmployeeId);
       setThisWeek(data.thisWeek);
       setNextWeek(data.nextWeek);
     } catch (err) {
@@ -76,7 +100,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [accessToken, locationId, employeeId]);
+  }, [accessToken, locationId, resolvedEmployeeId]);
 
   // Fetch on mount and when location/auth changes
   useEffect(() => {

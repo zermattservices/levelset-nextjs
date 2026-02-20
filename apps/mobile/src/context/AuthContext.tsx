@@ -12,6 +12,7 @@ import React, {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
 } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
@@ -79,6 +80,9 @@ interface AuthContextType {
   startDate: string;
   employeePhone: string;
 
+  // Multi-org support
+  getAppUserForOrg: (orgId: string) => Promise<AppUser | null>;
+
   // Auth actions
   signInWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
@@ -102,6 +106,46 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [error, setError] = useState<string | null>(null);
 
   const isAuthenticated = user !== null && appUser !== null;
+
+  // Cache for org-specific app_user lookups (multi-org support)
+  const orgAppUserCache = useRef<Map<string, AppUser | null>>(new Map());
+
+  // Fetch the app_user record for a specific org (for multi-org users)
+  const getAppUserForOrg = useCallback(async (orgId: string): Promise<AppUser | null> => {
+    // Check cache first
+    if (orgAppUserCache.current.has(orgId)) {
+      return orgAppUserCache.current.get(orgId) ?? null;
+    }
+
+    // If primary appUser matches, use it
+    if (appUser?.org_id === orgId) {
+      orgAppUserCache.current.set(orgId, appUser);
+      return appUser;
+    }
+
+    // Query for the app_user in the specified org
+    if (!user?.id) return null;
+
+    try {
+      const { data, error: fetchError } = await supabase
+        .from("app_users")
+        .select("*")
+        .eq("auth_user_id", user.id)
+        .eq("org_id", orgId)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error("[Auth] Error fetching app_user for org:", orgId, fetchError);
+        return null;
+      }
+
+      orgAppUserCache.current.set(orgId, data);
+      return data;
+    } catch (err) {
+      console.error("[Auth] Error fetching app_user for org:", orgId, err);
+      return null;
+    }
+  }, [user?.id, appUser]);
 
   // Fetch employee record linked to app_user
   const fetchEmployeeData = useCallback(async (employeeId: string | null | undefined) => {
@@ -359,6 +403,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setEmployeeData(null);
       setSession(null);
       setError(null);
+      orgAppUserCache.current.clear();
     } catch (err) {
       console.error("[Auth] Sign out error:", err);
     }
@@ -434,6 +479,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       birthDate,
       startDate,
       employeePhone,
+      getAppUserForOrg,
       signInWithEmail,
       signInWithGoogle,
       signOut,
@@ -463,6 +509,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       birthDate,
       startDate,
       employeePhone,
+      getAppUserForOrg,
       signInWithEmail,
       signInWithGoogle,
       signOut,

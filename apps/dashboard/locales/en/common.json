@@ -142,6 +142,39 @@
         "advanced": "Advanced",
         "levelset": "Levelset"
       }
+    },
+    "preview": {
+      "previewMode": "Preview Mode",
+      "previewHint": "Test the form below. Submissions are not saved.",
+      "reset": "Reset",
+      "noFields": "No Fields",
+      "noFieldsDescription": "This form has no fields yet. Use the Editor tab to add fields.",
+      "submitPreview": "Submit (Preview)",
+      "submittedTitle": "Form Submitted Successfully",
+      "submittedDescription": "This is a preview — no data was saved.",
+      "fillOutAgain": "Fill Out Again",
+      "previewSuccess": "Preview submission successful — no data saved"
+    },
+    "submissions": {
+      "title": "Submission Detail",
+      "form": "Form",
+      "submittedBy": "Submitted By",
+      "employee": "Employee",
+      "date": "Date",
+      "type": "Type",
+      "status": "Status",
+      "score": "Score",
+      "filterStatus": "Status",
+      "filterType": "Type",
+      "all": "All",
+      "submissionCount": "{{count}} submission",
+      "submissionCount_plural": "{{count}} submissions",
+      "approve": "Approve",
+      "reject": "Reject",
+      "statusSubmitted": "Submitted",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "statusDraft": "Draft"
     }
   }
 }
