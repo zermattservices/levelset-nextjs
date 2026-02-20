@@ -1,14 +1,37 @@
 /**
  * Permission Middleware
  * API route protection middleware for Next.js API routes
+ *
+ * Decodes the Supabase JWT locally instead of calling supabase.auth.getUser()
+ * because getUser() hits GoTrue's /user endpoint which does session-based
+ * validation. If the session was refreshed, GoTrue returns 403
+ * "session_not_found" even though the JWT is still valid. Local decode avoids
+ * this and is faster (no network round-trip).
  */
 
 import { NextApiRequest, NextApiResponse, NextApiHandler } from 'next';
-import { createClient } from '@supabase/supabase-js';
 import { checkPermission, checkAnyPermission, checkAllPermissions } from './service';
 import { PermissionKey } from './constants';
+import { createServerSupabaseClient } from '@/lib/supabase-server';
 
 type PermissionCheck = PermissionKey | PermissionKey[];
+
+/**
+ * Decode a Supabase JWT and extract the user ID (sub claim).
+ * Returns null if the token is malformed or expired.
+ */
+function decodeJwt(token: string): { sub: string } | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+    if (!payload.sub) return null;
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+    return { sub: payload.sub };
+  } catch {
+    return null;
+  }
+}
 
 /**
  * API middleware to require specific permission(s)
@@ -24,26 +47,18 @@ export function withPermission(
 ): NextApiHandler {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-      // Get auth token from request
       const token = req.headers.authorization?.replace('Bearer ', '');
       if (!token) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
-      // Create supabase client with user's token
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { global: { headers: { Authorization: `Bearer ${token}` } } }
-      );
-
-      // Get user info
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
+      const decoded = decodeJwt(token);
+      if (!decoded) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
+
+      const userId = decoded.sub;
+      const supabase = createServerSupabaseClient();
 
       // Get org_id from request (body, query, or header)
       let orgId =
@@ -77,11 +92,11 @@ export function withPermission(
       let hasPermission: boolean;
 
       if (permissions.length === 1) {
-        hasPermission = await checkPermission(supabase, user.id, orgId as string, permissions[0]);
+        hasPermission = await checkPermission(supabase, userId, orgId as string, permissions[0]);
       } else if (mode === 'any') {
-        hasPermission = await checkAnyPermission(supabase, user.id, orgId as string, permissions);
+        hasPermission = await checkAnyPermission(supabase, userId, orgId as string, permissions);
       } else {
-        hasPermission = await checkAllPermissions(supabase, user.id, orgId as string, permissions);
+        hasPermission = await checkAllPermissions(supabase, userId, orgId as string, permissions);
       }
 
       if (!hasPermission) {
@@ -122,26 +137,18 @@ export function withPermissionAndContext(
 ): NextApiHandler {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-      // Get auth token from request
       const token = req.headers.authorization?.replace('Bearer ', '');
       if (!token) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
-      // Create supabase client with user's token
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { global: { headers: { Authorization: `Bearer ${token}` } } }
-      );
-
-      // Get user info
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
+      const decoded = decodeJwt(token);
+      if (!decoded) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
+
+      const userId = decoded.sub;
+      const supabase = createServerSupabaseClient();
 
       // Get org_id from request (body, query, or header)
       let orgId =
@@ -175,11 +182,11 @@ export function withPermissionAndContext(
       let hasPermission: boolean;
 
       if (permissions.length === 1) {
-        hasPermission = await checkPermission(supabase, user.id, orgId as string, permissions[0]);
+        hasPermission = await checkPermission(supabase, userId, orgId as string, permissions[0]);
       } else if (mode === 'any') {
-        hasPermission = await checkAnyPermission(supabase, user.id, orgId as string, permissions);
+        hasPermission = await checkAnyPermission(supabase, userId, orgId as string, permissions);
       } else {
-        hasPermission = await checkAllPermissions(supabase, user.id, orgId as string, permissions);
+        hasPermission = await checkAllPermissions(supabase, userId, orgId as string, permissions);
       }
 
       if (!hasPermission) {
@@ -188,11 +195,11 @@ export function withPermissionAndContext(
 
       // Add user and org to request
       const authenticatedReq = req as AuthenticatedRequest;
-      authenticatedReq.user = { id: user.id, email: user.email };
+      authenticatedReq.user = { id: userId };
       authenticatedReq.orgId = orgId as string;
 
       // Permission granted - continue to handler with context
-      return handler(authenticatedReq, res, { userId: user.id, orgId: orgId as string });
+      return handler(authenticatedReq, res, { userId, orgId: orgId as string });
     } catch (error) {
       console.error('Permission middleware error:', error);
       return res.status(500).json({ error: 'Internal server error' });
