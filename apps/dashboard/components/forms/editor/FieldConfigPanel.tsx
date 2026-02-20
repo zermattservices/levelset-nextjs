@@ -6,6 +6,10 @@ import {
   IconButton,
   Button,
   Divider,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -13,12 +17,14 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import sty from './FieldConfigPanel.module.css';
 import { FIELD_TYPES } from '@/lib/forms/field-palette';
 import type { FormField, FieldOption } from '@/lib/forms/schema-builder';
+import { ConnectedQuestionPicker } from '../evaluation/ConnectedQuestionPicker';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 interface FieldConfigPanelProps {
   field: FormField | null;
   onUpdateField: (id: string, updates: Partial<FormField>) => void;
+  isEvaluation?: boolean;
 }
 
 const textFieldSx = {
@@ -38,9 +44,17 @@ const textFieldSx = {
   },
 };
 
+const SCORING_TYPES = [
+  { value: 'rating_1_3', label: 'Rating (1-3)' },
+  { value: 'rating_1_5', label: 'Rating (1-5)' },
+  { value: 'true_false', label: 'True / False' },
+  { value: 'percentage', label: 'Percentage' },
+];
+
 export function FieldConfigPanel({
   field,
   onUpdateField,
+  isEvaluation,
 }: FieldConfigPanelProps) {
   if (!field) {
     return (
@@ -294,6 +308,68 @@ export function FieldConfigPanel({
               sx={textFieldSx}
             />
           </div>
+        </>
+      )}
+
+      {/* Evaluation scoring settings */}
+      {isEvaluation && !isSection && (
+        <>
+          <Divider sx={{ margin: '8px 0' }} />
+          <div className={sty.configSection}>
+            <span className={sty.sectionLabel}>Scoring</span>
+            <FormControl fullWidth size="small">
+              <InputLabel sx={{ fontFamily, fontSize: 11 }}>Scoring Type</InputLabel>
+              <Select
+                value={field.settings.scoringType || ''}
+                onChange={(e) => handleSettingsChange('scoringType', e.target.value || undefined)}
+                label="Scoring Type"
+                sx={{ fontFamily, fontSize: 13 }}
+              >
+                <MenuItem value="">
+                  <em>None (not scored)</em>
+                </MenuItem>
+                {SCORING_TYPES.map((st) => (
+                  <MenuItem key={st.value} value={st.value} sx={{ fontFamily, fontSize: 13 }}>
+                    {st.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {field.settings.scoringType && (
+              <TextField
+                label="Weight (points)"
+                type="number"
+                value={field.settings.weight ?? 10}
+                onChange={(e) => handleSettingsChange('weight', Math.max(0, Math.min(100, Number(e.target.value))))}
+                size="small"
+                slotProps={{ htmlInput: { min: 0, max: 100 } }}
+                sx={textFieldSx}
+              />
+            )}
+          </div>
+
+          {field.settings.scoringType && (
+            <>
+              <Divider sx={{ margin: '8px 0' }} />
+              <div className={sty.configSection}>
+                <span className={sty.sectionLabel}>Data Connection</span>
+                <ConnectedQuestionPicker
+                  connectedTo={field.settings.connectedTo}
+                  connectorParams={field.settings.connectorParams}
+                  onChange={(connectedTo, params) => {
+                    onUpdateField(field.id, {
+                      settings: {
+                        ...field.settings,
+                        connectedTo,
+                        connectorParams: params,
+                      },
+                    });
+                  }}
+                />
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

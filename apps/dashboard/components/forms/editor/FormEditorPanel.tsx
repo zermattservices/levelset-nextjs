@@ -23,6 +23,7 @@ import {
   type FormField,
 } from '@/lib/forms/schema-builder';
 import type { FormTemplate } from '@/lib/forms/types';
+import { EvaluationEditorExtension } from '../evaluation/EvaluationEditorExtension';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -31,9 +32,10 @@ type SaveStatus = 'saved' | 'saving' | 'unsaved';
 interface FormEditorPanelProps {
   template: FormTemplate;
   onSave: (schema: Record<string, any>, uiSchema: Record<string, any>) => Promise<void>;
+  onSaveSettings?: (settings: Record<string, any>) => Promise<void>;
 }
 
-export function FormEditorPanel({ template, onSave }: FormEditorPanelProps) {
+export function FormEditorPanel({ template, onSave, onSaveSettings }: FormEditorPanelProps) {
   const [fields, setFields] = React.useState<FormField[]>([]);
   const [selectedFieldId, setSelectedFieldId] = React.useState<string | null>(null);
   const [draggedField, setDraggedField] = React.useState<FormField | null>(null);
@@ -223,8 +225,18 @@ export function FormEditorPanel({ template, onSave }: FormEditorPanelProps) {
         <FieldConfigPanel
           field={selectedField}
           onUpdateField={handleUpdateField}
+          isEvaluation={template.form_type === 'evaluation'}
         />
       </div>
+
+      {/* Evaluation-specific extension */}
+      {template.form_type === 'evaluation' && onSaveSettings && (
+        <EvaluationEditorExtension
+          template={template}
+          fields={fields}
+          onUpdateTemplate={(settings) => onSaveSettings(settings)}
+        />
+      )}
     </div>
   );
 }

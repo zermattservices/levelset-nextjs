@@ -1,0 +1,84 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 720px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ls-color-text-primary);
+  margin: 0;
+}
+
+.sectionSubtitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-muted);
+  margin: 0;
+}
+
+.roleLevelRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.roleLevelLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-neutral-soft-foreground);
+  white-space: nowrap;
+}
+
+.roleLevelValue {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  min-width: 20px;
+  text-align: center;
+}
+
+.weightSummary {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--ls-color-neutral-foreground);
+  border-radius: 8px;
+  border: 1px solid var(--ls-color-muted-border);
+}
+
+.weightSummaryLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+}
+
+.weightSummaryValue {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.weightBalanced {
+  color: var(--ls-color-success);
+}
+
+.weightUnbalanced {
+  color: var(--ls-color-warning);
+}

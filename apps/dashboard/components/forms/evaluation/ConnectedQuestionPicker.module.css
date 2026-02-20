@@ -1,0 +1,38 @@
+.picker {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.connectorSelect {
+  min-width: 180px;
+}
+
+.paramRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.paramLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 11px;
+  color: var(--ls-color-muted);
+  white-space: nowrap;
+}
+
+.connectedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "Satoshi", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  background: var(--ls-color-brand-soft);
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}

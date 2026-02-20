@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { calculateEvaluationScore } from '@/lib/forms/scoring';
+import { resolveConnectedQuestions } from '@/lib/forms/connectors-resolver';
 
 export default async function handler(
   req: NextApiRequest,
@@ -132,6 +134,55 @@ export default async function handler(
       return res.status(404).json({ error: 'Form template not found' });
     }
 
+    // Calculate evaluation score if applicable
+    let score: number | null = null;
+    const metadata: Record<string, any> = {};
+
+    if (template.form_type === 'evaluation' && template.settings?.evaluation) {
+      const evalSettings = template.settings.evaluation;
+      let scoringData = { ...response_data };
+
+      // Resolve connected questions if the evaluation has any
+      const connectedQuestions = Object.entries(evalSettings.questions || {})
+        .filter(([_, q]: [string, any]) => q.connected_to)
+        .map(([fieldId, q]: [string, any]) => ({
+          key: q.connected_to as string,
+          params: q.connector_params,
+          fieldId,
+        }));
+
+      if (connectedQuestions.length > 0 && employee_id) {
+        const connectorInputs = connectedQuestions.map((cq) => ({
+          key: cq.key,
+          params: cq.params,
+        }));
+
+        const resolved = await resolveConnectedQuestions(
+          supabase,
+          employee_id,
+          orgId,
+          location_id || null,
+          connectorInputs
+        );
+
+        for (const cq of connectedQuestions) {
+          if (resolved[cq.key] !== undefined) {
+            scoringData[cq.fieldId] = resolved[cq.key];
+          }
+        }
+      }
+
+      const result = calculateEvaluationScore(scoringData, evalSettings);
+      score = result.overallPercentage;
+      metadata.section_scores = result.sections.map((s) => ({
+        sectionId: s.sectionId,
+        sectionName: s.sectionName,
+        earned: s.earnedPoints,
+        max: s.maxPoints,
+        percentage: s.percentage,
+      }));
+    }
+
     // Create the submission with schema snapshot
     const { data: submission, error: insertError } = await supabase
       .from('form_submissions')
@@ -144,9 +195,9 @@ export default async function handler(
         employee_id: employee_id || null,
         response_data,
         schema_snapshot: template.schema,
-        score: null, // Will be calculated for evaluations in Sprint 5
+        score,
         status: 'submitted',
-        metadata: {},
+        metadata,
       })
       .select()
       .single();
@@ -159,7 +210,6 @@ export default async function handler(
     // is intentionally deferred. When a rating or discipline form
     // is submitted through this system, we will also insert into
     // the existing `ratings` or `infractions` tables.
-    // This will be wired in Sprint 5 alongside connected questions.
 
     return res.status(201).json(submission);
   }

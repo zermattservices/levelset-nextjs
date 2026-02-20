@@ -20,6 +20,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { FormRenderer } from './FormRenderer';
+import { EvaluationScoreDisplay } from './evaluation/EvaluationScoreDisplay';
+import { calculateEvaluationScore } from '@/lib/forms/scoring';
 import type { FormSubmission, FormType, SubmissionStatus } from '@/lib/forms/types';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -233,6 +235,22 @@ export function SubmissionDetailDialog({
         </div>
 
         <Divider sx={{ marginBottom: 3 }} />
+
+        {/* Evaluation score display */}
+        {submission.form_type === 'evaluation' && submission.metadata?.section_scores && (() => {
+          const evalSettings = submission.template?.settings?.evaluation ||
+            submission.schema_snapshot?.['x-evaluation'] || {};
+          if (evalSettings.sections && evalSettings.questions) {
+            const score = calculateEvaluationScore(submission.response_data, evalSettings);
+            return (
+              <>
+                <EvaluationScoreDisplay score={score} />
+                <Divider sx={{ marginY: 3 }} />
+              </>
+            );
+          }
+          return null;
+        })()}
 
         {/* Read-only form */}
         <FormRenderer
