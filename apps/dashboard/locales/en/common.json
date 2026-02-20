@@ -22,6 +22,67 @@
     "title": "Submission recorded",
     "backToHome": "Back to home",
     "overallRating": "Overall Rating"
+  },
+  "formManagement": {
+    "pageTitle": "Form Management",
+    "formsTab": "Forms",
+    "submissionsTab": "Submissions",
+    "comingSoon": "Form Management",
+    "comingSoonDescription": "Create and manage custom forms for your organization. This feature is currently being developed.",
+    "comingSoonBadge": "Coming Soon",
+    "createForm": "Create Form",
+    "createGroup": "Create Group",
+    "noForms": "No forms yet",
+    "noFormsDescription": "Create your first form to get started. Forms are organized into groups like Positional Excellence, Discipline, and Evaluations.",
+    "noSubmissions": "No submissions yet",
+    "noSubmissionsDescription": "Form submissions will appear here once forms are created and submitted.",
+    "groups": {
+      "positionalExcellence": "Positional Excellence",
+      "discipline": "Discipline",
+      "evaluations": "Evaluations"
+    },
+    "formTypes": {
+      "rating": "Rating",
+      "discipline": "Discipline",
+      "evaluation": "Evaluation",
+      "custom": "Custom"
+    },
+    "createFormDialog": {
+      "title": "Create New Form",
+      "name": "Form Name",
+      "namePlaceholder": "Enter form name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description for this form",
+      "group": "Form Group",
+      "type": "Form Type",
+      "create": "Create",
+      "cancel": "Cancel"
+    },
+    "createGroupDialog": {
+      "title": "Create New Group",
+      "name": "Group Name",
+      "namePlaceholder": "Enter group name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description for this group",
+      "create": "Create",
+      "cancel": "Cancel"
+    },
+    "formDetail": {
+      "settings": "Settings",
+      "editor": "Editor",
+      "preview": "Preview",
+      "submissions": "Submissions",
+      "backToList": "Back to Form Management",
+      "save": "Save Changes",
+      "saved": "Saved",
+      "saving": "Saving...",
+      "unsaved": "Unsaved changes"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "system": "System"
+    }
   }
 }
 

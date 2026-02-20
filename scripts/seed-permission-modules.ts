@@ -16,7 +16,7 @@ import {
   P,
   getSubItemKey,
   getModuleKey,
-} from '../lib/permissions/constants';
+} from '../apps/dashboard/lib/permissions/constants';
 
 dotenv.config({ path: '.env.local' });
 

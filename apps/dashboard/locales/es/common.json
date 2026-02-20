@@ -22,6 +22,67 @@
     "title": "Envío registrado",
     "backToHome": "Volver al inicio",
     "overallRating": "Calificación General"
+  },
+  "formManagement": {
+    "pageTitle": "Gestión de Formularios",
+    "formsTab": "Formularios",
+    "submissionsTab": "Envíos",
+    "comingSoon": "Gestión de Formularios",
+    "comingSoonDescription": "Crea y administra formularios personalizados para tu organización. Esta función está actualmente en desarrollo.",
+    "comingSoonBadge": "Próximamente",
+    "createForm": "Crear Formulario",
+    "createGroup": "Crear Grupo",
+    "noForms": "Aún no hay formularios",
+    "noFormsDescription": "Crea tu primer formulario para comenzar. Los formularios se organizan en grupos como Excelencia Posicional, Disciplina y Evaluaciones.",
+    "noSubmissions": "Aún no hay envíos",
+    "noSubmissionsDescription": "Los envíos de formularios aparecerán aquí una vez que se creen y envíen los formularios.",
+    "groups": {
+      "positionalExcellence": "Excelencia Posicional",
+      "discipline": "Disciplina",
+      "evaluations": "Evaluaciones"
+    },
+    "formTypes": {
+      "rating": "Calificación",
+      "discipline": "Disciplina",
+      "evaluation": "Evaluación",
+      "custom": "Personalizado"
+    },
+    "createFormDialog": {
+      "title": "Crear Nuevo Formulario",
+      "name": "Nombre del Formulario",
+      "namePlaceholder": "Ingrese el nombre del formulario",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Descripción opcional para este formulario",
+      "group": "Grupo de Formulario",
+      "type": "Tipo de Formulario",
+      "create": "Crear",
+      "cancel": "Cancelar"
+    },
+    "createGroupDialog": {
+      "title": "Crear Nuevo Grupo",
+      "name": "Nombre del Grupo",
+      "namePlaceholder": "Ingrese el nombre del grupo",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Descripción opcional para este grupo",
+      "create": "Crear",
+      "cancel": "Cancelar"
+    },
+    "formDetail": {
+      "settings": "Configuración",
+      "editor": "Editor",
+      "preview": "Vista Previa",
+      "submissions": "Envíos",
+      "backToList": "Volver a Gestión de Formularios",
+      "save": "Guardar Cambios",
+      "saved": "Guardado",
+      "saving": "Guardando...",
+      "unsaved": "Cambios sin guardar"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "system": "Sistema"
+    }
   }
 }
 

@@ -16,6 +16,7 @@ export const PERMISSION_MODULES = {
   HR_REPORTING: 'hr_reporting',
   BILLING: 'billing',
   SCHEDULING: 'scheduling',
+  FORM_MANAGEMENT: 'form_management',
 } as const;
 
 // All permission keys as const for type safety
@@ -87,6 +88,14 @@ export const P = {
   SCHED_VIEW: 'scheduling.view_schedule',
   SCHED_MANAGE: 'scheduling.manage_schedule',
   SCHED_MANAGE_SETTINGS: 'scheduling.manage_settings',
+
+  // Form Management
+  FM_VIEW_FORMS: 'form_management.view_forms',
+  FM_CREATE_FORMS: 'form_management.create_forms',
+  FM_EDIT_FORMS: 'form_management.edit_forms',
+  FM_DELETE_FORMS: 'form_management.delete_forms',
+  FM_VIEW_SUBMISSIONS: 'form_management.view_submissions',
+  FM_MANAGE_SUBMISSIONS: 'form_management.manage_submissions',
 } as const;
 
 // Type for any valid permission key
@@ -157,6 +166,11 @@ export const MODULE_METADATA: Record<string, ModuleMetadata> = {
     name: 'Scheduling',
     description: 'Schedule configuration, break rules, and position setup',
     order: 11,
+  },
+  [PERMISSION_MODULES.FORM_MANAGEMENT]: {
+    name: 'Form Management',
+    description: 'Create, edit, and manage forms and form submissions',
+    order: 12,
   },
 };
 
@@ -467,6 +481,44 @@ export const SUB_ITEM_METADATA: Record<PermissionKey, SubItemMetadata> = {
     description: 'Configure break rules, position setup, and scheduling preferences',
     order: 3,
     module: PERMISSION_MODULES.SCHEDULING,
+  },
+
+  // Form Management
+  [P.FM_VIEW_FORMS]: {
+    name: 'View Forms',
+    description: 'Access to view the Form Management page and browse forms',
+    order: 1,
+    module: PERMISSION_MODULES.FORM_MANAGEMENT,
+  },
+  [P.FM_CREATE_FORMS]: {
+    name: 'Create Forms',
+    description: 'Ability to create new form templates',
+    order: 2,
+    module: PERMISSION_MODULES.FORM_MANAGEMENT,
+  },
+  [P.FM_EDIT_FORMS]: {
+    name: 'Edit Forms',
+    description: 'Ability to edit existing form templates',
+    order: 3,
+    module: PERMISSION_MODULES.FORM_MANAGEMENT,
+  },
+  [P.FM_DELETE_FORMS]: {
+    name: 'Delete Forms',
+    description: 'Ability to delete or archive form templates',
+    order: 4,
+    module: PERMISSION_MODULES.FORM_MANAGEMENT,
+  },
+  [P.FM_VIEW_SUBMISSIONS]: {
+    name: 'View Submissions',
+    description: 'Access to view form submissions and results',
+    order: 5,
+    module: PERMISSION_MODULES.FORM_MANAGEMENT,
+  },
+  [P.FM_MANAGE_SUBMISSIONS]: {
+    name: 'Manage Submissions',
+    description: 'Ability to approve, reject, or manage form submissions',
+    order: 6,
+    module: PERMISSION_MODULES.FORM_MANAGEMENT,
   },
 };
 

@@ -76,8 +76,8 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
     {
       label: 'Form Management',
       description: 'Create and manage forms',
+      href: '/form-management',
       icon: <DescriptionOutlinedIcon sx={{ fontSize: 22 }} />,
-      disabled: true,
     },
   ],
   analytics: [
