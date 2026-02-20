@@ -144,11 +144,11 @@ export function calculateEvaluationScore(
   }
 
   // Calculate section percentages
-  for (const section of sectionMap.values()) {
+  Array.from(sectionMap.values()).forEach((section) => {
     section.percentage = section.maxPoints > 0
       ? (section.earnedPoints / section.maxPoints) * 100
       : 0;
-  }
+  });
 
   // Sort sections by the order from settings, uncategorized last
   const sectionOrder = new Map(sections.map((s, i) => [s.id, i]));
