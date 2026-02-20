@@ -144,15 +144,27 @@ export function LocationProvider({ children }: LocationProviderProps) {
 
       setLocations(fetchedLocations);
 
-      // Restore persisted selection
+      // Determine which location to select.
+      // Non-admin users should always have a location set so they never land
+      // on an empty state. Levelset Admins can browse all orgs, so only
+      // auto-select when there's exactly one location.
+      const isAdmin = appUser.role === "Levelset Admin";
       const storedId = await AsyncStorage.getItem(SELECTED_LOCATION_KEY);
+
       if (storedId && fetchedLocations.some((l) => l.id === storedId)) {
+        // Persisted selection still valid — restore it
         setSelectedLocationId(storedId);
       } else if (fetchedLocations.length === 1) {
-        // Auto-select if only one location
+        // Only one location available — auto-select for everyone
+        setSelectedLocationId(fetchedLocations[0].id);
+        await AsyncStorage.setItem(SELECTED_LOCATION_KEY, fetchedLocations[0].id);
+      } else if (!isAdmin && fetchedLocations.length > 0) {
+        // Non-admin with multiple locations and no persisted selection:
+        // default to the first location by store number (already sorted)
         setSelectedLocationId(fetchedLocations[0].id);
         await AsyncStorage.setItem(SELECTED_LOCATION_KEY, fetchedLocations[0].id);
       } else {
+        // Levelset Admin with multiple locations and no persisted selection
         setSelectedLocationId(null);
       }
     } catch (err) {

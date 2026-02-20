@@ -20,8 +20,8 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
-import { useAuth } from "../../context/AuthContext";
 import { useForms } from "../../context/FormsContext";
+import { useLocation } from "../../context/LocationContext";
 import { AppIcon } from "../ui";
 import { useTranslatedContent } from "../../hooks/useTranslatedContent";
 import {
@@ -51,9 +51,9 @@ export function PositionalRatingsForm() {
   const { t } = useTranslation();
   const { translate, language, getRatingLabel, getRatingColor } = useTranslatedContent();
   const { setDirty, completeSubmission } = useForms();
-  const { session } = useAuth();
+  const { mobileToken } = useLocation();
   const router = useRouter();
-  const token = session?.access_token ?? "";
+  const token = mobileToken ?? "";
 
   // Loading and error states
   const [loading, setLoading] = useState(true);
@@ -344,7 +344,17 @@ export function PositionalRatingsForm() {
   // Render
   // =============================================================================
 
-  if (!token) return null;
+  if (!token) {
+    return (
+      <View style={styles.errorContainer}>
+        <AppIcon name="mappin.slash" size={32} tintColor={colors.onSurfaceVariant} />
+        <Text style={[styles.errorTitle, { color: colors.onSurface }]}>No Location Selected</Text>
+        <Text style={[styles.errorMessage, { color: colors.onSurfaceVariant }]}>
+          Please select a location from the home screen to use forms.
+        </Text>
+      </View>
+    );
+  }
 
   if (loading) {
     return (
