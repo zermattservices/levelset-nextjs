@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // =============================================================================
 
 // Base URL for the PWA API - this should be configured per environment
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "https://levelset.vercel.app";
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "https://app.levelset.io";
 
 // Storage key for the mobile token
 const MOBILE_TOKEN_KEY = "levelset_mobile_token";
@@ -273,6 +273,130 @@ export async function uploadInfractionDocument(
 }
 
 // =============================================================================
+// Authenticated Native Form API (JWT-based)
+// These functions call the new /api/native/forms/ routes which require
+// a Supabase JWT Bearer token and check user permissions.
+// =============================================================================
+
+/** Build headers with JWT auth for native form API calls */
+function authHeaders(accessToken: string): HeadersInit {
+  return {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  };
+}
+
+/**
+ * Fetch positional ratings form data (authenticated)
+ */
+export async function fetchPositionalDataAuth(
+  accessToken: string,
+  locationId: string
+): Promise<PositionalDataResponse> {
+  const url = `${API_BASE_URL}/api/native/forms/positional-data?location_id=${encodeURIComponent(locationId)}`;
+  const response = await fetch(url, { headers: authHeaders(accessToken) });
+  return handleResponse<PositionalDataResponse>(response);
+}
+
+/**
+ * Fetch position labels for a specific position (authenticated)
+ */
+export async function fetchPositionLabelsAuth(
+  accessToken: string,
+  locationId: string,
+  position: string,
+  zone?: string
+): Promise<PositionLabelsResponse> {
+  let url = `${API_BASE_URL}/api/native/forms/position-labels?location_id=${encodeURIComponent(locationId)}&position=${encodeURIComponent(position)}`;
+  if (zone) {
+    url += `&zone=${encodeURIComponent(zone)}`;
+  }
+  const response = await fetch(url, { headers: authHeaders(accessToken) });
+  return handleResponse<PositionLabelsResponse>(response);
+}
+
+/**
+ * Submit positional ratings (authenticated)
+ */
+export async function submitRatingsAuth(
+  accessToken: string,
+  locationId: string,
+  data: RatingsSubmission
+): Promise<SubmissionResult> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/native/forms/ratings`,
+    {
+      method: "POST",
+      headers: authHeaders(accessToken),
+      body: JSON.stringify({ ...data, location_id: locationId }),
+    }
+  );
+  return handleResponse<SubmissionResult>(response);
+}
+
+/**
+ * Fetch infraction form data (authenticated)
+ */
+export async function fetchInfractionDataAuth(
+  accessToken: string,
+  locationId: string
+): Promise<InfractionDataResponse> {
+  const url = `${API_BASE_URL}/api/native/forms/infraction-data?location_id=${encodeURIComponent(locationId)}`;
+  const response = await fetch(url, { headers: authHeaders(accessToken) });
+  return handleResponse<InfractionDataResponse>(response);
+}
+
+/**
+ * Submit a discipline infraction (authenticated)
+ */
+export async function submitInfractionAuth(
+  accessToken: string,
+  locationId: string,
+  data: InfractionSubmission
+): Promise<SubmissionResult> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/native/forms/infractions`,
+    {
+      method: "POST",
+      headers: authHeaders(accessToken),
+      body: JSON.stringify({ ...data, location_id: locationId }),
+    }
+  );
+  return handleResponse<SubmissionResult>(response);
+}
+
+/**
+ * Upload a document attachment for an infraction (authenticated)
+ */
+export async function uploadInfractionDocumentAuth(
+  accessToken: string,
+  locationId: string,
+  infractionId: string,
+  file: { uri: string; name: string; type: string }
+): Promise<{ id: string; file_name: string }> {
+  const formData = new FormData();
+  formData.append("infraction_id", infractionId);
+  formData.append("location_id", locationId);
+  formData.append("file", {
+    uri: file.uri,
+    name: file.name,
+    type: file.type,
+  } as any);
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/native/forms/infraction-documents`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
+    }
+  );
+  return handleResponse<{ id: string; file_name: string }>(response);
+}
+
+// =============================================================================
 // Export all
 // =============================================================================
 
@@ -281,13 +405,19 @@ export default {
   setMobileToken,
   getMobileToken,
   clearMobileToken,
-  // Infraction API
+  // PWA Infraction API (token-based, DO NOT MODIFY)
   fetchInfractionData,
   submitInfraction,
-  // Document uploads
   uploadInfractionDocument,
-  // Ratings API
+  // PWA Ratings API (token-based, DO NOT MODIFY)
   fetchPositionalData,
   fetchPositionLabels,
   submitRatings,
+  // Native Form API (JWT-based, authenticated)
+  fetchPositionalDataAuth,
+  fetchPositionLabelsAuth,
+  submitRatingsAuth,
+  fetchInfractionDataAuth,
+  submitInfractionAuth,
+  uploadInfractionDocumentAuth,
 };

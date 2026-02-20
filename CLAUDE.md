@@ -264,6 +264,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 Validate org_id from the authenticated user's session, NOT from the request body.
 
+### Mobile Form API Routes (PWA vs Native)
+
+There are **two** sets of form API routes. They serve different clients and must be maintained independently.
+
+| | PWA Routes | Native Routes |
+|---|---|---|
+| **Path** | `/api/mobile/[token]/` | `/api/native/forms/` |
+| **Auth** | Static `location_mobile_token` (no user identity) | Supabase JWT via `Authorization: Bearer` header |
+| **Permissions** | None — anyone with the token can submit | `withPermissionAndContext` checks `PE_SUBMIT_RATINGS` / `DISC_SUBMIT_INFRACTIONS` |
+| **Status** | **LIVE IN PRODUCTION — DO NOT MODIFY** | Native mobile app (in development) |
+| **Location** | Derived from token lookup | `location_id` passed as query/body param, validated via `validateLocationAccess()` |
+
+**PWA routes** (`pages/api/mobile/[token]/`): Used by the legacy PWA at tablet kiosks. Unauthenticated. These are live in production and must never be modified.
+
+**Native routes** (`pages/api/native/forms/`): Used by the React Native mobile app. JWT-authenticated with permission checks. Location access validated via `lib/native-auth.ts`. These duplicate the PWA query logic intentionally — shared code is not possible since PWA routes cannot be touched.
+
 ## Component Conventions
 
 - **CSS Modules**: Co-located `ComponentName.module.css` files, imported as `import styles from './ComponentName.module.css'`

@@ -28,13 +28,14 @@ import { useColors } from "../../context/ThemeContext";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 import { useForms } from "../../context/FormsContext";
+import { useAuth } from "../../context/AuthContext";
 import { useLocation } from "../../context/LocationContext";
 import { AppIcon } from "../ui";
 import { useTranslatedContent } from "../../hooks/useTranslatedContent";
 import {
-  fetchInfractionData,
-  submitInfraction,
-  uploadInfractionDocument,
+  fetchInfractionDataAuth,
+  submitInfractionAuth,
+  uploadInfractionDocumentAuth,
   type Employee,
   type Infraction,
   ApiError,
@@ -57,9 +58,11 @@ export function DisciplineInfractionForm() {
   const { t } = useTranslation();
   const { translate } = useTranslatedContent();
   const { setDirty, completeSubmission } = useForms();
-  const { mobileToken } = useLocation();
+  const { session } = useAuth();
+  const { selectedLocationId } = useLocation();
   const router = useRouter();
-  const token = mobileToken ?? "";
+  const accessToken = session?.access_token ?? "";
+  const locationId = selectedLocationId ?? "";
 
   // Loading and error states
   const [loading, setLoading] = useState(true);
@@ -89,41 +92,31 @@ export function DisciplineInfractionForm() {
   // Data Loading
   // =============================================================================
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadData = useCallback(async () => {
+    if (!accessToken || !locationId) return;
 
-    async function loadData() {
-      setLoading(true);
-      setLoadError(null);
+    setLoading(true);
+    setLoadError(null);
 
-      try {
-        const data = await fetchInfractionData(token);
+    try {
+      const data = await fetchInfractionDataAuth(accessToken, locationId);
 
-        if (!cancelled) {
-          setEmployees(data.employees ?? []);
-          setLeaders(data.leaders?.length ? data.leaders : data.employees ?? []);
-          setInfractions(data.infractions ?? []);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          const message = err instanceof ApiError
-            ? err.message
-            : "Unable to load form data";
-          setLoadError(message);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
+      setEmployees(data.employees ?? []);
+      setLeaders(data.leaders?.length ? data.leaders : data.employees ?? []);
+      setInfractions(data.infractions ?? []);
+    } catch (err) {
+      const message = err instanceof ApiError
+        ? err.message
+        : "Unable to load form data";
+      setLoadError(message);
+    } finally {
+      setLoading(false);
     }
+  }, [accessToken, locationId]);
 
+  useEffect(() => {
     loadData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [token]);
+  }, [loadData]);
 
   // =============================================================================
   // Computed Values
@@ -332,7 +325,7 @@ export function DisciplineInfractionForm() {
     setSubmitError(null);
 
     try {
-      const result = await submitInfraction(token, {
+      const result = await submitInfractionAuth(accessToken, locationId, {
         leaderId: selectedLeaderId,
         employeeId: selectedEmployeeId,
         infractionId: selectedInfractionId,
@@ -347,7 +340,7 @@ export function DisciplineInfractionForm() {
       if (result?.infractionId && attachedFiles.length > 0) {
         for (const file of attachedFiles) {
           try {
-            await uploadInfractionDocument(token, result.infractionId, file);
+            await uploadInfractionDocumentAuth(accessToken, locationId, result.infractionId, file);
           } catch (err) {
             console.warn("[DisciplineInfractionForm] File upload failed:", err);
             // Don't fail the whole submission
@@ -390,7 +383,8 @@ export function DisciplineInfractionForm() {
     teamSignature,
     leaderSignature,
     attachedFiles,
-    token,
+    accessToken,
+    locationId,
     completeSubmission,
     setDirty,
     router,
@@ -400,7 +394,7 @@ export function DisciplineInfractionForm() {
   // Render
   // =============================================================================
 
-  if (!token) {
+  if (!accessToken || !locationId) {
     return (
       <View style={styles.errorContainer}>
         <AppIcon name="mappin.slash" size={32} tintColor={colors.onSurfaceVariant} />
@@ -428,10 +422,7 @@ export function DisciplineInfractionForm() {
         <Text style={[styles.errorMessage, { color: colors.onSurfaceVariant }]}>{loadError}</Text>
         <TouchableOpacity
           style={[styles.retryButton, { backgroundColor: colors.primary }]}
-          onPress={() => {
-            setLoadError(null);
-            setLoading(true);
-          }}
+          onPress={loadData}
         >
           <Text style={[styles.retryButtonText, { color: colors.onPrimary }]}>{t("common.tryAgain")}</Text>
         </TouchableOpacity>
