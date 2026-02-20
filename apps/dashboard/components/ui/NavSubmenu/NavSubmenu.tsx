@@ -2,6 +2,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import sty from './NavSubmenu.module.css';
 import { usePermissions, P, type PermissionKey } from '@/lib/providers/PermissionsProvider';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 // MUI Icons
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
@@ -42,6 +43,7 @@ export interface NavMenuItem {
   icon: React.ReactNode;
   disabled?: boolean;
   requiredPermission?: PermissionKey;
+  levelsetAdminOnly?: boolean;
 }
 
 export type MenuType = 'operations' | 'analytics' | 'hr';
@@ -78,6 +80,7 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       description: 'Create and manage forms',
       href: '/form-management',
       icon: <DescriptionOutlinedIcon sx={{ fontSize: 22 }} />,
+      levelsetAdminOnly: true,
     },
   ],
   analytics: [
@@ -131,6 +134,8 @@ export interface NavSubmenuProps {
 
 export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) {
   const { has } = usePermissions();
+  const auth = useAuth();
+  const isLevelsetAdmin = auth.role === 'Levelset Admin';
   const allItems = menuItems[menuType];
   // Filter items based on required permissions
   const items = allItems.filter(item => {
@@ -159,7 +164,8 @@ export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) 
     >
       <div className={classNames(sty.itemsGrid, isTwoColumn && sty.twoColumnGrid)}>
         {items.map((item) => {
-          if (item.disabled) {
+          const effectivelyDisabled = item.disabled || (item.levelsetAdminOnly && !isLevelsetAdmin);
+          if (effectivelyDisabled) {
             return (
               <div key={item.label} className={classNames(sty.menuCard, sty.menuCardDisabled)}>
                 <div className={sty.iconContainer}>
