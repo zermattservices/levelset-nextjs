@@ -397,6 +397,47 @@ export async function uploadInfractionDocumentAuth(
 }
 
 // =============================================================================
+// Schedule API (JWT-based, authenticated)
+// =============================================================================
+
+export interface ScheduleShift {
+  id: string;
+  shift_date: string;     // "2026-02-20"
+  start_time: string;     // "09:00:00"
+  end_time: string;       // "17:00:00"
+  break_minutes: number;
+  notes: string | null;
+  position: { id: string; name: string } | null;
+}
+
+export interface WeekSchedule {
+  weekStart: string;      // "2026-02-15"
+  shifts: ScheduleShift[];
+}
+
+export interface MyScheduleResponse {
+  thisWeek: WeekSchedule;
+  nextWeek: WeekSchedule | null;
+}
+
+/**
+ * Fetch the authenticated user's assigned shifts for this week and next week
+ */
+export async function fetchMyScheduleAuth(
+  accessToken: string,
+  locationId: string,
+  employeeId: string
+): Promise<MyScheduleResponse> {
+  const params = new URLSearchParams({
+    location_id: locationId,
+    employee_id: employeeId,
+  });
+  const url = `${API_BASE_URL}/api/native/forms/my-schedule?${params}`;
+  const response = await fetch(url, { headers: authHeaders(accessToken) });
+  return handleResponse<MyScheduleResponse>(response);
+}
+
+// =============================================================================
 // Export all
 // =============================================================================
 
@@ -420,4 +461,6 @@ export default {
   fetchInfractionDataAuth,
   submitInfractionAuth,
   uploadInfractionDocumentAuth,
+  // Schedule API (JWT-based, authenticated)
+  fetchMyScheduleAuth,
 };

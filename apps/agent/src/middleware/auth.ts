@@ -52,13 +52,19 @@ export async function authMiddleware(c: Context, next: Next) {
 
   const authUserId = payload.sub;
 
-  // Look up the app_users record to check the role
+  // Look up the app_users record to check the role.
+  // Use limit(1) instead of .single() to handle users with app_user
+  // records in multiple orgs. Order by created_at so the primary
+  // (earliest-created) record is returned.
   const supabase = createServiceClient();
-  const { data: appUser, error: userError } = await supabase
+  const { data: appUsers, error: userError } = await supabase
     .from('app_users')
     .select('id, role, org_id, first_name, last_name')
     .eq('auth_user_id', authUserId)
-    .single();
+    .order('created_at', { ascending: true })
+    .limit(1);
+
+  const appUser = appUsers?.[0] ?? null;
 
   if (userError || !appUser) {
     return c.json({ error: 'User not found in application' }, 403);

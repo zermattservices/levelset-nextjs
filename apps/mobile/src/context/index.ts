@@ -13,7 +13,7 @@ export {
 export type { MenuTab, MenuTabConfig } from "./SlidingMenuContext";
 
 export { ScheduleProvider, useSchedule } from "./ScheduleContext";
-export type { Shift, StaffMember } from "./ScheduleContext";
+export type { ScheduleShift, WeekSchedule } from "./ScheduleContext";
 
 export {
   LeviMenuProvider,

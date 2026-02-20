@@ -139,14 +139,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     try {
-      const { data, error: fetchError } = await supabase
+      // Use limit(1) instead of .single() to handle users with app_user
+      // records in multiple orgs. Order by created_at so the primary
+      // (earliest-created) record is returned.
+      const { data: rows, error: fetchError } = await supabase
         .from("app_users")
         .select("*")
         .eq("auth_user_id", authUser.id)
-        .single();
+        .order("created_at", { ascending: true })
+        .limit(1);
+
+      const data = rows?.[0] ?? null;
 
       if (fetchError) {
         console.error("[Auth] Error fetching app user data:", fetchError);
+        setAppUser(null);
+        return;
+      }
+
+      if (!data) {
+        console.error("[Auth] No app_user found for auth_user_id:", authUser.id);
         setAppUser(null);
         return;
       }

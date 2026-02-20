@@ -5,7 +5,6 @@
 
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { useSchedule } from "../../context/ScheduleContext";
 import { GlassCard } from "../../components/glass";
 import { useColors } from "../../context/ThemeContext";
 import { typography, fontWeights } from "../../lib/fonts";
@@ -13,7 +12,6 @@ import { spacing } from "../../lib/theme";
 
 export default function StaffScreen() {
   const colors = useColors();
-  const { staff } = useSchedule();
 
   return (
     <ScrollView
@@ -21,36 +19,15 @@ export default function StaffScreen() {
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
-      {staff.length === 0 ? (
-        <GlassCard style={styles.emptyCard}>
-          <View style={styles.emptyContent}>
-            <Text style={styles.emptyIcon}>👥</Text>
-            <Text style={[styles.emptyTitle, { color: colors.onSurface }]}>No Staff Members</Text>
-            <Text style={[styles.emptyDescription, { color: colors.onSurfaceVariant }]}>
-              Staff information will appear here once the system is connected.
-            </Text>
-          </View>
-        </GlassCard>
-      ) : (
-        <>
-          <Text style={[styles.sectionTitle, { color: colors.onSurfaceVariant }]}>Team Members</Text>
-          {staff.map((member) => (
-            <GlassCard key={member.id} style={styles.staffCard}>
-              <View style={styles.staffRow}>
-                <View style={[styles.avatar, { backgroundColor: colors.primaryTransparent }]}>
-                  <Text style={[styles.avatarText, { color: colors.primary }]}>
-                    {member.name.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
-                <View style={styles.staffInfo}>
-                  <Text style={[styles.staffName, { color: colors.onSurface }]}>{member.name}</Text>
-                  <Text style={[styles.staffRole, { color: colors.onSurfaceVariant }]}>{member.role}</Text>
-                </View>
-              </View>
-            </GlassCard>
-          ))}
-        </>
-      )}
+      <GlassCard style={styles.emptyCard}>
+        <View style={styles.emptyContent}>
+          <Text style={styles.emptyIcon}>👥</Text>
+          <Text style={[styles.emptyTitle, { color: colors.onSurface }]}>No Staff Members</Text>
+          <Text style={[styles.emptyDescription, { color: colors.onSurfaceVariant }]}>
+            Staff information will appear here once the system is connected.
+          </Text>
+        </View>
+      </GlassCard>
     </ScrollView>
   );
 }

@@ -1,87 +1,84 @@
 /**
  * ScheduleContext
- * Manages schedule/shift data for the Schedule tab
- * Currently using mock data - will be connected to backend in future
+ * Manages schedule/shift data for the Schedule tab.
+ * Fetches the authenticated user's assigned shifts from the backend.
  */
 
 import React, {
   createContext,
-  useContext,
-  useState,
   useCallback,
   useEffect,
+  useState,
 } from "react";
+import { useAuth } from "./AuthContext";
+import { useLocation } from "./LocationContext";
+import {
+  fetchMyScheduleAuth,
+  ApiError,
+  type ScheduleShift,
+  type WeekSchedule,
+} from "../lib/api";
 
-export interface Shift {
-  id: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  area?: string;
-  role?: string;
-  hours: number;
-  status?: "scheduled" | "completed" | "cancelled";
-}
-
-export interface StaffMember {
-  id: string;
-  name: string;
-  role: string;
-  avatar?: string;
-}
+// Re-export for consumers
+export type { ScheduleShift, WeekSchedule };
 
 interface ScheduleContextType {
-  shifts: Shift[];
-  staff: StaffMember[];
+  thisWeek: WeekSchedule | null;
+  nextWeek: WeekSchedule | null;
   isLoading: boolean;
   error: string | null;
   refreshSchedule: () => Promise<void>;
-  lastUpdated: Date | null;
 }
 
 const ScheduleContext = createContext<ScheduleContextType | undefined>(
   undefined
 );
 
-// Mock data for UI development
-// Schedule is not connected to backend yet (no Deputy integration)
-const MOCK_SHIFTS: Shift[] = [];
-
-const MOCK_STAFF: StaffMember[] = [];
-
 interface ScheduleProviderProps {
   children: React.ReactNode;
 }
 
 export function ScheduleProvider({ children }: ScheduleProviderProps) {
-  const [shifts, setShifts] = useState<Shift[]>(MOCK_SHIFTS);
-  const [staff, setStaff] = useState<StaffMember[]>(MOCK_STAFF);
+  const { session, appUser } = useAuth();
+  const { selectedLocationId } = useLocation();
+
+  const [thisWeek, setThisWeek] = useState<WeekSchedule | null>(null);
+  const [nextWeek, setNextWeek] = useState<WeekSchedule | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const accessToken = session?.access_token ?? "";
+  const locationId = selectedLocationId ?? "";
+  const employeeId = appUser?.employee_id ?? "";
 
   const refreshSchedule = useCallback(async () => {
+    if (!accessToken || !locationId || !employeeId) {
+      setThisWeek(null);
+      setNextWeek(null);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
-      // TODO: Connect to Deputy or other scheduling API
-      // For now, just simulate a refresh with mock data
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      setShifts(MOCK_SHIFTS);
-      setStaff(MOCK_STAFF);
-      setLastUpdated(new Date());
+      const data = await fetchMyScheduleAuth(accessToken, locationId, employeeId);
+      setThisWeek(data.thisWeek);
+      setNextWeek(data.nextWeek);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load schedule"
-      );
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : "Failed to load schedule";
+      setError(message);
+      setThisWeek(null);
+      setNextWeek(null);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [accessToken, locationId, employeeId]);
 
-  // Initial load
+  // Fetch on mount and when location/auth changes
   useEffect(() => {
     refreshSchedule();
   }, [refreshSchedule]);
@@ -89,12 +86,11 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
   return (
     <ScheduleContext.Provider
       value={{
-        shifts,
-        staff,
+        thisWeek,
+        nextWeek,
         isLoading,
         error,
         refreshSchedule,
-        lastUpdated,
       }}
     >
       {children}
@@ -103,7 +99,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
 }
 
 export function useSchedule() {
-  const context = useContext(ScheduleContext);
+  const context = React.useContext(ScheduleContext);
   if (context === undefined) {
     throw new Error("useSchedule must be used within a ScheduleProvider");
   }

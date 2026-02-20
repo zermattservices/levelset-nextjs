@@ -7,13 +7,22 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { GlassCard } from "../glass";
-import { Shift } from "../../context/ScheduleContext";
+import { type ScheduleShift } from "../../context/ScheduleContext";
 import { useColors } from "../../context/ThemeContext";
 import { typography, fontWeights } from "../../lib/fonts";
 import { spacing, borderRadius } from "../../lib/theme";
 
+/** Format "09:00:00" → "9:00 AM" */
+function formatTime(time: string): string {
+  const [h, m] = time.split(":");
+  const hour = parseInt(h, 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const display = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  return `${display}:${m} ${ampm}`;
+}
+
 interface ShiftCardProps {
-  shift: Shift;
+  shift: ScheduleShift;
   onPress?: () => void;
   index?: number;
 }
@@ -22,7 +31,7 @@ export function ShiftCard({ shift, onPress, index }: ShiftCardProps) {
   const colors = useColors();
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = new Date(dateString + "T12:00:00");
     return date.toLocaleDateString("en-US", {
       weekday: "short",
       month: "short",
@@ -30,68 +39,31 @@ export function ShiftCard({ shift, onPress, index }: ShiftCardProps) {
     });
   };
 
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case "completed":
-        return colors.success;
-      case "cancelled":
-        return colors.error;
-      default:
-        return colors.primary;
-    }
-  };
-
   return (
     <Animated.View entering={FadeIn.delay((index ?? 0) * 50)}>
       <GlassCard onPress={onPress} style={styles.card}>
         <View style={styles.header}>
-          <Text selectable style={[styles.date, { color: colors.onSurface }]}>{formatDate(shift.date)}</Text>
+          <Text selectable style={[styles.date, { color: colors.onSurface }]}>{formatDate(shift.shift_date)}</Text>
           <View
             style={[
               styles.hoursBadge,
-              { backgroundColor: getStatusColor(shift.status) + "20" },
+              { backgroundColor: colors.primary + "20" },
             ]}
           >
             <Text
               style={[
                 styles.hoursText,
-                { color: getStatusColor(shift.status) },
+                { color: colors.primary },
               ]}
             >
-              {shift.hours}h
+              {shift.position?.name ?? "Shift"}
             </Text>
           </View>
         </View>
 
         <Text selectable style={[styles.time, { color: colors.onSurface }]}>
-          {shift.startTime} - {shift.endTime}
+          {formatTime(shift.start_time)} – {formatTime(shift.end_time)}
         </Text>
-
-        {(shift.area || shift.role) && (
-          <View style={styles.details}>
-            {shift.area && <Text selectable style={[styles.detail, { color: colors.onSurfaceVariant }]}>{shift.area}</Text>}
-            {shift.area && shift.role && <Text style={[styles.separator, { color: colors.onSurfaceVariant }]}>•</Text>}
-            {shift.role && <Text selectable style={[styles.detail, { color: colors.onSurfaceVariant }]}>{shift.role}</Text>}
-          </View>
-        )}
-
-        {shift.status && shift.status !== "scheduled" && (
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(shift.status) + "15" },
-            ]}
-          >
-            <Text
-              style={[
-                styles.statusText,
-                { color: getStatusColor(shift.status) },
-              ]}
-            >
-              {shift.status.charAt(0).toUpperCase() + shift.status.slice(1)}
-            </Text>
-          </View>
-        )}
       </GlassCard>
     </Animated.View>
   );

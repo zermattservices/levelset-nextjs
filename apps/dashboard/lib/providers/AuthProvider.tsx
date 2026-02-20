@@ -84,14 +84,23 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
     }
 
     try {
-      const { data, error } = await supabase
+      // Use limit(1) instead of .single() to handle users with app_user
+      // records in multiple orgs. Order by created_at so the primary
+      // (earliest-created) record is returned.
+      const { data: rows, error } = await supabase
         .from('app_users')
         .select('*')
         .eq('auth_user_id', authUser.id)
-        .single();
+        .order('created_at', { ascending: true })
+        .limit(1);
+
+      const data = rows?.[0] ?? null;
 
       if (error) {
         console.error('Error fetching app user data:', error);
+        setAppUser(null);
+      } else if (!data) {
+        console.error('No app_user found for auth_user_id:', authUser.id);
         setAppUser(null);
       } else {
         // If user has a Google profile image and app_user doesn't have one, save it
