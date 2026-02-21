@@ -19,6 +19,7 @@ export function DiscActionSelectWidget(props: WidgetProps) {
   const { id, value, required, disabled, readonly, onChange, label, rawErrors } = props;
   const [options, setOptions] = React.useState<DiscActionRubricOption[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -30,7 +31,10 @@ export function DiscActionSelectWidget(props: WidgetProps) {
         const supabase = createSupabaseClient();
         const { data: session } = await supabase.auth.getSession();
         const token = session.session?.access_token;
-        if (!token) return;
+        if (!token) {
+          setLoadError('Not authenticated');
+          return;
+        }
 
         // Get current user's org
         const { data: appUser } = await supabase
@@ -59,8 +63,9 @@ export function DiscActionSelectWidget(props: WidgetProps) {
             }))
           );
         }
-      } catch {
-        // Silently handle
+      } catch (err) {
+        console.error('DiscActionSelectWidget: load failed', err);
+        if (!cancelled) setLoadError('Failed to load discipline actions');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -113,6 +118,11 @@ export function DiscActionSelectWidget(props: WidgetProps) {
         )}
         sx={{ '& .MuiAutocomplete-option': { fontFamily, fontSize: 13 } }}
       />
+      {loadError && (
+        <FormHelperText error sx={{ fontFamily, fontSize: 12 }}>
+          {loadError}
+        </FormHelperText>
+      )}
       {rawErrors && rawErrors.length > 0 && (
         <FormHelperText error sx={{ fontFamily, fontSize: 12 }}>
           {rawErrors[0]}

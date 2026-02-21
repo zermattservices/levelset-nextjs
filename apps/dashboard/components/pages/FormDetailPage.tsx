@@ -139,12 +139,18 @@ export function FormDetailPage() {
     }
   }, [template, getAccessToken]);
 
+  // Derive named tab key from index (system forms hide the Editor tab)
+  const tabKeys = template?.is_system
+    ? (['settings', 'preview', 'submissions'] as const)
+    : (['settings', 'editor', 'preview', 'submissions'] as const);
+  const activeTabKey = tabKeys[activeTab] || 'settings';
+
   // Load submissions when switching to submissions tab
   React.useEffect(() => {
-    if (activeTab === 3 && template) {
+    if (activeTabKey === 'submissions' && template) {
       fetchSubmissions();
     }
-  }, [activeTab, template, fetchSubmissions]);
+  }, [activeTabKey, template, fetchSubmissions]);
 
   const handleSaveSettings = async (updates: Partial<FormTemplate>) => {
     if (!template) return;
@@ -280,6 +286,7 @@ export function FormDetailPage() {
 
   const typeColor = TYPE_COLORS[template.form_type] || TYPE_COLORS.custom;
   const typeLabel = TYPE_LABELS[template.form_type] || 'Custom';
+  const isSystem = !!template.is_system;
 
   return (
     <>
@@ -420,11 +427,13 @@ export function FormDetailPage() {
                   iconPosition="start"
                   label="Settings"
                 />
-                <Tab
-                  icon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
-                  iconPosition="start"
-                  label="Editor"
-                />
+                {!isSystem && (
+                  <Tab
+                    icon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
+                    iconPosition="start"
+                    label="Editor"
+                  />
+                )}
                 <Tab
                   icon={<PreviewOutlinedIcon sx={{ fontSize: 16 }} />}
                   iconPosition="start"
@@ -440,17 +449,18 @@ export function FormDetailPage() {
 
             {/* Tab Content */}
             <div className={sty.tabContent}>
-              {activeTab === 0 && (
+              {activeTabKey === 'settings' && (
                 <FormSettingsPanel
                   template={template}
                   groups={groups}
                   onSave={handleSaveSettings}
                   onDelete={handleDelete}
                   saving={saving}
+                  isSystem={isSystem}
                 />
               )}
 
-              {activeTab === 1 && (
+              {activeTabKey === 'editor' && (
                 <FormEditorPanel
                   template={template}
                   onSave={handleSaveSchema}
@@ -458,11 +468,11 @@ export function FormDetailPage() {
                 />
               )}
 
-              {activeTab === 2 && (
+              {activeTabKey === 'preview' && (
                 <FormPreviewPanel template={template} />
               )}
 
-              {activeTab === 3 && (
+              {activeTabKey === 'submissions' && (
                 <FormSubmissionsTable
                   submissions={submissions}
                   loading={submissionsLoading}

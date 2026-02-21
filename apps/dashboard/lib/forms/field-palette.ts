@@ -119,7 +119,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
       maximum: 3,
       enum: [1, 2, 3],
     },
-    uiWidget: 'radio',
+    uiWidget: 'ratingScale',
   },
   rating_1_5: {
     type: 'rating_1_5',
@@ -133,7 +133,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
       maximum: 5,
       enum: [1, 2, 3, 4, 5],
     },
-    uiWidget: 'radio',
+    uiWidget: 'ratingScale',
   },
   percentage: {
     type: 'percentage',

@@ -320,6 +320,10 @@ function inferFieldType(
   if (widget === 'infraction_select') return 'infraction_select';
   if (widget === 'disc_action_select') return 'disc_action_select';
   if (widget === 'textarea') return 'textarea';
+  if (widget === 'ratingScale') {
+    if (propSchema.maximum === 3) return 'rating_1_3';
+    return 'rating_1_5';
+  }
 
   if (propSchema.type === 'boolean') return 'true_false';
 

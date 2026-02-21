@@ -34,6 +34,7 @@ export function LeaderSelectWidget(props: WidgetProps) {
   const { id, value, required, disabled, readonly, onChange, label, rawErrors } = props;
   const [leaders, setLeaders] = React.useState<LeaderOption[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -44,7 +45,10 @@ export function LeaderSelectWidget(props: WidgetProps) {
         const { createSupabaseClient } = await import('@/util/supabase/component');
         const supabase = createSupabaseClient();
         const { data: session } = await supabase.auth.getSession();
-        if (!session.session) return;
+        if (!session.session) {
+          setLoadError('Not authenticated');
+          return;
+        }
 
         const { data: appUser } = await supabase
           .from('app_users')
@@ -73,8 +77,9 @@ export function LeaderSelectWidget(props: WidgetProps) {
           const leaderList = all.filter((e) => e.isLeader);
           setLeaders(leaderList.length > 0 ? leaderList : all);
         }
-      } catch {
-        // Silently handle
+      } catch (err) {
+        console.error('LeaderSelectWidget: load failed', err);
+        if (!cancelled) setLoadError('Failed to load leaders');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -126,6 +131,11 @@ export function LeaderSelectWidget(props: WidgetProps) {
           />
         )}
       />
+      {loadError && (
+        <FormHelperText error sx={{ fontFamily, fontSize: 12 }}>
+          {loadError}
+        </FormHelperText>
+      )}
       {rawErrors && rawErrors.length > 0 && (
         <FormHelperText error sx={{ fontFamily, fontSize: 12 }}>
           {rawErrors[0]}

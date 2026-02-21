@@ -36,17 +36,23 @@ export const rjsfMuiTheme = createTheme({
         root: {
           '& .MuiInputLabel-root': {
             fontFamily: '"Satoshi", sans-serif',
-            fontSize: 12,
           },
           '& .MuiInputBase-root': {
             fontFamily: '"Satoshi", sans-serif',
             fontSize: 14,
           },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'var(--ls-color-muted-border)',
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          '&:hover fieldset': {
+            borderColor: 'var(--ls-color-brand)',
           },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'var(--ls-color-border)',
+          '&.Mui-focused fieldset': {
+            borderColor: 'var(--ls-color-brand)',
           },
         },
       },

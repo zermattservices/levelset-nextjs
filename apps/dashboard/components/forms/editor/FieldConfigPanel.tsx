@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  TextField,
   Switch,
   FormControlLabel,
   IconButton,
@@ -15,34 +14,16 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import sty from './FieldConfigPanel.module.css';
+import { StyledTextField, fontFamily, inputLabelSx } from '../dialogStyles';
 import { FIELD_TYPES } from '@/lib/forms/field-palette';
 import type { FormField, FieldOption } from '@/lib/forms/schema-builder';
 import { ConnectedQuestionPicker } from '../evaluation/ConnectedQuestionPicker';
-
-const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 interface FieldConfigPanelProps {
   field: FormField | null;
   onUpdateField: (id: string, updates: Partial<FormField>) => void;
   isEvaluation?: boolean;
 }
-
-const textFieldSx = {
-  '& .MuiInputLabel-root': {
-    fontFamily,
-    fontSize: 11,
-    color: 'var(--ls-color-muted)',
-    '&.Mui-focused': { color: 'var(--ls-color-brand)' },
-  },
-  '& .MuiInputBase-root': { fontFamily, fontSize: 13 },
-  '& .MuiInputBase-input': { fontFamily, fontSize: 13, padding: '8px 10px' },
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-muted-border)' },
-  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-border)' },
-  '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
-};
 
 const SCORING_TYPES = [
   { value: 'rating_1_3', label: 'Rating (1-3)' },
@@ -136,21 +117,19 @@ export function FieldConfigPanel({
       {/* Label fields */}
       <div className={sty.configSection}>
         <span className={sty.sectionLabel}>Label</span>
-        <TextField
+        <StyledTextField
           label="English"
           value={field.label}
           onChange={(e) => handleLabelChange(e.target.value)}
           fullWidth
           size="small"
-          sx={textFieldSx}
         />
-        <TextField
+        <StyledTextField
           label="Spanish"
           value={field.labelEs}
           onChange={(e) => handleLabelEsChange(e.target.value)}
           fullWidth
           size="small"
-          sx={textFieldSx}
         />
       </div>
 
@@ -158,7 +137,7 @@ export function FieldConfigPanel({
       {!isSection && (
         <div className={sty.configSection}>
           <span className={sty.sectionLabel}>Help Text</span>
-          <TextField
+          <StyledTextField
             label="English"
             value={field.description || ''}
             onChange={(e) => handleDescriptionChange(e.target.value)}
@@ -166,9 +145,9 @@ export function FieldConfigPanel({
             size="small"
             multiline
             rows={2}
-            sx={textFieldSx}
+            InputLabelProps={{ shrink: true }}
           />
-          <TextField
+          <StyledTextField
             label="Spanish"
             value={field.descriptionEs || ''}
             onChange={(e) => handleDescriptionEsChange(e.target.value)}
@@ -176,7 +155,7 @@ export function FieldConfigPanel({
             size="small"
             multiline
             rows={2}
-            sx={textFieldSx}
+            InputLabelProps={{ shrink: true }}
           />
         </div>
       )}
@@ -220,15 +199,12 @@ export function FieldConfigPanel({
               {field.options.map((option, index) => (
                 <div key={index} className={sty.optionRow}>
                   <DragIndicatorIcon sx={{ fontSize: 14, color: 'var(--ls-color-muted)', opacity: 0.5 }} />
-                  <TextField
+                  <StyledTextField
                     value={option.label}
                     onChange={(e) => handleOptionUpdate(index, { label: e.target.value })}
                     size="small"
                     placeholder="Option label"
-                    sx={{
-                      flex: 1,
-                      ...textFieldSx,
-                    }}
+                    sx={{ flex: 1 }}
                   />
                   <IconButton
                     size="small"
@@ -271,21 +247,21 @@ export function FieldConfigPanel({
           <div className={sty.configSection}>
             <span className={sty.sectionLabel}>Range</span>
             <div className={sty.rangeRow}>
-              <TextField
+              <StyledTextField
                 label="Min"
                 type="number"
                 value={field.settings.min ?? ''}
                 onChange={(e) => handleSettingsChange('min', e.target.value === '' ? undefined : Number(e.target.value))}
                 size="small"
-                sx={{ flex: 1, ...textFieldSx }}
+                sx={{ flex: 1 }}
               />
-              <TextField
+              <StyledTextField
                 label="Max"
                 type="number"
                 value={field.settings.max ?? ''}
                 onChange={(e) => handleSettingsChange('max', e.target.value === '' ? undefined : Number(e.target.value))}
                 size="small"
-                sx={{ flex: 1, ...textFieldSx }}
+                sx={{ flex: 1 }}
               />
             </div>
           </div>
@@ -298,14 +274,13 @@ export function FieldConfigPanel({
           <Divider sx={{ margin: '8px 0' }} />
           <div className={sty.configSection}>
             <span className={sty.sectionLabel}>Display</span>
-            <TextField
+            <StyledTextField
               label="Rows"
               type="number"
               value={field.settings.rows || 3}
               onChange={(e) => handleSettingsChange('rows', Math.max(1, Math.min(10, Number(e.target.value))))}
               size="small"
               slotProps={{ htmlInput: { min: 1, max: 10 } }}
-              sx={textFieldSx}
             />
           </div>
         </>
@@ -318,7 +293,7 @@ export function FieldConfigPanel({
           <div className={sty.configSection}>
             <span className={sty.sectionLabel}>Scoring</span>
             <FormControl fullWidth size="small">
-              <InputLabel sx={{ fontFamily, fontSize: 11 }}>Scoring Type</InputLabel>
+              <InputLabel sx={inputLabelSx}>Scoring Type</InputLabel>
               <Select
                 value={field.settings.scoringType || ''}
                 onChange={(e) => handleSettingsChange('scoringType', e.target.value || undefined)}
@@ -337,14 +312,13 @@ export function FieldConfigPanel({
             </FormControl>
 
             {field.settings.scoringType && (
-              <TextField
+              <StyledTextField
                 label="Weight (points)"
                 type="number"
                 value={field.settings.weight ?? 10}
                 onChange={(e) => handleSettingsChange('weight', Math.max(0, Math.min(100, Number(e.target.value))))}
                 size="small"
                 slotProps={{ htmlInput: { min: 0, max: 100 } }}
-                sx={textFieldSx}
               />
             )}
           </div>

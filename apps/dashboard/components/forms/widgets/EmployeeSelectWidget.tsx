@@ -19,6 +19,7 @@ export function EmployeeSelectWidget(props: WidgetProps) {
   const { id, value, required, disabled, readonly, onChange, label, rawErrors } = props;
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -30,7 +31,10 @@ export function EmployeeSelectWidget(props: WidgetProps) {
         const supabase = createSupabaseClient();
         const { data: session } = await supabase.auth.getSession();
         const token = session.session?.access_token;
-        if (!token) return;
+        if (!token) {
+          setLoadError('Not authenticated');
+          return;
+        }
 
         // Get current user's org employees
         const { data: appUser } = await supabase
@@ -58,8 +62,9 @@ export function EmployeeSelectWidget(props: WidgetProps) {
             }))
           );
         }
-      } catch {
-        // Silently handle
+      } catch (err) {
+        console.error('EmployeeSelectWidget: load failed', err);
+        if (!cancelled) setLoadError('Failed to load employees');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -112,6 +117,11 @@ export function EmployeeSelectWidget(props: WidgetProps) {
         )}
         sx={{ '& .MuiAutocomplete-option': { fontFamily, fontSize: 13 } }}
       />
+      {loadError && (
+        <FormHelperText error sx={{ fontFamily, fontSize: 12 }}>
+          {loadError}
+        </FormHelperText>
+      )}
       {rawErrors && rawErrors.length > 0 && (
         <FormHelperText error sx={{ fontFamily, fontSize: 12 }}>
           {rawErrors[0]}

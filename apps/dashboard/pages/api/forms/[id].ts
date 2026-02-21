@@ -81,6 +81,30 @@ export default async function handler(
       settings,
     } = req.body;
 
+    // Check if this is a system template — only allow is_active changes
+    const { data: existingTemplate } = await supabase
+      .from('form_templates')
+      .select('is_system')
+      .eq(lookupField, id)
+      .eq('org_id', orgId)
+      .single();
+
+    if (existingTemplate?.is_system) {
+      const hasStructuralChanges =
+        name !== undefined ||
+        name_es !== undefined ||
+        description !== undefined ||
+        description_es !== undefined ||
+        group_id !== undefined ||
+        schema !== undefined ||
+        ui_schema !== undefined ||
+        settings !== undefined;
+
+      if (hasStructuralChanges) {
+        return res.status(403).json({ error: 'System form structure cannot be modified. Only active status can be changed.' });
+      }
+    }
+
     // Build update object with only provided fields
     const updates: Record<string, any> = { updated_at: new Date().toISOString() };
 

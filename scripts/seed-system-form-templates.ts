@@ -46,9 +46,9 @@ const FIELD_DEFS: Record<string, { schema: Record<string, any>; uiWidget?: strin
   position_select: { schema: { type: 'string' }, uiWidget: 'position_select' },
   infraction_select: { schema: { type: 'string' }, uiWidget: 'infraction_select' },
   disc_action_select: { schema: { type: 'string' }, uiWidget: 'disc_action_select' },
-  rating_1_5: {
-    schema: { type: 'integer', minimum: 1, maximum: 5, enum: [1, 2, 3, 4, 5] },
-    uiWidget: 'radio',
+  rating_1_3: {
+    schema: { type: 'integer', minimum: 1, maximum: 3, enum: [1, 2, 3] },
+    uiWidget: 'ratingScale',
   },
   textarea: { schema: { type: 'string' }, uiWidget: 'textarea', uiOptions: { rows: 3 } },
   date: { schema: { type: 'string', format: 'date' } },
@@ -127,11 +127,11 @@ function buildRatingFields(requireNotes: boolean): SimpleField[] {
     { id: generateFieldId(), type: 'employee_select', label: 'Employee', labelEs: 'Empleado', required: true },
     { id: generateFieldId(), type: 'leader_select', label: 'Leader', labelEs: 'Líder', required: true },
     { id: generateFieldId(), type: 'position_select', label: 'Position', labelEs: 'Posición', required: true },
-    { id: generateFieldId(), type: 'rating_1_5', label: 'Rating 1', labelEs: 'Calificación 1', required: true },
-    { id: generateFieldId(), type: 'rating_1_5', label: 'Rating 2', labelEs: 'Calificación 2', required: true },
-    { id: generateFieldId(), type: 'rating_1_5', label: 'Rating 3', labelEs: 'Calificación 3', required: true },
-    { id: generateFieldId(), type: 'rating_1_5', label: 'Rating 4', labelEs: 'Calificación 4', required: true },
-    { id: generateFieldId(), type: 'rating_1_5', label: 'Rating 5', labelEs: 'Calificación 5', required: true },
+    { id: generateFieldId(), type: 'rating_1_3', label: 'Rating 1', labelEs: 'Calificación 1', required: true },
+    { id: generateFieldId(), type: 'rating_1_3', label: 'Rating 2', labelEs: 'Calificación 2', required: true },
+    { id: generateFieldId(), type: 'rating_1_3', label: 'Rating 3', labelEs: 'Calificación 3', required: true },
+    { id: generateFieldId(), type: 'rating_1_3', label: 'Rating 4', labelEs: 'Calificación 4', required: true },
+    { id: generateFieldId(), type: 'rating_1_3', label: 'Rating 5', labelEs: 'Calificación 5', required: true },
     { id: generateFieldId(), type: 'textarea', label: 'Notes', labelEs: 'Notas', required: requireNotes, rows: 3 },
   ];
 }
@@ -176,8 +176,8 @@ const TEMPLATE_DEFS: TemplateDefinition[] = [
   {
     name: 'Positional Excellence Rating',
     name_es: 'Calificación de Excelencia Posicional',
-    description: 'Standard 5-rating positional excellence form',
-    description_es: 'Formulario estándar de 5 calificaciones de excelencia posicional',
+    description: 'Standard positional excellence rating form',
+    description_es: 'Formulario estándar de calificación de excelencia posicional',
     form_type: 'rating',
     groupSlug: 'positional_excellence',
     buildFields: buildRatingFields,
@@ -246,6 +246,7 @@ async function seedSystemFormTemplates() {
   console.log(`Found ${orgs.length} organization(s). Seeding system form templates...\n`);
 
   let created = 0;
+  let updated = 0;
   let skipped = 0;
 
   for (const org of orgs) {
@@ -281,6 +282,14 @@ async function seedSystemFormTemplates() {
         continue;
       }
 
+      // Build fields — pass requireNotes for rating form
+      const fields = templateDef.groupSlug === 'positional_excellence'
+        ? templateDef.buildFields(requireNotes)
+        : templateDef.buildFields();
+
+      const { schema, uiSchema } = buildSchema(fields);
+      const fieldMappings = templateDef.buildMappings(fields);
+
       // Check if a system template with this name already exists
       const { data: existing } = await supabase
         .from('form_templates')
@@ -292,17 +301,27 @@ async function seedSystemFormTemplates() {
         .maybeSingle();
 
       if (existing) {
-        skipped++;
+        // Update existing template with latest schema, ui_schema, settings, description
+        const { error: updateError } = await supabase
+          .from('form_templates')
+          .update({
+            description: templateDef.description,
+            description_es: templateDef.description_es,
+            schema,
+            ui_schema: uiSchema,
+            settings: { field_mappings: fieldMappings },
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id);
+
+        if (updateError) {
+          console.error(`  ✗ Error updating "${templateDef.name}":`, updateError.message);
+        } else {
+          updated++;
+          console.log(`  ↻ Updated "${templateDef.name}"`);
+        }
         continue;
       }
-
-      // Build fields — pass requireNotes for rating form
-      const fields = templateDef.groupSlug === 'positional_excellence'
-        ? templateDef.buildFields(requireNotes)
-        : templateDef.buildFields();
-
-      const { schema, uiSchema } = buildSchema(fields);
-      const fieldMappings = templateDef.buildMappings(fields);
 
       const { error: insertError } = await supabase
         .from('form_templates')
@@ -332,7 +351,7 @@ async function seedSystemFormTemplates() {
     }
   }
 
-  console.log(`\nDone! Created: ${created}, Skipped (already exist): ${skipped}`);
+  console.log(`\nDone! Created: ${created}, Updated: ${updated}, Skipped: ${skipped}`);
 }
 
 seedSystemFormTemplates().catch(console.error);

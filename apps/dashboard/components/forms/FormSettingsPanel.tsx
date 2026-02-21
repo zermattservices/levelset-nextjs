@@ -1,9 +1,7 @@
 import * as React from 'react';
 import {
-  TextField,
   FormControl,
   InputLabel,
-  Select,
   MenuItem,
   Switch,
   FormControlLabel,
@@ -15,9 +13,8 @@ import {
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import sty from './FormSettingsPanel.module.css';
+import { StyledTextField, StyledSelect, fontFamily, inputLabelSx } from './dialogStyles';
 import type { FormTemplate, FormGroup, FormType } from '@/lib/forms/types';
-
-const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 interface FormSettingsPanelProps {
   template: FormTemplate;
@@ -25,35 +22,8 @@ interface FormSettingsPanelProps {
   onSave: (updates: Partial<FormTemplate>) => Promise<void>;
   onDelete?: () => Promise<void>;
   saving: boolean;
+  isSystem?: boolean;
 }
-
-const textFieldSx = {
-  '& .MuiInputLabel-root': {
-    fontFamily,
-    fontSize: 12,
-    color: 'var(--ls-color-muted)',
-    '&.Mui-focused': { color: 'var(--ls-color-brand)' },
-  },
-  '& .MuiInputBase-root': { fontFamily, fontSize: 14 },
-  '& .MuiInputBase-input': { fontFamily, fontSize: 14, padding: '10px 14px' },
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-muted-border)' },
-  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-border)' },
-  '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
-};
-
-const selectSx = {
-  fontFamily,
-  fontSize: 14,
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-muted-border)' },
-  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-border)' },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
-};
 
 const TYPE_LABELS: Record<FormType, string> = {
   rating: 'Rating',
@@ -62,12 +32,17 @@ const TYPE_LABELS: Record<FormType, string> = {
   custom: 'Custom',
 };
 
+const readOnlyInputSx = {
+  '& .MuiOutlinedInput-root': { backgroundColor: 'var(--ls-color-neutral-foreground)' },
+};
+
 export function FormSettingsPanel({
   template,
   groups,
   onSave,
   onDelete,
   saving,
+  isSystem,
 }: FormSettingsPanelProps) {
   const [name, setName] = React.useState(template.name);
   const [nameEs, setNameEs] = React.useState(template.name_es || '');
@@ -129,6 +104,15 @@ export function FormSettingsPanel({
       <div className={sty.section}>
         <h3 className={sty.sectionTitle}>General</h3>
 
+        {isSystem && (
+          <Alert
+            severity="info"
+            sx={{ fontFamily, fontSize: 13, borderRadius: '8px', mb: 1 }}
+          >
+            This is a system form. Its structure is managed by Levelset.
+          </Alert>
+        )}
+
         {error && (
           <Alert severity="error" sx={{ fontFamily, fontSize: 13 }}>
             {error}
@@ -136,27 +120,29 @@ export function FormSettingsPanel({
         )}
 
         <div className={sty.fieldRow}>
-          <TextField
+          <StyledTextField
             label="Form Name (English)"
             value={name}
             onChange={(e) => setName(e.target.value)}
             fullWidth
             size="small"
             required
-            sx={textFieldSx}
+            InputProps={isSystem ? { readOnly: true } : undefined}
+            sx={isSystem ? readOnlyInputSx : undefined}
           />
-          <TextField
+          <StyledTextField
             label="Form Name (Spanish)"
             value={nameEs}
             onChange={(e) => setNameEs(e.target.value)}
             fullWidth
             size="small"
-            sx={textFieldSx}
+            InputProps={isSystem ? { readOnly: true } : undefined}
+            sx={isSystem ? readOnlyInputSx : undefined}
           />
         </div>
 
         <div className={sty.fieldRow}>
-          <TextField
+          <StyledTextField
             label="Description (English)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -164,9 +150,11 @@ export function FormSettingsPanel({
             size="small"
             multiline
             rows={2}
-            sx={textFieldSx}
+            InputLabelProps={{ shrink: true }}
+            InputProps={isSystem ? { readOnly: true } : undefined}
+            sx={isSystem ? readOnlyInputSx : undefined}
           />
-          <TextField
+          <StyledTextField
             label="Description (Spanish)"
             value={descriptionEs}
             onChange={(e) => setDescriptionEs(e.target.value)}
@@ -174,7 +162,9 @@ export function FormSettingsPanel({
             size="small"
             multiline
             rows={2}
-            sx={textFieldSx}
+            InputLabelProps={{ shrink: true }}
+            InputProps={isSystem ? { readOnly: true } : undefined}
+            sx={isSystem ? readOnlyInputSx : undefined}
           />
         </div>
       </div>
@@ -186,21 +176,21 @@ export function FormSettingsPanel({
 
         <div className={sty.fieldRow}>
           <FormControl fullWidth size="small">
-            <InputLabel sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)', '&.Mui-focused': { color: 'var(--ls-color-brand)' } }}>
+            <InputLabel sx={inputLabelSx}>
               Form Group
             </InputLabel>
-            <Select
+            <StyledSelect
               value={groupId}
-              onChange={(e) => setGroupId(e.target.value)}
+              onChange={(e) => setGroupId(e.target.value as string)}
               label="Form Group"
-              sx={selectSx}
+              disabled={isSystem}
             >
               {groups.map((group) => (
                 <MenuItem key={group.id} value={group.id} sx={{ fontFamily, fontSize: 13 }}>
                   {group.name}
                 </MenuItem>
               ))}
-            </Select>
+            </StyledSelect>
           </FormControl>
 
           <div className={sty.readOnlyField}>

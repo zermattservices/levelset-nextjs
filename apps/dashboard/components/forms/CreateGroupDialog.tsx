@@ -4,7 +4,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Button,
   IconButton,
   CircularProgress,
@@ -12,8 +11,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import {
-  textFieldSx,
-  textFieldMultilineSx,
+  StyledTextField,
   dialogPaperSx,
   dialogTitleSx,
   dialogContentSx,
@@ -109,7 +107,7 @@ export function CreateGroupDialog({
           </Alert>
         )}
 
-        <TextField
+        <StyledTextField
           label="Group Name"
           placeholder="Enter group name"
           value={name}
@@ -117,19 +115,18 @@ export function CreateGroupDialog({
           fullWidth
           size="small"
           required
-          sx={textFieldSx}
         />
 
-        <TextField
+        <StyledTextField
           label="Description"
           placeholder="Optional description for this group"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           fullWidth
+          size="small"
           multiline
           rows={2}
           InputLabelProps={{ shrink: true }}
-          sx={textFieldMultilineSx}
         />
       </DialogContent>
 

@@ -12,7 +12,6 @@ import {
   DialogContent,
   DialogActions,
   Drawer,
-  Select,
   MenuItem,
   InputLabel,
   FormControl,
@@ -45,6 +44,12 @@ import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import {
+  StyledTextField,
+  StyledSelect,
+  inputLabelSx,
+  menuItemSx,
+} from '@/components/forms/dialogStyles';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -736,17 +741,13 @@ export function DocumentsPage() {
   /*  MUI shared sx                                                    */
   /* ---------------------------------------------------------------- */
 
-  const muiInputSx = {
-    fontFamily,
-    fontSize: 13,
+  /* muiInputSx kept only for the search bar which has no label */
+  const searchInputSx = {
     '& .MuiOutlinedInput-root': {
       fontFamily,
       fontSize: 13,
       borderRadius: '8px',
-    },
-    '& .MuiInputLabel-root': {
-      fontFamily,
-      fontSize: 13,
+      height: 36,
     },
   };
 
@@ -867,14 +868,7 @@ export function DocumentsPage() {
                           />
                         ),
                       }}
-                      sx={{
-                        ...muiInputSx,
-                        width: 260,
-                        '& .MuiOutlinedInput-root': {
-                          ...muiInputSx['& .MuiOutlinedInput-root'],
-                          height: 36,
-                        },
-                      }}
+                      sx={{ ...searchInputSx, width: 260 }}
                       className={sty.searchInput}
                     />
 
@@ -1083,8 +1077,14 @@ export function DocumentsPage() {
                 fontFamily,
                 fontSize: 12,
                 fontWeight: 500,
+                px: 1,
                 ...(uploadMode === 'file'
-                  ? { backgroundColor: 'var(--ls-color-brand)', color: '#fff' }
+                  ? {
+                      backgroundColor: 'var(--ls-color-brand)',
+                      color: '#fff',
+                      '& .MuiChip-icon': { color: '#fff' },
+                      '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
+                    }
                   : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
               }}
             />
@@ -1097,8 +1097,14 @@ export function DocumentsPage() {
                 fontFamily,
                 fontSize: 12,
                 fontWeight: 500,
+                px: 1,
                 ...(uploadMode === 'url'
-                  ? { backgroundColor: 'var(--ls-color-brand)', color: '#fff' }
+                  ? {
+                      backgroundColor: 'var(--ls-color-brand)',
+                      color: '#fff',
+                      '& .MuiChip-icon': { color: '#fff' },
+                      '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
+                    }
                   : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
               }}
             />
@@ -1146,29 +1152,29 @@ export function DocumentsPage() {
 
           {/* URL input */}
           {uploadMode === 'url' && (
-            <TextField
+            <StyledTextField
               label="URL"
               placeholder="https://example.com/document.pdf"
               fullWidth
               size="small"
               value={uploadUrl}
               onChange={(e) => setUploadUrl(e.target.value)}
-              sx={{ ...muiInputSx, mb: 2 }}
+              sx={{ mb: 2 }}
             />
           )}
 
           {/* Common fields */}
-          <TextField
+          <StyledTextField
             label="Document Name"
             fullWidth
             size="small"
             required
             value={uploadName}
             onChange={(e) => setUploadName(e.target.value)}
-            sx={{ ...muiInputSx, mb: 2 }}
+            sx={{ mb: 2 }}
           />
 
-          <TextField
+          <StyledTextField
             label="Description"
             fullWidth
             size="small"
@@ -1176,23 +1182,23 @@ export function DocumentsPage() {
             rows={2}
             value={uploadDescription}
             onChange={(e) => setUploadDescription(e.target.value)}
-            sx={{ ...muiInputSx, mb: 2 }}
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 2 }}
           />
 
-          <FormControl fullWidth size="small" sx={{ ...muiInputSx }}>
-            <InputLabel sx={{ fontFamily, fontSize: 13 }}>Category</InputLabel>
-            <Select
+          <FormControl fullWidth size="small">
+            <InputLabel sx={inputLabelSx}>Category</InputLabel>
+            <StyledSelect
               value={uploadCategory}
               label="Category"
               onChange={(e) => setUploadCategory(e.target.value as DocumentCategory)}
-              sx={{ fontFamily, fontSize: 13, borderRadius: '8px' }}
             >
               {DOCUMENT_CATEGORIES.map((cat) => (
-                <MenuItem key={cat} value={cat} sx={{ fontFamily, fontSize: 13 }}>
+                <MenuItem key={cat} value={cat} sx={menuItemSx}>
                   {CATEGORY_LABELS[cat]}
                 </MenuItem>
               ))}
-            </Select>
+            </StyledSelect>
           </FormControl>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -1239,7 +1245,7 @@ export function DocumentsPage() {
           Create Folder
         </DialogTitle>
         <DialogContent sx={{ pt: '8px !important' }}>
-          <TextField
+          <StyledTextField
             label="Folder Name"
             fullWidth
             size="small"
@@ -1250,7 +1256,7 @@ export function DocumentsPage() {
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleCreateFolder();
             }}
-            sx={{ ...muiInputSx, mt: 1 }}
+            sx={{ mt: 1 }}
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -1294,7 +1300,7 @@ export function DocumentsPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', flex: 1 }}>
                 {getFileTypeIcon(selectedDocument.file_type, selectedDocument.source_type)}
                 {editingField === 'name' ? (
-                  <TextField
+                  <StyledTextField
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     size="small"
@@ -1304,7 +1310,7 @@ export function DocumentsPage() {
                       if (e.key === 'Enter') handleSaveDocumentField('name');
                       if (e.key === 'Escape') setEditingField(null);
                     }}
-                    sx={{ ...muiInputSx, flex: 1 }}
+                    sx={{ flex: 1 }}
                   />
                 ) : (
                   <Typography
@@ -1414,14 +1420,13 @@ export function DocumentsPage() {
               <div className={sty.drawerSectionLabel}>Description</div>
               {editingField === 'description' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <TextField
+                  <StyledTextField
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     size="small"
                     multiline
                     rows={3}
                     autoFocus
-                    sx={muiInputSx}
                   />
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                     <Button
@@ -1472,18 +1477,17 @@ export function DocumentsPage() {
               <div className={sty.drawerSectionLabel}>Category</div>
               {editingField === 'category' ? (
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <FormControl size="small" sx={{ flex: 1, ...muiInputSx }}>
-                    <Select
+                  <FormControl size="small" sx={{ flex: 1 }}>
+                    <StyledSelect
                       value={editCategory}
                       onChange={(e) => setEditCategory(e.target.value as DocumentCategory)}
-                      sx={{ fontFamily, fontSize: 13, borderRadius: '8px' }}
                     >
                       {DOCUMENT_CATEGORIES.map((cat) => (
-                        <MenuItem key={cat} value={cat} sx={{ fontFamily, fontSize: 13 }}>
+                        <MenuItem key={cat} value={cat} sx={menuItemSx}>
                           {CATEGORY_LABELS[cat]}
                         </MenuItem>
                       ))}
-                    </Select>
+                    </StyledSelect>
                   </FormControl>
                   <Button
                     size="small"

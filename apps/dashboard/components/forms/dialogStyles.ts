@@ -1,95 +1,70 @@
 /**
- * Shared styling constants for form management dialogs.
+ * Shared styling constants for form management components.
  *
- * Provides a single source-of-truth for the font, TextField, Select,
- * Dialog, and Button sx objects used by CreateFormDialog, CreateGroupDialog,
- * and any future form dialogs.
+ * Provides styled MUI components and sx objects used across form management.
+ * The StyledTextField and StyledSelect components match the working pattern
+ * from OrgSettings (OrganizationDetails, RatingCriteriaTab, etc.).
  *
- * NOTE: Multiline TextFields must use `textFieldMultilineSx` (which omits
- * the input padding override) and set `InputLabelProps={{ shrink: true }}`
- * so the label stays above the textarea instead of overlapping the placeholder.
+ * IMPORTANT: Do NOT override `.MuiInputBase-input` padding or label fontSize —
+ * this breaks MUI's internal label positioning math when combined with size="small".
+ *
+ * For multiline StyledTextFields, add InputLabelProps={{ shrink: true }}
+ * so the label stays in the notch above the textarea.
  */
+
+import { styled } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import Select from '@mui/material/Select';
 
 export const fontFamily =
   '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
-/* ── TextField (single-line) ───────────────────────────────────── */
-
-export const textFieldSx = {
-  '& .MuiInputLabel-root': {
-    fontFamily,
-    fontSize: 12,
-    color: 'var(--ls-color-muted)',
-    '&.Mui-focused': { color: 'var(--ls-color-brand)' },
-  },
-  '& .MuiInputBase-root': { fontFamily, fontSize: 14 },
-  '& .MuiInputBase-input': { fontFamily, fontSize: 14, padding: '10px 14px' },
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-muted-border)',
-  },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-border)',
-  },
-  '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
-};
-
-/* ── TextField (multiline) ─────────────────────────────────────
- *  Identical to textFieldSx but WITHOUT the padding override on
- *  .MuiInputBase-input.  MUI's multiline variant wraps a <textarea>
- *  and handles its own internal padding — overriding it causes the
- *  placeholder text to render outside the outlined border.
+/* ── Styled TextField ──────────────────────────────────────────────
+ *  Matches the working pattern from OrgSettings/OrganizationDetails.
+ *  Targets .MuiOutlinedInput-root (NOT .MuiInputBase-input) so MUI's
+ *  internal padding and label positioning works correctly with size="small".
  *
- *  When using this, also pass: InputLabelProps={{ shrink: true }}
- *  on the TextField so the label stays in the notch at all times.
- * ────────────────────────────────────────────────────────────── */
+ *  For multiline, also pass: InputLabelProps={{ shrink: true }}
+ * ────────────────────────────────────────────────────────────────── */
 
-export const textFieldMultilineSx = {
+export const StyledTextField = styled(TextField)(() => ({
+  '& .MuiOutlinedInput-root': {
+    fontFamily,
+    fontSize: 14,
+    borderRadius: 8,
+    '&:hover fieldset': {
+      borderColor: 'var(--ls-color-brand)',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: 'var(--ls-color-brand)',
+    },
+  },
   '& .MuiInputLabel-root': {
     fontFamily,
-    fontSize: 12,
-    color: 'var(--ls-color-muted)',
-    '&.Mui-focused': { color: 'var(--ls-color-brand)' },
   },
-  '& .MuiInputBase-root': { fontFamily, fontSize: 14 },
-  '& .MuiInputBase-input': { fontFamily, fontSize: 14 },
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-muted-border)',
-  },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-border)',
-  },
-  '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
-};
+}));
 
-/* ── Select ────────────────────────────────────────────────────── */
+/* ── Styled Select ─────────────────────────────────────────────── */
 
-export const selectSx = {
+export const StyledSelect = styled(Select)(() => ({
   fontFamily,
   fontSize: 14,
+  borderRadius: 8,
   '& .MuiOutlinedInput-notchedOutline': {
     borderColor: 'var(--ls-color-muted-border)',
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-border)',
+    borderColor: 'var(--ls-color-brand)',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
     borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
   },
-};
+}));
 
 /* ── Input label (for FormControl + Select combos) ─────────────── */
 
 export const inputLabelSx = {
   fontFamily,
-  fontSize: 12,
-  color: 'var(--ls-color-muted)',
   '&.Mui-focused': { color: 'var(--ls-color-brand)' },
 };
 

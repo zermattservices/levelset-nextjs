@@ -4,10 +4,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   FormControl,
   InputLabel,
-  Select,
   MenuItem,
   Button,
   IconButton,
@@ -17,9 +15,8 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import type { FormGroup, FormType } from '@/lib/forms/types';
 import {
-  textFieldSx,
-  textFieldMultilineSx,
-  selectSx,
+  StyledTextField,
+  StyledSelect,
   inputLabelSx,
   dialogPaperSx,
   dialogTitleSx,
@@ -27,7 +24,7 @@ import {
   dialogActionsSx,
   cancelButtonSx,
   primaryButtonSx,
-  menuItemSx,
+  fontFamily,
   alertSx,
 } from './dialogStyles';
 
@@ -141,7 +138,7 @@ export function CreateFormDialog({
           </Alert>
         )}
 
-        <TextField
+        <StyledTextField
           label="Form Name"
           placeholder="Enter form name"
           value={name}
@@ -149,35 +146,33 @@ export function CreateFormDialog({
           fullWidth
           size="small"
           required
-          sx={textFieldSx}
         />
 
-        <TextField
+        <StyledTextField
           label="Description"
           placeholder="Optional description for this form"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           fullWidth
+          size="small"
           multiline
           rows={2}
           InputLabelProps={{ shrink: true }}
-          sx={textFieldMultilineSx}
         />
 
         <FormControl fullWidth size="small">
           <InputLabel sx={inputLabelSx}>Form Group</InputLabel>
-          <Select
+          <StyledSelect
             value={groupId}
-            onChange={(e) => setGroupId(e.target.value)}
+            onChange={(e) => setGroupId(e.target.value as string)}
             label="Form Group"
-            sx={selectSx}
           >
             {groups.map((group) => (
-              <MenuItem key={group.id} value={group.id} sx={menuItemSx}>
+              <MenuItem key={group.id} value={group.id} sx={{ fontFamily, fontSize: 13 }}>
                 {group.name}
               </MenuItem>
             ))}
-          </Select>
+          </StyledSelect>
         </FormControl>
       </DialogContent>
 

@@ -5,9 +5,9 @@ import type { WidgetProps } from '@rjsf/utils';
 const fontFamily = '"Satoshi", sans-serif';
 
 const RATING_1_3_LABELS: Record<number, { label: string; color: string }> = {
-  1: { label: '1 - Below', color: 'var(--ls-color-destructive)' },
-  2: { label: '2 - Meets', color: 'var(--ls-color-warning)' },
-  3: { label: '3 - Exceeds', color: 'var(--ls-color-success)' },
+  1: { label: 'Not Yet', color: '#b91c1c' },
+  2: { label: 'On the Rise', color: '#f59e0b' },
+  3: { label: 'Crushing It', color: 'var(--ls-color-brand)' },
 };
 
 const RATING_1_5_LABELS: Record<number, { label: string; color: string }> = {
