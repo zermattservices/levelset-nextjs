@@ -112,12 +112,13 @@ div[class*="DatePicker"] .MuiInputLabel-root.Mui-focused {
   border-width: 2px !important;
 }
 
-/* CONSISTENT INPUT HEIGHTS - Match pill buttons (36-38px total height) */
-.MuiInputBase-root.MuiInputBase-sizeSmall {
+/* CONSISTENT INPUT HEIGHTS - Match pill buttons (36-38px total height)
+   Exclude multiline inputs so textareas can grow beyond 36px */
+.MuiInputBase-root.MuiInputBase-sizeSmall:not(.MuiInputBase-multiline) {
   height: 36px !important;
 }
 
-.MuiInputBase-root.MuiInputBase-sizeSmall .MuiInputBase-input {
+.MuiInputBase-root.MuiInputBase-sizeSmall:not(.MuiInputBase-multiline) .MuiInputBase-input {
   padding: 8.5px 14px !important;
 }
 
