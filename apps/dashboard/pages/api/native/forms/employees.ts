@@ -39,7 +39,7 @@ export default withPermissionAndContext(
       // 1. Fetch active employees for this location
       const { data: employeesData, error: empError } = await supabase
         .from('employees')
-        .select('id, full_name, first_name, last_name, role, hire_date, is_leader, is_foh, is_boh, position')
+        .select('id, full_name, first_name, last_name, role, hire_date, is_leader, is_foh, is_boh')
         .eq('location_id', locationId)
         .eq('active', true)
         .order('full_name');
