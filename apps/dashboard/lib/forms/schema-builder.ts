@@ -317,6 +317,8 @@ function inferFieldType(
   if (widget === 'employee_select') return 'employee_select';
   if (widget === 'leader_select') return 'leader_select';
   if (widget === 'position_select') return 'position_select';
+  if (widget === 'infraction_select') return 'infraction_select';
+  if (widget === 'disc_action_select') return 'disc_action_select';
   if (widget === 'textarea') return 'textarea';
 
   if (propSchema.type === 'boolean') return 'true_false';

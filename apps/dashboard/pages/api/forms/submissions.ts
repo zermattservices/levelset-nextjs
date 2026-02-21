@@ -258,6 +258,7 @@ export default async function handler(
           }
 
           if (template.form_type === 'discipline') {
+            // Infraction dual-write (when infraction_id mapping exists)
             if (mappings.employee_id && mappings.leader_id && mappings.infraction_id) {
               // Look up rubric item
               const infractionRubricId = response_data[mappings.infraction_id];
@@ -322,6 +323,51 @@ export default async function handler(
                     .from('form_submissions')
                     .update({ metadata: { ...metadata, infraction_id: infractionRow.id } })
                     .eq('id', submission.id);
+                }
+              }
+            }
+
+            // Discipline action dual-write (when action_id mapping exists)
+            if (mappings.employee_id && mappings.action_id) {
+              const actionRubricId = response_data[mappings.action_id];
+
+              if (actionRubricId) {
+                const { data: actionRubric } = await supabase
+                  .from('disc_actions_rubric')
+                  .select('id, action')
+                  .eq('id', actionRubricId)
+                  .maybeSingle();
+
+                if (actionRubric) {
+                  const actionDate = mappings.action_date
+                    ? (response_data[mappings.action_date] || new Date().toISOString().split('T')[0])
+                    : new Date().toISOString().split('T')[0];
+
+                  const actingLeaderId = mappings.acting_leader
+                    ? (response_data[mappings.acting_leader] || appUser.id)
+                    : appUser.id;
+
+                  const { data: actionRow } = await supabase
+                    .from('disc_actions')
+                    .insert({
+                      employee_id: response_data[mappings.employee_id] || employee_id,
+                      action_id: actionRubricId,
+                      action: actionRubric.action,
+                      action_date: actionDate,
+                      acting_leader: actingLeaderId,
+                      notes: mappings.notes ? (response_data[mappings.notes] || null) : null,
+                      org_id: orgId,
+                      location_id: location_id || null,
+                    })
+                    .select('id')
+                    .single();
+
+                  if (actionRow?.id) {
+                    await supabase
+                      .from('form_submissions')
+                      .update({ metadata: { ...metadata, disc_action_id: actionRow.id } })
+                      .eq('id', submission.id);
+                  }
                 }
               }
             }

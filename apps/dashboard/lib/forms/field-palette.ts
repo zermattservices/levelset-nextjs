@@ -201,6 +201,24 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     schema: { type: 'string' },
     uiWidget: 'position_select',
   },
+  infraction_select: {
+    type: 'infraction_select',
+    label: 'Infraction Type',
+    labelEs: 'Tipo de Infracción',
+    icon: 'ReportProblemOutlined',
+    category: 'levelset',
+    schema: { type: 'string' },
+    uiWidget: 'infraction_select',
+  },
+  disc_action_select: {
+    type: 'disc_action_select',
+    label: 'Discipline Action',
+    labelEs: 'Acción Disciplinaria',
+    icon: 'GavelOutlined',
+    category: 'levelset',
+    schema: { type: 'string' },
+    uiWidget: 'disc_action_select',
+  },
 };
 
 /**

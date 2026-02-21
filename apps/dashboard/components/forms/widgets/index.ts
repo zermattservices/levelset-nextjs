@@ -13,6 +13,8 @@ import { EmployeeSelectWidget } from './EmployeeSelectWidget';
 import { LeaderSelectWidget } from './LeaderSelectWidget';
 import { PositionSelectWidget } from './PositionSelectWidget';
 import { FileUploadWidget } from './FileUploadWidget';
+import { InfractionSelectWidget } from './InfractionSelectWidget';
+import { DiscActionSelectWidget } from './DiscActionSelectWidget';
 
 export const customWidgets: RegistryWidgetsType = {
   signature: SignatureWidget,
@@ -21,6 +23,8 @@ export const customWidgets: RegistryWidgetsType = {
   leader_select: LeaderSelectWidget,
   position_select: PositionSelectWidget,
   file: FileUploadWidget,
+  infraction_select: InfractionSelectWidget,
+  disc_action_select: DiscActionSelectWidget,
 };
 
 /**

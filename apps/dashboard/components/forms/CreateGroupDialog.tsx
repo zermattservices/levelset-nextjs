@@ -126,7 +126,6 @@ export function CreateGroupDialog({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           fullWidth
-          size="small"
           multiline
           rows={2}
           InputLabelProps={{ shrink: true }}

@@ -13,12 +13,10 @@ import {
   IconButton,
   CircularProgress,
   Alert,
-  Typography,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import type { FormGroup, FormType } from '@/lib/forms/types';
 import {
-  fontFamily,
   textFieldSx,
   textFieldMultilineSx,
   selectSx,
@@ -48,13 +46,6 @@ const SLUG_TO_TYPE: Record<string, FormType> = {
   evaluations: 'evaluation',
 };
 
-/** Human-readable labels for derived form types */
-const TYPE_LABELS: Record<FormType, string> = {
-  rating: 'Rating',
-  discipline: 'Discipline',
-  evaluation: 'Evaluation',
-  custom: 'Custom',
-};
 
 export function CreateFormDialog({
   open,
@@ -167,43 +158,27 @@ export function CreateFormDialog({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           fullWidth
-          size="small"
           multiline
           rows={2}
           InputLabelProps={{ shrink: true }}
           sx={textFieldMultilineSx}
         />
 
-        <div>
-          <FormControl fullWidth size="small">
-            <InputLabel sx={inputLabelSx}>Form Group</InputLabel>
-            <Select
-              value={groupId}
-              onChange={(e) => setGroupId(e.target.value)}
-              label="Form Group"
-              sx={selectSx}
-            >
-              {groups.map((group) => (
-                <MenuItem key={group.id} value={group.id} sx={menuItemSx}>
-                  {group.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {selectedGroup && (
-            <Typography
-              sx={{
-                fontFamily,
-                fontSize: 12,
-                color: 'var(--ls-color-muted)',
-                mt: '6px',
-                ml: '2px',
-              }}
-            >
-              Form type: <strong>{TYPE_LABELS[formType]}</strong>
-            </Typography>
-          )}
-        </div>
+        <FormControl fullWidth size="small">
+          <InputLabel sx={inputLabelSx}>Form Group</InputLabel>
+          <Select
+            value={groupId}
+            onChange={(e) => setGroupId(e.target.value)}
+            label="Form Group"
+            sx={selectSx}
+          >
+            {groups.map((group) => (
+              <MenuItem key={group.id} value={group.id} sx={menuItemSx}>
+                {group.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </DialogContent>
 
       <DialogActions sx={dialogActionsSx}>
