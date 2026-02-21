@@ -11,8 +11,17 @@ import {
   Alert,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-
-const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+import {
+  textFieldSx,
+  textFieldMultilineSx,
+  dialogPaperSx,
+  dialogTitleSx,
+  dialogContentSx,
+  dialogActionsSx,
+  cancelButtonSx,
+  primaryButtonSx,
+  alertSx,
+} from './dialogStyles';
 
 interface CreateGroupDialogProps {
   open: boolean;
@@ -20,23 +29,6 @@ interface CreateGroupDialogProps {
   onCreated: () => void;
   getAccessToken: () => Promise<string | null>;
 }
-
-const textFieldSx = {
-  '& .MuiInputLabel-root': {
-    fontFamily,
-    fontSize: 12,
-    color: 'var(--ls-color-muted)',
-    '&.Mui-focused': { color: 'var(--ls-color-brand)' },
-  },
-  '& .MuiInputBase-root': { fontFamily, fontSize: 14 },
-  '& .MuiInputBase-input': { fontFamily, fontSize: 14, padding: '10px 14px' },
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-muted-border)' },
-  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-border)' },
-  '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
-};
 
 export function CreateGroupDialog({
   open,
@@ -101,33 +93,18 @@ export function CreateGroupDialog({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: '12px',
-          fontFamily,
-        },
-      }}
+      PaperProps={{ sx: dialogPaperSx }}
     >
-      <DialogTitle
-        sx={{
-          fontFamily: '"Mont", sans-serif',
-          fontSize: 18,
-          fontWeight: 600,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 24px',
-        }}
-      >
+      <DialogTitle sx={dialogTitleSx}>
         Create New Group
         <IconButton size="small" onClick={onClose}>
           <CloseIcon sx={{ fontSize: 18 }} />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ padding: '8px 24px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <DialogContent sx={dialogContentSx}>
         {error && (
-          <Alert severity="error" sx={{ fontFamily, fontSize: 13 }}>
+          <Alert severity="error" sx={alertSx}>
             {error}
           </Alert>
         )}
@@ -152,23 +129,13 @@ export function CreateGroupDialog({
           size="small"
           multiline
           rows={2}
-          sx={textFieldSx}
+          InputLabelProps={{ shrink: true }}
+          sx={textFieldMultilineSx}
         />
       </DialogContent>
 
-      <DialogActions sx={{ padding: '8px 24px 16px', gap: '8px' }}>
-        <Button
-          onClick={onClose}
-          disabled={saving}
-          sx={{
-            fontFamily,
-            fontSize: 13,
-            fontWeight: 600,
-            textTransform: 'none',
-            color: 'var(--ls-color-muted)',
-            borderRadius: '8px',
-          }}
-        >
+      <DialogActions sx={dialogActionsSx}>
+        <Button onClick={onClose} disabled={saving} sx={cancelButtonSx}>
           Cancel
         </Button>
         <Button
@@ -176,20 +143,7 @@ export function CreateGroupDialog({
           onClick={handleCreate}
           disabled={saving || !name.trim()}
           startIcon={saving ? <CircularProgress size={14} color="inherit" /> : null}
-          sx={{
-            fontFamily,
-            fontSize: 13,
-            fontWeight: 600,
-            textTransform: 'none',
-            backgroundColor: 'var(--ls-color-brand)',
-            borderRadius: '8px',
-            boxShadow: 'none',
-            padding: '6px 20px',
-            '&:hover': {
-              backgroundColor: 'var(--ls-color-brand-hover)',
-              boxShadow: 'none',
-            },
-          }}
+          sx={primaryButtonSx}
         >
           {saving ? 'Creating...' : 'Create'}
         </Button>
