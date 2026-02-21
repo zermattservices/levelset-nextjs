@@ -208,10 +208,130 @@ export default async function handler(
       return res.status(500).json({ error: insertError.message });
     }
 
-    // NOTE: Dual-write logic for rating/discipline form types
-    // is intentionally deferred. When a rating or discipline form
-    // is submitted through this system, we will also insert into
-    // the existing `ratings` or `infractions` tables.
+    // Dual-write: rating/discipline form submissions also insert into
+    // legacy tables so existing PE and Discipline dashboards stay current.
+    // Uses settings.field_mappings to extract values from response_data.
+    // Best-effort — dual-write failures don't block the submission.
+    if (submission && (template.form_type === 'rating' || template.form_type === 'discipline')) {
+      const mappings = template.settings?.field_mappings;
+      if (mappings) {
+        try {
+          if (template.form_type === 'rating') {
+            const ratingFields = mappings.ratings;
+            if (
+              mappings.employee_id &&
+              mappings.leader_id &&
+              mappings.position &&
+              Array.isArray(ratingFields) &&
+              ratingFields.length === 5
+            ) {
+              const ratings = ratingFields.map((fid: string) => Number(response_data[fid]) || 0);
+              const allValid = ratings.every((v: number) => v >= 1 && v <= 5);
+
+              if (allValid) {
+                const { data: ratingRow } = await supabase
+                  .from('ratings')
+                  .insert({
+                    employee_id: response_data[mappings.employee_id] || employee_id,
+                    rater_user_id: response_data[mappings.leader_id] || appUser.id,
+                    position: response_data[mappings.position],
+                    rating_1: ratings[0],
+                    rating_2: ratings[1],
+                    rating_3: ratings[2],
+                    rating_4: ratings[3],
+                    rating_5: ratings[4],
+                    location_id: location_id || null,
+                    org_id: orgId,
+                    notes: mappings.notes ? (response_data[mappings.notes] || null) : null,
+                  })
+                  .select('id')
+                  .single();
+
+                if (ratingRow?.id) {
+                  await supabase
+                    .from('form_submissions')
+                    .update({ metadata: { ...metadata, rating_id: ratingRow.id } })
+                    .eq('id', submission.id);
+                }
+              }
+            }
+          }
+
+          if (template.form_type === 'discipline') {
+            if (mappings.employee_id && mappings.leader_id && mappings.infraction_id) {
+              // Look up rubric item
+              const infractionRubricId = response_data[mappings.infraction_id];
+              let rubric: { action: string; points: number | null } | null = null;
+
+              if (infractionRubricId) {
+                const { data: orgRubric } = await supabase
+                  .from('infractions_rubric')
+                  .select('action, points')
+                  .eq('org_id', orgId)
+                  .is('location_id', null)
+                  .eq('id', infractionRubricId)
+                  .maybeSingle();
+
+                rubric = orgRubric;
+
+                if (!rubric && location_id) {
+                  const { data: locRubric } = await supabase
+                    .from('infractions_rubric')
+                    .select('action, points')
+                    .eq('location_id', location_id)
+                    .eq('id', infractionRubricId)
+                    .maybeSingle();
+                  rubric = locRubric;
+                }
+              }
+
+              if (rubric) {
+                const acknowledged = mappings.acknowledged
+                  ? Boolean(response_data[mappings.acknowledged])
+                  : false;
+
+                const infractionDate = mappings.infraction_date
+                  ? (response_data[mappings.infraction_date] || new Date().toISOString().split('T')[0])
+                  : new Date().toISOString().split('T')[0];
+
+                const { data: infractionRow } = await supabase
+                  .from('infractions')
+                  .insert({
+                    employee_id: response_data[mappings.employee_id] || employee_id,
+                    leader_id: response_data[mappings.leader_id] || appUser.id,
+                    infraction: rubric.action,
+                    points: rubric.points ?? 0,
+                    acknowledgement: acknowledged ? 'Notified' : 'Not notified',
+                    ack_bool: acknowledged,
+                    infraction_date: infractionDate,
+                    org_id: orgId,
+                    location_id: location_id || null,
+                    notes: mappings.notes ? (response_data[mappings.notes] || null) : null,
+                    team_member_signature: mappings.team_member_signature
+                      ? (response_data[mappings.team_member_signature] || null)
+                      : null,
+                    leader_signature: mappings.leader_signature
+                      ? (response_data[mappings.leader_signature] || null)
+                      : null,
+                  })
+                  .select('id')
+                  .single();
+
+                if (infractionRow?.id) {
+                  await supabase
+                    .from('form_submissions')
+                    .update({ metadata: { ...metadata, infraction_id: infractionRow.id } })
+                    .eq('id', submission.id);
+                }
+              }
+            }
+          }
+        } catch (dualWriteErr) {
+          // Log but don't fail the submission
+          console.error('[submissions] Dual-write failed:', dualWriteErr);
+        }
+      }
+    }
 
     return res.status(201).json(submission);
   }

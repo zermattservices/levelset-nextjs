@@ -9,24 +9,18 @@
 import type { RegistryWidgetsType } from '@rjsf/utils';
 import { RatingScaleWidget } from './RatingScaleWidget';
 import { SignatureWidget } from './SignatureWidget';
+import { EmployeeSelectWidget } from './EmployeeSelectWidget';
+import { LeaderSelectWidget } from './LeaderSelectWidget';
+import { PositionSelectWidget } from './PositionSelectWidget';
+import { FileUploadWidget } from './FileUploadWidget';
 
-/**
- * Custom widget registry for RJSF forms.
- * Widgets for employee_select, leader_select, position_select, and file
- * are placeholder pass-throughs for now — they'll render as standard text
- * inputs until Sprint 5 wires up the full Levelset data connectors.
- */
 export const customWidgets: RegistryWidgetsType = {
-  // Custom widgets
   signature: SignatureWidget,
   ratingScale: RatingScaleWidget,
-
-  // Placeholder widgets — render as default text inputs for now
-  // These will be replaced with full autocomplete implementations in Sprint 5
-  employee_select: undefined as any,
-  leader_select: undefined as any,
-  position_select: undefined as any,
-  file: undefined as any,
+  employee_select: EmployeeSelectWidget,
+  leader_select: LeaderSelectWidget,
+  position_select: PositionSelectWidget,
+  file: FileUploadWidget,
 };
 
 /**
