@@ -92,13 +92,26 @@ export default async function handler(
       // Verify group belongs to this org
       const { data: group } = await supabase
         .from('form_groups')
-        .select('id, org_id')
+        .select('id, org_id, slug')
         .eq('id', group_id)
         .eq('org_id', orgId)
         .single();
 
       if (!group) {
         return res.status(404).json({ error: 'Form group not found' });
+      }
+
+      // Validate form_type matches system group slug
+      const slugToType: Record<string, string> = {
+        positional_excellence: 'rating',
+        discipline: 'discipline',
+        evaluations: 'evaluation',
+      };
+      const expectedType = slugToType[group.slug];
+      if (expectedType && form_type !== expectedType) {
+        return res.status(400).json({
+          error: `The "${group.slug}" group requires form type "${expectedType}"`,
+        });
       }
 
       // Create template with default empty schema
