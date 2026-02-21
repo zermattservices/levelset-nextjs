@@ -116,7 +116,7 @@ export function FormDetailPage() {
     };
 
     fetchData();
-  }, [formId, auth.isLoaded, auth.authUser, getAccessToken, router]);
+  }, [formId, auth.isLoaded, auth.authUser, auth.appUser, getAccessToken, router]);
 
   // Fetch submissions for this template (use template.id UUID, not the slug from URL)
   const fetchSubmissions = React.useCallback(async () => {
