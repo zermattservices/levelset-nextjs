@@ -22,7 +22,7 @@ export default async function handler(
     const { data: connectors, error } = await supabase
       .from('form_connectors')
       .select('*')
-      .eq('active', true)
+      .eq('is_active', true)
       .order('key');
 
     if (error) {

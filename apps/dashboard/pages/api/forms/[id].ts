@@ -23,11 +23,13 @@ export default async function handler(
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const { data: appUser } = await supabase
+  const { data: appUsers } = await supabase
     .from('app_users')
     .select('id, org_id, role')
     .eq('auth_user_id', user.id)
-    .single();
+    .order('created_at');
+
+  const appUser = appUsers?.find(u => u.role === 'Levelset Admin') || appUsers?.[0];
 
   if (!appUser?.org_id) {
     return res.status(403).json({ error: 'No organization found' });

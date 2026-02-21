@@ -207,6 +207,40 @@ export function FormDetailPage() {
     [template, getAccessToken]
   );
 
+  const handleSaveEvaluationSettings = React.useCallback(
+    async (evaluationSettings: Record<string, any>) => {
+      if (!template) return;
+
+      try {
+        const token = await getAccessToken();
+        const mergedSettings = {
+          ...(template.settings || {}),
+          evaluation: evaluationSettings,
+        };
+        const res = await fetch(`/api/forms/${template.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ settings: mergedSettings }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Failed to save evaluation settings');
+        }
+
+        const updated = await res.json();
+        setTemplate((prev) => (prev ? { ...prev, ...updated } : prev));
+      } catch (err: any) {
+        setSnackbar({ open: true, message: err.message || 'Failed to save evaluation settings', severity: 'error' });
+        throw err;
+      }
+    },
+    [template, getAccessToken]
+  );
+
   const handleDelete = async () => {
     if (!template) return;
 
@@ -420,6 +454,7 @@ export function FormDetailPage() {
                 <FormEditorPanel
                   template={template}
                   onSave={handleSaveSchema}
+                  onSaveSettings={template.form_type === 'evaluation' ? handleSaveEvaluationSettings : undefined}
                 />
               )}
 
