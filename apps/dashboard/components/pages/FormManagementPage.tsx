@@ -96,7 +96,7 @@ export function FormManagementPage() {
   }, [getAccessToken]);
 
   React.useEffect(() => {
-    if (!auth.isLoaded || !auth.authUser || auth.role !== 'Levelset Admin') return;
+    if (!auth.isLoaded || !auth.authUser || !auth.appUser || auth.role !== 'Levelset Admin') return;
     fetchData();
   }, [auth.isLoaded, auth.authUser, auth.role, fetchData]);
 

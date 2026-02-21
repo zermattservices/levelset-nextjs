@@ -26,6 +26,7 @@ export interface FormTemplate {
   group_id: string;
   name: string;
   name_es: string | null;
+  slug: string;
   description: string | null;
   description_es: string | null;
   form_type: FormType;

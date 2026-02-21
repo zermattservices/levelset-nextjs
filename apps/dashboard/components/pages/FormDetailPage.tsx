@@ -62,12 +62,12 @@ export function FormDetailPage() {
     }
   }, [auth.isLoaded, auth.authUser, router]);
 
-  // Redirect non-admins
+  // Redirect non-admins (wait for appUser to load so role is populated)
   React.useEffect(() => {
-    if (auth.isLoaded && auth.authUser && auth.role !== 'Levelset Admin') {
+    if (auth.isLoaded && auth.authUser && auth.appUser && auth.role !== 'Levelset Admin') {
       router.push('/form-management');
     }
-  }, [auth.isLoaded, auth.authUser, auth.role, router]);
+  }, [auth.isLoaded, auth.authUser, auth.appUser, auth.role, router]);
 
   const getAccessToken = React.useCallback(async (): Promise<string | null> => {
     try {
@@ -82,7 +82,7 @@ export function FormDetailPage() {
 
   // Fetch template and groups
   React.useEffect(() => {
-    if (!formId || !auth.isLoaded || !auth.authUser) return;
+    if (!formId || !auth.isLoaded || !auth.authUser || !auth.appUser) return;
 
     const fetchData = async () => {
       setLoading(true);
@@ -118,16 +118,16 @@ export function FormDetailPage() {
     fetchData();
   }, [formId, auth.isLoaded, auth.authUser, getAccessToken, router]);
 
-  // Fetch submissions for this template
+  // Fetch submissions for this template (use template.id UUID, not the slug from URL)
   const fetchSubmissions = React.useCallback(async () => {
-    if (!formId) return;
+    if (!template) return;
     setSubmissionsLoading(true);
     try {
       const token = await getAccessToken();
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`/api/forms/submissions?template_id=${formId}`, { headers });
+      const res = await fetch(`/api/forms/submissions?template_id=${template.id}`, { headers });
       if (res.ok) {
         const data = await res.json();
         setSubmissions(data);
@@ -137,7 +137,7 @@ export function FormDetailPage() {
     } finally {
       setSubmissionsLoading(false);
     }
-  }, [formId, getAccessToken]);
+  }, [template, getAccessToken]);
 
   // Load submissions when switching to submissions tab
   React.useEffect(() => {

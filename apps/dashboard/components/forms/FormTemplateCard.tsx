@@ -60,7 +60,7 @@ export function FormTemplateCard({
   const typeLabel = TYPE_LABELS[template.form_type] || 'Custom';
 
   const handleClick = () => {
-    router.push(`/form-management/${template.id}`);
+    router.push(`/form-management/${template.slug || template.id}`);
   };
 
   const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => {
@@ -74,7 +74,7 @@ export function FormTemplateCard({
 
   const handleEdit = () => {
     handleMenuClose();
-    router.push(`/form-management/${template.id}`);
+    router.push(`/form-management/${template.slug || template.id}`);
   };
 
   const handleDuplicate = () => {

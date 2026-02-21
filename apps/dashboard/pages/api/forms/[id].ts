@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { generateUniqueSlug } from '@/lib/forms/slugify';
 
 export default async function handler(
   req: NextApiRequest,
@@ -37,11 +38,15 @@ export default async function handler(
 
   const orgId = appUser.org_id;
 
+  // Determine if the id is a UUID or a slug
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  const lookupField = isUuid ? 'id' : 'slug';
+
   if (req.method === 'GET') {
     const { data: template, error } = await supabase
       .from('form_templates')
       .select('*, form_groups!inner(id, name, slug, is_system)')
-      .eq('id', id)
+      .eq(lookupField, id)
       .eq('org_id', orgId)
       .single();
 
@@ -89,10 +94,26 @@ export default async function handler(
     if (ui_schema !== undefined) updates.ui_schema = ui_schema;
     if (settings !== undefined) updates.settings = settings;
 
+    // Regenerate slug when name changes
+    if (name !== undefined) {
+      // First resolve the template UUID if we looked up by slug
+      let templateId = id;
+      if (!isUuid) {
+        const { data: found } = await supabase
+          .from('form_templates')
+          .select('id')
+          .eq('slug', id)
+          .eq('org_id', orgId)
+          .single();
+        if (found) templateId = found.id;
+      }
+      updates.slug = await generateUniqueSlug(supabase, orgId, name, templateId);
+    }
+
     const { data: template, error } = await supabase
       .from('form_templates')
       .update(updates)
-      .eq('id', id)
+      .eq(lookupField, id)
       .eq('org_id', orgId)
       .select()
       .single();
@@ -114,7 +135,7 @@ export default async function handler(
     const { data: existing } = await supabase
       .from('form_templates')
       .select('is_system')
-      .eq('id', id)
+      .eq(lookupField, id)
       .eq('org_id', orgId)
       .single();
 
@@ -130,7 +151,7 @@ export default async function handler(
     const { error } = await supabase
       .from('form_templates')
       .update({ is_active: false, updated_at: new Date().toISOString() })
-      .eq('id', id)
+      .eq(lookupField, id)
       .eq('org_id', orgId);
 
     if (error) {

@@ -27,6 +27,16 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// ── Slug utility (inlined to avoid cross-package import issues) ────────
+
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-');
+}
+
 // ── Inline schema builder (to avoid cross-package import issues) ──────
 
 /** Field type definitions matching apps/dashboard/lib/forms/field-palette.ts */
@@ -301,6 +311,7 @@ async function seedSystemFormTemplates() {
           group_id: groupId,
           name: templateDef.name,
           name_es: templateDef.name_es,
+          slug: slugify(templateDef.name),
           description: templateDef.description,
           description_es: templateDef.description_es,
           form_type: templateDef.form_type,

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { generateUniqueSlug } from '@/lib/forms/slugify';
 
 export default async function handler(
   req: NextApiRequest,
@@ -114,6 +115,9 @@ export default async function handler(
         });
       }
 
+      // Generate a unique slug from the form name
+      const slug = await generateUniqueSlug(supabase, orgId, name);
+
       // Create template with default empty schema
       const { data: template, error } = await supabase
         .from('form_templates')
@@ -122,6 +126,7 @@ export default async function handler(
           group_id,
           name,
           name_es: name_es || null,
+          slug,
           description: description || null,
           description_es: description_es || null,
           form_type,
