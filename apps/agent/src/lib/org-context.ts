@@ -9,7 +9,8 @@
  * Token budget: ~200-400 tokens in the system prompt.
  */
 
-import { createServiceClient } from '@levelset/supabase-client';
+import { getServiceClient } from '@levelset/supabase-client';
+import { tenantCache, CacheTTL } from './tenant-cache.js';
 
 export interface OrgContext {
   orgId: string;
@@ -33,7 +34,18 @@ export async function loadOrgContext(
   orgId: string,
   locationId?: string
 ): Promise<OrgContext> {
-  const supabase = createServiceClient();
+  const cacheKey = `org_context:${locationId ?? 'org'}`;
+  return tenantCache.getOrFetch(orgId, cacheKey, CacheTTL.ORG_CONFIG, () =>
+    _loadOrgContext(orgId, locationId)
+  );
+}
+
+/** Internal: uncached org context loader */
+async function _loadOrgContext(
+  orgId: string,
+  locationId?: string
+): Promise<OrgContext> {
+  const supabase = getServiceClient();
 
   // Run all queries in parallel
   const [

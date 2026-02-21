@@ -134,8 +134,10 @@ function LeviHeader({
     </Pressable>
   );
 
+  const singleLocation = !hasMultipleLocations && !!selectedLocation;
+
   const handleLocationPress = () => {
-    if (hasMultipleLocations || !selectedLocation) {
+    if (!singleLocation) {
       haptics.light();
       router.push("/(tabs)/(levi)/location-picker");
     }
@@ -168,10 +170,10 @@ function LeviHeader({
       {!isLoading && locations.length > 0 ? (
         <Pressable
           onPress={handleLocationPress}
-          disabled={!hasMultipleLocations && !!selectedLocation}
+          disabled={singleLocation}
           style={styles.locationSelector}
         >
-          {hasMultipleLocations && (
+          {!singleLocation && (
             <AppIcon
               name="chevron.down"
               size={12}

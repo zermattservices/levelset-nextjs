@@ -3,7 +3,8 @@
  * Provides infractions, discipline actions, and point thresholds.
  */
 
-import { createServiceClient } from '@levelset/supabase-client';
+import { getServiceClient } from '@levelset/supabase-client';
+import { tenantCache, CacheTTL } from '../../lib/tenant-cache.js';
 
 /**
  * Get a discipline summary for the location or a specific employee.
@@ -15,8 +16,23 @@ export async function getDisciplineSummary(
   orgId: string,
   locationId?: string
 ): Promise<string> {
-  const supabase = createServiceClient();
   const employeeId = args.employee_id as string | undefined;
+  const cacheKey = employeeId
+    ? `discipline:${employeeId}`
+    : `discipline:overview:${locationId ?? 'org'}`;
+
+  return tenantCache.getOrFetch(orgId, cacheKey, CacheTTL.DYNAMIC, () =>
+    _getDisciplineSummary(orgId, locationId, employeeId)
+  );
+}
+
+/** Internal: uncached discipline summary */
+async function _getDisciplineSummary(
+  orgId: string,
+  locationId?: string,
+  employeeId?: string
+): Promise<string> {
+  const supabase = getServiceClient();
 
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
     .toISOString()

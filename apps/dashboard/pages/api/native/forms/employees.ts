@@ -117,7 +117,8 @@ export default withPermissionAndContext(
         };
       });
 
-      res.setHeader('Cache-Control', 'no-store');
+      res.setHeader('Cache-Control', 'private, s-maxage=60, stale-while-revalidate=300');
+      res.setHeader('Vary', 'Authorization');
       return res.status(200).json({ employees: result });
     } catch (error) {
       console.error('[employees API] Error:', error);

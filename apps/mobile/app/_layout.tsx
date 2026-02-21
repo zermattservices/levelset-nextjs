@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "../src/context/AuthContext";
 import { LocationProvider } from "../src/context/LocationContext";
+import { EmployeesProvider } from "../src/context/EmployeesContext";
 import { FormsProvider } from "../src/context/FormsContext";
 import { ThemeProvider, useColors, useTheme } from "../src/context/ThemeContext";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
@@ -110,10 +111,12 @@ export default function RootLayout() {
         <ThemeProvider>
           <AuthProvider>
             <LocationProvider>
-              <FormsProvider>
-                <StatusBar style="auto" />
-                <RootLayoutNav />
-              </FormsProvider>
+              <EmployeesProvider>
+                <FormsProvider>
+                  <StatusBar style="auto" />
+                  <RootLayoutNav />
+                </FormsProvider>
+              </EmployeesProvider>
             </LocationProvider>
           </AuthProvider>
         </ThemeProvider>

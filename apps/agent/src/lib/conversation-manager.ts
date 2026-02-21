@@ -5,7 +5,7 @@
  * are archived after 24 hours of inactivity and a new one is created.
  */
 
-import { createServiceClient } from '@levelset/supabase-client';
+import { getServiceClient } from '@levelset/supabase-client';
 import type { ChatMessage } from './types.js';
 
 const MAX_HISTORY_MESSAGES = 20;
@@ -21,7 +21,7 @@ export async function getOrCreateConversation(
   orgId: string,
   locationId?: string,
 ): Promise<string> {
-  const supabase = createServiceClient();
+  const supabase = getServiceClient();
   const cutoff = new Date(
     Date.now() - CONVERSATION_TTL_HOURS * 60 * 60 * 1000
   ).toISOString();
@@ -82,7 +82,7 @@ export async function getOrCreateConversation(
 export async function loadConversationHistory(
   conversationId: string
 ): Promise<ChatMessage[]> {
-  const supabase = createServiceClient();
+  const supabase = getServiceClient();
 
   const { data: messages, error } = await supabase
     .from('ai_messages')
@@ -127,7 +127,7 @@ export async function loadHistoryPage(
   }>;
   hasMore: boolean;
 }> {
-  const supabase = createServiceClient();
+  const supabase = getServiceClient();
   const limit = options.limit ?? DEFAULT_PAGE_SIZE;
 
   let query = supabase
@@ -177,7 +177,7 @@ export async function findActiveConversation(
   orgId: string,
   locationId?: string,
 ): Promise<string | null> {
-  const supabase = createServiceClient();
+  const supabase = getServiceClient();
   const cutoff = new Date(
     Date.now() - CONVERSATION_TTL_HOURS * 60 * 60 * 1000
   ).toISOString();
@@ -220,7 +220,7 @@ export async function persistMessage(
     uiBlocks?: unknown;
   }
 ): Promise<string> {
-  const supabase = createServiceClient();
+  const supabase = getServiceClient();
 
   const { data, error } = await supabase
     .from('ai_messages')

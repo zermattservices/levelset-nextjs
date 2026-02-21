@@ -5,7 +5,7 @@
  * Dashboard continues using its own lib/supabase-server.ts and util/supabase/ directly.
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Create a Supabase client using service role key (for server-side use only).
@@ -39,4 +39,19 @@ export function createAnonClient() {
   }
 
   return createClient(url, key);
+}
+
+/**
+ * Singleton Supabase service client for long-running processes (e.g. Fly.io agent).
+ * Creates the client once and reuses it across all requests.
+ * Use this instead of createServiceClient() in the agent to avoid
+ * creating a new client on every tool call.
+ */
+let _singleton: SupabaseClient | null = null;
+
+export function getServiceClient(): SupabaseClient {
+  if (!_singleton) {
+    _singleton = createServiceClient();
+  }
+  return _singleton;
 }

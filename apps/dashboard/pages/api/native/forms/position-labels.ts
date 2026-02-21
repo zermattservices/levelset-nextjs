@@ -134,7 +134,8 @@ async function handler(
     return res.status(404).json({ error: 'No labels found for position' });
   }
 
-  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Cache-Control', 'private, s-maxage=300, stale-while-revalidate=600');
+  res.setHeader('Vary', 'Authorization');
   return res.status(200).json({
     labels,
     labels_es,

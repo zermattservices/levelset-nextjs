@@ -137,13 +137,6 @@ export function ShiftActionDrawer({
           description="Notify your manager you can't make this shift"
           onPress={() => handleAction("Call Out")}
         />
-        <ActionRow
-          icon="xmark.circle"
-          title="Cancel Shift"
-          description="Cancel this shift"
-          destructive
-          onPress={() => handleAction("Cancel Shift")}
-        />
       </View>
     </GlassDrawer>
   );

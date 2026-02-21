@@ -3,7 +3,8 @@
  * All queries are scoped by org_id (and optionally location_id) from auth context.
  */
 
-import { createServiceClient } from '@levelset/supabase-client';
+import { getServiceClient } from '@levelset/supabase-client';
+import { tenantCache, CacheTTL } from '../../lib/tenant-cache.js';
 
 /**
  * Search for an employee by name. Searches across full_name, first_name, and last_name.
@@ -14,7 +15,7 @@ export async function lookupEmployee(
   orgId: string,
   locationId?: string
 ): Promise<string> {
-  const supabase = createServiceClient();
+  const supabase = getServiceClient();
   const name = args.name as string;
   const role = args.role as string | undefined;
 
@@ -59,9 +60,36 @@ export async function listEmployees(
   orgId: string,
   locationId?: string
 ): Promise<string> {
-  const supabase = createServiceClient();
   const activeOnly = args.active_only !== false; // default true
   const limit = Math.min((args.limit as number) || 20, 50);
+
+  // Build a deterministic cache key from the filter args
+  const filterParts = [
+    `loc:${locationId ?? 'org'}`,
+    `active:${activeOnly}`,
+    `limit:${limit}`,
+    args.is_leader !== undefined ? `leader:${args.is_leader}` : '',
+    args.is_boh !== undefined ? `boh:${args.is_boh}` : '',
+    args.is_foh !== undefined ? `foh:${args.is_foh}` : '',
+    args.is_trainer !== undefined ? `trainer:${args.is_trainer}` : '',
+    args.role ? `role:${args.role}` : '',
+  ].filter(Boolean).join(':');
+  const cacheKey = `employees:list:${filterParts}`;
+
+  return tenantCache.getOrFetch(orgId, cacheKey, CacheTTL.TEAM, () =>
+    _listEmployees(orgId, locationId, activeOnly, limit, args)
+  );
+}
+
+/** Internal: uncached employee list */
+async function _listEmployees(
+  orgId: string,
+  locationId: string | undefined,
+  activeOnly: boolean,
+  limit: number,
+  args: Record<string, unknown>
+): Promise<string> {
+  const supabase = getServiceClient();
 
   let query = supabase
     .from('employees')

@@ -61,7 +61,7 @@ export function GlassDrawer({
   useEffect(() => {
     if (visible) {
       fadeAnim.value = withTiming(1, { duration: 200 });
-      slideAnim.value = withSpring(0, { damping: 20, stiffness: 200 });
+      slideAnim.value = withSpring(0, { damping: 28, stiffness: 300, mass: 0.8 });
     } else {
       fadeAnim.value = withTiming(0, { duration: 150 });
       slideAnim.value = withTiming(SCREEN_HEIGHT, { duration: 200 });
@@ -96,7 +96,7 @@ export function GlassDrawer({
           {children}
         </ScrollView>
       ) : (
-        <View style={styles.content}>{children}</View>
+        <View style={[styles.content, fullScreen && { flex: 1 }]}>{children}</View>
       )}
 
       {/* Footer */}
@@ -135,7 +135,11 @@ export function GlassDrawer({
 
         {/* Drawer Content */}
         <ReAnimated.View
-          style={[styles.animatedContainer, { maxHeight: SCREEN_HEIGHT * 0.9 }, contentAnimStyle]}
+          style={[
+            styles.animatedContainer,
+            fullScreen ? { flex: 1 } : { maxHeight: SCREEN_HEIGHT * 0.9 },
+            contentAnimStyle,
+          ]}
         >
           {useGlassEffect && GlassView ? (
             <GlassView

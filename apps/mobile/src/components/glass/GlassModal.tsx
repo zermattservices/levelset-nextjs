@@ -59,7 +59,7 @@ export function GlassModal({
   useEffect(() => {
     if (visible) {
       fadeAnim.value = withTiming(1, { duration: 200 });
-      scaleAnim.value = withSpring(1, { damping: 22, stiffness: 280 });
+      scaleAnim.value = withSpring(1, { damping: 28, stiffness: 300, mass: 0.8 });
     } else {
       fadeAnim.value = withTiming(0, { duration: 150 });
       scaleAnim.value = withTiming(0.9, { duration: 150 });

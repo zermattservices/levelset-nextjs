@@ -173,7 +173,8 @@ export default withPermissionAndContext(
         `${employee.first_name ?? ''} ${employee.last_name ?? ''}`.trim() ||
         'Unnamed';
 
-      res.setHeader('Cache-Control', 'no-store');
+      res.setHeader('Cache-Control', 'private, s-maxage=60, stale-while-revalidate=300');
+      res.setHeader('Vary', 'Authorization');
       return res.status(200).json({
         employee: {
           id: employee.id,

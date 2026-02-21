@@ -17,7 +17,12 @@ import { spacing, haptics } from "../../lib/theme";
 import { AppIcon } from "./AppIcon";
 import "../../lib/i18n";
 
-export function LocationSelector() {
+interface LocationSelectorProps {
+  /** Override the default location-picker route (e.g. "/(tabs)/(schedule)/location-picker") */
+  pickerRoute?: string;
+}
+
+export function LocationSelector({ pickerRoute }: LocationSelectorProps = {}) {
   const { t } = useTranslation();
   const colors = useColors();
   const router = useRouter();
@@ -32,12 +37,14 @@ export function LocationSelector() {
   // Don't render anything while loading or if no locations exist
   if (isLoading || locations.length === 0) return null;
 
+  const singleLocation = !hasMultipleLocations && !!selectedLocation;
+
   return (
     <Pressable
       onPress={() => {
-        if (hasMultipleLocations || !selectedLocation) {
+        if (!singleLocation) {
           haptics.light();
-          router.push("/(tabs)/(home)/location-picker");
+          router.push((pickerRoute || "/(tabs)/(home)/location-picker") as any);
         }
       }}
       style={{
@@ -47,9 +54,9 @@ export function LocationSelector() {
         gap: spacing[2],
         paddingVertical: spacing[1],
       }}
-      disabled={!hasMultipleLocations && !!selectedLocation}
+      disabled={singleLocation}
     >
-      {hasMultipleLocations && (
+      {!singleLocation && (
         <AppIcon name="chevron.down" size={12} tintColor={colors.onSurfaceDisabled} />
       )}
 

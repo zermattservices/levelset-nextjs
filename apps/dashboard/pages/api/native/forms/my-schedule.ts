@@ -127,6 +127,8 @@ export default withPermissionAndContext(
 
       const hasNextWeek = schedules?.some((s: any) => s.week_start === nextWeekStart);
 
+      res.setHeader('Cache-Control', 'private, s-maxage=120, stale-while-revalidate=300');
+      res.setHeader('Vary', 'Authorization');
       return res.status(200).json({
         thisWeek: { weekStart: thisWeekStart, shifts: thisWeekShifts },
         nextWeek: hasNextWeek

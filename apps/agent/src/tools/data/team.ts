@@ -4,7 +4,8 @@
  * and provides a structured overview of the team.
  */
 
-import { createServiceClient } from '@levelset/supabase-client';
+import { getServiceClient } from '@levelset/supabase-client';
+import { tenantCache, CacheTTL } from '../../lib/tenant-cache.js';
 
 /**
  * Get a location-level team overview snapshot.
@@ -16,8 +17,21 @@ export async function getTeamOverview(
   orgId: string,
   locationId?: string
 ): Promise<string> {
-  const supabase = createServiceClient();
   const zone = args.zone as string | undefined; // "FOH" or "BOH"
+  const cacheKey = `team:${locationId ?? 'org'}:${zone ?? 'all'}`;
+
+  return tenantCache.getOrFetch(orgId, cacheKey, CacheTTL.TEAM, () =>
+    _getTeamOverview(orgId, locationId, zone)
+  );
+}
+
+/** Internal: uncached team overview */
+async function _getTeamOverview(
+  orgId: string,
+  locationId?: string,
+  zone?: string
+): Promise<string> {
+  const supabase = getServiceClient();
 
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
     .toISOString()

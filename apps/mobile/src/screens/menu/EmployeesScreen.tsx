@@ -3,7 +3,7 @@
  * Displays employees for the selected location with filters and profile drawer.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -18,13 +18,13 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { Image } from "expo-image";
 import { useAuth } from "../../context/AuthContext";
 import { useLocation } from "../../context/LocationContext";
+import { useEmployees } from "../../context/EmployeesContext";
 import { useColors } from "../../context/ThemeContext";
 import { typography, fontWeights } from "../../lib/fonts";
 import { spacing, borderRadius, haptics } from "../../lib/theme";
 import { GlassCard, GlassButton, GlassDrawer, GlassModal } from "../../components/glass";
 import { AppIcon } from "../../components/ui";
 import {
-  fetchEmployeesAuth,
   fetchEmployeeProfileAuth,
   ApiError,
   type EmployeeListItem,
@@ -704,32 +704,15 @@ export default function EmployeesScreen() {
   const colors = useColors();
   const { session } = useAuth();
   const { selectedLocationId } = useLocation();
+  const { employees, loading: isLoading, refreshEmployees } = useEmployees();
 
-  const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [filterVisible, setFilterVisible] = useState(false);
 
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
-
-  const loadEmployees = useCallback(async () => {
-    if (!session?.access_token || !selectedLocationId) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await fetchEmployeesAuth(session.access_token, selectedLocationId);
-      setEmployees(res.employees);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to load employees");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [session?.access_token, selectedLocationId]);
-
-  useEffect(() => { loadEmployees(); }, [loadEmployees]);
 
   const availableRoles = useMemo(() => {
     const roles = new Set<string>();
@@ -798,7 +781,7 @@ export default function EmployeesScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
-            onRefresh={loadEmployees}
+            onRefresh={refreshEmployees}
             tintColor={colors.primary}
             colors={[colors.primary]}
           />

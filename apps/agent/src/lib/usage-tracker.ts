@@ -2,7 +2,7 @@
  * Usage tracker — logs every LLM call for billing and rate limiting.
  */
 
-import { createServiceClient } from '@levelset/supabase-client';
+import { getServiceClient } from '@levelset/supabase-client';
 
 /** Per-million-token pricing by model */
 const COST_PER_MILLION: Record<string, { input: number; output: number }> = {
@@ -32,7 +32,7 @@ export interface UsageLogParams {
  * Calculates cost from the model pricing table.
  */
 export async function logUsage(params: UsageLogParams): Promise<void> {
-  const supabase = createServiceClient();
+  const supabase = getServiceClient();
 
   const pricing = COST_PER_MILLION[params.model] ?? { input: 0, output: 0 };
   const cost =
@@ -66,7 +66,7 @@ export async function logUsage(params: UsageLogParams): Promise<void> {
  * Returns true if the request should be allowed.
  */
 export async function checkRateLimit(orgId: string): Promise<boolean> {
-  const supabase = createServiceClient();
+  const supabase = getServiceClient();
   const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
 
   const { count, error } = await supabase

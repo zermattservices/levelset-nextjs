@@ -21,6 +21,15 @@ export default function ScheduleLayout() {
               headerTitleStyle: { color: PlatformColor("label") },
             }}
           />
+          <Stack.Screen
+            name="location-picker"
+            options={{
+              presentation: "transparentModal",
+              animation: "fade",
+              contentStyle: { backgroundColor: "transparent" },
+              headerShown: false,
+            }}
+          />
         </Stack>
       </ScheduleProvider>
     </SlidingMenuProvider>

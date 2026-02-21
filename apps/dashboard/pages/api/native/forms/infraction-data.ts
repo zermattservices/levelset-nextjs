@@ -190,7 +190,8 @@ async function handler(
     require_leader_signature: item.require_leader_signature ?? false,
   }));
 
-  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Cache-Control', 'private, s-maxage=300, stale-while-revalidate=600');
+  res.setHeader('Vary', 'Authorization');
   return res.status(200).json({
     employees,
     leaders,

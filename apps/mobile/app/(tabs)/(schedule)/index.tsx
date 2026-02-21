@@ -24,13 +24,18 @@ import {
   GestureDetector,
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { SlidingMenu } from "../../../src/components/schedule/SlidingMenu";
 import { useSlidingMenu } from "../../../src/context/SlidingMenuContext";
+import { useLocation } from "../../../src/context/LocationContext";
 import { AppIcon } from "../../../src/components/ui";
 import { useColors } from "../../../src/context/ThemeContext";
-import { typography, fontWeights } from "../../../src/lib/fonts";
+import { typography, fontWeights, fontSizes } from "../../../src/lib/fonts";
 import { spacing, haptics } from "../../../src/lib/theme";
 import { useGlass, isGlassAvailable } from "../../../src/hooks/useGlass";
+import "../../../src/lib/i18n";
 
 // Import menu screens directly
 import MyScheduleScreen from "../../../src/screens/menu/MyScheduleScreen";
@@ -73,12 +78,21 @@ function ScheduleContent() {
 /* -- ScheduleHeader -------------------------------------------------- */
 
 function ScheduleHeader({ onToggle }: { onToggle: () => void }) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const colors = useColors();
+  const router = useRouter();
   const { GlassView } = useGlass();
   const glassAvail = isGlassAvailable();
-  const { activeTab, menuTabs } = useSlidingMenu();
-  const currentTab = menuTabs.find((tab) => tab.id === activeTab);
+  const {
+    selectedLocation,
+    selectedLocationName,
+    hasMultipleLocations,
+    isLoading,
+    locations,
+  } = useLocation();
+
+  const singleLocation = !hasMultipleLocations && !!selectedLocation;
 
   const menuIcon = (
     <Pressable
@@ -93,6 +107,13 @@ function ScheduleHeader({ onToggle }: { onToggle: () => void }) {
       />
     </Pressable>
   );
+
+  const handleLocationPress = () => {
+    if (!singleLocation) {
+      haptics.light();
+      router.push("/(tabs)/(schedule)/location-picker");
+    }
+  };
 
   return (
     <View style={[styles.header, { paddingTop: insets.top + spacing[1] }]}>
@@ -112,10 +133,42 @@ function ScheduleHeader({ onToggle }: { onToggle: () => void }) {
         </View>
       )}
 
-      {/* Center -- active tab title */}
-      <Text style={[styles.headerTitle, { color: colors.onSurface }]}>
-        {currentTab?.label || "Schedule"}
-      </Text>
+      {/* Center — location selector */}
+      {!isLoading && locations.length > 0 ? (
+        <Pressable
+          onPress={handleLocationPress}
+          disabled={singleLocation}
+          style={styles.locationSelector}
+        >
+          {!singleLocation && (
+            <AppIcon
+              name="chevron.down"
+              size={12}
+              tintColor={colors.onSurfaceDisabled}
+            />
+          )}
+          {selectedLocation?.image_url && (
+            <View style={styles.locationLogo}>
+              <Image
+                source={{ uri: selectedLocation.image_url }}
+                style={styles.locationLogoImage}
+                contentFit="contain"
+                cachePolicy="disk"
+              />
+            </View>
+          )}
+          <Text
+            style={[styles.locationName, { color: colors.onSurface }]}
+            numberOfLines={1}
+          >
+            {selectedLocationName || t("home.noLocation")}
+          </Text>
+        </Pressable>
+      ) : (
+        <Text style={[styles.headerTitle, { color: colors.onSurface }]}>
+          Schedule
+        </Text>
+      )}
 
       {/* Right spacer (matching width of left button for centering) */}
       <View style={styles.headerButtonSpacer} />
@@ -279,6 +332,32 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.labelLarge,
     fontWeight: fontWeights.semibold,
+  },
+  locationSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing[2],
+    flex: 1,
+    paddingVertical: spacing[1],
+  },
+  locationLogo: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    backgroundColor: "#FFFFFF",
+  },
+  locationLogoImage: {
+    width: 18,
+    height: 18,
+  },
+  locationName: {
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.semibold,
+    maxWidth: 200,
   },
   headerButtonSpacer: {
     width: 36,

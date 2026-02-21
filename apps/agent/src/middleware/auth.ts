@@ -1,5 +1,5 @@
 import { Context, Next } from 'hono';
-import { createServiceClient } from '@levelset/supabase-client';
+import { getServiceClient } from '@levelset/supabase-client';
 import { isLevelsetAdmin } from '@levelset/permissions';
 
 /**
@@ -56,7 +56,7 @@ export async function authMiddleware(c: Context, next: Next) {
   // Use limit(1) instead of .single() to handle users with app_user
   // records in multiple orgs. Order by created_at so the primary
   // (earliest-created) record is returned.
-  const supabase = createServiceClient();
+  const supabase = getServiceClient();
   const { data: appUsers, error: userError } = await supabase
     .from('app_users')
     .select('id, role, org_id, first_name, last_name')

@@ -3,7 +3,8 @@
  * Runs parallel queries for employee details, ratings, infractions, and discipline.
  */
 
-import { createServiceClient } from '@levelset/supabase-client';
+import { getServiceClient } from '@levelset/supabase-client';
+import { tenantCache, CacheTTL } from '../../lib/tenant-cache.js';
 
 /**
  * Get a comprehensive profile for a single employee.
@@ -14,8 +15,20 @@ export async function getEmployeeProfile(
   orgId: string,
   locationId?: string
 ): Promise<string> {
-  const supabase = createServiceClient();
   const employeeId = args.employee_id as string;
+  const cacheKey = `profile:${employeeId}`;
+
+  return tenantCache.getOrFetch(orgId, cacheKey, CacheTTL.PROFILE, () =>
+    _getEmployeeProfile(orgId, employeeId)
+  );
+}
+
+/** Internal: uncached profile loader */
+async function _getEmployeeProfile(
+  orgId: string,
+  employeeId: string
+): Promise<string> {
+  const supabase = getServiceClient();
 
   // Run all queries in parallel
   const [employeeResult, ratingsResult, infractionsResult, discActionsResult] =

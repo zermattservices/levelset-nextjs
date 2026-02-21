@@ -3,7 +3,8 @@
  * All queries are scoped by org_id (and optionally location_id) from auth context.
  */
 
-import { createServiceClient } from '@levelset/supabase-client';
+import { getServiceClient } from '@levelset/supabase-client';
+import { tenantCache, CacheTTL } from '../../lib/tenant-cache.js';
 
 /**
  * Get infraction and discipline history for a specific employee.
@@ -14,9 +15,23 @@ export async function getEmployeeInfractions(
   orgId: string,
   locationId?: string
 ): Promise<string> {
-  const supabase = createServiceClient();
   const employeeId = args.employee_id as string;
   const limit = (args.limit as number) || 10;
+  const cacheKey = `infractions:${employeeId}:${locationId ?? 'org'}:${limit}`;
+
+  return tenantCache.getOrFetch(orgId, cacheKey, CacheTTL.DYNAMIC, () =>
+    _getEmployeeInfractions(orgId, employeeId, limit, locationId)
+  );
+}
+
+/** Internal: uncached infractions query */
+async function _getEmployeeInfractions(
+  orgId: string,
+  employeeId: string,
+  limit: number,
+  locationId?: string
+): Promise<string> {
+  const supabase = getServiceClient();
 
   let query = supabase
     .from('infractions')

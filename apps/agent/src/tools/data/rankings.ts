@@ -6,7 +6,8 @@
  * All queries are scoped by org_id (and optionally location_id) from auth context.
  */
 
-import { createServiceClient } from '@levelset/supabase-client';
+import { getServiceClient } from '@levelset/supabase-client';
+import { tenantCache, CacheTTL } from '../../lib/tenant-cache.js';
 
 /**
  * Get employees ranked by their average rating for a specific position.
@@ -17,11 +18,27 @@ export async function getPositionRankings(
   orgId: string,
   locationId?: string
 ): Promise<string> {
-  const supabase = createServiceClient();
   const position = args.position as string;
   const limit = Math.min((args.limit as number) || 10, 50);
   const sort = (args.sort as string) || 'best';
   const ascending = sort === 'worst';
+  const cacheKey = `rankings:${locationId ?? 'org'}:${position.toLowerCase()}:${sort}:${limit}`;
+
+  return tenantCache.getOrFetch(orgId, cacheKey, CacheTTL.DYNAMIC, () =>
+    _getPositionRankings(orgId, locationId, position, limit, sort, ascending)
+  );
+}
+
+/** Internal: uncached rankings query */
+async function _getPositionRankings(
+  orgId: string,
+  locationId: string | undefined,
+  position: string,
+  limit: number,
+  sort: string,
+  ascending: boolean
+): Promise<string> {
+  const supabase = getServiceClient();
 
   // Try daily_position_averages first (most efficient — JSONB extraction)
   const latestDateResult = await supabase

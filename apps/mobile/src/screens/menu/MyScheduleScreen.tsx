@@ -2,15 +2,19 @@
  * MyScheduleScreen
  * Displays the user's assigned shifts in a week view.
  * Shows "This Week" (today + remaining days) and "Next Week" (if published).
+ * Collapsible week headers with individual glass cards per day.
  */
 
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   RefreshControl,
   Pressable,
+  LayoutAnimation,
+  UIManager,
+  Platform,
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useRouter } from "expo-router";
@@ -21,11 +25,16 @@ import { useColors } from "../../context/ThemeContext";
 import { typography, fontWeights } from "../../lib/fonts";
 import { spacing, borderRadius, haptics } from "../../lib/theme";
 
+// Enable LayoutAnimation on Android
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 // =============================================================================
 // Helpers
 // =============================================================================
 
-/** Format "09:00:00" → "9:00 AM" */
+/** Format "09:00:00" -> "9:00 AM" */
 function formatTime(time: string): string {
   const [h, m] = time.split(":");
   const hour = parseInt(h, 10);
@@ -34,17 +43,19 @@ function formatTime(time: string): string {
   return `${display}:${m} ${ampm}`;
 }
 
-/** Format "2026-02-20" → "Thu, Feb 20" */
-function formatDayLabel(dateStr: string): string {
-  const date = new Date(dateStr + "T12:00:00"); // noon to avoid TZ issues
-  return date.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+/** Format "2026-02-20" -> "Thu" */
+function formatDayShort(dateStr: string): string {
+  const date = new Date(dateStr + "T12:00:00");
+  return date.toLocaleDateString("en-US", { weekday: "short" });
 }
 
-/** Format week range like "Feb 15–21" */
+/** Format "2026-02-20" -> "Feb 20" */
+function formatDateShort(dateStr: string): string {
+  const date = new Date(dateStr + "T12:00:00");
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+/** Format week range like "Feb 15-21" */
 function formatWeekRange(weekStart: string): string {
   const start = new Date(weekStart + "T12:00:00");
   const end = new Date(start);
@@ -54,9 +65,9 @@ function formatWeekRange(weekStart: string): string {
   const endMonth = end.toLocaleDateString("en-US", { month: "short" });
 
   if (startMonth === endMonth) {
-    return `${startMonth} ${start.getDate()}–${end.getDate()}`;
+    return `${startMonth} ${start.getDate()}-${end.getDate()}`;
   }
-  return `${startMonth} ${start.getDate()} – ${endMonth} ${end.getDate()}`;
+  return `${startMonth} ${start.getDate()} - ${endMonth} ${end.getDate()}`;
 }
 
 /** Check if a date string is today */
@@ -107,120 +118,127 @@ function groupShiftsByDate(shifts: ScheduleShift[]): Map<string, ScheduleShift[]
   return map;
 }
 
+/** Count total shift days in a week */
+function countShiftDays(shifts: ScheduleShift[]): number {
+  const dates = new Set(shifts.map((s) => s.shift_date));
+  return dates.size;
+}
+
 // =============================================================================
 // Components
 // =============================================================================
 
-interface DayRowProps {
+interface DayCardProps {
   date: string;
   shifts: ScheduleShift[];
   index: number;
   onPress: () => void;
 }
 
-function DayRow({ date, shifts, index, onPress }: DayRowProps) {
+function DayCard({ date, shifts, index, onPress }: DayCardProps) {
   const colors = useColors();
   const today = isToday(date);
+  const hasShifts = shifts.length > 0;
 
   return (
-    <Animated.View entering={FadeIn.delay(index * 40).duration(300)}>
-      <Pressable
-        onPress={() => {
-          haptics.light();
-          onPress();
-        }}
-        style={({ pressed }) => [
-          {
-            flexDirection: "row",
-            paddingVertical: spacing[3],
-            paddingHorizontal: spacing[4],
-            backgroundColor: pressed ? colors.surfaceVariant : "transparent",
-            borderLeftWidth: today ? 3 : 0,
-            borderLeftColor: today ? colors.primary : "transparent",
-            marginLeft: today ? 0 : 3, // compensate for border
-          },
-        ]}
+    <Animated.View
+      entering={FadeIn.delay(index * 50).duration(250)}
+      style={{ paddingHorizontal: spacing[4], marginBottom: spacing[2] }}
+    >
+      <GlassCard
+        onPress={onPress}
+        style={today ? { borderWidth: 1, borderColor: colors.primary } : undefined}
       >
-        {/* Day label column */}
-        <View style={{ width: 110, justifyContent: "flex-start", paddingTop: 2 }}>
-          {today && (
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {/* Day column */}
+          <View style={{ width: 56, alignItems: "center", marginRight: spacing[3] }}>
             <Text
               style={{
                 ...typography.labelSmall,
                 fontWeight: fontWeights.semibold,
-                color: colors.primary,
-                marginBottom: 2,
+                color: today ? colors.primary : colors.onSurfaceVariant,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
               }}
             >
-              Today
+              {formatDayShort(date)}
             </Text>
-          )}
-          <Text
-            selectable
-            style={{
-              ...typography.labelLarge,
-              fontWeight: today ? fontWeights.bold : fontWeights.medium,
-              color: today ? colors.onSurface : colors.onSurfaceVariant,
-            }}
-          >
-            {formatDayLabel(date)}
-          </Text>
-        </View>
-
-        {/* Shifts column */}
-        <View style={{ flex: 1, gap: spacing[1] }}>
-          {shifts.length === 0 ? (
             <Text
               style={{
-                ...typography.bodySmall,
-                color: colors.onSurfaceDisabled,
-                fontStyle: "italic",
-                paddingTop: 2,
+                ...typography.h3,
+                fontWeight: today ? fontWeights.bold : fontWeights.semibold,
+                color: today ? colors.primary : colors.onSurface,
+                lineHeight: 28,
               }}
             >
-              No shifts scheduled
+              {new Date(date + "T12:00:00").getDate()}
             </Text>
-          ) : (
-            shifts.map((shift) => (
+            {today && (
               <View
-                key={shift.id}
-                style={{ flexDirection: "row", alignItems: "center", gap: spacing[2] }}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: colors.primary,
+                  marginTop: 2,
+                }}
+              />
+            )}
+          </View>
+
+          {/* Shifts detail */}
+          <View style={{ flex: 1, gap: spacing[1] }}>
+            {!hasShifts ? (
+              <Text
+                style={{
+                  ...typography.bodySmall,
+                  color: colors.onSurfaceDisabled,
+                  fontStyle: "italic",
+                }}
               >
-                <Text
-                  selectable
-                  style={{
-                    ...typography.bodyMedium,
-                    fontWeight: fontWeights.semibold,
-                    color: colors.onSurface,
-                    minWidth: 80,
-                  }}
-                >
-                  {shift.position?.name ?? "Shift"}
-                </Text>
-                <Text
-                  selectable
-                  style={{
-                    ...typography.bodySmall,
-                    color: colors.onSurfaceVariant,
-                    fontVariant: ["tabular-nums"],
-                  }}
-                >
-                  {formatTime(shift.start_time)} – {formatTime(shift.end_time)}
-                </Text>
-              </View>
-            ))
+                Off
+              </Text>
+            ) : (
+              shifts.map((shift) => (
+                <View key={shift.id} style={{ gap: 2 }}>
+                  <Text
+                    style={{
+                      ...typography.bodyMedium,
+                      fontWeight: fontWeights.semibold,
+                      color: colors.onSurface,
+                    }}
+                  >
+                    {shift.position?.name ?? "Shift"}
+                  </Text>
+                  <Text
+                    style={{
+                      ...typography.bodySmall,
+                      color: colors.onSurfaceVariant,
+                      fontVariant: ["tabular-nums"],
+                    }}
+                  >
+                    {formatTime(shift.start_time)} - {formatTime(shift.end_time)}
+                    {shift.break_minutes > 0 && (
+                      `  ·  ${shift.break_minutes}min break`
+                    )}
+                  </Text>
+                </View>
+              ))
+            )}
+          </View>
+
+          {/* Chevron */}
+          {hasShifts && (
+            <View style={{ justifyContent: "center", paddingLeft: spacing[2] }}>
+              <AppIcon
+                name="chevron.right"
+                size={14}
+                tintColor={colors.onSurfaceDisabled}
+              />
+            </View>
           )}
         </View>
-
-        {/* Chevron */}
-        <View style={{ justifyContent: "center", paddingLeft: spacing[2] }}>
-          <AppIcon
-            name="chevron.right"
-            size={14}
-            tintColor={colors.onSurfaceDisabled}
-          />
-        </View>
-      </Pressable>
+      </GlassCard>
     </Animated.View>
   );
 }
@@ -231,6 +249,7 @@ interface WeekSectionProps {
   shifts: ScheduleShift[];
   days: string[];
   startIndex: number;
+  defaultExpanded: boolean;
   onDayPress: (date: string, shifts: ScheduleShift[]) => void;
 }
 
@@ -240,28 +259,43 @@ function WeekSection({
   shifts,
   days,
   startIndex,
+  defaultExpanded,
   onDayPress,
 }: WeekSectionProps) {
   const colors = useColors();
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const shiftsByDate = useMemo(() => groupShiftsByDate(shifts), [shifts]);
+  const shiftDayCount = useMemo(() => countShiftDays(shifts), [shifts]);
+
+  const toggleExpanded = () => {
+    haptics.light();
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded((prev) => !prev);
+  };
 
   return (
-    <View style={{ marginBottom: spacing[4] }}>
-      {/* Section header */}
-      <View
+    <View style={{ marginBottom: spacing[3] }}>
+      {/* Collapsible header */}
+      <Pressable
+        onPress={toggleExpanded}
         style={{
           flexDirection: "row",
           alignItems: "center",
           paddingHorizontal: spacing[4],
-          paddingVertical: spacing[2],
-          marginBottom: spacing[1],
+          paddingVertical: spacing[3],
         }}
       >
+        <AppIcon
+          name={expanded ? "chevron.down" : "chevron.right"}
+          size={12}
+          tintColor={colors.onSurfaceVariant}
+        />
         <Text
           style={{
             ...typography.labelLarge,
-            fontWeight: fontWeights.semibold,
-            color: colors.onSurfaceVariant,
+            fontWeight: fontWeights.bold,
+            color: colors.onSurface,
+            marginLeft: spacing[2],
           }}
         >
           {title}
@@ -275,35 +309,42 @@ function WeekSection({
         >
           {formatWeekRange(weekStart)}
         </Text>
-      </View>
+        {shiftDayCount > 0 && (
+          <View
+            style={{
+              backgroundColor: colors.primary,
+              borderRadius: 10,
+              paddingHorizontal: 7,
+              paddingVertical: 1,
+              marginLeft: "auto",
+            }}
+          >
+            <Text
+              style={{
+                ...typography.labelSmall,
+                fontWeight: fontWeights.bold,
+                color: "#FFFFFF",
+              }}
+            >
+              {shiftDayCount} {shiftDayCount === 1 ? "day" : "days"}
+            </Text>
+          </View>
+        )}
+      </Pressable>
 
-      {/* Day rows */}
-      <GlassCard contentStyle={{ padding: 0 }}>
-        {days.map((date, idx) => {
-          const dayShifts = shiftsByDate.get(date) || [];
-          const isLast = idx === days.length - 1;
-          return (
-            <View key={date}>
-              <DayRow
-                date={date}
-                shifts={dayShifts}
-                index={startIndex + idx}
-                onPress={() => onDayPress(date, dayShifts)}
-              />
-              {!isLast && (
-                <View
-                  style={{
-                    height: 1,
-                    backgroundColor: colors.outline,
-                    marginLeft: spacing[4],
-                    opacity: 0.5,
-                  }}
-                />
-              )}
-            </View>
-          );
-        })}
-      </GlassCard>
+      {/* Day cards */}
+      {expanded && days.map((date, idx) => {
+        const dayShifts = shiftsByDate.get(date) || [];
+        return (
+          <DayCard
+            key={date}
+            date={date}
+            shifts={dayShifts}
+            index={startIndex + idx}
+            onPress={() => onDayPress(date, dayShifts)}
+          />
+        );
+      })}
     </View>
   );
 }
@@ -359,7 +400,7 @@ export default function MyScheduleScreen() {
           backgroundColor: colors.background,
         }}
       >
-        <Text style={{ fontSize: 48, marginBottom: spacing[4] }}>⚠️</Text>
+        <Text style={{ fontSize: 48, marginBottom: spacing[4] }}>&#x26A0;&#xFE0F;</Text>
         <Text
           style={{
             ...typography.h4,
@@ -386,7 +427,7 @@ export default function MyScheduleScreen() {
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{
-        paddingTop: spacing[3],
+        paddingTop: spacing[1],
         paddingBottom: spacing[10],
         flexGrow: 1,
       }}
@@ -409,7 +450,7 @@ export default function MyScheduleScreen() {
                 paddingVertical: spacing[10],
               }}
             >
-              <Text style={{ fontSize: 56, marginBottom: spacing[4] }}>📅</Text>
+              <Text style={{ fontSize: 56, marginBottom: spacing[4] }}>&#x1F4C5;</Text>
               <Text
                 style={{
                   ...typography.h3,
@@ -450,6 +491,7 @@ export default function MyScheduleScreen() {
               shifts={thisWeek.shifts}
               days={thisWeekDays}
               startIndex={0}
+              defaultExpanded={true}
               onDayPress={handleDayPress}
             />
           )}
@@ -461,6 +503,7 @@ export default function MyScheduleScreen() {
               shifts={nextWeek.shifts}
               days={nextWeekDays}
               startIndex={thisWeekDays.length}
+              defaultExpanded={false}
               onDayPress={handleDayPress}
             />
           )}

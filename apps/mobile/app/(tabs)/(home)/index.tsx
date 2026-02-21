@@ -14,14 +14,17 @@ import {
   Image,
 } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { Image as ExpoImage } from "expo-image";
 import { useAuth } from "../../../src/context/AuthContext";
 import { useForms } from "../../../src/context/FormsContext";
+import { useLocation } from "../../../src/context/LocationContext";
 import { useColors } from "../../../src/context/ThemeContext";
-import { typography, fontWeights } from "../../../src/lib/fonts";
+import { typography, fontWeights, fontSizes } from "../../../src/lib/fonts";
 import { spacing, borderRadius, haptics } from "../../../src/lib/theme";
-import { AppIcon, LocationSelector } from "../../../src/components/ui";
+import { AppIcon } from "../../../src/components/ui";
 import { GlassCard } from "../../../src/components/glass";
 import "../../../src/lib/i18n";
 
@@ -29,11 +32,20 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const colors = useColors();
+  const insets = useSafeAreaInsets();
   const { fullName, profileImage, email } = useAuth();
   const { lastSubmission, clearLastSubmission } = useForms();
+  const {
+    selectedLocation,
+    selectedLocationName,
+    hasMultipleLocations,
+    isLoading,
+    locations,
+  } = useLocation();
 
   const firstName = fullName?.split(" ")[0] || "there";
   const greeting = getGreeting(t);
+  const singleLocation = !hasMultipleLocations && !!selectedLocation;
 
   const getInitials = (name: string | null | undefined) => {
     if (!name) return email?.charAt(0)?.toUpperCase() || "U";
@@ -46,19 +58,10 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ paddingTop: spacing[2], paddingHorizontal: spacing[5], paddingBottom: spacing[5], gap: spacing[4] }}
-      style={[styles.container, { backgroundColor: colors.background }]}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Location selector — centered above greeting */}
-      <Animated.View entering={FadeIn.duration(400)} style={styles.locationRow}>
-        <LocationSelector />
-      </Animated.View>
-
-      {/* Greeting bar: Avatar + greeting text */}
-      <Animated.View entering={FadeIn.delay(50).duration(400)} style={styles.topBar}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Fixed header — matches Levi/Schedule exactly */}
+      <View style={[styles.header, { paddingTop: insets.top + spacing[1] }]}>
+        {/* Left — avatar bubble */}
         <Pressable
           onPress={() => {
             haptics.light();
@@ -74,14 +77,60 @@ export default function HomeScreen() {
             </View>
           )}
         </Pressable>
-        <View style={{ flex: 1 }}>
+
+        {/* Center — location selector */}
+        {!isLoading && locations.length > 0 ? (
+          <Pressable
+            onPress={() => {
+              if (!singleLocation) {
+                haptics.light();
+                router.push("/(tabs)/(home)/location-picker");
+              }
+            }}
+            disabled={singleLocation}
+            style={styles.locationSelector}
+          >
+            {!singleLocation && (
+              <AppIcon name="chevron.down" size={12} tintColor={colors.onSurfaceDisabled} />
+            )}
+            {selectedLocation?.image_url && (
+              <View style={styles.locationLogo}>
+                <ExpoImage
+                  source={{ uri: selectedLocation.image_url }}
+                  style={styles.locationLogoImage}
+                  contentFit="contain"
+                  cachePolicy="disk"
+                />
+              </View>
+            )}
+            <Text style={[styles.locationName, { color: colors.onSurface }]} numberOfLines={1}>
+              {selectedLocationName || t("home.noLocation")}
+            </Text>
+          </Pressable>
+        ) : (
+          <View style={styles.locationSelector}>
+            <Text style={[styles.locationName, { color: colors.onSurface }]}>Home</Text>
+          </View>
+        )}
+
+        {/* Right spacer (matches avatar width for centering) */}
+        <View style={styles.headerSpacer} />
+      </View>
+
+      {/* Scrollable content */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Greeting — left-aligned */}
+        <Animated.View entering={FadeIn.delay(50).duration(400)}>
           <Text style={[styles.greeting, { color: colors.onSurfaceVariant }]}>
             {greeting}, <Text style={[styles.userName, { color: colors.onBackground }]}>{firstName}</Text>
           </Text>
-        </View>
-      </Animated.View>
+        </Animated.View>
 
-      {/* Success banner */}
+        {/* Success banner */}
       {lastSubmission && (
         <Animated.View entering={FadeInDown.duration(300)}>
           <Pressable
@@ -172,6 +221,7 @@ export default function HomeScreen() {
         </Animated.View>
       </Animated.View>
     </ScrollView>
+    </View>
   );
 }
 
@@ -186,35 +236,69 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  locationRow: {
-    alignItems: "center",
-  },
-  topBar: {
+  header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing[3],
+    justifyContent: "space-between",
+    paddingHorizontal: spacing[4],
+    paddingBottom: spacing[2],
   },
   avatarBubble: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     overflow: "hidden",
   },
   avatarImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   avatarFallback: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: fontWeights.bold,
+  },
+  locationSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing[2],
+    flex: 1,
+    paddingVertical: spacing[1],
+  },
+  locationLogo: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    backgroundColor: "#FFFFFF",
+  },
+  locationLogoImage: {
+    width: 18,
+    height: 18,
+  },
+  locationName: {
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.semibold,
+    maxWidth: 200,
+  },
+  headerSpacer: {
+    width: 36,
+    height: 36,
+  },
+  scrollContent: {
+    paddingHorizontal: spacing[5],
+    paddingBottom: spacing[5],
+    gap: spacing[3],
   },
   greeting: {
     ...typography.h2,
