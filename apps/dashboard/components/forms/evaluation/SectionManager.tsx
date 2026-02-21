@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  TextField,
   IconButton,
   Button,
   Tooltip,
@@ -11,8 +10,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import LockIcon from '@mui/icons-material/Lock';
-
-const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+import { StyledTextField, fontFamily } from '../dialogStyles';
 
 interface EvaluationSection {
   id: string;
@@ -28,23 +26,6 @@ interface SectionManagerProps {
   onSectionsChange: (sections: EvaluationSection[]) => void;
   roleLevel: number;
 }
-
-const textFieldSx = {
-  '& .MuiInputLabel-root': {
-    fontFamily,
-    fontSize: 11,
-    color: 'var(--ls-color-muted)',
-    '&.Mui-focused': { color: 'var(--ls-color-brand)' },
-  },
-  '& .MuiInputBase-root': { fontFamily, fontSize: 13 },
-  '& .MuiInputBase-input': { fontFamily, fontSize: 13, padding: '8px 10px' },
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-muted-border)' },
-  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-border)' },
-  '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
-};
 
 export function SectionManager({
   sections,
@@ -153,21 +134,19 @@ export function SectionManager({
               </div>
 
               <div style={{ flex: 1, display: 'flex', gap: 8 }}>
-                <TextField
+                <StyledTextField
                   label="Name (EN)"
                   value={section.name}
                   onChange={(e) => handleNameChange(section.id, e.target.value)}
                   size="small"
                   fullWidth
-                  sx={textFieldSx}
                 />
-                <TextField
+                <StyledTextField
                   label="Name (ES)"
                   value={section.name_es || ''}
                   onChange={(e) => handleNameEsChange(section.id, e.target.value)}
                   size="small"
                   fullWidth
-                  sx={textFieldSx}
                 />
               </div>
 

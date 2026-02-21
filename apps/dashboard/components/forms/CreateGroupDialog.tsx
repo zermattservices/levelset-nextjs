@@ -109,7 +109,6 @@ export function CreateGroupDialog({
 
         <StyledTextField
           label="Group Name"
-          placeholder="Enter group name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           fullWidth
@@ -119,7 +118,6 @@ export function CreateGroupDialog({
 
         <StyledTextField
           label="Description"
-          placeholder="Optional description for this group"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           fullWidth

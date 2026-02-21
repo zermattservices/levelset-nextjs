@@ -101,6 +101,14 @@ body {
   font-weight: 700 !important;
 }
 
+/* ── MUI outlined input notch fix ──
+   MUI calculates the label notch width from a hidden <legend> element.
+   If the legend uses a different font than the visible label (Satoshi),
+   the notch will be the wrong width. This ensures they always match. */
+.MuiOutlinedInput-notchedOutline legend {
+  font-family: 'Satoshi', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 /* RosterTable styles are imported directly in the component */
 
 /* Loading spinner animation */

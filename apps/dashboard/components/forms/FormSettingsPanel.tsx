@@ -6,7 +6,6 @@ import {
   Switch,
   FormControlLabel,
   Button,
-  Chip,
   Alert,
   CircularProgress,
   Divider,
@@ -14,7 +13,7 @@ import {
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import sty from './FormSettingsPanel.module.css';
 import { StyledTextField, StyledSelect, fontFamily, inputLabelSx } from './dialogStyles';
-import type { FormTemplate, FormGroup, FormType } from '@/lib/forms/types';
+import type { FormTemplate, FormGroup } from '@/lib/forms/types';
 
 interface FormSettingsPanelProps {
   template: FormTemplate;
@@ -24,13 +23,6 @@ interface FormSettingsPanelProps {
   saving: boolean;
   isSystem?: boolean;
 }
-
-const TYPE_LABELS: Record<FormType, string> = {
-  rating: 'Rating',
-  discipline: 'Discipline',
-  evaluation: 'Evaluation',
-  custom: 'Custom',
-};
 
 const readOnlyInputSx = {
   '& .MuiOutlinedInput-root': { backgroundColor: 'var(--ls-color-neutral-foreground)' },
@@ -174,45 +166,23 @@ export function FormSettingsPanel({
       <div className={sty.section}>
         <h3 className={sty.sectionTitle}>Configuration</h3>
 
-        <div className={sty.fieldRow}>
-          <FormControl fullWidth size="small">
-            <InputLabel sx={inputLabelSx}>
-              Form Group
-            </InputLabel>
-            <StyledSelect
-              value={groupId}
-              onChange={(e) => setGroupId(e.target.value as string)}
-              label="Form Group"
-              disabled={isSystem}
-            >
-              {groups.map((group) => (
-                <MenuItem key={group.id} value={group.id} sx={{ fontFamily, fontSize: 13 }}>
-                  {group.name}
-                </MenuItem>
-              ))}
-            </StyledSelect>
-          </FormControl>
-
-          <div className={sty.readOnlyField}>
-            <span className={sty.readOnlyLabel}>Form Type</span>
-            <Chip
-              label={TYPE_LABELS[template.form_type] || template.form_type}
-              size="small"
-              sx={{
-                fontFamily,
-                fontSize: 12,
-                fontWeight: 600,
-                height: 26,
-                borderRadius: '6px',
-                backgroundColor: 'var(--ls-color-neutral-foreground)',
-                color: 'var(--ls-color-text-primary)',
-              }}
-            />
-            {template.is_system && (
-              <span className={sty.readOnlyHint}>Type cannot be changed for system forms</span>
-            )}
-          </div>
-        </div>
+        <FormControl fullWidth size="small">
+          <InputLabel sx={inputLabelSx}>
+            Form Group
+          </InputLabel>
+          <StyledSelect
+            value={groupId}
+            onChange={(e) => setGroupId(e.target.value as string)}
+            label="Form Group"
+            disabled={isSystem}
+          >
+            {groups.map((group) => (
+              <MenuItem key={group.id} value={group.id} sx={{ fontFamily, fontSize: 13 }}>
+                {group.name}
+              </MenuItem>
+            ))}
+          </StyledSelect>
+        </FormControl>
 
         <FormControlLabel
           control={

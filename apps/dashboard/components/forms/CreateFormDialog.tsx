@@ -140,7 +140,6 @@ export function CreateFormDialog({
 
         <StyledTextField
           label="Form Name"
-          placeholder="Enter form name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           fullWidth
@@ -150,7 +149,6 @@ export function CreateFormDialog({
 
         <StyledTextField
           label="Description"
-          placeholder="Optional description for this form"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           fullWidth

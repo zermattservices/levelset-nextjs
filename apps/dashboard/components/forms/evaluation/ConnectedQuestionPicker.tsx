@@ -2,15 +2,12 @@ import * as React from 'react';
 import {
   Switch,
   FormControl,
-  Select,
   MenuItem,
-  TextField,
   Tooltip,
 } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import sty from './ConnectedQuestionPicker.module.css';
-
-const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+import { StyledTextField, StyledSelect, fontFamily } from '../dialogStyles';
 
 interface ConnectedQuestionPickerProps {
   connectedTo: string | undefined;
@@ -29,29 +26,6 @@ const CONNECTORS = [
   { key: 'certified_status', label: 'Certified Status', hasParams: false },
   { key: 'no_unresolved_actions', label: 'No Unresolved Actions', hasParams: false },
 ] as const;
-
-const selectSx = {
-  fontFamily,
-  fontSize: 12,
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-muted-border)' },
-  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-border)' },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
-  '& .MuiSelect-select': { padding: '6px 10px', fontFamily, fontSize: 12 },
-};
-
-const paramFieldSx = {
-  width: 72,
-  '& .MuiInputBase-root': { fontFamily, fontSize: 12 },
-  '& .MuiInputBase-input': { fontFamily, fontSize: 12, padding: '5px 8px', textAlign: 'center' as const },
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-muted-border)' },
-  '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
-};
 
 export function ConnectedQuestionPicker({
   connectedTo,
@@ -118,30 +92,29 @@ export function ConnectedQuestionPicker({
       </span>
 
       <FormControl size="small" className={sty.connectorSelect}>
-        <Select
+        <StyledSelect
           value={connectedTo}
-          onChange={(e) => handleConnectorChange(e.target.value)}
-          sx={selectSx}
+          onChange={(e) => handleConnectorChange(e.target.value as string)}
         >
           {CONNECTORS.map((c) => (
             <MenuItem key={c.key} value={c.key} sx={{ fontFamily, fontSize: 12 }}>
               {c.label}
             </MenuItem>
           ))}
-        </Select>
+        </StyledSelect>
       </FormControl>
 
       {activeConnector?.hasParams && 'paramKey' in activeConnector && (
         <div className={sty.paramRow}>
           <span className={sty.paramLabel}>{activeConnector.paramLabel}:</span>
-          <TextField
+          <StyledTextField
             type="number"
             value={connectorParams?.[activeConnector.paramKey] ?? ''}
             onChange={(e) =>
               handleParamChange(activeConnector.paramKey, Number(e.target.value) || 0)
             }
             size="small"
-            sx={paramFieldSx}
+            sx={{ width: 72 }}
           />
         </div>
       )}

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  TextField,
   Button,
   Chip,
   InputAdornment,
@@ -9,9 +8,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import CreateNewFolderOutlinedIcon from '@mui/icons-material/CreateNewFolderOutlined';
 import sty from './FormManagementToolbar.module.css';
+import { StyledTextField, fontFamily } from './dialogStyles';
 import type { FormType } from '@/lib/forms/types';
-
-const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 interface FormManagementToolbarProps {
   searchQuery: string;
@@ -40,7 +38,7 @@ export function FormManagementToolbar({
   return (
     <div className={sty.toolbar}>
       <div className={sty.searchRow}>
-        <TextField
+        <StyledTextField
           size="small"
           placeholder="Search forms..."
           value={searchQuery}
@@ -54,25 +52,7 @@ export function FormManagementToolbar({
               ),
             },
           }}
-          sx={{
-            flex: 1,
-            maxWidth: 360,
-            '& .MuiInputBase-root': {
-              fontFamily,
-              fontSize: 14,
-              borderRadius: '8px',
-            },
-            '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: 'var(--ls-color-muted-border)',
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: 'var(--ls-color-border)',
-            },
-            '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: 'var(--ls-color-brand)',
-              borderWidth: '2px',
-            },
-          }}
+          sx={{ flex: 1, maxWidth: 360 }}
         />
         <div className={sty.actions}>
           <Button

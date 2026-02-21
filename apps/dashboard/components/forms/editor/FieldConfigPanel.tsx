@@ -6,7 +6,6 @@ import {
   Button,
   Divider,
   MenuItem,
-  Select,
   InputLabel,
   FormControl,
 } from '@mui/material';
@@ -14,7 +13,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import sty from './FieldConfigPanel.module.css';
-import { StyledTextField, fontFamily, inputLabelSx } from '../dialogStyles';
+import { StyledTextField, StyledSelect, fontFamily, inputLabelSx } from '../dialogStyles';
 import { FIELD_TYPES } from '@/lib/forms/field-palette';
 import type { FormField, FieldOption } from '@/lib/forms/schema-builder';
 import { ConnectedQuestionPicker } from '../evaluation/ConnectedQuestionPicker';
@@ -294,11 +293,10 @@ export function FieldConfigPanel({
             <span className={sty.sectionLabel}>Scoring</span>
             <FormControl fullWidth size="small">
               <InputLabel sx={inputLabelSx}>Scoring Type</InputLabel>
-              <Select
+              <StyledSelect
                 value={field.settings.scoringType || ''}
                 onChange={(e) => handleSettingsChange('scoringType', e.target.value || undefined)}
                 label="Scoring Type"
-                sx={{ fontFamily, fontSize: 13 }}
               >
                 <MenuItem value="">
                   <em>None (not scored)</em>
@@ -308,7 +306,7 @@ export function FieldConfigPanel({
                     {st.label}
                   </MenuItem>
                 ))}
-              </Select>
+              </StyledSelect>
             </FormControl>
 
             {field.settings.scoringType && (

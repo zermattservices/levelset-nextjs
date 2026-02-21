@@ -55,6 +55,12 @@ export const rjsfMuiTheme = createTheme({
             borderColor: 'var(--ls-color-brand)',
           },
         },
+        // Ensure notch legend uses Satoshi so its width matches the label
+        notchedOutline: {
+          '& legend': {
+            fontFamily: '"Satoshi", sans-serif',
+          },
+        },
       },
     },
     MuiFormLabel: {

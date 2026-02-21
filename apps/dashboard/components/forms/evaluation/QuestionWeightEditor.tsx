@@ -1,15 +1,12 @@
 import * as React from 'react';
 import {
-  TextField,
   Chip,
   FormControl,
-  Select,
   MenuItem,
 } from '@mui/material';
 import { ConnectedQuestionPicker } from './ConnectedQuestionPicker';
+import { StyledTextField, StyledSelect, fontFamily } from '../dialogStyles';
 import type { FormField } from '@/lib/forms/schema-builder';
-
-const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 interface EvaluationQuestion {
   section_id: string;
@@ -40,35 +37,6 @@ const SCORING_TYPES: Record<string, { label: string; color: string }> = {
   rating_1_5: { label: '1–5', color: 'var(--ls-color-brand)' },
   true_false: { label: 'T/F', color: '#6366F1' },
   percentage: { label: '%', color: '#D97706' },
-};
-
-const selectSx = {
-  fontFamily,
-  fontSize: 12,
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-muted-border)' },
-  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-border)' },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
-  '& .MuiSelect-select': { padding: '6px 10px', fontFamily, fontSize: 12 },
-};
-
-const weightFieldSx = {
-  width: 64,
-  '& .MuiInputBase-root': { fontFamily, fontSize: 13 },
-  '& .MuiInputBase-input': {
-    fontFamily,
-    fontSize: 13,
-    padding: '6px 8px',
-    textAlign: 'center' as const,
-  },
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-muted-border)' },
-  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--ls-color-border)' },
-  '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'var(--ls-color-brand)',
-    borderWidth: '2px',
-  },
 };
 
 export function QuestionWeightEditor({
@@ -174,7 +142,7 @@ export function QuestionWeightEditor({
                     }}
                   />
 
-                  <TextField
+                  <StyledTextField
                     type="number"
                     value={weight}
                     onChange={(e) => {
@@ -183,17 +151,16 @@ export function QuestionWeightEditor({
                     }}
                     size="small"
                     slotProps={{ htmlInput: { min: 0, max: 100 } }}
-                    sx={weightFieldSx}
+                    sx={{ width: 64 }}
                   />
 
                   <FormControl size="small" sx={{ minWidth: 140 }}>
-                    <Select
+                    <StyledSelect
                       value={q?.section_id || ''}
                       onChange={(e) =>
-                        onUpdateQuestion(field.id, { section_id: e.target.value })
+                        onUpdateQuestion(field.id, { section_id: e.target.value as string })
                       }
                       displayEmpty
-                      sx={selectSx}
                     >
                       <MenuItem value="" disabled sx={{ fontFamily, fontSize: 12 }}>
                         Section...
@@ -203,7 +170,7 @@ export function QuestionWeightEditor({
                           {s.name}
                         </MenuItem>
                       ))}
-                    </Select>
+                    </StyledSelect>
                   </FormControl>
 
                   <ConnectedQuestionPicker

@@ -42,6 +42,10 @@ export const StyledTextField = styled(TextField)(() => ({
   '& .MuiInputLabel-root': {
     fontFamily,
   },
+  // Notch legend must use same font as label so notch width matches
+  '& .MuiOutlinedInput-notchedOutline legend': {
+    fontFamily,
+  },
 }));
 
 /* ── Styled Select ─────────────────────────────────────────────── */
