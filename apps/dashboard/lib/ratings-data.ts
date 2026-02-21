@@ -1012,6 +1012,7 @@ export async function fetchPositionsList(
       .eq('org_id', locationData.org_id)
       .eq('zone', area)
       .eq('is_active', true)
+      .eq('position_type', 'standard')
       .order('display_order', { ascending: true });
 
     if (!orgError && orgPositions && orgPositions.length > 0) {

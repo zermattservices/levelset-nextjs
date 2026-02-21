@@ -19,6 +19,7 @@ export function PositionSelectWidget(props: WidgetProps) {
   const { id, value, required, disabled, readonly, onChange, label, rawErrors } = props;
   const [positions, setPositions] = React.useState<PositionOption[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -29,7 +30,10 @@ export function PositionSelectWidget(props: WidgetProps) {
         const { createSupabaseClient } = await import('@/util/supabase/component');
         const supabase = createSupabaseClient();
         const { data: session } = await supabase.auth.getSession();
-        if (!session.session) return;
+        if (!session.session) {
+          setLoadError('Not authenticated');
+          return;
+        }
 
         const { data: appUser } = await supabase
           .from('app_users')
@@ -45,6 +49,7 @@ export function PositionSelectWidget(props: WidgetProps) {
           .select('id, name, zone')
           .eq('org_id', appUser.org_id)
           .eq('is_active', true)
+          .eq('position_type', 'standard')
           .order('zone')
           .order('display_order');
 
@@ -57,8 +62,9 @@ export function PositionSelectWidget(props: WidgetProps) {
             }))
           );
         }
-      } catch {
-        // Silently handle
+      } catch (err) {
+        console.error('PositionSelectWidget: load failed', err);
+        if (!cancelled) setLoadError('Failed to load positions');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -104,6 +110,11 @@ export function PositionSelectWidget(props: WidgetProps) {
           />
         )}
       />
+      {loadError && (
+        <FormHelperText error sx={{ fontFamily, fontSize: 12 }}>
+          {loadError}
+        </FormHelperText>
+      )}
       {rawErrors && rawErrors.length > 0 && (
         <FormHelperText error sx={{ fontFamily, fontSize: 12 }}>
           {rawErrors[0]}

@@ -87,6 +87,7 @@ async function handler(
       .select('name, name_es, description, description_es, zone, display_order')
       .eq('org_id', location.org_id)
       .eq('is_active', true)
+      .eq('position_type', 'standard')
       .order('display_order', { ascending: true });
 
     if (!orgPositionsError && orgPositionsData && orgPositionsData.length > 0) {
