@@ -176,6 +176,73 @@
       "statusRejected": "Rechazado",
       "statusDraft": "Borrador"
     }
+  },
+  "documents": {
+    "pageTitle": "Documentos",
+    "uploadButton": "Subir Documento",
+    "createFolder": "Nueva Carpeta",
+    "searchPlaceholder": "Buscar documentos...",
+    "emptyState": "No hay documentos aún. Suba su primer documento para comenzar.",
+    "emptyFolder": "Esta carpeta está vacía.",
+    "allCategories": "Todas las Categorías",
+    "categories": {
+      "employee_handbook": "Manual del Empleado",
+      "leadership_resource": "Recurso de Liderazgo",
+      "development_resource": "Recurso de Desarrollo",
+      "organization_info": "Información de la Organización",
+      "benefits": "Beneficios",
+      "other": "Otro"
+    },
+    "table": {
+      "name": "Nombre",
+      "category": "Categoría",
+      "type": "Tipo",
+      "size": "Tamaño",
+      "uploadedBy": "Subido Por",
+      "date": "Fecha"
+    },
+    "upload": {
+      "title": "Subir Documento",
+      "dragDrop": "Arrastre y suelte archivos aquí, o haga clic para navegar",
+      "orUrl": "O pegue una URL",
+      "urlPlaceholder": "https://ejemplo.com/documento",
+      "name": "Nombre del Documento",
+      "description": "Descripción (opcional)",
+      "category": "Categoría",
+      "uploading": "Subiendo...",
+      "processing": "Procesando documento...",
+      "success": "Documento subido exitosamente",
+      "acceptedFormats": "PDF, DOCX, TXT, MD, PNG, JPEG, WebP"
+    },
+    "detail": {
+      "title": "Detalles del Documento",
+      "fileInfo": "Información del Archivo",
+      "replace": "Reemplazar Documento",
+      "download": "Descargar",
+      "delete": "Eliminar Documento",
+      "deleteConfirm": "¿Está seguro de que desea eliminar este documento? Esta acción no se puede deshacer.",
+      "digestStatus": "Estado de Procesamiento",
+      "digestPending": "Esperando procesamiento",
+      "digestProcessing": "Extrayendo contenido...",
+      "digestCompleted": "Contenido extraído",
+      "digestFailed": "Extracción fallida",
+      "version": "Versión",
+      "originalFilename": "Nombre Original",
+      "fileSize": "Tamaño del Archivo",
+      "fileType": "Tipo de Archivo",
+      "uploadedAt": "Subido",
+      "sourceUrl": "URL de Origen"
+    },
+    "folder": {
+      "createTitle": "Crear Carpeta",
+      "nameLabel": "Nombre de la Carpeta",
+      "namePlaceholder": "Ingrese el nombre de la carpeta",
+      "rename": "Renombrar Carpeta",
+      "deleteConfirm": "¿Está seguro de que desea eliminar esta carpeta?",
+      "notEmpty": "No se puede eliminar una carpeta que contiene documentos o subcarpetas."
+    },
+    "comingSoon": "Documentos",
+    "comingSoonDescription": "Suba, organice y administre los documentos de su organización. Esta función está actualmente disponible para administradores."
   }
 }
 

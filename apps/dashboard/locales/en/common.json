@@ -176,6 +176,73 @@
       "statusRejected": "Rejected",
       "statusDraft": "Draft"
     }
+  },
+  "documents": {
+    "pageTitle": "Documents",
+    "uploadButton": "Upload Document",
+    "createFolder": "New Folder",
+    "searchPlaceholder": "Search documents...",
+    "emptyState": "No documents yet. Upload your first document to get started.",
+    "emptyFolder": "This folder is empty.",
+    "allCategories": "All Categories",
+    "categories": {
+      "employee_handbook": "Employee Handbook",
+      "leadership_resource": "Leadership Resource",
+      "development_resource": "Development Resource",
+      "organization_info": "Organization Info",
+      "benefits": "Benefits",
+      "other": "Other"
+    },
+    "table": {
+      "name": "Name",
+      "category": "Category",
+      "type": "Type",
+      "size": "Size",
+      "uploadedBy": "Uploaded By",
+      "date": "Date"
+    },
+    "upload": {
+      "title": "Upload Document",
+      "dragDrop": "Drag and drop files here, or click to browse",
+      "orUrl": "Or paste a URL",
+      "urlPlaceholder": "https://example.com/document",
+      "name": "Document Name",
+      "description": "Description (optional)",
+      "category": "Category",
+      "uploading": "Uploading...",
+      "processing": "Processing document...",
+      "success": "Document uploaded successfully",
+      "acceptedFormats": "PDF, DOCX, TXT, MD, PNG, JPEG, WebP"
+    },
+    "detail": {
+      "title": "Document Details",
+      "fileInfo": "File Information",
+      "replace": "Replace Document",
+      "download": "Download",
+      "delete": "Delete Document",
+      "deleteConfirm": "Are you sure you want to delete this document? This action cannot be undone.",
+      "digestStatus": "Processing Status",
+      "digestPending": "Awaiting processing",
+      "digestProcessing": "Extracting content...",
+      "digestCompleted": "Content extracted",
+      "digestFailed": "Extraction failed",
+      "version": "Version",
+      "originalFilename": "Original Filename",
+      "fileSize": "File Size",
+      "fileType": "File Type",
+      "uploadedAt": "Uploaded",
+      "sourceUrl": "Source URL"
+    },
+    "folder": {
+      "createTitle": "Create Folder",
+      "nameLabel": "Folder Name",
+      "namePlaceholder": "Enter folder name",
+      "rename": "Rename Folder",
+      "deleteConfirm": "Are you sure you want to delete this folder?",
+      "notEmpty": "Cannot delete a folder that contains documents or subfolders."
+    },
+    "comingSoon": "Documents",
+    "comingSoonDescription": "Upload, organize, and manage your organization's documents. This feature is currently available to administrators."
   }
 }
 

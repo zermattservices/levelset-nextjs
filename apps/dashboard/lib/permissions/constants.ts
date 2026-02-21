@@ -17,6 +17,7 @@ export const PERMISSION_MODULES = {
   BILLING: 'billing',
   SCHEDULING: 'scheduling',
   FORM_MANAGEMENT: 'form_management',
+  DOCUMENTS: 'documents',
 } as const;
 
 // All permission keys as const for type safety
@@ -96,6 +97,13 @@ export const P = {
   FM_DELETE_FORMS: 'form_management.delete_forms',
   FM_VIEW_SUBMISSIONS: 'form_management.view_submissions',
   FM_MANAGE_SUBMISSIONS: 'form_management.manage_submissions',
+
+  // Documents
+  DOCS_VIEW: 'documents.view_documents',
+  DOCS_UPLOAD: 'documents.upload_documents',
+  DOCS_EDIT: 'documents.edit_documents',
+  DOCS_DELETE: 'documents.delete_documents',
+  DOCS_MANAGE_FOLDERS: 'documents.manage_folders',
 } as const;
 
 // Type for any valid permission key
@@ -171,6 +179,11 @@ export const MODULE_METADATA: Record<string, ModuleMetadata> = {
     name: 'Form Management',
     description: 'Create, edit, and manage forms and form submissions',
     order: 12,
+  },
+  [PERMISSION_MODULES.DOCUMENTS]: {
+    name: 'Documents',
+    description: 'Organization document management and storage',
+    order: 13,
   },
 };
 
@@ -519,6 +532,38 @@ export const SUB_ITEM_METADATA: Record<PermissionKey, SubItemMetadata> = {
     description: 'Ability to approve, reject, or manage form submissions',
     order: 6,
     module: PERMISSION_MODULES.FORM_MANAGEMENT,
+  },
+
+  // Documents
+  [P.DOCS_VIEW]: {
+    name: 'View Documents',
+    description: 'Access to view the Documents page and browse uploaded files',
+    order: 1,
+    module: PERMISSION_MODULES.DOCUMENTS,
+  },
+  [P.DOCS_UPLOAD]: {
+    name: 'Upload Documents',
+    description: 'Ability to upload new documents and import URLs',
+    order: 2,
+    module: PERMISSION_MODULES.DOCUMENTS,
+  },
+  [P.DOCS_EDIT]: {
+    name: 'Edit Documents',
+    description: 'Ability to edit document metadata, move between folders, and replace files',
+    order: 3,
+    module: PERMISSION_MODULES.DOCUMENTS,
+  },
+  [P.DOCS_DELETE]: {
+    name: 'Delete Documents',
+    description: 'Ability to delete documents and their associated files',
+    order: 4,
+    module: PERMISSION_MODULES.DOCUMENTS,
+  },
+  [P.DOCS_MANAGE_FOLDERS]: {
+    name: 'Manage Folders',
+    description: 'Ability to create, rename, and delete document folders',
+    order: 5,
+    module: PERMISSION_MODULES.DOCUMENTS,
   },
 };
 

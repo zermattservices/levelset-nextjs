@@ -16,6 +16,7 @@ import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
+import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -112,6 +113,13 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       requiredPermission: P.HR_VIEW_REPORTING,
     },
     {
+      label: 'Documents',
+      description: 'Organization document hub',
+      href: '/documents',
+      icon: <FolderOutlinedIcon sx={{ fontSize: 22 }} />,
+      levelsetAdminOnly: true,
+    },
+    {
       label: '360 Overview',
       description: 'Complete employee profiles',
       icon: <AllInclusiveOutlinedIcon sx={{ fontSize: 22 }} />,
@@ -142,7 +150,7 @@ export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) 
     if (!item.requiredPermission) return true;
     return has(item.requiredPermission);
   });
-  const isTwoColumn = menuType === 'operations';
+  const isTwoColumn = menuType === 'operations' || menuType === 'hr';
   const isRoadmapSubdomain = useIsRoadmapSubdomain();
 
   // Helper to get the correct link URL

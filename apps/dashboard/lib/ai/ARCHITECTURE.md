@@ -12,7 +12,7 @@
 |-------|--------|-------------|--------------|
 | **Phase 1: Monorepo** | **Complete** | pnpm workspaces, Turborepo, `apps/agent` on Fly.io, `packages/shared`, `packages/permissions`, `packages/supabase-client`, `packages/design-tokens` | — |
 | **Phase 2: Agentic Foundation** | **In Progress** | Agent skeleton (Hono, auth middleware, health check, CORS), chat endpoint with tool loop, LLM integration (MiniMax M2.5 + Claude Sonnet escalation via OpenRouter), conversation DB tables (`ai_conversations`, `ai_messages`), conversation persistence + history pagination, structured data tools (employee lookup/list, ratings, infractions), SSE streaming with tool call events, usage tracking + rate limiting | Dashboard chat UI |
-| **Phase 3: Doc Intelligence** | Not Started | — | PageIndex integration, hybrid RAG |
+| **Phase 3: Doc Intelligence** | **In Progress** | Document storage (`document_folders`, `documents`, `document_digests`, `document_versions`), `org_documents` storage bucket, Documents hub UI (folder navigation, upload, replace, versioning), content extraction pipeline (text/PDF via pdf-parse/DOCX via mammoth/OCR via OpenAI Vision/URL via Defuddle), permission module (DOCUMENTS + 5 sub-items) | PageIndex integration, hybrid RAG, pgvector embeddings |
 | **Phase 4-5: Meetings** | Not Started | — | All meeting functionality |
 | **Phase 6: Memory** | Not Started | — | Memory tables, feedback, learning |
 | **Phase 7: Autonomy** | Not Started | — | Heartbeat, escalation, channels |
@@ -2034,8 +2034,11 @@ export const LEVI_TOOLS = {
 **Deliverables:** Functional chat assistant with structured data tools, streaming, and usage tracking
 
 ### Phase 3: Document Intelligence
+- [x] Document storage and management UI (document hub, folders, upload, replace, versioning)
+- [x] Content extraction pipeline (text, PDF via pdf-parse, DOCX via mammoth)
+- [x] Image OCR (OpenAI Vision API via OpenRouter)
+- [x] URL content extraction (Defuddle + jsdom)
 - [ ] PageIndex integration
-- [ ] Document and meeting tools
 - [ ] Hybrid retrieval (pgvector for structured, PageIndex for documents)
 - [ ] Operational overview document indexing
 
