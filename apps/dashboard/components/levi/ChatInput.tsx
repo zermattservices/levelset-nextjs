@@ -1,7 +1,7 @@
 /**
  * ChatInput — bottom input bar for the Levi chat.
  * Auto-expanding textarea, Enter to send (Shift+Enter for newline).
- * Includes a "New conversation" button to clear chat history.
+ * Includes a "New conversation" button pinned to bottom-right of the full-width bar.
  */
 
 import * as React from 'react';
@@ -90,21 +90,21 @@ export function ChatInput({ onSend, onClear, disabled, hasMessages }: ChatInputP
             <ArrowUpwardIcon style={{ fontSize: 20 }} />
           </button>
         </div>
-        {hasMessages && (
-          <div className={styles.bottomRow}>
-            <button
-              type="button"
-              className={styles.clearButton}
-              onClick={onClear}
-              disabled={disabled}
-              aria-label="New conversation"
-            >
-              <AddIcon style={{ fontSize: 14 }} />
-              New conversation
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* Pinned to bottom-right of the full-width bar, outside the centered inner */}
+      {hasMessages && (
+        <button
+          type="button"
+          className={styles.clearButton}
+          onClick={onClear}
+          disabled={disabled}
+          aria-label="New conversation"
+        >
+          <AddIcon style={{ fontSize: 14 }} />
+          New conversation
+        </button>
+      )}
     </div>
   );
 }

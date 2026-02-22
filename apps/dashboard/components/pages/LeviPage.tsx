@@ -76,7 +76,7 @@ export function LeviPage() {
         <title>Levi | Levelset</title>
       </Head>
       <div className={styles.page}>
-        <MenuNavigation />
+        <MenuNavigation fullWidth />
 
         {isLevelsetAdmin ? (
           <div className={styles.chatArea}>

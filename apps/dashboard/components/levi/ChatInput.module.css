@@ -1,4 +1,5 @@
 .container {
+  position: relative;
   padding: var(--ls-space-3) var(--ls-space-4);
   border-top: 1px solid var(--ls-color-neutral-border);
   background: var(--ls-color-basic-base);
@@ -67,19 +68,16 @@
   cursor: default;
 }
 
-.bottomRow {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: var(--ls-space-2);
-}
-
 .clearButton {
+  position: absolute;
+  right: var(--ls-space-4);
+  bottom: var(--ls-space-3);
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-family: var(--ls-font-body);
   font-size: var(--ls-font-size-xs);
-  color: var(--ls-color-text-tertiary);
+  color: var(--ls-color-text-secondary);
   background: none;
   border: 1px solid var(--ls-color-neutral-border);
   border-radius: var(--ls-radius-lg);
@@ -89,7 +87,7 @@
 }
 
 .clearButton:hover:not(:disabled) {
-  color: var(--ls-color-text-secondary);
+  color: var(--ls-color-text-primary);
   border-color: var(--ls-color-text-tertiary);
   background: var(--ls-color-muted-soft);
 }
