@@ -96,6 +96,10 @@ function buildSchema(fields: SimpleField[]): { schema: Record<string, any>; uiSc
     if (field.type === 'textarea') {
       fieldUi['ui:options'] = { rows: field.rows || 3 };
     }
+    // Rating fields render their own card with title — hide RJSF's built-in label
+    if (field.type === 'rating_1_3') {
+      fieldUi['ui:options'] = { ...(fieldUi['ui:options'] || {}), label: false };
+    }
     fieldUi['ui:fieldMeta'] = {
       fieldType: field.type,
       labelEs: field.labelEs,
@@ -124,15 +128,15 @@ function buildSchema(fields: SimpleField[]): { schema: Record<string, any>; uiSc
 
 function buildRatingFields(requireNotes: boolean): SimpleField[] {
   return [
-    { id: generateFieldId(), type: 'employee_select', label: 'Employee', labelEs: 'Empleado', required: true },
-    { id: generateFieldId(), type: 'leader_select', label: 'Leader', labelEs: 'Líder', required: true },
+    { id: generateFieldId(), type: 'leader_select', label: 'Leader name', labelEs: 'Nombre del líder', required: true },
+    { id: generateFieldId(), type: 'employee_select', label: 'Team member', labelEs: 'Miembro del equipo', required: true },
     { id: generateFieldId(), type: 'position_select', label: 'Position', labelEs: 'Posición', required: true },
-    { id: generateFieldId(), type: 'rating_1_3', label: 'Rating 1', labelEs: 'Calificación 1', required: true },
-    { id: generateFieldId(), type: 'rating_1_3', label: 'Rating 2', labelEs: 'Calificación 2', required: true },
-    { id: generateFieldId(), type: 'rating_1_3', label: 'Rating 3', labelEs: 'Calificación 3', required: true },
-    { id: generateFieldId(), type: 'rating_1_3', label: 'Rating 4', labelEs: 'Calificación 4', required: true },
-    { id: generateFieldId(), type: 'rating_1_3', label: 'Rating 5', labelEs: 'Calificación 5', required: true },
-    { id: generateFieldId(), type: 'textarea', label: 'Notes', labelEs: 'Notas', required: requireNotes, rows: 3 },
+    { id: generateFieldId(), type: 'rating_1_3', label: 'Criteria 1', labelEs: 'Criterio 1', required: true },
+    { id: generateFieldId(), type: 'rating_1_3', label: 'Criteria 2', labelEs: 'Criterio 2', required: true },
+    { id: generateFieldId(), type: 'rating_1_3', label: 'Criteria 3', labelEs: 'Criterio 3', required: true },
+    { id: generateFieldId(), type: 'rating_1_3', label: 'Criteria 4', labelEs: 'Criterio 4', required: true },
+    { id: generateFieldId(), type: 'rating_1_3', label: 'Criteria 5', labelEs: 'Criterio 5', required: true },
+    { id: generateFieldId(), type: 'textarea', label: 'Additional Details', labelEs: 'Detalles Adicionales', required: requireNotes, rows: 3 },
   ];
 }
 
@@ -176,14 +180,14 @@ const TEMPLATE_DEFS: TemplateDefinition[] = [
   {
     name: 'Positional Excellence Rating',
     name_es: 'Calificación de Excelencia Posicional',
-    description: 'Standard positional excellence rating form',
-    description_es: 'Formulario estándar de calificación de excelencia posicional',
+    description: 'Evaluate Team Members across the Big 5 competencies for the selected position.',
+    description_es: 'Evalúe a los miembros del equipo en las 5 competencias principales para la posición seleccionada.',
     form_type: 'rating',
     groupSlug: 'positional_excellence',
     buildFields: buildRatingFields,
     buildMappings: (fields) => ({
-      employee_id: fields[0].id,
-      leader_id: fields[1].id,
+      leader_id: fields[0].id,
+      employee_id: fields[1].id,
       position: fields[2].id,
       ratings: [fields[3].id, fields[4].id, fields[5].id, fields[6].id, fields[7].id],
       notes: fields[8].id,

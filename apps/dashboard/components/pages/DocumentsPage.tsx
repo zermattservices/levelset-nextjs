@@ -1154,7 +1154,7 @@ export function DocumentsPage() {
           {uploadMode === 'url' && (
             <StyledTextField
               label="URL"
-              placeholder="https://example.com/document.pdf"
+              placeholder="https://example.com/page-or-resource"
               fullWidth
               size="small"
               value={uploadUrl}

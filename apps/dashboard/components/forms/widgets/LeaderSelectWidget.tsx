@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Autocomplete, TextField, FormControl, FormHelperText } from '@mui/material';
 import type { WidgetProps } from '@rjsf/utils';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -32,11 +33,13 @@ function isLeaderRole(role?: string | null): boolean {
  */
 export function LeaderSelectWidget(props: WidgetProps) {
   const { id, value, required, disabled, readonly, onChange, label, rawErrors } = props;
+  const { org_id } = useAuth();
   const [leaders, setLeaders] = React.useState<LeaderOption[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [loadError, setLoadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    if (!org_id) return;
     let cancelled = false;
 
     const fetchLeaders = async () => {
@@ -44,25 +47,11 @@ export function LeaderSelectWidget(props: WidgetProps) {
       try {
         const { createSupabaseClient } = await import('@/util/supabase/component');
         const supabase = createSupabaseClient();
-        const { data: session } = await supabase.auth.getSession();
-        if (!session.session) {
-          setLoadError('Not authenticated');
-          return;
-        }
-
-        const { data: appUser } = await supabase
-          .from('app_users')
-          .select('org_id')
-          .eq('auth_user_id', session.session.user.id)
-          .limit(1)
-          .single();
-
-        if (!appUser?.org_id || cancelled) return;
 
         const { data } = await supabase
           .from('employees')
           .select('id, full_name, first_name, last_name, role, is_leader')
-          .eq('org_id', appUser.org_id)
+          .eq('org_id', org_id)
           .eq('active', true)
           .order('full_name');
 
@@ -87,7 +76,7 @@ export function LeaderSelectWidget(props: WidgetProps) {
 
     fetchLeaders();
     return () => { cancelled = true; };
-  }, []);
+  }, [org_id]);
 
   const selectedOption = leaders.find((e) => e.id === value) || null;
   const isDisabled = disabled || readonly;

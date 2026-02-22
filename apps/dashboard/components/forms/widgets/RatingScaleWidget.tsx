@@ -1,86 +1,138 @@
 import * as React from 'react';
-import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, FormHelperText } from '@mui/material';
+import { Box, Radio, RadioGroup, FormHelperText, Typography } from '@mui/material';
 import type { WidgetProps } from '@rjsf/utils';
 
-const fontFamily = '"Satoshi", sans-serif';
+const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
-const RATING_1_3_LABELS: Record<number, { label: string; color: string }> = {
-  1: { label: 'Not Yet', color: '#b91c1c' },
-  2: { label: 'On the Rise', color: '#f59e0b' },
-  3: { label: 'Crushing It', color: 'var(--ls-color-brand)' },
-};
+const RATING_1_3_OPTIONS: Array<{ label: string; value: number; color: string }> = [
+  { label: 'Not Yet', value: 1, color: '#b91c1c' },
+  { label: 'On the Rise', value: 2, color: '#f59e0b' },
+  { label: 'Crushing It', value: 3, color: 'var(--ls-color-brand)' },
+];
 
-const RATING_1_5_LABELS: Record<number, { label: string; color: string }> = {
-  1: { label: '1 - Poor', color: 'var(--ls-color-destructive)' },
-  2: { label: '2 - Below', color: '#E57373' },
-  3: { label: '3 - Meets', color: 'var(--ls-color-warning)' },
-  4: { label: '4 - Good', color: '#81C784' },
-  5: { label: '5 - Excellent', color: 'var(--ls-color-success)' },
-};
+const RATING_1_5_OPTIONS: Array<{ label: string; value: number; color: string }> = [
+  { label: '1 - Poor', value: 1, color: 'var(--ls-color-destructive)' },
+  { label: '2 - Below', value: 2, color: '#E57373' },
+  { label: '3 - Meets', value: 3, color: 'var(--ls-color-warning)' },
+  { label: '4 - Good', value: 4, color: '#81C784' },
+  { label: '5 - Excellent', value: 5, color: 'var(--ls-color-success)' },
+];
 
+/**
+ * Rating scale widget for RJSF forms.
+ *
+ * Renders as a card matching the PWA PositionalRatingsForm layout:
+ * - Card container with border, rounded corners, background
+ * - Bold title + optional description
+ * - Horizontally distributed radio buttons with colored labels above
+ */
 export function RatingScaleWidget(props: WidgetProps) {
-  const { id, value, required, disabled, readonly, onChange, label, schema, rawErrors } = props;
+  const { value, required, disabled, readonly, onChange, label, schema, rawErrors, uiSchema } = props;
 
-  const options: number[] = schema.enum as number[] || [];
-  const isScale3 = options.length === 3 && options[0] === 1 && options[2] === 3;
-  const labels = isScale3 ? RATING_1_3_LABELS : RATING_1_5_LABELS;
+  const enumValues: number[] = (schema.enum as number[]) || [];
+  const isScale3 = enumValues.length === 3 && enumValues[0] === 1 && enumValues[2] === 3;
+  const ratingOptions = isScale3 ? RATING_1_3_OPTIONS : RATING_1_5_OPTIONS;
+
+  // Description from schema or uiSchema fieldMeta
+  const description = schema.description || uiSchema?.['ui:fieldMeta']?.description || '';
 
   return (
-    <FormControl
-      required={required}
-      disabled={disabled || readonly}
-      error={rawErrors && rawErrors.length > 0}
-      component="fieldset"
-      sx={{ width: '100%' }}
+    <Box
+      sx={{
+        backgroundColor: 'var(--ls-color-bg-container, #fff)',
+        borderRadius: '12px',
+        border: '1px solid var(--ls-color-muted-border)',
+        padding: '16px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        opacity: disabled || readonly ? 0.6 : 1,
+      }}
     >
-      {label && (
-        <FormLabel component="legend" sx={{ fontFamily, fontSize: 14, fontWeight: 500, mb: 1 }}>
-          {label}
-        </FormLabel>
-      )}
+      {/* Title + Description */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {label && (
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: 16,
+              fontWeight: 600,
+              color: 'var(--ls-color-neutral-soft-foreground)',
+            }}
+          >
+            {label}
+            {required && (
+              <Box component="span" sx={{ color: '#dc2626', ml: 0.5 }}>*</Box>
+            )}
+          </Typography>
+        )}
+        {description && (
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--ls-color-muted)',
+              lineHeight: 1.4,
+            }}
+          >
+            {description}
+          </Typography>
+        )}
+      </Box>
+
+      {/* Radio group — labels above radios, evenly distributed */}
       <RadioGroup
         row
         value={value ?? ''}
         onChange={(e) => onChange(Number(e.target.value))}
-        sx={{ gap: '4px' }}
+        sx={{ justifyContent: 'space-between', columnGap: 1 }}
       >
-        {options.map((opt) => {
-          const info = labels[opt] || { label: String(opt), color: 'var(--ls-color-muted)' };
-          const isSelected = value === opt;
-          return (
-            <FormControlLabel
-              key={opt}
-              value={opt}
-              control={
-                <Radio
-                  size="small"
-                  sx={{
-                    color: 'var(--ls-color-muted-border)',
-                    '&.Mui-checked': { color: info.color },
-                  }}
-                />
-              }
-              label={
-                <span
-                  style={{
-                    fontFamily,
-                    fontSize: 13,
-                    fontWeight: isSelected ? 600 : 400,
-                    color: isSelected ? info.color : 'var(--ls-color-text-primary)',
-                  }}
-                >
-                  {info.label}
-                </span>
-              }
+        {ratingOptions.map((option) => (
+          <Box
+            key={option.value}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 0.5,
+              flex: 1,
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily,
+                fontSize: 13,
+                fontWeight: 700,
+                color: option.color,
+                textAlign: 'center',
+              }}
+            >
+              {option.label}
+            </Typography>
+            <Radio
+              value={option.value}
+              disabled={disabled || readonly}
+              sx={{
+                color: option.color,
+                '&.Mui-checked': {
+                  color: option.color,
+                },
+                '& .MuiSvgIcon-root': {
+                  fontSize: 26,
+                },
+              }}
             />
-          );
-        })}
+          </Box>
+        ))}
       </RadioGroup>
+
+      {/* Validation errors */}
       {rawErrors && rawErrors.length > 0 && (
         <FormHelperText error sx={{ fontFamily, fontSize: 12 }}>
           {rawErrors[0]}
         </FormHelperText>
       )}
-    </FormControl>
+    </Box>
   );
 }

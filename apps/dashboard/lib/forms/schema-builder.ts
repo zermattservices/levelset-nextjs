@@ -170,6 +170,14 @@ export function fieldsToJsonSchema(fields: FormField[]): {
       fieldUiSchema['ui:widget'] = fieldDef.uiWidget;
     }
 
+    // Rating fields render their own card with title + description — hide RJSF's label
+    if (field.type === 'rating_1_3' || field.type === 'rating_1_5') {
+      fieldUiSchema['ui:options'] = {
+        ...(fieldUiSchema['ui:options'] || {}),
+        label: false,
+      };
+    }
+
     // Textarea rows
     if (field.type === 'textarea') {
       fieldUiSchema['ui:options'] = {

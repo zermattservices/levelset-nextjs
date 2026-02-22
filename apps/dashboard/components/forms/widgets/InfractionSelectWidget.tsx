@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Autocomplete, TextField, FormControl, FormHelperText } from '@mui/material';
 import type { WidgetProps } from '@rjsf/utils';
+import { useAuth } from '@/lib/providers/AuthProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -19,11 +20,13 @@ interface InfractionRubricOption {
  */
 export function InfractionSelectWidget(props: WidgetProps) {
   const { id, value, required, disabled, readonly, onChange, label, rawErrors } = props;
+  const { org_id } = useAuth();
   const [options, setOptions] = React.useState<InfractionRubricOption[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [loadError, setLoadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    if (!org_id) return;
     let cancelled = false;
 
     const fetchRubric = async () => {
@@ -31,28 +34,12 @@ export function InfractionSelectWidget(props: WidgetProps) {
       try {
         const { createSupabaseClient } = await import('@/util/supabase/component');
         const supabase = createSupabaseClient();
-        const { data: session } = await supabase.auth.getSession();
-        const token = session.session?.access_token;
-        if (!token) {
-          setLoadError('Not authenticated');
-          return;
-        }
-
-        // Get current user's org
-        const { data: appUser } = await supabase
-          .from('app_users')
-          .select('org_id')
-          .eq('auth_user_id', session.session!.user.id)
-          .limit(1)
-          .single();
-
-        if (!appUser?.org_id || cancelled) return;
 
         // Fetch org-level infraction rubric (location_id IS NULL)
         const { data } = await supabase
           .from('infractions_rubric')
           .select('id, action, action_es, points')
-          .eq('org_id', appUser.org_id)
+          .eq('org_id', org_id)
           .is('location_id', null)
           .order('points', { ascending: true });
 
@@ -76,7 +63,7 @@ export function InfractionSelectWidget(props: WidgetProps) {
 
     fetchRubric();
     return () => { cancelled = true; };
-  }, []);
+  }, [org_id]);
 
   const selectedOption = options.find((o) => o.id === value) || null;
   const isDisabled = disabled || readonly;
