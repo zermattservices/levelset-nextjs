@@ -1,4 +1,4 @@
-{"types":"export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: \"13.0.5\"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -47,25 +47,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"ai_conversations_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "ai_conversations_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"ai_conversations_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "ai_conversations_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"ai_conversations_user_id_fkey\"
-            columns: [\"user_id\"]
+            foreignKeyName: "ai_conversations_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -105,11 +105,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"ai_messages_conversation_id_fkey\"
-            columns: [\"conversation_id\"]
+            foreignKeyName: "ai_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
             isOneToOne: false
-            referencedRelation: \"ai_conversations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -170,53 +170,53 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"app_users_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "app_users_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"app_users_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "app_users_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"app_users_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "app_users_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"app_users_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "app_users_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"app_users_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "app_users_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"app_users_permission_profile_id_fkey\"
-            columns: [\"permission_profile_id\"]
+            foreignKeyName: "app_users_permission_profile_id_fkey"
+            columns: ["permission_profile_id"]
             isOneToOne: false
-            referencedRelation: \"permission_profiles\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "permission_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"fk_app_users_org_loc\"
-            columns: [\"org_id\", \"location_id\"]
+            foreignKeyName: "fk_app_users_org_loc"
+            columns: ["org_id", "location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"org_id\", \"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["org_id", "id"]
           },
         ]
       }
@@ -253,11 +253,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"break_rules_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "break_rules_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -306,39 +306,39 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"certification_audit_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "certification_audit_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"certification_audit_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "certification_audit_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"certification_audit_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "certification_audit_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"certification_audit_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "certification_audit_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"certification_audit_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "certification_audit_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -423,25 +423,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"context_chunks_document_digest_id_fkey\"
-            columns: [\"document_digest_id\"]
+            foreignKeyName: "context_chunks_document_digest_id_fkey"
+            columns: ["document_digest_id"]
             isOneToOne: false
-            referencedRelation: \"document_digests\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "document_digests"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"context_chunks_global_document_digest_id_fkey\"
-            columns: [\"global_document_digest_id\"]
+            foreignKeyName: "context_chunks_global_document_digest_id_fkey"
+            columns: ["global_document_digest_id"]
             isOneToOne: false
-            referencedRelation: \"global_document_digests\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "global_document_digests"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"context_chunks_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "context_chunks_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -475,39 +475,39 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"daily_position_averages_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "daily_position_averages_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"daily_position_averages_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "daily_position_averages_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"daily_position_averages_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "daily_position_averages_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"daily_position_averages_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "daily_position_averages_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"daily_position_averages_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "daily_position_averages_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -556,67 +556,67 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"disc_actions_acting_leader_fkey\"
-            columns: [\"acting_leader\"]
+            foreignKeyName: "disc_actions_acting_leader_fkey"
+            columns: ["acting_leader"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"disc_actions_acting_leader_fkey\"
-            columns: [\"acting_leader\"]
+            foreignKeyName: "disc_actions_acting_leader_fkey"
+            columns: ["acting_leader"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"disc_actions_acting_leader_fkey\"
-            columns: [\"acting_leader\"]
+            foreignKeyName: "disc_actions_acting_leader_fkey"
+            columns: ["acting_leader"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"disc_actions_action_id_fkey\"
-            columns: [\"action_id\"]
+            foreignKeyName: "disc_actions_action_id_fkey"
+            columns: ["action_id"]
             isOneToOne: false
-            referencedRelation: \"disc_actions_rubric\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "disc_actions_rubric"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"disc_actions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "disc_actions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"disc_actions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "disc_actions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"disc_actions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "disc_actions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"disc_actions_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "disc_actions_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"disc_actions_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "disc_actions_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -647,25 +647,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"disc_actions_rubric_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "disc_actions_rubric_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"disc_actions_rubric_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "disc_actions_rubric_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"disc_actions_rubric_org_id_fkey1\"
-            columns: [\"org_id\"]
+            foreignKeyName: "disc_actions_rubric_org_id_fkey1"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -696,11 +696,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"discipline_role_access_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "discipline_role_access_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -764,18 +764,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"document_digests_document_id_fkey\"
-            columns: [\"document_id\"]
+            foreignKeyName: "document_digests_document_id_fkey"
+            columns: ["document_id"]
             isOneToOne: false
-            referencedRelation: \"documents\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"document_digests_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "document_digests_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -809,25 +809,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"document_folders_created_by_fkey\"
-            columns: [\"created_by\"]
+            foreignKeyName: "document_folders_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"document_folders_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "document_folders_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"document_folders_parent_folder_id_fkey\"
-            columns: [\"parent_folder_id\"]
+            foreignKeyName: "document_folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
             isOneToOne: false
-            referencedRelation: \"document_folders\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "document_folders"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -864,18 +864,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"document_versions_document_id_fkey\"
-            columns: [\"document_id\"]
+            foreignKeyName: "document_versions_document_id_fkey"
+            columns: ["document_id"]
             isOneToOne: false
-            referencedRelation: \"documents\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"document_versions_replaced_by_fkey\"
-            columns: [\"replaced_by\"]
+            foreignKeyName: "document_versions_replaced_by_fkey"
+            columns: ["replaced_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -936,32 +936,32 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"documents_folder_id_fkey\"
-            columns: [\"folder_id\"]
+            foreignKeyName: "documents_folder_id_fkey"
+            columns: ["folder_id"]
             isOneToOne: false
-            referencedRelation: \"document_folders\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "document_folders"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"documents_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "documents_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"documents_uploaded_by_fkey\"
-            columns: [\"uploaded_by\"]
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
         ]
       }
       employees: {
         Row: {
           active: boolean
-          availability: Database[\"public\"][\"Enums\"][\"availability_type\"] | null
+          availability: Database["public"]["Enums"]["availability_type"] | null
           birth_date: string | null
           calculated_pay: number | null
           certified_status: string
@@ -990,7 +990,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
-          availability?: Database[\"public\"][\"Enums\"][\"availability_type\"] | null
+          availability?: Database["public"]["Enums"]["availability_type"] | null
           birth_date?: string | null
           calculated_pay?: number | null
           certified_status?: string
@@ -1019,7 +1019,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
-          availability?: Database[\"public\"][\"Enums\"][\"availability_type\"] | null
+          availability?: Database["public"]["Enums"]["availability_type"] | null
           birth_date?: string | null
           calculated_pay?: number | null
           certified_status?: string
@@ -1048,46 +1048,46 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"employees_consolidated_employee_id_fkey\"
-            columns: [\"consolidated_employee_id\"]
+            foreignKeyName: "employees_consolidated_employee_id_fkey"
+            columns: ["consolidated_employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"employees_consolidated_employee_id_fkey\"
-            columns: [\"consolidated_employee_id\"]
+            foreignKeyName: "employees_consolidated_employee_id_fkey"
+            columns: ["consolidated_employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"employees_consolidated_employee_id_fkey\"
-            columns: [\"consolidated_employee_id\"]
+            foreignKeyName: "employees_consolidated_employee_id_fkey"
+            columns: ["consolidated_employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"employees_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "employees_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"employees_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "employees_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"fk_employees_org_loc\"
-            columns: [\"org_id\", \"location_id\"]
+            foreignKeyName: "fk_employees_org_loc"
+            columns: ["org_id", "location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"org_id\", \"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["org_id", "id"]
           },
         ]
       }
@@ -1151,60 +1151,60 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"evaluations_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "evaluations_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"evaluations_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "evaluations_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"evaluations_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "evaluations_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"evaluations_leader_id_fkey\"
-            columns: [\"leader_id\"]
+            foreignKeyName: "evaluations_leader_id_fkey"
+            columns: ["leader_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"evaluations_leader_id_fkey\"
-            columns: [\"leader_id\"]
+            foreignKeyName: "evaluations_leader_id_fkey"
+            columns: ["leader_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"evaluations_leader_id_fkey\"
-            columns: [\"leader_id\"]
+            foreignKeyName: "evaluations_leader_id_fkey"
+            columns: ["leader_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"evaluations_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "evaluations_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"evaluations_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "evaluations_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1295,11 +1295,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"form_groups_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "form_groups_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1354,53 +1354,53 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"form_submissions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "form_submissions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"form_submissions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "form_submissions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"form_submissions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "form_submissions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"form_submissions_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "form_submissions_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"form_submissions_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "form_submissions_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"form_submissions_submitted_by_fkey\"
-            columns: [\"submitted_by\"]
+            foreignKeyName: "form_submissions_submitted_by_fkey"
+            columns: ["submitted_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"form_submissions_template_id_fkey\"
-            columns: [\"template_id\"]
+            foreignKeyName: "form_submissions_template_id_fkey"
+            columns: ["template_id"]
             isOneToOne: false
-            referencedRelation: \"form_templates\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "form_templates"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1467,25 +1467,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"form_templates_created_by_fkey\"
-            columns: [\"created_by\"]
+            foreignKeyName: "form_templates_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"form_templates_group_id_fkey\"
-            columns: [\"group_id\"]
+            foreignKeyName: "form_templates_group_id_fkey"
+            columns: ["group_id"]
             isOneToOne: false
-            referencedRelation: \"form_groups\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "form_groups"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"form_templates_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "form_templates_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1546,11 +1546,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"global_document_digests_document_id_fkey\"
-            columns: [\"document_id\"]
+            foreignKeyName: "global_document_digests_document_id_fkey"
+            columns: ["document_id"]
             isOneToOne: false
-            referencedRelation: \"global_documents\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "global_documents"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1581,18 +1581,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"global_document_folders_created_by_fkey\"
-            columns: [\"created_by\"]
+            foreignKeyName: "global_document_folders_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"global_document_folders_parent_folder_id_fkey\"
-            columns: [\"parent_folder_id\"]
+            foreignKeyName: "global_document_folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
             isOneToOne: false
-            referencedRelation: \"global_document_folders\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "global_document_folders"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1629,18 +1629,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"global_document_versions_document_id_fkey\"
-            columns: [\"document_id\"]
+            foreignKeyName: "global_document_versions_document_id_fkey"
+            columns: ["document_id"]
             isOneToOne: false
-            referencedRelation: \"global_documents\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "global_documents"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"global_document_versions_replaced_by_fkey\"
-            columns: [\"replaced_by\"]
+            foreignKeyName: "global_document_versions_replaced_by_fkey"
+            columns: ["replaced_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1701,18 +1701,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"global_documents_folder_id_fkey\"
-            columns: [\"folder_id\"]
+            foreignKeyName: "global_documents_folder_id_fkey"
+            columns: ["folder_id"]
             isOneToOne: false
-            referencedRelation: \"global_document_folders\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "global_document_folders"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"global_documents_uploaded_by_fkey\"
-            columns: [\"uploaded_by\"]
+            foreignKeyName: "global_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1797,18 +1797,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"google_reviews_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "google_reviews_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"google_reviews_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "google_reviews_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1839,18 +1839,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"hs_sync_notifications_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "hs_sync_notifications_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"hs_sync_notifications_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "hs_sync_notifications_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1893,11 +1893,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"infraction_documents_infraction_id_fkey\"
-            columns: [\"infraction_id\"]
+            foreignKeyName: "infraction_documents_infraction_id_fkey"
+            columns: ["infraction_id"]
             isOneToOne: false
-            referencedRelation: \"infractions\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "infractions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1958,60 +1958,60 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"infractions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "infractions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"infractions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "infractions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"infractions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "infractions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"infractions_leader_id_fkey\"
-            columns: [\"leader_id\"]
+            foreignKeyName: "infractions_leader_id_fkey"
+            columns: ["leader_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"infractions_leader_id_fkey\"
-            columns: [\"leader_id\"]
+            foreignKeyName: "infractions_leader_id_fkey"
+            columns: ["leader_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"infractions_leader_id_fkey\"
-            columns: [\"leader_id\"]
+            foreignKeyName: "infractions_leader_id_fkey"
+            columns: ["leader_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"infractions_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "infractions_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"infractions_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "infractions_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2051,18 +2051,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"disc_rubric_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "disc_rubric_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"disc_rubric_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "disc_rubric_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2090,11 +2090,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"levi_config_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "levi_config_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: true
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2182,25 +2182,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"levi_usage_log_conversation_id_fkey\"
-            columns: [\"conversation_id\"]
+            foreignKeyName: "levi_usage_log_conversation_id_fkey"
+            columns: ["conversation_id"]
             isOneToOne: false
-            referencedRelation: \"ai_conversations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"levi_usage_log_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "levi_usage_log_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"levi_usage_log_user_id_fkey\"
-            columns: [\"user_id\"]
+            foreignKeyName: "levi_usage_log_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2243,11 +2243,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"location_business_hours_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "location_business_hours_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2284,11 +2284,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"location_role_hierarchy_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "location_role_hierarchy_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2382,11 +2382,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"locations_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "locations_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2453,11 +2453,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"org_feature_toggles_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "org_feature_toggles_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: true
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2488,11 +2488,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"org_features_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "org_features_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2532,11 +2532,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"org_pay_config_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "org_pay_config_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2576,11 +2576,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"org_pay_rates_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "org_pay_rates_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2635,18 +2635,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"org_positions_area_id_fkey\"
-            columns: [\"area_id\"]
+            foreignKeyName: "org_positions_area_id_fkey"
+            columns: ["area_id"]
             isOneToOne: false
-            referencedRelation: \"scheduling_areas\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "scheduling_areas"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"org_positions_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "org_positions_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2686,11 +2686,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"org_roles_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "org_roles_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2754,18 +2754,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"payroll_sync_notifications_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "payroll_sync_notifications_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"payroll_sync_notifications_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "payroll_sync_notifications_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2826,18 +2826,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"permission_profile_access_profile_id_fkey\"
-            columns: [\"profile_id\"]
+            foreignKeyName: "permission_profile_access_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: \"permission_profiles\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "permission_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"permission_profile_access_sub_item_id_fkey\"
-            columns: [\"sub_item_id\"]
+            foreignKeyName: "permission_profile_access_sub_item_id_fkey"
+            columns: ["sub_item_id"]
             isOneToOne: false
-            referencedRelation: \"permission_sub_items\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "permission_sub_items"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2877,11 +2877,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"permission_profiles_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "permission_profiles_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2918,18 +2918,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"permission_sub_items_module_id_fkey\"
-            columns: [\"module_id\"]
+            foreignKeyName: "permission_sub_items_module_id_fkey"
+            columns: ["module_id"]
             isOneToOne: false
-            referencedRelation: \"permission_modules\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "permission_modules"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"permission_sub_items_requires_sub_item_id_fkey\"
-            columns: [\"requires_sub_item_id\"]
+            foreignKeyName: "permission_sub_items_requires_sub_item_id_fkey"
+            columns: ["requires_sub_item_id"]
             isOneToOne: false
-            referencedRelation: \"permission_sub_items\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "permission_sub_items"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3038,25 +3038,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"position_criteria_pillar_1_id_fkey\"
-            columns: [\"pillar_1_id\"]
+            foreignKeyName: "position_criteria_pillar_1_id_fkey"
+            columns: ["pillar_1_id"]
             isOneToOne: false
-            referencedRelation: \"oe_pillars\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "oe_pillars"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"position_criteria_pillar_2_id_fkey\"
-            columns: [\"pillar_2_id\"]
+            foreignKeyName: "position_criteria_pillar_2_id_fkey"
+            columns: ["pillar_2_id"]
             isOneToOne: false
-            referencedRelation: \"oe_pillars\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "oe_pillars"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"position_criteria_position_id_fkey\"
-            columns: [\"position_id\"]
+            foreignKeyName: "position_criteria_position_id_fkey"
+            columns: ["position_id"]
             isOneToOne: false
-            referencedRelation: \"org_positions\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "org_positions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3090,11 +3090,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"position_role_permissions_position_id_fkey\"
-            columns: [\"position_id\"]
+            foreignKeyName: "position_role_permissions_position_id_fkey"
+            columns: ["position_id"]
             isOneToOne: false
-            referencedRelation: \"org_positions\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "org_positions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3128,18 +3128,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"fk_rating_thresholds_location\"
-            columns: [\"location_id\"]
+            foreignKeyName: "fk_rating_thresholds_location"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"rating_thresholds_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "rating_thresholds_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3197,67 +3197,67 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"fk_ratings_location\"
-            columns: [\"location_id\"]
+            foreignKeyName: "fk_ratings_location"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"fk_ratings_org\"
-            columns: [\"org_id\"]
+            foreignKeyName: "fk_ratings_org"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"ratings_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "ratings_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"ratings_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "ratings_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"ratings_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "ratings_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"ratings_position_id_fkey\"
-            columns: [\"position_id\"]
+            foreignKeyName: "ratings_position_id_fkey"
+            columns: ["position_id"]
             isOneToOne: false
-            referencedRelation: \"org_positions\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "org_positions"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"ratings_rater_user_id_fkey\"
-            columns: [\"rater_user_id\"]
+            foreignKeyName: "ratings_rater_user_id_fkey"
+            columns: ["rater_user_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"ratings_rater_user_id_fkey\"
-            columns: [\"rater_user_id\"]
+            foreignKeyName: "ratings_rater_user_id_fkey"
+            columns: ["rater_user_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"ratings_rater_user_id_fkey\"
-            columns: [\"rater_user_id\"]
+            foreignKeyName: "ratings_rater_user_id_fkey"
+            columns: ["rater_user_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
         ]
       }
@@ -3306,60 +3306,60 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"recommended_disc_actions_action_taken_by_fkey\"
-            columns: [\"action_taken_by\"]
+            foreignKeyName: "recommended_disc_actions_action_taken_by_fkey"
+            columns: ["action_taken_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"recommended_disc_actions_disc_action_id_fkey\"
-            columns: [\"disc_action_id\"]
+            foreignKeyName: "recommended_disc_actions_disc_action_id_fkey"
+            columns: ["disc_action_id"]
             isOneToOne: false
-            referencedRelation: \"disc_actions\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "disc_actions"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"recommended_disc_actions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "recommended_disc_actions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"recommended_disc_actions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "recommended_disc_actions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"recommended_disc_actions_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "recommended_disc_actions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"recommended_disc_actions_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "recommended_disc_actions_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"recommended_disc_actions_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "recommended_disc_actions_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"recommended_disc_actions_recommended_action_id_fkey\"
-            columns: [\"recommended_action_id\"]
+            foreignKeyName: "recommended_disc_actions_recommended_action_id_fkey"
+            columns: ["recommended_action_id"]
             isOneToOne: false
-            referencedRelation: \"disc_actions_rubric\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "disc_actions_rubric"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3390,11 +3390,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"roadmap_comments_feature_id_fkey\"
-            columns: [\"feature_id\"]
+            foreignKeyName: "roadmap_comments_feature_id_fkey"
+            columns: ["feature_id"]
             isOneToOne: false
-            referencedRelation: \"roadmap_features\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "roadmap_features"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3449,11 +3449,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"roadmap_features_organization_id_fkey\"
-            columns: [\"organization_id\"]
+            foreignKeyName: "roadmap_features_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3484,11 +3484,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"roadmap_votes_feature_id_fkey\"
-            columns: [\"feature_id\"]
+            foreignKeyName: "roadmap_votes_feature_id_fkey"
+            columns: ["feature_id"]
             isOneToOne: false
-            referencedRelation: \"roadmap_features\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "roadmap_features"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3537,25 +3537,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"schedules_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "schedules_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"schedules_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "schedules_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"schedules_published_by_fkey\"
-            columns: [\"published_by\"]
+            foreignKeyName: "schedules_published_by_fkey"
+            columns: ["published_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3592,11 +3592,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"scheduling_areas_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "scheduling_areas_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3642,53 +3642,53 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"setup_assignments_assigned_by_fkey\"
-            columns: [\"assigned_by\"]
+            foreignKeyName: "setup_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"setup_assignments_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "setup_assignments_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"setup_assignments_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "setup_assignments_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"setup_assignments_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "setup_assignments_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"setup_assignments_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "setup_assignments_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"setup_assignments_position_id_fkey\"
-            columns: [\"position_id\"]
+            foreignKeyName: "setup_assignments_position_id_fkey"
+            columns: ["position_id"]
             isOneToOne: false
-            referencedRelation: \"org_positions\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "org_positions"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"setup_assignments_shift_id_fkey\"
-            columns: [\"shift_id\"]
+            foreignKeyName: "setup_assignments_shift_id_fkey"
+            columns: ["shift_id"]
             isOneToOne: false
-            referencedRelation: \"shifts\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3719,11 +3719,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"setup_template_schedules_template_id_fkey\"
-            columns: [\"template_id\"]
+            foreignKeyName: "setup_template_schedules_template_id_fkey"
+            columns: ["template_id"]
             isOneToOne: false
-            referencedRelation: \"setup_templates\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "setup_templates"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3757,18 +3757,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"setup_template_slots_position_id_fkey\"
-            columns: [\"position_id\"]
+            foreignKeyName: "setup_template_slots_position_id_fkey"
+            columns: ["position_id"]
             isOneToOne: false
-            referencedRelation: \"org_positions\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "org_positions"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"setup_template_slots_template_id_fkey\"
-            columns: [\"template_id\"]
+            foreignKeyName: "setup_template_slots_template_id_fkey"
+            columns: ["template_id"]
             isOneToOne: false
-            referencedRelation: \"setup_templates\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "setup_templates"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3805,11 +3805,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"setup_templates_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "setup_templates_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3849,18 +3849,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"shift_areas_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "shift_areas_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"shift_areas_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "shift_areas_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3897,46 +3897,46 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"shift_assignments_assigned_by_fkey\"
-            columns: [\"assigned_by\"]
+            foreignKeyName: "shift_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"shift_assignments_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "shift_assignments_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employee_latest_rating\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"shift_assignments_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "shift_assignments_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"employees\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"shift_assignments_employee_id_fkey\"
-            columns: [\"employee_id\"]
+            foreignKeyName: "shift_assignments_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: \"v_employee_infraction_rollup\"
-            referencedColumns: [\"employee_id\"]
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
           },
           {
-            foreignKeyName: \"shift_assignments_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "shift_assignments_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"shift_assignments_shift_id_fkey\"
-            columns: [\"shift_id\"]
+            foreignKeyName: "shift_assignments_shift_id_fkey"
+            columns: ["shift_id"]
             isOneToOne: false
-            referencedRelation: \"shifts\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3991,32 +3991,32 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"shifts_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "shifts_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"shifts_position_id_fkey\"
-            columns: [\"position_id\"]
+            foreignKeyName: "shifts_position_id_fkey"
+            columns: ["position_id"]
             isOneToOne: false
-            referencedRelation: \"org_positions\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "org_positions"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"shifts_schedule_id_fkey\"
-            columns: [\"schedule_id\"]
+            foreignKeyName: "shifts_schedule_id_fkey"
+            columns: ["schedule_id"]
             isOneToOne: false
-            referencedRelation: \"schedules\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"shifts_shift_area_id_fkey\"
-            columns: [\"shift_area_id\"]
+            foreignKeyName: "shifts_shift_area_id_fkey"
+            columns: ["shift_area_id"]
             isOneToOne: false
-            referencedRelation: \"shift_areas\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "shift_areas"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -4041,18 +4041,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"user_location_access_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "user_location_access_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"user_location_access_user_id_fkey\"
-            columns: [\"user_id\"]
+            foreignKeyName: "user_location_access_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: \"app_users\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -4149,18 +4149,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"yelp_reviews_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "yelp_reviews_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: \"yelp_reviews_org_id_fkey\"
-            columns: [\"org_id\"]
+            foreignKeyName: "yelp_reviews_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: \"orgs\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -4177,11 +4177,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: \"employees_location_id_fkey\"
-            columns: [\"location_id\"]
+            foreignKeyName: "employees_location_id_fkey"
+            columns: ["location_id"]
             isOneToOne: false
-            referencedRelation: \"locations\"
-            referencedColumns: [\"id\"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -4244,16 +4244,16 @@ export type Database = {
         Returns: undefined
       }
       show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { \"\": string }; Returns: string[] }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       store_daily_position_averages: { Args: never; Returns: number }
     }
     Enums: {
-      availability_type: \"Limited\" | \"Available\"
+      availability_type: "Limited" | "Available"
       certification_status_enum:
-        | \"Not Certified\"
-        | \"Pending\"
-        | \"Certified\"
-        | \"PIP\"
+        | "Not Certified"
+        | "Pending"
+        | "Certified"
+        | "PIP"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4261,33 +4261,33 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, \"__InternalSupabase\">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, \"public\">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema[\"Tables\"] & DefaultSchema[\"Views\"])
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions[\"schema\"]][\"Tables\"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions[\"schema\"]][\"Views\"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions[\"schema\"]][\"Tables\"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions[\"schema\"]][\"Views\"])[TableName] extends {
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema[\"Tables\"] &
-        DefaultSchema[\"Views\"])
-    ? (DefaultSchema[\"Tables\"] &
-        DefaultSchema[\"Views\"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -4296,23 +4296,23 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema[\"Tables\"]
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions[\"schema\"]][\"Tables\"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions[\"schema\"]][\"Tables\"][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema[\"Tables\"]
-    ? DefaultSchema[\"Tables\"][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -4321,23 +4321,23 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema[\"Tables\"]
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions[\"schema\"]][\"Tables\"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions[\"schema\"]][\"Tables\"][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema[\"Tables\"]
-    ? DefaultSchema[\"Tables\"][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -4346,49 +4346,48 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema[\"Enums\"]
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions[\"schema\"]][\"Enums\"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions[\"schema\"]][\"Enums\"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema[\"Enums\"]
-    ? DefaultSchema[\"Enums\"][DefaultSchemaEnumNameOrOptions]
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema[\"CompositeTypes\"]
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions[\"schema\"]][\"CompositeTypes\"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions[\"schema\"]][\"CompositeTypes\"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema[\"CompositeTypes\"]
-    ? DefaultSchema[\"CompositeTypes\"][PublicCompositeTypeNameOrOptions]
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
   public: {
     Enums: {
-      availability_type: [\"Limited\", \"Available\"],
+      availability_type: ["Limited", "Available"],
       certification_status_enum: [
-        \"Not Certified\",
-        \"Pending\",
-        \"Certified\",
-        \"PIP\",
+        "Not Certified",
+        "Pending",
+        "Certified",
+        "PIP",
       ],
     },
   },
 } as const
-"}

@@ -78,7 +78,8 @@ export function FeatureRequestsPage() {
   const [editCreator, setEditCreator] = React.useState<string>('levelset');
   const [editCreatorSearch, setEditCreatorSearch] = React.useState('');
   const [showEditCreatorDropdown, setShowEditCreatorDropdown] = React.useState(false);
-  
+  const [editAgentContext, setEditAgentContext] = React.useState('');
+
   // Create form state
   const [createTitle, setCreateTitle] = React.useState('');
   const [createDescription, setCreateDescription] = React.useState('');
@@ -88,7 +89,8 @@ export function FeatureRequestsPage() {
   const [createCreator, setCreateCreator] = React.useState<string>('levelset');
   const [creatorSearch, setCreatorSearch] = React.useState('');
   const [showCreatorDropdown, setShowCreatorDropdown] = React.useState(false);
-  
+  const [createAgentContext, setCreateAgentContext] = React.useState('');
+
   const [actionLoading, setActionLoading] = React.useState(false);
   const creatorDropdownRef = React.useRef<HTMLDivElement>(null);
   const editCreatorDropdownRef = React.useRef<HTMLDivElement>(null);
@@ -258,6 +260,7 @@ export function FeatureRequestsPage() {
     setEditCreator(feature.created_by || 'levelset');
     setEditCreatorSearch('');
     setShowEditCreatorDropdown(false);
+    setEditAgentContext(feature.agent_context || '');
     setEditModalOpen(true);
   };
 
@@ -281,6 +284,7 @@ export function FeatureRequestsPage() {
         priority: editPriority as RoadmapFeature['priority'],
         is_public: editStatus !== 'submitted',
         created_by: createdBy,
+        agent_context: editAgentContext || null,
       });
       if (updated) {
         setFeatures(prev => prev.map(f => f.id === updated.id ? updated : f));
@@ -304,6 +308,7 @@ export function FeatureRequestsPage() {
     setCreateCreator('levelset');
     setCreatorSearch('');
     setShowCreatorDropdown(false);
+    setCreateAgentContext('');
     setCreateModalOpen(true);
   };
 
@@ -325,7 +330,8 @@ export function FeatureRequestsPage() {
         createCategory,
         createStatus as RoadmapFeature['status'],
         createPriority as RoadmapFeature['priority'],
-        createdBy
+        createdBy,
+        createAgentContext || null
       );
       if (newFeature) {
         setFeatures(prev => [newFeature, ...prev]);
@@ -639,6 +645,20 @@ export function FeatureRequestsPage() {
                 rows={3}
               />
             </div>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Agent Context</label>
+              <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 4px' }}>
+                Internal notes for AI agents. Not visible on the public roadmap.
+              </p>
+              <textarea
+                className={styles.modalTextarea}
+                value={editAgentContext}
+                onChange={(e) => setEditAgentContext(e.target.value)}
+                rows={5}
+                placeholder="Implementation details, file paths, architecture notes..."
+                style={{ fontFamily: 'monospace', fontSize: 13 }}
+              />
+            </div>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Category</label>
@@ -775,6 +795,20 @@ export function FeatureRequestsPage() {
                 onChange={(e) => setCreateDescription(e.target.value)}
                 rows={3}
                 placeholder="Describe the feature..."
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Agent Context</label>
+              <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 4px' }}>
+                Internal notes for AI agents. Not visible on the public roadmap.
+              </p>
+              <textarea
+                className={styles.modalTextarea}
+                value={createAgentContext}
+                onChange={(e) => setCreateAgentContext(e.target.value)}
+                rows={5}
+                placeholder="Implementation details, file paths, architecture notes..."
+                style={{ fontFamily: 'monospace', fontSize: 13 }}
               />
             </div>
             <div className={styles.formRow}>

@@ -16,6 +16,7 @@ export interface RoadmapFeature {
   created_by?: string | null;
   created_by_name?: string | null;
   is_public?: boolean;
+  agent_context?: string | null;
 }
 
 export interface RoadmapComment {
@@ -41,6 +42,9 @@ export interface RoadmapStats {
   inProgress: number;
 }
 
+// Columns to select for public-facing queries (excludes agent_context)
+const PUBLIC_COLUMNS = 'id, title, description, status, priority, category, vote_count, comment_count, created_at, updated_at, organization_id, created_by, is_public';
+
 // Supabase queries
 export async function fetchFeatures(
   status?: string,
@@ -55,7 +59,7 @@ export async function fetchFeatures(
   // Build the main query for public features
   let query = supabase
     .from('roadmap_features')
-    .select('*')
+    .select(PUBLIC_COLUMNS)
     .eq('is_public', true)
     .neq('status', 'submitted'); // Exclude submitted status from public view
   
@@ -103,7 +107,7 @@ export async function fetchFeatures(
   if (userId) {
     const { data: userSubmissions, error: userError } = await supabase
       .from('roadmap_features')
-      .select('*')
+      .select(PUBLIC_COLUMNS)
       .eq('created_by', userId)
       .eq('status', 'submitted')
       .order('created_at', { ascending: false });
@@ -122,7 +126,7 @@ export async function fetchFeatureById(id: string, organizationId?: string): Pro
   
   const { data, error } = await supabase
     .from('roadmap_features')
-    .select('*')
+    .select(PUBLIC_COLUMNS)
     .eq('id', id)
     .or(organizationId ? `is_public.eq.true,organization_id.is.null,organization_id.eq.${organizationId}` : 'is_public.eq.true,organization_id.is.null')
     .single();
@@ -419,7 +423,7 @@ export async function fetchAllFeaturesAdmin(): Promise<RoadmapFeature[]> {
 // Update a feature (for admin)
 export async function updateFeature(
   featureId: string,
-  updates: Partial<Pick<RoadmapFeature, 'title' | 'description' | 'category' | 'status' | 'priority' | 'is_public' | 'created_by'>>
+  updates: Partial<Pick<RoadmapFeature, 'title' | 'description' | 'category' | 'status' | 'priority' | 'is_public' | 'created_by' | 'agent_context'>>
 ): Promise<RoadmapFeature | null> {
   const supabase = createSupabaseClient();
   
@@ -476,10 +480,11 @@ export async function createFeatureAdmin(
   category: string,
   status: RoadmapFeature['status'],
   priority: RoadmapFeature['priority'],
-  createdBy?: string | null
+  createdBy?: string | null,
+  agentContext?: string | null
 ): Promise<RoadmapFeature | null> {
   const supabase = createSupabaseClient();
-  
+
   const { data, error } = await supabase
     .from('roadmap_features')
     .insert({
@@ -492,6 +497,7 @@ export async function createFeatureAdmin(
       comment_count: 0,
       is_public: status !== 'submitted',
       created_by: createdBy || null,
+      agent_context: agentContext || null,
     })
     .select()
     .single();
