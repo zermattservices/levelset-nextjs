@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireLevelsetAdmin } from '@/lib/api-auth';
 import { indexDocumentChunks } from '@/lib/document-indexing';
+import { indexDocumentInPageIndex } from '@/lib/pageindex';
 import crypto from 'crypto';
 
 export default async function handler(
@@ -227,10 +228,13 @@ export default async function handler(
       .eq('document_id', document_id)
       .single();
 
-    // Trigger embedding indexing (non-blocking)
+    // Trigger embedding + PageIndex indexing (non-blocking, parallel)
     if (updatedDigest?.id && text.trim().length > 0) {
       indexDocumentChunks(updatedDigest.id, 'global_document', null, text)
         .catch((err) => console.error('[global-documents/process] Embedding indexing failed:', err));
+
+      indexDocumentInPageIndex(updatedDigest.id, 'global_document', doc.file_type, doc.storage_path)
+        .catch((err) => console.error('[global-documents/process] PageIndex indexing failed:', err));
     }
 
     return res.status(200).json({
