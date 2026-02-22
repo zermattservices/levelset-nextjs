@@ -9,7 +9,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  *   type        — 'positions' | 'infractions' | 'disc_actions' | 'leaders'
  *   org_id      — required
  *   location_id — required for type=leaders
- *   form_type   — required for type=leaders ('rating' | 'discipline' | 'evaluation' | 'custom')
+ *   form_type   — optional for type=leaders ('rating' | 'discipline' | 'evaluation' | 'custom'), defaults to hierarchy fallback
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
