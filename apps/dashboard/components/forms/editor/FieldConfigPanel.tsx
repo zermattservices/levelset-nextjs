@@ -14,7 +14,9 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import sty from './FieldConfigPanel.module.css';
 import { StyledTextField, StyledSelect, fontFamily, inputLabelSx } from '../dialogStyles';
-import { FIELD_TYPES } from '@/lib/forms/field-palette';
+import { FIELD_TYPES, getLevelsetFieldInfo } from '@/lib/forms/field-palette';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import OpenInNewOutlinedIcon from '@mui/icons-material/OpenInNewOutlined';
 import type { FormField, FieldOption } from '@/lib/forms/schema-builder';
 import { ConnectedQuestionPicker } from '../evaluation/ConnectedQuestionPicker';
 
@@ -22,6 +24,7 @@ interface FieldConfigPanelProps {
   field: FormField | null;
   onUpdateField: (id: string, updates: Partial<FormField>) => void;
   isEvaluation?: boolean;
+  formType?: string;
 }
 
 const SCORING_TYPES = [
@@ -35,6 +38,7 @@ export function FieldConfigPanel({
   field,
   onUpdateField,
   isEvaluation,
+  formType,
 }: FieldConfigPanelProps) {
   if (!field) {
     return (
@@ -47,6 +51,7 @@ export function FieldConfigPanel({
   }
 
   const fieldDef = FIELD_TYPES[field.type];
+  const levelsetInfo = getLevelsetFieldInfo(field.type, formType);
   const isSection = field.type === 'section';
 
   const handleLabelChange = (value: string) => {
@@ -112,6 +117,31 @@ export function FieldConfigPanel({
       <span className={sty.fieldType}>{fieldDef?.label || field.type}</span>
 
       <Divider sx={{ margin: '8px 0' }} />
+
+      {levelsetInfo && (
+        <>
+          <div className={sty.levelsetInfoCard}>
+            <InfoOutlinedIcon sx={{ fontSize: 14, color: 'var(--ls-color-brand)', flexShrink: 0, mt: '1px' }} />
+            <div className={sty.levelsetInfoContent}>
+              <span className={sty.levelsetInfoText}>
+                {levelsetInfo.description}
+              </span>
+              {levelsetInfo.configLink && (
+                <a
+                  href={levelsetInfo.configLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={sty.levelsetConfigLink}
+                >
+                  {levelsetInfo.configLinkLabel}
+                  <OpenInNewOutlinedIcon sx={{ fontSize: 12, ml: '2px' }} />
+                </a>
+              )}
+            </div>
+          </div>
+          <Divider sx={{ margin: '8px 0' }} />
+        </>
+      )}
 
       {/* Label fields */}
       <div className={sty.configSection}>
