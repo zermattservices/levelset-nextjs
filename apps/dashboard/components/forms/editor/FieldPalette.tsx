@@ -17,6 +17,8 @@ import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
 import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
+import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined';
+import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import sty from './FieldPalette.module.css';
 import { FIELD_CATEGORIES, getFieldTypesByCategory, type FieldTypeDefinition } from '@/lib/forms/field-palette';
 
@@ -38,6 +40,8 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   PersonOutlined: <PersonOutlinedIcon sx={{ fontSize: 16 }} />,
   SupervisorAccountOutlined: <SupervisorAccountOutlinedIcon sx={{ fontSize: 16 }} />,
   WorkOutlineOutlined: <WorkOutlineOutlinedIcon sx={{ fontSize: 16 }} />,
+  ReportProblemOutlined: <ReportProblemOutlinedIcon sx={{ fontSize: 16 }} />,
+  GavelOutlined: <GavelOutlinedIcon sx={{ fontSize: 16 }} />,
 };
 
 function DraggableFieldChip({ fieldDef }: { fieldDef: FieldTypeDefinition }) {

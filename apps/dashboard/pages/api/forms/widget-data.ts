@@ -77,16 +77,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       case 'leaders': {
-        const { location_id, form_type } = req.query;
+        const { location_id, form_type, max_hierarchy } = req.query;
 
         if (!location_id || typeof location_id !== 'string') {
           return res.status(400).json({ error: 'location_id is required for type=leaders' });
         }
 
         const formTypeStr = typeof form_type === 'string' ? form_type : '';
+        const maxHierarchy = typeof max_hierarchy === 'string' ? parseInt(max_hierarchy, 10) : undefined;
         let allowedRoles: string[] = [];
 
-        if (formTypeStr === 'rating') {
+        if (maxHierarchy !== undefined && !isNaN(maxHierarchy)) {
+          // Direct hierarchy filter from field config — takes precedence
+          const { data: roles, error: rolesErr } = await supabase
+            .from('org_roles')
+            .select('role_name')
+            .eq('org_id', org_id)
+            .lte('hierarchy_level', maxHierarchy);
+
+          if (rolesErr) {
+            console.error('widget-data leaders hierarchy filter error:', rolesErr);
+            return res.status(500).json({ error: 'Failed to fetch leader roles' });
+          }
+          allowedRoles = (roles || []).map(r => r.role_name);
+        } else if (formTypeStr === 'rating') {
           // Check position_role_permissions (joined with org_positions for org scoping)
           const { data: permRoles, error: permErr } = await supabase
             .from('position_role_permissions')

@@ -297,6 +297,25 @@ export function FieldConfigPanel({
         </>
       )}
 
+      {/* Leader role filter */}
+      {field.type === 'leader_select' && (
+        <>
+          <Divider sx={{ margin: '8px 0' }} />
+          <div className={sty.configSection}>
+            <span className={sty.sectionLabel}>Role Filter</span>
+            <StyledTextField
+              label="Max Hierarchy Level"
+              type="number"
+              value={field.settings.maxHierarchyLevel ?? 2}
+              onChange={(e) => handleSettingsChange('maxHierarchyLevel', Math.max(0, Math.min(10, Number(e.target.value))))}
+              size="small"
+              slotProps={{ htmlInput: { min: 0, max: 10 } }}
+              helperText="Include roles at this hierarchy level and above (0 = top level)"
+            />
+          </div>
+        </>
+      )}
+
       {/* Textarea rows */}
       {field.type === 'textarea' && (
         <>

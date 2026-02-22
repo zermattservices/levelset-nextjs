@@ -19,6 +19,10 @@ export interface FieldTypeDefinition {
   hasOptions?: boolean;
   /** If true, this field supports min/max configuration */
   hasRange?: boolean;
+  /** Label shown in the type tag on the editor canvas (e.g., "Dropdown" for Levelset selects) */
+  displayTypeLabel?: string;
+  /** Icon name for the type tag (defaults to `icon` if not set) */
+  displayTypeIcon?: string;
 }
 
 export type FieldCategory = 'basic' | 'selection' | 'advanced' | 'levelset';
@@ -182,6 +186,8 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     category: 'levelset',
     schema: { type: 'string' },
     uiWidget: 'employee_select',
+    displayTypeLabel: 'Dropdown',
+    displayTypeIcon: 'ArrowDropDownCircleOutlined',
   },
   leader_select: {
     type: 'leader_select',
@@ -191,6 +197,8 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     category: 'levelset',
     schema: { type: 'string' },
     uiWidget: 'leader_select',
+    displayTypeLabel: 'Dropdown',
+    displayTypeIcon: 'ArrowDropDownCircleOutlined',
   },
   position_select: {
     type: 'position_select',
@@ -200,6 +208,8 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     category: 'levelset',
     schema: { type: 'string' },
     uiWidget: 'position_select',
+    displayTypeLabel: 'Dropdown',
+    displayTypeIcon: 'ArrowDropDownCircleOutlined',
   },
   infraction_select: {
     type: 'infraction_select',
@@ -209,6 +219,8 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     category: 'levelset',
     schema: { type: 'string' },
     uiWidget: 'infraction_select',
+    displayTypeLabel: 'Dropdown',
+    displayTypeIcon: 'ArrowDropDownCircleOutlined',
   },
   disc_action_select: {
     type: 'disc_action_select',
@@ -218,6 +230,8 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     category: 'levelset',
     schema: { type: 'string' },
     uiWidget: 'disc_action_select',
+    displayTypeLabel: 'Dropdown',
+    displayTypeIcon: 'ArrowDropDownCircleOutlined',
   },
 };
 
@@ -259,24 +273,8 @@ export function getLevelsetFieldInfo(
         description: 'All active team members at this location',
       };
     case 'leader_select': {
-      if (formType === 'rating') {
-        return {
-          description: 'These options are displayed dynamically based on Positional Excellence role mappings.',
-          configLink: '/org-settings?tab=positional-excellence&subtab=role-mapping',
-          configLinkLabel: 'Configure role mappings',
-        };
-      }
-      if (formType === 'discipline') {
-        return {
-          description: 'These options are displayed dynamically based on Discipline access roles.',
-          configLink: '/org-settings?tab=discipline&subtab=access',
-          configLinkLabel: 'Configure discipline access',
-        };
-      }
       return {
-        description: 'Shows employees with leadership roles (hierarchy level 0-2).',
-        configLink: '/org-settings?tab=positional-excellence&subtab=role-mapping',
-        configLinkLabel: 'Configure roles',
+        description: 'Filters employees by role hierarchy level. Adjust the max hierarchy level below to control which roles appear.',
       };
     }
     case 'position_select':

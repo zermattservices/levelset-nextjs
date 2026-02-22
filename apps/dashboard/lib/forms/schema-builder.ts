@@ -44,6 +44,8 @@ export interface FieldSettings {
   /** For section headers */
   sectionName?: string;
   sectionNameEs?: string;
+  /** For leader_select: max hierarchy level to include (default 2) */
+  maxHierarchyLevel?: number;
 }
 
 /**
@@ -88,6 +90,11 @@ export function createFieldFromType(fieldType: string): FormField {
   // Set default rows for textarea
   if (fieldType === 'textarea') {
     field.settings.rows = 3;
+  }
+
+  // Set default max hierarchy level for leader select
+  if (fieldType === 'leader_select') {
+    field.settings.maxHierarchyLevel = 2;
   }
 
   return field;
@@ -195,6 +202,7 @@ export function fieldsToJsonSchema(fields: FormField[]): {
       ...(field.settings.scoringType ? { scoringType: field.settings.scoringType } : {}),
       ...(field.settings.connectedTo ? { connectedTo: field.settings.connectedTo } : {}),
       ...(field.settings.connectorParams ? { connectorParams: field.settings.connectorParams } : {}),
+      ...(field.settings.maxHierarchyLevel !== undefined ? { maxHierarchyLevel: field.settings.maxHierarchyLevel } : {}),
     };
 
     if (Object.keys(fieldUiSchema).length > 0) {
@@ -302,6 +310,7 @@ export function jsonSchemaToFields(
     if (meta.scoringType) field.settings.scoringType = meta.scoringType;
     if (meta.connectedTo) field.settings.connectedTo = meta.connectedTo;
     if (meta.connectorParams) field.settings.connectorParams = meta.connectorParams;
+    if (meta.maxHierarchyLevel !== undefined) field.settings.maxHierarchyLevel = meta.maxHierarchyLevel;
 
     fields.push(field);
   }

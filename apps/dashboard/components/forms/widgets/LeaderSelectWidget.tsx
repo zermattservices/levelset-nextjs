@@ -22,6 +22,7 @@ export function LeaderSelectWidget(props: WidgetProps) {
   const org_id = formContext?.orgId || auth.org_id;
   const location_id = formContext?.locationId || auth.location_id;
   const formType = formContext?.formType || 'custom';
+  const maxHierarchyLevel = props.uiSchema?.['ui:fieldMeta']?.maxHierarchyLevel;
   const [leaders, setLeaders] = React.useState<LeaderOption[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [loadError, setLoadError] = React.useState<string | null>(null);
@@ -39,6 +40,9 @@ export function LeaderSelectWidget(props: WidgetProps) {
           location_id,
           form_type: formType,
         });
+        if (maxHierarchyLevel !== undefined) {
+          params.set('max_hierarchy', String(maxHierarchyLevel));
+        }
         const res = await fetch(`/api/forms/widget-data?${params}`);
         const json = await res.json();
 
@@ -61,7 +65,7 @@ export function LeaderSelectWidget(props: WidgetProps) {
 
     fetchLeaders();
     return () => { cancelled = true; };
-  }, [org_id, location_id, formType]);
+  }, [org_id, location_id, formType, maxHierarchyLevel]);
 
   const selectedOption = leaders.find((e) => e.id === value) || null;
   const isDisabled = disabled || readonly;
