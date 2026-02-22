@@ -44,6 +44,7 @@ import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
 import sty from './DocumentsPageContent.module.css';
 import { DigestViewerModal } from './DigestViewerModal';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import {
   StyledTextField,
   StyledSelect,
@@ -98,6 +99,7 @@ function formatDate(iso: string): string {
 
 export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
   const auth = useAuth();
+  const locationCtx = useLocationContext();
 
   // Data state
   const [folders, setFolders] = React.useState<DocumentFolder[]>([]);
@@ -177,9 +179,12 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
       const token = await getAccessToken();
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (config.mode === 'org' && locationCtx.selectedLocationOrgId) {
+        headers['x-org-id'] = locationCtx.selectedLocationOrgId;
+      }
       return headers;
     },
-    [getAccessToken],
+    [getAccessToken, config.mode, locationCtx.selectedLocationOrgId],
   );
 
   /* ---------------------------------------------------------------- */
