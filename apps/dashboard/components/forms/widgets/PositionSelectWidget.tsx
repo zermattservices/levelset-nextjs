@@ -19,8 +19,9 @@ interface PositionOption {
  * Stores the position name as the field value.
  */
 export function PositionSelectWidget(props: WidgetProps) {
-  const { id, value, required, disabled, readonly, onChange, label, rawErrors } = props;
-  const { org_id } = useAuth();
+  const { id, value, required, disabled, readonly, onChange, label, rawErrors, formContext } = props;
+  const auth = useAuth();
+  const org_id = formContext?.orgId || auth.org_id;
   const [positions, setPositions] = React.useState<PositionOption[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [loadError, setLoadError] = React.useState<string | null>(null);

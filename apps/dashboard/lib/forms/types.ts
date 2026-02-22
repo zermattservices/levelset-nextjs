@@ -80,7 +80,7 @@ export interface FormConnector {
 }
 
 export type FormType = 'rating' | 'discipline' | 'evaluation' | 'custom';
-export type SubmissionStatus = 'submitted' | 'approved' | 'rejected' | 'draft';
+export type SubmissionStatus = 'submitted' | 'deleted';
 
 // System group slugs (predefined, cannot be deleted)
 export const SYSTEM_GROUP_SLUGS = {

@@ -486,6 +486,7 @@ export function FormDetailPage() {
                   loading={submissionsLoading}
                   templateId={template.id}
                   showFormName={false}
+                  isSystem={isSystem}
                   onRefresh={fetchSubmissions}
                   getAccessToken={getAccessToken}
                 />

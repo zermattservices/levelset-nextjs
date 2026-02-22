@@ -17,8 +17,9 @@ interface DiscActionRubricOption {
  * Stores the rubric item ID as the field value.
  */
 export function DiscActionSelectWidget(props: WidgetProps) {
-  const { id, value, required, disabled, readonly, onChange, label, rawErrors } = props;
-  const { org_id } = useAuth();
+  const { id, value, required, disabled, readonly, onChange, label, rawErrors, formContext } = props;
+  const auth = useAuth();
+  const org_id = formContext?.orgId || auth.org_id;
   const [options, setOptions] = React.useState<DiscActionRubricOption[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [loadError, setLoadError] = React.useState<string | null>(null);

@@ -10,15 +10,11 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
   Chip,
   Divider,
   IconButton,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
 import { FormRenderer } from './FormRenderer';
 import { EvaluationScoreDisplay } from './evaluation/EvaluationScoreDisplay';
 import { calculateEvaluationScore } from '@/lib/forms/scoring';
@@ -28,9 +24,7 @@ const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Se
 
 const STATUS_CONFIG: Record<SubmissionStatus, { label: string; bg: string; text: string }> = {
   submitted: { label: 'Submitted', bg: 'var(--ls-color-brand-soft)', text: 'var(--ls-color-brand)' },
-  approved: { label: 'Approved', bg: 'var(--ls-color-success-soft)', text: 'var(--ls-color-success)' },
-  rejected: { label: 'Rejected', bg: 'var(--ls-color-destructive-soft)', text: 'var(--ls-color-destructive)' },
-  draft: { label: 'Draft', bg: 'var(--ls-color-neutral-foreground)', text: 'var(--ls-color-muted)' },
+  deleted: { label: 'Deleted', bg: 'var(--ls-color-destructive-soft)', text: 'var(--ls-color-destructive)' },
 };
 
 const TYPE_LABELS: Record<FormType, string> = {
@@ -55,8 +49,6 @@ export function SubmissionDetailDialog({
   onStatusUpdate,
   getAccessToken,
 }: SubmissionDetailDialogProps) {
-  const [updating, setUpdating] = React.useState(false);
-
   if (!submission) return null;
 
   const statusConfig = STATUS_CONFIG[submission.status] || STATUS_CONFIG.submitted;
@@ -91,32 +83,6 @@ export function SubmissionDetailDialog({
     version: 1,
     created_at: submission.created_at,
     updated_at: submission.updated_at,
-  };
-
-  const handleStatusChange = async (newStatus: 'approved' | 'rejected') => {
-    setUpdating(true);
-    try {
-      const token = await getAccessToken();
-      const res = await fetch(`/api/forms/submissions/${submission.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to update status');
-      }
-
-      if (onStatusUpdate) onStatusUpdate();
-    } catch {
-      // Error handling — snackbar in parent
-    } finally {
-      setUpdating(false);
-    }
   };
 
   return (
@@ -261,57 +227,6 @@ export function SubmissionDetailDialog({
         />
       </DialogContent>
 
-      {/* Action buttons — only show for submitted status */}
-      {submission.status === 'submitted' && (
-        <DialogActions
-          sx={{
-            padding: '16px 24px',
-            borderTop: '1px solid var(--ls-color-muted-border)',
-            gap: 1,
-          }}
-        >
-          <Button
-            onClick={() => handleStatusChange('rejected')}
-            disabled={updating}
-            startIcon={<CancelIcon sx={{ fontSize: 16 }} />}
-            sx={{
-              fontFamily,
-              fontSize: 13,
-              fontWeight: 600,
-              textTransform: 'none',
-              color: 'var(--ls-color-destructive)',
-              borderColor: 'var(--ls-color-destructive)',
-              borderRadius: '8px',
-              '&:hover': {
-                backgroundColor: 'var(--ls-color-destructive-soft)',
-                borderColor: 'var(--ls-color-destructive)',
-              },
-            }}
-            variant="outlined"
-          >
-            Reject
-          </Button>
-          <Button
-            onClick={() => handleStatusChange('approved')}
-            disabled={updating}
-            startIcon={<CheckCircleIcon sx={{ fontSize: 16 }} />}
-            variant="contained"
-            sx={{
-              fontFamily,
-              fontSize: 13,
-              fontWeight: 600,
-              textTransform: 'none',
-              backgroundColor: 'var(--ls-color-success)',
-              borderRadius: '8px',
-              '&:hover': {
-                backgroundColor: 'var(--ls-color-success-hover, var(--ls-color-success))',
-              },
-            }}
-          >
-            Approve
-          </Button>
-        </DialogActions>
-      )}
     </Dialog>
   );
 }

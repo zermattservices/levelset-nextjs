@@ -98,13 +98,13 @@ export default async function handler(
 
     const { status } = req.body;
 
-    // Only allow valid status transitions
-    const validStatuses = ['approved', 'rejected'];
+    // Only allow valid status values
+    const validStatuses = ['submitted', 'deleted'];
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ error: 'Invalid status. Must be "approved" or "rejected"' });
+      return res.status(400).json({ error: 'Invalid status. Must be "submitted" or "deleted"' });
     }
 
-    // Verify submission exists and is in 'submitted' state
+    // Verify submission exists
     const { data: existing } = await supabase
       .from('form_submissions')
       .select('status')
@@ -114,12 +114,6 @@ export default async function handler(
 
     if (!existing) {
       return res.status(404).json({ error: 'Submission not found' });
-    }
-
-    if (existing.status !== 'submitted') {
-      return res.status(400).json({
-        error: `Cannot change status from "${existing.status}" to "${status}". Only submitted forms can be approved or rejected.`,
-      });
     }
 
     const { data: updated, error } = await supabase

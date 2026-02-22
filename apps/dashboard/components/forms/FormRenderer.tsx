@@ -128,6 +128,7 @@ export function FormRenderer({
         formData={formData}
         validator={validator}
         widgets={widgets}
+        formContext={{ orgId: template.org_id }}
         onChange={handleChange}
         onSubmit={handleSubmit}
         disabled={readOnly}

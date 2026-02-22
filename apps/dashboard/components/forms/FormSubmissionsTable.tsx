@@ -16,7 +16,6 @@ import {
   Box,
   Typography,
   Chip,
-  TextField,
   Select,
   MenuItem,
   FormControl,
@@ -34,20 +33,10 @@ const STATUS_CONFIG: Record<SubmissionStatus, { label: string; bg: string; text:
     bg: 'var(--ls-color-brand-soft)',
     text: 'var(--ls-color-brand)',
   },
-  approved: {
-    label: 'Approved',
-    bg: 'var(--ls-color-success-soft)',
-    text: 'var(--ls-color-success)',
-  },
-  rejected: {
-    label: 'Rejected',
+  deleted: {
+    label: 'Deleted',
     bg: 'var(--ls-color-destructive-soft)',
     text: 'var(--ls-color-destructive)',
-  },
-  draft: {
-    label: 'Draft',
-    bg: 'var(--ls-color-neutral-foreground)',
-    text: 'var(--ls-color-muted)',
   },
 };
 
@@ -67,6 +56,8 @@ interface FormSubmissionsTableProps {
   templateId?: string;
   /** Whether to show the form name column (hide when viewing a single template) */
   showFormName?: boolean;
+  /** Whether this is a system form (hides status filter + column) */
+  isSystem?: boolean;
   /** Refresh callback after status update */
   onRefresh?: () => void;
   /** Access token getter for API calls */
@@ -77,6 +68,7 @@ export function FormSubmissionsTable({
   submissions,
   loading = false,
   showFormName = true,
+  isSystem = false,
   onRefresh,
   getAccessToken,
 }: FormSubmissionsTableProps) {
@@ -118,145 +110,143 @@ export function FormSubmissionsTable({
       cols.push({
         field: 'form_name',
         headerName: 'Form',
-        width: 220,
+        flex: 1.5,
+        minWidth: 160,
         sortable: true,
-        resizable: false,
         renderCell: (params) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Typography
-              sx={{
-                fontFamily,
-                fontSize: 13,
-                fontWeight: 600,
-                color: 'var(--ls-color-text-primary)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {params.value}
-            </Typography>
-          </Box>
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--ls-color-text-primary)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {params.value}
+          </Typography>
         ),
       });
     }
 
-    cols.push(
-      {
+    if (showFormName) {
+      cols.push({
         field: 'form_type',
         headerName: 'Type',
-        width: 120,
+        flex: 0.7,
+        minWidth: 100,
         sortable: true,
-        resizable: false,
         headerAlign: 'center',
         align: 'center',
         renderCell: (params) => {
           const config = TYPE_CONFIG[params.value as FormType] || TYPE_CONFIG.custom;
           return (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-              <Chip
-                label={config.label}
-                size="small"
-                sx={{
-                  fontFamily,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  height: 22,
-                  borderRadius: '6px',
-                  backgroundColor: config.bg,
-                  color: config.text,
-                }}
-              />
-            </Box>
+            <Chip
+              label={config.label}
+              size="small"
+              sx={{
+                fontFamily,
+                fontSize: 11,
+                fontWeight: 600,
+                height: 22,
+                borderRadius: '6px',
+                backgroundColor: config.bg,
+                color: config.text,
+              }}
+            />
           );
         },
-      },
+      });
+    }
+
+    cols.push(
       {
         field: 'submitted_by_name',
         headerName: 'Submitted By',
-        width: 180,
+        flex: 1.2,
+        minWidth: 140,
         sortable: true,
-        resizable: false,
         renderCell: (params) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500 }}>
-              {params.value}
-            </Typography>
-          </Box>
+          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500 }}>
+            {params.value}
+          </Typography>
         ),
       },
       {
         field: 'employee_name',
         headerName: 'Employee',
-        width: 180,
+        flex: 1.2,
+        minWidth: 140,
         sortable: true,
-        resizable: false,
         renderCell: (params) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)' }}>
-              {params.value}
-            </Typography>
-          </Box>
+          <Typography sx={{ fontFamily, fontSize: 13, fontWeight: 500, color: 'var(--ls-color-neutral-soft-foreground)' }}>
+            {params.value}
+          </Typography>
         ),
       },
-      {
+    );
+
+    // Only show status column for custom forms
+    if (!isSystem) {
+      cols.push({
         field: 'status',
         headerName: 'Status',
-        width: 130,
+        flex: 0.7,
+        minWidth: 100,
         sortable: true,
-        resizable: false,
         headerAlign: 'center',
         align: 'center',
         renderCell: (params) => {
           const config = STATUS_CONFIG[params.value as SubmissionStatus] || STATUS_CONFIG.submitted;
           return (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-              <Chip
-                label={config.label}
-                size="small"
-                sx={{
-                  fontFamily,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  height: 22,
-                  borderRadius: '6px',
-                  backgroundColor: config.bg,
-                  color: config.text,
-                }}
-              />
-            </Box>
+            <Chip
+              label={config.label}
+              size="small"
+              sx={{
+                fontFamily,
+                fontSize: 11,
+                fontWeight: 600,
+                height: 22,
+                borderRadius: '6px',
+                backgroundColor: config.bg,
+                color: config.text,
+              }}
+            />
           );
         },
-      },
+      });
+    }
+
+    cols.push(
       {
         field: 'score',
         headerName: 'Score',
-        width: 100,
+        flex: 0.6,
+        minWidth: 80,
         sortable: true,
-        resizable: false,
         headerAlign: 'center',
         align: 'center',
         renderCell: (params) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-            <Typography
-              sx={{
-                fontFamily,
-                fontSize: 13,
-                fontWeight: 600,
-                color: params.value != null ? 'var(--ls-color-text-primary)' : 'var(--ls-color-muted)',
-              }}
-            >
-              {params.value != null ? `${Math.round(params.value)}%` : '—'}
-            </Typography>
-          </Box>
+          <Typography
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 600,
+              color: params.value != null ? 'var(--ls-color-text-primary)' : 'var(--ls-color-muted)',
+            }}
+          >
+            {params.value != null ? `${Math.round(params.value)}%` : '—'}
+          </Typography>
         ),
       },
       {
         field: 'created_at',
         headerName: 'Date',
-        width: 160,
+        flex: 1,
+        minWidth: 140,
         sortable: true,
-        resizable: false,
         renderCell: (params) => {
           const date = new Date(params.value);
           const formatted = date.toLocaleDateString('en-US', {
@@ -267,18 +257,16 @@ export function FormSubmissionsTable({
             minute: '2-digit',
           });
           return (
-            <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-              <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)' }}>
-                {formatted}
-              </Typography>
-            </Box>
+            <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)' }}>
+              {formatted}
+            </Typography>
           );
         },
       }
     );
 
     return cols;
-  }, [showFormName]);
+  }, [showFormName, isSystem]);
 
   const handleRowClick = (params: any) => {
     const raw = params.row._raw as FormSubmission;
@@ -296,21 +284,22 @@ export function FormSubmissionsTable({
     <div className={sty.tableWrapper}>
       {/* Filters */}
       <div className={sty.filters}>
-        <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel sx={{ fontFamily, fontSize: 13 }}>Status</InputLabel>
-          <Select
-            value={statusFilter}
-            label="Status"
-            onChange={(e) => setStatusFilter(e.target.value as SubmissionStatus | '')}
-            sx={{ fontFamily, fontSize: 13 }}
-          >
-            <MenuItem value="" sx={{ fontFamily, fontSize: 13 }}>All</MenuItem>
-            <MenuItem value="submitted" sx={{ fontFamily, fontSize: 13 }}>Submitted</MenuItem>
-            <MenuItem value="approved" sx={{ fontFamily, fontSize: 13 }}>Approved</MenuItem>
-            <MenuItem value="rejected" sx={{ fontFamily, fontSize: 13 }}>Rejected</MenuItem>
-            <MenuItem value="draft" sx={{ fontFamily, fontSize: 13 }}>Draft</MenuItem>
-          </Select>
-        </FormControl>
+        {/* Status filter — only for custom forms */}
+        {!isSystem && (
+          <FormControl size="small" sx={{ minWidth: 140 }}>
+            <InputLabel sx={{ fontFamily, fontSize: 13 }}>Status</InputLabel>
+            <Select
+              value={statusFilter}
+              label="Status"
+              onChange={(e) => setStatusFilter(e.target.value as SubmissionStatus | '')}
+              sx={{ fontFamily, fontSize: 13 }}
+            >
+              <MenuItem value="" sx={{ fontFamily, fontSize: 13 }}>All</MenuItem>
+              <MenuItem value="submitted" sx={{ fontFamily, fontSize: 13 }}>Submitted</MenuItem>
+              <MenuItem value="deleted" sx={{ fontFamily, fontSize: 13 }}>Deleted</MenuItem>
+            </Select>
+          </FormControl>
+        )}
 
         {showFormName && (
           <FormControl size="small" sx={{ minWidth: 140 }}>
@@ -336,70 +325,73 @@ export function FormSubmissionsTable({
       </div>
 
       {/* DataGrid */}
-      <DataGridPro
-        rows={rows}
-        columns={columns}
-        loading={loading}
-        pagination
-        pageSizeOptions={[25, 50, 100]}
-        initialState={{
-          pagination: {
-            paginationModel: { pageSize: 25 },
-          },
-          sorting: {
-            sortModel: [{ field: 'created_at', sort: 'desc' }],
-          },
-        }}
-        disableRowSelectionOnClick
-        disableColumnResize
-        showColumnVerticalBorder={false}
-        rowHeight={48}
-        columnHeaderHeight={48}
-        onRowClick={handleRowClick}
-        autoHeight
-        sx={{
-          fontFamily,
-          border: '1px solid var(--ls-color-muted-border)',
-          borderRadius: '12px',
+      <Box sx={{ width: '100%' }}>
+        <DataGridPro
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          pagination
+          pageSizeOptions={[25, 50, 100]}
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 25 },
+            },
+            sorting: {
+              sortModel: [{ field: 'created_at', sort: 'desc' }],
+            },
+          }}
+          disableRowSelectionOnClick
+          disableColumnResize
+          showColumnVerticalBorder={false}
+          rowHeight={48}
+          columnHeaderHeight={48}
+          onRowClick={handleRowClick}
+          autoHeight
+          sx={{
+            fontFamily,
+            width: '100%',
+            border: '1px solid var(--ls-color-muted-border)',
+            borderRadius: '12px',
 
-          [`& .${gridClasses.columnHeaders}`]: {
-            borderBottom: '1px solid var(--ls-color-muted-border)',
-          },
-          [`& .${gridClasses.columnHeader}`]: {
-            backgroundColor: 'var(--ls-color-neutral-foreground)',
-            fontWeight: 600,
-            fontSize: 12,
-            color: 'var(--ls-color-muted)',
-            fontFamily,
-            '&:focus, &:focus-within': { outline: 'none' },
-          },
-          [`& .${gridClasses.columnSeparator}`]: { display: 'none' },
-          [`& .${gridClasses.cell}`]: {
-            borderBottom: '1px solid var(--ls-color-muted-soft)',
-            borderRight: 'none',
-            fontSize: 13,
-            fontWeight: 500,
-            color: 'var(--ls-color-neutral-soft-foreground)',
-            fontFamily,
-            '&:focus, &:focus-within': { outline: 'none' },
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 16px',
-          },
-          [`& .${gridClasses.row}:hover`]: {
-            backgroundColor: 'var(--ls-color-neutral-foreground)',
-            cursor: 'pointer',
-          },
-          [`& .${gridClasses.footerContainer}`]: {
-            borderTop: '1px solid var(--ls-color-muted-border)',
-            fontFamily,
-          },
-          '& .MuiTablePagination-root': {
-            fontFamily,
-            color: 'var(--ls-color-muted)',
-          },
-        }}
-      />
+            [`& .${gridClasses.columnHeaders}`]: {
+              borderBottom: '1px solid var(--ls-color-muted-border)',
+            },
+            [`& .${gridClasses.columnHeader}`]: {
+              backgroundColor: 'var(--ls-color-neutral-foreground)',
+              fontWeight: 600,
+              fontSize: 12,
+              color: 'var(--ls-color-muted)',
+              fontFamily,
+              '&:focus, &:focus-within': { outline: 'none' },
+            },
+            [`& .${gridClasses.columnSeparator}`]: { display: 'none' },
+            [`& .${gridClasses.cell}`]: {
+              borderBottom: '1px solid var(--ls-color-muted-soft)',
+              borderRight: 'none',
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--ls-color-neutral-soft-foreground)',
+              fontFamily,
+              '&:focus, &:focus-within': { outline: 'none' },
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 16px',
+            },
+            [`& .${gridClasses.row}:hover`]: {
+              backgroundColor: 'var(--ls-color-neutral-foreground)',
+              cursor: 'pointer',
+            },
+            [`& .${gridClasses.footerContainer}`]: {
+              borderTop: '1px solid var(--ls-color-muted-border)',
+              fontFamily,
+            },
+            '& .MuiTablePagination-root': {
+              fontFamily,
+              color: 'var(--ls-color-muted)',
+            },
+          }}
+        />
+      </Box>
 
       {/* Detail Dialog */}
       <SubmissionDetailDialog
