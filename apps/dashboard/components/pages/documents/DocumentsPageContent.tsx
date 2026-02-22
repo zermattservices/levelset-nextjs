@@ -52,6 +52,7 @@ import {
 import type { DocumentsConfig, DocumentFolder, Document } from './types';
 
 const fontFamily = '"Satoshi", sans-serif';
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -334,25 +335,46 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
       const token = await getAccessToken();
 
       if (uploadMode === 'file' && uploadFile) {
-        // Step 1: Upload file
-        const formData = new FormData();
-        formData.append('file', uploadFile);
-        if (currentFolderId) formData.append('folder_id', currentFolderId);
-
-        const uploadRes = await fetch(`${config.apiBasePath}/upload`, {
-          method: 'POST',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          body: formData,
-        });
-
-        if (!uploadRes.ok) {
-          const err = await uploadRes.json();
-          throw new Error(err.error || 'Upload failed');
+        // Validate file size
+        if (uploadFile.size > MAX_FILE_SIZE) {
+          throw new Error('File exceeds 100MB limit');
         }
 
-        const uploadData = await uploadRes.json();
+        // Step 1: Get signed upload URL
+        const urlRes = await fetch(`${config.apiBasePath}/upload-url`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            filename: uploadFile.name,
+            content_type: uploadFile.type,
+            file_size: uploadFile.size,
+          }),
+        });
 
-        // Step 2: Create document record
+        if (!urlRes.ok) {
+          const err = await urlRes.json();
+          throw new Error(err.error || 'Failed to get upload URL');
+        }
+
+        const { signed_url, token: uploadToken, storage_path } = await urlRes.json();
+
+        // Step 2: Upload file directly to Supabase Storage (bypasses Vercel)
+        const storageRes = await fetch(signed_url, {
+          method: 'PUT',
+          body: uploadFile,
+          headers: {
+            'Content-Type': uploadFile.type,
+          },
+        });
+
+        if (!storageRes.ok) {
+          throw new Error('Failed to upload file to storage');
+        }
+
+        // Step 3: Create document record
         const createRes = await fetch(config.apiBasePath, {
           method: 'POST',
           headers: {
@@ -366,7 +388,7 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
             category: uploadCategory,
             folder_id: currentFolderId,
             source_type: 'file',
-            storage_path: uploadData.storage_path,
+            storage_path,
             file_type: uploadFile.type,
             file_size: uploadFile.size,
             original_filename: uploadFile.name,
@@ -537,22 +559,70 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
     if (!file || !selectedDocument) return;
 
     try {
-      const token = await getAccessToken();
-      const formData = new FormData();
-      formData.append('file', file);
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        throw new Error('File exceeds 100MB limit');
+      }
 
-      const res = await fetch(`${config.apiBasePath}/${selectedDocument.id}/replace`, {
+      const token = await getAccessToken();
+
+      // Step 1: Get signed URL for replacement
+      const urlRes = await fetch(`${config.apiBasePath}/${selectedDocument.id}/replace-url`, {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          filename: file.name,
+          content_type: file.type,
+          file_size: file.size,
+        }),
       });
 
-      if (!res.ok) {
-        const err = await res.json();
+      if (!urlRes.ok) {
+        const err = await urlRes.json();
+        throw new Error(err.error || 'Failed to get upload URL');
+      }
+
+      const { signed_url, token: uploadToken, storage_path, new_version } = await urlRes.json();
+
+      // Step 2: Upload file directly to Supabase Storage
+      const storageRes = await fetch(signed_url, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
+
+      if (!storageRes.ok) {
+        throw new Error('Failed to upload file to storage');
+      }
+
+      // Step 3: Finalize (archives old version + updates record)
+      const finalizeRes = await fetch(`${config.apiBasePath}/${selectedDocument.id}/replace`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          intent: 'finalize',
+          storage_path,
+          file_type: file.type,
+          file_size: file.size,
+          original_filename: file.name,
+          new_version,
+        }),
+      });
+
+      if (!finalizeRes.ok) {
+        const err = await finalizeRes.json();
         throw new Error(err.error || 'Replace failed');
       }
 
-      const updated = await res.json();
+      const updated = await finalizeRes.json();
       setSelectedDocument(updated);
       setSnackbar({ open: true, message: 'File replaced', severity: 'success' });
       fetchDocuments();

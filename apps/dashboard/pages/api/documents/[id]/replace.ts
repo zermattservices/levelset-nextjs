@@ -1,30 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
-import formidable from 'formidable';
-import fs from 'fs';
-
-// Disable Next.js body parser for multipart uploads
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
-const ALLOWED_TYPES = [
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain',
-  'text/markdown',
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-];
-
-function sanitizeFilename(name: string): string {
-  return name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 100);
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -41,7 +16,7 @@ export default async function handler(
 
   const supabase = createServerSupabaseClient();
 
-  // Authenticate manually (can't use middleware with bodyParser disabled)
+  // Authenticate
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -67,6 +42,16 @@ export default async function handler(
 
   const orgId = appUser.org_id;
 
+  const { intent, storage_path, file_type, file_size, original_filename, new_version } = req.body;
+
+  if (intent !== 'finalize') {
+    return res.status(400).json({ error: 'Invalid intent. Expected "finalize".' });
+  }
+
+  if (!storage_path || !new_version) {
+    return res.status(400).json({ error: 'storage_path and new_version are required' });
+  }
+
   // Look up existing document
   const { data: doc, error: docError } = await supabase
     .from('documents')
@@ -77,39 +62,6 @@ export default async function handler(
 
   if (docError || !doc) {
     return res.status(404).json({ error: 'Document not found' });
-  }
-
-  // Parse multipart form
-  const form = formidable({
-    maxFileSize: MAX_FILE_SIZE,
-    maxFiles: 1,
-  });
-
-  let files: formidable.Files;
-
-  try {
-    [, files] = await form.parse(req);
-  } catch (err: any) {
-    console.error('[documents/replace] Form parse error', err);
-    if (err.code === formidable.errors.biggerThanMaxFileSize) {
-      return res.status(400).json({ error: 'File exceeds 25MB limit' });
-    }
-    return res.status(400).json({ error: 'Failed to parse upload' });
-  }
-
-  const fileArray = files.file;
-  const uploadedFile = Array.isArray(fileArray) ? fileArray[0] : fileArray;
-
-  if (!uploadedFile) {
-    return res.status(400).json({ error: 'No file provided' });
-  }
-
-  // Validate MIME type
-  const mimeType = uploadedFile.mimetype || '';
-  if (!ALLOWED_TYPES.includes(mimeType)) {
-    return res.status(400).json({
-      error: `File type not allowed. Accepted: PDF, DOC, DOCX, TXT, MD, JPEG, PNG, WebP`,
-    });
   }
 
   // Archive current version in document_versions
@@ -128,43 +80,15 @@ export default async function handler(
     return res.status(500).json({ error: 'Failed to archive current version' });
   }
 
-  // Upload new file to storage
-  const originalName = uploadedFile.originalFilename || 'unnamed';
-  const sanitized = sanitizeFilename(originalName);
-  const newStoragePath = `${orgId}/${doc.id}/${sanitized}`;
-
-  const fileBuffer = fs.readFileSync(uploadedFile.filepath);
-
-  const { error: uploadError } = await supabase.storage
-    .from('org_documents')
-    .upload(newStoragePath, fileBuffer, {
-      contentType: mimeType,
-      upsert: true,
-    });
-
-  if (uploadError) {
-    console.error('[documents/replace] Storage upload failed', uploadError);
-    return res.status(500).json({ error: 'Failed to upload replacement file' });
-  }
-
-  // Clean up temp file
-  try {
-    fs.unlinkSync(uploadedFile.filepath);
-  } catch {
-    // Ignore cleanup errors
-  }
-
   // Update document record
-  const newVersion = (doc.current_version || 1) + 1;
-
   const { data: updated, error: updateError } = await supabase
     .from('documents')
     .update({
-      storage_path: newStoragePath,
-      file_size: uploadedFile.size || fileBuffer.length,
-      file_type: mimeType,
-      original_filename: originalName,
-      current_version: newVersion,
+      storage_path,
+      file_size: file_size || null,
+      file_type: file_type || null,
+      original_filename: original_filename || null,
+      current_version: new_version,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
@@ -202,7 +126,6 @@ export default async function handler(
         '[documents/replace] Failed to reset digest',
         digestError
       );
-      // Non-fatal: document was still replaced successfully
     }
   }
 
