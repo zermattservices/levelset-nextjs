@@ -13,6 +13,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import sty from './DigestViewerModal.module.css';
 
@@ -301,7 +302,7 @@ export function DigestViewerModal({
                   />
                 ) : (
                   <div className={sty.formattedView}>
-                    <ReactMarkdown>{selectedVersion?.content_md || ''}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedVersion?.content_md || ''}</ReactMarkdown>
                   </div>
                 )}
               </div>
