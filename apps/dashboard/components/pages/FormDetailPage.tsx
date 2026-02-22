@@ -80,15 +80,19 @@ export function FormDetailPage() {
     }
   }, []);
 
-  // Fetch template and groups — only on initial mount (when formId + auth are ready).
-  // We intentionally exclude auth object refs from deps to prevent refetches on
-  // TOKEN_REFRESHED events (which fire when the browser tab regains focus and
-  // would destroy editor state by resetting loading → true).
+  // Fetch template and groups once when auth is ready.
+  // dataFetchedRef prevents refetches on TOKEN_REFRESHED events (which fire
+  // when the browser tab regains focus and would destroy editor state).
   const dataFetchedRef = React.useRef(false);
 
+  // Coerce auth objects to stable booleans so the effect re-runs when they
+  // go from null → object, but NOT when the object reference changes.
+  const hasAuthUser = !!auth.authUser;
+  const hasAppUser = !!auth.appUser;
+
   React.useEffect(() => {
-    if (!formId || !auth.isLoaded || !auth.authUser || !auth.appUser) return;
-    if (dataFetchedRef.current) return; // Already fetched — don't refetch on auth object changes
+    if (!formId || !auth.isLoaded || !hasAuthUser || !hasAppUser) return;
+    if (dataFetchedRef.current) return;
     dataFetchedRef.current = true;
 
     const fetchData = async () => {
@@ -123,8 +127,7 @@ export function FormDetailPage() {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formId, auth.isLoaded]);
+  }, [formId, auth.isLoaded, hasAuthUser, hasAppUser, getAccessToken, router]);
 
   // Fetch submissions for this template (use template.id UUID, not the slug from URL)
   const fetchSubmissions = React.useCallback(async () => {
