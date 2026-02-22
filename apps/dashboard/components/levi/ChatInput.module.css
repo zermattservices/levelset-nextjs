@@ -66,3 +66,35 @@
   opacity: 0.4;
   cursor: default;
 }
+
+.bottomRow {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--ls-space-2);
+}
+
+.clearButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-xs);
+  color: var(--ls-color-text-tertiary);
+  background: none;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-lg);
+  padding: var(--ls-space-1) var(--ls-space-2-5);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.clearButton:hover:not(:disabled) {
+  color: var(--ls-color-text-secondary);
+  border-color: var(--ls-color-text-tertiary);
+  background: var(--ls-color-muted-soft);
+}
+
+.clearButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

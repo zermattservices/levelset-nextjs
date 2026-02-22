@@ -407,6 +407,39 @@ export function useLeviChat() {
     [sdkSendMessage]
   );
 
+  // ---------------------------------------------------------------------------
+  // Clear conversation (soft delete)
+  // ---------------------------------------------------------------------------
+
+  const clearConversation = useCallback(async () => {
+    const orgId = selectedLocationOrgId;
+    const locationId = selectedLocationId;
+    if (!orgId || !locationId) return;
+
+    const token = await getToken();
+    if (!token) return;
+
+    try {
+      const res = await fetch(
+        `${AGENT_URL}/api/ai/chat/clear?org_id=${orgId}&location_id=${locationId}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (res.ok) {
+        // Clear local state
+        setHistoryMessages([]);
+        setSessionMessages([]);
+        setHasMoreHistory(false);
+        // Reset the location ref so history won't re-load the archived conversation
+        lastLoadedLocationRef.current = null;
+      }
+    } catch (err) {
+      console.warn('[LeviChat] Failed to clear conversation:', err);
+    }
+  }, [selectedLocationId, selectedLocationOrgId, getToken, setSessionMessages]);
+
   return {
     historyMessages: allMessages.history,
     sessionMessages: allMessages.session,
@@ -415,6 +448,7 @@ export function useLeviChat() {
     hasMoreHistory,
     loadMoreHistory,
     sendMessage,
+    clearConversation,
     status,
     error: chatError,
   };

@@ -88,6 +88,7 @@ export function LeviPage() {
               hasMoreHistory={chat.hasMoreHistory}
               loadMoreHistory={chat.loadMoreHistory}
               sendMessage={chat.sendMessage}
+              clearConversation={chat.clearConversation}
               status={chat.status}
               onEmployeeClick={handleEmployeeClick}
             />

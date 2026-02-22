@@ -37,6 +37,7 @@ import {
   persistMessage,
   findActiveConversation,
   loadHistoryPage,
+  archiveConversation,
 } from '../../lib/conversation-manager.js';
 import { retrieveContext } from '../../lib/context-retriever.js';
 import { logUsage, checkRateLimit } from '../../lib/usage-tracker.js';
@@ -384,6 +385,28 @@ chatRoute.get('/history', async (c) => {
   } catch (err) {
     console.error('History endpoint error:', err);
     return c.json({ messages: [], hasMore: false });
+  }
+});
+
+/**
+ * DELETE /clear — Archive the active conversation (soft delete).
+ * Clears chat context so the next message starts a fresh conversation.
+ */
+chatRoute.delete('/clear', async (c) => {
+  try {
+    const user = c.get('user') as UserContext;
+    const isAdmin = isLevelsetAdmin(user.role);
+    const orgId = isAdmin
+      ? (c.req.query('org_id') || user.orgId)
+      : (user.orgId || c.req.query('org_id'));
+    if (!orgId) return c.json({ success: false, error: 'Missing org_id' }, 400);
+    const locationId = c.req.query('location_id') ?? undefined;
+
+    const archived = await archiveConversation(user.appUserId, orgId, locationId);
+    return c.json({ success: true, archived });
+  } catch (err) {
+    console.error('Clear conversation error:', err);
+    return c.json({ success: false, error: 'Failed to clear conversation' }, 500);
   }
 });
 

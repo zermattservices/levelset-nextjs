@@ -1,21 +1,25 @@
 /**
  * ChatInput — bottom input bar for the Levi chat.
  * Auto-expanding textarea, Enter to send (Shift+Enter for newline).
+ * Includes a "New conversation" button to clear chat history.
  */
 
 import * as React from 'react';
 import { useState, useRef, useCallback } from 'react';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import AddIcon from '@mui/icons-material/Add';
 import styles from './ChatInput.module.css';
 
 interface ChatInputProps {
   onSend: (text: string) => void;
+  onClear: () => void;
   disabled?: boolean;
+  hasMessages?: boolean;
 }
 
 const MAX_LENGTH = 2000;
 
-export function ChatInput({ onSend, disabled }: ChatInputProps) {
+export function ChatInput({ onSend, onClear, disabled, hasMessages }: ChatInputProps) {
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -86,6 +90,20 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             <ArrowUpwardIcon style={{ fontSize: 20 }} />
           </button>
         </div>
+        {hasMessages && (
+          <div className={styles.bottomRow}>
+            <button
+              type="button"
+              className={styles.clearButton}
+              onClick={onClear}
+              disabled={disabled}
+              aria-label="New conversation"
+            >
+              <AddIcon style={{ fontSize: 14 }} />
+              New conversation
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

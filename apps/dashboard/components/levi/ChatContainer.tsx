@@ -23,6 +23,7 @@ interface ChatContainerProps {
   hasMoreHistory: boolean;
   loadMoreHistory: () => void;
   sendMessage: (text: string) => void;
+  clearConversation: () => void;
   status: string;
   onEmployeeClick?: (employeeId: string) => void;
 }
@@ -67,6 +68,7 @@ export function ChatContainer({
   hasMoreHistory,
   loadMoreHistory,
   sendMessage,
+  clearConversation,
   status,
   onEmployeeClick,
 }: ChatContainerProps) {
@@ -218,7 +220,12 @@ export function ChatContainer({
         </div>
       </div>
 
-      <ChatInput onSend={sendMessage} disabled={isSending} />
+      <ChatInput
+        onSend={sendMessage}
+        onClear={clearConversation}
+        disabled={isSending}
+        hasMessages={totalMessages > 0}
+      />
     </div>
   );
 }

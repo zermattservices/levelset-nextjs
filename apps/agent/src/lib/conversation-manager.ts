@@ -207,6 +207,49 @@ export async function findActiveConversation(
 }
 
 /**
+ * Archive (soft-delete) the active conversation for a user+org+location.
+ * Returns true if a conversation was archived, false if none was active.
+ */
+export async function archiveConversation(
+  userId: string,
+  orgId: string,
+  locationId?: string,
+): Promise<boolean> {
+  const supabase = getServiceClient();
+
+  let findQuery = supabase
+    .from('ai_conversations')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('org_id', orgId)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (locationId) {
+    findQuery = findQuery.eq('location_id', locationId);
+  } else {
+    findQuery = findQuery.is('location_id', null);
+  }
+
+  const { data: existing } = await findQuery.maybeSingle();
+
+  if (!existing) return false;
+
+  const { error } = await supabase
+    .from('ai_conversations')
+    .update({ status: 'archived', updated_at: new Date().toISOString() })
+    .eq('id', existing.id);
+
+  if (error) {
+    console.error('Failed to archive conversation:', error);
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Persist a message to the database.
  */
 export async function persistMessage(
