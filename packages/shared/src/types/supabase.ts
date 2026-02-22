@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          location_id: string | null
           org_id: string
           status: string
           title: string | null
@@ -27,6 +28,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          location_id?: string | null
           org_id: string
           status?: string
           title?: string | null
@@ -36,6 +38,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          location_id?: string | null
           org_id?: string
           status?: string
           title?: string | null
@@ -43,6 +46,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ai_conversations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ai_conversations_org_id_fkey"
             columns: ["org_id"]
@@ -67,6 +77,9 @@ export type Database = {
           id: string
           metadata: Json | null
           role: string
+          tool_call_id: string | null
+          tool_calls: Json | null
+          ui_blocks: Json | null
         }
         Insert: {
           content: string
@@ -75,6 +88,9 @@ export type Database = {
           id?: string
           metadata?: Json | null
           role: string
+          tool_call_id?: string | null
+          tool_calls?: Json | null
+          ui_blocks?: Json | null
         }
         Update: {
           content?: string
@@ -83,6 +99,9 @@ export type Database = {
           id?: string
           metadata?: Json | null
           role?: string
+          tool_call_id?: string | null
+          tool_calls?: Json | null
+          ui_blocks?: Json | null
         }
         Relationships: [
           {
@@ -198,6 +217,47 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "locations"
             referencedColumns: ["org_id", "id"]
+          },
+        ]
+      }
+      break_rules: {
+        Row: {
+          break_duration_minutes: number
+          created_at: string | null
+          display_order: number
+          id: string
+          is_active: boolean | null
+          org_id: string
+          trigger_hours: number
+          updated_at: string | null
+        }
+        Insert: {
+          break_duration_minutes: number
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          org_id: string
+          trigger_hours: number
+          updated_at?: string | null
+        }
+        Update: {
+          break_duration_minutes?: number
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          org_id?: string
+          trigger_hours?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "break_rules_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -574,6 +634,248 @@ export type Database = {
           },
         ]
       }
+      document_digests: {
+        Row: {
+          content_hash: string | null
+          content_md: string | null
+          created_at: string
+          document_id: string
+          extraction_error: string | null
+          extraction_method: string | null
+          extraction_status: string
+          id: string
+          metadata: Json
+          org_id: string
+          previous_content_md: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          content_hash?: string | null
+          content_md?: string | null
+          created_at?: string
+          document_id: string
+          extraction_error?: string | null
+          extraction_method?: string | null
+          extraction_status?: string
+          id?: string
+          metadata?: Json
+          org_id: string
+          previous_content_md?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          content_hash?: string | null
+          content_md?: string | null
+          created_at?: string
+          document_id?: string
+          extraction_error?: string | null
+          extraction_method?: string | null
+          extraction_status?: string
+          id?: string
+          metadata?: Json
+          org_id?: string
+          previous_content_md?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_digests_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_digests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_folders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          org_id: string
+          parent_folder_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          org_id: string
+          parent_folder_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          org_id?: string
+          parent_folder_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_folders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_folders_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "document_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_versions: {
+        Row: {
+          content_diff_summary: string | null
+          created_at: string
+          document_id: string
+          file_size: number | null
+          id: string
+          replaced_by: string | null
+          storage_path: string
+          version_number: number
+        }
+        Insert: {
+          content_diff_summary?: string | null
+          created_at?: string
+          document_id: string
+          file_size?: number | null
+          id?: string
+          replaced_by?: string | null
+          storage_path: string
+          version_number: number
+        }
+        Update: {
+          content_diff_summary?: string | null
+          created_at?: string
+          document_id?: string
+          file_size?: number | null
+          id?: string
+          replaced_by?: string | null
+          storage_path?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_versions_replaced_by_fkey"
+            columns: ["replaced_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          category: string
+          created_at: string
+          current_version: number
+          description: string | null
+          file_size: number | null
+          file_type: string | null
+          folder_id: string | null
+          id: string
+          name: string
+          org_id: string
+          original_filename: string | null
+          original_url: string | null
+          source_type: string
+          storage_path: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          current_version?: number
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          folder_id?: string | null
+          id?: string
+          name: string
+          org_id: string
+          original_filename?: string | null
+          original_url?: string | null
+          source_type: string
+          storage_path?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          current_version?: number
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          folder_id?: string | null
+          id?: string
+          name?: string
+          org_id?: string
+          original_filename?: string | null
+          original_url?: string | null
+          source_type?: string
+          storage_path?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "document_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           active: boolean
@@ -820,6 +1122,499 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      form_connectors: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          description_es: string | null
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+          name_es: string | null
+          params: Json | null
+          return_type: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          description_es?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+          name_es?: string | null
+          params?: Json | null
+          return_type: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          description_es?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          name_es?: string | null
+          params?: Json | null
+          return_type?: string
+        }
+        Relationships: []
+      }
+      form_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          description_es: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          is_system: boolean
+          name: string
+          name_es: string | null
+          org_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          description_es?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_system?: boolean
+          name: string
+          name_es?: string | null
+          org_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          description_es?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_system?: boolean
+          name?: string
+          name_es?: string | null
+          org_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_groups_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      form_submissions: {
+        Row: {
+          created_at: string
+          employee_id: string | null
+          form_type: string
+          id: string
+          location_id: string | null
+          metadata: Json | null
+          org_id: string
+          response_data: Json
+          schema_snapshot: Json
+          score: number | null
+          status: string
+          submitted_by: string | null
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id?: string | null
+          form_type: string
+          id?: string
+          location_id?: string | null
+          metadata?: Json | null
+          org_id: string
+          response_data?: Json
+          schema_snapshot?: Json
+          score?: number | null
+          status?: string
+          submitted_by?: string | null
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string | null
+          form_type?: string
+          id?: string
+          location_id?: string | null
+          metadata?: Json | null
+          org_id?: string
+          response_data?: Json
+          schema_snapshot?: Json
+          score?: number | null
+          status?: string
+          submitted_by?: string | null
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_submissions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "form_submissions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_submissions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "form_submissions_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_submissions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_submissions_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_submissions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "form_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      form_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_es: string | null
+          form_type: string
+          group_id: string
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          name_es: string | null
+          org_id: string
+          schema: Json
+          settings: Json
+          slug: string
+          ui_schema: Json
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_es?: string | null
+          form_type: string
+          group_id: string
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          name_es?: string | null
+          org_id: string
+          schema?: Json
+          settings?: Json
+          slug: string
+          ui_schema?: Json
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_es?: string | null
+          form_type?: string
+          group_id?: string
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          name_es?: string | null
+          org_id?: string
+          schema?: Json
+          settings?: Json
+          slug?: string
+          ui_schema?: Json
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_templates_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "form_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_templates_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      global_document_digests: {
+        Row: {
+          content_hash: string | null
+          content_md: string | null
+          created_at: string
+          document_id: string
+          extraction_error: string | null
+          extraction_method: string | null
+          extraction_status: string
+          id: string
+          metadata: Json
+          previous_content_md: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          content_hash?: string | null
+          content_md?: string | null
+          created_at?: string
+          document_id: string
+          extraction_error?: string | null
+          extraction_method?: string | null
+          extraction_status?: string
+          id?: string
+          metadata?: Json
+          previous_content_md?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          content_hash?: string | null
+          content_md?: string | null
+          created_at?: string
+          document_id?: string
+          extraction_error?: string | null
+          extraction_method?: string | null
+          extraction_status?: string
+          id?: string
+          metadata?: Json
+          previous_content_md?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "global_document_digests_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "global_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      global_document_folders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          parent_folder_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          parent_folder_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          parent_folder_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "global_document_folders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "global_document_folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "global_document_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      global_document_versions: {
+        Row: {
+          content_diff_summary: string | null
+          created_at: string
+          document_id: string
+          file_size: number | null
+          id: string
+          replaced_by: string | null
+          storage_path: string
+          version_number: number
+        }
+        Insert: {
+          content_diff_summary?: string | null
+          created_at?: string
+          document_id: string
+          file_size?: number | null
+          id?: string
+          replaced_by?: string | null
+          storage_path: string
+          version_number: number
+        }
+        Update: {
+          content_diff_summary?: string | null
+          created_at?: string
+          document_id?: string
+          file_size?: number | null
+          id?: string
+          replaced_by?: string | null
+          storage_path?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "global_document_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "global_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "global_document_versions_replaced_by_fkey"
+            columns: ["replaced_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      global_documents: {
+        Row: {
+          category: string
+          created_at: string
+          current_version: number
+          description: string | null
+          file_size: number | null
+          file_type: string | null
+          folder_id: string | null
+          id: string
+          name: string
+          original_filename: string | null
+          original_url: string | null
+          source_type: string
+          storage_path: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          current_version?: number
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          folder_id?: string | null
+          id?: string
+          name: string
+          original_filename?: string | null
+          original_url?: string | null
+          source_type: string
+          storage_path?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          current_version?: number
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          folder_id?: string | null
+          id?: string
+          name?: string
+          original_filename?: string | null
+          original_url?: string | null
+          source_type?: string
+          storage_path?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "global_documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "global_document_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "global_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
             referencedColumns: ["id"]
           },
         ]
@@ -1206,6 +2001,79 @@ export type Database = {
           },
         ]
       }
+      levi_usage_log: {
+        Row: {
+          conversation_id: string | null
+          cost_usd: number | null
+          created_at: string | null
+          escalated: boolean | null
+          escalation_reason: string | null
+          id: string
+          input_tokens: number
+          latency_ms: number | null
+          model: string
+          org_id: string
+          output_tokens: number
+          task_type: string
+          tier: string
+          user_id: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          cost_usd?: number | null
+          created_at?: string | null
+          escalated?: boolean | null
+          escalation_reason?: string | null
+          id?: string
+          input_tokens: number
+          latency_ms?: number | null
+          model: string
+          org_id: string
+          output_tokens: number
+          task_type: string
+          tier: string
+          user_id?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          cost_usd?: number | null
+          created_at?: string | null
+          escalated?: boolean | null
+          escalation_reason?: string | null
+          id?: string
+          input_tokens?: number
+          latency_ms?: number | null
+          model?: string
+          org_id?: string
+          output_tokens?: number
+          task_type?: string
+          tier?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levi_usage_log_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "levi_usage_log_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "levi_usage_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_business_hours: {
         Row: {
           close_hour: number
@@ -1588,6 +2456,7 @@ export type Database = {
       }
       org_positions: {
         Row: {
+          area_id: string | null
           created_at: string
           description: string | null
           description_es: string | null
@@ -1597,10 +2466,13 @@ export type Database = {
           name: string
           name_es: string | null
           org_id: string
+          position_type: string
+          scheduling_enabled: boolean
           updated_at: string
           zone: string
         }
         Insert: {
+          area_id?: string | null
           created_at?: string
           description?: string | null
           description_es?: string | null
@@ -1610,10 +2482,13 @@ export type Database = {
           name: string
           name_es?: string | null
           org_id: string
+          position_type?: string
+          scheduling_enabled?: boolean
           updated_at?: string
           zone: string
         }
         Update: {
+          area_id?: string | null
           created_at?: string
           description?: string | null
           description_es?: string | null
@@ -1623,10 +2498,19 @@ export type Database = {
           name?: string
           name_es?: string | null
           org_id?: string
+          position_type?: string
+          scheduling_enabled?: boolean
           updated_at?: string
           zone?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "org_positions_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "scheduling_areas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "org_positions_org_id_fkey"
             columns: ["org_id"]
@@ -2538,6 +3422,260 @@ export type Database = {
             columns: ["published_by"]
             isOneToOne: false
             referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduling_areas: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          org_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          org_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          org_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduling_areas_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      setup_assignments: {
+        Row: {
+          assigned_by: string | null
+          assignment_date: string
+          created_at: string
+          employee_id: string
+          end_time: string
+          id: string
+          org_id: string
+          position_id: string
+          shift_id: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          assignment_date: string
+          created_at?: string
+          employee_id: string
+          end_time: string
+          id?: string
+          org_id: string
+          position_id: string
+          shift_id: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string | null
+          assignment_date?: string
+          created_at?: string
+          employee_id?: string
+          end_time?: string
+          id?: string
+          org_id?: string
+          position_id?: string
+          shift_id?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setup_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setup_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_latest_rating"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "setup_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setup_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "v_employee_infraction_rollup"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "setup_assignments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setup_assignments_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "org_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setup_assignments_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      setup_template_schedules: {
+        Row: {
+          created_at: string
+          day_of_week: number[]
+          end_time: string
+          id: string
+          start_time: string
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number[]
+          end_time: string
+          id?: string
+          start_time: string
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number[]
+          end_time?: string
+          id?: string
+          start_time?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setup_template_schedules_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "setup_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      setup_template_slots: {
+        Row: {
+          created_at: string
+          id: string
+          is_required: boolean
+          position_id: string
+          slot_count: number
+          template_id: string
+          time_slot: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          position_id: string
+          slot_count?: number
+          template_id: string
+          time_slot: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          position_id?: string
+          slot_count?: number
+          template_id?: string
+          time_slot?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setup_template_slots_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "org_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setup_template_slots_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "setup_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      setup_templates: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          org_id: string
+          priority: number
+          updated_at: string
+          zone: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          org_id: string
+          priority?: number
+          updated_at?: string
+          zone: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          priority?: number
+          updated_at?: string
+          zone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setup_templates_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
         ]
