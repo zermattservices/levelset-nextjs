@@ -30,13 +30,24 @@ export function GlobalDocumentsPage() {
     }
   }, [auth.isLoaded, auth.authUser, router]);
 
+  // Redirect non-admins once role is known
+  React.useEffect(() => {
+    if (auth.isLoaded && auth.authUser && auth.role && auth.role !== 'Levelset Admin') {
+      router.push('/documents');
+    }
+  }, [auth.isLoaded, auth.authUser, auth.role, router]);
+
   if (!auth.isLoaded || !auth.authUser) {
+    return <AuthLoadingScreen />;
+  }
+
+  // Wait for appUser data to load (role is '' until fetched)
+  if (!auth.role) {
     return <AuthLoadingScreen />;
   }
 
   // Only Levelset Admins can access global documents
   if (auth.role !== 'Levelset Admin') {
-    router.push('/documents');
     return <AuthLoadingScreen />;
   }
 

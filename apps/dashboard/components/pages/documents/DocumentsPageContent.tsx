@@ -38,6 +38,7 @@ import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 
 import sty from './DocumentsPageContent.module.css';
 import { useAuth } from '@/lib/providers/AuthProvider';
@@ -68,6 +69,7 @@ function formatFileSize(bytes: number | null): string {
 }
 
 function getFileTypeIcon(fileType: string | null, sourceType: string): React.ReactNode {
+  if (sourceType === 'text') return <ArticleOutlinedIcon sx={{ fontSize: 20, color: 'var(--ls-color-success)' }} />;
   if (sourceType === 'url') return <LinkOutlinedIcon sx={{ fontSize: 20, color: 'var(--ls-color-muted)' }} />;
   if (!fileType) return <InsertDriveFileOutlinedIcon sx={{ fontSize: 20, color: 'var(--ls-color-muted)' }} />;
   if (fileType.includes('pdf')) return <PictureAsPdfOutlinedIcon sx={{ fontSize: 20, color: '#e53935' }} />;
@@ -111,9 +113,10 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
 
   // Upload dialog
   const [uploadDialogOpen, setUploadDialogOpen] = React.useState(false);
-  const [uploadMode, setUploadMode] = React.useState<'file' | 'url'>('file');
+  const [uploadMode, setUploadMode] = React.useState<'file' | 'url' | 'text'>('file');
   const [uploadFile, setUploadFile] = React.useState<File | null>(null);
   const [uploadUrl, setUploadUrl] = React.useState('');
+  const [uploadRawContent, setUploadRawContent] = React.useState('');
   const [uploadName, setUploadName] = React.useState('');
   const [uploadDescription, setUploadDescription] = React.useState('');
   const [uploadCategory, setUploadCategory] = React.useState<string>('other');
@@ -286,6 +289,7 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
     setUploadMode('file');
     setUploadFile(null);
     setUploadUrl('');
+    setUploadRawContent('');
     setUploadName('');
     setUploadDescription('');
     setUploadCategory('other');
@@ -322,6 +326,7 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
   const handleUploadSubmit = async () => {
     if (uploadMode === 'file' && !uploadFile) return;
     if (uploadMode === 'url' && !uploadUrl.trim()) return;
+    if (uploadMode === 'text' && !uploadRawContent.trim()) return;
     if (!uploadName.trim()) return;
 
     setUploading(true);
@@ -365,6 +370,29 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
             file_type: uploadFile.type,
             file_size: uploadFile.size,
             original_filename: uploadFile.name,
+          }),
+        });
+
+        if (!createRes.ok) {
+          const err = await createRes.json();
+          throw new Error(err.error || 'Failed to create document');
+        }
+      } else if (uploadMode === 'text') {
+        // Text document — paste markdown directly, no file upload
+        const createRes = await fetch(config.apiBasePath, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            intent: 'create',
+            name: uploadName.trim(),
+            description: uploadDescription.trim() || null,
+            category: uploadCategory,
+            folder_id: currentFolderId,
+            source_type: 'text',
+            raw_content: uploadRawContent.trim(),
           }),
         });
 
@@ -970,6 +998,28 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
                   : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
               }}
             />
+            {config.mode === 'global' && (
+              <Chip
+                label="Paste Text"
+                icon={<ArticleOutlinedIcon sx={{ fontSize: 16 }} />}
+                variant={uploadMode === 'text' ? 'filled' : 'outlined'}
+                onClick={() => setUploadMode('text')}
+                sx={{
+                  fontFamily,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  px: 1,
+                  ...(uploadMode === 'text'
+                    ? {
+                        backgroundColor: 'var(--ls-color-brand)',
+                        color: '#fff',
+                        '& .MuiChip-icon': { color: '#fff' },
+                        '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
+                      }
+                    : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
+                }}
+              />
+            )}
           </div>
 
           {/* File drop zone */}
@@ -1021,6 +1071,29 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
               size="small"
               value={uploadUrl}
               onChange={(e) => setUploadUrl(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+          )}
+
+          {/* Raw text / markdown input */}
+          {uploadMode === 'text' && (
+            <StyledTextField
+              label="Content (Markdown)"
+              placeholder="Paste your markdown content here..."
+              fullWidth
+              size="small"
+              multiline
+              rows={10}
+              value={uploadRawContent}
+              onChange={(e) => setUploadRawContent(e.target.value)}
+              InputProps={{
+                sx: {
+                  fontFamily: '"SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace',
+                  fontSize: 12,
+                  lineHeight: 1.6,
+                },
+              }}
+              InputLabelProps={{ shrink: true }}
               sx={{ mb: 2 }}
             />
           )}
@@ -1078,7 +1151,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
               uploading ||
               !uploadName.trim() ||
               (uploadMode === 'file' && !uploadFile) ||
-              (uploadMode === 'url' && !uploadUrl.trim())
+              (uploadMode === 'url' && !uploadUrl.trim()) ||
+              (uploadMode === 'text' && !uploadRawContent.trim())
             }
             startIcon={uploading ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : undefined}
             sx={{
@@ -1200,7 +1274,7 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
 
             {/* Actions */}
             <div className={sty.drawerActions}>
-              {selectedDocument.source_type === 'file' ? (
+              {selectedDocument.source_type === 'file' && (
                 <Button
                   variant="outlined"
                   size="small"
@@ -1215,7 +1289,9 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
                 >
                   Download
                 </Button>
-              ) : (
+              )}
+
+              {selectedDocument.source_type === 'url' && (
                 <Button
                   variant="outlined"
                   size="small"
@@ -1433,6 +1509,13 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
                   </>
                 )}
 
+                {selectedDocument.source_type === 'text' && (
+                  <>
+                    <span className={sty.drawerDetailLabel}>Format</span>
+                    <span className={sty.drawerDetailValue}>Markdown (raw text)</span>
+                  </>
+                )}
+
                 <span className={sty.drawerDetailLabel}>Version</span>
                 <span className={sty.drawerDetailValue}>v{selectedDocument.current_version}</span>
 
@@ -1478,6 +1561,31 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
                 )}
               </div>
             </div>
+
+            {/* Raw content preview for text documents */}
+            {selectedDocument.source_type === 'text' && selectedDocument.raw_content && (
+              <div className={sty.drawerSection}>
+                <div className={sty.drawerSectionLabel}>Content</div>
+                <pre
+                  style={{
+                    fontFamily: '"SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace',
+                    fontSize: 11,
+                    lineHeight: 1.6,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    backgroundColor: 'var(--ls-color-muted-soft)',
+                    borderRadius: 8,
+                    padding: 12,
+                    margin: 0,
+                    maxHeight: 300,
+                    overflow: 'auto',
+                    color: 'var(--ls-color-text-primary)',
+                  }}
+                >
+                  {selectedDocument.raw_content}
+                </pre>
+              </div>
+            )}
           </div>
         )}
       </Drawer>

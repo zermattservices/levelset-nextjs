@@ -61,7 +61,7 @@ export default async function handler(
 
   // PUT: Update document metadata
   if (req.method === 'PUT') {
-    const { name, description, category, folder_id } = req.body;
+    const { name, description, category, folder_id, raw_content } = req.body;
 
     const updates: Record<string, any> = {
       updated_at: new Date().toISOString(),
@@ -71,6 +71,7 @@ export default async function handler(
     if (description !== undefined) updates.description = description;
     if (category !== undefined) updates.category = category;
     if (folder_id !== undefined) updates.folder_id = folder_id;
+    if (raw_content !== undefined) updates.raw_content = raw_content;
 
     const { data: updated, error } = await supabase
       .from('global_documents')

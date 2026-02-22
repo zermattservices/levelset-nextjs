@@ -1563,6 +1563,7 @@ export type Database = {
           name: string
           original_filename: string | null
           original_url: string | null
+          raw_content: string | null
           source_type: string
           storage_path: string | null
           updated_at: string
@@ -1580,6 +1581,7 @@ export type Database = {
           name: string
           original_filename?: string | null
           original_url?: string | null
+          raw_content?: string | null
           source_type: string
           storage_path?: string | null
           updated_at?: string
@@ -1597,6 +1599,7 @@ export type Database = {
           name?: string
           original_filename?: string | null
           original_url?: string | null
+          raw_content?: string | null
           source_type?: string
           storage_path?: string | null
           updated_at?: string
@@ -4258,4 +4261,3 @@ export const Constants = {
     },
   },
 } as const
-

@@ -87,7 +87,7 @@ export interface Document {
   name: string;
   description: string | null;
   category: string;
-  source_type: 'file' | 'url';
+  source_type: 'file' | 'url' | 'text';
   file_type: string | null;
   file_size: number | null;
   storage_path: string | null;
@@ -99,6 +99,7 @@ export interface Document {
   created_at: string;
   updated_at: string;
   extraction_status?: string;
+  raw_content?: string | null;
 }
 
 /* ------------------------------------------------------------------ */

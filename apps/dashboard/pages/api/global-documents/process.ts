@@ -63,7 +63,13 @@ export default async function handler(
     let text = '';
     let extractionMetadata: Record<string, any> = {};
 
-    if (doc.source_type === 'url') {
+    if (doc.source_type === 'text') {
+      // Raw text documents — use raw_content directly
+      if (!doc.raw_content) {
+        throw new Error('No raw_content found for text-type document');
+      }
+      text = doc.raw_content;
+    } else if (doc.source_type === 'url') {
       if (!doc.original_url) {
         throw new Error('No original_url found for URL-type document');
       }
@@ -242,6 +248,7 @@ function getExtractionMethod(
   sourceType: string | null,
   fileType: string | null
 ): string {
+  if (sourceType === 'text') return 'raw_text';
   if (sourceType === 'url') return 'web_scrape';
   if (!fileType) return 'text_extract';
   if (fileType.includes('pdf')) return 'pdf_extract';

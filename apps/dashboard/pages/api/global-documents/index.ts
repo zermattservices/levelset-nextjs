@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireLevelsetAdmin } from '@/lib/api-auth';
+import crypto from 'crypto';
 
 export default async function handler(
   req: NextApiRequest,
@@ -80,6 +81,7 @@ export default async function handler(
       original_filename,
       file_type,
       file_size,
+      raw_content,
     } = req.body;
 
     if (!name || !category || !source_type) {
@@ -101,6 +103,7 @@ export default async function handler(
         original_filename: original_filename || null,
         file_type: file_type || null,
         file_size: file_size || null,
+        raw_content: source_type === 'text' ? (raw_content || null) : null,
         uploaded_by: appUser.id,
         current_version: 1,
       })
@@ -112,19 +115,49 @@ export default async function handler(
       return res.status(500).json({ error: insertError.message });
     }
 
-    // Create initial digest record
-    const { error: digestError } = await supabase
-      .from('global_document_digests')
-      .insert({
-        document_id: document.id,
-        extraction_status: 'pending',
-      });
+    // For text documents, create digest immediately with completed status
+    if (source_type === 'text' && raw_content) {
+      const contentHash = crypto
+        .createHash('sha256')
+        .update(raw_content)
+        .digest('hex');
+      const wordCount =
+        raw_content.trim().length > 0
+          ? raw_content.trim().split(/\s+/).length
+          : 0;
 
-    if (digestError) {
-      console.error(
-        '[global-documents] Failed to create digest record',
-        digestError
-      );
+      const { error: digestError } = await supabase
+        .from('global_document_digests')
+        .insert({
+          document_id: document.id,
+          content_md: raw_content,
+          content_hash: contentHash,
+          extraction_method: 'raw_text',
+          extraction_status: 'completed',
+          metadata: { word_count: wordCount },
+        });
+
+      if (digestError) {
+        console.error(
+          '[global-documents] Failed to create digest for text document',
+          digestError
+        );
+      }
+    } else {
+      // Create initial digest record with pending status for file/url documents
+      const { error: digestError } = await supabase
+        .from('global_document_digests')
+        .insert({
+          document_id: document.id,
+          extraction_status: 'pending',
+        });
+
+      if (digestError) {
+        console.error(
+          '[global-documents] Failed to create digest record',
+          digestError
+        );
+      }
     }
 
     return res.status(201).json(document);
