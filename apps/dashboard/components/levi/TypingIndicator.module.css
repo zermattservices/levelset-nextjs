@@ -9,7 +9,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--ls-color-brand-soft);
+  background: var(--ls-color-muted-soft);
   display: flex;
   align-items: center;
   justify-content: center;

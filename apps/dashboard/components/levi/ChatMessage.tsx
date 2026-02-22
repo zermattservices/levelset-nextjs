@@ -7,6 +7,9 @@
  *
  * Assistant messages render markdown via react-markdown and interleave
  * text with UI block cards and tool call summaries.
+ *
+ * For session messages, consecutive assistant messages from the AI SDK are
+ * grouped into a single visual message via the `sessionMessages` array prop.
  */
 
 import * as React from 'react';
@@ -57,8 +60,10 @@ function getToolLabel(toolName: string): string {
 interface ChatMessageProps {
   /** History message from the API */
   historyMessage?: HistoryMessage;
-  /** Session message from useChat (AI SDK UIMessage) */
-  sessionMessage?: any; // UIMessage from @ai-sdk/react
+  /** Single session message from useChat (user messages) */
+  sessionMessage?: any;
+  /** Grouped assistant session messages (consecutive assistant msgs merged) */
+  sessionMessages?: any[];
   onEmployeeClick?: (employeeId: string) => void;
 }
 
@@ -130,7 +135,7 @@ function AssistantHistoryMessage({
 }
 
 // ---------------------------------------------------------------------------
-// Assistant message (session / AI SDK UIMessage)
+// Helpers for session message part detection
 // ---------------------------------------------------------------------------
 
 function isToolPart(part: any): boolean {
@@ -146,17 +151,21 @@ function isDataPart(part: any): boolean {
   return typeof part.type === 'string' && part.type.startsWith('data-');
 }
 
-function AssistantSessionMessage({
-  message,
-  onEmployeeClick,
-}: {
-  message: any;
-  onEmployeeClick?: (id: string) => void;
-}) {
-  // Collect tool calls from parts
+// ---------------------------------------------------------------------------
+// Render parts from a single AI SDK message
+// ---------------------------------------------------------------------------
+
+function renderSessionParts(
+  message: any,
+  onEmployeeClick?: (id: string) => void,
+  keyPrefix: string = '',
+): { nodes: React.ReactNode[]; toolCalls: ToolCallInfo[] } {
   const toolCalls: ToolCallInfo[] = [];
   const seenToolIds = new Set<string>();
+  const renderedParts: React.ReactNode[] = [];
+  let toolSummaryAdded = false;
 
+  // Collect tool calls first
   if (message.parts) {
     for (const part of message.parts) {
       if (isToolPart(part) && part.toolCallId) {
@@ -165,7 +174,9 @@ function AssistantSessionMessage({
           toolCalls.push({
             id: part.toolCallId,
             name: part.toolName || part.type.replace('tool-', ''),
-            label: getToolLabel(part.toolName || part.type.replace('tool-', '')),
+            label: getToolLabel(
+              part.toolName || part.type.replace('tool-', '')
+            ),
             status: part.state === 'output-available' ? 'done' : 'calling',
           });
         }
@@ -173,36 +184,34 @@ function AssistantSessionMessage({
     }
   }
 
-  // Render parts in order: text, tool summaries, data-ui-block
-  const renderedParts: React.ReactNode[] = [];
-  let toolSummaryAdded = false;
-
+  // Render parts
   if (message.parts) {
     for (let i = 0; i < message.parts.length; i++) {
       const part = message.parts[i];
 
       if (part.type === 'text' && part.text) {
         renderedParts.push(
-          <div key={`text-${i}`} className={styles.prose}>
+          <div key={`${keyPrefix}text-${i}`} className={styles.prose}>
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {part.text}
             </ReactMarkdown>
           </div>
         );
       } else if (isToolPart(part) && !toolSummaryAdded) {
-        // Show tool summary once (before the first tool call part)
         if (toolCalls.length > 0) {
           renderedParts.push(
-            <ToolCallSummary key="tools" toolCalls={toolCalls} />
+            <ToolCallSummary
+              key={`${keyPrefix}tools`}
+              toolCalls={toolCalls}
+            />
           );
           toolSummaryAdded = true;
         }
       } else if (isDataPart(part) && part.data) {
-        // Custom data events from agent (data-ui-block, data-tool-status)
         const data = part.data;
         if (data && data.blockType && data.blockId) {
           renderedParts.push(
-            <div key={`block-${i}`} className={styles.uiBlockWrap}>
+            <div key={`${keyPrefix}block-${i}`} className={styles.uiBlockWrap}>
               <UIBlockRenderer
                 block={data as UIBlock}
                 onEmployeeClick={onEmployeeClick}
@@ -227,7 +236,7 @@ function AssistantSessionMessage({
           : '';
     if (contentText) {
       renderedParts.push(
-        <div key="fallback" className={styles.prose}>
+        <div key={`${keyPrefix}fallback`} className={styles.prose}>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {contentText}
           </ReactMarkdown>
@@ -236,12 +245,38 @@ function AssistantSessionMessage({
     }
   }
 
+  return { nodes: renderedParts, toolCalls };
+}
+
+// ---------------------------------------------------------------------------
+// Grouped assistant session message (multiple AI SDK messages → one visual)
+// ---------------------------------------------------------------------------
+
+function AssistantSessionGroup({
+  messages,
+  onEmployeeClick,
+}: {
+  messages: any[];
+  onEmployeeClick?: (id: string) => void;
+}) {
+  // Render parts from ALL messages in the group
+  const allNodes: React.ReactNode[] = [];
+
+  for (let m = 0; m < messages.length; m++) {
+    const { nodes } = renderSessionParts(
+      messages[m],
+      onEmployeeClick,
+      `m${m}-`
+    );
+    allNodes.push(...nodes);
+  }
+
   return (
     <div className={styles.assistantRow}>
       <div className={styles.avatar}>
         <LeviIcon size={16} color="var(--ls-color-brand-base)" />
       </div>
-      <div className={styles.content}>{renderedParts}</div>
+      <div className={styles.content}>{allNodes}</div>
     </div>
   );
 }
@@ -253,6 +288,7 @@ function AssistantSessionMessage({
 export function ChatMessage({
   historyMessage,
   sessionMessage,
+  sessionMessages,
   onEmployeeClick,
 }: ChatMessageProps) {
   // History message rendering
@@ -268,7 +304,17 @@ export function ChatMessage({
     );
   }
 
-  // Session message rendering (AI SDK UIMessage)
+  // Grouped assistant session messages (consecutive assistant msgs merged)
+  if (sessionMessages && sessionMessages.length > 0) {
+    return (
+      <AssistantSessionGroup
+        messages={sessionMessages}
+        onEmployeeClick={onEmployeeClick}
+      />
+    );
+  }
+
+  // Single session message (user messages)
   if (sessionMessage) {
     if (sessionMessage.role === 'user') {
       // Extract text from session message
@@ -279,9 +325,10 @@ export function ChatMessage({
           : '');
       return <UserBubble text={text} />;
     }
+    // Single assistant message fallback
     return (
-      <AssistantSessionMessage
-        message={sessionMessage}
+      <AssistantSessionGroup
+        messages={[sessionMessage]}
         onEmployeeClick={onEmployeeClick}
       />
     );

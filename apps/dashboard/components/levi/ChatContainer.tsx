@@ -1,10 +1,13 @@
 /**
  * ChatContainer — scrollable message list with auto-scroll and history pagination.
  * Renders history messages, then session messages, with typing indicator.
+ *
+ * Consecutive assistant session messages from the AI SDK (tool step + text step)
+ * are grouped into a single visual message with one avatar.
  */
 
 import * as React from 'react';
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChatMessage } from './ChatMessage';
 import { TypingIndicator } from './TypingIndicator';
 import { EmptyState } from './EmptyState';
@@ -23,6 +26,38 @@ interface ChatContainerProps {
   status: string;
   onEmployeeClick?: (employeeId: string) => void;
 }
+
+// ---------------------------------------------------------------------------
+// Group consecutive assistant messages into clusters
+// ---------------------------------------------------------------------------
+
+type SessionGroup =
+  | { type: 'user'; message: any }
+  | { type: 'assistant'; messages: any[] };
+
+function groupSessionMessages(messages: any[]): SessionGroup[] {
+  const groups: SessionGroup[] = [];
+
+  for (const msg of messages) {
+    if (msg.role === 'user') {
+      groups.push({ type: 'user', message: msg });
+    } else if (msg.role === 'assistant') {
+      // Append to last group if it's also assistant
+      const lastGroup = groups[groups.length - 1];
+      if (lastGroup && lastGroup.type === 'assistant') {
+        lastGroup.messages.push(msg);
+      } else {
+        groups.push({ type: 'assistant', messages: [msg] });
+      }
+    }
+  }
+
+  return groups;
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function ChatContainer({
   historyMessages,
@@ -43,6 +78,12 @@ export function ChatContainer({
   const totalMessages = historyMessages.length + sessionMessages.length;
   const isEmpty = totalMessages === 0 && historyLoaded;
   const isSending = status === 'streaming' || status === 'submitted';
+
+  // Group consecutive assistant session messages
+  const sessionGroups = useMemo(
+    () => groupSessionMessages(sessionMessages),
+    [sessionMessages]
+  );
 
   // Scroll to bottom helper — debounced via rAF to avoid excessive calls during streaming
   const scrollToBottom = useCallback(() => {
@@ -90,6 +131,14 @@ export function ChatContainer({
     };
   }, []);
 
+  // Check if we should show typing indicator:
+  // Show when sending and the last session message is from the user
+  // (i.e., we're waiting for the first assistant response)
+  const showTyping =
+    isSending &&
+    sessionMessages.length > 0 &&
+    sessionMessages[sessionMessages.length - 1]?.role === 'user';
+
   return (
     <div className={styles.wrapper}>
       <div
@@ -124,21 +173,29 @@ export function ChatContainer({
             />
           ))}
 
-          {/* Session messages */}
-          {sessionMessages.map((msg: any) => (
-            <ChatMessage
-              key={`s-${msg.id}`}
-              sessionMessage={msg}
-              onEmployeeClick={onEmployeeClick}
-            />
-          ))}
+          {/* Session messages — grouped so consecutive assistant msgs share one avatar */}
+          {sessionGroups.map((group, idx) => {
+            if (group.type === 'user') {
+              return (
+                <ChatMessage
+                  key={`sg-${idx}-${group.message.id}`}
+                  sessionMessage={group.message}
+                  onEmployeeClick={onEmployeeClick}
+                />
+              );
+            }
+            // Assistant group — all consecutive assistant messages as one visual unit
+            return (
+              <ChatMessage
+                key={`sg-${idx}-${group.messages[0]?.id}`}
+                sessionMessages={group.messages}
+                onEmployeeClick={onEmployeeClick}
+              />
+            );
+          })}
 
           {/* Typing indicator */}
-          {isSending &&
-            sessionMessages.length > 0 &&
-            sessionMessages[sessionMessages.length - 1]?.role === 'user' && (
-              <TypingIndicator />
-            )}
+          {showTyping && <TypingIndicator />}
 
           <div ref={bottomRef} />
         </div>
