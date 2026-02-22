@@ -146,6 +146,72 @@ function mapHistoryMessage(msg: any): HistoryMessage {
   return base;
 }
 
+/**
+ * Consolidate consecutive assistant history messages into a single message.
+ *
+ * During streaming the agent persists separate DB rows for each tool-call step
+ * and then a final row with the text + UI blocks. When loaded from history these
+ * appear as separate HistoryMessages, but they should render as one visual unit
+ * (just like session messages are grouped via groupSessionMessages).
+ *
+ * Merges: toolCalls, parts (text before ui-blocks), and content.
+ */
+function consolidateHistoryMessages(
+  messages: HistoryMessage[]
+): HistoryMessage[] {
+  const result: HistoryMessage[] = [];
+
+  for (const msg of messages) {
+    if (msg.role === 'user') {
+      result.push(msg);
+      continue;
+    }
+
+    // Assistant message — try to merge with previous if also assistant
+    const prev = result[result.length - 1];
+    if (prev && prev.role === 'assistant') {
+      // Merge tool calls
+      if (msg.toolCalls && msg.toolCalls.length > 0) {
+        prev.toolCalls = [...(prev.toolCalls || []), ...msg.toolCalls];
+      }
+
+      // Merge parts: collect text parts first, then ui-block parts
+      if (msg.parts && msg.parts.length > 0) {
+        const existingParts = prev.parts || [];
+        const existingText = existingParts.filter((p) => p.type === 'text');
+        const existingBlocks = existingParts.filter(
+          (p) => p.type === 'ui-block'
+        );
+        const newText = msg.parts.filter((p) => p.type === 'text');
+        const newBlocks = msg.parts.filter((p) => p.type === 'ui-block');
+
+        prev.parts = [
+          ...existingText,
+          ...newText,
+          ...existingBlocks,
+          ...newBlocks,
+        ];
+      }
+
+      // Merge content (for fallback rendering)
+      if (msg.content) {
+        prev.content = prev.content
+          ? prev.content + '\n' + msg.content
+          : msg.content;
+      }
+    } else {
+      // Start a new group — shallow-copy so we can safely mutate during merge
+      result.push({
+        ...msg,
+        toolCalls: msg.toolCalls ? [...msg.toolCalls] : undefined,
+        parts: msg.parts ? [...msg.parts] : undefined,
+      });
+    }
+  }
+
+  return result;
+}
+
 // ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
@@ -262,7 +328,7 @@ export function useLeviChat() {
         if (res.ok) {
           const data = await res.json();
           const mapped = (data.messages ?? []).map(mapHistoryMessage);
-          setHistoryMessages(mapped);
+          setHistoryMessages(consolidateHistoryMessages(mapped));
           setHasMoreHistory(data.hasMore ?? false);
         }
       } catch (err) {
@@ -305,7 +371,9 @@ export function useLeviChat() {
           mapHistoryMessage
         );
         if (olderMessages.length > 0) {
-          setHistoryMessages((prev) => [...olderMessages, ...prev]);
+          setHistoryMessages((prev) =>
+            consolidateHistoryMessages([...olderMessages, ...prev])
+          );
         }
         setHasMoreHistory(data.hasMore ?? false);
       }
