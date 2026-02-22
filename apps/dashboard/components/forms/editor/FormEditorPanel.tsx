@@ -11,6 +11,8 @@ import { Chip } from '@mui/material';
 import CloudDoneOutlinedIcon from '@mui/icons-material/CloudDoneOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { Alert } from '@mui/material';
 import sty from './FormEditorPanel.module.css';
 import { FieldPalette } from './FieldPalette';
 import { EditorCanvas } from './EditorCanvas';
@@ -33,9 +35,10 @@ interface FormEditorPanelProps {
   template: FormTemplate;
   onSave: (schema: Record<string, any>, uiSchema: Record<string, any>) => Promise<void>;
   onSaveSettings?: (settings: Record<string, any>) => Promise<void>;
+  readOnly?: boolean;
 }
 
-export function FormEditorPanel({ template, onSave, onSaveSettings }: FormEditorPanelProps) {
+export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: FormEditorPanelProps) {
   const [fields, setFields] = React.useState<FormField[]>([]);
   const [selectedFieldId, setSelectedFieldId] = React.useState<string | null>(null);
   const [draggedField, setDraggedField] = React.useState<FormField | null>(null);
@@ -54,9 +57,11 @@ export function FormEditorPanel({ template, onSave, onSaveSettings }: FormEditor
     fieldsInitialized.current = true;
   }, [template]);
 
-  // Auto-save with 1s debounce
+  // Auto-save with 1s debounce (disabled in readOnly mode)
   const triggerAutoSave = React.useCallback(
     (updatedFields: FormField[]) => {
+      if (readOnly) return; // System forms — no saving
+
       setSaveStatus('unsaved');
 
       if (saveTimeoutRef.current) {
@@ -74,7 +79,7 @@ export function FormEditorPanel({ template, onSave, onSaveSettings }: FormEditor
         }
       }, 1000);
     },
-    [onSave]
+    [onSave, readOnly]
   );
 
   // Cleanup timeout on unmount
@@ -184,53 +189,74 @@ export function FormEditorPanel({ template, onSave, onSaveSettings }: FormEditor
 
   return (
     <div className={sty.editorWrapper}>
+      {/* Read-only banner for system forms */}
+      {readOnly && (
+        <Alert
+          severity="info"
+          icon={<LockOutlinedIcon sx={{ fontSize: 18 }} />}
+          sx={{
+            fontFamily,
+            fontSize: 13,
+            borderRadius: '8px',
+            mb: 0,
+            '& .MuiAlert-message': { fontFamily, fontSize: 13 },
+          }}
+        >
+          This is a system form. Its structure is managed by Levelset and cannot be edited.
+        </Alert>
+      )}
+
       {/* Status bar */}
       <div className={sty.statusBar}>
         <span className={sty.fieldCount}>
           {fields.length} field{fields.length !== 1 ? 's' : ''}
         </span>
-        <SaveStatusChip status={saveStatus} />
+        {!readOnly && <SaveStatusChip status={saveStatus} />}
       </div>
 
       {/* Editor body */}
       <div className={sty.editorBody}>
         <DndContext
           collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
+          onDragStart={readOnly ? undefined : handleDragStart}
+          onDragEnd={readOnly ? undefined : handleDragEnd}
+          onDragCancel={readOnly ? undefined : handleDragCancel}
         >
-          <FieldPalette />
+          {!readOnly && <FieldPalette />}
 
           <EditorCanvas
             fields={fields}
-            selectedFieldId={selectedFieldId}
-            onSelectField={setSelectedFieldId}
-            onDeleteField={handleDeleteField}
+            selectedFieldId={readOnly ? null : selectedFieldId}
+            onSelectField={readOnly ? () => {} : setSelectedFieldId}
+            onDeleteField={readOnly ? () => {} : handleDeleteField}
           />
 
-          <DragOverlay dropAnimation={null}>
-            {draggedField && (
-              <EditorFieldCard
-                field={draggedField}
-                isSelected={false}
-                onSelect={() => {}}
-                onDelete={() => {}}
-                isOverlay
-              />
-            )}
-          </DragOverlay>
+          {!readOnly && (
+            <DragOverlay dropAnimation={null}>
+              {draggedField && (
+                <EditorFieldCard
+                  field={draggedField}
+                  isSelected={false}
+                  onSelect={() => {}}
+                  onDelete={() => {}}
+                  isOverlay
+                />
+              )}
+            </DragOverlay>
+          )}
         </DndContext>
 
-        <FieldConfigPanel
-          field={selectedField}
-          onUpdateField={handleUpdateField}
-          isEvaluation={template.form_type === 'evaluation'}
-        />
+        {!readOnly && (
+          <FieldConfigPanel
+            field={selectedField}
+            onUpdateField={handleUpdateField}
+            isEvaluation={template.form_type === 'evaluation'}
+          />
+        )}
       </div>
 
       {/* Evaluation-specific extension */}
-      {template.form_type === 'evaluation' && onSaveSettings && (
+      {!readOnly && template.form_type === 'evaluation' && onSaveSettings && (
         <EvaluationEditorExtension
           template={template}
           fields={fields}

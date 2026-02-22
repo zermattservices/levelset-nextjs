@@ -80,9 +80,16 @@ export function FormDetailPage() {
     }
   }, []);
 
-  // Fetch template and groups
+  // Fetch template and groups — only on initial mount (when formId + auth are ready).
+  // We intentionally exclude auth object refs from deps to prevent refetches on
+  // TOKEN_REFRESHED events (which fire when the browser tab regains focus and
+  // would destroy editor state by resetting loading → true).
+  const dataFetchedRef = React.useRef(false);
+
   React.useEffect(() => {
     if (!formId || !auth.isLoaded || !auth.authUser || !auth.appUser) return;
+    if (dataFetchedRef.current) return; // Already fetched — don't refetch on auth object changes
+    dataFetchedRef.current = true;
 
     const fetchData = async () => {
       setLoading(true);
@@ -116,7 +123,8 @@ export function FormDetailPage() {
     };
 
     fetchData();
-  }, [formId, auth.isLoaded, auth.authUser, auth.appUser, getAccessToken, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formId, auth.isLoaded]);
 
   // Fetch submissions for this template (use template.id UUID, not the slug from URL)
   const fetchSubmissions = React.useCallback(async () => {
@@ -139,10 +147,8 @@ export function FormDetailPage() {
     }
   }, [template, getAccessToken]);
 
-  // Derive named tab key from index (system forms hide the Editor tab)
-  const tabKeys = template?.is_system
-    ? (['settings', 'preview', 'submissions'] as const)
-    : (['settings', 'editor', 'preview', 'submissions'] as const);
+  // All forms have the same 4 tabs — system forms show editor in read-only mode
+  const tabKeys = ['settings', 'editor', 'preview', 'submissions'] as const;
   const activeTabKey = tabKeys[activeTab] || 'settings';
 
   // Load submissions when switching to submissions tab
@@ -427,13 +433,11 @@ export function FormDetailPage() {
                   iconPosition="start"
                   label="Settings"
                 />
-                {!isSystem && (
-                  <Tab
-                    icon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
-                    iconPosition="start"
-                    label="Editor"
-                  />
-                )}
+                <Tab
+                  icon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
+                  iconPosition="start"
+                  label="Editor"
+                />
                 <Tab
                   icon={<PreviewOutlinedIcon sx={{ fontSize: 16 }} />}
                   iconPosition="start"
@@ -465,6 +469,7 @@ export function FormDetailPage() {
                   template={template}
                   onSave={handleSaveSchema}
                   onSaveSettings={template.form_type === 'evaluation' ? handleSaveEvaluationSettings : undefined}
+                  readOnly={isSystem}
                 />
               )}
 
