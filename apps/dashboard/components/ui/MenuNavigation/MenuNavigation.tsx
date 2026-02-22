@@ -293,6 +293,15 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
                 </Link>
               </div>
             )}
+
+            {/* Levi AI - direct link, Levelset Admin only */}
+            {isActualLevelsetAdmin && (
+              <div className={sty.navButtonContainer}>
+                <Link href="/levi" className={classNames(sty.navButton, sty.navButtonDirect)}>
+                  <span className={sty.navButtonText}>Levi</span>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Right side - Admin Mode, Location selector, user info, logout, profile icon */}

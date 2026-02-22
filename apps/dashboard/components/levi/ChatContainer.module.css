@@ -1,0 +1,64 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--ls-space-4) var(--ls-space-4);
+}
+
+/* Thin scrollbar */
+.scrollArea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollArea::-webkit-scrollbar-thumb {
+  background: var(--ls-color-neutral-border);
+  border-radius: 3px;
+}
+
+.scrollArea::-webkit-scrollbar-thumb:hover {
+  background: var(--ls-color-text-tertiary);
+}
+
+.messageList {
+  max-width: 768px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.loadMoreRow {
+  display: flex;
+  justify-content: center;
+  padding: var(--ls-space-2) 0 var(--ls-space-4) 0;
+}
+
+.loadMoreButton {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-xs);
+  color: var(--ls-color-text-secondary);
+  background: var(--ls-color-muted-soft);
+  border: none;
+  border-radius: var(--ls-radius-lg);
+  padding: var(--ls-space-1-5) var(--ls-space-3);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.loadMoreButton:hover:not(:disabled) {
+  background: var(--ls-color-neutral-soft);
+}
+
+.loadMoreButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

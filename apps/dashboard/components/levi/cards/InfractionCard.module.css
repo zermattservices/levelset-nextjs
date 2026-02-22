@@ -1,0 +1,83 @@
+.card {
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-lg);
+  background: var(--ls-color-bg-container);
+  padding: var(--ls-space-3) var(--ls-space-4);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--ls-space-3);
+}
+
+.iconWrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #FEE2E2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iconText {
+  font-family: var(--ls-font-heading);
+  font-size: var(--ls-font-size-lg);
+  font-weight: var(--ls-font-weight-bold);
+  color: var(--ls-color-destructive);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.infractionType {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-base);
+  font-weight: var(--ls-font-weight-medium);
+  color: var(--ls-color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: var(--ls-space-2);
+}
+
+.meta {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-xs);
+  color: var(--ls-color-text-secondary);
+}
+
+.metaSecondary {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-xs);
+  color: var(--ls-color-disabled-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pointsBadge {
+  padding: var(--ls-space-1) var(--ls-space-3);
+  border-radius: var(--ls-radius-md);
+  background: #FEE2E2;
+  flex-shrink: 0;
+}
+
+.pointsText {
+  font-family: var(--ls-font-mono);
+  font-size: var(--ls-font-size-sm);
+  font-weight: var(--ls-font-weight-bold);
+  color: var(--ls-color-destructive);
+}

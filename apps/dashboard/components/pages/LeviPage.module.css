@@ -1,0 +1,39 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--ls-color-neutral-soft);
+}
+
+.chatArea {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.accessDenied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: var(--ls-space-2);
+  text-align: center;
+  padding: var(--ls-space-8);
+}
+
+.accessDeniedTitle {
+  font-family: var(--ls-font-heading);
+  font-size: var(--ls-font-size-xl);
+  font-weight: var(--ls-font-weight-semibold);
+  color: var(--ls-color-text-primary);
+  margin: 0;
+}
+
+.accessDeniedText {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-base);
+  color: var(--ls-color-text-secondary);
+  margin: 0;
+}
