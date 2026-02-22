@@ -39,8 +39,10 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
+import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
 
 import sty from './DocumentsPageContent.module.css';
+import { DigestViewerModal } from './DigestViewerModal';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import {
   StyledTextField,
@@ -137,6 +139,9 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
   const [editDescription, setEditDescription] = React.useState('');
   const [editCategory, setEditCategory] = React.useState<string>('other');
   const [savingEdit, setSavingEdit] = React.useState(false);
+
+  // Digest viewer
+  const [digestViewerOpen, setDigestViewerOpen] = React.useState(false);
 
   // Delete confirm
   const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
@@ -1453,6 +1458,27 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
               >
                 Delete
               </Button>
+
+              {auth.role === 'Levelset Admin' && selectedDocument.extraction_status === 'completed' && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<AutoStoriesOutlinedIcon sx={{ fontSize: 16 }} />}
+                  onClick={() => setDigestViewerOpen(true)}
+                  sx={{
+                    ...muiButtonSx,
+                    fontSize: 12,
+                    borderColor: 'var(--ls-color-brand-border)',
+                    color: 'var(--ls-color-brand)',
+                    '&:hover': {
+                      backgroundColor: 'var(--ls-color-brand-soft)',
+                      borderColor: 'var(--ls-color-brand)',
+                    },
+                  }}
+                >
+                  View Digest
+                </Button>
+              )}
             </div>
 
             {/* Info sections */}
@@ -1734,6 +1760,20 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* ============================================================ */}
+      {/*  Digest Viewer Modal                                          */}
+      {/* ============================================================ */}
+      {selectedDocument && (
+        <DigestViewerModal
+          open={digestViewerOpen}
+          onClose={() => setDigestViewerOpen(false)}
+          documentId={selectedDocument.id}
+          documentName={selectedDocument.name}
+          apiBasePath={config.apiBasePath}
+          authHeaders={authHeaders}
+        />
+      )}
 
       {/* ============================================================ */}
       {/*  Snackbar                                                     */}
