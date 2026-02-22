@@ -6,6 +6,7 @@
     "dev": "turbo dev",
     "dev:dashboard": "turbo dev --filter=dashboard",
     "dev:agent": "turbo dev --filter=agent",
+    "dev:marketing": "turbo dev --filter=@levelset/marketing",
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
