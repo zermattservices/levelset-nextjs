@@ -8,10 +8,12 @@ interface StatItem {
   label: string;
 }
 
-const stats: StatItem[] = [
+const FALLBACK_RATINGS = 3783;
+
+const defaultStats: StatItem[] = [
   { value: 2, suffix: '+', label: 'Operators' },
   { value: 3, suffix: '+', label: 'Locations' },
-  { value: 3783, suffix: '+', label: 'Ratings Submitted' },
+  { value: FALLBACK_RATINGS, suffix: '+', label: 'Ratings Submitted' },
 ];
 
 function animateCount(
@@ -84,6 +86,25 @@ function AnimatedCounter({ target, suffix }: { target: number; suffix: string })
 }
 
 export function Stats() {
+  const [stats, setStats] = useState<StatItem[]>(defaultStats);
+
+  useEffect(() => {
+    fetch('/api/stats')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.ratingsCount && data.ratingsCount > 0) {
+          setStats([
+            defaultStats[0],
+            defaultStats[1],
+            { value: data.ratingsCount, suffix: '+', label: 'Ratings Submitted' },
+          ]);
+        }
+      })
+      .catch(() => {
+        // Keep fallback values
+      });
+  }, []);
+
   return (
     <section className="py-20 md:py-24 bg-white border-y border-[#31664A]/10">
       <div className="max-w-content mx-auto px-6">
