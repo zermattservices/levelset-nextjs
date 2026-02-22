@@ -52,7 +52,7 @@ import { getDisciplineSummary } from '../../tools/data/discipline.js';
 import { getPositionRankings } from '../../tools/data/rankings.js';
 import { toolResultToUIBlocks } from '../../lib/ui-blocks.js';
 
-const MAX_TOOL_STEPS = 3;
+const MAX_TOOL_STEPS = 5;
 
 /* ── Convert DB ChatMessages to AI SDK ModelMessages ──────── */
 
@@ -174,11 +174,15 @@ function getToolCallLabel(name: string, input: Record<string, unknown>): string 
 
 /* ── Build tool definitions ─────────────────────────────────── */
 
-function buildTools(orgId: string, locationId?: string) {
+function buildTools(
+  orgId: string,
+  locationId?: string,
+  features?: { certifications: boolean; evaluations: boolean; pip: boolean; customRoles: boolean }
+) {
   return {
     lookup_employee: tool({
       description:
-        'Search for an employee by name and return their details including role, hire date, certification status, and current discipline points.',
+        'Search for an employee by name and return their basic details (role, hire date, leader/trainer status). Use this to find an employee ID before calling other tools. For a full profile, call get_employee_profile after this.',
       inputSchema: z.object({
         name: z.string().describe('Full or partial name of the employee to search for'),
         role: z.string().optional().describe('Filter by role name (e.g. "Team Leader")'),
@@ -189,7 +193,7 @@ function buildTools(orgId: string, locationId?: string) {
     }),
     list_employees: tool({
       description:
-        'List employees in the organization. Can filter by active status, position type (FOH/BOH), leaders, trainers, or role.',
+        'List employees with optional filters. Use for counting or listing employees by role, zone (FOH/BOH), leaders, or trainers. Does NOT include ratings or discipline data — use get_team_overview for that.',
       inputSchema: z.object({
         active_only: z.boolean().optional().describe('Only return active employees (default: true)'),
         is_leader: z.boolean().optional().describe('Filter for leaders only'),
@@ -205,7 +209,7 @@ function buildTools(orgId: string, locationId?: string) {
     }),
     get_employee_ratings: tool({
       description:
-        'Get rating history for a specific employee. Returns their ratings (rating_1 through rating_5, rating_avg) with dates and positions rated. Use lookup_employee first to get the employee ID. Prefer get_employee_profile instead if you also need discipline data.',
+        'Get detailed rating history for ONE specific employee — individual ratings with scores, dates, and positions. Requires employee_id (use lookup_employee first). For team-wide rating data, use get_team_overview instead. Prefer get_employee_profile if you also need discipline data.',
       inputSchema: z.object({
         employee_id: z.string().describe('The UUID of the employee'),
         limit: z.number().optional().describe('Maximum number of ratings to return (default: 10)'),
@@ -216,7 +220,7 @@ function buildTools(orgId: string, locationId?: string) {
     }),
     get_employee_infractions: tool({
       description:
-        'Get infraction and discipline history for a specific employee. Returns infraction type, points, date, leader who documented, and notes. Use lookup_employee first to get the employee ID.',
+        'Get infraction history for ONE specific employee. Requires employee_id (use lookup_employee first). For team-wide discipline data, use get_discipline_summary instead.',
       inputSchema: z.object({
         employee_id: z.string().describe('The UUID of the employee'),
         limit: z.number().optional().describe('Maximum number of infractions to return (default: 10)'),
@@ -227,7 +231,7 @@ function buildTools(orgId: string, locationId?: string) {
     }),
     get_employee_profile: tool({
       description:
-        'Get a comprehensive one-shot profile for an employee including their details, recent ratings with trends, infractions with current points, and discipline actions. More efficient than calling individual tools separately. Use lookup_employee first to get the employee ID. After calling this, do NOT also call get_employee_ratings or get_employee_infractions.',
+        'Get a comprehensive profile for ONE employee: details, recent ratings with trend, infractions, and discipline actions — all in one call. Requires employee_id (use lookup_employee first). After calling this, do NOT also call get_employee_ratings or get_employee_infractions.',
       inputSchema: z.object({
         employee_id: z.string().describe('The UUID of the employee'),
       }),
@@ -237,7 +241,7 @@ function buildTools(orgId: string, locationId?: string) {
     }),
     get_team_overview: tool({
       description:
-        'Get a location-level team snapshot including role breakdown, FOH/BOH zone split, certification stats, leadership counts, employees needing attention (high points), and recent hires. Great for "how is the team doing?" questions.',
+        'Get the full team overview: rating averages by position, top/bottom performers by rating, team structure (roles, zones, leaders, trainers), discipline attention items, and recent hires. This is the go-to tool for broad questions about the team, ratings trends, team performance, or "how is the team doing?".',
       inputSchema: z.object({
         zone: z
           .enum(['FOH', 'BOH'])
@@ -245,12 +249,14 @@ function buildTools(orgId: string, locationId?: string) {
           .describe('Filter to front-of-house or back-of-house employees only'),
       }),
       execute: async (input: Record<string, unknown>) => {
-        return await getTeamOverview(input, orgId, locationId);
+        return await getTeamOverview(input, orgId, locationId, {
+          certificationsEnabled: features?.certifications ?? false,
+        });
       },
     }),
     get_discipline_summary: tool({
       description:
-        'Get a discipline overview. When employee_id is provided, returns detailed discipline history for that person including infractions, actions taken, and pending recommendations. When omitted, returns a location-wide discipline overview with point holders, infraction breakdown, and recent actions.',
+        'Get discipline data. With employee_id: detailed discipline history (infractions, actions, pending recommendations). Without employee_id: location-wide overview (top point holders, infraction breakdown, recent actions). Use this for discipline-specific questions — not for ratings.',
       inputSchema: z.object({
         employee_id: z
           .string()
@@ -263,7 +269,7 @@ function buildTools(orgId: string, locationId?: string) {
     }),
     get_position_rankings: tool({
       description:
-        'Get employees ranked by their average rating for a specific position. Use this for questions like "who is the best bagger?", "top rated hosts", "ranking for iPOS", or any "best/worst at X" question. Returns a ranked list in one call — do NOT use multiple get_employee_ratings calls instead.',
+        'Get employees ranked by rating average for ONE specific position. Use for "who is the best bagger?", "top hosts", "worst iPOS". Returns ranked list in one call. For ratings across ALL positions at once, use get_team_overview instead.',
       inputSchema: z.object({
         position: z
           .string()
@@ -394,8 +400,8 @@ chatRoute.post('/', async (c) => {
       retrievedContext: retrievedParts.length > 0 ? retrievedParts.join('\n\n') : undefined,
     });
 
-    // 8. Build tools (location-scoped when available)
-    const leviTools = buildTools(orgId, locationId);
+    // 8. Build tools (location-scoped when available, feature-aware)
+    const leviTools = buildTools(orgId, locationId, orgContext?.features);
 
     // 9. Streaming path (default)
     if (wantsStream) {

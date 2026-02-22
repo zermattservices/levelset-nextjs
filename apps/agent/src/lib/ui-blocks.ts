@@ -47,7 +47,7 @@ export function toolResultToUIBlocks(
       case 'get_position_rankings':
         return positionRankingsBlocks(data);
       case 'get_team_overview':
-        return teamOverviewBlocks(data);
+        return teamOverviewBlocks(data, userMessage);
       case 'get_discipline_summary':
         return disciplineSummaryBlocks(data);
       default:
@@ -288,18 +288,59 @@ function positionRankingsBlocks(data: any): UIBlock[] {
   ];
 }
 
-function teamOverviewBlocks(data: any): UIBlock[] {
+function teamOverviewBlocks(data: any, userMessage?: string): UIBlock[] {
   const blocks: UIBlock[] = [];
+  const intents = detectQueryIntent(userMessage);
+  const showRatings = intents.has('ratings') || intents.has('general');
+  const showDiscipline = intents.has('discipline') || intents.has('general');
 
-  // Attention items as employee list
-  if (data.attention_items && data.attention_items.length > 0) {
+  // Rating top performers — shown for ratings or general questions
+  if (showRatings && data.ratings?.top_performers && data.ratings.top_performers.length > 0) {
+    blocks.push({
+      blockType: 'employee-list',
+      blockId: `top-performers-${Date.now()}`,
+      payload: {
+        title: 'Top Performers',
+        employees: data.ratings.top_performers.map((item: any, i: number) => ({
+          employee_id: '',
+          name: item.name,
+          role: item.role,
+          rank: i + 1,
+          metric_label: 'Avg Rating',
+          metric_value: item.rating_avg,
+        })),
+      },
+    });
+  }
+
+  // Rating needs improvement — shown for ratings questions
+  if (showRatings && data.ratings?.needs_improvement && data.ratings.needs_improvement.length > 0) {
+    blocks.push({
+      blockType: 'employee-list',
+      blockId: `needs-improvement-${Date.now()}`,
+      payload: {
+        title: 'Needs Improvement',
+        employees: data.ratings.needs_improvement.map((item: any, i: number) => ({
+          employee_id: '',
+          name: item.name,
+          role: item.role,
+          rank: i + 1,
+          metric_label: 'Avg Rating',
+          metric_value: item.rating_avg,
+        })),
+      },
+    });
+  }
+
+  // Discipline attention items — shown for discipline or general questions
+  if (showDiscipline && data.discipline?.attention_items && data.discipline.attention_items.length > 0) {
     blocks.push({
       blockType: 'employee-list',
       blockId: `attention-${Date.now()}`,
       payload: {
         title: 'Needs Attention',
-        employees: data.attention_items.map((item: any, i: number) => ({
-          employee_id: '', // Not available from team overview
+        employees: data.discipline.attention_items.map((item: any, i: number) => ({
+          employee_id: '',
           name: item.name,
           role: item.role,
           rank: i + 1,

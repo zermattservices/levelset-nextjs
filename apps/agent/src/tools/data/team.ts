@@ -1,27 +1,33 @@
 /**
- * Team Overview tool — location-level team snapshot.
- * Queries all active employees with role/certification/points data
- * and provides a structured overview of the team.
+ * Team Overview tool — location-level team snapshot with ratings + discipline.
+ * Queries active employees, their position averages, and infraction data
+ * to provide a comprehensive team overview.
  */
 
 import { getServiceClient } from '@levelset/supabase-client';
 import { tenantCache, CacheTTL } from '../../lib/tenant-cache.js';
 
+/** Options that can be passed from the org context */
+export interface TeamOverviewOptions {
+  /** Whether the certifications feature is enabled */
+  certificationsEnabled?: boolean;
+}
+
 /**
  * Get a location-level team overview snapshot.
- * Returns role breakdown, zone split, certification stats,
- * attention items (high points), and top performers (certified).
+ * Returns role breakdown, rating averages by position, attention items, and recent hires.
  */
 export async function getTeamOverview(
   args: Record<string, unknown>,
   orgId: string,
-  locationId?: string
+  locationId?: string,
+  options?: TeamOverviewOptions
 ): Promise<string> {
-  const zone = args.zone as string | undefined; // "FOH" or "BOH"
+  const zone = args.zone as string | undefined;
   const cacheKey = `team:${locationId ?? 'org'}:${zone ?? 'all'}`;
 
   return tenantCache.getOrFetch(orgId, cacheKey, CacheTTL.TEAM, () =>
-    _getTeamOverview(orgId, locationId, zone)
+    _getTeamOverview(orgId, locationId, zone, options)
   );
 }
 
@@ -29,20 +35,21 @@ export async function getTeamOverview(
 async function _getTeamOverview(
   orgId: string,
   locationId?: string,
-  zone?: string
+  zone?: string,
+  options?: TeamOverviewOptions
 ): Promise<string> {
   const supabase = getServiceClient();
+  const showCerts = options?.certificationsEnabled ?? false;
 
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
     .toISOString()
     .split('T')[0];
 
   // Build employee query scoped to org + location
+  // Always select all columns — we strip cert data from the output if the feature is disabled
   let empQuery = supabase
     .from('employees')
-    .select(
-      'id, full_name, role, hire_date, certified_status, active, is_leader, is_trainer, is_boh, is_foh'
-    )
+    .select('id, full_name, role, hire_date, certified_status, active, is_leader, is_trainer, is_boh, is_foh')
     .eq('org_id', orgId)
     .eq('active', true)
     .order('full_name', { ascending: true });
@@ -50,15 +57,13 @@ async function _getTeamOverview(
   if (locationId) {
     empQuery = empQuery.eq('location_id', locationId);
   }
-
-  // Apply zone filter if specified
   if (zone?.toUpperCase() === 'FOH') {
     empQuery = empQuery.eq('is_foh', true);
   } else if (zone?.toUpperCase() === 'BOH') {
     empQuery = empQuery.eq('is_boh', true);
   }
 
-  // Query infractions from last 90 days to calculate current points
+  // Query infractions from last 90 days for discipline points
   let infQuery = supabase
     .from('infractions')
     .select('employee_id, points')
@@ -69,7 +74,21 @@ async function _getTeamOverview(
     infQuery = infQuery.eq('location_id', locationId);
   }
 
-  const [empResult, infResult] = await Promise.all([empQuery, infQuery]);
+  // Query latest position averages (ratings data)
+  const latestDateQuery = supabase
+    .from('daily_position_averages')
+    .select('calculation_date')
+    .eq('org_id', orgId)
+    .order('calculation_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // Run all in parallel
+  const [empResult, infResult, latestDateResult] = await Promise.all([
+    empQuery,
+    infQuery,
+    latestDateQuery,
+  ]);
 
   if (empResult.error) {
     return JSON.stringify({ error: empResult.error.message });
@@ -84,41 +103,137 @@ async function _getTeamOverview(
     });
   }
 
-  // Calculate current points per employee from infractions
+  // ── Rating averages by position ──
+  let positionAverages: Record<string, { avg: number; count: number }> = {};
+  let topPerformers: Array<{ name: string; role: string; position: string; rating_avg: number }> = [];
+  let bottomPerformers: Array<{ name: string; role: string; position: string; rating_avg: number }> = [];
+  let ratingsAvailable = false;
+
+  if (latestDateResult.data?.calculation_date) {
+    const latestDate = latestDateResult.data.calculation_date;
+
+    let avgQuery = supabase
+      .from('daily_position_averages')
+      .select('employee_id, position_averages')
+      .eq('org_id', orgId)
+      .eq('calculation_date', latestDate);
+
+    if (locationId) {
+      avgQuery = avgQuery.eq('location_id', locationId);
+    }
+
+    const { data: avgData } = await avgQuery;
+
+    if (avgData && avgData.length > 0) {
+      ratingsAvailable = true;
+      const empMap = new Map(employees.map((e: any) => [e.id, e]));
+
+      // Collect per-position sums + best/worst per employee
+      const posSums: Record<string, { total: number; count: number }> = {};
+      const employeeOveralls: Array<{
+        employee_id: string;
+        name: string;
+        role: string;
+        positions: Record<string, number>;
+        overall_avg: number;
+      }> = [];
+
+      for (const row of avgData) {
+        const avgs = row.position_averages as Record<string, number>;
+        if (!avgs || Object.keys(avgs).length === 0) continue;
+
+        const emp = empMap.get(row.employee_id);
+        if (!emp) continue;
+
+        // Filter by zone if specified
+        if (zone?.toUpperCase() === 'FOH' && !(emp as any).is_foh) continue;
+        if (zone?.toUpperCase() === 'BOH' && !(emp as any).is_boh) continue;
+
+        let empTotal = 0;
+        let empCount = 0;
+        for (const [pos, avg] of Object.entries(avgs)) {
+          if (typeof avg !== 'number' || avg <= 0) continue;
+          // Accumulate position averages
+          if (!posSums[pos]) posSums[pos] = { total: 0, count: 0 };
+          posSums[pos].total += avg;
+          posSums[pos].count += 1;
+
+          empTotal += avg;
+          empCount += 1;
+        }
+
+        if (empCount > 0) {
+          employeeOveralls.push({
+            employee_id: row.employee_id,
+            name: (emp as any).full_name,
+            role: (emp as any).role,
+            positions: avgs,
+            overall_avg: Math.round((empTotal / empCount) * 100) / 100,
+          });
+        }
+      }
+
+      // Compute position averages
+      for (const [pos, { total, count }] of Object.entries(posSums)) {
+        positionAverages[pos] = {
+          avg: Math.round((total / count) * 100) / 100,
+          count,
+        };
+      }
+
+      // Sort for top/bottom performers
+      const sorted = employeeOveralls.sort((a, b) => b.overall_avg - a.overall_avg);
+
+      // Top 5 performers — pick their best position for display
+      topPerformers = sorted.slice(0, 5).map((e) => {
+        const bestPos = Object.entries(e.positions).sort(([, a], [, b]) => b - a)[0];
+        return {
+          name: e.name,
+          role: e.role,
+          position: bestPos?.[0] || '',
+          rating_avg: e.overall_avg,
+        };
+      });
+
+      // Bottom 5 performers (needs improvement)
+      bottomPerformers = sorted
+        .slice(-5)
+        .reverse()
+        .map((e) => {
+          const worstPos = Object.entries(e.positions).sort(([, a], [, b]) => a - b)[0];
+          return {
+            name: e.name,
+            role: e.role,
+            position: worstPos?.[0] || '',
+            rating_avg: e.overall_avg,
+          };
+        });
+    }
+  }
+
+  // ── Discipline points per employee ──
   const pointsByEmployee = new Map<string, number>();
   for (const inf of infractions90d) {
     const empId = (inf as any).employee_id;
     pointsByEmployee.set(empId, (pointsByEmployee.get(empId) || 0) + ((inf as any).points ?? 0));
   }
 
-  // Role breakdown
+  // ── Role breakdown ──
   const roleCounts: Record<string, number> = {};
   for (const emp of employees) {
     const role = emp.role || 'Unknown';
     roleCounts[role] = (roleCounts[role] || 0) + 1;
   }
 
-  // Zone split
+  // ── Zone split ──
   const fohCount = employees.filter((e: any) => e.is_foh).length;
   const bohCount = employees.filter((e: any) => e.is_boh).length;
-  const bothCount = employees.filter((e: any) => e.is_foh && e.is_boh).length;
 
-  // Certification stats
-  const certifiedCount = employees.filter(
-    (e: any) => e.certified_status === 'Certified'
-  ).length;
-  const inTrainingCount = employees.filter(
-    (e: any) => e.certified_status === 'In Training'
-  ).length;
-  const notCertifiedCount = employees.filter(
-    (e: any) => !e.certified_status || e.certified_status === 'Not Certified'
-  ).length;
-
-  // Leader & trainer counts
+  // ── Leader & trainer counts ──
   const leaderCount = employees.filter((e: any) => e.is_leader).length;
   const trainerCount = employees.filter((e: any) => e.is_trainer).length;
 
-  // Attention items — employees with high current discipline points (90-day cutoff)
+  // ── Attention items (discipline points ≥ 3) ──
   const attentionItems = employees
     .map((e: any) => ({
       name: e.full_name,
@@ -129,35 +244,48 @@ async function _getTeamOverview(
     .sort((a: any, b: any) => b.current_points - a.current_points)
     .slice(0, 10);
 
-  // Recent hires (last 90 days)
+  // ── Recent hires (last 90 days) ──
+  const recentHireFields = showCerts
+    ? (e: any) => ({ name: e.full_name, role: e.role, hire_date: e.hire_date, certified_status: e.certified_status })
+    : (e: any) => ({ name: e.full_name, role: e.role, hire_date: e.hire_date });
+
   const recentHires = employees
     .filter((e: any) => e.hire_date && e.hire_date >= ninetyDaysAgo)
-    .map((e: any) => ({
-      name: e.full_name,
-      role: e.role,
-      hire_date: e.hire_date,
-      certified_status: e.certified_status,
-    }));
+    .map(recentHireFields);
 
-  return JSON.stringify({
+  // ── Build response ──
+  const result: Record<string, unknown> = {
     total_employees: employees.length,
     zone_filter: zone || 'all',
     roles: roleCounts,
-    zones: {
-      foh: fohCount,
-      boh: bohCount,
-      both: bothCount,
-    },
-    leadership: {
-      leaders: leaderCount,
-      trainers: trainerCount,
-    },
-    certifications: {
-      certified: certifiedCount,
-      in_training: inTrainingCount,
-      not_certified: notCertifiedCount,
-    },
+    zones: { foh: fohCount, boh: bohCount },
+    leadership: { leaders: leaderCount, trainers: trainerCount },
+  };
+
+  // Only include certifications if the feature is enabled
+  if (showCerts) {
+    const certifiedCount = employees.filter((e: any) => e.certified_status === 'Certified').length;
+    const inTrainingCount = employees.filter((e: any) => e.certified_status === 'In Training').length;
+    const notCertifiedCount = employees.filter((e: any) => !e.certified_status || e.certified_status === 'Not Certified').length;
+    result.certifications = { certified: certifiedCount, in_training: inTrainingCount, not_certified: notCertifiedCount };
+  }
+
+  // Ratings section — only when data is available
+  if (ratingsAvailable) {
+    result.ratings = {
+      position_averages: positionAverages,
+      top_performers: topPerformers,
+      needs_improvement: bottomPerformers,
+    };
+  }
+
+  // Discipline section
+  result.discipline = {
+    employees_with_points: attentionItems.length,
     attention_items: attentionItems,
-    recent_hires: recentHires,
-  });
+  };
+
+  result.recent_hires = recentHires;
+
+  return JSON.stringify(result);
 }
