@@ -55,7 +55,7 @@
 }
 
 .promptButton:hover {
-  border-color: var(--ls-color-brand-base);
+  border-color: var(--ls-color-brand);
   color: var(--ls-color-text-primary);
   background: var(--ls-color-brand-soft);
 }

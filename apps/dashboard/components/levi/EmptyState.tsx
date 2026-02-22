@@ -22,7 +22,7 @@ export function EmptyState({ onPromptClick }: EmptyStateProps) {
   return (
     <div className={styles.container}>
       <div className={styles.iconWrap}>
-        <LeviIcon size={40} color="var(--ls-color-brand-base)" />
+        <LeviIcon size={40} color="var(--ls-color-brand)" />
       </div>
       <h2 className={styles.title}>How can I help you today?</h2>
 

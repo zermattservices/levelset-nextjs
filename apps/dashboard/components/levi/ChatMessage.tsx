@@ -93,7 +93,7 @@ function AssistantHistoryMessage({
   return (
     <div className={styles.assistantRow}>
       <div className={styles.avatar}>
-        <LeviIcon size={16} color="var(--ls-color-brand-base)" />
+        <LeviIcon size={16} color="var(--ls-color-brand)" />
       </div>
       <div className={styles.content}>
         {message.toolCalls && message.toolCalls.length > 0 && (
@@ -274,7 +274,7 @@ function AssistantSessionGroup({
   return (
     <div className={styles.assistantRow}>
       <div className={styles.avatar}>
-        <LeviIcon size={16} color="var(--ls-color-brand-base)" />
+        <LeviIcon size={16} color="var(--ls-color-brand)" />
       </div>
       <div className={styles.content}>{allNodes}</div>
     </div>

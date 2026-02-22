@@ -10,7 +10,7 @@ export function TypingIndicator() {
   return (
     <div className={styles.container}>
       <div className={styles.avatar}>
-        <LeviIcon size={16} color="var(--ls-color-brand-base)" />
+        <LeviIcon size={16} color="var(--ls-color-brand)" />
       </div>
       <span className={styles.text}>Thinking...</span>
     </div>

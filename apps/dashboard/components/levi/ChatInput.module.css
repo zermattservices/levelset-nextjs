@@ -21,7 +21,7 @@
 }
 
 .inputRow:focus-within {
-  border-color: var(--ls-color-brand-base);
+  border-color: var(--ls-color-brand);
 }
 
 .textarea {
@@ -51,7 +51,7 @@
   height: 36px;
   border: none;
   border-radius: 50%;
-  background: var(--ls-color-brand-base);
+  background: var(--ls-color-brand);
   color: var(--ls-color-brand-foreground);
   cursor: pointer;
   flex-shrink: 0;
