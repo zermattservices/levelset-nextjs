@@ -1,12 +1,14 @@
 /**
  * System prompt builder for Levi.
  *
- * Three-section prompt:
+ * Five-section prompt:
  *   1. Identity & Guidelines — who Levi is, response style, tool usage rules (~100 tokens)
- *   2. Org Context — formatted from OrgContext: roles, positions, thresholds, rubrics (~200-400 tokens)
- *   3. User & Session — user name, date, language preference (~30 tokens)
+ *   2. Core Domain Context — Tier 1 always-present summaries (~700 tokens)
+ *   3. Org Context — formatted from OrgContext: roles, positions, thresholds, rubrics (~200-400 tokens)
+ *   4. Retrieved Context — Tier 2+3 query-specific chunks + PageIndex reasoning (~300-800 tokens)
+ *   5. User & Session — user name, date, language preference (~30 tokens)
  *
- * Total target: ~400-600 tokens (up from ~150 without org context).
+ * Total target: ~1400-2100 tokens (up from ~400-600 without context retrieval).
  */
 
 import { getStyleInstruction } from './ai-provider.js';
@@ -91,6 +93,8 @@ export function buildSystemPrompt(params: {
   userName: string;
   style: string;
   orgContext?: OrgContext;
+  coreContext?: string;
+  retrievedContext?: string;
 }): string {
   const today = new Date().toISOString().split('T')[0];
   const styleInstruction = getStyleInstruction(params.style);
@@ -136,14 +140,26 @@ Response style:
 - Use bullet points and line breaks to structure longer responses.
 - For multi-faceted questions, provide a clear, opinionated answer first, then briefly explain the reasoning.`;
 
-  // Section 2: Org Context (optional — included when loaded)
+  // Section 2: Core Domain Context (Tier 1 — always present when loaded)
+  let coreSection = '';
+  if (params.coreContext) {
+    coreSection = `\n\n## Levelset Domain Knowledge\n${params.coreContext}`;
+  }
+
+  // Section 3: Org Context (optional — included when loaded)
   let orgSection = '';
   if (params.orgContext) {
     orgSection = `\n\n## Organization Context\n${formatOrgContext(params.orgContext)}`;
   }
 
-  // Section 3: User & Session
+  // Section 4: Retrieved Context (Tier 2+3 — query-specific)
+  let retrievedSection = '';
+  if (params.retrievedContext) {
+    retrievedSection = `\n\n## Relevant Context\nThe following information may help answer the current question:\n${params.retrievedContext}`;
+  }
+
+  // Section 5: User & Session
   const session = `\n\nThe current user is ${params.userName}.\nToday's date is ${today}.`;
 
-  return identity + orgSection + session;
+  return identity + coreSection + orgSection + retrievedSection + session;
 }

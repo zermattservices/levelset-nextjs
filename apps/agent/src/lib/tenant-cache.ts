@@ -30,6 +30,8 @@ export const CacheTTL = {
   PROFILE: 5 * 60 * 1000,
   /** Dynamic data: ratings, infractions (2 min) */
   DYNAMIC: 2 * 60 * 1000,
+  /** Context data: core context summaries, document metadata (30 min) */
+  CONTEXT: 30 * 60 * 1000,
 } as const;
 
 /** Cache invalidation scopes (used by the invalidation endpoint) */

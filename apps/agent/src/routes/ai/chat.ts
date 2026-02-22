@@ -38,6 +38,7 @@ import {
   findActiveConversation,
   loadHistoryPage,
 } from '../../lib/conversation-manager.js';
+import { retrieveContext } from '../../lib/context-retriever.js';
 import { logUsage, checkRateLimit } from '../../lib/usage-tracker.js';
 import {
   lookupEmployee,
@@ -356,11 +357,15 @@ chatRoute.post('/', async (c) => {
       );
     }
 
-    // 4. Get or create conversation + load org context in parallel
-    const [conversationId, orgContext] = await Promise.all([
+    // 4. Get or create conversation + load org context + retrieve context in parallel
+    const [conversationId, orgContext, contextResult] = await Promise.all([
       getOrCreateConversation(userId, orgId, locationId),
       loadOrgContext(orgId, locationId).catch((err) => {
         console.warn('Org context load failed (non-fatal):', err);
+        return undefined;
+      }),
+      retrieveContext(userMessage, orgId, locationId).catch((err) => {
+        console.warn('Context retrieval failed (non-fatal):', err);
         return undefined;
       }),
     ]);
@@ -375,11 +380,18 @@ chatRoute.post('/', async (c) => {
     const history = await loadConversationHistory(conversationId);
     const llmMessages = toModelMessages(history);
 
-    // 7. Build system prompt (with org context if loaded)
+    // 7. Build system prompt (with org context + retrieved context)
+    const retrievedParts = [
+      ...(contextResult?.semanticChunks || []),
+      contextResult?.documentContext,
+    ].filter(Boolean);
+
     const systemPrompt = buildSystemPrompt({
       userName: user.name,
       style: 'concise',
       orgContext,
+      coreContext: contextResult?.coreContext || undefined,
+      retrievedContext: retrievedParts.length > 0 ? retrievedParts.join('\n\n') : undefined,
     });
 
     // 8. Build tools (location-scoped when available)
