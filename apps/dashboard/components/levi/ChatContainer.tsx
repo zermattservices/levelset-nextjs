@@ -113,7 +113,7 @@ export function ChatContainer({
           )}
 
           {/* Empty state */}
-          {isEmpty && <EmptyState />}
+          {isEmpty && <EmptyState onPromptClick={sendMessage} />}
 
           {/* History messages */}
           {historyMessages.map((msg) => (

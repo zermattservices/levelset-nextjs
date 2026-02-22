@@ -12,7 +12,7 @@
 import * as React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import { LeviIcon } from './LeviIcon';
 import { UIBlockRenderer } from './cards/UIBlockRenderer';
 import { ToolCallSummary } from './ToolCallSummary';
 import type {
@@ -88,9 +88,7 @@ function AssistantHistoryMessage({
   return (
     <div className={styles.assistantRow}>
       <div className={styles.avatar}>
-        <SmartToyOutlinedIcon
-          style={{ fontSize: 18, color: 'var(--ls-color-brand)' }}
-        />
+        <LeviIcon size={16} color="var(--ls-color-brand-base)" />
       </div>
       <div className={styles.content}>
         {message.toolCalls && message.toolCalls.length > 0 && (
@@ -135,6 +133,19 @@ function AssistantHistoryMessage({
 // Assistant message (session / AI SDK UIMessage)
 // ---------------------------------------------------------------------------
 
+function isToolPart(part: any): boolean {
+  // AI SDK v6: tool parts are 'dynamic-tool' or 'tool-<name>'
+  return (
+    part.type === 'dynamic-tool' ||
+    (typeof part.type === 'string' && part.type.startsWith('tool-'))
+  );
+}
+
+function isDataPart(part: any): boolean {
+  // AI SDK v6: custom data events are 'data-<name>' (e.g. 'data-ui-block')
+  return typeof part.type === 'string' && part.type.startsWith('data-');
+}
+
 function AssistantSessionMessage({
   message,
   onEmployeeClick,
@@ -148,18 +159,14 @@ function AssistantSessionMessage({
 
   if (message.parts) {
     for (const part of message.parts) {
-      if (
-        (part.type === 'tool-invocation' || part.type === 'tool-call') &&
-        part.toolInvocation
-      ) {
-        const inv = part.toolInvocation;
-        if (!seenToolIds.has(inv.toolCallId)) {
-          seenToolIds.add(inv.toolCallId);
+      if (isToolPart(part) && part.toolCallId) {
+        if (!seenToolIds.has(part.toolCallId)) {
+          seenToolIds.add(part.toolCallId);
           toolCalls.push({
-            id: inv.toolCallId,
-            name: inv.toolName,
-            label: getToolLabel(inv.toolName),
-            status: inv.state === 'result' ? 'done' : 'calling',
+            id: part.toolCallId,
+            name: part.toolName || part.type.replace('tool-', ''),
+            label: getToolLabel(part.toolName || part.type.replace('tool-', '')),
+            status: part.state === 'output-available' ? 'done' : 'calling',
           });
         }
       }
@@ -182,10 +189,7 @@ function AssistantSessionMessage({
             </ReactMarkdown>
           </div>
         );
-      } else if (
-        (part.type === 'tool-invocation' || part.type === 'tool-call') &&
-        !toolSummaryAdded
-      ) {
+      } else if (isToolPart(part) && !toolSummaryAdded) {
         // Show tool summary once (before the first tool call part)
         if (toolCalls.length > 0) {
           renderedParts.push(
@@ -193,21 +197,18 @@ function AssistantSessionMessage({
           );
           toolSummaryAdded = true;
         }
-      } else if (part.type === 'data' && part.data) {
+      } else if (isDataPart(part) && part.data) {
         // Custom data events from agent (data-ui-block, data-tool-status)
-        const data = Array.isArray(part.data) ? part.data : [part.data];
-        for (let j = 0; j < data.length; j++) {
-          const item = data[j];
-          if (item && item.blockType && item.blockId) {
-            renderedParts.push(
-              <div key={`block-${i}-${j}`} className={styles.uiBlockWrap}>
-                <UIBlockRenderer
-                  block={item as UIBlock}
-                  onEmployeeClick={onEmployeeClick}
-                />
-              </div>
-            );
-          }
+        const data = part.data;
+        if (data && data.blockType && data.blockId) {
+          renderedParts.push(
+            <div key={`block-${i}`} className={styles.uiBlockWrap}>
+              <UIBlockRenderer
+                block={data as UIBlock}
+                onEmployeeClick={onEmployeeClick}
+              />
+            </div>
+          );
         }
       }
     }
@@ -238,9 +239,7 @@ function AssistantSessionMessage({
   return (
     <div className={styles.assistantRow}>
       <div className={styles.avatar}>
-        <SmartToyOutlinedIcon
-          style={{ fontSize: 18, color: 'var(--ls-color-brand)' }}
-        />
+        <LeviIcon size={16} color="var(--ls-color-brand-base)" />
       </div>
       <div className={styles.content}>{renderedParts}</div>
     </div>

@@ -3,14 +3,14 @@
  */
 
 import * as React from 'react';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import { LeviIcon } from './LeviIcon';
 import styles from './TypingIndicator.module.css';
 
 export function TypingIndicator() {
   return (
     <div className={styles.container}>
       <div className={styles.avatar}>
-        <SmartToyOutlinedIcon style={{ fontSize: 18, color: 'var(--ls-color-brand)' }} />
+        <LeviIcon size={16} color="var(--ls-color-brand-base)" />
       </div>
       <span className={styles.text}>Thinking...</span>
     </div>
