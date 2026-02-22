@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireLevelsetAdmin } from '@/lib/api-auth';
+import { indexDocumentChunks } from '@/lib/document-indexing';
 import crypto from 'crypto';
 
 export default async function handler(
@@ -217,6 +218,19 @@ export default async function handler(
 
     if (updateError) {
       throw new Error(`Failed to update digest: ${updateError.message}`);
+    }
+
+    // Get the digest ID for embedding indexing
+    const { data: updatedDigest } = await supabase
+      .from('global_document_digests')
+      .select('id')
+      .eq('document_id', document_id)
+      .single();
+
+    // Trigger embedding indexing (non-blocking)
+    if (updatedDigest?.id && text.trim().length > 0) {
+      indexDocumentChunks(updatedDigest.id, 'global_document', null, text)
+        .catch((err) => console.error('[global-documents/process] Embedding indexing failed:', err));
     }
 
     return res.status(200).json({
