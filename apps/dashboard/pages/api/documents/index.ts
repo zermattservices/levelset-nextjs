@@ -42,7 +42,7 @@ export default async function handler(
       .select(
         `
         *,
-        uploaded_by_user:app_users!documents_uploaded_by_fkey(id, full_name),
+        uploaded_by_user:app_users!documents_uploaded_by_fkey(id, first_name, last_name),
         document_digests(id, extraction_status)
       `
       )
@@ -75,7 +75,9 @@ export default async function handler(
     // Transform joined data
     const transformed = (documents || []).map((doc: any) => ({
       ...doc,
-      uploaded_by_name: doc.uploaded_by_user?.full_name || null,
+      uploaded_by_name: doc.uploaded_by_user
+        ? [doc.uploaded_by_user.first_name, doc.uploaded_by_user.last_name].filter(Boolean).join(' ')
+        : null,
       extraction_status: doc.document_digests?.[0]?.extraction_status || null,
       uploaded_by_user: undefined,
       document_digests: undefined,
