@@ -27,37 +27,30 @@ function isLeaderRole(role?: string | null): boolean {
 
 /**
  * Leader/manager select widget for RJSF forms.
- * Fetches employees and filters to those with leadership roles.
+ * Fetches employees via /api/employees and filters to leadership roles.
  * Falls back to all employees if no leaders found.
  * Stores the employee ID as the field value.
  */
 export function LeaderSelectWidget(props: WidgetProps) {
   const { id, value, required, disabled, readonly, onChange, label, rawErrors, formContext } = props;
   const auth = useAuth();
-  const org_id = formContext?.orgId || auth.org_id;
+  const location_id = formContext?.locationId || auth.location_id;
   const [leaders, setLeaders] = React.useState<LeaderOption[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [loadError, setLoadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (!org_id) return;
+    if (!location_id) return;
     let cancelled = false;
 
     const fetchLeaders = async () => {
       setLoading(true);
       try {
-        const { createSupabaseClient } = await import('@/util/supabase/component');
-        const supabase = createSupabaseClient();
+        const res = await fetch(`/api/employees?location_id=${encodeURIComponent(location_id)}`);
+        const json = await res.json();
 
-        const { data } = await supabase
-          .from('employees')
-          .select('id, full_name, first_name, last_name, role, is_leader')
-          .eq('org_id', org_id)
-          .eq('active', true)
-          .order('full_name');
-
-        if (!cancelled && data) {
-          const all = data.map((e: any) => ({
+        if (!cancelled && json.employees) {
+          const all = json.employees.map((e: any) => ({
             id: e.id,
             full_name: e.full_name?.trim() || `${e.first_name ?? ''} ${e.last_name ?? ''}`.trim() || 'Unnamed',
             role: e.role ?? null,
@@ -77,7 +70,7 @@ export function LeaderSelectWidget(props: WidgetProps) {
 
     fetchLeaders();
     return () => { cancelled = true; };
-  }, [org_id]);
+  }, [location_id]);
 
   const selectedOption = leaders.find((e) => e.id === value) || null;
   const isDisabled = disabled || readonly;

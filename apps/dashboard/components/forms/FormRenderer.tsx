@@ -16,6 +16,7 @@ import { Button } from '@mui/material';
 import { rjsfMuiTheme } from '@/lib/forms/rjsf-theme';
 import { getCustomWidgets } from '@/components/forms/widgets';
 import type { FormTemplate } from '@/lib/forms/types';
+import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -43,6 +44,7 @@ export function FormRenderer({
   submitLabel = 'Submit',
 }: FormRendererProps) {
   const [formData, setFormData] = React.useState<Record<string, any>>(initialData || {});
+  const { selectedLocationId } = useLocationContext();
 
   const widgets = React.useMemo(() => getCustomWidgets(), []);
 
@@ -128,7 +130,7 @@ export function FormRenderer({
         formData={formData}
         validator={validator}
         widgets={widgets}
-        formContext={{ orgId: template.org_id }}
+        formContext={{ orgId: template.org_id, locationId: selectedLocationId }}
         onChange={handleChange}
         onSubmit={handleSubmit}
         disabled={readOnly}

@@ -13,37 +13,30 @@ interface EmployeeOption {
 
 /**
  * Employee select widget for RJSF forms.
- * Fetches active employees for the current org and renders an Autocomplete.
+ * Fetches active employees for the current location via /api/employees.
  * Stores the employee ID as the field value.
  */
 export function EmployeeSelectWidget(props: WidgetProps) {
   const { id, value, required, disabled, readonly, onChange, label, rawErrors, formContext } = props;
   const auth = useAuth();
-  const org_id = formContext?.orgId || auth.org_id;
+  const location_id = formContext?.locationId || auth.location_id;
   const [employees, setEmployees] = React.useState<EmployeeOption[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [loadError, setLoadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (!org_id) return;
+    if (!location_id) return;
     let cancelled = false;
 
     const fetchEmployees = async () => {
       setLoading(true);
       try {
-        const { createSupabaseClient } = await import('@/util/supabase/component');
-        const supabase = createSupabaseClient();
+        const res = await fetch(`/api/employees?location_id=${encodeURIComponent(location_id)}`);
+        const json = await res.json();
 
-        const { data } = await supabase
-          .from('employees')
-          .select('id, full_name, first_name, last_name, role')
-          .eq('org_id', org_id)
-          .eq('active', true)
-          .order('full_name');
-
-        if (!cancelled && data) {
+        if (!cancelled && json.employees) {
           setEmployees(
-            data.map((e: any) => ({
+            json.employees.map((e: any) => ({
               id: e.id,
               full_name: e.full_name?.trim() || `${e.first_name ?? ''} ${e.last_name ?? ''}`.trim() || 'Unnamed',
               role: e.role ?? null,
@@ -60,7 +53,7 @@ export function EmployeeSelectWidget(props: WidgetProps) {
 
     fetchEmployees();
     return () => { cancelled = true; };
-  }, [org_id]);
+  }, [location_id]);
 
   const selectedOption = employees.find((e) => e.id === value) || null;
   const isDisabled = disabled || readonly;

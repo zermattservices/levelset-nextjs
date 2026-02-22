@@ -29,6 +29,7 @@
   flex-direction: row;
   height: 600px;
   min-height: 600px;
+  overflow: hidden;
 }
 
 @media (max-width: 900px) {

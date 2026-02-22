@@ -31,20 +31,12 @@ export function DiscActionSelectWidget(props: WidgetProps) {
     const fetchRubric = async () => {
       setLoading(true);
       try {
-        const { createSupabaseClient } = await import('@/util/supabase/component');
-        const supabase = createSupabaseClient();
+        const res = await fetch(`/api/forms/widget-data?type=disc_actions&org_id=${encodeURIComponent(org_id)}`);
+        const json = await res.json();
 
-        // Fetch org-level disc_actions_rubric (location_id IS NULL)
-        const { data } = await supabase
-          .from('disc_actions_rubric')
-          .select('id, action, points_threshold')
-          .eq('org_id', org_id)
-          .is('location_id', null)
-          .order('points_threshold', { ascending: true });
-
-        if (!cancelled && data) {
+        if (!cancelled && json.data) {
           setOptions(
-            data.map((item: any) => ({
+            json.data.map((item: any) => ({
               id: item.id,
               action: item.action || 'Unknown',
               points_threshold: item.points_threshold ?? null,

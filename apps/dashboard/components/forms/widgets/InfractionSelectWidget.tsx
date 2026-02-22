@@ -33,20 +33,12 @@ export function InfractionSelectWidget(props: WidgetProps) {
     const fetchRubric = async () => {
       setLoading(true);
       try {
-        const { createSupabaseClient } = await import('@/util/supabase/component');
-        const supabase = createSupabaseClient();
+        const res = await fetch(`/api/forms/widget-data?type=infractions&org_id=${encodeURIComponent(org_id)}`);
+        const json = await res.json();
 
-        // Fetch org-level infraction rubric (location_id IS NULL)
-        const { data } = await supabase
-          .from('infractions_rubric')
-          .select('id, action, action_es, points')
-          .eq('org_id', org_id)
-          .is('location_id', null)
-          .order('points', { ascending: true });
-
-        if (!cancelled && data) {
+        if (!cancelled && json.data) {
           setOptions(
-            data.map((item: any) => ({
+            json.data.map((item: any) => ({
               id: item.id,
               action: item.action || 'Unknown',
               action_es: item.action_es ?? null,

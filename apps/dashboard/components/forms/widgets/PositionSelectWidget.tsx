@@ -33,21 +33,12 @@ export function PositionSelectWidget(props: WidgetProps) {
     const fetchPositions = async () => {
       setLoading(true);
       try {
-        const { createSupabaseClient } = await import('@/util/supabase/component');
-        const supabase = createSupabaseClient();
+        const res = await fetch(`/api/forms/widget-data?type=positions&org_id=${encodeURIComponent(org_id)}`);
+        const json = await res.json();
 
-        const { data } = await supabase
-          .from('org_positions')
-          .select('id, name, zone, description')
-          .eq('org_id', org_id)
-          .eq('is_active', true)
-          .eq('position_type', 'standard')
-          .order('zone')
-          .order('display_order');
-
-        if (!cancelled && data) {
+        if (!cancelled && json.data) {
           setPositions(
-            data.map((p: any) => ({
+            json.data.map((p: any) => ({
               id: p.id,
               name: p.name,
               zone: p.zone ?? null,

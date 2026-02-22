@@ -7,7 +7,7 @@
   min-width: 260px;
   border-left: 1px solid var(--ls-color-muted-border);
   overflow-y: auto;
-  height: 100%;
+  min-height: 0;
 }
 
 .panelTitle {
