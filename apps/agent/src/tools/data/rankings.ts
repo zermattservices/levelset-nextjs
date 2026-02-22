@@ -19,7 +19,7 @@ export async function getPositionRankings(
   locationId?: string
 ): Promise<string> {
   const position = args.position as string;
-  const limit = Math.min((args.limit as number) || 10, 50);
+  const limit = Math.min((args.limit as number) || 5, 50);
   const sort = (args.sort as string) || 'best';
   const ascending = sort === 'worst';
   const cacheKey = `rankings:${locationId ?? 'org'}:${position.toLowerCase()}:${sort}:${limit}`;

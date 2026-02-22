@@ -269,7 +269,7 @@ function buildTools(
     }),
     get_position_rankings: tool({
       description:
-        'Get employees ranked by rating average for ONE specific position. Use for "who is the best bagger?", "top hosts", "worst iPOS". Returns ranked list in one call. For ratings across ALL positions at once, use get_team_overview instead.',
+        'Rank employees for a SINGLE position the user explicitly named (e.g. "who is the best host?"). NEVER call this tool more than once — if the user asks about ratings in general, trends, or overall performance, call get_team_overview instead. get_team_overview already includes per-position averages and top/bottom performers.',
       inputSchema: z.object({
         position: z
           .string()
@@ -277,7 +277,7 @@ function buildTools(
         limit: z
           .number()
           .optional()
-          .describe('Maximum number of ranked employees to return (default: 10)'),
+          .describe('Maximum number of ranked employees to return (default: 5)'),
         sort: z
           .enum(['best', 'worst'])
           .optional()

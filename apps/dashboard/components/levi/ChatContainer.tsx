@@ -131,13 +131,30 @@ export function ChatContainer({
     };
   }, []);
 
-  // Check if we should show typing indicator:
-  // Show when sending and the last session message is from the user
-  // (i.e., we're waiting for the first assistant response)
-  const showTyping =
-    isSending &&
-    sessionMessages.length > 0 &&
-    sessionMessages[sessionMessages.length - 1]?.role === 'user';
+  // Show typing indicator whenever we're waiting for content:
+  // 1. After user sends a message (waiting for first response)
+  // 2. After tool calls finish but text hasn't started streaming yet
+  //    (the LLM is generating the analysis — can take 30-60s)
+  const showTyping = useMemo(() => {
+    if (!isSending || sessionMessages.length === 0) return false;
+
+    const lastMsg = sessionMessages[sessionMessages.length - 1];
+
+    // Waiting for first assistant response
+    if (lastMsg?.role === 'user') return true;
+
+    // Check if the last assistant message group has any text content yet.
+    // If it only has tool calls / data parts but no text, the LLM is still
+    // generating the analysis — show "Thinking..." so the user knows.
+    if (lastMsg?.role === 'assistant' && lastMsg.parts) {
+      const hasText = lastMsg.parts.some(
+        (p: any) => p.type === 'text' && p.text && p.text.trim().length > 0
+      );
+      if (!hasText) return true;
+    }
+
+    return false;
+  }, [isSending, sessionMessages]);
 
   return (
     <div className={styles.wrapper}>

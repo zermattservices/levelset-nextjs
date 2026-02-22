@@ -74,7 +74,7 @@ async function _getTeamOverview(
     infQuery = infQuery.eq('location_id', locationId);
   }
 
-  // Query latest position averages (ratings data)
+  // Query latest and ~30-days-ago position averages for trend comparison
   const latestDateQuery = supabase
     .from('daily_position_averages')
     .select('calculation_date')
@@ -83,11 +83,26 @@ async function _getTeamOverview(
     .limit(1)
     .maybeSingle();
 
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+
+  // Find the closest calculation_date on or before 30 days ago
+  const priorDateQuery = supabase
+    .from('daily_position_averages')
+    .select('calculation_date')
+    .eq('org_id', orgId)
+    .lte('calculation_date', thirtyDaysAgo)
+    .order('calculation_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   // Run all in parallel
-  const [empResult, infResult, latestDateResult] = await Promise.all([
+  const [empResult, infResult, latestDateResult, priorDateResult] = await Promise.all([
     empQuery,
     infQuery,
     latestDateQuery,
+    priorDateQuery,
   ]);
 
   if (empResult.error) {
@@ -103,33 +118,97 @@ async function _getTeamOverview(
     });
   }
 
-  // ── Rating averages by position ──
-  let positionAverages: Record<string, { avg: number; count: number }> = {};
+  // ── Rating averages by position (current + 30-day trend) ──
+  let positionAverages: Record<string, { avg: number; count: number; prior_avg?: number; change?: number }> = {};
   let topPerformers: Array<{ name: string; role: string; position: string; rating_avg: number }> = [];
   let bottomPerformers: Array<{ name: string; role: string; position: string; rating_avg: number }> = [];
   let ratingsAvailable = false;
+  let ratingsSummary: Record<string, unknown> | undefined;
 
   if (latestDateResult.data?.calculation_date) {
     const latestDate = latestDateResult.data.calculation_date;
+    const priorDate = priorDateResult?.data?.calculation_date;
 
-    let avgQuery = supabase
+    // Fetch current and (optionally) prior position averages in parallel
+    let currentQuery = supabase
       .from('daily_position_averages')
       .select('employee_id, position_averages')
       .eq('org_id', orgId)
       .eq('calculation_date', latestDate);
+    if (locationId) currentQuery = currentQuery.eq('location_id', locationId);
 
-    if (locationId) {
-      avgQuery = avgQuery.eq('location_id', locationId);
+    let priorQueryPromise: PromiseLike<any> | null = null;
+    if (priorDate && priorDate !== latestDate) {
+      let pq = supabase
+        .from('daily_position_averages')
+        .select('employee_id, position_averages')
+        .eq('org_id', orgId)
+        .eq('calculation_date', priorDate);
+      if (locationId) pq = pq.eq('location_id', locationId);
+      priorQueryPromise = pq.then((r: any) => r);
     }
 
-    const { data: avgData } = await avgQuery;
+    const [currentResult, priorResult] = await Promise.all([
+      currentQuery.then((r: any) => r),
+      priorQueryPromise ?? Promise.resolve({ data: null }),
+    ]);
+    const avgData = currentResult?.data;
+    const priorData = priorResult?.data;
 
     if (avgData && avgData.length > 0) {
       ratingsAvailable = true;
       const empMap = new Map(employees.map((e: any) => [e.id, e]));
 
-      // Collect per-position sums + best/worst per employee
-      const posSums: Record<string, { total: number; count: number }> = {};
+      // Helper to compute position sums from a dataset
+      const computePositionSums = (data: any[]) => {
+        const sums: Record<string, { total: number; count: number }> = {};
+        for (const row of data) {
+          const avgs = row.position_averages as Record<string, number>;
+          if (!avgs || Object.keys(avgs).length === 0) continue;
+          const emp = empMap.get(row.employee_id);
+          if (!emp) continue;
+          if (zone?.toUpperCase() === 'FOH' && !(emp as any).is_foh) continue;
+          if (zone?.toUpperCase() === 'BOH' && !(emp as any).is_boh) continue;
+          for (const [pos, avg] of Object.entries(avgs)) {
+            if (typeof avg !== 'number' || avg <= 0) continue;
+            if (!sums[pos]) sums[pos] = { total: 0, count: 0 };
+            sums[pos].total += avg;
+            sums[pos].count += 1;
+          }
+        }
+        return sums;
+      };
+
+      // Current position averages
+      const currentSums = computePositionSums(avgData);
+      for (const [pos, { total, count }] of Object.entries(currentSums)) {
+        positionAverages[pos] = {
+          avg: Math.round((total / count) * 100) / 100,
+          count,
+        };
+      }
+
+      // Prior position averages + compute change
+      if (priorData && priorData.length > 0) {
+        const priorSums = computePositionSums(priorData);
+        for (const [pos, current] of Object.entries(positionAverages)) {
+          const prior = priorSums[pos];
+          if (prior) {
+            const priorAvg = Math.round((prior.total / prior.count) * 100) / 100;
+            current.prior_avg = priorAvg;
+            current.change = Math.round((current.avg - priorAvg) * 100) / 100;
+          }
+        }
+        ratingsSummary = {
+          current_date: latestDate,
+          comparison_date: priorDate,
+          days_between: Math.round(
+            (new Date(latestDate).getTime() - new Date(priorDate!).getTime()) / (1000 * 60 * 60 * 24)
+          ),
+        };
+      }
+
+      // Collect per-employee overalls for top/bottom performers
       const employeeOveralls: Array<{
         employee_id: string;
         name: string;
@@ -141,23 +220,15 @@ async function _getTeamOverview(
       for (const row of avgData) {
         const avgs = row.position_averages as Record<string, number>;
         if (!avgs || Object.keys(avgs).length === 0) continue;
-
         const emp = empMap.get(row.employee_id);
         if (!emp) continue;
-
-        // Filter by zone if specified
         if (zone?.toUpperCase() === 'FOH' && !(emp as any).is_foh) continue;
         if (zone?.toUpperCase() === 'BOH' && !(emp as any).is_boh) continue;
 
         let empTotal = 0;
         let empCount = 0;
-        for (const [pos, avg] of Object.entries(avgs)) {
+        for (const [, avg] of Object.entries(avgs)) {
           if (typeof avg !== 'number' || avg <= 0) continue;
-          // Accumulate position averages
-          if (!posSums[pos]) posSums[pos] = { total: 0, count: 0 };
-          posSums[pos].total += avg;
-          posSums[pos].count += 1;
-
           empTotal += avg;
           empCount += 1;
         }
@@ -173,40 +244,20 @@ async function _getTeamOverview(
         }
       }
 
-      // Compute position averages
-      for (const [pos, { total, count }] of Object.entries(posSums)) {
-        positionAverages[pos] = {
-          avg: Math.round((total / count) * 100) / 100,
-          count,
-        };
-      }
-
       // Sort for top/bottom performers
       const sorted = employeeOveralls.sort((a, b) => b.overall_avg - a.overall_avg);
 
-      // Top 5 performers — pick their best position for display
       topPerformers = sorted.slice(0, 5).map((e) => {
         const bestPos = Object.entries(e.positions).sort(([, a], [, b]) => b - a)[0];
-        return {
-          name: e.name,
-          role: e.role,
-          position: bestPos?.[0] || '',
-          rating_avg: e.overall_avg,
-        };
+        return { name: e.name, role: e.role, position: bestPos?.[0] || '', rating_avg: e.overall_avg };
       });
 
-      // Bottom 5 performers (needs improvement)
       bottomPerformers = sorted
         .slice(-5)
         .reverse()
         .map((e) => {
           const worstPos = Object.entries(e.positions).sort(([, a], [, b]) => a - b)[0];
-          return {
-            name: e.name,
-            role: e.role,
-            position: worstPos?.[0] || '',
-            rating_avg: e.overall_avg,
-          };
+          return { name: e.name, role: e.role, position: worstPos?.[0] || '', rating_avg: e.overall_avg };
         });
     }
   }
@@ -272,11 +323,15 @@ async function _getTeamOverview(
 
   // Ratings section — only when data is available
   if (ratingsAvailable) {
-    result.ratings = {
+    const ratingsData: Record<string, unknown> = {
       position_averages: positionAverages,
       top_performers: topPerformers,
       needs_improvement: bottomPerformers,
     };
+    if (ratingsSummary) {
+      ratingsData.trend = ratingsSummary;
+    }
+    result.ratings = ratingsData;
   }
 
   // Discipline section
