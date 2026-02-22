@@ -233,8 +233,10 @@ export default async function handler(
       indexDocumentChunks(updatedDigest.id, 'global_document', null, text)
         .catch((err) => console.error('[global-documents/process] Embedding indexing failed:', err));
 
-      indexDocumentInPageIndex(updatedDigest.id, 'global_document', doc.file_type, doc.storage_path)
-        .catch((err) => console.error('[global-documents/process] PageIndex indexing failed:', err));
+      indexDocumentInPageIndex(
+        updatedDigest.id, 'global_document', document_id,
+        doc.file_type, doc.storage_path, text, doc.name
+      ).catch((err) => console.error('[global-documents/process] PageIndex indexing failed:', err));
     }
 
     return res.status(200).json({

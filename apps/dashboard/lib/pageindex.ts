@@ -4,19 +4,81 @@
  * PageIndex is a vectorless, reasoning-based RAG engine that processes
  * documents holistically and generates hierarchical tree structures.
  *
- * Currently only PDF files are supported for indexing.
- * Non-PDF documents (markdown, text, URLs) are handled by pgvector embeddings only.
+ * All org-uploaded documents are indexed in PageIndex:
+ * - PDFs: uploaded directly from storage (best quality)
+ * - Non-PDFs (markdown, text, URL content): converted to PDF via pdfkit
+ *
+ * The 4 authored context docs (levelset-domain-model, etc.) are excluded
+ * since they're already served by Tier 1 core context + Tier 2 embeddings.
  */
 
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import PDFDocument from 'pdfkit';
 
 const PAGEINDEX_API_URL = 'https://api.pageindex.ai';
 
-// ─── Indexing ─────────────────────────────────────────────────────────────────
+/**
+ * Deterministic UUIDs for authored context documents.
+ * These are excluded from PageIndex since they're covered by Tier 1 + Tier 2.
+ */
+const AUTHORED_CONTEXT_DOC_IDS = new Set([
+  '00000000-0000-0000-0001-000000000001',
+  '00000000-0000-0000-0001-000000000002',
+  '00000000-0000-0000-0001-000000000003',
+  '00000000-0000-0000-0001-000000000004',
+]);
+
+// ─── PDF Generation ───────────────────────────────────────────────────────────
 
 /**
- * Submit a PDF document to PageIndex for processing.
- * Returns the doc_id (used as pageindex_tree_id in our schema).
+ * Convert markdown/text content to a PDF buffer using pdfkit.
+ * Produces a clean text PDF — PageIndex cares about content, not formatting.
+ */
+function markdownToPdfBuffer(content: string, title?: string): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50 });
+    const chunks: Uint8Array[] = [];
+
+    doc.on('data', (chunk: Uint8Array) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+
+    if (title) {
+      doc.fontSize(16).text(title, { underline: true });
+      doc.moveDown();
+    }
+
+    // Simple markdown rendering: headings get larger font, rest is body text
+    const lines = content.split('\n');
+    for (const line of lines) {
+      if (line.startsWith('# ')) {
+        doc.moveDown(0.5);
+        doc.fontSize(16).text(line.replace(/^#\s+/, ''), { underline: true });
+        doc.moveDown(0.3);
+      } else if (line.startsWith('## ')) {
+        doc.moveDown(0.5);
+        doc.fontSize(14).text(line.replace(/^##\s+/, ''));
+        doc.moveDown(0.2);
+      } else if (line.startsWith('### ')) {
+        doc.moveDown(0.3);
+        doc.fontSize(12).text(line.replace(/^###\s+/, ''), { underline: true });
+        doc.moveDown(0.2);
+      } else if (line.trim() === '') {
+        doc.moveDown(0.3);
+      } else {
+        doc.fontSize(11).text(line);
+      }
+    }
+
+    doc.end();
+  });
+}
+
+// ─── PageIndex API ────────────────────────────────────────────────────────────
+
+/**
+ * Submit a PDF buffer to PageIndex for processing.
+ * Returns the doc_id (stored as pageindex_tree_id in our schema).
  */
 export async function submitToPageIndex(
   fileBuffer: Buffer,
@@ -53,7 +115,6 @@ export async function submitToPageIndex(
 
 /**
  * Check the processing status of a PageIndex document.
- * Returns 'processing' | 'completed' | 'failed'.
  */
 export async function getPageIndexStatus(docId: string): Promise<string> {
   const apiKey = process.env.PAGEINDEX_API_KEY;
@@ -74,21 +135,25 @@ export async function getPageIndexStatus(docId: string): Promise<string> {
 // ─── Document Processing Hook ─────────────────────────────────────────────────
 
 /**
- * Index a PDF document in PageIndex after extraction.
+ * Index a document in PageIndex after extraction.
  *
- * Downloads the original PDF from storage, submits to PageIndex,
- * and updates the digest record with the tree_id.
- *
- * Only processes PDF documents — skips non-PDF files silently.
+ * Strategy:
+ * - PDFs in storage → upload the original PDF directly (best quality)
+ * - Non-PDFs with content_md → convert markdown to PDF via pdfkit, then upload
+ * - Authored context docs → skip (covered by Tier 1 + Tier 2)
+ * - No content and no storage path → skip
  */
 export async function indexDocumentInPageIndex(
   digestId: string,
   sourceType: 'global_document' | 'org_document',
+  documentId: string,
   fileType: string | null,
-  storagePath: string | null
+  storagePath: string | null,
+  contentMd: string | null,
+  documentName?: string | null
 ): Promise<void> {
-  // Only process PDFs
-  if (!fileType?.includes('pdf') || !storagePath) {
+  // Skip authored context documents
+  if (AUTHORED_CONTEXT_DOC_IDS.has(documentId)) {
     return;
   }
 
@@ -103,20 +168,33 @@ export async function indexDocumentInPageIndex(
   const storageBucket = sourceType === 'global_document' ? 'global_documents' : 'org_documents';
 
   try {
-    // Download original PDF from storage
-    const { data: fileData, error: downloadError } = await supabase.storage
-      .from(storageBucket)
-      .download(storagePath);
+    let pdfBuffer: Buffer;
+    let fileName: string;
 
-    if (downloadError || !fileData) {
-      throw new Error(`Failed to download file: ${downloadError?.message || 'Unknown error'}`);
+    if (fileType?.includes('pdf') && storagePath) {
+      // Strategy 1: Original PDF from storage (best quality)
+      const { data: fileData, error: downloadError } = await supabase.storage
+        .from(storageBucket)
+        .download(storagePath);
+
+      if (downloadError || !fileData) {
+        throw new Error(`Failed to download file: ${downloadError?.message || 'Unknown error'}`);
+      }
+
+      pdfBuffer = Buffer.from(await fileData.arrayBuffer());
+      fileName = storagePath.split('/').pop() || 'document.pdf';
+    } else if (contentMd && contentMd.trim().length > 0) {
+      // Strategy 2: Convert content_md to PDF
+      const title = documentName || undefined;
+      pdfBuffer = await markdownToPdfBuffer(contentMd, title || undefined);
+      fileName = `${(documentName || 'document').replace(/[^a-zA-Z0-9-_]/g, '_')}.pdf`;
+    } else {
+      // No PDF and no content — nothing to index
+      return;
     }
 
-    const buffer = Buffer.from(await fileData.arrayBuffer());
-    const fileName = storagePath.split('/').pop() || 'document.pdf';
-
     // Submit to PageIndex
-    const docId = await submitToPageIndex(buffer, fileName);
+    const docId = await submitToPageIndex(pdfBuffer, fileName);
 
     // Update digest with PageIndex tree_id
     await supabase

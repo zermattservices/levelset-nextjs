@@ -54,7 +54,7 @@
     "@types/jsdom": "^27.0.0",
     "@types/node": "^22.10.7",
     "@types/pdf-parse": "^1.1.5",
-    "@types/pdfkit": "^0.17.4",
+    "@types/pdfkit": "^0.17.5",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^18",
     "@types/react-dom": "^18",

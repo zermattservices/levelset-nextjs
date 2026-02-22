@@ -45,11 +45,11 @@ export default async function handler(
   if (globalDigests && globalDigests.length > 0) {
     results.global.total = globalDigests.length;
 
-    // Look up document metadata for PageIndex (need file_type and storage_path)
+    // Look up document metadata for PageIndex
     const docIds = globalDigests.map((d) => d.document_id);
     const { data: globalDocs } = await supabase
       .from('global_documents')
-      .select('id, file_type, storage_path')
+      .select('id, name, file_type, storage_path')
       .in('id', docIds);
 
     const docMap = new Map((globalDocs || []).map((d: any) => [d.id, d]));
@@ -74,12 +74,15 @@ export default async function handler(
         results.global.errors.push(`${digest.id}: ${err.message}`);
       }
 
-      // PageIndex indexing (PDF only, if not already indexed)
+      // PageIndex indexing (if not already indexed)
       if (!digest.pageindex_indexed) {
         const doc = docMap.get(digest.document_id);
         if (doc) {
           try {
-            await indexDocumentInPageIndex(digest.id, 'global_document', doc.file_type, doc.storage_path);
+            await indexDocumentInPageIndex(
+              digest.id, 'global_document', digest.document_id,
+              doc.file_type, doc.storage_path, digest.content_md, doc.name
+            );
             results.global.pageindex++;
           } catch (err: any) {
             results.global.errors.push(`${digest.id} (pageindex): ${err.message}`);
@@ -103,7 +106,7 @@ export default async function handler(
     const docIds = orgDigests.map((d) => d.document_id);
     const { data: orgDocs } = await supabase
       .from('documents')
-      .select('id, file_type, storage_path')
+      .select('id, name, file_type, storage_path')
       .in('id', docIds);
 
     const docMap = new Map((orgDocs || []).map((d: any) => [d.id, d]));
@@ -123,12 +126,15 @@ export default async function handler(
         results.org.errors.push(`${digest.id}: ${err.message}`);
       }
 
-      // PageIndex indexing (PDF only, if not already indexed)
+      // PageIndex indexing (if not already indexed)
       if (!digest.pageindex_indexed) {
         const doc = docMap.get(digest.document_id);
         if (doc) {
           try {
-            await indexDocumentInPageIndex(digest.id, 'org_document', doc.file_type, doc.storage_path);
+            await indexDocumentInPageIndex(
+              digest.id, 'org_document', digest.document_id,
+              doc.file_type, doc.storage_path, digest.content_md, doc.name
+            );
             results.org.pageindex++;
           } catch (err: any) {
             results.org.errors.push(`${digest.id} (pageindex): ${err.message}`);
