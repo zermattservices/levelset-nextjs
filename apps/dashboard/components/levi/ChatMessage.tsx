@@ -30,6 +30,9 @@ import styles from './ChatMessage.module.css';
 // Helpers for tool label resolution
 // ---------------------------------------------------------------------------
 
+/** Display tools render UI blocks — they don't appear in the tool call summary */
+const DISPLAY_TOOLS = new Set(['show_employee_list', 'show_employee_card']);
+
 function getToolLabel(toolName: string): string {
   switch (toolName) {
     case 'lookup_employee':
@@ -177,15 +180,18 @@ function AssistantSessionGroup({
     for (let i = 0; i < msg.parts.length; i++) {
       const part = msg.parts[i];
 
-      // Collect tool calls
+      // Collect tool calls (skip display tools — they only render UI blocks)
       if (isToolPart(part) && part.toolCallId && !seenToolIds.has(part.toolCallId)) {
-        seenToolIds.add(part.toolCallId);
-        allToolCalls.push({
-          id: part.toolCallId,
-          name: part.toolName || part.type.replace('tool-', ''),
-          label: getToolLabel(part.toolName || part.type.replace('tool-', '')),
-          status: part.state === 'output-available' ? 'done' : 'calling',
-        });
+        const toolName = part.toolName || part.type.replace('tool-', '');
+        if (!DISPLAY_TOOLS.has(toolName)) {
+          seenToolIds.add(part.toolCallId);
+          allToolCalls.push({
+            id: part.toolCallId,
+            name: toolName,
+            label: getToolLabel(toolName),
+            status: part.state === 'output-available' ? 'done' : 'calling',
+          });
+        }
       }
 
       // Collect text parts

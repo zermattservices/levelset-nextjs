@@ -93,12 +93,15 @@ function getToolLabel(toolName: string): string {
   }
 }
 
+/** Display tools render UI blocks — they don't appear in the tool call summary */
+const DISPLAY_TOOLS = new Set(['show_employee_list', 'show_employee_card']);
+
 function parseHistoryToolCalls(
   toolCalls: unknown
 ): ToolCallInfo[] | undefined {
   if (!Array.isArray(toolCalls) || toolCalls.length === 0) return undefined;
   return toolCalls
-    .filter((tc: any) => tc?.function?.name)
+    .filter((tc: any) => tc?.function?.name && !DISPLAY_TOOLS.has(tc.function.name))
     .map((tc: any) => ({
       id: tc.id ?? tc.toolCallId ?? '',
       name: tc.function.name,

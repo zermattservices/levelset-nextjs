@@ -50,7 +50,8 @@ import { getEmployeeProfile } from '../../tools/data/profile.js';
 import { getTeamOverview } from '../../tools/data/team.js';
 import { getDisciplineSummary } from '../../tools/data/discipline.js';
 import { getPositionRankings } from '../../tools/data/rankings.js';
-import { toolResultToUIBlocks } from '../../lib/ui-blocks.js';
+// UI blocks are now emitted by display tools (show_employee_list, show_employee_card)
+// called by the LLM, not auto-generated from data tool results.
 
 const MAX_TOOL_STEPS = 5;
 
@@ -167,6 +168,9 @@ function getToolCallLabel(name: string, input: Record<string, unknown>): string 
       const pos = input.position || '';
       return pos ? `Ranking employees for ${pos}` : 'Ranking employees by position';
     }
+    case 'show_employee_list':
+    case 'show_employee_card':
+      return ''; // Display tools — no label needed (handled silently)
     default:
       return `Running ${name.replace(/_/g, ' ')}`;
   }
@@ -285,6 +289,69 @@ function buildTools(
       }),
       execute: async (input: Record<string, unknown>) => {
         return await getPositionRankings(input, orgId, locationId);
+      },
+    }),
+
+    // ── Display tools — the LLM decides when to show visual cards ──
+
+    show_employee_list: tool({
+      description:
+        'Display a visual ranked-list card in the chat. Use this when you want to highlight a group of employees — top performers, employees needing improvement, position rankings, etc. Only call AFTER you have fetched data and want to present a visual summary. Not every response needs a card — only use when the visual genuinely adds value.',
+      inputSchema: z.object({
+        title: z.string().describe('Card title (e.g. "Top Performers", "Needs Improvement", "Top iPOS")'),
+        employees: z.array(
+          z.object({
+            employee_id: z.string().optional().describe('Employee UUID if available from the data'),
+            name: z.string().describe('Employee full name'),
+            role: z.string().optional().describe('Employee role'),
+            metric_label: z.string().optional().describe('Label for the metric (e.g. "Avg Rating", "Points")'),
+            metric_value: z.number().optional().describe('Numeric value for the metric'),
+          })
+        ).describe('Employees to display (max 10)'),
+      }),
+      execute: async ({ title, employees }: { title: string; employees: Array<{ employee_id?: string; name: string; role?: string; metric_label?: string; metric_value?: number }> }) => {
+        return {
+          __display: true,
+          blockType: 'employee-list',
+          blockId: `list-${Date.now()}`,
+          payload: {
+            title,
+            employees: employees.slice(0, 10).map((e, i) => ({
+              employee_id: e.employee_id || '',
+              name: e.name,
+              role: e.role || '',
+              rank: i + 1,
+              metric_label: e.metric_label,
+              metric_value: e.metric_value,
+            })),
+          },
+        };
+      },
+    }),
+
+    show_employee_card: tool({
+      description:
+        'Display a visual card for a single employee. Use this when looking up or highlighting one specific employee. Only call AFTER you have fetched data about the employee.',
+      inputSchema: z.object({
+        employee_id: z.string().optional().describe('Employee UUID if available from the data'),
+        name: z.string().describe('Employee full name'),
+        role: z.string().optional().describe('Employee role'),
+        rating_avg: z.number().optional().describe('Overall rating average if available'),
+        current_points: z.number().optional().describe('Current discipline points if relevant'),
+      }),
+      execute: async (input: { employee_id?: string; name: string; role?: string; rating_avg?: number; current_points?: number }) => {
+        return {
+          __display: true,
+          blockType: 'employee-card',
+          blockId: `card-${input.employee_id || Date.now()}`,
+          payload: {
+            employee_id: input.employee_id || '',
+            name: input.name,
+            role: input.role || '',
+            rating_avg: input.rating_avg,
+            current_points: input.current_points,
+          },
+        };
       },
     }),
   };
@@ -432,75 +499,81 @@ chatRoute.post('/', async (c) => {
                   totalOutputTokens += step.usage.outputTokens ?? 0;
                 }
 
-                // Emit custom tool status labels
+                // Emit custom tool status labels for data-fetching tools only
+                // (display tools like show_employee_list are silent)
+                const DISPLAY_TOOLS = new Set(['show_employee_list', 'show_employee_card']);
+
                 if (step.toolCalls && step.toolCalls.length > 0) {
                   toolCallCount += step.toolCalls.length;
 
                   for (let i = 0; i < step.toolCalls.length; i++) {
                     const tc = step.toolCalls[i] as { toolCallId: string; toolName: string; input: Record<string, unknown> };
 
-                    writer.write({
-                      type: 'data-tool-status' as any,
-                      data: {
-                        toolCallId: tc.toolCallId,
-                        toolName: tc.toolName,
-                        status: 'done',
-                        label: getToolCallLabel(tc.toolName, tc.input),
-                      },
-                    });
+                    if (!DISPLAY_TOOLS.has(tc.toolName)) {
+                      writer.write({
+                        type: 'data-tool-status' as any,
+                        data: {
+                          toolCallId: tc.toolCallId,
+                          toolName: tc.toolName,
+                          status: 'done',
+                          label: getToolCallLabel(tc.toolName, tc.input),
+                        },
+                      });
+                    }
                   }
                 }
 
-                // Persist tool messages from this step
+                // Persist tool messages and emit UI blocks from display tools
                 if (step.toolCalls && step.toolCalls.length > 0) {
-                  const toolCalls = step.toolCalls.map((tc: any) => ({
-                    id: tc.toolCallId,
-                    type: 'function' as const,
-                    function: {
-                      name: tc.toolName,
-                      arguments: JSON.stringify(tc.input),
-                    },
-                  }));
+                  // Only persist data-fetching tool calls (not display tools)
+                  const dataToolCalls = step.toolCalls
+                    .filter((tc: any) => !DISPLAY_TOOLS.has(tc.toolName))
+                    .map((tc: any) => ({
+                      id: tc.toolCallId,
+                      type: 'function' as const,
+                      function: {
+                        name: tc.toolName,
+                        arguments: JSON.stringify(tc.input),
+                      },
+                    }));
 
-                  await persistMessage(conversationId, {
-                    role: 'assistant',
-                    content: step.text || '',
-                    toolCalls,
-                  });
+                  if (dataToolCalls.length > 0) {
+                    await persistMessage(conversationId, {
+                      role: 'assistant',
+                      content: step.text || '',
+                      toolCalls: dataToolCalls,
+                    });
+                  }
 
                   if (step.toolResults) {
                     for (const tr of step.toolResults as Array<{ toolCallId: string; output: unknown }>) {
-                      const outputStr = typeof tr.output === 'string'
-                        ? tr.output
-                        : JSON.stringify(tr.output);
+                      const output = tr.output;
+                      const outputStr = typeof output === 'string'
+                        ? output
+                        : JSON.stringify(output);
 
-                      await persistMessage(conversationId, {
-                        role: 'tool',
-                        content: outputStr,
-                        toolCallId: tr.toolCallId,
-                      });
+                      // Check if this is a display tool result (has __display flag)
+                      const isDisplay = typeof output === 'object' && output !== null && (output as any).__display;
 
-                      // Emit UI blocks for this tool result
-                      const matchingCall = step.toolCalls.find(
-                        (tc: any) => tc.toolCallId === tr.toolCallId
-                      ) as { toolCallId: string; toolName: string; input: Record<string, unknown> } | undefined;
-                      if (matchingCall) {
-                        const uiBlocks = toolResultToUIBlocks(
-                          matchingCall.toolName,
-                          matchingCall.input,
-                          outputStr,
-                          userMessage
-                        );
-                        if (uiBlocks.length === 0) {
-                          console.warn(`[Chat] No UI blocks for ${matchingCall.toolName}. Output preview: ${outputStr.slice(0, 200)}`);
-                        }
-                        for (const block of uiBlocks) {
-                          allUIBlocks.push(block);
-                          writer.write({
-                            type: 'data-ui-block' as any,
-                            data: block,
-                          });
-                        }
+                      if (isDisplay) {
+                        // Emit as UI block directly — the LLM chose to show this
+                        const block = {
+                          blockType: (output as any).blockType as string,
+                          blockId: (output as any).blockId as string,
+                          payload: (output as any).payload as Record<string, unknown>,
+                        };
+                        allUIBlocks.push(block);
+                        writer.write({
+                          type: 'data-ui-block' as any,
+                          data: block,
+                        });
+                      } else {
+                        // Persist data tool result (display tool results are ephemeral)
+                        await persistMessage(conversationId, {
+                          role: 'tool',
+                          content: outputStr,
+                          toolCallId: tr.toolCallId,
+                        });
                       }
                     }
                   }
