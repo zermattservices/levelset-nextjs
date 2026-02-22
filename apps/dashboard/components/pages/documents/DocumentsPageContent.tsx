@@ -333,6 +333,7 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
     setUploading(true);
     try {
       const token = await getAccessToken();
+      let createData: any = null;
 
       if (uploadMode === 'file' && uploadFile) {
         // Validate file size
@@ -399,6 +400,7 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
           const err = await createRes.json();
           throw new Error(err.error || 'Failed to create document');
         }
+        createData = await createRes.json();
       } else if (uploadMode === 'text') {
         // Text document — paste markdown directly, no file upload
         const createRes = await fetch(config.apiBasePath, {
@@ -422,6 +424,7 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
           const err = await createRes.json();
           throw new Error(err.error || 'Failed to create document');
         }
+        createData = await createRes.json();
       } else {
         // URL document — no file upload needed
         const createRes = await fetch(config.apiBasePath, {
@@ -445,12 +448,28 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
           const err = await createRes.json();
           throw new Error(err.error || 'Failed to create document');
         }
+        createData = await createRes.json();
       }
 
       setSnackbar({ open: true, message: 'Document added', severity: 'success' });
       resetUploadForm();
       setUploadDialogOpen(false);
       fetchDocuments();
+
+      // Trigger document processing in the background (fire-and-forget)
+      const docId = createData?.id;
+      if (docId) {
+        fetch(`${config.apiBasePath}/process`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ document_id: docId }),
+        }).catch(() => {
+          // Processing failure is non-blocking — status shows in UI
+        });
+      }
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Upload failed', severity: 'error' });
     } finally {
@@ -626,6 +645,19 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
       setSelectedDocument(updated);
       setSnackbar({ open: true, message: 'File replaced', severity: 'success' });
       fetchDocuments();
+
+      // Trigger document processing in the background (fire-and-forget)
+      const token2 = await getAccessToken();
+      fetch(`${config.apiBasePath}/process`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token2 ? { Authorization: `Bearer ${token2}` } : {}),
+        },
+        body: JSON.stringify({ document_id: selectedDocument.id }),
+      }).catch(() => {
+        // Processing failure is non-blocking — status shows in UI
+      });
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Replace failed', severity: 'error' });
     }
