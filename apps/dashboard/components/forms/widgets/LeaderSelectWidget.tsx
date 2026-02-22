@@ -11,54 +11,45 @@ interface LeaderOption {
   role: string | null;
 }
 
-function isLeaderRole(role?: string | null): boolean {
-  if (!role) return false;
-  const normalized = role.toLowerCase();
-  return (
-    normalized.includes('lead') ||
-    normalized.includes('manager') ||
-    normalized.includes('director') ||
-    normalized.includes('executive') ||
-    normalized.includes('operator') ||
-    normalized.includes('trainer') ||
-    normalized.includes('owner')
-  );
-}
-
 /**
  * Leader/manager select widget for RJSF forms.
- * Fetches employees via /api/employees and filters to leadership roles.
- * Falls back to all employees if no leaders found.
+ * Fetches leaders via /api/forms/widget-data?type=leaders with server-side role filtering.
  * Stores the employee ID as the field value.
  */
 export function LeaderSelectWidget(props: WidgetProps) {
   const { id, value, required, disabled, readonly, onChange, label, rawErrors, formContext } = props;
   const auth = useAuth();
+  const org_id = formContext?.orgId || auth.org_id;
   const location_id = formContext?.locationId || auth.location_id;
+  const formType = formContext?.formType || 'custom';
   const [leaders, setLeaders] = React.useState<LeaderOption[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [loadError, setLoadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (!location_id) return;
+    if (!org_id || !location_id) return;
     let cancelled = false;
 
     const fetchLeaders = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/employees?location_id=${encodeURIComponent(location_id)}`);
+        const params = new URLSearchParams({
+          type: 'leaders',
+          org_id,
+          location_id,
+          form_type: formType,
+        });
+        const res = await fetch(`/api/forms/widget-data?${params}`);
         const json = await res.json();
 
-        if (!cancelled && json.employees) {
-          const all = json.employees.map((e: any) => ({
-            id: e.id,
-            full_name: e.full_name?.trim() || `${e.first_name ?? ''} ${e.last_name ?? ''}`.trim() || 'Unnamed',
-            role: e.role ?? null,
-            isLeader: e.is_leader || isLeaderRole(e.role),
-          }));
-
-          const leaderList = all.filter((e) => e.isLeader);
-          setLeaders(leaderList.length > 0 ? leaderList : all);
+        if (!cancelled && json.data) {
+          setLeaders(
+            json.data.map((e: any) => ({
+              id: e.id,
+              full_name: e.full_name || 'Unnamed',
+              role: e.role ?? null,
+            }))
+          );
         }
       } catch (err) {
         console.error('LeaderSelectWidget: load failed', err);
@@ -70,7 +61,7 @@ export function LeaderSelectWidget(props: WidgetProps) {
 
     fetchLeaders();
     return () => { cancelled = true; };
-  }, [location_id]);
+  }, [org_id, location_id, formType]);
 
   const selectedOption = leaders.find((e) => e.id === value) || null;
   const isDisabled = disabled || readonly;
