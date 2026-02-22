@@ -85,3 +85,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.cardLevelset {
+  border-left: 3px solid var(--ls-color-brand);
+}
+
+.levelsetDescription {
+  font-family: "Satoshi", sans-serif;
+  font-size: 11px;
+  color: var(--ls-color-brand);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
+}

@@ -229,6 +229,7 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
             selectedFieldId={readOnly ? null : selectedFieldId}
             onSelectField={readOnly ? () => {} : setSelectedFieldId}
             onDeleteField={readOnly ? () => {} : handleDeleteField}
+            formType={template.form_type}
           />
 
           {!readOnly && (
@@ -240,6 +241,7 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
                   onSelect={() => {}}
                   onDelete={() => {}}
                   isOverlay
+                  formType={template.form_type}
                 />
               )}
             </DragOverlay>
@@ -251,6 +253,7 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
             field={selectedField}
             onUpdateField={handleUpdateField}
             isEvaluation={template.form_type === 'evaluation'}
+            formType={template.form_type}
           />
         )}
       </div>

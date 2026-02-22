@@ -5,7 +5,7 @@ import { IconButton, Chip } from '@mui/material';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import sty from './EditorFieldCard.module.css';
-import { FIELD_TYPES } from '@/lib/forms/field-palette';
+import { FIELD_TYPES, getLevelsetFieldInfo } from '@/lib/forms/field-palette';
 import type { FormField } from '@/lib/forms/schema-builder';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -17,6 +17,7 @@ interface EditorFieldCardProps {
   onDelete: () => void;
   /** Render as overlay during drag */
   isOverlay?: boolean;
+  formType?: string;
 }
 
 export function EditorFieldCard({
@@ -25,6 +26,7 @@ export function EditorFieldCard({
   onSelect,
   onDelete,
   isOverlay,
+  formType,
 }: EditorFieldCardProps) {
   const {
     attributes,
@@ -50,6 +52,12 @@ export function EditorFieldCard({
   const typeLabel = fieldDef?.label || field.type;
   const isSection = field.type === 'section';
 
+  const levelsetInfo = React.useMemo(
+    () => getLevelsetFieldInfo(field.type, formType),
+    [field.type, formType]
+  );
+  const isLevelset = levelsetInfo !== null;
+
   const handleClick = (e: React.MouseEvent) => {
     // Don't select when clicking delete
     if ((e.target as HTMLElement).closest('button')) return;
@@ -60,7 +68,7 @@ export function EditorFieldCard({
     <div
       ref={isOverlay ? undefined : setNodeRef}
       style={style}
-      className={`${sty.card} ${isSelected ? sty.cardSelected : ''} ${isSection ? sty.cardSection : ''} ${isOverlay ? sty.cardOverlay : ''}`}
+      className={`${sty.card} ${isSelected ? sty.cardSelected : ''} ${isSection ? sty.cardSection : ''} ${isOverlay ? sty.cardOverlay : ''} ${isLevelset ? sty.cardLevelset : ''}`}
       onClick={handleClick}
     >
       <div className={sty.dragHandle} {...(isOverlay ? {} : { ...listeners, ...attributes })}>
@@ -103,6 +111,9 @@ export function EditorFieldCard({
         </div>
         {field.description && (
           <span className={sty.fieldDescription}>{field.description}</span>
+        )}
+        {levelsetInfo && (
+          <span className={sty.levelsetDescription}>{levelsetInfo.description}</span>
         )}
       </div>
 
