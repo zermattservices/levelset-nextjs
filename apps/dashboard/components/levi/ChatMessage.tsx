@@ -152,103 +152,6 @@ function isDataPart(part: any): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Render parts from a single AI SDK message
-// ---------------------------------------------------------------------------
-
-function renderSessionParts(
-  message: any,
-  onEmployeeClick?: (id: string) => void,
-  keyPrefix: string = '',
-): { nodes: React.ReactNode[]; toolCalls: ToolCallInfo[] } {
-  const toolCalls: ToolCallInfo[] = [];
-  const seenToolIds = new Set<string>();
-  const renderedParts: React.ReactNode[] = [];
-  let toolSummaryAdded = false;
-
-  // Collect tool calls first
-  if (message.parts) {
-    for (const part of message.parts) {
-      if (isToolPart(part) && part.toolCallId) {
-        if (!seenToolIds.has(part.toolCallId)) {
-          seenToolIds.add(part.toolCallId);
-          toolCalls.push({
-            id: part.toolCallId,
-            name: part.toolName || part.type.replace('tool-', ''),
-            label: getToolLabel(
-              part.toolName || part.type.replace('tool-', '')
-            ),
-            status: part.state === 'output-available' ? 'done' : 'calling',
-          });
-        }
-      }
-    }
-  }
-
-  // Render parts
-  if (message.parts) {
-    for (let i = 0; i < message.parts.length; i++) {
-      const part = message.parts[i];
-
-      if (part.type === 'text' && part.text) {
-        renderedParts.push(
-          <div key={`${keyPrefix}text-${i}`} className={styles.prose}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {part.text}
-            </ReactMarkdown>
-          </div>
-        );
-      } else if (isToolPart(part) && !toolSummaryAdded) {
-        if (toolCalls.length > 0) {
-          renderedParts.push(
-            <ToolCallSummary
-              key={`${keyPrefix}tools`}
-              toolCalls={toolCalls}
-            />
-          );
-          toolSummaryAdded = true;
-        }
-      } else if (isDataPart(part) && part.data) {
-        const data = part.data;
-        if (data && data.blockType && data.blockId) {
-          renderedParts.push(
-            <div key={`${keyPrefix}block-${i}`} className={styles.uiBlockWrap}>
-              <UIBlockRenderer
-                block={data as UIBlock}
-                onEmployeeClick={onEmployeeClick}
-              />
-            </div>
-          );
-        }
-      }
-    }
-  }
-
-  // Fallback to content string if no parts rendered
-  if (renderedParts.length === 0 && message.content) {
-    const contentText =
-      typeof message.content === 'string'
-        ? message.content
-        : Array.isArray(message.content)
-          ? message.content
-              .filter((c: any) => c.type === 'text')
-              .map((c: any) => c.text)
-              .join('')
-          : '';
-    if (contentText) {
-      renderedParts.push(
-        <div key={`${keyPrefix}fallback`} className={styles.prose}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {contentText}
-          </ReactMarkdown>
-        </div>
-      );
-    }
-  }
-
-  return { nodes: renderedParts, toolCalls };
-}
-
-// ---------------------------------------------------------------------------
 // Grouped assistant session message (multiple AI SDK messages → one visual)
 // ---------------------------------------------------------------------------
 
@@ -259,16 +162,78 @@ function AssistantSessionGroup({
   messages: any[];
   onEmployeeClick?: (id: string) => void;
 }) {
-  // Render parts from ALL messages in the group
-  const allNodes: React.ReactNode[] = [];
+  // Consolidate ALL tool calls from ALL messages in the group so they
+  // render as ONE ToolCallSummary, then all text, then all UI blocks.
+  const allToolCalls: ToolCallInfo[] = [];
+  const seenToolIds = new Set<string>();
+  const textNodes: React.ReactNode[] = [];
+  const blockNodes: React.ReactNode[] = [];
 
   for (let m = 0; m < messages.length; m++) {
-    const { nodes } = renderSessionParts(
-      messages[m],
-      onEmployeeClick,
-      `m${m}-`
-    );
-    allNodes.push(...nodes);
+    const msg = messages[m];
+    if (!msg.parts) continue;
+    const prefix = `m${m}-`;
+
+    for (let i = 0; i < msg.parts.length; i++) {
+      const part = msg.parts[i];
+
+      // Collect tool calls
+      if (isToolPart(part) && part.toolCallId && !seenToolIds.has(part.toolCallId)) {
+        seenToolIds.add(part.toolCallId);
+        allToolCalls.push({
+          id: part.toolCallId,
+          name: part.toolName || part.type.replace('tool-', ''),
+          label: getToolLabel(part.toolName || part.type.replace('tool-', '')),
+          status: part.state === 'output-available' ? 'done' : 'calling',
+        });
+      }
+
+      // Collect text parts
+      if (part.type === 'text' && part.text) {
+        textNodes.push(
+          <div key={`${prefix}text-${i}`} className={styles.prose}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {part.text}
+            </ReactMarkdown>
+          </div>
+        );
+      }
+
+      // Collect UI block parts
+      if (isDataPart(part) && part.data?.blockType && part.data?.blockId) {
+        blockNodes.push(
+          <div key={`${prefix}block-${i}`} className={styles.uiBlockWrap}>
+            <UIBlockRenderer
+              block={part.data as UIBlock}
+              onEmployeeClick={onEmployeeClick}
+            />
+          </div>
+        );
+      }
+    }
+  }
+
+  // Fallback: if no text or block nodes, try extracting from content
+  if (textNodes.length === 0 && blockNodes.length === 0) {
+    for (let m = 0; m < messages.length; m++) {
+      const msg = messages[m];
+      if (!msg.content) continue;
+      const contentText =
+        typeof msg.content === 'string'
+          ? msg.content
+          : Array.isArray(msg.content)
+            ? msg.content.filter((c: any) => c.type === 'text').map((c: any) => c.text).join('')
+            : '';
+      if (contentText) {
+        textNodes.push(
+          <div key={`m${m}-fallback`} className={styles.prose}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {contentText}
+            </ReactMarkdown>
+          </div>
+        );
+      }
+    }
   }
 
   return (
@@ -276,7 +241,13 @@ function AssistantSessionGroup({
       <div className={styles.avatar}>
         <LeviIcon size={16} color="var(--ls-color-brand)" />
       </div>
-      <div className={styles.content}>{allNodes}</div>
+      <div className={styles.content}>
+        {allToolCalls.length > 0 && (
+          <ToolCallSummary key="tools" toolCalls={allToolCalls} />
+        )}
+        {textNodes}
+        {blockNodes}
+      </div>
     </div>
   );
 }

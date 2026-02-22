@@ -99,31 +99,12 @@ function listEmployeesBlocks(data: any): UIBlock[] {
   ];
 }
 
-function employeeRatingsBlocks(data: any, toolInput: Record<string, unknown>): UIBlock[] {
-  const ratings = data.ratings;
-  if (!Array.isArray(ratings) || ratings.length === 0) return [];
-
-  // Group ratings by position and compute averages
-  const byPosition = new Map<string, { sum: number; count: number }>();
-  for (const r of ratings) {
-    const pos = r.position;
-    const existing = byPosition.get(pos) || { sum: 0, count: 0 };
-    existing.sum += r.rating_avg;
-    existing.count += 1;
-    byPosition.set(pos, existing);
-  }
-
-  return Array.from(byPosition.entries()).map(([position, { sum, count }]) => ({
-    blockType: 'rating-summary' as const,
-    blockId: `rating-${toolInput.employee_id}-${position}`,
-    payload: {
-      employee_id: toolInput.employee_id,
-      employee_name: '', // Not available from ratings tool alone
-      position,
-      rating_avg: Math.round((sum / count) * 100) / 100,
-      rating_count: count,
-    },
-  }));
+function employeeRatingsBlocks(_data: any, _toolInput: Record<string, unknown>): UIBlock[] {
+  // Per-position rating-summary cards are noisy for individual employee lookups
+  // (can produce 10+ cards per employee). The LLM's text analysis is more useful.
+  // For rich employee UI, use get_employee_profile which generates a single
+  // employee-card with overall average instead.
+  return [];
 }
 
 function employeeInfractionsBlocks(data: any): UIBlock[] {
