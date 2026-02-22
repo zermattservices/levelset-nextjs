@@ -238,3 +238,66 @@ export function getFieldTypesByCategory(): Record<FieldCategory, FieldTypeDefini
 
   return grouped;
 }
+
+export interface LevelsetFieldInfo {
+  description: string;
+  configLink?: string;
+  configLinkLabel?: string;
+}
+
+/**
+ * Get context-specific description and config link for a Levelset field
+ * based on the form's form_type.
+ */
+export function getLevelsetFieldInfo(
+  fieldType: string,
+  formType?: string
+): LevelsetFieldInfo | null {
+  switch (fieldType) {
+    case 'employee_select':
+      return {
+        description: 'All active team members at this location',
+      };
+    case 'leader_select': {
+      if (formType === 'rating') {
+        return {
+          description: 'These options are displayed dynamically based on Positional Excellence role mappings.',
+          configLink: '/org-settings?tab=positional-excellence&subtab=role-mapping',
+          configLinkLabel: 'Configure role mappings',
+        };
+      }
+      if (formType === 'discipline') {
+        return {
+          description: 'These options are displayed dynamically based on Discipline access roles.',
+          configLink: '/org-settings?tab=discipline&subtab=access',
+          configLinkLabel: 'Configure discipline access',
+        };
+      }
+      return {
+        description: 'Shows employees with leadership roles (hierarchy level 0-2).',
+        configLink: '/org-settings?tab=positional-excellence&subtab=role-mapping',
+        configLinkLabel: 'Configure roles',
+      };
+    }
+    case 'position_select':
+      return {
+        description: 'Positions configured for this organization.',
+        configLink: '/org-settings?tab=positional-excellence&subtab=positions',
+        configLinkLabel: 'Manage positions',
+      };
+    case 'infraction_select':
+      return {
+        description: 'Infraction types from the discipline rubric.',
+        configLink: '/org-settings?tab=discipline&subtab=infractions',
+        configLinkLabel: 'Manage infractions',
+      };
+    case 'disc_action_select':
+      return {
+        description: 'Discipline actions from the discipline rubric.',
+        configLink: '/org-settings?tab=discipline&subtab=actions',
+        configLinkLabel: 'Manage actions',
+      };
+    default:
+      return null;
+  }
+}
