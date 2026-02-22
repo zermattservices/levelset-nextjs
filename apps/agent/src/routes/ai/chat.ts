@@ -485,6 +485,9 @@ chatRoute.post('/', async (c) => {
                           outputStr,
                           userMessage
                         );
+                        if (uiBlocks.length === 0) {
+                          console.warn(`[Chat] No UI blocks for ${matchingCall.toolName}. Output preview: ${outputStr.slice(0, 200)}`);
+                        }
                         for (const block of uiBlocks) {
                           allUIBlocks.push(block);
                           writer.write({

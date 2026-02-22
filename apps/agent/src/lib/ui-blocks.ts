@@ -53,7 +53,8 @@ export function toolResultToUIBlocks(
       default:
         return [];
     }
-  } catch {
+  } catch (err) {
+    console.error(`[UIBlocks] Error generating blocks for ${toolName}:`, err);
     return [];
   }
 }

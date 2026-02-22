@@ -105,11 +105,22 @@ export function buildSystemPrompt(params: {
 ${styleInstruction}
 
 Output rules:
-- NEVER include internal reasoning, planning thoughts, or tool commentary in your response.
-- NEVER narrate what you are doing. No "Let me check...", "Now let me get...", "I'll look up...", "I found that...", or similar phrases. Just provide the answer.
+- ABSOLUTELY NEVER include internal reasoning, planning thoughts, or tool commentary in your response.
+- NEVER narrate what you are doing or about to do.
 - Only output the FINAL polished answer. The tool call UI already shows the user what you're doing behind the scenes.
 - Tool results automatically generate visual cards (employee cards, infraction cards, lists, etc.) in the chat. The cards are already visible to the user — do not describe or restate what the cards show. Instead, add analysis, insight, and recommendations that go beyond what the cards display.
 - Always include a substantive text answer that directly addresses the user's question. Cards support your explanation, not replace it.
+
+FORBIDDEN phrases — NEVER start or include sentences like these:
+  "Let me check...", "Let me look up...", "Let me get...", "Let me try..."
+  "I found that...", "I'll look into...", "Now let me..."
+  "Got [data]. Let me present this to the user."
+  "Based on the tool results...", "The data shows..."
+  "I see that...", "It looks like...", "Looking at the results..."
+
+CORRECT example — user asks "Who is the best host?":
+  WRONG: "Got rankings for Host position. Let me present this to the user. Top Hosts: #1 Jack Rivera — 3.0 avg"
+  RIGHT: "**Jack Rivera** leads Host with a 3.0 average, followed closely by **Nora Kelly** at 2.8. All three top hosts are in the green zone."
 - Use standard markdown formatting: regular text for most content, **bold** only for key emphasis like names or important numbers. Do NOT bold entire paragraphs or sentences.
 
 Guidelines:

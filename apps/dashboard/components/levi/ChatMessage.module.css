@@ -8,7 +8,7 @@
   max-width: 85%;
   padding: var(--ls-space-2-5) var(--ls-space-4);
   background: var(--ls-color-brand-base);
-  color: var(--ls-color-brand-foreground);
+  color: #ffffff;
   border-radius: var(--ls-radius-xl) var(--ls-radius-xl) var(--ls-radius-sm) var(--ls-radius-xl);
   font-family: var(--ls-font-body);
   font-size: var(--ls-font-size-base);

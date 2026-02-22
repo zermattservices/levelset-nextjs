@@ -38,28 +38,33 @@ export function ChatContainer({
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const userScrolledUpRef = useRef(false);
-  const lastMessageCountRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
 
   const totalMessages = historyMessages.length + sessionMessages.length;
   const isEmpty = totalMessages === 0 && historyLoaded;
   const isSending = status === 'streaming' || status === 'submitted';
 
-  // Auto-scroll to bottom on new messages (unless user scrolled up)
-  useEffect(() => {
-    if (totalMessages > lastMessageCountRef.current) {
-      if (!userScrolledUpRef.current) {
-        bottomRef.current?.scrollIntoView({ behavior: 'instant' as any });
-      }
-    }
-    lastMessageCountRef.current = totalMessages;
-  }, [totalMessages]);
-
-  // Also scroll when streaming status changes (response starting)
-  useEffect(() => {
-    if (isSending && !userScrolledUpRef.current) {
+  // Scroll to bottom helper — debounced via rAF to avoid excessive calls during streaming
+  const scrollToBottom = useCallback(() => {
+    if (userScrolledUpRef.current) return;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
       bottomRef.current?.scrollIntoView({ behavior: 'instant' as any });
+      rafRef.current = null;
+    });
+  }, []);
+
+  // Auto-scroll whenever sessionMessages changes (AI SDK returns new array ref on each token)
+  useEffect(() => {
+    if (sessionMessages.length > 0) {
+      scrollToBottom();
     }
-  }, [isSending]);
+  }, [sessionMessages, scrollToBottom]);
+
+  // Also scroll when a new history message batch arrives
+  useEffect(() => {
+    scrollToBottom();
+  }, [totalMessages, scrollToBottom]);
 
   // Detect when user scrolls up
   const handleScroll = useCallback(() => {
@@ -69,7 +74,7 @@ export function ChatContainer({
     userScrolledUpRef.current = distanceFromBottom > 100;
   }, []);
 
-  // Scroll to bottom on initial load
+  // Scroll to bottom on initial history load
   useEffect(() => {
     if (historyLoaded) {
       requestAnimationFrame(() => {
@@ -77,6 +82,13 @@ export function ChatContainer({
       });
     }
   }, [historyLoaded]);
+
+  // Cleanup rAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   return (
     <div className={styles.wrapper}>
