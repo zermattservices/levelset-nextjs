@@ -56,6 +56,7 @@ const FEATURE_GROUPS: FeatureGroup[] = [
       { key: 'certifications', label: 'Certifications', description: 'Employee certification tracking' },
       { key: 'roster_suggested_pay', label: 'Roster Suggested Pay', description: 'Automated pay recommendations' },
       { key: 'multi_unit', label: 'Multi-Unit Functionality', description: 'Manage multiple locations' },
+      { key: 'operational_excellence', label: 'Operational Excellence', description: 'OE pillar analytics and scoring' },
     ],
   },
   {

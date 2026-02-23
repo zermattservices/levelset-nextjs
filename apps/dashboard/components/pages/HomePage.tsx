@@ -10,6 +10,7 @@ import { DashboardMetricCard } from '@/components/CodeComponents/DashboardMetric
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -19,7 +20,8 @@ export function HomePage() {
   const router = useRouter();
   const auth = useAuth();
   const { selectedLocationId, selectedLocationImageUrl } = useLocationContext();
-  const isOEEnabled = auth.role === 'Levelset Admin' || auth.org_id === '88ae7722-9d14-44ce-9183-56c6e8dd70d4';
+  const { hasFeature } = useOrgFeatures();
+  const isOEEnabled = hasFeature(F.OPERATIONAL_EXCELLENCE);
 
   // Redirect unauthenticated users
   React.useEffect(() => {

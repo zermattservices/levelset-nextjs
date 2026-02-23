@@ -1,6 +1,7 @@
 import React from 'react';
 import { AuthProvider } from './AuthProvider';
 import { PermissionsProvider } from './PermissionsProvider';
+import { OrgFeaturesProvider } from './OrgFeaturesProvider';
 import { ImpersonationProvider } from './ImpersonationProvider';
 import { LocationProvider } from '@/components/CodeComponents/LocationContext';
 import { LocationSelectModal } from '@/components/CodeComponents/LocationSelectModal';
@@ -24,11 +25,13 @@ export function AppProviders({ children }: AppProvidersProps) {
         <ImpersonationProvider>
           <LocationProvider>
             <PermissionsProvider>
-              {/* Impersonation banner - shows when admin is testing as another user */}
-              <ImpersonationBanner />
-              {children}
-              {/* Global Location Select Modal - shows when no location is selected */}
-              <LocationSelectModal />
+              <OrgFeaturesProvider>
+                {/* Impersonation banner - shows when admin is testing as another user */}
+                <ImpersonationBanner />
+                {children}
+                {/* Global Location Select Modal - shows when no location is selected */}
+                <LocationSelectModal />
+              </OrgFeaturesProvider>
             </PermissionsProvider>
           </LocationProvider>
         </ImpersonationProvider>

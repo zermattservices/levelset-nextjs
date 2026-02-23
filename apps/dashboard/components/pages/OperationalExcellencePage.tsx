@@ -27,6 +27,7 @@ import { DashboardMetricCard } from '@/components/CodeComponents/DashboardMetric
 import { EmployeeModal } from '@/components/CodeComponents/EmployeeModal';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
 
 // ------------------------------------------------------------------
 // Constants
@@ -241,6 +242,7 @@ export function OperationalExcellencePage() {
   const router = useRouter();
   const auth = useAuth();
   const { selectedLocationId } = useLocationContext();
+  const { hasFeature } = useOrgFeatures();
 
   // Date range state
   const [dateRange, setDateRange] = React.useState<DateRange>('90d');
@@ -383,8 +385,7 @@ export function OperationalExcellencePage() {
   }
 
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
-  const OE_ENABLED_ORG_IDS = ['88ae7722-9d14-44ce-9183-56c6e8dd70d4']; // Riley Emter
-  const isOEEnabled = isLevelsetAdmin || OE_ENABLED_ORG_IDS.includes(auth.org_id);
+  const isOEEnabled = hasFeature(F.OPERATIONAL_EXCELLENCE);
 
   // ------------------------------------------------------------------
   // Build DataGrid columns

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import sty from './NavSubmenu.module.css';
 import { usePermissions, P, type PermissionKey } from '@/lib/providers/PermissionsProvider';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useOrgFeatures, F, type FeatureKey } from '@/lib/providers/OrgFeaturesProvider';
 
 // MUI Icons
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
@@ -45,7 +46,8 @@ export interface NavMenuItem {
   disabled?: boolean;
   requiredPermission?: PermissionKey;
   levelsetAdminOnly?: boolean;
-  allowedOrgIds?: string[];
+  /** Feature flag key — when set, item is enabled only if org has this feature */
+  requiredFeature?: FeatureKey;
 }
 
 export type MenuType = 'operations' | 'analytics' | 'hr';
@@ -91,8 +93,7 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       description: 'Track key performance metrics',
       href: '/operational-excellence',
       icon: <StarOutlinedIcon sx={{ fontSize: 22 }} />,
-      levelsetAdminOnly: true,
-      allowedOrgIds: ['88ae7722-9d14-44ce-9183-56c6e8dd70d4'], // Riley Emter
+      requiredFeature: F.OPERATIONAL_EXCELLENCE,
     },
     {
       label: 'Retention',
@@ -146,6 +147,7 @@ export interface NavSubmenuProps {
 export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) {
   const { has } = usePermissions();
   const auth = useAuth();
+  const { hasFeature } = useOrgFeatures();
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
   const allItems = menuItems[menuType];
   // Filter items based on required permissions
@@ -175,8 +177,8 @@ export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) 
     >
       <div className={classNames(sty.itemsGrid, isTwoColumn && sty.twoColumnGrid)}>
         {items.map((item) => {
-          const orgAllowed = item.allowedOrgIds?.includes(auth.org_id) ?? false;
-          const effectivelyDisabled = item.disabled || (item.levelsetAdminOnly && !isLevelsetAdmin && !orgAllowed);
+          const featureEnabled = item.requiredFeature ? hasFeature(item.requiredFeature) : true;
+          const effectivelyDisabled = item.disabled || (item.levelsetAdminOnly && !isLevelsetAdmin) || (item.requiredFeature && !featureEnabled);
           if (effectivelyDisabled) {
             return (
               <div key={item.label} className={classNames(sty.menuCard, sty.menuCardDisabled)}>
