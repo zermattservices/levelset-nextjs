@@ -47,6 +47,7 @@
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
   padding: 8px 0 100px;
+  box-sizing: border-box;
 }
 
 .contentInner {
@@ -59,6 +60,7 @@
   min-width: 0;
   padding: 16px 24px;
   gap: 24px;
+  box-sizing: border-box;
 }
 
 /* Coming Soon */
@@ -97,7 +99,7 @@
   font-size: 14px;
   font-weight: 600;
   font-family: "Satoshi", sans-serif;
-  color: var(--ls-color-brand-base);
+  color: var(--ls-color-brand);
   background: var(--ls-color-brand-soft);
   padding: 6px 16px;
   border-radius: 20px;
@@ -130,23 +132,44 @@
   flex-wrap: wrap;
 }
 
-/* Score Cards — uniform grid, all same size */
-.scoreCardsGrid {
+/* Score Cards — OE card on left spanning 2 rows, 5 pillar cards in 3+2 grid on right */
+.scoreCardsSection {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
   gap: 16px;
   width: 100%;
 }
 
+.oeCardCell {
+  grid-row: 1 / 3;
+  grid-column: 1;
+  display: flex;
+}
+
+.oeCardCell > * {
+  flex: 1;
+}
+
 @media (max-width: 1200px) {
-  .scoreCardsGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .scoreCardsSection {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .oeCardCell {
+    grid-row: auto;
+    grid-column: 1 / -1;
   }
 }
 
 @media (max-width: 768px) {
-  .scoreCardsGrid {
+  .scoreCardsSection {
     grid-template-columns: 1fr;
+  }
+
+  .oeCardCell {
+    grid-row: auto;
+    grid-column: auto;
   }
 }
 
@@ -157,12 +180,14 @@
   gap: 24px;
   width: 100%;
   align-items: flex-start;
+  min-width: 0;
 }
 
 .leftColumn {
   flex: 3;
   min-width: 0;
   min-height: 400px;
+  overflow: hidden;
 }
 
 .rightColumn {
@@ -234,7 +259,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: var(--ls-color-brand-base);
+  color: var(--ls-color-brand);
   background: var(--ls-color-brand-soft);
   padding: 3px 10px;
   border-radius: 12px;
@@ -278,7 +303,7 @@
 
 .improverName {
   cursor: pointer;
-  color: var(--ls-color-brand-base);
+  color: var(--ls-color-brand);
   font-weight: 600;
 }
 
@@ -297,10 +322,10 @@
   text-align: right;
 }
 
-/* DataGrid container — matches card styling */
+/* DataGrid container — matches card styling with visible border */
 .dataGridCard {
   background: #ffffff;
-  box-shadow: inset 0 0 0 1px #e9eaeb;
+  border: 1px solid #e9eaeb;
   filter: drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05));
   border-radius: 16px;
   overflow: hidden;
@@ -311,7 +336,7 @@
 /* Employee name link in DataGrid */
 .employeeNameLink {
   cursor: pointer;
-  color: var(--ls-color-brand-base);
+  color: var(--ls-color-brand);
   font-weight: 600;
   font-family: "Satoshi", sans-serif;
 }

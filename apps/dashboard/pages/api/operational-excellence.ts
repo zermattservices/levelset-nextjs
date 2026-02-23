@@ -43,6 +43,7 @@ interface OrgPositionRow {
   id: string;
   name: string;
   org_id: string;
+  zone: string | null;
 }
 
 // Response types
@@ -76,7 +77,7 @@ interface EmployeeScore {
 }
 
 interface TrendPoint {
-  weekStart: string;
+  date: string;
   pillarScores: Record<string, number | null>;
   overallScore: number;
 }
@@ -102,12 +103,9 @@ function normalizeTo100(avg: number): number {
   return ((avg - 1) / 2) * 100;
 }
 
-/** Get ISO week start (Monday) for a date */
-function getWeekStart(date: Date): string {
+/** Get date key (YYYY-MM-DD) for daily grouping */
+function getDateKey(date: Date): string {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
-  d.setDate(diff);
   d.setHours(0, 0, 0, 0);
   return d.toISOString().split('T')[0];
 }
@@ -192,7 +190,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { location_id, start, end } = req.query;
+  const { location_id, start, end, show_foh, show_boh } = req.query;
 
   if (!location_id || typeof location_id !== 'string') {
     return res.status(400).json({ error: 'location_id is required' });
@@ -200,6 +198,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!start || typeof start !== 'string' || !end || typeof end !== 'string') {
     return res.status(400).json({ error: 'start and end dates are required' });
   }
+
+  // FOH/BOH filtering — default to showing both
+  const includeFOH = show_foh !== 'false';
+  const includeBOH = show_boh !== 'false';
 
   const supabase = createServerSupabaseClient();
 
@@ -233,20 +235,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (locationError) throw locationError;
     const orgId = locationData.org_id;
 
-    // 3. Fetch org_positions for this org (for name-based fallback)
+    // 3. Fetch org_positions for this org (includes zone for FOH/BOH filtering)
     const { data: positionsData, error: positionsError } = await supabase
       .from('org_positions')
-      .select('id, name, org_id')
+      .select('id, name, org_id, zone')
       .eq('org_id', orgId)
       .eq('is_active', true);
 
     if (positionsError) throw positionsError;
     const positions: OrgPositionRow[] = positionsData || [];
 
-    // Build name→id map (scoped by org)
+    // Build name→id map and zone maps (scoped by org)
     const positionNameToId = new Map<string, string>();
+    const positionIdToZone = new Map<string, string>();
+    const positionNameToZone = new Map<string, string>();
     for (const p of positions) {
       positionNameToId.set(p.name, p.id);
+      if (p.zone) {
+        positionIdToZone.set(p.id, p.zone);
+        positionNameToZone.set(p.name, p.zone);
+      }
     }
 
     // 4. Fetch position_criteria with pillar mappings for all org positions
@@ -284,7 +292,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (currentError) throw currentError;
 
     // Prior period
-    const { data: priorRatings, error: priorError } = await supabase
+    const { data: priorRatingsRaw, error: priorError } = await supabase
       .from('ratings')
       .select('id, employee_id, position, position_id, rating_1, rating_2, rating_3, rating_4, rating_5, created_at, org_id')
       .eq('location_id', location_id)
@@ -293,9 +301,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (priorError) throw priorError;
 
+    // 5b. Apply FOH/BOH filter if not showing both
+    const filterByZone = (ratings: RatingRow[]): RatingRow[] => {
+      if (includeFOH && includeBOH) return ratings;
+      return ratings.filter((r) => {
+        const posId = r.position_id || positionNameToId.get(r.position);
+        const zone = posId ? positionIdToZone.get(posId) : positionNameToZone.get(r.position);
+        if (!zone) return true; // If no zone info, include by default
+        if (zone === 'FOH') return includeFOH;
+        if (zone === 'BOH') return includeBOH;
+        return true;
+      });
+    };
+
+    const filteredCurrentRatings = filterByZone(currentRatings || []);
+    const priorRatings = filterByZone(priorRatingsRaw || []);
+
     // 6. Fetch employee names
     const employeeIds = new Set<string>();
-    for (const r of [...(currentRatings || []), ...(priorRatings || [])]) {
+    for (const r of [...filteredCurrentRatings, ...priorRatings]) {
       employeeIds.add(r.employee_id);
     }
 
@@ -316,14 +340,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Compute location-level pillar scores (current period)
     // ------------------------------------------------------------------
     const locationContributions: Record<string, PillarAccumulator> = {};
-    for (const rating of currentRatings || []) {
+    for (const rating of filteredCurrentRatings) {
       distributeRatingToPillars(rating, criteriaByPosition, positionNameToId, locationContributions);
     }
     const currentLocation = computePillarScores(locationContributions, pillarDefs);
 
     // Prior period location scores
     const priorContributions: Record<string, PillarAccumulator> = {};
-    for (const rating of priorRatings || []) {
+    for (const rating of priorRatings) {
       distributeRatingToPillars(rating, criteriaByPosition, positionNameToId, priorContributions);
     }
     const priorLocation = computePillarScores(priorContributions, pillarDefs);
@@ -360,7 +384,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // ------------------------------------------------------------------
     // Group current ratings by employee
     const ratingsByEmployee = new Map<string, RatingRow[]>();
-    for (const r of currentRatings || []) {
+    for (const r of filteredCurrentRatings) {
       const arr = ratingsByEmployee.get(r.employee_id) || [];
       arr.push(r);
       ratingsByEmployee.set(r.employee_id, arr);
@@ -368,7 +392,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Group prior ratings by employee
     const priorRatingsByEmployee = new Map<string, RatingRow[]>();
-    for (const r of priorRatings || []) {
+    for (const r of priorRatings) {
       const arr = priorRatingsByEmployee.get(r.employee_id) || [];
       arr.push(r);
       priorRatingsByEmployee.set(r.employee_id, arr);
@@ -457,41 +481,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     employees.sort((a, b) => b.overallScore - a.overallScore);
 
     // ------------------------------------------------------------------
-    // Weekly trends
+    // Daily trends
     // ------------------------------------------------------------------
-    const ratingsByWeek = new Map<string, RatingRow[]>();
-    for (const r of currentRatings || []) {
-      const weekKey = getWeekStart(new Date(r.created_at));
-      const arr = ratingsByWeek.get(weekKey) || [];
+    const ratingsByDate = new Map<string, RatingRow[]>();
+    for (const r of filteredCurrentRatings) {
+      const dateKey = getDateKey(new Date(r.created_at));
+      const arr = ratingsByDate.get(dateKey) || [];
       arr.push(r);
-      ratingsByWeek.set(weekKey, arr);
+      ratingsByDate.set(dateKey, arr);
     }
 
     const trends: TrendPoint[] = [];
-    const sortedWeeks = Array.from(ratingsByWeek.keys()).sort();
-    for (const weekStart of sortedWeeks) {
-      const weekRatings = ratingsByWeek.get(weekStart) || [];
-      const weekContributions: Record<string, PillarAccumulator> = {};
-      for (const r of weekRatings) {
-        distributeRatingToPillars(r, criteriaByPosition, positionNameToId, weekContributions);
+    const sortedDates = Array.from(ratingsByDate.keys()).sort();
+    for (const dateKey of sortedDates) {
+      const dayRatings = ratingsByDate.get(dateKey) || [];
+      const dayContributions: Record<string, PillarAccumulator> = {};
+      for (const r of dayRatings) {
+        distributeRatingToPillars(r, criteriaByPosition, positionNameToId, dayContributions);
       }
-      const weekScores = computePillarScores(weekContributions, pillarDefs);
+      const dayScores = computePillarScores(dayContributions, pillarDefs);
 
-      // Use null for pillars with no data this week (prevents zero-spikes in chart)
-      const pillarScoresForWeek: Record<string, number | null> = {};
+      // Use null for pillars with no data this day (prevents zero-spikes in chart)
+      const pillarScoresForDay: Record<string, number | null> = {};
       for (const pillar of pillarDefs) {
-        const acc = weekContributions[pillar.id];
+        const acc = dayContributions[pillar.id];
         if (acc && acc.totalWeight > 0) {
-          pillarScoresForWeek[pillar.id] = Math.round(weekScores.pillarScores[pillar.id] * 10) / 10;
+          pillarScoresForDay[pillar.id] = Math.round(dayScores.pillarScores[pillar.id] * 10) / 10;
         } else {
-          pillarScoresForWeek[pillar.id] = null;
+          pillarScoresForDay[pillar.id] = null;
         }
       }
 
       trends.push({
-        weekStart,
-        pillarScores: pillarScoresForWeek,
-        overallScore: Math.round(weekScores.overallScore * 10) / 10,
+        date: dateKey,
+        pillarScores: pillarScoresForDay,
+        overallScore: Math.round(dayScores.overallScore * 10) / 10,
       });
     }
 

@@ -49,10 +49,14 @@ const PILLAR_COLORS: Record<number, string> = {
 type DateRange = 'mtd' | 'qtd' | '30d' | '90d' | 'custom';
 
 // ------------------------------------------------------------------
-// Styled Components (matching PE table pattern exactly)
+// Styled Components (copied from PositionalRatings.tsx — single source of truth)
 // ------------------------------------------------------------------
 
-const levelsetGreen = '#12b76a';
+const levelsetGreen = 'var(--ls-color-brand)';
+const fohColor = '#006391';
+const bohColor = '#ffcc5b';
+const fohColorLight = '#eaf9ff';
+const bohColorLight = '#fffcf0';
 
 const DateRangeContainer = styled(Box)({
   display: 'flex',
@@ -77,6 +81,27 @@ const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
     color: selected ? '#ffffff !important' : 'var(--ls-color-muted)',
   },
 }));
+
+const AreaPill = styled(Box)<{ selected?: boolean; area: 'FOH' | 'BOH' }>(({ selected, area }) => {
+  const baseColor = area === 'FOH' ? fohColor : bohColor;
+  const lightColor = area === 'FOH' ? fohColorLight : bohColorLight;
+
+  return {
+    fontFamily,
+    fontSize: 13,
+    fontWeight: 600,
+    padding: '6px 16px',
+    borderRadius: 20,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    backgroundColor: selected ? baseColor : lightColor,
+    color: selected ? '#ffffff' : baseColor,
+    border: `2px solid ${baseColor}`,
+    '&:hover': {
+      opacity: 0.9,
+    },
+  };
+});
 
 // Custom DatePicker TextField - matching PE table style
 const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
@@ -148,9 +173,12 @@ const datePickerPopperSx = {
     },
     '&:hover': { backgroundColor: 'rgba(49, 102, 74, 0.04)' },
   },
+  '& .MuiDialogActions-root .MuiButton-root': {
+    fontFamily, fontSize: 12, color: levelsetGreen, textTransform: 'none',
+  },
+  '& .MuiButton-root': { color: `${levelsetGreen} !important`, fontFamily },
   '& .MuiPickersArrowSwitcher-button': { color: `${levelsetGreen} !important` },
   '& .MuiPickersCalendarHeader-switchViewButton': { color: `${levelsetGreen} !important` },
-  '& .MuiButton-root': { color: `${levelsetGreen} !important`, fontFamily },
 };
 
 // ------------------------------------------------------------------
@@ -187,7 +215,7 @@ interface EmployeeScore {
 }
 
 interface TrendPoint {
-  weekStart: string;
+  date: string;
   pillarScores: Record<string, number | null>;
   overallScore: number;
 }
@@ -217,6 +245,10 @@ export function OperationalExcellencePage() {
   const [dateRange, setDateRange] = React.useState<DateRange>('90d');
   const [startDate, setStartDate] = React.useState<Date | null>(null);
   const [endDate, setEndDate] = React.useState<Date | null>(null);
+
+  // FOH/BOH filter
+  const [showFOH, setShowFOH] = React.useState(true);
+  const [showBOH, setShowBOH] = React.useState(true);
 
   // Pillar filter
   const [selectedPillarId, setSelectedPillarId] = React.useState<string | null>(null);
@@ -287,6 +319,8 @@ export function OperationalExcellencePage() {
           location_id: selectedLocationId,
           start: startDate.toISOString(),
           end: endDate.toISOString(),
+          show_foh: String(showFOH),
+          show_boh: String(showBOH),
         });
 
         const res = await fetch(`/api/operational-excellence?${params}`);
@@ -306,7 +340,7 @@ export function OperationalExcellencePage() {
 
     fetchData();
     return () => { cancelled = true; };
-  }, [selectedLocationId, startDate, endDate]);
+  }, [selectedLocationId, startDate, endDate, showFOH, showBOH]);
 
   // Date range handlers
   const handleDatePreset = (preset: DateRange) => {
@@ -396,7 +430,7 @@ export function OperationalExcellencePage() {
     ...pillars.map((p) => ({
       field: `pillar_${p.id}`,
       headerName: p.name,
-      width: 110,
+      width: 155,
       renderCell: (params: any) => {
         const val = params.value as number;
         const isSelected = selectedPillarId === p.id;
@@ -500,10 +534,10 @@ export function OperationalExcellencePage() {
     [data?.employees, pillars, selectedPillarId, pillarColorMap]
   );
 
-  // Build chart data — null values mean no data for that pillar in that week
+  // Build chart data — null values mean no data for that pillar on that day
   const chartData = (data?.trends || []).map((t) => {
     const point: any = {
-      week: new Date(t.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     };
     for (const p of pillars) {
       point[p.id] = t.pillarScores[p.id]; // null from API = line won't plot
@@ -593,6 +627,33 @@ export function OperationalExcellencePage() {
                 {/* Page Header + Date Range */}
                 <div className={sty.pageHeader}>
                   <h1 className={sty.pageTitle}>Operational Excellence</h1>
+                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* FOH/BOH toggles */}
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <AreaPill
+                        selected={showFOH}
+                        area="FOH"
+                        onClick={() => setShowFOH(!showFOH)}
+                      >
+                        FOH
+                      </AreaPill>
+                      <AreaPill
+                        selected={showBOH}
+                        area="BOH"
+                        onClick={() => setShowBOH(!showBOH)}
+                      >
+                        BOH
+                      </AreaPill>
+                    </Box>
+
+                    {/* Divider */}
+                    <Box sx={{
+                      width: '1px',
+                      height: '24px',
+                      backgroundColor: 'rgba(0, 0, 0, 0.23)',
+                      mx: 1,
+                    }} />
+
                   <DateRangeContainer>
                     <PillButton selected={dateRange === 'mtd'} onClick={() => handleDatePreset('mtd')}>MTD</PillButton>
                     <PillButton selected={dateRange === 'qtd'} onClick={() => handleDatePreset('qtd')}>QTD</PillButton>
@@ -659,25 +720,35 @@ export function OperationalExcellencePage() {
                       }}
                     />
                   </DateRangeContainer>
+                  </Box>
                 </div>
 
-                {/* Score Cards — all same size in uniform grid */}
-                <div className={sty.scoreCardsGrid}>
+                {/* Score Cards — OE card large on left, pillar cards grid on right */}
+                <div className={sty.scoreCardsSection}>
                   {loading && !data ? (
-                    Array.from({ length: 6 }).map((_, i) => (
-                      <Skeleton key={i} variant="rounded" animation="wave" sx={{ height: 140, borderRadius: '16px' }} />
-                    ))
+                    <>
+                      <div className={sty.oeCardCell}>
+                        <Skeleton variant="rounded" animation="wave" sx={{ height: '100%', minHeight: 200, borderRadius: '16px' }} />
+                      </div>
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Skeleton key={i} variant="rounded" animation="wave" sx={{ height: 120, borderRadius: '16px' }} />
+                      ))}
+                    </>
                   ) : (
                     <>
-                      <DashboardMetricCard
-                        variant="positional-excellence"
-                        customMetric={buildCustomMetric(
-                          'Operational Excellence',
-                          data?.overall.score ?? 0,
-                          data?.overall.change ?? 0,
-                          data?.overall.percentChange ?? 0,
-                        )}
-                      />
+                      <div className={sty.oeCardCell}>
+                        <DashboardMetricCard
+                          variant="positional-excellence"
+                          selected={selectedPillarId === null}
+                          onClick={() => setSelectedPillarId(null)}
+                          customMetric={buildCustomMetric(
+                            'Operational Excellence',
+                            data?.overall.score ?? 0,
+                            data?.overall.change ?? 0,
+                            data?.overall.percentChange ?? 0,
+                          )}
+                        />
+                      </div>
                       {pillars.map((p) => (
                         <DashboardMetricCard
                           key={p.id}
@@ -753,10 +824,11 @@ export function OperationalExcellencePage() {
                             <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                               <CartesianGrid strokeDasharray="3 3" stroke="#e9eaeb" />
                               <XAxis
-                                dataKey="week"
-                                tick={{ fontSize: 12, fontFamily, fill: '#535862' }}
+                                dataKey="date"
+                                tick={{ fontSize: 11, fontFamily, fill: '#535862' }}
                                 tickLine={false}
                                 axisLine={{ stroke: '#e9eaeb' }}
+                                interval="preserveStartEnd"
                               />
                               <YAxis
                                 domain={[0, 100]}
