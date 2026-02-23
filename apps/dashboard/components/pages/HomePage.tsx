@@ -19,6 +19,7 @@ export function HomePage() {
   const router = useRouter();
   const auth = useAuth();
   const { selectedLocationId, selectedLocationImageUrl } = useLocationContext();
+  const isOEEnabled = auth.role === 'Levelset Admin' || auth.org_id === '88ae7722-9d14-44ce-9183-56c6e8dd70d4';
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -156,36 +157,38 @@ export function HomePage() {
                   <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text___3DmR3)}>
                     Operational Excellence
                   </div>
-                  <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text___1AVHs)}>
-                    Coming soon
-                  </div>
+                  {!isOEEnabled && (
+                    <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text___1AVHs)}>
+                      Coming soon
+                    </div>
+                  )}
                 </div>
                 <div className={classNames(projectcss.all, sty.freeBox__hvq52)}>
                   <div className={classNames(projectcss.all, sty.freeBox___1VsLt)}>
                     <DashboardMetricCard
                       className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
                       variant="caring-interactions"
-                      isPlaceholder
+                      isPlaceholder={!isOEEnabled}
                     />
                     <DashboardMetricCard
                       className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
                       variant="great-food"
-                      isPlaceholder
+                      isPlaceholder={!isOEEnabled}
                     />
                     <DashboardMetricCard
                       className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
                       variant="quick-accurate"
-                      isPlaceholder
+                      isPlaceholder={!isOEEnabled}
                     />
                     <DashboardMetricCard
                       className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
                       variant="creating-moments"
-                      isPlaceholder
+                      isPlaceholder={!isOEEnabled}
                     />
                     <DashboardMetricCard
                       className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
                       variant="inviting-atmosphere"
-                      isPlaceholder
+                      isPlaceholder={!isOEEnabled}
                     />
                   </div>
                 </div>

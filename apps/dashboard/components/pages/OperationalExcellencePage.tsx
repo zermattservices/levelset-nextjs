@@ -383,6 +383,8 @@ export function OperationalExcellencePage() {
   }
 
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
+  const OE_ENABLED_ORG_IDS = ['88ae7722-9d14-44ce-9183-56c6e8dd70d4']; // Riley Emter
+  const isOEEnabled = isLevelsetAdmin || OE_ENABLED_ORG_IDS.includes(auth.org_id);
 
   // ------------------------------------------------------------------
   // Build DataGrid columns
@@ -675,7 +677,7 @@ export function OperationalExcellencePage() {
 
         <div className={sty.contentWrapper}>
           {/* Page Header — inside contentWrapper like scheduling toolbar inside scheduleContainer */}
-          {isLevelsetAdmin && (
+          {isOEEnabled && (
             <div className={sty.pageHeader}>
               <h1 className={sty.pageTitle}>Operational Excellence</h1>
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -774,7 +776,7 @@ export function OperationalExcellencePage() {
               </Box>
             </div>
           )}
-            {!isLevelsetAdmin ? (
+            {!isOEEnabled ? (
               <div className={sty.contentInner}>
                 <div className={sty.comingSoonContainer}>
                   <StarOutlinedIcon className={sty.comingSoonIcon} />

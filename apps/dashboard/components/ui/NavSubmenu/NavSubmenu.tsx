@@ -45,6 +45,7 @@ export interface NavMenuItem {
   disabled?: boolean;
   requiredPermission?: PermissionKey;
   levelsetAdminOnly?: boolean;
+  allowedOrgIds?: string[];
 }
 
 export type MenuType = 'operations' | 'analytics' | 'hr';
@@ -91,6 +92,7 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       href: '/operational-excellence',
       icon: <StarOutlinedIcon sx={{ fontSize: 22 }} />,
       levelsetAdminOnly: true,
+      allowedOrgIds: ['88ae7722-9d14-44ce-9183-56c6e8dd70d4'], // Riley Emter
     },
     {
       label: 'Retention',
@@ -173,7 +175,8 @@ export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) 
     >
       <div className={classNames(sty.itemsGrid, isTwoColumn && sty.twoColumnGrid)}>
         {items.map((item) => {
-          const effectivelyDisabled = item.disabled || (item.levelsetAdminOnly && !isLevelsetAdmin);
+          const orgAllowed = item.allowedOrgIds?.includes(auth.org_id) ?? false;
+          const effectivelyDisabled = item.disabled || (item.levelsetAdminOnly && !isLevelsetAdmin && !orgAllowed);
           if (effectivelyDisabled) {
             return (
               <div key={item.label} className={classNames(sty.menuCard, sty.menuCardDisabled)}>
