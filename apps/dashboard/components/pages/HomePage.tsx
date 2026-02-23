@@ -112,18 +112,14 @@ export function HomePage() {
     router.push('/operational-excellence');
   };
 
-  // Build customMetric for an OE pillar card
-  const getOECustomMetric = (variant: string) => {
+  // Build externalData for an OE pillar card (uses standard card layout)
+  const getOEExternalData = (variant: string) => {
     const p = oePillars[variant];
     if (!p) return undefined;
     return {
-      title: p.name,
-      percentChange: p.percentChange,
-      isNegativeChange: p.change < 0,
-      primaryValue: p.score.toFixed(1),
-      valueSuffix: '/100',
-      changeText: `${p.change > 0 ? '+' : ''}${p.change.toFixed(1)} pts`,
-      periodLabel: 'over prior 30 days',
+      total: p.score,
+      change: p.change,
+      percent: p.percentChange,
     };
   };
 
@@ -257,7 +253,7 @@ export function HomePage() {
                         className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
                         variant={variant}
                         isPlaceholder={!isOEEnabled}
-                        customMetric={isOEEnabled ? getOECustomMetric(variant) : undefined}
+                        externalData={isOEEnabled ? getOEExternalData(variant) : undefined}
                         onClick={isOEEnabled ? handleGoToOE : undefined}
                       />
                     ))}

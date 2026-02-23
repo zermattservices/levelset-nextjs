@@ -47,6 +47,12 @@ interface CustomMetricDisplay {
   periodLabel: string;
 }
 
+interface ExternalMetricData {
+  total: number;
+  change: number;
+  percent: number;
+}
+
 interface DashboardMetricCardProps {
   variant: MetricVariant;
   locationId?: string;
@@ -56,6 +62,8 @@ interface DashboardMetricCardProps {
   className?: string;
   isPlaceholder?: boolean; // For blurred/coming soon cards
   customMetric?: CustomMetricDisplay;
+  /** Pre-computed metric data — uses the standard card layout, bypasses fetch */
+  externalData?: ExternalMetricData;
   selected?: boolean;
   titleBadge?: string;
   size?: 'default' | 'large';
@@ -112,40 +120,40 @@ const VARIANT_CONFIG: Record<MetricVariant, MetricConfig> = {
   },
   'caring-interactions': {
     title: 'Caring Interactions',
-    totalLabel: 'Total:',
-    deltaLabel: 'over prior 90 days',
+    totalLabel: 'Score:',
+    deltaLabel: 'over prior 30 days',
     table: '',
     dateColumn: '',
     invertTrend: false,
   },
   'great-food': {
     title: 'Great Food',
-    totalLabel: 'Total:',
-    deltaLabel: 'over prior 90 days',
+    totalLabel: 'Score:',
+    deltaLabel: 'over prior 30 days',
     table: '',
     dateColumn: '',
     invertTrend: false,
   },
   'quick-accurate': {
     title: 'Quick & Accurate',
-    totalLabel: 'Total:',
-    deltaLabel: 'over prior 90 days',
+    totalLabel: 'Score:',
+    deltaLabel: 'over prior 30 days',
     table: '',
     dateColumn: '',
     invertTrend: false,
   },
   'creating-moments': {
     title: 'Creating Moments',
-    totalLabel: 'Total:',
-    deltaLabel: 'over prior 90 days',
+    totalLabel: 'Score:',
+    deltaLabel: 'over prior 30 days',
     table: '',
     dateColumn: '',
     invertTrend: false,
   },
   'inviting-atmosphere': {
     title: 'Inviting Atmosphere',
-    totalLabel: 'Total:',
-    deltaLabel: 'over prior 90 days',
+    totalLabel: 'Score:',
+    deltaLabel: 'over prior 30 days',
     table: '',
     dateColumn: '',
     invertTrend: false,
@@ -165,6 +173,7 @@ export function DashboardMetricCard({
   className,
   isPlaceholder = false,
   customMetric,
+  externalData,
   selected = false,
   titleBadge,
   size = 'default',
@@ -223,6 +232,18 @@ export function DashboardMetricCard({
 
     // Skip fetch when using external custom metric data
     if (customMetric) {
+      setLoading(false);
+      return;
+    }
+
+    // Use pre-computed external data — standard layout, no fetch
+    if (externalData) {
+      setMetricState({
+        total: externalData.total,
+        change: externalData.change,
+        percent: externalData.percent,
+        timestamp: new Date(),
+      });
       setLoading(false);
       return;
     }
@@ -328,6 +349,7 @@ export function DashboardMetricCard({
     config.dateColumn,
     config.table,
     customMetric,
+    externalData,
     effectiveLocationId,
     effectiveLocationIds,
     isPlaceholder,
@@ -380,7 +402,7 @@ export function DashboardMetricCard({
   // Context is missing only if NEITHER single location nor multiple locations are provided
   const hasLocationContext = effectiveLocationId || (effectiveLocationIds && effectiveLocationIds.length > 0);
   const missingContext = !hasLocationContext;
-  const shouldShowSkeleton = !customMetric && (loading || missingContext || (!metricState && !error));
+  const shouldShowSkeleton = !customMetric && !externalData && (loading || missingContext || (!metricState && !error));
   
   console.log(`[DashboardMetricCard] Render decision for ${variant}:`, { 
     hasLocationContext, 
@@ -404,9 +426,12 @@ export function DashboardMetricCard({
   const change = metricState?.change ?? 0;
   const percent = metricState?.percent ?? 0;
 
+  const isOEVariant = ['caring-interactions', 'great-food', 'quick-accurate', 'creating-moments', 'inviting-atmosphere'].includes(variant);
   const percentRounded = Number.isFinite(percent) ? Number(percent.toFixed(1)) : 0;
   const percentText = `${percentRounded > 0 ? '+' : percentRounded < 0 ? '' : ''}${percentRounded.toFixed(1)}%`;
-  const deltaText = `${change > 0 ? '+' : ''}${formatNumber(change)}`;
+  const deltaText = isOEVariant
+    ? `${change > 0 ? '+' : ''}${change.toFixed(1)}`
+    : `${change > 0 ? '+' : ''}${formatNumber(change)}`;
 
   const isNegativeTrend = config.invertTrend ? change > 0 : change < 0;
   const percentTrendClasses = [styles.trendBadge, isNegativeTrend ? styles.negative : '']
@@ -418,7 +443,7 @@ export function DashboardMetricCard({
   const arrowClasses = [styles.trendIcon, change < 0 ? styles.down : '']
     .filter(Boolean)
     .join(' ');
-  const secondaryLabel = 'Past 90 days';
+  const secondaryLabel = isOEVariant ? 'Past 30 days' : 'Past 90 days';
 
   const displayTitle = customMetric?.title ?? config.title;
 
@@ -483,7 +508,7 @@ export function DashboardMetricCard({
                   {shouldShowSkeleton ? (
                     <Skeleton variant="text" animation="wave" sx={{ width: 64, height: 28 }} />
                   ) : (
-                    formatNumber(total)
+                    isOEVariant ? total.toFixed(1) : formatNumber(total)
                   )}
                 </span>
                 <span className={styles.primaryMeta}>
