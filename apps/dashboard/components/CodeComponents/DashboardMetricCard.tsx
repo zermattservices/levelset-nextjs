@@ -58,6 +58,7 @@ interface DashboardMetricCardProps {
   customMetric?: CustomMetricDisplay;
   selected?: boolean;
   titleBadge?: string;
+  size?: 'default' | 'large';
 }
 
 interface MetricConfig {
@@ -166,6 +167,7 @@ export function DashboardMetricCard({
   customMetric,
   selected = false,
   titleBadge,
+  size = 'default',
 }: DashboardMetricCardProps) {
   const router = useRouter();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
@@ -371,7 +373,7 @@ export function DashboardMetricCard({
 
   const isClickable = Boolean(onClick || linkHref);
   const containerClasses = [styles.root, className].filter(Boolean).join(' ');
-  const cardClasses = [styles.metricItem, isClickable ? styles.clickable : '', selected ? styles.selected : '']
+  const cardClasses = [styles.metricItem, isClickable ? styles.clickable : '', selected ? styles.selected : '', size === 'large' ? styles.large : '']
     .filter(Boolean)
     .join(' ');
 

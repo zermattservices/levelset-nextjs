@@ -534,16 +534,43 @@ export function OperationalExcellencePage() {
     [data?.employees, pillars, selectedPillarId, pillarColorMap]
   );
 
-  // Build chart data — null values mean no data for that pillar on that day
-  const chartData = (data?.trends || []).map((t) => {
-    const point: any = {
-      date: new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    };
-    for (const p of pillars) {
-      point[p.id] = t.pillarScores[p.id]; // null from API = line won't plot
-    }
-    return point;
-  });
+  // Build chart data — raw daily scores (for scatter) + 7-day rolling averages (for MA lines)
+  const chartData = (() => {
+    const trends = data?.trends || [];
+    if (trends.length === 0) return [];
+
+    return trends.map((t) => {
+      const point: any = {
+        date: new Date(t.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      };
+
+      const currentDate = new Date(t.date + 'T00:00:00');
+      const windowStart = new Date(currentDate);
+      windowStart.setDate(windowStart.getDate() - 6); // 7 calendar days
+
+      for (const p of pillars) {
+        // Raw daily score (scatter dots when pillar selected)
+        point[`raw_${p.id}`] = t.pillarScores[p.id];
+
+        // 7-day rolling average (MA line)
+        const windowValues: number[] = [];
+        for (const other of trends) {
+          const otherDate = new Date(other.date + 'T00:00:00');
+          if (otherDate >= windowStart && otherDate <= currentDate) {
+            const val = other.pillarScores[p.id];
+            if (val !== null && val !== undefined) {
+              windowValues.push(val);
+            }
+          }
+        }
+        point[`ma_${p.id}`] = windowValues.length > 0
+          ? Math.round((windowValues.reduce((a, b) => a + b, 0) / windowValues.length) * 10) / 10
+          : null;
+      }
+
+      return point;
+    });
+  })();
 
   // Build improvers list
   const getImprovers = () => {
@@ -739,6 +766,7 @@ export function OperationalExcellencePage() {
                       <div className={sty.oeCardCell}>
                         <DashboardMetricCard
                           variant="positional-excellence"
+                          size="large"
                           selected={selectedPillarId === null}
                           onClick={() => setSelectedPillarId(null)}
                           customMetric={buildCustomMetric(
@@ -814,9 +842,12 @@ export function OperationalExcellencePage() {
 
                     {/* Right: Chart + Improvers */}
                     <div className={sty.rightColumn}>
-                      {/* Trend Chart */}
+                      {/* Trend Chart — 7-day MA lines + scatter dots for selected pillar */}
                       <div className={sty.chartCard}>
-                        <h3 className={sty.chartTitle}>Pillar Scores Over Time</h3>
+                        <div className={sty.chartHeader}>
+                          <h3 className={sty.chartTitle}>Pillar Trends</h3>
+                          <span className={sty.chartSubtitle}>7-day moving average</span>
+                        </div>
                         {loading ? (
                           <Skeleton variant="rounded" animation="wave" sx={{ height: 280, borderRadius: '8px' }} />
                         ) : chartData.length > 0 ? (
@@ -848,20 +879,46 @@ export function OperationalExcellencePage() {
                               <Legend
                                 wrapperStyle={{ fontFamily, fontSize: 12 }}
                               />
+                              {/* 7-day MA lines for all pillars */}
                               {pillars.map((p) => (
                                 <Line
-                                  key={p.id}
+                                  key={`ma_${p.id}`}
                                   type="monotone"
-                                  dataKey={p.id}
+                                  dataKey={`ma_${p.id}`}
                                   name={p.name}
                                   stroke={pillarColorMap[p.id]}
                                   strokeWidth={selectedPillarId === p.id ? 3 : selectedPillarId ? 1 : 2}
-                                  strokeOpacity={selectedPillarId && selectedPillarId !== p.id ? 0.3 : 1}
+                                  strokeOpacity={selectedPillarId && selectedPillarId !== p.id ? 0.2 : 1}
                                   dot={false}
                                   activeDot={{ r: 4, strokeWidth: 2 }}
                                   connectNulls={false}
                                 />
                               ))}
+                              {/* Scatter dots for selected pillar — Line with no stroke, only dots */}
+                              {selectedPillarId && (
+                                <Line
+                                  key={`raw_${selectedPillarId}`}
+                                  type="monotone"
+                                  dataKey={`raw_${selectedPillarId}`}
+                                  name={`${pillars.find(p => p.id === selectedPillarId)?.name || ''} (daily)`}
+                                  stroke="transparent"
+                                  strokeWidth={0}
+                                  dot={{
+                                    fill: pillarColorMap[selectedPillarId] || '#6b7280',
+                                    fillOpacity: 0.4,
+                                    r: 3,
+                                    strokeWidth: 0,
+                                  }}
+                                  activeDot={{
+                                    fill: pillarColorMap[selectedPillarId] || '#6b7280',
+                                    r: 5,
+                                    strokeWidth: 2,
+                                    stroke: '#fff',
+                                  }}
+                                  connectNulls={false}
+                                  legendType="none"
+                                />
+                              )}
                             </LineChart>
                           </ResponsiveContainer>
                         ) : (

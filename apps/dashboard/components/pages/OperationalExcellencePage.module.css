@@ -221,12 +221,26 @@
   box-sizing: border-box;
 }
 
+.chartHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
 .chartTitle {
   font-family: "Satoshi", sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: #181d27;
-  margin: 0 0 16px 0;
+  margin: 0;
+}
+
+.chartSubtitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #535862;
 }
 
 /* Improvers Table */
