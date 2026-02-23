@@ -46,7 +46,7 @@
   background: #ffffff;
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
-  padding: 8px 0 100px;
+  padding: 0 0 100px;
   box-sizing: border-box;
 }
 
@@ -105,7 +105,7 @@
   border-radius: 20px;
 }
 
-/* Page Header — full-width bar like scheduling page */
+/* Page Header — full-width bar, direct child of root grid like scheduling page */
 .pageHeader {
   display: flex;
   flex-direction: row;
@@ -118,6 +118,8 @@
   border-bottom: 1px solid #e9eaeb;
   box-sizing: border-box;
   background: #ffffff;
+  grid-column-start: 1 !important;
+  grid-column-end: -1 !important;
 }
 
 .pageTitle {

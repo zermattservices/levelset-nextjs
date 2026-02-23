@@ -586,6 +586,21 @@ export function OperationalExcellencePage() {
     });
   })();
 
+  // Compute Y-axis min from chart data (don't start from 0)
+  const chartYMin = (() => {
+    if (chartData.length === 0) return 0;
+    const allValues: number[] = [];
+    for (const d of chartData) {
+      for (const p of pillars) {
+        const v = d[`ma_${p.id}`];
+        if (v != null) allValues.push(v);
+      }
+      if (d.ma_oe != null) allValues.push(d.ma_oe);
+    }
+    if (allValues.length === 0) return 0;
+    return Math.max(0, Math.floor(Math.min(...allValues) - 5));
+  })();
+
   // Build improvers list
   const getImprovers = () => {
     return (data?.employees || [])
@@ -652,22 +667,9 @@ export function OperationalExcellencePage() {
           userRole={auth.role}
         />
 
-        <div className={sty.contentWrapper}>
-            {!isLevelsetAdmin ? (
-              <div className={sty.contentInner}>
-                <div className={sty.comingSoonContainer}>
-                  <StarOutlinedIcon className={sty.comingSoonIcon} />
-                  <h2 className={sty.comingSoonTitle}>Operational Excellence</h2>
-                  <p className={sty.comingSoonDescription}>
-                    Track and analyze operational excellence metrics across your team. This feature is currently being developed.
-                  </p>
-                  <span className={sty.comingSoonBadge}>Coming Soon</span>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Page Header + Date Range */}
-                <div className={sty.pageHeader}>
+        {/* Page Header — direct child of root grid for true full-width */}
+        {isLevelsetAdmin && (
+          <div className={sty.pageHeader}>
                   <h1 className={sty.pageTitle}>Operational Excellence</h1>
                   <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                     {/* FOH/BOH toggles */}
@@ -764,8 +766,22 @@ export function OperationalExcellencePage() {
                   </DateRangeContainer>
                   </Box>
                 </div>
+        )}
 
-                <div className={sty.contentInner}>
+        <div className={sty.contentWrapper}>
+            {!isLevelsetAdmin ? (
+              <div className={sty.contentInner}>
+                <div className={sty.comingSoonContainer}>
+                  <StarOutlinedIcon className={sty.comingSoonIcon} />
+                  <h2 className={sty.comingSoonTitle}>Operational Excellence</h2>
+                  <p className={sty.comingSoonDescription}>
+                    Track and analyze operational excellence metrics across your team. This feature is currently being developed.
+                  </p>
+                  <span className={sty.comingSoonBadge}>Coming Soon</span>
+                </div>
+              </div>
+            ) : (
+              <div className={sty.contentInner}>
                 {/* Score Cards — OE card large on left, pillar cards grid on right */}
                 <div className={sty.scoreCardsSection}>
                   {loading && !data ? (
@@ -878,7 +894,7 @@ export function OperationalExcellencePage() {
                                 interval="preserveStartEnd"
                               />
                               <YAxis
-                                domain={[(dataMin: number) => Math.max(0, Math.floor(dataMin - 5)), 100]}
+                                domain={[chartYMin, 100]}
                                 tick={{ fontSize: 12, fontFamily, fill: '#535862' }}
                                 tickLine={false}
                                 axisLine={{ stroke: '#e9eaeb' }}
@@ -1004,8 +1020,7 @@ export function OperationalExcellencePage() {
                     </div>
                   </div>
                 )}
-                </div>
-              </>
+              </div>
             )}
         </div>
       </div>
