@@ -206,12 +206,13 @@ interface EmployeeScore {
   employeeId: string;
   name: string;
   overallScore: number;
-  priorOverallScore: number;
-  change: number;
+  priorOverallScore: number | null;
+  change: number | null;
   pillarScores: Record<string, number>;
   priorPillarScores: Record<string, number>;
   positions: EmployeePositionDetail[];
   ratingCount: number;
+  priorRatingCount: number;
 }
 
 interface TrendPoint {
@@ -450,7 +451,10 @@ export function OperationalExcellencePage() {
       headerName: 'Change',
       width: 90,
       renderCell: (params) => {
-        const val = params.value as number;
+        const val = params.value as number | null;
+        if (val === null || val === undefined) {
+          return <span style={{ fontFamily, color: '#535862' }}>—</span>;
+        }
         const isNeg = val < 0;
         return (
           <span style={{
@@ -601,9 +605,10 @@ export function OperationalExcellencePage() {
     return Math.max(0, Math.floor(Math.min(...allValues) - 5));
   })();
 
-  // Build improvers list
+  // Build improvers list — only include employees who had prior period data
   const getImprovers = () => {
     return (data?.employees || [])
+      .filter((emp) => emp.priorRatingCount > 0) // Must have prior data for a meaningful change
       .map((emp) => {
         let currentScore: number;
         let priorScore: number;
@@ -612,7 +617,7 @@ export function OperationalExcellencePage() {
           priorScore = emp.priorPillarScores[selectedPillarId] ?? 0;
         } else {
           currentScore = emp.overallScore;
-          priorScore = emp.priorOverallScore;
+          priorScore = emp.priorOverallScore ?? 0;
         }
         return {
           employeeId: emp.employeeId,
@@ -665,110 +670,110 @@ export function OperationalExcellencePage() {
           className={classNames("__wab_instance", sty.menuNavigation)}
           firstName={auth.first_name}
           userRole={auth.role}
+          fullWidth
         />
 
-        {/* Page Header — direct child of root grid for true full-width */}
-        {isLevelsetAdmin && (
-          <div className={sty.pageHeader}>
-                  <h1 className={sty.pageTitle}>Operational Excellence</h1>
-                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                    {/* FOH/BOH toggles */}
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <AreaPill
-                        selected={showFOH}
-                        area="FOH"
-                        onClick={() => setShowFOH(!showFOH)}
-                      >
-                        FOH
-                      </AreaPill>
-                      <AreaPill
-                        selected={showBOH}
-                        area="BOH"
-                        onClick={() => setShowBOH(!showBOH)}
-                      >
-                        BOH
-                      </AreaPill>
-                    </Box>
-
-                    {/* Divider */}
-                    <Box sx={{
-                      width: '1px',
-                      height: '24px',
-                      backgroundColor: 'rgba(0, 0, 0, 0.23)',
-                      mx: 1,
-                    }} />
-
-                  <DateRangeContainer>
-                    <PillButton selected={dateRange === 'mtd'} onClick={() => handleDatePreset('mtd')}>MTD</PillButton>
-                    <PillButton selected={dateRange === 'qtd'} onClick={() => handleDatePreset('qtd')}>QTD</PillButton>
-                    <PillButton selected={dateRange === '30d'} onClick={() => handleDatePreset('30d')}>Last 30 Days</PillButton>
-                    <PillButton selected={dateRange === '90d'} onClick={() => handleDatePreset('90d')}>Last 90 Days</PillButton>
-                    <DatePicker
-                      label="Start Date"
-                      value={startDate}
-                      onChange={handleStartDateChange}
-                      format="M/d/yyyy"
-                      enableAccessibleFieldDOMStructure={false}
-                      slots={{ textField: CustomDateTextField }}
-                      slotProps={{
-                        textField: {
-                          sx: {
-                            '& .MuiInputLabel-root': {
-                              fontFamily: `${fontFamily} !important`,
-                              fontSize: '16px !important',
-                              color: 'rgba(0, 0, 0, 0.6) !important',
-                              '&.Mui-focused': { color: `${levelsetGreen} !important` },
-                            },
-                            '& .MuiOutlinedInput-root': {
-                              '& fieldset': { borderColor: 'var(--ls-color-muted-border) !important' },
-                              '&:hover fieldset': { borderColor: 'var(--ls-color-border) !important' },
-                              '&.Mui-focused fieldset': { borderColor: `${levelsetGreen} !important`, borderWidth: '2px !important' },
-                            },
-                            '& .MuiInputAdornment-root .MuiIconButton-root': {
-                              color: 'var(--ls-color-muted) !important',
-                              '&:hover': { color: `${levelsetGreen} !important`, backgroundColor: 'rgba(49, 102, 74, 0.04) !important' },
-                            },
-                          },
-                        },
-                        popper: { sx: datePickerPopperSx },
-                      }}
-                    />
-                    <DatePicker
-                      label="End Date"
-                      value={endDate}
-                      onChange={handleEndDateChange}
-                      format="M/d/yyyy"
-                      enableAccessibleFieldDOMStructure={false}
-                      slots={{ textField: CustomDateTextField }}
-                      slotProps={{
-                        textField: {
-                          sx: {
-                            '& .MuiInputLabel-root': {
-                              fontFamily: `${fontFamily} !important`,
-                              fontSize: '16px !important',
-                              color: 'rgba(0, 0, 0, 0.6) !important',
-                              '&.Mui-focused': { color: `${levelsetGreen} !important` },
-                            },
-                            '& .MuiOutlinedInput-root': {
-                              '& fieldset': { borderColor: 'var(--ls-color-muted-border) !important' },
-                              '&:hover fieldset': { borderColor: 'var(--ls-color-border) !important' },
-                              '&.Mui-focused fieldset': { borderColor: `${levelsetGreen} !important`, borderWidth: '2px !important' },
-                            },
-                            '& .MuiInputAdornment-root .MuiIconButton-root': {
-                              color: 'var(--ls-color-muted) !important',
-                              '&:hover': { color: `${levelsetGreen} !important`, backgroundColor: 'rgba(49, 102, 74, 0.04) !important' },
-                            },
-                          },
-                        },
-                        popper: { sx: datePickerPopperSx },
-                      }}
-                    />
-                  </DateRangeContainer>
-                  </Box>
-                </div>
-        )}
-
         <div className={sty.contentWrapper}>
+          {/* Page Header — inside contentWrapper like scheduling toolbar inside scheduleContainer */}
+          {isLevelsetAdmin && (
+            <div className={sty.pageHeader}>
+              <h1 className={sty.pageTitle}>Operational Excellence</h1>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* FOH/BOH toggles */}
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <AreaPill
+                    selected={showFOH}
+                    area="FOH"
+                    onClick={() => setShowFOH(!showFOH)}
+                  >
+                    FOH
+                  </AreaPill>
+                  <AreaPill
+                    selected={showBOH}
+                    area="BOH"
+                    onClick={() => setShowBOH(!showBOH)}
+                  >
+                    BOH
+                  </AreaPill>
+                </Box>
+
+                {/* Divider */}
+                <Box sx={{
+                  width: '1px',
+                  height: '24px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.23)',
+                  mx: 1,
+                }} />
+
+                <DateRangeContainer>
+                  <PillButton selected={dateRange === 'mtd'} onClick={() => handleDatePreset('mtd')}>MTD</PillButton>
+                  <PillButton selected={dateRange === 'qtd'} onClick={() => handleDatePreset('qtd')}>QTD</PillButton>
+                  <PillButton selected={dateRange === '30d'} onClick={() => handleDatePreset('30d')}>Last 30 Days</PillButton>
+                  <PillButton selected={dateRange === '90d'} onClick={() => handleDatePreset('90d')}>Last 90 Days</PillButton>
+                  <DatePicker
+                    label="Start Date"
+                    value={startDate}
+                    onChange={handleStartDateChange}
+                    format="M/d/yyyy"
+                    enableAccessibleFieldDOMStructure={false}
+                    slots={{ textField: CustomDateTextField }}
+                    slotProps={{
+                      textField: {
+                        sx: {
+                          '& .MuiInputLabel-root': {
+                            fontFamily: `${fontFamily} !important`,
+                            fontSize: '16px !important',
+                            color: 'rgba(0, 0, 0, 0.6) !important',
+                            '&.Mui-focused': { color: `${levelsetGreen} !important` },
+                          },
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': { borderColor: 'var(--ls-color-muted-border) !important' },
+                            '&:hover fieldset': { borderColor: 'var(--ls-color-border) !important' },
+                            '&.Mui-focused fieldset': { borderColor: `${levelsetGreen} !important`, borderWidth: '2px !important' },
+                          },
+                          '& .MuiInputAdornment-root .MuiIconButton-root': {
+                            color: 'var(--ls-color-muted) !important',
+                            '&:hover': { color: `${levelsetGreen} !important`, backgroundColor: 'rgba(49, 102, 74, 0.04) !important' },
+                          },
+                        },
+                      },
+                      popper: { sx: datePickerPopperSx },
+                    }}
+                  />
+                  <DatePicker
+                    label="End Date"
+                    value={endDate}
+                    onChange={handleEndDateChange}
+                    format="M/d/yyyy"
+                    enableAccessibleFieldDOMStructure={false}
+                    slots={{ textField: CustomDateTextField }}
+                    slotProps={{
+                      textField: {
+                        sx: {
+                          '& .MuiInputLabel-root': {
+                            fontFamily: `${fontFamily} !important`,
+                            fontSize: '16px !important',
+                            color: 'rgba(0, 0, 0, 0.6) !important',
+                            '&.Mui-focused': { color: `${levelsetGreen} !important` },
+                          },
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': { borderColor: 'var(--ls-color-muted-border) !important' },
+                            '&:hover fieldset': { borderColor: 'var(--ls-color-border) !important' },
+                            '&.Mui-focused fieldset': { borderColor: `${levelsetGreen} !important`, borderWidth: '2px !important' },
+                          },
+                          '& .MuiInputAdornment-root .MuiIconButton-root': {
+                            color: 'var(--ls-color-muted) !important',
+                            '&:hover': { color: `${levelsetGreen} !important`, backgroundColor: 'rgba(49, 102, 74, 0.04) !important' },
+                          },
+                        },
+                      },
+                      popper: { sx: datePickerPopperSx },
+                    }}
+                  />
+                </DateRangeContainer>
+              </Box>
+            </div>
+          )}
             {!isLevelsetAdmin ? (
               <div className={sty.contentInner}>
                 <div className={sty.comingSoonContainer}>

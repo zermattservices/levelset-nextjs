@@ -68,12 +68,13 @@ interface EmployeeScore {
   employeeId: string;
   name: string;
   overallScore: number;
-  priorOverallScore: number;
-  change: number;
+  priorOverallScore: number | null;
+  change: number | null;
   pillarScores: Record<string, number>;
   priorPillarScores: Record<string, number>;
   positions: EmployeePositionDetail[];
   ratingCount: number;
+  priorRatingCount: number;
 }
 
 interface TrendPoint {
@@ -458,22 +459,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
 
-      const empChange = empScores.overallScore - priorEmpScores.overallScore;
+      // Only compute change if employee had prior ratings — otherwise delta from zero is meaningless
+      const hasPriorData = priorEmpRatings.length > 0;
+      const empChange = hasPriorData
+        ? empScores.overallScore - priorEmpScores.overallScore
+        : null;
 
       employees.push({
         employeeId: empId,
         name: `${emp.first_name} ${emp.last_name}`,
         overallScore: Math.round(empScores.overallScore * 10) / 10,
-        priorOverallScore: Math.round(priorEmpScores.overallScore * 10) / 10,
-        change: Math.round(empChange * 10) / 10,
+        priorOverallScore: hasPriorData ? Math.round(priorEmpScores.overallScore * 10) / 10 : null,
+        change: empChange !== null ? Math.round(empChange * 10) / 10 : null,
         pillarScores: Object.fromEntries(
           Object.entries(empScores.pillarScores).map(([k, v]) => [k, Math.round(v * 10) / 10])
         ),
-        priorPillarScores: Object.fromEntries(
-          Object.entries(priorEmpScores.pillarScores).map(([k, v]) => [k, Math.round(v * 10) / 10])
-        ),
+        priorPillarScores: hasPriorData
+          ? Object.fromEntries(
+              Object.entries(priorEmpScores.pillarScores).map(([k, v]) => [k, Math.round(v * 10) / 10])
+            )
+          : {},
         positions: positionDetails,
         ratingCount: empRatings.length,
+        priorRatingCount: priorEmpRatings.length,
       });
     }
 
