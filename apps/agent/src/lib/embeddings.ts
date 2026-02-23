@@ -96,64 +96,8 @@ export async function searchSimilarChunks(
   });
 
   if (error) {
-    // If RPC doesn't exist, fall back to raw SQL
-    console.warn('[embeddings] match_context_chunks RPC not found, using raw query');
-    return searchSimilarChunksRaw(supabase, queryEmbedding, orgId, limit, threshold);
-  }
-
-  return (data ?? []).map((row: any) => ({
-    id: row.id,
-    heading: row.heading,
-    content: row.content,
-    tokenCount: row.token_count,
-    similarity: row.similarity,
-    sourceType: row.source_type,
-    digestId: row.global_document_digest_id || row.document_digest_id || null,
-  }));
-}
-
-/**
- * Fallback: raw SQL query for pgvector search when RPC is not available.
- */
-async function searchSimilarChunksRaw(
-  supabase: any,
-  queryEmbedding: number[],
-  orgId: string | null,
-  limit: number,
-  threshold: number
-): Promise<ContextChunk[]> {
-  const embeddingStr = `[${queryEmbedding.join(',')}]`;
-
-  // Build WHERE clause: global docs + core_context always, plus org docs if orgId provided
-  const orgFilter = orgId
-    ? `AND (source_type IN ('global_document', 'core_context') OR (source_type = 'org_document' AND org_id = '${orgId}'))`
-    : `AND source_type IN ('global_document', 'core_context')`;
-
-  const query = `
-    SELECT
-      id,
-      heading,
-      content,
-      token_count,
-      source_type,
-      global_document_digest_id,
-      document_digest_id,
-      1 - (embedding <=> '${embeddingStr}'::vector) as similarity
-    FROM context_chunks
-    WHERE embedding IS NOT NULL
-      ${orgFilter}
-      AND 1 - (embedding <=> '${embeddingStr}'::vector) >= ${threshold}
-    ORDER BY similarity DESC
-    LIMIT ${limit}
-  `;
-
-  const { data, error } = await supabase.rpc('exec_sql' as any, { query });
-
-  if (error) {
-    // Last resort: use Supabase SQL execution via postgrest
-    // This won't work with standard postgrest, so just return empty
-    console.error('[embeddings] Raw SQL search failed:', error.message);
-    return [];
+    console.error('[embeddings] match_context_chunks RPC failed:', error.message);
+    throw new Error(`pgvector search failed: ${error.message}`);
   }
 
   return (data ?? []).map((row: any) => ({

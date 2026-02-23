@@ -60,10 +60,6 @@ export function chunkDocument(contentMd: string): DocumentChunk[] {
       }
       currentHeading = h3Match[1].trim();
       currentLines = [line];
-      // Store parent heading reference
-      sections.push; // just a marker — we handle parentHeading below
-      // Actually set the parent on the current accumulator
-      currentLines = [line];
     } else {
       currentLines.push(line);
     }
