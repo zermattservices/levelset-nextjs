@@ -16,6 +16,22 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
+// Map pillar names (from API) → DashboardMetricCard variant
+const PILLAR_VARIANT_MAP: Record<string, string> = {
+  'Caring Interactions': 'caring-interactions',
+  'Great Food': 'great-food',
+  'Quick & Accurate': 'quick-accurate',
+  'Creating Moments': 'creating-moments',
+  'Inviting Atmosphere': 'inviting-atmosphere',
+};
+
+interface OEPillarData {
+  name: string;
+  score: number;
+  change: number;
+  percentChange: number;
+}
+
 export function HomePage() {
   const router = useRouter();
   const auth = useAuth();
@@ -23,12 +39,61 @@ export function HomePage() {
   const { hasFeature } = useOrgFeatures();
   const isOEEnabled = hasFeature(F.OPERATIONAL_EXCELLENCE);
 
+  // OE pillar data for enabled orgs
+  const [oePillars, setOEPillars] = React.useState<Record<string, OEPillarData>>({});
+  const [oeLoading, setOELoading] = React.useState(false);
+
   // Redirect unauthenticated users
   React.useEffect(() => {
     if (auth.isLoaded && !auth.authUser) {
       router.push(`/auth/login?redirect=${encodeURIComponent(router.asPath)}`);
     }
   }, [auth.isLoaded, auth.authUser, router]);
+
+  // Fetch OE pillar scores when feature is enabled
+  React.useEffect(() => {
+    if (!isOEEnabled || !selectedLocationId) {
+      setOEPillars({});
+      return;
+    }
+
+    let cancelled = false;
+    async function fetchOE() {
+      setOELoading(true);
+      try {
+        const now = new Date();
+        const start = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        const res = await fetch(
+          `/api/operational-excellence?location_id=${selectedLocationId}&start=${start.toISOString()}&end=${now.toISOString()}`
+        );
+        if (!res.ok) throw new Error('OE fetch failed');
+        const data = await res.json();
+        if (cancelled) return;
+
+        const pillarMap: Record<string, OEPillarData> = {};
+        for (const p of data.pillars || []) {
+          const variant = PILLAR_VARIANT_MAP[p.name];
+          if (variant) {
+            pillarMap[variant] = {
+              name: p.name,
+              score: p.score,
+              change: p.change,
+              percentChange: p.percentChange,
+            };
+          }
+        }
+        setOEPillars(pillarMap);
+      } catch (err) {
+        console.error('Failed to fetch OE data for homepage:', err);
+        if (!cancelled) setOEPillars({});
+      } finally {
+        if (!cancelled) setOELoading(false);
+      }
+    }
+
+    fetchOE();
+    return () => { cancelled = true; };
+  }, [isOEEnabled, selectedLocationId]);
 
   // Show loading screen while auth is loading or redirecting
   if (!auth.isLoaded || !auth.authUser) {
@@ -41,6 +106,25 @@ export function HomePage() {
 
   const handleGoToDiscipline = () => {
     router.push('/discipline');
+  };
+
+  const handleGoToOE = () => {
+    router.push('/operational-excellence');
+  };
+
+  // Build customMetric for an OE pillar card
+  const getOECustomMetric = (variant: string) => {
+    const p = oePillars[variant];
+    if (!p) return undefined;
+    return {
+      title: p.name,
+      percentChange: p.percentChange,
+      isNegativeChange: p.change < 0,
+      primaryValue: p.score.toFixed(1),
+      valueSuffix: '/100',
+      changeText: `${p.change > 0 ? '+' : ''}${p.change.toFixed(1)} pts`,
+      periodLabel: 'vs prior 90 days',
+    };
   };
 
   return (
@@ -167,31 +251,16 @@ export function HomePage() {
                 </div>
                 <div className={classNames(projectcss.all, sty.freeBox__hvq52)}>
                   <div className={classNames(projectcss.all, sty.freeBox___1VsLt)}>
-                    <DashboardMetricCard
-                      className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
-                      variant="caring-interactions"
-                      isPlaceholder={!isOEEnabled}
-                    />
-                    <DashboardMetricCard
-                      className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
-                      variant="great-food"
-                      isPlaceholder={!isOEEnabled}
-                    />
-                    <DashboardMetricCard
-                      className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
-                      variant="quick-accurate"
-                      isPlaceholder={!isOEEnabled}
-                    />
-                    <DashboardMetricCard
-                      className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
-                      variant="creating-moments"
-                      isPlaceholder={!isOEEnabled}
-                    />
-                    <DashboardMetricCard
-                      className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
-                      variant="inviting-atmosphere"
-                      isPlaceholder={!isOEEnabled}
-                    />
+                    {(['caring-interactions', 'great-food', 'quick-accurate', 'creating-moments', 'inviting-atmosphere'] as const).map((variant) => (
+                      <DashboardMetricCard
+                        key={variant}
+                        className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
+                        variant={variant}
+                        isPlaceholder={!isOEEnabled}
+                        customMetric={isOEEnabled ? getOECustomMetric(variant) : undefined}
+                        onClick={isOEEnabled ? handleGoToOE : undefined}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
