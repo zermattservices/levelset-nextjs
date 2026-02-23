@@ -88,8 +88,9 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
     {
       label: 'Operational Excellence',
       description: 'Track key performance metrics',
+      href: '/operational-excellence',
       icon: <StarOutlinedIcon sx={{ fontSize: 22 }} />,
-      disabled: true,
+      levelsetAdminOnly: true,
     },
     {
       label: 'Retention',
