@@ -62,7 +62,7 @@ export function HomePage() {
       setOELoading(true);
       try {
         const now = new Date();
-        const start = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         const res = await fetch(
           `/api/operational-excellence?location_id=${selectedLocationId}&start=${start.toISOString()}&end=${now.toISOString()}`
         );
@@ -123,7 +123,7 @@ export function HomePage() {
       primaryValue: p.score.toFixed(1),
       valueSuffix: '/100',
       changeText: `${p.change > 0 ? '+' : ''}${p.change.toFixed(1)} pts`,
-      periodLabel: 'vs prior 90 days',
+      periodLabel: 'over prior 30 days',
     };
   };
 
@@ -250,7 +250,7 @@ export function HomePage() {
                   )}
                 </div>
                 <div className={classNames(projectcss.all, sty.freeBox__hvq52)}>
-                  <div className={classNames(projectcss.all, sty.freeBox___1VsLt)}>
+                  <div className={classNames(projectcss.all, sty.freeBox___1VsLt, !isOEEnabled && sty.oeBlurred)}>
                     {(['caring-interactions', 'great-food', 'quick-accurate', 'creating-moments', 'inviting-atmosphere'] as const).map((variant) => (
                       <DashboardMetricCard
                         key={variant}
