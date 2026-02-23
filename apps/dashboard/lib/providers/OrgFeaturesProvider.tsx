@@ -26,6 +26,9 @@ export const F = {
   ROSTER_SUGGESTED_PAY: 'roster_suggested_pay',
   MULTI_UNIT: 'multi_unit',
   OPERATIONAL_EXCELLENCE: 'operational_excellence',
+  SCHEDULING: 'scheduling',
+  FORM_MANAGEMENT: 'form_management',
+  LEVI_AI: 'levi_ai',
 } as const;
 
 export type FeatureKey = (typeof F)[keyof typeof F];

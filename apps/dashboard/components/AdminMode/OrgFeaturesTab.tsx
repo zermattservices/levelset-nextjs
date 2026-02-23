@@ -57,12 +57,16 @@ const FEATURE_GROUPS: FeatureGroup[] = [
       { key: 'roster_suggested_pay', label: 'Roster Suggested Pay', description: 'Automated pay recommendations' },
       { key: 'multi_unit', label: 'Multi-Unit Functionality', description: 'Manage multiple locations' },
       { key: 'operational_excellence', label: 'Operational Excellence', description: 'OE pillar analytics and scoring' },
+      { key: 'scheduling', label: 'Scheduling', description: 'Shift scheduling and management' },
+      { key: 'form_management', label: 'Form Management', description: 'Create and manage custom forms' },
     ],
   },
   {
     name: 'Ultimate Features',
     tier: 'ultimate',
-    features: [],
+    features: [
+      { key: 'levi_ai', label: 'Levi AI', description: 'AI-powered assistant' },
+    ],
   },
 ];
 
