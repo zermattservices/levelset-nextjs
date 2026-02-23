@@ -77,7 +77,7 @@ interface EmployeeScore {
 
 interface TrendPoint {
   weekStart: string;
-  pillarScores: Record<string, number>;
+  pillarScores: Record<string, number | null>;
   overallScore: number;
 }
 
@@ -476,11 +476,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         distributeRatingToPillars(r, criteriaByPosition, positionNameToId, weekContributions);
       }
       const weekScores = computePillarScores(weekContributions, pillarDefs);
+
+      // Use null for pillars with no data this week (prevents zero-spikes in chart)
+      const pillarScoresForWeek: Record<string, number | null> = {};
+      for (const pillar of pillarDefs) {
+        const acc = weekContributions[pillar.id];
+        if (acc && acc.totalWeight > 0) {
+          pillarScoresForWeek[pillar.id] = Math.round(weekScores.pillarScores[pillar.id] * 10) / 10;
+        } else {
+          pillarScoresForWeek[pillar.id] = null;
+        }
+      }
+
       trends.push({
         weekStart,
-        pillarScores: Object.fromEntries(
-          Object.entries(weekScores.pillarScores).map(([k, v]) => [k, Math.round(v * 10) / 10])
-        ),
+        pillarScores: pillarScoresForWeek,
         overallScore: Math.round(weekScores.overallScore * 10) / 10,
       });
     }

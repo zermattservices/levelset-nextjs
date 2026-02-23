@@ -2,7 +2,7 @@ import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { styled } from '@mui/material/styles';
-import { Button, Box, Skeleton } from '@mui/material';
+import { Button, Box, Skeleton, TextField } from '@mui/material';
 import { DataGridPro, type GridColDef, type GridRowParams } from '@mui/x-data-grid-pro';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -23,7 +23,7 @@ import sty from './OperationalExcellencePage.module.css';
 import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
-import { OEScoreCard } from '@/components/CodeComponents/OEScoreCard';
+import { DashboardMetricCard } from '@/components/CodeComponents/DashboardMetricCard';
 import { EmployeeModal } from '@/components/CodeComponents/EmployeeModal';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
@@ -37,7 +37,6 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const levelsetGreen = '#12b76a';
 
 const PILLAR_COLORS: Record<number, string> = {
   1: '#12b76a', // Great Food — green
@@ -50,8 +49,16 @@ const PILLAR_COLORS: Record<number, string> = {
 type DateRange = 'mtd' | 'qtd' | '30d' | '90d' | 'custom';
 
 // ------------------------------------------------------------------
-// Styled Components (matching PE page pattern)
+// Styled Components (matching PE table pattern exactly)
 // ------------------------------------------------------------------
+
+const levelsetGreen = '#12b76a';
+
+const DateRangeContainer = styled(Box)({
+  display: 'flex',
+  gap: 8,
+  alignItems: 'center',
+});
 
 const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
   fontFamily,
@@ -70,6 +77,81 @@ const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
     color: selected ? '#ffffff !important' : 'var(--ls-color-muted)',
   },
 }));
+
+// Custom DatePicker TextField - matching PE table style
+const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
+  <TextField
+    {...props}
+    ref={ref}
+    size="small"
+    sx={{
+      width: 130,
+      '& .MuiInputBase-input': {
+        fontFamily,
+        fontSize: 11,
+        padding: '8px 10px',
+      },
+      '& .MuiInputLabel-root': {
+        fontFamily,
+        fontSize: 11,
+      },
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: 'var(--ls-color-muted-border)',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: 'var(--ls-color-border)',
+      },
+      '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: levelsetGreen,
+        borderWidth: '2px',
+      },
+      '& .MuiIconButton-root': {
+        padding: '6px',
+        '& .MuiSvgIcon-root': {
+          fontSize: '1rem',
+        },
+      },
+      ...props.sx,
+    }}
+  />
+));
+
+const datePickerPopperSx = {
+  '& .MuiPaper-root': { fontFamily },
+  '& .MuiTypography-root': { fontFamily, fontSize: 11 },
+  '& .MuiPickersDay-root': {
+    fontFamily, fontSize: 11,
+    '&.Mui-selected': {
+      backgroundColor: `${levelsetGreen} !important`,
+      color: '#fff !important',
+      '&:hover': { backgroundColor: `${levelsetGreen} !important` },
+      '&:focus': { backgroundColor: `${levelsetGreen} !important` },
+    },
+    '&:hover': { backgroundColor: 'rgba(49, 102, 74, 0.04)' },
+    '&:focus': { backgroundColor: 'rgba(49, 102, 74, 0.12)' },
+  },
+  '& .MuiPickersCalendarHeader-label': { fontFamily, fontSize: 12 },
+  '& .MuiDayCalendar-weekDayLabel': { fontFamily, fontSize: 10 },
+  '& .MuiButtonBase-root': { fontFamily, fontSize: 11, color: levelsetGreen },
+  '& .MuiIconButton-root': {
+    color: `${levelsetGreen} !important`,
+    '&:hover': { backgroundColor: 'rgba(49, 102, 74, 0.04)' },
+    '&:focus': { backgroundColor: 'rgba(49, 102, 74, 0.12)' },
+  },
+  '& .MuiPickersYear-yearButton': {
+    fontFamily, fontSize: 12,
+    '&.Mui-selected': {
+      backgroundColor: `${levelsetGreen} !important`,
+      color: '#fff !important',
+      '&:hover': { backgroundColor: `${levelsetGreen} !important` },
+      '&:focus': { backgroundColor: `${levelsetGreen} !important` },
+    },
+    '&:hover': { backgroundColor: 'rgba(49, 102, 74, 0.04)' },
+  },
+  '& .MuiPickersArrowSwitcher-button': { color: `${levelsetGreen} !important` },
+  '& .MuiPickersCalendarHeader-switchViewButton': { color: `${levelsetGreen} !important` },
+  '& .MuiButton-root': { color: `${levelsetGreen} !important`, fontFamily },
+};
 
 // ------------------------------------------------------------------
 // Types (matching API response)
@@ -106,7 +188,7 @@ interface EmployeeScore {
 
 interface TrendPoint {
   weekStart: string;
-  pillarScores: Record<string, number>;
+  pillarScores: Record<string, number | null>;
   overallScore: number;
 }
 
@@ -211,18 +293,14 @@ export function OperationalExcellencePage() {
         if (!res.ok) throw new Error('Failed to fetch OE data');
 
         const json: OEData = await res.json();
-        if (!cancelled) {
-          setData(json);
-        }
+        if (!cancelled) setData(json);
       } catch (err: any) {
         if (!cancelled) {
           console.error('[OE Page] Error:', err);
           setError(err.message || 'Failed to load data');
         }
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     };
 
@@ -422,26 +500,23 @@ export function OperationalExcellencePage() {
     [data?.employees, pillars, selectedPillarId, pillarColorMap]
   );
 
-  // Build chart data
+  // Build chart data — null values mean no data for that pillar in that week
   const chartData = (data?.trends || []).map((t) => {
     const point: any = {
       week: new Date(t.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      overall: t.overallScore,
     };
     for (const p of pillars) {
-      point[p.id] = t.pillarScores[p.id] ?? null;
+      point[p.id] = t.pillarScores[p.id]; // null from API = line won't plot
     }
     return point;
   });
 
   // Build improvers list
   const getImprovers = () => {
-    const employees = data?.employees || [];
-    const mapped = employees
+    return (data?.employees || [])
       .map((emp) => {
         let currentScore: number;
         let priorScore: number;
-
         if (selectedPillarId) {
           currentScore = emp.pillarScores[selectedPillarId] ?? 0;
           priorScore = emp.priorPillarScores[selectedPillarId] ?? 0;
@@ -449,7 +524,6 @@ export function OperationalExcellencePage() {
           currentScore = emp.overallScore;
           priorScore = emp.priorOverallScore;
         }
-
         return {
           employeeId: emp.employeeId,
           name: emp.name,
@@ -460,14 +534,23 @@ export function OperationalExcellencePage() {
       .filter((e) => e.change > 0)
       .sort((a, b) => b.change - a.change)
       .slice(0, 5);
-
-    return mapped;
   };
 
   const improvers = data ? getImprovers() : [];
   const selectedPillarName = selectedPillarId
     ? pillars.find((p) => p.id === selectedPillarId)?.name || 'Pillar'
     : 'Overall';
+
+  // Helper to build customMetric prop for DashboardMetricCard
+  const buildCustomMetric = (title: string, score: number, change: number, percentChange: number) => ({
+    title,
+    percentChange,
+    isNegativeChange: change < 0,
+    primaryValue: score.toFixed(1),
+    valueSuffix: ' /100',
+    changeText: `${change >= 0 ? '+' : ''}${change.toFixed(1)} pts`,
+    periodLabel: 'vs prior period',
+  });
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -510,69 +593,103 @@ export function OperationalExcellencePage() {
                 {/* Page Header + Date Range */}
                 <div className={sty.pageHeader}>
                   <h1 className={sty.pageTitle}>Operational Excellence</h1>
-                  <div className={sty.dateRangeRow}>
+                  <DateRangeContainer>
                     <PillButton selected={dateRange === 'mtd'} onClick={() => handleDatePreset('mtd')}>MTD</PillButton>
                     <PillButton selected={dateRange === 'qtd'} onClick={() => handleDatePreset('qtd')}>QTD</PillButton>
-                    <PillButton selected={dateRange === '30d'} onClick={() => handleDatePreset('30d')}>30d</PillButton>
-                    <PillButton selected={dateRange === '90d'} onClick={() => handleDatePreset('90d')}>90d</PillButton>
+                    <PillButton selected={dateRange === '30d'} onClick={() => handleDatePreset('30d')}>Last 30 Days</PillButton>
+                    <PillButton selected={dateRange === '90d'} onClick={() => handleDatePreset('90d')}>Last 90 Days</PillButton>
                     <DatePicker
                       label="Start Date"
                       value={startDate}
                       onChange={handleStartDateChange}
+                      format="M/d/yyyy"
+                      enableAccessibleFieldDOMStructure={false}
+                      slots={{ textField: CustomDateTextField }}
                       slotProps={{
                         textField: {
-                          size: 'small',
-                          sx: { width: 150, '& .MuiInputBase-root': { fontFamily, fontSize: 13, borderRadius: '8px' } },
+                          sx: {
+                            '& .MuiInputLabel-root': {
+                              fontFamily: `${fontFamily} !important`,
+                              fontSize: '16px !important',
+                              color: 'rgba(0, 0, 0, 0.6) !important',
+                              '&.Mui-focused': { color: `${levelsetGreen} !important` },
+                            },
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': { borderColor: 'var(--ls-color-muted-border) !important' },
+                              '&:hover fieldset': { borderColor: 'var(--ls-color-border) !important' },
+                              '&.Mui-focused fieldset': { borderColor: `${levelsetGreen} !important`, borderWidth: '2px !important' },
+                            },
+                            '& .MuiInputAdornment-root .MuiIconButton-root': {
+                              color: 'var(--ls-color-muted) !important',
+                              '&:hover': { color: `${levelsetGreen} !important`, backgroundColor: 'rgba(49, 102, 74, 0.04) !important' },
+                            },
+                          },
                         },
+                        popper: { sx: datePickerPopperSx },
                       }}
                     />
                     <DatePicker
                       label="End Date"
                       value={endDate}
                       onChange={handleEndDateChange}
+                      format="M/d/yyyy"
+                      enableAccessibleFieldDOMStructure={false}
+                      slots={{ textField: CustomDateTextField }}
                       slotProps={{
                         textField: {
-                          size: 'small',
-                          sx: { width: 150, '& .MuiInputBase-root': { fontFamily, fontSize: 13, borderRadius: '8px' } },
+                          sx: {
+                            '& .MuiInputLabel-root': {
+                              fontFamily: `${fontFamily} !important`,
+                              fontSize: '16px !important',
+                              color: 'rgba(0, 0, 0, 0.6) !important',
+                              '&.Mui-focused': { color: `${levelsetGreen} !important` },
+                            },
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': { borderColor: 'var(--ls-color-muted-border) !important' },
+                              '&:hover fieldset': { borderColor: 'var(--ls-color-border) !important' },
+                              '&.Mui-focused fieldset': { borderColor: `${levelsetGreen} !important`, borderWidth: '2px !important' },
+                            },
+                            '& .MuiInputAdornment-root .MuiIconButton-root': {
+                              color: 'var(--ls-color-muted) !important',
+                              '&:hover': { color: `${levelsetGreen} !important`, backgroundColor: 'rgba(49, 102, 74, 0.04) !important' },
+                            },
+                          },
                         },
+                        popper: { sx: datePickerPopperSx },
                       }}
                     />
-                  </div>
+                  </DateRangeContainer>
                 </div>
 
-                {/* Score Cards */}
+                {/* Score Cards — all same size in uniform grid */}
                 <div className={sty.scoreCardsGrid}>
-                  <div className={sty.overallCardWrapper}>
-                    <OEScoreCard
-                      title="Operational Excellence"
-                      score={data?.overall.score ?? 0}
-                      change={data?.overall.change ?? 0}
-                      percentChange={data?.overall.percentChange ?? 0}
-                      size="large"
-                      loading={loading}
-                    />
-                  </div>
-                  <div className={sty.pillarCardsGrid}>
-                    {loading && !data ? (
-                      Array.from({ length: 5 }).map((_, i) => (
-                        <Skeleton key={i} variant="rounded" animation="wave" sx={{ height: 140, borderRadius: '16px' }} />
-                      ))
-                    ) : (
-                      pillars.map((p) => (
-                        <OEScoreCard
+                  {loading && !data ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <Skeleton key={i} variant="rounded" animation="wave" sx={{ height: 140, borderRadius: '16px' }} />
+                    ))
+                  ) : (
+                    <>
+                      <DashboardMetricCard
+                        variant="positional-excellence"
+                        customMetric={buildCustomMetric(
+                          'Operational Excellence',
+                          data?.overall.score ?? 0,
+                          data?.overall.change ?? 0,
+                          data?.overall.percentChange ?? 0,
+                        )}
+                      />
+                      {pillars.map((p) => (
+                        <DashboardMetricCard
                           key={p.id}
-                          title={p.name}
-                          score={p.score}
-                          change={p.change}
-                          percentChange={p.percentChange}
-                          weight={p.weight}
+                          variant="positional-excellence"
+                          titleBadge={`${p.weight}%`}
                           selected={selectedPillarId === p.id}
                           onClick={() => setSelectedPillarId(selectedPillarId === p.id ? null : p.id)}
-                          loading={loading}
+                          customMetric={buildCustomMetric(p.name, p.score, p.change, p.percentChange)}
                         />
-                      ))
-                    )}
-                  </div>
+                      ))}
+                    </>
+                  )}
                 </div>
 
                 {/* Bottom Section */}
@@ -670,6 +787,7 @@ export function OperationalExcellencePage() {
                                   strokeOpacity={selectedPillarId && selectedPillarId !== p.id ? 0.3 : 1}
                                   dot={false}
                                   activeDot={{ r: 4, strokeWidth: 2 }}
+                                  connectNulls={false}
                                 />
                               ))}
                             </LineChart>

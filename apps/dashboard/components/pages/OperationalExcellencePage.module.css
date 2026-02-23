@@ -42,11 +42,11 @@
   height: auto;
   max-width: 100%;
   justify-content: flex-start;
-  align-items: center;
+  align-items: stretch;
   background: #ffffff;
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
-  padding: 8px 8px 100px;
+  padding: 8px 0 100px;
 }
 
 .contentInner {
@@ -54,11 +54,10 @@
   flex-direction: column;
   width: 100%;
   height: auto;
-  max-width: var(--ls-max-content-width);
   justify-content: flex-start;
   align-items: stretch;
   min-width: 0;
-  padding: 16px 8px;
+  padding: 16px 24px;
   gap: 24px;
 }
 
@@ -131,62 +130,24 @@
   flex-wrap: wrap;
 }
 
-/* Score Cards Section */
+/* Score Cards — uniform grid, all same size */
 .scoreCardsGrid {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  width: 100%;
-  align-items: stretch;
-}
-
-.overallCardWrapper {
-  flex: 0 0 280px;
-  min-width: 240px;
-}
-
-.pillarCardsGrid {
-  flex: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  min-width: 0;
+  gap: 16px;
+  width: 100%;
 }
 
 @media (max-width: 1200px) {
   .scoreCardsGrid {
-    flex-direction: column;
-  }
-
-  .overallCardWrapper {
-    flex: none;
-    width: 100%;
-  }
-
-  .pillarCardsGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .pillarCardsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Pillar Filter */
-.pillarFilterRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.pillarFilterLabel {
-  font-family: "Satoshi", sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #535862;
+@media (max-width: 768px) {
+  .scoreCardsGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Bottom Section (two-column) */
@@ -336,7 +297,7 @@
   text-align: right;
 }
 
-/* DataGrid container */
+/* DataGrid container — matches card styling */
 .dataGridCard {
   background: #ffffff;
   box-shadow: inset 0 0 0 1px #e9eaeb;

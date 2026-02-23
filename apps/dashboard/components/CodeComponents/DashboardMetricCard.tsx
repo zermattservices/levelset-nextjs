@@ -37,6 +37,16 @@ type MetricVariant =
   | 'creating-moments'
   | 'inviting-atmosphere';
 
+interface CustomMetricDisplay {
+  title: string;
+  percentChange: number;
+  isNegativeChange: boolean;
+  primaryValue: string;
+  valueSuffix?: string;
+  changeText: string;
+  periodLabel: string;
+}
+
 interface DashboardMetricCardProps {
   variant: MetricVariant;
   locationId?: string;
@@ -45,6 +55,9 @@ interface DashboardMetricCardProps {
   onClick?: () => void;
   className?: string;
   isPlaceholder?: boolean; // For blurred/coming soon cards
+  customMetric?: CustomMetricDisplay;
+  selected?: boolean;
+  titleBadge?: string;
 }
 
 interface MetricConfig {
@@ -150,6 +163,9 @@ export function DashboardMetricCard({
   onClick,
   className,
   isPlaceholder = false,
+  customMetric,
+  selected = false,
+  titleBadge,
 }: DashboardMetricCardProps) {
   const router = useRouter();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
@@ -202,7 +218,13 @@ export function DashboardMetricCard({
     console.log('[DashboardMetricCard] effectiveLocationId:', effectiveLocationId);
     console.log('[DashboardMetricCard] effectiveLocationIds:', effectiveLocationIds);
     console.log('[DashboardMetricCard] locationIdsKey:', locationIdsKey);
-    
+
+    // Skip fetch when using external custom metric data
+    if (customMetric) {
+      setLoading(false);
+      return;
+    }
+
     // For placeholder variants, show static zero data
     if (isPlaceholder || isPlaceholderVariant) {
       setMetricState({
@@ -303,6 +325,7 @@ export function DashboardMetricCard({
   }, [
     config.dateColumn,
     config.table,
+    customMetric,
     effectiveLocationId,
     effectiveLocationIds,
     isPlaceholder,
@@ -348,14 +371,14 @@ export function DashboardMetricCard({
 
   const isClickable = Boolean(onClick || linkHref);
   const containerClasses = [styles.root, className].filter(Boolean).join(' ');
-  const cardClasses = [styles.metricItem, isClickable ? styles.clickable : '']
+  const cardClasses = [styles.metricItem, isClickable ? styles.clickable : '', selected ? styles.selected : '']
     .filter(Boolean)
     .join(' ');
 
   // Context is missing only if NEITHER single location nor multiple locations are provided
   const hasLocationContext = effectiveLocationId || (effectiveLocationIds && effectiveLocationIds.length > 0);
   const missingContext = !hasLocationContext;
-  const shouldShowSkeleton = loading || missingContext || (!metricState && !error);
+  const shouldShowSkeleton = !customMetric && (loading || missingContext || (!metricState && !error));
   
   console.log(`[DashboardMetricCard] Render decision for ${variant}:`, { 
     hasLocationContext, 
@@ -395,6 +418,8 @@ export function DashboardMetricCard({
     .join(' ');
   const secondaryLabel = 'Past 90 days';
 
+  const displayTitle = customMetric?.title ?? config.title;
+
   return (
     <div className={containerClasses}>
       <div
@@ -403,47 +428,77 @@ export function DashboardMetricCard({
         tabIndex={isClickable ? 0 : undefined}
         onClick={isClickable ? handleNavigate : undefined}
         onKeyDown={isClickable ? handleKeyDown : undefined}
-        aria-label={`${config.title} summary`}
+        aria-label={`${displayTitle} summary`}
       >
-        <div className={styles.titleAndTrend}>
-          <div className={styles.title}>{config.title}</div>
-          {shouldShowSkeleton ? (
-            <Skeleton
-              variant="rounded"
-              animation="wave"
-              sx={{ width: 110, height: 36, borderRadius: 18 }}
-            />
-          ) : (
-            <div className={percentTrendClasses} aria-live="polite">
-              <ArrowUpIcon className={arrowClasses} />
-              <span>{percentText}</span>
+        {customMetric ? (
+          <>
+            <div className={styles.titleAndTrend}>
+              <div className={styles.title}>
+                {customMetric.title}
+                {titleBadge && <span className={styles.titleBadge}>{titleBadge}</span>}
+              </div>
+              <div className={[styles.trendBadge, customMetric.isNegativeChange ? styles.negative : ''].filter(Boolean).join(' ')} aria-live="polite">
+                <ArrowUpIcon className={[styles.trendIcon, customMetric.percentChange < 0 ? styles.down : ''].filter(Boolean).join(' ')} />
+                <span>{`${customMetric.percentChange > 0 ? '+' : ''}${customMetric.percentChange.toFixed(1)}%`}</span>
+              </div>
             </div>
-          )}
-        </div>
-
-        <div className={styles.supportingMetrics}>
-          <div className={styles.primaryRow}>
-            <span className={styles.primaryLabel}>{config.totalLabel}</span>
-            <span className={styles.primaryValue}>
+            <div className={styles.supportingMetrics}>
+              <div className={styles.primaryRow}>
+                <span className={styles.primaryValue}>
+                  {customMetric.primaryValue}
+                  {customMetric.valueSuffix && <span className={styles.valueSuffix}>{customMetric.valueSuffix}</span>}
+                </span>
+                <span className={styles.primaryMeta}>
+                  <span className={[styles.deltaValue, customMetric.isNegativeChange ? styles.negative : ''].filter(Boolean).join(' ')}>
+                    {customMetric.changeText}
+                  </span>
+                  <span className={styles.periodLabel}>{customMetric.periodLabel}</span>
+                </span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.titleAndTrend}>
+              <div className={styles.title}>{config.title}</div>
               {shouldShowSkeleton ? (
-                <Skeleton variant="text" animation="wave" sx={{ width: 64, height: 28 }} />
+                <Skeleton
+                  variant="rounded"
+                  animation="wave"
+                  sx={{ width: 110, height: 36, borderRadius: 18 }}
+                />
               ) : (
-                formatNumber(total)
+                <div className={percentTrendClasses} aria-live="polite">
+                  <ArrowUpIcon className={arrowClasses} />
+                  <span>{percentText}</span>
+                </div>
               )}
-            </span>
-            <span className={styles.primaryMeta}>
-              {shouldShowSkeleton ? (
-                <Skeleton variant="text" animation="wave" sx={{ width: 56, height: 20 }} />
-              ) : (
-                <span className={deltaClasses}>{deltaText}</span>
-              )}
-              <span className={styles.periodLabel}>{config.deltaLabel}</span>
-            </span>
-          </div>
-          <div className={styles.secondaryRow}>
-            <span className={styles.secondaryLabel}>{secondaryLabel}</span>
-          </div>
-        </div>
+            </div>
+            <div className={styles.supportingMetrics}>
+              <div className={styles.primaryRow}>
+                <span className={styles.primaryLabel}>{config.totalLabel}</span>
+                <span className={styles.primaryValue}>
+                  {shouldShowSkeleton ? (
+                    <Skeleton variant="text" animation="wave" sx={{ width: 64, height: 28 }} />
+                  ) : (
+                    formatNumber(total)
+                  )}
+                </span>
+                <span className={styles.primaryMeta}>
+                  {shouldShowSkeleton ? (
+                    <Skeleton variant="text" animation="wave" sx={{ width: 56, height: 20 }} />
+                  ) : (
+                    <span className={deltaClasses}>{deltaText}</span>
+                  )}
+                  <span className={styles.periodLabel}>{config.deltaLabel}</span>
+                </span>
+              </div>
+              <div className={styles.secondaryRow}>
+                <span className={styles.secondaryLabel}>{secondaryLabel}</span>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
