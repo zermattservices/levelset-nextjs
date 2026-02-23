@@ -534,7 +534,7 @@ export function OperationalExcellencePage() {
     [data?.employees, pillars, selectedPillarId, pillarColorMap]
   );
 
-  // Build chart data — raw daily scores (for scatter) + 7-day rolling averages (for MA lines)
+  // Build chart data — raw daily scores (for scatter) + 7-day rolling averages (for MA lines) + OE weighted avg
   const chartData = (() => {
     const trends = data?.trends || [];
     if (trends.length === 0) return [];
@@ -567,6 +567,20 @@ export function OperationalExcellencePage() {
           ? Math.round((windowValues.reduce((a, b) => a + b, 0) / windowValues.length) * 10) / 10
           : null;
       }
+
+      // OE line — weighted average of pillar MAs (not double-rolling)
+      let oeWeightedSum = 0;
+      let oeTotalWeight = 0;
+      for (const p of pillars) {
+        const maVal = point[`ma_${p.id}`];
+        if (maVal !== null && maVal !== undefined) {
+          oeWeightedSum += maVal * p.weight;
+          oeTotalWeight += p.weight;
+        }
+      }
+      point.ma_oe = oeTotalWeight > 0
+        ? Math.round((oeWeightedSum / oeTotalWeight) * 10) / 10
+        : null;
 
       return point;
     });
@@ -639,15 +653,16 @@ export function OperationalExcellencePage() {
         />
 
         <div className={sty.contentWrapper}>
-          <div className={sty.contentInner}>
             {!isLevelsetAdmin ? (
-              <div className={sty.comingSoonContainer}>
-                <StarOutlinedIcon className={sty.comingSoonIcon} />
-                <h2 className={sty.comingSoonTitle}>Operational Excellence</h2>
-                <p className={sty.comingSoonDescription}>
-                  Track and analyze operational excellence metrics across your team. This feature is currently being developed.
-                </p>
-                <span className={sty.comingSoonBadge}>Coming Soon</span>
+              <div className={sty.contentInner}>
+                <div className={sty.comingSoonContainer}>
+                  <StarOutlinedIcon className={sty.comingSoonIcon} />
+                  <h2 className={sty.comingSoonTitle}>Operational Excellence</h2>
+                  <p className={sty.comingSoonDescription}>
+                    Track and analyze operational excellence metrics across your team. This feature is currently being developed.
+                  </p>
+                  <span className={sty.comingSoonBadge}>Coming Soon</span>
+                </div>
               </div>
             ) : (
               <>
@@ -750,6 +765,7 @@ export function OperationalExcellencePage() {
                   </Box>
                 </div>
 
+                <div className={sty.contentInner}>
                 {/* Score Cards — OE card large on left, pillar cards grid on right */}
                 <div className={sty.scoreCardsSection}>
                   {loading && !data ? (
@@ -862,7 +878,7 @@ export function OperationalExcellencePage() {
                                 interval="preserveStartEnd"
                               />
                               <YAxis
-                                domain={[0, 100]}
+                                domain={[(dataMin: number) => Math.max(0, Math.floor(dataMin - 5)), 100]}
                                 tick={{ fontSize: 12, fontFamily, fill: '#535862' }}
                                 tickLine={false}
                                 axisLine={{ stroke: '#e9eaeb' }}
@@ -879,6 +895,19 @@ export function OperationalExcellencePage() {
                               <Legend
                                 wrapperStyle={{ fontFamily, fontSize: 12 }}
                               />
+                              {/* OE weighted average line — bold, always visible */}
+                              <Line
+                                key="ma_oe"
+                                type="monotone"
+                                dataKey="ma_oe"
+                                name="OE Score"
+                                stroke="#181d27"
+                                strokeWidth={selectedPillarId ? 2 : 3.5}
+                                strokeOpacity={selectedPillarId ? 0.3 : 1}
+                                dot={false}
+                                activeDot={{ r: 5, strokeWidth: 2, fill: '#181d27' }}
+                                connectNulls={false}
+                              />
                               {/* 7-day MA lines for all pillars */}
                               {pillars.map((p) => (
                                 <Line
@@ -887,8 +916,8 @@ export function OperationalExcellencePage() {
                                   dataKey={`ma_${p.id}`}
                                   name={p.name}
                                   stroke={pillarColorMap[p.id]}
-                                  strokeWidth={selectedPillarId === p.id ? 3 : selectedPillarId ? 1 : 2}
-                                  strokeOpacity={selectedPillarId && selectedPillarId !== p.id ? 0.2 : 1}
+                                  strokeWidth={selectedPillarId === p.id ? 3 : selectedPillarId ? 1 : 1.5}
+                                  strokeOpacity={selectedPillarId && selectedPillarId !== p.id ? 0.2 : 0.8}
                                   dot={false}
                                   activeDot={{ r: 4, strokeWidth: 2 }}
                                   connectNulls={false}
@@ -975,9 +1004,9 @@ export function OperationalExcellencePage() {
                     </div>
                   </div>
                 )}
+                </div>
               </>
             )}
-          </div>
         </div>
       </div>
 

@@ -105,16 +105,19 @@
   border-radius: 20px;
 }
 
-/* Page Header */
+/* Page Header — full-width bar like scheduling page */
 .pageHeader {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0;
+  padding: 12px 24px;
   flex-wrap: wrap;
   gap: 12px;
+  border-bottom: 1px solid #e9eaeb;
+  box-sizing: border-box;
+  background: #ffffff;
 }
 
 .pageTitle {
