@@ -2,12 +2,14 @@ import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { styled } from '@mui/material/styles';
-import { Button, Box, Skeleton, TextField } from '@mui/material';
+import { Button, Box, Skeleton, TextField, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
 import { DataGridPro, type GridColDef, type GridRowParams } from '@mui/x-data-grid-pro';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   LineChart,
   Line,
@@ -28,6 +30,7 @@ import { EmployeeModal } from '@/components/CodeComponents/EmployeeModal';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
+import { createSupabaseClient } from '@/util/supabase/component';
 
 // ------------------------------------------------------------------
 // Constants
@@ -264,6 +267,31 @@ export function OperationalExcellencePage() {
   // Employee modal
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
+
+  // Pillar Descriptions modal
+  const [descriptionsModalOpen, setDescriptionsModalOpen] = React.useState(false);
+  const [pillarDescriptions, setPillarDescriptions] = React.useState<
+    Array<{ id: string; name: string; weight: number; description: string; display_order: number }>
+  >([]);
+
+  const supabase = React.useMemo(() => createSupabaseClient(), []);
+
+  // Fetch pillar descriptions for the modal
+  React.useEffect(() => {
+    if (!descriptionsModalOpen) return;
+    let cancelled = false;
+    async function fetchDescriptions() {
+      const { data, error } = await supabase
+        .from('oe_pillars')
+        .select('id, name, weight, description, display_order')
+        .order('display_order');
+      if (!cancelled && data && !error) {
+        setPillarDescriptions(data);
+      }
+    }
+    fetchDescriptions();
+    return () => { cancelled = true; };
+  }, [descriptionsModalOpen, supabase]);
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -827,6 +855,13 @@ export function OperationalExcellencePage() {
                           customMetric={buildCustomMetric(p.name, p.score, p.change, p.percentChange)}
                         />
                       ))}
+                      <button
+                        className={sty.pillarDescriptionsBtn}
+                        onClick={() => setDescriptionsModalOpen(true)}
+                      >
+                        <InfoOutlinedIcon sx={{ fontSize: 16 }} />
+                        Pillar Descriptions
+                      </button>
                     </>
                   )}
                 </div>
@@ -1046,6 +1081,58 @@ export function OperationalExcellencePage() {
           initialTab="pe"
         />
       )}
+
+      {/* Pillar Descriptions Modal */}
+      <Dialog
+        open={descriptionsModalOpen}
+        onClose={() => setDescriptionsModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            maxHeight: '80vh',
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontFamily,
+            fontSize: 18,
+            fontWeight: 600,
+            color: '#0d1b14',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingRight: 2,
+          }}
+        >
+          OE Pillar Descriptions
+          <IconButton
+            onClick={() => setDescriptionsModalOpen(false)}
+            size="small"
+            sx={{ color: 'var(--ls-color-muted)' }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ paddingTop: '8px !important' }}>
+          <p className={sty.modalSubtitle}>
+            These pillars align with Chick-fil-A's Winning Hearts Every Day (WHED) strategy. Each pillar maps to a WHED Focus Area and determines its weighted contribution to your overall OE score.
+          </p>
+          <div className={sty.pillarDescriptionsList}>
+            {pillarDescriptions.map((pillar) => (
+              <div key={pillar.id} className={sty.pillarDescriptionItem}>
+                <div className={sty.pillarDescriptionHeader}>
+                  <span className={sty.pillarDescriptionName}>{pillar.name}</span>
+                  <span className={sty.pillarDescriptionWeight}>{pillar.weight}%</span>
+                </div>
+                <p className={sty.pillarDescriptionText}>{pillar.description}</p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </LocalizationProvider>
   );
 }

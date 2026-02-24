@@ -48,6 +48,7 @@
   grid-column-end: -1 !important;
   padding: 0 0 100px;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .contentInner {
@@ -61,6 +62,7 @@
   padding: 16px 24px;
   gap: 24px;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* Coming Soon */
@@ -126,6 +128,7 @@
   font-family: "Mont", sans-serif;
   color: var(--ls-color-text-primary);
   margin: 0;
+  white-space: nowrap;
 }
 
 .dateRangeRow {
@@ -142,16 +145,48 @@
   grid-template-rows: auto auto;
   gap: 16px;
   width: 100%;
+  min-width: 0;
+}
+
+/* Ensure cards don't overflow their grid cell */
+.scoreCardsSection > * {
+  min-width: 0;
 }
 
 .oeCardCell {
   grid-row: 1 / 3;
   grid-column: 1;
   display: flex;
+  min-width: 0;
 }
 
 .oeCardCell > * {
   flex: 1;
+  min-width: 0;
+}
+
+/* Pillar Descriptions Button — sits inside the score cards grid */
+.pillarDescriptionsBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  background: none;
+  border: 1px dashed var(--ls-color-brand);
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.pillarDescriptionsBtn:hover {
+  background: var(--ls-color-brand-soft);
 }
 
 @media (max-width: 1200px) {
@@ -163,6 +198,35 @@
     grid-row: auto;
     grid-column: 1 / -1;
   }
+
+  .pageTitle {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 900px) {
+  .scoreCardsSection {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .oeCardCell {
+    grid-row: auto;
+    grid-column: 1 / -1;
+  }
+
+  .pillarDescriptionsBtn {
+    grid-column: 1 / -1;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 16px;
+  }
+
+  .contentInner {
+    padding: 16px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -173,6 +237,19 @@
   .oeCardCell {
     grid-row: auto;
     grid-column: auto;
+  }
+
+  .pillarDescriptionsBtn {
+    grid-column: auto;
+  }
+
+  .pageTitle {
+    font-size: 22px;
+  }
+
+  .contentInner {
+    padding: 12px;
+    gap: 16px;
   }
 }
 
@@ -222,6 +299,7 @@
   padding: 20px;
   width: 100%;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .chartHeader {
@@ -406,4 +484,72 @@
   color: #535862;
   font-family: "Satoshi", sans-serif;
   font-size: 16px;
+}
+
+/* Pillar Descriptions Modal */
+.modalSubtitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.pillarDescriptionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pillarDescriptionItem {
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.pillarDescriptionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pillarDescriptionName {
+  font-family: "Satoshi", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0d1b14;
+}
+
+.pillarDescriptionWeight {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  background: #dcfce7;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+.pillarDescriptionText {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: #4b5563;
+  margin: 0;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .detailPanel {
+    padding: 12px 16px 12px 16px;
+  }
+
+  .chartCard {
+    padding: 16px 12px;
+  }
+
+  .improversCard {
+    padding: 16px 12px;
+  }
 }
