@@ -59,6 +59,7 @@ const FEATURE_GROUPS: FeatureGroup[] = [
       { key: 'operational_excellence', label: 'Operational Excellence', description: 'OE pillar analytics and scoring' },
       { key: 'scheduling', label: 'Scheduling', description: 'Shift scheduling and management' },
       { key: 'form_management', label: 'Form Management', description: 'Create and manage custom forms' },
+      { key: 'documents', label: 'Documents', description: 'Organization document hub' },
     ],
   },
   {

@@ -10,6 +10,7 @@ import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
 
 import { DocumentsPageContent } from './documents/DocumentsPageContent';
 import {
@@ -28,6 +29,7 @@ const fontFamily = '"Satoshi", sans-serif';
 export function DocumentsPage() {
   const router = useRouter();
   const auth = useAuth();
+  const { hasFeature } = useOrgFeatures();
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -41,6 +43,7 @@ export function DocumentsPage() {
   }
 
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
+  const isDocumentsEnabled = hasFeature(F.DOCUMENTS);
 
   const headerExtra = isLevelsetAdmin ? (
     <Button
@@ -104,7 +107,7 @@ export function DocumentsPage() {
 
         <div className={sty.contentWrapper}>
           <div className={sty.contentInner}>
-            {!isLevelsetAdmin ? (
+            {!isDocumentsEnabled ? (
               <>
                 <Head>
                   <title key="title">Levelset | Documents</title>

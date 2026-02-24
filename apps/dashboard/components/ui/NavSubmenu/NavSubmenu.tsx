@@ -84,7 +84,7 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       description: 'Create and manage forms',
       href: '/form-management',
       icon: <DescriptionOutlinedIcon sx={{ fontSize: 22 }} />,
-      levelsetAdminOnly: true,
+      requiredFeature: F.FORM_MANAGEMENT,
     },
   ],
   analytics: [
@@ -121,7 +121,7 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       description: 'Organization document hub',
       href: '/documents',
       icon: <FolderOutlinedIcon sx={{ fontSize: 22 }} />,
-      levelsetAdminOnly: true,
+      requiredFeature: F.DOCUMENTS,
     },
     {
       label: '360 Overview',

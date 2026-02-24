@@ -29,6 +29,7 @@ export const F = {
   SCHEDULING: 'scheduling',
   FORM_MANAGEMENT: 'form_management',
   LEVI_AI: 'levi_ai',
+  DOCUMENTS: 'documents',
 } as const;
 
 export type FeatureKey = (typeof F)[keyof typeof F];

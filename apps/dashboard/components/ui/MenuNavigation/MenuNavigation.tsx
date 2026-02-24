@@ -19,6 +19,7 @@ import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 import { useImpersonation } from '@/lib/providers/ImpersonationProvider';
+import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
 
 // Check if we're on the roadmap subdomain
 function useIsRoadmapSubdomain(): boolean {
@@ -52,6 +53,7 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
   const { isImpersonating, impersonatedUser } = useImpersonation();
   const { userHierarchyLevel, selectedLocationId } = useLocationContext();
   const { has } = usePermissions();
+  const { hasFeature } = useOrgFeatures();
   const isRoadmapSubdomain = useIsRoadmapSubdomain();
   const [activeMenu, setActiveMenu] = React.useState<MenuType | null>(null);
   const [isClosing, setIsClosing] = React.useState(false);
@@ -285,8 +287,8 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
               </div>
             ))}
 
-            {/* Scheduling - direct link, Levelset Admin only */}
-            {isActualLevelsetAdmin && (
+            {/* Scheduling - direct link, feature flag gated */}
+            {hasFeature(F.SCHEDULING) && (
               <div className={sty.navButtonContainer}>
                 <Link href="/schedule" className={classNames(sty.navButton, sty.navButtonDirect)}>
                   <span className={sty.navButtonText}>Scheduling</span>
@@ -294,8 +296,8 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
               </div>
             )}
 
-            {/* Levi AI - direct link, Levelset Admin only */}
-            {isActualLevelsetAdmin && (
+            {/* Levi AI - direct link, feature flag gated */}
+            {hasFeature(F.LEVI_AI) && (
               <div className={sty.navButtonContainer}>
                 <Link href="/levi" className={classNames(sty.navButton, sty.navButtonDirect)}>
                   <span className={sty.navButtonText}>Levi</span>
