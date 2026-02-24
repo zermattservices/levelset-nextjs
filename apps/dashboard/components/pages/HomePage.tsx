@@ -2,6 +2,12 @@ import * as React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CloseIcon from '@mui/icons-material/Close';
 import sty from './HomePage.module.css';
 import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
@@ -11,6 +17,7 @@ import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
+import { createSupabaseClient } from '@/util/supabase/component';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -42,6 +49,11 @@ export function HomePage() {
   // OE pillar data for enabled orgs
   const [oePillars, setOEPillars] = React.useState<Record<string, OEPillarData>>({});
   const [oeLoading, setOELoading] = React.useState(false);
+
+  // Pillar descriptions modal
+  const [descriptionsModalOpen, setDescriptionsModalOpen] = React.useState(false);
+  const [pillarDescriptions, setPillarDescriptions] = React.useState<any[]>([]);
+  const supabase = React.useMemo(() => createSupabaseClient(), []);
 
   // Redirect unauthenticated users
   React.useEffect(() => {
@@ -94,6 +106,23 @@ export function HomePage() {
     fetchOE();
     return () => { cancelled = true; };
   }, [isOEEnabled, selectedLocationId]);
+
+  // Fetch pillar descriptions when modal opens
+  React.useEffect(() => {
+    if (!descriptionsModalOpen) return;
+    let cancelled = false;
+    async function fetchDescriptions() {
+      const { data, error } = await supabase
+        .from('oe_pillars')
+        .select('id, name, weight, description, display_order')
+        .order('display_order');
+      if (!cancelled && data && !error) {
+        setPillarDescriptions(data);
+      }
+    }
+    fetchDescriptions();
+    return () => { cancelled = true; };
+  }, [descriptionsModalOpen, supabase]);
 
   // Show loading screen while auth is loading or redirecting
   if (!auth.isLoaded || !auth.authUser) {
@@ -239,6 +268,16 @@ export function HomePage() {
                   <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text___3DmR3)}>
                     Operational Excellence
                   </div>
+                  {isOEEnabled && (
+                    <IconButton
+                      size="small"
+                      onClick={() => setDescriptionsModalOpen(true)}
+                      className={sty.oeInfoBtn}
+                      sx={{ color: 'var(--ls-color-muted)', padding: '4px' }}
+                    >
+                      <InfoOutlinedIcon sx={{ fontSize: 20 }} />
+                    </IconButton>
+                  )}
                   {!isOEEnabled && (
                     <div className={classNames(projectcss.all, projectcss.__wab_text, sty.text___1AVHs)}>
                       Coming soon
@@ -264,6 +303,58 @@ export function HomePage() {
           </div>
         </RedirectIf>
       </div>
+
+      {/* Pillar Descriptions Modal */}
+      <Dialog
+        open={descriptionsModalOpen}
+        onClose={() => setDescriptionsModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            maxHeight: '80vh',
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontFamily: '"Satoshi", sans-serif',
+            fontSize: 18,
+            fontWeight: 600,
+            color: '#0d1b14',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingRight: 2,
+          }}
+        >
+          OE Pillar Descriptions
+          <IconButton
+            onClick={() => setDescriptionsModalOpen(false)}
+            size="small"
+            sx={{ color: 'var(--ls-color-muted)' }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ paddingTop: '8px !important' }}>
+          <p className={sty.modalSubtitle}>
+            These pillars align with Chick-fil-A's Winning Hearts Every Day (WHED) strategy. Each pillar maps to a WHED Focus Area and determines its weighted contribution to your overall OE score.
+          </p>
+          <div className={sty.pillarDescriptionsList}>
+            {pillarDescriptions.map((pillar) => (
+              <div key={pillar.id} className={sty.pillarDescriptionItem}>
+                <div className={sty.pillarDescriptionHeader}>
+                  <span className={sty.pillarDescriptionName}>{pillar.name}</span>
+                  <span className={sty.pillarDescriptionWeight}>{pillar.weight}%</span>
+                </div>
+                <p className={sty.pillarDescriptionText}>{pillar.description}</p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

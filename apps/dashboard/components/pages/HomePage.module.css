@@ -510,3 +510,65 @@
   font-size: var(--ls-font-size-2xl);
   color: var(--ls-color-text-primary);
 }
+
+/* OE Info Button */
+.oeInfoBtn {
+  flex-shrink: 0;
+}
+.oeInfoBtn:hover {
+  color: var(--ls-color-brand) !important;
+}
+
+/* Pillar Descriptions Modal */
+.modalSubtitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.pillarDescriptionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pillarDescriptionItem {
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.pillarDescriptionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pillarDescriptionName {
+  font-family: "Satoshi", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0d1b14;
+}
+
+.pillarDescriptionWeight {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  background: #dcfce7;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+.pillarDescriptionText {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: #4b5563;
+  margin: 0;
+  line-height: 1.6;
+}
