@@ -247,7 +247,7 @@ export function HomePage() {
                 </div>
                 <div className={classNames(projectcss.all, sty.freeBox__hvq52)}>
                   <div className={classNames(projectcss.all, sty.freeBox___1VsLt, !isOEEnabled && sty.oeBlurred)}>
-                    {(['caring-interactions', 'great-food', 'quick-accurate', 'creating-moments', 'inviting-atmosphere'] as const).map((variant) => (
+                    {(['great-food', 'quick-accurate', 'creating-moments', 'caring-interactions', 'inviting-atmosphere'] as const).map((variant) => (
                       <DashboardMetricCard
                         key={variant}
                         className={classNames("__wab_instance", sty.dashboardMetricCard__fWith)}
