@@ -17,6 +17,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { OrgOverviewTab } from './OrgOverviewTab';
 import { OrgFeaturesTab } from './OrgFeaturesTab';
+import { OrgSubscriptionTab } from './OrgSubscriptionTab';
 import styles from './OrganizationModal.module.css';
 
 interface Location {
@@ -196,30 +197,7 @@ export function OrganizationModal({ open, organization, onClose }: OrganizationM
           <OrgOverviewTab organization={organization} locationNames={locationNames} />
         )}
         {activeTab === 'subscription' && (
-          <div className={styles.placeholder}>
-            <div className={styles.placeholderContent}>
-              <Typography
-                sx={{
-                  fontFamily: '"Satoshi", sans-serif',
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  color: '#666',
-                  marginBottom: '8px',
-                }}
-              >
-                Subscription Management
-              </Typography>
-              <Typography
-                sx={{
-                  fontFamily: '"Satoshi", sans-serif',
-                  fontSize: '14px',
-                  color: '#999',
-                }}
-              >
-                Coming soon. This will connect to Stripe for billing management.
-              </Typography>
-            </div>
-          </div>
+          <OrgSubscriptionTab orgId={organization.id} />
         )}
         {activeTab === 'features' && (
           <OrgFeaturesTab orgId={organization.id} />

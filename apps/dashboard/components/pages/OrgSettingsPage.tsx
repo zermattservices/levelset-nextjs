@@ -20,6 +20,7 @@ import { RolesTab } from '@/components/OrgSettings/RolesTab';
 import { PermissionsSettings } from '@/components/OrgSettings/PermissionsSettings';
 import { PaySettingsTab } from '@/components/OrgSettings/PaySettingsTab';
 import { SchedulingSettings } from '@/components/OrgSettings/SchedulingSettings';
+import { BillingTab } from '@/components/OrgSettings/BillingTab';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
@@ -200,7 +201,7 @@ export function OrgSettingsPage() {
   const standaloneItems: StandaloneItem[] = [
     { id: 'location-details', label: 'Location Details', status: 'active' },
     { id: 'org-details', label: 'Organization Details', status: 'active' },
-    { id: 'billing', label: 'Billing', status: 'coming-soon' },
+    { id: 'billing', label: 'Billing', status: 'active' },
   ];
 
   const renderContent = () => {
@@ -234,7 +235,7 @@ export function OrgSettingsPage() {
       case 'org-details':
         return <OrganizationDetails orgId={selectedLocationOrgId} disabled={!canEdit} />;
       case 'billing':
-        return <ComingSoonPlaceholder title="Billing" description="Billing management, invoices, and subscription details coming soon." />;
+        return <BillingTab orgId={selectedLocationOrgId} />;
       default:
         return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
     }

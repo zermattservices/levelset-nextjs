@@ -113,6 +113,47 @@ export type Database = {
           },
         ]
       }
+      ai_usage_monthly: {
+        Row: {
+          created_at: string | null
+          id: string
+          included_queries: number
+          month: string
+          org_id: string
+          overage_cost_cents: number
+          overage_queries: number
+          total_queries: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          included_queries?: number
+          month: string
+          org_id: string
+          overage_cost_cents?: number
+          overage_queries?: number
+          total_queries?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          included_queries?: number
+          month?: string
+          org_id?: string
+          overage_cost_cents?: number
+          overage_queries?: number
+          total_queries?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_monthly_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_users: {
         Row: {
           auth_user_id: string | null
@@ -2066,6 +2107,59 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          amount_due: number
+          amount_paid: number
+          created_at: string | null
+          currency: string
+          hosted_invoice_url: string | null
+          id: string
+          invoice_pdf: string | null
+          org_id: string
+          period_end: string | null
+          period_start: string | null
+          status: string
+          stripe_invoice_id: string
+        }
+        Insert: {
+          amount_due?: number
+          amount_paid?: number
+          created_at?: string | null
+          currency?: string
+          hosted_invoice_url?: string | null
+          id?: string
+          invoice_pdf?: string | null
+          org_id: string
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          stripe_invoice_id: string
+        }
+        Update: {
+          amount_due?: number
+          amount_paid?: number
+          created_at?: string | null
+          currency?: string
+          hosted_invoice_url?: string | null
+          id?: string
+          invoice_pdf?: string | null
+          org_id?: string
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          stripe_invoice_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       levi_config: {
         Row: {
           created_at: string
@@ -2697,31 +2791,40 @@ export type Database = {
       orgs: {
         Row: {
           created_at: string
+          custom_price_cents: number | null
+          custom_pricing: boolean | null
           id: string
           name: string
           operator_name: string | null
           start_date: string | null
           state: string | null
+          stripe_customer_id: string | null
           subscription_plan: string | null
           team_member_website: string | null
         }
         Insert: {
           created_at?: string
+          custom_price_cents?: number | null
+          custom_pricing?: boolean | null
           id?: string
           name: string
           operator_name?: string | null
           start_date?: string | null
           state?: string | null
+          stripe_customer_id?: string | null
           subscription_plan?: string | null
           team_member_website?: string | null
         }
         Update: {
           created_at?: string
+          custom_price_cents?: number | null
+          custom_pricing?: boolean | null
           id?: string
           name?: string
           operator_name?: string | null
           start_date?: string | null
           state?: string | null
+          stripe_customer_id?: string | null
           subscription_plan?: string | null
           team_member_website?: string | null
         }
@@ -4020,6 +4123,68 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          org_id: string
+          plan_tier: string
+          quantity: number
+          status: string
+          stripe_price_id: string | null
+          stripe_subscription_id: string
+          trial_end: string | null
+          trial_start: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          org_id: string
+          plan_tier: string
+          quantity?: number
+          status?: string
+          stripe_price_id?: string | null
+          stripe_subscription_id: string
+          trial_end?: string | null
+          trial_start?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          org_id?: string
+          plan_tier?: string
+          quantity?: number
+          status?: string
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string
+          trial_end?: string | null
+          trial_start?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_location_access: {
         Row: {
           created_at: string | null
@@ -4061,22 +4226,37 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          is_multi_unit: boolean | null
+          message: string | null
+          metadata: Json | null
           notes: string | null
+          operator_name: string | null
           source: string | null
+          store_number: string | null
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
+          is_multi_unit?: boolean | null
+          message?: string | null
+          metadata?: Json | null
           notes?: string | null
+          operator_name?: string | null
           source?: string | null
+          store_number?: string | null
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
+          is_multi_unit?: boolean | null
+          message?: string | null
+          metadata?: Json | null
           notes?: string | null
+          operator_name?: string | null
           source?: string | null
+          store_number?: string | null
         }
         Relationships: []
       }
@@ -4233,6 +4413,24 @@ export type Database = {
         Returns: undefined
       }
       generate_location_mobile_token: { Args: never; Returns: string }
+      match_context_chunks: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          p_org_id?: string
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          document_digest_id: string
+          global_document_digest_id: string
+          heading: string
+          id: string
+          similarity: number
+          source_type: string
+          token_count: number
+        }[]
+      }
       new_location_mobile_token: { Args: never; Returns: string }
       random_role_color: { Args: never; Returns: string }
       refresh_all_disciplinary_recommendations: {

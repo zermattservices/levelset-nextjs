@@ -13,65 +13,19 @@ import {
   AccordionSummary,
   AccordionDetails,
   Chip,
+  Alert,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { FEATURE_GROUPS, getAllFeatureKeys } from '@/lib/billing/constants';
+import type { FeatureGroup } from '@/lib/billing/constants';
 import styles from './OrgFeaturesTab.module.css';
 
 interface OrgFeaturesTabProps {
   orgId: string;
 }
 
-interface FeatureDefinition {
-  key: string;
-  label: string;
-  description: string;
-}
-
-interface FeatureGroup {
-  name: string;
-  tier: 'core' | 'pro' | 'ultimate';
-  features: FeatureDefinition[];
-}
-
-const FEATURE_GROUPS: FeatureGroup[] = [
-  {
-    name: 'Core Features',
-    tier: 'core',
-    features: [
-      { key: 'dashboard_access', label: 'Dashboard Access', description: 'Access to the main dashboard' },
-      { key: 'positional_excellence', label: 'Positional Excellence Dashboard', description: 'PE ratings and analytics' },
-      { key: 'positional_excellence_classic', label: 'Positional Excellence Classic', description: 'Classic PE interface' },
-      { key: 'discipline_dashboard', label: 'Discipline Dashboard', description: 'Discipline tracking and management' },
-      { key: 'roster_management', label: 'Roster Management', description: 'Employee roster management' },
-      { key: 'roster_sync', label: 'Roster Sync', description: 'HotSchedules roster synchronization' },
-      { key: 'mobile_app_access', label: 'Mobile App Access', description: 'Access to Levelset mobile app' },
-      { key: 'organization_settings', label: 'Organization Settings', description: 'Configure organization settings' },
-    ],
-  },
-  {
-    name: 'Pro Features',
-    tier: 'pro',
-    features: [
-      { key: 'certifications', label: 'Certifications', description: 'Employee certification tracking' },
-      { key: 'roster_suggested_pay', label: 'Roster Suggested Pay', description: 'Automated pay recommendations' },
-      { key: 'multi_unit', label: 'Multi-Unit Functionality', description: 'Manage multiple locations' },
-      { key: 'operational_excellence', label: 'Operational Excellence', description: 'OE pillar analytics and scoring' },
-      { key: 'scheduling', label: 'Scheduling', description: 'Shift scheduling and management' },
-      { key: 'form_management', label: 'Form Management', description: 'Create and manage custom forms' },
-      { key: 'documents', label: 'Documents', description: 'Organization document hub' },
-    ],
-  },
-  {
-    name: 'Ultimate Features',
-    tier: 'ultimate',
-    features: [
-      { key: 'levi_ai', label: 'Levi AI', description: 'AI-powered assistant' },
-    ],
-  },
-];
-
-const ALL_FEATURE_KEYS = FEATURE_GROUPS.flatMap(g => g.features.map(f => f.key));
+const ALL_FEATURE_KEYS = getAllFeatureKeys();
 
 const fontFamily = '"Satoshi", sans-serif';
 
@@ -80,8 +34,25 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set());
+  const [customPricing, setCustomPricing] = React.useState(false);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
+
+  // Fetch custom pricing status
+  React.useEffect(() => {
+    async function fetchCustomPricing() {
+      const { data } = await supabase
+        .from('orgs')
+        .select('custom_pricing')
+        .eq('id', orgId)
+        .single();
+
+      if (data) {
+        setCustomPricing(data.custom_pricing || false);
+      }
+    }
+    fetchCustomPricing();
+  }, [orgId, supabase]);
 
   // Fetch current feature settings
   React.useEffect(() => {
@@ -240,6 +211,9 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
     );
   }
 
+  // Feature toggles are disabled when not using custom pricing
+  const togglesDisabled = !customPricing;
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -256,6 +230,33 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
           <CircularProgress size={16} sx={{ color: 'var(--ls-color-brand)' }} />
         )}
       </div>
+
+      {!customPricing && (
+        <Alert
+          severity="info"
+          sx={{
+            marginBottom: 2,
+            fontFamily,
+            fontSize: '13px',
+            '& .MuiAlert-message': { fontFamily },
+          }}
+        >
+          Features are synced automatically from the subscription tier. Toggle <strong>Custom Pricing</strong> in the Subscription tab to manage features manually.
+        </Alert>
+      )}
+      {customPricing && (
+        <Alert
+          severity="warning"
+          sx={{
+            marginBottom: 2,
+            fontFamily,
+            fontSize: '13px',
+            '& .MuiAlert-message': { fontFamily },
+          }}
+        >
+          Custom pricing mode. Features are managed independently from the subscription tier.
+        </Alert>
+      )}
 
       <div className={styles.modulesContainer}>
         {FEATURE_GROUPS.map(group => {
@@ -304,7 +305,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
                   checked={isFullyEnabled}
                   indeterminate={isPartiallyEnabled}
                   onChange={(e) => toggleGroup(group, e.target.checked)}
-                  disabled={group.features.length === 0}
+                  disabled={group.features.length === 0 || togglesDisabled}
                   onClick={(e) => e.stopPropagation()}
                   sx={{
                     padding: '4px',
@@ -352,6 +353,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
                         <Checkbox
                           checked={features.get(feature.key) || false}
                           onChange={(e) => toggleFeature(feature.key, e.target.checked)}
+                          disabled={togglesDisabled}
                           sx={{
                             padding: '4px',
                             color: 'var(--ls-color-border)',
