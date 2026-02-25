@@ -208,6 +208,16 @@ export function SchedulePage() {
     setShiftModalOpen(true);
   };
 
+  const handleAssignHouseShift = async (shiftId: string, employeeId: string) => {
+    if (isPublished) return;
+    try {
+      await data.assignEmployee(shiftId, employeeId);
+      await data.updateShift(shiftId, { is_house_shift: false });
+    } catch (err) {
+      console.error('Failed to assign house shift:', err);
+    }
+  };
+
   const handlePublish = async () => {
     if (!window.confirm('Publish this schedule? Editing will be locked until you unpublish.')) return;
     try {
@@ -316,6 +326,7 @@ export function SchedulePage() {
                     onShiftClick={handleShiftClick}
                     onShiftDelete={handleShiftDelete}
                     onDragCreate={handleDragCreate}
+                    onAssignHouseShift={handleAssignHouseShift}
                     pendingShift={shiftModalOpen && !editingShift ? pendingShift : null}
                     businessHours={businessHours}
                     externalHoverMinute={chartHoverMinute}

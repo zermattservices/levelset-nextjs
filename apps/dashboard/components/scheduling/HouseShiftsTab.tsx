@@ -1,5 +1,5 @@
 import * as React from 'react';
-import sty from './BottomPanel.module.css';
+import styles from './HouseShiftsTab.module.css';
 import IconButton from '@mui/material/IconButton';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import type { Shift } from '@/lib/scheduling.types';
@@ -8,6 +8,8 @@ interface HouseShiftsTabProps {
   houseShifts: Shift[];
   isPublished: boolean;
   onDeleteShift: (id: string) => Promise<void>;
+  /** Called when user drops a house shift card onto an employee row */
+  onAssignShift?: (shiftId: string, employeeId: string) => Promise<void>;
 }
 
 function formatTimeShort(time: string): string {
@@ -17,51 +19,91 @@ function formatTimeShort(time: string): string {
   return m === 0 ? `${hour}${period}` : `${hour}:${String(m).padStart(2, '0')}${period}`;
 }
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00');
-  return `${d.getMonth() + 1}/${d.getDate()}`;
-}
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const ZONE_LABELS: Record<string, string> = { BOH: 'Back of House', FOH: 'Front of House' };
+function formatDayHeader(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${DAY_NAMES[d.getDay()]} ${d.getMonth() + 1}/${d.getDate()}`;
+}
 
 export function HouseShiftsTab({ houseShifts, isPublished, onDeleteShift }: HouseShiftsTabProps) {
   if (houseShifts.length === 0) {
     return (
-      <div className={sty.emptyState}>
-        <span className={sty.emptyText}>No house shifts available.</span>
-        <span className={sty.emptySubText}>Mark shifts as house shifts in the shift editor.</span>
+      <div className={styles.emptyState}>
+        <span className={styles.emptyText}>No house shifts available.</span>
+        <span className={styles.emptySubText}>
+          House shifts are unassigned shifts. Drag them to an employee row to assign.
+        </span>
       </div>
     );
   }
 
+  // Group shifts by date, sorted chronologically
+  const grouped = React.useMemo(() => {
+    const map = new Map<string, Shift[]>();
+    const sorted = [...houseShifts].sort((a, b) => {
+      const dateComp = a.shift_date.localeCompare(b.shift_date);
+      if (dateComp !== 0) return dateComp;
+      return a.start_time.localeCompare(b.start_time);
+    });
+    for (const shift of sorted) {
+      const existing = map.get(shift.shift_date) || [];
+      existing.push(shift);
+      map.set(shift.shift_date, existing);
+    }
+    return Array.from(map.entries());
+  }, [houseShifts]);
+
+  const handleDragStart = React.useCallback((e: React.DragEvent, shift: Shift) => {
+    e.dataTransfer.setData('application/x-house-shift', JSON.stringify({
+      shiftId: shift.id,
+      positionName: shift.position?.name || 'No Position',
+      startTime: shift.start_time,
+      endTime: shift.end_time,
+    }));
+    e.dataTransfer.effectAllowed = 'move';
+  }, []);
+
   return (
-    <table className={sty.table}>
-      <thead>
-        <tr>
-          <th className={sty.th}>Position</th>
-          <th className={sty.th}>Date</th>
-          <th className={sty.th}>Time</th>
-          <th className={sty.th}>Zone</th>
-          <th className={sty.th} style={{ width: 40 }}></th>
-        </tr>
-      </thead>
-      <tbody>
-        {houseShifts.map((shift) => (
-          <tr key={shift.id} className={sty.tr}>
-            <td className={sty.td}>{shift.position?.name ?? 'No Position'}</td>
-            <td className={sty.td}>{formatDate(shift.shift_date)}</td>
-            <td className={sty.td}>{formatTimeShort(shift.start_time)}–{formatTimeShort(shift.end_time)}</td>
-            <td className={sty.td}>{shift.position ? ZONE_LABELS[shift.position.zone] ?? shift.position.zone : '—'}</td>
-            <td className={sty.td}>
-              {!isPublished && (
-                <IconButton size="small" onClick={() => onDeleteShift(shift.id)} sx={{ padding: '2px' }}>
-                  <DeleteOutlineIcon sx={{ fontSize: 14, color: 'var(--ls-color-destructive)' }} />
-                </IconButton>
-              )}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className={styles.container}>
+      {grouped.map(([date, shifts]) => (
+        <div key={date} className={styles.dayGroup}>
+          <div className={styles.dayHeader}>{formatDayHeader(date)}</div>
+          <div className={styles.cardRow}>
+            {shifts.map((shift) => (
+              <div
+                key={shift.id}
+                className={styles.card}
+                draggable={!isPublished}
+                onDragStart={(e) => handleDragStart(e, shift)}
+              >
+                <div className={styles.cardTop}>
+                  <span className={styles.cardPosition}>
+                    {shift.position?.name ?? 'No Position'}
+                  </span>
+                  {!isPublished && (
+                    <IconButton
+                      size="small"
+                      onClick={(e) => { e.stopPropagation(); onDeleteShift(shift.id); }}
+                      sx={{ padding: '2px', marginLeft: 'auto' }}
+                    >
+                      <DeleteOutlineIcon sx={{ fontSize: 13, color: 'var(--ls-color-destructive)' }} />
+                    </IconButton>
+                  )}
+                </div>
+                <div className={styles.cardTime}>
+                  {formatTimeShort(shift.start_time)}–{formatTimeShort(shift.end_time)}
+                </div>
+                {shift.position?.zone && (
+                  <div className={styles.cardZone}>
+                    {shift.position.zone}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

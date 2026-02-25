@@ -87,9 +87,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // New scheduling data fields (optional — backwards compatible)
     const shifts: HotSchedulesShift[] = req.body.shifts || [];
-    const jobs: HotSchedulesJob[] = req.body.jobs || [];
     const roles: HotSchedulesRole[] = req.body.roles || [];
     const bootstrap: HotSchedulesBootstrap | undefined = req.body.bootstrap;
+
+    // Merge jobs from endpoint (/client/jobs/) and bootstrap — some shift jobIds
+    // only exist in bootstrap.jobs but not in the client endpoint.
+    const endpointJobs: HotSchedulesJob[] = req.body.jobs || [];
+    const bootstrapJobs: HotSchedulesJob[] = bootstrap?.jobs || [];
+    const jobById = new Map<number, HotSchedulesJob>();
+    bootstrapJobs.forEach(j => jobById.set(j.id, j));  // bootstrap first (lower priority)
+    endpointJobs.forEach(j => jobById.set(j.id, j));   // endpoint overwrites (higher priority)
+    const jobs: HotSchedulesJob[] = Array.from(jobById.values());
     const forecasts = req.body.forecasts || {};
     const slsProjected = req.body.slsProjected || [];
     const timeOff: HotSchedulesTimeOff[] = req.body.timeOff || [];

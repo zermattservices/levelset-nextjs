@@ -95,6 +95,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }>;
     }>;
 
+    // Step 3b: Re-resolve employee IDs from current DB state.
+    // On first sync, employees didn't exist yet when the notification was created,
+    // so levelset_employee_id was null. Now they've been created in the employee
+    // confirm step, so we look them up fresh by hs_id.
+    const hsEmployeeIds = shiftsByEmployee
+      .filter(g => g.hs_employee_id > 0)
+      .map(g => g.hs_employee_id);
+
+    if (hsEmployeeIds.length > 0) {
+      const { data: currentEmployees } = await supabase
+        .from('employees')
+        .select('id, hs_id')
+        .eq('location_id', location_id)
+        .not('hs_id', 'is', null);
+
+      const empByHsId = new Map<number, string>();
+      (currentEmployees || []).forEach((emp: any) => {
+        if (emp.hs_id) empByHsId.set(Number(emp.hs_id), emp.id);
+      });
+
+      let resolved = 0;
+      for (const group of shiftsByEmployee) {
+        if (!group.levelset_employee_id && group.hs_employee_id > 0) {
+          const empId = empByHsId.get(group.hs_employee_id);
+          if (empId) {
+            group.levelset_employee_id = empId;
+            resolved++;
+          }
+        }
+      }
+      if (resolved > 0) {
+        console.log(`[SyncConfirm] Re-resolved ${resolved} employee IDs from current DB state`);
+      }
+    }
+
     // Step 4: Create/update schedule and sync shifts
     const result = await syncScheduleShifts(
       supabase,

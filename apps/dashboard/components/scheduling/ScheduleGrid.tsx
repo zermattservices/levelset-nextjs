@@ -53,6 +53,8 @@ interface ScheduleGridProps {
   externalHoverMinute?: number | null;
   /** Called when user hovers in the grid timeline — passes minutes-of-day */
   onHoverMinuteChange?: (minute: number | null) => void;
+  /** Called when a house shift card is dropped onto an employee row */
+  onAssignHouseShift?: (shiftId: string, employeeId: string) => void;
 }
 
 const DAY_LABELS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -607,6 +609,7 @@ function DayEmployeeView({
   shifts, employees, selectedDay, isPublished,
   canViewPay, columnConfig, onColumnConfigUpdate,
   onCellClick, onShiftClick, onDragCreate,
+  onAssignHouseShift,
   pendingShift, businessHours,
   externalHoverMinute, onHoverMinuteChange,
 }: {
@@ -621,6 +624,7 @@ function DayEmployeeView({
   onShiftClick: (shift: Shift) => void;
   onShiftDelete: (shiftId: string) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
+  onAssignHouseShift?: (shiftId: string, employeeId: string) => void;
   pendingShift?: PendingShiftPreview | null;
   businessHours?: LocationBusinessHours[];
   externalHoverMinute?: number | null;
@@ -762,6 +766,7 @@ function DayEmployeeView({
               onCellClick={onCellClick}
               onShiftClick={onShiftClick}
               onDragCreate={onDragCreate}
+              onAssignHouseShift={onAssignHouseShift}
               pendingShift={empPending}
               gridHoverPct={activeHoverPct}
             />
@@ -792,7 +797,7 @@ function DayEmployeeView({
 function DayEmployeeRow({
   emp, empShifts, empHours, empCost, selectedDay, timeRange, totalMinutes, shiftStyleFn, isPublished,
   canViewPay, columnConfig,
-  onCellClick, onShiftClick, onDragCreate,
+  onCellClick, onShiftClick, onDragCreate, onAssignHouseShift,
   pendingShift, gridHoverPct,
 }: {
   emp: Employee;
@@ -809,6 +814,7 @@ function DayEmployeeRow({
   onCellClick: (date: string, entityId?: string) => void;
   onShiftClick: (shift: Shift) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
+  onAssignHouseShift?: (shiftId: string, employeeId: string) => void;
   pendingShift?: PendingShiftPreview | null;
   gridHoverPct: number | null;
 }) {
@@ -860,8 +866,34 @@ function DayEmployeeRow({
     };
   }, [dragPreview, emp.actual_pay, emp.actual_pay_type, emp.calculated_pay]);
 
+  // House shift drop handlers
+  const [isDragOver, setIsDragOver] = React.useState(false);
+  const handleDragOver = React.useCallback((e: React.DragEvent) => {
+    if (e.dataTransfer.types.includes('application/x-house-shift')) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      setIsDragOver(true);
+    }
+  }, []);
+  const handleDragLeave = React.useCallback(() => setIsDragOver(false), []);
+  const handleDrop = React.useCallback((e: React.DragEvent) => {
+    setIsDragOver(false);
+    const raw = e.dataTransfer.getData('application/x-house-shift');
+    if (!raw || !onAssignHouseShift) return;
+    try {
+      const data = JSON.parse(raw);
+      if (data.shiftId) onAssignHouseShift(data.shiftId, emp.id);
+    } catch { /* ignore */ }
+  }, [onAssignHouseShift, emp.id]);
+
   return (
-    <div className={sty.dayRow}>
+    <div
+      className={sty.dayRow}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      style={isDragOver ? { background: 'var(--ls-color-brand-soft)', outline: '2px solid var(--ls-color-brand-border)', outlineOffset: -2, borderRadius: 4 } : undefined}
+    >
       <div className={sty.rowLabel}>
         <span className={sty.empNameLink}>{emp.full_name}</span>
         <div className={sty.empMeta}>
@@ -1424,7 +1456,7 @@ export function ScheduleGrid(props: ScheduleGridProps) {
   } = props;
 
   if (timeViewMode === 'day' && gridViewMode === 'employees') {
-    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} businessHours={businessHours} externalHoverMinute={externalHoverMinute} onHoverMinuteChange={onHoverMinuteChange} />;
+    return <DayEmployeeView shifts={shifts} employees={employees} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} onAssignHouseShift={props.onAssignHouseShift} pendingShift={pendingShift} businessHours={businessHours} externalHoverMinute={externalHoverMinute} onHoverMinuteChange={onHoverMinuteChange} />;
   }
   if (timeViewMode === 'day' && gridViewMode === 'positions') {
     return <DayPositionView shifts={shifts} positions={positions} selectedDay={selectedDay} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} onDragCreate={onDragCreate} pendingShift={pendingShift} businessHours={businessHours} externalHoverMinute={externalHoverMinute} onHoverMinuteChange={onHoverMinuteChange} />;

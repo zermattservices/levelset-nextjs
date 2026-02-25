@@ -35,7 +35,7 @@ import type { Employee, AvailabilityType } from "@/lib/supabase.types";
 import { RolePill } from "./shared/RolePill";
 import { createSupabaseClient } from "@/util/supabase/component";
 import type { SchedulingSyncAnalysis } from "@/lib/hotschedules.types";
-import { useOrgFeatures, F } from "@/lib/providers/OrgFeaturesProvider";
+
 
 export interface SyncEmployeesModalProps {
   open: boolean;
@@ -639,8 +639,16 @@ export function SyncEmployeesModal({
     total_cost: number;
   } | null>(null);
   const [scheduleSyncing, setScheduleSyncing] = React.useState(false);
-  const { hasFeature } = useOrgFeatures();
-  const hasSchedulingFeature = hasFeature(F.SCHEDULING);
+  // Check org's actual scheduling feature — query directly so admin bypass doesn't
+  // show scheduling config for orgs that don't have the feature enabled.
+  const [hasSchedulingFeature, setHasSchedulingFeature] = React.useState(false);
+  React.useEffect(() => {
+    if (!orgId) return;
+    const supabase = createSupabaseClient();
+    supabase.from('org_features').select('enabled')
+      .eq('org_id', orgId).eq('feature_key', 'scheduling').maybeSingle()
+      .then(({ data }) => setHasSchedulingFeature(data?.enabled === true));
+  }, [orgId]);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   console.log('[SyncEmployeesModal] baseUrl =', baseUrl);
