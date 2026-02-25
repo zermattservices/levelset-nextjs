@@ -221,9 +221,11 @@ async function resolvePositionMappings(
       result.set(mapping.hs_job_id, mapping.position_id);
     } else {
       // Auto-create a scheduling_only position
-      // Determine zone from HS role name heuristic
+      // Determine zone from HS job name and role name heuristic
+      const jobName = (mapping.hs_job_name || '').toLowerCase();
       const roleName = (mapping.hs_role_name || '').toLowerCase();
-      const isBoh = roleName.includes('back') || roleName.includes('boh');
+      const combined = `${jobName} ${roleName}`;
+      const isBoh = combined.includes('back') || combined.includes('boh');
       const zone: 'FOH' | 'BOH' = isBoh ? 'BOH' : 'FOH';
       const areaId = isBoh ? bohArea?.id : fohArea?.id;
 
