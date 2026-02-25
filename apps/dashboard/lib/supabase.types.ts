@@ -22,6 +22,9 @@ export interface Employee {
   certified_status?: CertificationStatus;
   availability?: AvailabilityType;
   calculated_pay?: number;
+  actual_pay?: number;
+  actual_pay_type?: 'hourly' | 'salary';
+  actual_pay_annual?: number;
   position?: string;
   hire_date?: string;
   payroll_name?: string;

@@ -125,8 +125,12 @@ function buildIntervalData(
         // Shift overlaps interval if shiftStart < intervalEnd AND shiftEnd > intervalStart
         if (shiftStart < intervalEnd && shiftEnd > intervalStart) {
           headcount++;
-          if (canViewPay && shift.assignment?.employee?.calculated_pay) {
-            costRate += shift.assignment.employee.calculated_pay;
+          if (canViewPay && shift.assignment?.employee) {
+            const emp = shift.assignment.employee as any;
+            if (emp.actual_pay_type !== 'salary') {
+              const rate = emp.actual_pay ?? emp.calculated_pay;
+              if (rate) costRate += rate;
+            }
           }
         }
       }

@@ -222,18 +222,25 @@ async function calculateProjectedCost(
 ): Promise<number | null> {
   const { data: employee } = await supabase
     .from('employees')
-    .select('calculated_pay')
+    .select('actual_pay, actual_pay_type, actual_pay_annual, calculated_pay')
     .eq('id', employeeId)
     .single();
 
-  if (!employee?.calculated_pay) return null;
+  if (!employee) return null;
+
+  // Salaried employees: no per-shift cost (flat weekly rate)
+  if (employee.actual_pay_type === 'salary') return null;
+
+  // Prefer actual_pay (from HS), fall back to calculated_pay (from org rules)
+  const hourlyRate = employee.actual_pay ?? employee.calculated_pay;
+  if (!hourlyRate) return null;
 
   const startMinutes = parseTime(startTime);
   let endMinutes = parseTime(endTime);
   if (endMinutes <= startMinutes) endMinutes += 24 * 60; // cross-day shift
   const netHours = Math.max(0, (endMinutes - startMinutes) / 60 - breakMinutes / 60);
 
-  return Math.round(employee.calculated_pay * netHours * 100) / 100;
+  return Math.round(hourlyRate * netHours * 100) / 100;
 }
 
 function parseTime(time: string): number {

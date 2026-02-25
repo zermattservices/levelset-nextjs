@@ -16,6 +16,9 @@ interface Employee {
   full_name: string;
   role: string;
   calculated_pay?: number;
+  actual_pay?: number;
+  actual_pay_type?: 'hourly' | 'salary';
+  actual_pay_annual?: number;
   is_foh: boolean;
   is_boh: boolean;
 }
@@ -80,7 +83,12 @@ function calculateCost(
   endTime: string,
   breakMinutes: number,
 ): number | null {
-  if (!employee?.calculated_pay) return null;
+  if (!employee) return null;
+  // Salaried employees: no per-shift cost (flat weekly rate)
+  if (employee.actual_pay_type === 'salary') return null;
+  // Prefer actual_pay (from HS), fall back to calculated_pay (from org rules)
+  const rate = employee.actual_pay ?? employee.calculated_pay;
+  if (!rate) return null;
   const [sh, sm] = startTime.split(':').map(Number);
   const [eh, em] = endTime.split(':').map(Number);
   const startMin = sh * 60 + sm;
@@ -95,7 +103,7 @@ function calculateCost(
     endMin += 24 * 60; // fallback cross-day
   }
   const netHours = Math.max(0, (endMin - startMin) / 60 - breakMinutes / 60);
-  return Math.round(employee.calculated_pay * netHours * 100) / 100;
+  return Math.round(rate * netHours * 100) / 100;
 }
 
 function generateTimeOptions(): { value: string; label: string }[] {
@@ -601,7 +609,15 @@ export function ShiftModal({
               {filteredEmployees.map((e) => (
                 <option key={e.id} value={e.id}>
                   {e.full_name} — {e.role}
-                  {canViewPay && e.calculated_pay ? ` ($${e.calculated_pay.toFixed(2)}/hr)` : ''}
+                  {canViewPay
+                    ? e.actual_pay_type === 'salary'
+                      ? ' (Salaried)'
+                      : e.actual_pay
+                        ? ` ($${e.actual_pay.toFixed(2)}/hr)`
+                        : e.calculated_pay
+                          ? ` ($${e.calculated_pay.toFixed(2)}/hr)`
+                          : ''
+                    : ''}
                 </option>
               ))}
             </select>

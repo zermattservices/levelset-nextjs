@@ -7,6 +7,7 @@ import type {
   HotSchedulesJob,
   HotSchedulesRole,
   HotSchedulesBootstrap,
+  HotSchedulesUserJob,
   HotSchedulesForecastDaily,
   HotSchedulesTimeOff,
   HotSchedulesTimeOffStatus,
@@ -374,6 +375,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       );
     }
 
+    // Step 7f: Extract actual pay rates from bootstrap.userJobs
+    if (bootstrap?.userJobs && bootstrap.userJobs.length > 0) {
+      await updateActualPayRates(supabase, bootstrap.userJobs, existingEmployeesByHsId);
+    }
+
     // Step 8: Create sync notification record
     const syncData: Record<string, any> = {
       new_employees: newEmployees,
@@ -598,5 +604,83 @@ async function analyzeSchedulingData(
     unmapped_jobs: unmappedJobs,
     shifts_by_employee: shiftsByEmployee,
   };
+}
+
+/**
+ * Extract actual pay rates from HS bootstrap.userJobs and write to employees table.
+ * Each employee may have multiple userJobs — pick the primary job's rate,
+ * or the highest rate if none is marked primary.
+ * Rates > $100/hr (10000 cents) are treated as annual salaries.
+ */
+const SALARY_THRESHOLD_CENTS = 10000; // $100/hr — anything above is treated as salary
+
+async function updateActualPayRates(
+  supabase: ReturnType<typeof createServerSupabaseClient>,
+  userJobs: HotSchedulesUserJob[],
+  employeesByHsId: Map<number, Employee>,
+): Promise<void> {
+  // Build map: HS employeeId → best payRate (cents)
+  const bestRate = new Map<number, number>();
+  const primaryRate = new Map<number, number>();
+
+  for (const uj of userJobs) {
+    if (!uj.employeeId || !uj.payRate) continue;
+
+    if (uj.primary) {
+      primaryRate.set(uj.employeeId, uj.payRate);
+    }
+
+    const current = bestRate.get(uj.employeeId) || 0;
+    if (uj.payRate > current) {
+      bestRate.set(uj.employeeId, uj.payRate);
+    }
+  }
+
+  let updated = 0;
+  for (const [hsEmpId, highestRate] of Array.from(bestRate.entries())) {
+    const levelsetEmp = employeesByHsId.get(hsEmpId);
+    if (!levelsetEmp) continue;
+
+    // Use primary job rate if available, otherwise highest
+    const payRateCents = primaryRate.get(hsEmpId) ?? highestRate;
+
+    if (payRateCents > SALARY_THRESHOLD_CENTS) {
+      // Salary: the rate represents an annual salary in cents
+      const annualDollars = Math.round(payRateCents) / 100;
+      const { error } = await supabase
+        .from('employees')
+        .update({
+          actual_pay: null,
+          actual_pay_type: 'salary',
+          actual_pay_annual: annualDollars,
+        })
+        .eq('id', levelsetEmp.id);
+
+      if (error) {
+        console.error(`[Sync] Error updating salary for ${levelsetEmp.id}:`, error);
+      } else {
+        updated++;
+      }
+    } else {
+      // Hourly: convert cents to dollars
+      const hourlyDollars = Math.round(payRateCents) / 100;
+      const { error } = await supabase
+        .from('employees')
+        .update({
+          actual_pay: hourlyDollars,
+          actual_pay_type: 'hourly',
+          actual_pay_annual: null,
+        })
+        .eq('id', levelsetEmp.id);
+
+      if (error) {
+        console.error(`[Sync] Error updating hourly pay for ${levelsetEmp.id}:`, error);
+      } else {
+        updated++;
+      }
+    }
+  }
+
+  console.log(`[Sync] Updated actual pay rates for ${updated} employees`);
 }
 

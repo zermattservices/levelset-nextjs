@@ -304,20 +304,28 @@ async function syncScheduleShifts(
     throw new Error(`Failed to clear existing shifts: ${deleteError.message}`);
   }
 
-  // Step 3: Pre-fetch all employee pay rates to avoid N+1 queries
+  // Step 3: Pre-fetch all employee pay info to avoid N+1 queries
   const employeeIds = shiftsByEmployee
     .filter(g => g.levelset_employee_id)
     .map(g => g.levelset_employee_id!);
 
-  const payRateMap = new Map<string, number>();
+  interface PayInfo {
+    hourlyRate: number | null;
+    isSalary: boolean;
+    weeklyCost: number | null;
+  }
+  const payInfoMap = new Map<string, PayInfo>();
   if (employeeIds.length > 0) {
     const { data: employees } = await supabase
       .from('employees')
-      .select('id, calculated_pay')
+      .select('id, actual_pay, actual_pay_type, actual_pay_annual, calculated_pay')
       .in('id', Array.from(new Set(employeeIds)));
 
     (employees || []).forEach((emp: any) => {
-      if (emp.calculated_pay) payRateMap.set(emp.id, emp.calculated_pay);
+      const isSalary = emp.actual_pay_type === 'salary' && emp.actual_pay_annual;
+      const hourlyRate = isSalary ? null : (emp.actual_pay ?? emp.calculated_pay ?? null);
+      const weeklyCost = isSalary ? Math.round(emp.actual_pay_annual / 52 * 100) / 100 : null;
+      payInfoMap.set(emp.id, { hourlyRate, isSalary: !!isSalary, weeklyCost });
     });
   }
 
@@ -325,7 +333,8 @@ async function syncScheduleShifts(
   let shiftsCreated = 0;
   let assignmentsCreated = 0;
   let totalHours = 0;
-  let totalCost = 0;
+  let totalHourlyCost = 0;
+  const salariedEmployeesInSchedule = new Set<string>();
 
   for (const group of shiftsByEmployee) {
     for (const shift of group.shifts) {
@@ -365,11 +374,14 @@ async function syncScheduleShifts(
 
       // Create assignment if not a house shift and employee is matched
       if (!shift.is_house_shift && group.levelset_employee_id) {
-        const payRate = payRateMap.get(group.levelset_employee_id);
+        const payInfo = payInfoMap.get(group.levelset_employee_id);
         let projectedCost: number | null = null;
 
-        if (payRate) {
-          projectedCost = Math.round(payRate * netHours * 100) / 100;
+        if (payInfo?.isSalary) {
+          // Salary: no per-shift cost, track employee for weekly total
+          salariedEmployeesInSchedule.add(group.levelset_employee_id);
+        } else if (payInfo?.hourlyRate) {
+          projectedCost = Math.round(payInfo.hourlyRate * netHours * 100) / 100;
         }
 
         const { error: assignError } = await supabase
@@ -385,13 +397,23 @@ async function syncScheduleShifts(
           console.error(`Error creating assignment:`, assignError);
         } else {
           assignmentsCreated++;
-          totalCost += projectedCost || 0;
+          totalHourlyCost += projectedCost || 0;
         }
       }
     }
   }
 
-  // Step 4: Update schedule with totals and publish
+  // Calculate total cost: hourly costs + salaried weekly costs
+  let totalSalaryCost = 0;
+  for (const empId of Array.from(salariedEmployeesInSchedule)) {
+    const payInfo = payInfoMap.get(empId);
+    if (payInfo?.weeklyCost) {
+      totalSalaryCost += payInfo.weeklyCost;
+    }
+  }
+  const totalCost = totalHourlyCost + totalSalaryCost;
+
+  // Step 5: Update schedule with totals and publish
   await supabase
     .from('schedules')
     .update({
@@ -403,7 +425,7 @@ async function syncScheduleShifts(
     })
     .eq('id', scheduleId);
 
-  console.log(`[SyncConfirm] Schedule synced: ${shiftsCreated} shifts, ${assignmentsCreated} assignments, ${totalHours.toFixed(1)}h, $${totalCost.toFixed(2)}`);
+  console.log(`[SyncConfirm] Schedule synced: ${shiftsCreated} shifts, ${assignmentsCreated} assignments, ${totalHours.toFixed(1)}h, $${totalCost.toFixed(2)} (hourly: $${totalHourlyCost.toFixed(2)}, salary: $${totalSalaryCost.toFixed(2)})`);
 
   return {
     schedule_id: scheduleId,

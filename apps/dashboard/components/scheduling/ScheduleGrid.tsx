@@ -16,6 +16,9 @@ interface Employee {
   is_foh: boolean;
   is_boh: boolean;
   calculated_pay?: number;
+  actual_pay?: number;
+  actual_pay_type?: 'hourly' | 'salary';
+  actual_pay_annual?: number;
 }
 
 /** Describes a pending shift being created (shown while the drawer is open) */
@@ -207,12 +210,23 @@ function WeekEmployeeView({
   function empWeekSummary(empId: string) {
     let hours = 0;
     let cost = 0;
+    const emp = employees.find(e => e.id === empId);
+    const isSalary = emp?.actual_pay_type === 'salary' && emp?.actual_pay_annual;
+
     for (const s of shifts) {
       if (s.assignment?.employee_id === empId) {
         hours += shiftNetHours(s);
-        cost += s.assignment?.projected_cost ?? 0;
+        if (!isSalary) {
+          cost += s.assignment?.projected_cost ?? 0;
+        }
       }
     }
+
+    // Salaried employees: flat weekly cost regardless of hours
+    if (isSalary && emp?.actual_pay_annual) {
+      cost = Math.round(emp.actual_pay_annual / 52 * 100) / 100;
+    }
+
     return { hours, cost };
   }
 
@@ -716,11 +730,18 @@ function DayEmployeeView({
           const empShifts = shiftMap.get(emp.id) ?? [];
           let hours = 0;
           let cost = 0;
+          const isSalaryEmp = emp.actual_pay_type === 'salary' && emp.actual_pay_annual;
           for (const s of shifts) {
             if (s.assignment?.employee_id === emp.id) {
               hours += shiftNetHours(s);
-              cost += s.assignment?.projected_cost ?? 0;
+              if (!isSalaryEmp) {
+                cost += s.assignment?.projected_cost ?? 0;
+              }
             }
+          }
+          // Salaried: show flat weekly cost divided by 7 for daily view
+          if (isSalaryEmp && emp.actual_pay_annual) {
+            cost = Math.round(emp.actual_pay_annual / 52 / 7 * 100) / 100;
           }
           // Show pending shift preview on matching employee row
           const empPending = pendingShift?.date === selectedDay && pendingShift?.entityId === emp.id ? pendingShift : null;
@@ -811,8 +832,9 @@ function DayEmployeeRow({
     if (endMin <= startMin) endMin = totalMinutes;
     const zoneColor = pendingShift.positionZone ? ZONE_COLORS[pendingShift.positionZone] : null;
     const hours = computeNetHours(pendingShift.startTime, pendingShift.endTime);
-    const payRate = emp.calculated_pay ?? 0;
-    const cost = hours * payRate;
+    const isSalary = emp.actual_pay_type === 'salary';
+    const payRate = isSalary ? 0 : (emp.actual_pay ?? emp.calculated_pay ?? 0);
+    const cost = isSalary ? 0 : hours * payRate;
     return {
       left: `${Math.max(0, (startMin / totalMinutes) * 100)}%`,
       width: `${Math.max(2, ((endMin - startMin) / totalMinutes) * 100)}%`,
@@ -824,18 +846,19 @@ function DayEmployeeRow({
       cost,
       payRate,
     };
-  }, [pendingShift, timeRange.minHour, totalMinutes, emp.calculated_pay]);
+  }, [pendingShift, timeRange.minHour, totalMinutes, emp.actual_pay, emp.actual_pay_type, emp.calculated_pay]);
 
   // Compute drag preview cost
   const dragCostInfo = React.useMemo(() => {
     if (!dragPreview) return null;
-    const payRate = emp.calculated_pay ?? 0;
+    const isSalary = emp.actual_pay_type === 'salary';
+    const payRate = isSalary ? 0 : (emp.actual_pay ?? emp.calculated_pay ?? 0);
     return {
       hours: dragPreview.hours,
-      cost: dragPreview.hours * payRate,
+      cost: isSalary ? 0 : dragPreview.hours * payRate,
       payRate,
     };
-  }, [dragPreview, emp.calculated_pay]);
+  }, [dragPreview, emp.actual_pay, emp.actual_pay_type, emp.calculated_pay]);
 
   return (
     <div className={sty.dayRow}>
