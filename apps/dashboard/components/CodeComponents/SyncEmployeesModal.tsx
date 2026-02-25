@@ -646,22 +646,22 @@ export function SyncEmployeesModal({
   console.log('[SyncEmployeesModal] baseUrl =', baseUrl);
   
   const bookmarkletCode = React.useMemo(() => {
-    console.log('[SyncEmployeesModal] useMemo: bookmarkletCode called', { baseUrl, locationId, orgId });
+    console.log('[SyncEmployeesModal] useMemo: bookmarkletCode called', { baseUrl });
     if (!baseUrl) return '';
-    if (!locationId || !orgId) return '';
 
     // Bookmarklet phases:
-    // 1. Bootstrap — fetch schedule config to get weekStartDate, jobs, roles
-    // 2. Parallel fetch — employees + shifts + jobs + roles + forecasts + time-off + availability
-    // 3. POST all data to sync-hotschedules endpoint
+    // 1. Parse HS cookie to extract location number + HS client ID
+    // 2. Bootstrap — fetch schedule config to get weekStartDate, jobs, roles
+    // 3. Parallel fetch — employees + shifts + jobs + roles + forecasts + time-off + availability
+    // 4. POST all data to sync-hotschedules endpoint (no embedded Levelset IDs)
     const code = `javascript:(function(){
 var baseUrl='${baseUrl}';
-var locationId='${locationId}';
-var orgId='${orgId}';
 var loadingDiv=document.createElement('div');
 loadingDiv.style.cssText='position:fixed;top:20px;right:20px;background:#31664a;color:white;padding:15px 20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;min-width:260px;';
 loadingDiv.textContent='Connecting to HotSchedules...';
 document.body.appendChild(loadingDiv);
+var hsClientId=null;var hsLocationNumber=null;var hsLocationDisplay=null;
+try{var cookieMatch=document.cookie.match(/clarifi_previous_node_store_selection=([^;]+)/);if(cookieMatch){var decoded=decodeURIComponent(cookieMatch[1]);var parsed=JSON.parse(decoded);var keys=Object.keys(parsed);if(keys.length>0){var entry=parsed[keys[0]];hsLocationDisplay=entry.display||'';var numMatch=hsLocationDisplay.match(/\\((\\d{5})\\)/);if(numMatch)hsLocationNumber=numMatch[1];var idMatch=entry.name?entry.name.match(/:clarifi:(\\d+):/):null;if(idMatch)hsClientId=parseInt(idMatch[1],10);}}}catch(e){console.warn('Could not parse HS cookie:',e);}
 var hsOrigin=window.location.origin;
 var ts=Date.now();
 var fetchOpts={method:'GET',credentials:'include',headers:{'Accept':'application/json'}};
@@ -700,7 +700,7 @@ var slsProjected=results[5];
 var timeOff=Array.isArray(results[6])?results[6]:[];
 var timeOffStatuses=Array.isArray(results[7])?results[7]:[];
 var availability=Array.isArray(results[8])?results[8]:[];
-var payload={employees:visibleEmployees,shifts:shifts,jobs:jobs,roles:roles,bootstrap:{currentWeekStartDate:bootstrap.currentWeekStartDate,utcOffset:bootstrap.utcOffset,tz:bootstrap.tz,scheduleMinuteInterval:bootstrap.scheduleMinuteInterval,clientWorkWeekStart:bootstrap.clientWorkWeekStart,userJobs:bootstrap.userJobs||[],jobs:bootstrap.jobs||[],schedules:bootstrap.schedules||[]},forecasts:{daily:forecastSummary&&forecastSummary.projectedVolume?forecastSummary.projectedVolume:[],intervals:[],benchmarks:[]},slsProjected:Array.isArray(slsProjected)?slsProjected:[],timeOff:timeOff,timeOffStatuses:timeOffStatuses,availability:availability,weekStartDate:weekStart,location_id:locationId,org_id:orgId};
+var payload={employees:visibleEmployees,shifts:shifts,jobs:jobs,roles:roles,bootstrap:{id:bootstrap.id,currentWeekStartDate:bootstrap.currentWeekStartDate,utcOffset:bootstrap.utcOffset,tz:bootstrap.tz,scheduleMinuteInterval:bootstrap.scheduleMinuteInterval,clientWorkWeekStart:bootstrap.clientWorkWeekStart,userJobs:bootstrap.userJobs||[],jobs:bootstrap.jobs||[],schedules:bootstrap.schedules||[]},forecasts:{daily:forecastSummary&&forecastSummary.projectedVolume?forecastSummary.projectedVolume:[],intervals:[],benchmarks:[]},slsProjected:Array.isArray(slsProjected)?slsProjected:[],timeOff:timeOff,timeOffStatuses:timeOffStatuses,availability:availability,weekStartDate:weekStart,hs_client_id:hsClientId||bootstrap.id,hs_location_number:hsLocationNumber,hs_location_display:hsLocationDisplay};
 loadingDiv.textContent='Syncing to Levelset...';
 return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
 });
@@ -708,7 +708,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
 })();`;
 
     return code;
-  }, [baseUrl, locationId, orgId]);
+  }, [baseUrl]);
 
   // Fetch has_synced_before flag
   React.useEffect(() => {

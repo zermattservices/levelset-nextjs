@@ -80,8 +80,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const supabase = createServerSupabaseClient();
     const employees: HotSchedulesEmployee[] = req.body.employees || req.body;
-    const locationId = req.body.location_id as string | undefined;
-    const orgId = req.body.org_id as string | undefined;
+    const locationId = req.body.location_id as string | undefined;     // backward compat
+    const orgId = req.body.org_id as string | undefined;               // backward compat
+    const hsClientId = req.body.hs_client_id as number | undefined;    // from cookie/bootstrap
+    const hsLocationNumber = req.body.hs_location_number as string | undefined; // from cookie
 
     // New scheduling data fields (optional — backwards compatible)
     const shifts: HotSchedulesShift[] = req.body.shifts || [];
@@ -99,59 +101,87 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Invalid request body. Expected array of employees.' });
     }
 
-    // Step 1: Get location_id and org_id (from request or extract from data)
-    let finalLocationId: string;
-    let finalOrgId: string;
-    let locationNumber: string;
+    // Step 1: Resolve location — cascade through detection methods
+    let finalLocationId: string | undefined;
+    let finalOrgId: string | undefined;
+    let locationNumber: string = 'unknown';
 
+    // Method A: Direct from request (backward compat with old bookmarklets)
     if (locationId && orgId) {
-      // Use provided location_id and org_id
       finalLocationId = locationId;
       finalOrgId = orgId;
-      
-      // Get location number for storage filename
-      const { data: locationData } = await supabase
-        .from('locations')
-        .select('location_number')
-        .eq('id', locationId)
-        .single();
-      locationNumber = locationData?.location_number || 'unknown';
-    } else {
-      // Fallback: Extract location number from HotSchedules data (legacy support)
+      const { data } = await supabase.from('locations').select('location_number')
+        .eq('id', locationId).single();
+      locationNumber = data?.location_number || 'unknown';
+      console.log(`[Sync] Location resolved via Method A (direct IDs): ${locationNumber}`);
+    }
+
+    // Method B: Lookup by HS client ID (fast, saved from previous syncs)
+    if (!finalLocationId && hsClientId) {
+      const { data } = await supabase.from('locations')
+        .select('id, org_id, location_number')
+        .eq('hs_client_id', hsClientId).single();
+      if (data) {
+        finalLocationId = data.id;
+        finalOrgId = data.org_id;
+        locationNumber = data.location_number;
+        console.log(`[Sync] Location resolved via Method B (hs_client_id ${hsClientId}): ${locationNumber}`);
+      }
+    }
+
+    // Method C: Lookup by location number (from cookie, works on first sync)
+    if (!finalLocationId && hsLocationNumber) {
+      const { data } = await supabase.from('locations')
+        .select('id, org_id, location_number')
+        .eq('location_number', hsLocationNumber).single();
+      if (data) {
+        finalLocationId = data.id;
+        finalOrgId = data.org_id;
+        locationNumber = data.location_number;
+        console.log(`[Sync] Location resolved via Method C (location_number ${hsLocationNumber}): ${locationNumber}`);
+      }
+    }
+
+    // Method D: Legacy type:5 employee extraction (last resort)
+    if (!finalLocationId) {
       const locationEmployee = employees.find(emp => {
         if (emp.type !== 5) return false;
-        if (emp.name?.startsWith('x')) return false; // lowercase x
-        const match = emp.name?.match(/\b\d{5}\b/); // 5 consecutive digits
+        if (emp.name?.startsWith('x')) return false;
+        const match = emp.name?.match(/\b\d{5}\b/);
         return match !== null;
       });
 
-      if (!locationEmployee || !locationEmployee.name) {
-        return res.status(400).json({ error: 'Could not find location number in HotSchedules data. Expected employee with type: 5 and 5-digit location number in name, or provide location_id and org_id in request.' });
+      if (locationEmployee?.name) {
+        const locationNumberMatch = locationEmployee.name.match(/\b\d{5}\b/);
+        const extractedNumber = locationNumberMatch?.[0] || '';
+        if (extractedNumber) {
+          const { data } = await supabase.from('locations')
+            .select('id, org_id, location_number')
+            .eq('location_number', extractedNumber).single();
+          if (data) {
+            finalLocationId = data.id;
+            finalOrgId = data.org_id;
+            locationNumber = data.location_number;
+            console.log(`[Sync] Location resolved via Method D (type:5 employee): ${locationNumber}`);
+          }
+        }
       }
+    }
 
-      const locationNumberMatch = locationEmployee.name.match(/\b\d{5}\b/);
-      locationNumber = locationNumberMatch?.[0] || '';
+    if (!finalLocationId || !finalOrgId) {
+      return res.status(400).json({
+        error: 'Could not identify location. No hs_client_id mapping, location_number, or type:5 employee found.',
+        debug: { hsClientId, hsLocationNumber, locationId, orgId },
+      });
+    }
 
-      if (!locationNumber) {
-        return res.status(400).json({ error: 'Could not extract location number from employee name.' });
-      }
-
-      // Look up location_id and org_id from locations table
-      const { data: locationData, error: locationError } = await supabase
-        .from('locations')
-        .select('id, org_id')
-        .eq('location_number', locationNumber)
-        .single();
-
-      if (locationError || !locationData) {
-        return res.status(404).json({ 
-          error: `Location not found for location number: ${locationNumber}`,
-          details: locationError?.message 
-        });
-      }
-
-      finalLocationId = locationData.id;
-      finalOrgId = locationData.org_id;
+    // Persist hs_client_id for faster future lookups
+    const effectiveHsClientId = hsClientId || (bootstrap?.id as number | undefined);
+    if (effectiveHsClientId) {
+      await supabase.from('locations')
+        .update({ hs_client_id: effectiveHsClientId })
+        .eq('id', finalLocationId)
+        .is('hs_client_id', null);  // Only set if not already set
     }
 
     // Step 3: Filter and transform HotSchedules employees

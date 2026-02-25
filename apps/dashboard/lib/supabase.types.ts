@@ -169,6 +169,7 @@ export interface Location {
   image_url?: string;
   location_mobile_token?: string;
   has_synced_before?: boolean;
+  hs_client_id?: number;
   google_place_id?: string;
   latitude?: number;
   longitude?: number;
