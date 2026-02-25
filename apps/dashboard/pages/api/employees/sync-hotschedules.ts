@@ -2,6 +2,26 @@ import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { Employee } from '@/lib/supabase.types';
 import { calculatePayForLocation, shouldCalculatePay } from '@/lib/pay-calculator';
+import type {
+  HotSchedulesShift,
+  HotSchedulesJob,
+  HotSchedulesRole,
+  HotSchedulesBootstrap,
+  HotSchedulesForecastDaily,
+  HotSchedulesTimeOff,
+  HotSchedulesTimeOffStatus,
+  HotSchedulesAvailability,
+  SchedulingSyncAnalysis,
+} from '@/lib/hotschedules.types';
+
+// Increase body size limit for large HS payloads (900+ shifts)
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
 
 interface HotSchedulesEmployee {
   id?: number | string;
@@ -61,6 +81,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const employees: HotSchedulesEmployee[] = req.body.employees || req.body;
     const locationId = req.body.location_id as string | undefined;
     const orgId = req.body.org_id as string | undefined;
+
+    // New scheduling data fields (optional — backwards compatible)
+    const shifts: HotSchedulesShift[] = req.body.shifts || [];
+    const jobs: HotSchedulesJob[] = req.body.jobs || [];
+    const roles: HotSchedulesRole[] = req.body.roles || [];
+    const bootstrap: HotSchedulesBootstrap | undefined = req.body.bootstrap;
+    const forecasts = req.body.forecasts || {};
+    const slsProjected = req.body.slsProjected || [];
+    const timeOff: HotSchedulesTimeOff[] = req.body.timeOff || [];
+    const timeOffStatuses: HotSchedulesTimeOffStatus[] = req.body.timeOffStatuses || [];
+    const availability: HotSchedulesAvailability[] = req.body.availability || [];
+    const weekStartDate: string | undefined = req.body.weekStartDate;
 
     if (!Array.isArray(employees) || employees.length === 0) {
       return res.status(400).json({ error: 'Invalid request body. Expected array of employees.' });
@@ -286,11 +318,70 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Don't fail the request if storage upload fails, just log it
     }
 
+    // Step 7b: Upload raw scheduling data to storage (if present)
+    if (shifts.length > 0 || jobs.length > 0) {
+      try {
+        const scheduleFileName = `schedule_${locationNumber}_${timestamp}.json`;
+        const scheduleData = JSON.stringify({ shifts, jobs, roles, bootstrap, weekStartDate }, null, 2);
+        await supabase.storage
+          .from('hs_script_updates')
+          .upload(scheduleFileName, scheduleData, { contentType: 'application/json', upsert: false });
+        console.log(`[Sync] Uploaded scheduling data: ${scheduleFileName}`);
+      } catch (e) {
+        console.error('Error uploading scheduling data:', e);
+      }
+    }
+
+    // Step 7c: Upload raw forecast data to storage (if present)
+    if (forecasts.daily?.length > 0 || slsProjected.length > 0) {
+      try {
+        const forecastFileName = `forecast_${locationNumber}_${timestamp}.json`;
+        const forecastData = JSON.stringify({ forecasts, slsProjected }, null, 2);
+        await supabase.storage
+          .from('hs_script_updates')
+          .upload(forecastFileName, forecastData, { contentType: 'application/json', upsert: false });
+        console.log(`[Sync] Uploaded forecast data: ${forecastFileName}`);
+      } catch (e) {
+        console.error('Error uploading forecast data:', e);
+      }
+    }
+
+    // Step 7d: Upload raw availability/time-off data to storage (if present)
+    if (timeOff.length > 0 || availability.length > 0) {
+      try {
+        const availFileName = `availability_${locationNumber}_${timestamp}.json`;
+        const availData = JSON.stringify({ timeOff, timeOffStatuses, availability }, null, 2);
+        await supabase.storage
+          .from('hs_script_updates')
+          .upload(availFileName, availData, { contentType: 'application/json', upsert: false });
+        console.log(`[Sync] Uploaded availability data: ${availFileName}`);
+      } catch (e) {
+        console.error('Error uploading availability data:', e);
+      }
+    }
+
+    // Step 7e: Analyze scheduling data for notification
+    let schedulingAnalysis: SchedulingSyncAnalysis | undefined;
+    if (shifts.length > 0 && weekStartDate) {
+      schedulingAnalysis = await analyzeSchedulingData(
+        supabase,
+        shifts,
+        jobs,
+        roles,
+        weekStartDate,
+        finalLocationId,
+        existingEmployees || [],
+      );
+    }
+
     // Step 8: Create sync notification record
-    const syncData = {
+    const syncData: Record<string, any> = {
       new_employees: newEmployees,
       modified_employees: modifiedEmployees,
       terminated_employees: terminatedEmployees,
+      has_scheduling_data: shifts.length > 0,
+      week_start_date: weekStartDate || null,
+      scheduling: schedulingAnalysis || null,
     };
 
     const { data: notification, error: notificationError } = await supabase
@@ -329,6 +420,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         new: newEmployees.length,
         modified: modifiedEmployees.length,
         terminated: terminatedEmployees.length,
+        shifts_received: shifts.length || undefined,
+        jobs_received: jobs.length || undefined,
       },
       storage_file: uploadError ? null : fileName,
       debug: {
@@ -341,10 +434,169 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (error) {
     console.error('Error in sync-hotschedules:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
+}
+
+/**
+ * Analyze scheduling data to produce a summary for the sync notification.
+ * Filters shifts to the target week, identifies HS jobs used, checks for
+ * existing position mappings, and groups shifts by employee.
+ */
+async function analyzeSchedulingData(
+  supabase: ReturnType<typeof createServerSupabaseClient>,
+  shifts: HotSchedulesShift[],
+  jobs: HotSchedulesJob[],
+  roles: HotSchedulesRole[],
+  weekStartDate: string,
+  locationId: string,
+  existingEmployees: Employee[],
+): Promise<SchedulingSyncAnalysis> {
+  // Build lookup maps
+  const jobMap = new Map<number, HotSchedulesJob>();
+  jobs.forEach(j => jobMap.set(j.id, j));
+
+  const roleMap = new Map<number, HotSchedulesRole>();
+  roles.forEach(r => roleMap.set(r.id, r));
+
+  const employeeByHsId = new Map<number, Employee>();
+  existingEmployees.forEach(emp => {
+    if (emp.hs_id) employeeByHsId.set(Number(emp.hs_id), emp);
+  });
+
+  // Filter shifts to target week only (weekStartDate to weekStartDate + 6 days)
+  const weekStart = new Date(weekStartDate + 'T00:00:00');
+  const weekEnd = new Date(weekStartDate + 'T00:00:00');
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  const weekShifts = shifts.filter(s => {
+    const shiftDate = new Date(s.startDate + 'T00:00:00');
+    return shiftDate >= weekStart && shiftDate <= weekEnd;
+  });
+
+  console.log(`[Sync] Scheduling analysis: ${weekShifts.length} shifts in target week (${weekStartDate})`);
+
+  // Calculate end time from startTime + duration
+  function calcEndTime(startTime: string, durationMinutes: number): string {
+    const [h, m] = startTime.split(':').map(Number);
+    const totalMinutes = h * 60 + m + durationMinutes;
+    const endH = Math.floor(totalMinutes / 60) % 24;
+    const endM = totalMinutes % 60;
+    return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+  }
+
+  // Calculate break minutes from mbpBreaks array
+  function calcBreakMinutes(mbpBreaks: any[]): number {
+    if (!mbpBreaks || !Array.isArray(mbpBreaks)) return 0;
+    return mbpBreaks.reduce((total: number, b: any) => total + (b.duration || 0), 0);
+  }
+
+  // Identify unique HS jobs used in this week's shifts
+  const jobIdsUsed = new Set<number>();
+  weekShifts.forEach(s => jobIdsUsed.add(s.jobId));
+
+  const hsJobsUsed = Array.from(jobIdsUsed).map(jobId => {
+    const job = jobMap.get(jobId);
+    const role = job ? roleMap.get(job.defaultScheduleId) : undefined;
+    const shiftCount = weekShifts.filter(s => s.jobId === jobId).length;
+    return {
+      hs_job_id: jobId,
+      hs_job_name: job?.jobName || `Unknown Job (${jobId})`,
+      hs_role_id: role?.id || job?.defaultScheduleId || 0,
+      hs_role_name: role?.name || 'Unknown',
+      shift_count: shiftCount,
+    };
+  });
+
+  // Look up existing position mappings for this location
+  const { data: existingMappings } = await supabase
+    .from('hs_position_mappings')
+    .select('hs_job_id, position_id, org_positions(id, name)')
+    .eq('location_id', locationId);
+
+  const mappingByJobId = new Map<number, { position_id: string; position_name: string }>();
+  (existingMappings || []).forEach((m: any) => {
+    if (m.position_id) {
+      mappingByJobId.set(Number(m.hs_job_id), {
+        position_id: m.position_id,
+        position_name: m.org_positions?.name || 'Unknown',
+      });
+    }
+  });
+
+  const mappedJobs = hsJobsUsed
+    .filter(j => mappingByJobId.has(j.hs_job_id))
+    .map(j => ({
+      hs_job_id: j.hs_job_id,
+      hs_job_name: j.hs_job_name,
+      position_id: mappingByJobId.get(j.hs_job_id)!.position_id,
+      position_name: mappingByJobId.get(j.hs_job_id)!.position_name,
+    }));
+
+  const unmappedJobs = hsJobsUsed.filter(j => !mappingByJobId.has(j.hs_job_id));
+
+  // Group shifts by employee
+  const shiftsByOwner = new Map<number, HotSchedulesShift[]>();
+  weekShifts.forEach(s => {
+    const ownerId = s.house ? 0 : s.ownerId;
+    if (!shiftsByOwner.has(ownerId)) shiftsByOwner.set(ownerId, []);
+    shiftsByOwner.get(ownerId)!.push(s);
+  });
+
+  const shiftsByEmployee = Array.from(shiftsByOwner.entries()).map(([ownerId, ownerShifts]) => {
+    const levelsetEmp = ownerId ? employeeByHsId.get(ownerId) : undefined;
+    // Try to get name from the first shift's data or from Levelset employee
+    const empName = levelsetEmp
+      ? `${levelsetEmp.first_name || ''} ${levelsetEmp.last_name || ''}`.trim()
+      : ownerId === 0
+        ? 'Open Shifts'
+        : `HS Employee #${ownerId}`;
+
+    return {
+      hs_employee_id: ownerId,
+      employee_name: empName,
+      levelset_employee_id: levelsetEmp?.id || null,
+      shifts: ownerShifts.map(s => {
+        const breakMins = calcBreakMinutes(s.mbpBreaks);
+        return {
+          hs_shift_id: s.id,
+          date: s.startDate,
+          start_time: s.startTime,
+          end_time: calcEndTime(s.startTime, s.duration),
+          duration_minutes: s.duration,
+          hs_job_id: s.jobId,
+          hs_job_name: jobMap.get(s.jobId)?.jobName || `Job ${s.jobId}`,
+          is_house_shift: s.house,
+          break_minutes: breakMins,
+          notes: s.shiftNote || null,
+        };
+      }),
+    };
+  });
+
+  // Calculate totals
+  const totalHours = weekShifts.reduce((sum, s) => {
+    const breakMins = calcBreakMinutes(s.mbpBreaks);
+    return sum + (s.duration - breakMins) / 60;
+  }, 0);
+
+  // Estimated cost from HS pay data (totalCost is in CENTS)
+  const totalEstimatedCost = weekShifts.reduce((sum, s) => sum + (s.totalCost || 0), 0) / 100;
+
+  const uniqueEmployees = new Set(weekShifts.filter(s => !s.house && s.ownerId).map(s => s.ownerId));
+
+  return {
+    total_shifts: weekShifts.length,
+    total_employees_scheduled: uniqueEmployees.size,
+    total_hours: Math.round(totalHours * 100) / 100,
+    total_estimated_cost: Math.round(totalEstimatedCost * 100) / 100,
+    hs_jobs_used: hsJobsUsed,
+    mapped_jobs: mappedJobs,
+    unmapped_jobs: unmappedJobs,
+    shifts_by_employee: shiftsByEmployee,
+  };
 }
 

@@ -20,6 +20,10 @@ import {
   Menu,
   MenuItem,
   CircularProgress,
+  Switch,
+  FormControlLabel,
+  Select,
+  FormControl,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SyncIcon from "@mui/icons-material/Sync";
@@ -30,6 +34,8 @@ import { DataGridPro, GridColDef } from "@mui/x-data-grid-pro";
 import type { Employee, AvailabilityType } from "@/lib/supabase.types";
 import { RolePill } from "./shared/RolePill";
 import { createSupabaseClient } from "@/util/supabase/component";
+import type { SchedulingSyncAnalysis } from "@/lib/hotschedules.types";
+import { useOrgFeatures, F } from "@/lib/providers/OrgFeaturesProvider";
 
 export interface SyncEmployeesModalProps {
   open: boolean;
@@ -94,7 +100,7 @@ const AvailabilityChip = styled(Box)(() => ({
   },
 }));
 
-type Page = 'instructions' | 'review' | 'confirmation';
+type Page = 'instructions' | 'config' | 'review' | 'position_mapping' | 'schedule_review' | 'confirmation';
 
 interface SyncNotification {
   id: string;
@@ -123,6 +129,9 @@ interface SyncNotification {
       first_name: string;
       last_name: string;
     }>;
+    has_scheduling_data?: boolean;
+    week_start_date?: string;
+    scheduling?: SchedulingSyncAnalysis;
   };
   created_at: string;
   viewed: boolean;
@@ -619,6 +628,20 @@ export function SyncEmployeesModal({
   const [existingEmployees, setExistingEmployees] = React.useState<ExistingEmployee[]>([]);
   const [manualMatches, setManualMatches] = React.useState<Map<string, string>>(new Map()); // newEmpKey -> existingEmpId
 
+  // Scheduling sync state
+  const [scheduleToggle, setScheduleToggle] = React.useState(false);
+  const [positionMappings, setPositionMappings] = React.useState<Map<number, string | null>>(new Map());
+  const [orgPositions, setOrgPositions] = React.useState<Array<{ id: string; name: string; zone: string }>>([]);
+  const [scheduleStats, setScheduleStats] = React.useState<{
+    shifts_created: number;
+    assignments_created: number;
+    total_hours: number;
+    total_cost: number;
+  } | null>(null);
+  const [scheduleSyncing, setScheduleSyncing] = React.useState(false);
+  const { hasFeature } = useOrgFeatures();
+  const hasSchedulingFeature = hasFeature(F.SCHEDULING);
+
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   console.log('[SyncEmployeesModal] baseUrl =', baseUrl);
   
@@ -626,21 +649,64 @@ export function SyncEmployeesModal({
     console.log('[SyncEmployeesModal] useMemo: bookmarkletCode called', { baseUrl, locationId, orgId });
     if (!baseUrl) return '';
     if (!locationId || !orgId) return '';
-    
+
+    // Bookmarklet phases:
+    // 1. Bootstrap — fetch schedule config to get weekStartDate, jobs, roles
+    // 2. Parallel fetch — employees + shifts + jobs + roles + forecasts + time-off + availability
+    // 3. POST all data to sync-hotschedules endpoint
     const code = `javascript:(function(){
 var baseUrl='${baseUrl}';
 var locationId='${locationId}';
 var orgId='${orgId}';
 var loadingDiv=document.createElement('div');
-// TODO: Use design token for #31664a below (bookmarklet context - CSS vars not available)
-loadingDiv.style.cssText='position:fixed;top:20px;right:20px;background:#31664a;color:white;padding:15px 20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;';
-loadingDiv.textContent='Fetching employee data...';
+loadingDiv.style.cssText='position:fixed;top:20px;right:20px;background:#31664a;color:white;padding:15px 20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;min-width:260px;';
+loadingDiv.textContent='Connecting to HotSchedules...';
 document.body.appendChild(loadingDiv);
 var hsOrigin=window.location.origin;
-var apiUrl=hsOrigin+'/hs/spring/client/employee/?active=true&_='+Date.now();
-fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok){throw new Error('Failed to fetch employees: '+r.status);}return r.json();}).then(function(allEmployees){if(!Array.isArray(allEmployees)||allEmployees.length===0){throw new Error('No employee data received from HotSchedules API');}var visibleEmployees=allEmployees.filter(function(emp){return emp.visible===true;});if(visibleEmployees.length===0){throw new Error('No visible employees found in the data');}loadingDiv.textContent='Syncing employees...';return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({employees:visibleEmployees,location_id:locationId,org_id:orgId})});}).then(function(r){if(!r.ok){return r.json().then(function(data){throw new Error(data.error||'Sync failed');});}return r.json();}).then(function(data){loadingDiv.remove();var resultDiv=document.createElement('div');resultDiv.style.cssText='position:fixed;top:20px;right:20px;background:'+(data.success?'#10b981':'#ef4444')+';color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';if(data.success){resultDiv.innerHTML='<strong>Sync Successful!</strong><br><br>Created: '+data.stats.created+'<br>Updated: '+data.stats.updated+'<br>Terminated: '+data.stats.terminated+'<br>Total: '+data.stats.total_processed;}else{resultDiv.innerHTML='<strong>Sync Failed</strong><br><br>'+data.error+(data.details?'<br><br>Details: '+data.details:'');}document.body.appendChild(resultDiv);setTimeout(function(){resultDiv.remove();},8000);}).catch(function(err){loadingDiv.remove();var errorDiv=document.createElement('div');errorDiv.style.cssText='position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';errorDiv.innerHTML='<strong>Error</strong><br><br>'+err.message;document.body.appendChild(errorDiv);setTimeout(function(){errorDiv.remove();},8000);});
+var ts=Date.now();
+var fetchOpts={method:'GET',credentials:'include',headers:{'Accept':'application/json'}};
+function hsFetch(path){return fetch(hsOrigin+path+(path.indexOf('?')>-1?'&':'?')+'_='+ts,fetchOpts).then(function(r){if(!r.ok)throw new Error('HS API error '+r.status+' on '+path);return r.json();});}
+function safeFetch(path){return hsFetch(path).catch(function(){return [];});}
+loadingDiv.textContent='Fetching schedule configuration...';
+hsFetch('/hs/spring/scheduling/bootstrap').then(function(bootstrap){
+var weekStart=bootstrap.currentWeekStartDate||'';
+var prevWeek=new Date(weekStart);prevWeek.setDate(prevWeek.getDate()-7);
+var nextWeek=new Date(weekStart);nextWeek.setDate(nextWeek.getDate()+14);
+var rangeStart=prevWeek.toISOString().split('T')[0];
+var rangeEnd=nextWeek.toISOString().split('T')[0];
+var weekEnd=new Date(weekStart);weekEnd.setDate(weekEnd.getDate()+6);
+var weekEndStr=weekEnd.toISOString().split('T')[0];
+loadingDiv.textContent='Fetching employees, shifts, and forecasts...';
+return Promise.all([
+hsFetch('/hs/spring/client/employee/?active=true'),
+safeFetch('/hs/spring/scheduling/shift/?start='+rangeStart+'&end='+rangeEnd),
+safeFetch('/hs/spring/client/jobs/'),
+safeFetch('/hs/spring/client/roles/'),
+safeFetch('/hs/spring/forecast/forecast-summary/'+weekStart),
+safeFetch('/hs/spring/forecast/sls-projected-total/?weekStartDate='+weekStart),
+safeFetch('/hs/rest-session/timeoff/range/?start='+weekStart+'T00:00:00&end='+weekEndStr+'T23:59:59'),
+safeFetch('/hs/rest-session/timeoff/range/status/?start='+weekStart+'T00:00:00&end='+weekEndStr+'T23:59:59'),
+safeFetch('/hs/rest-session/availability-calendar/?minStatus=0&start='+weekStart+'T00:00:00&end='+weekEndStr+'T23:59:59')
+]).then(function(results){
+var allEmployees=results[0];
+if(!Array.isArray(allEmployees)||allEmployees.length===0)throw new Error('No employee data received from HotSchedules API');
+var visibleEmployees=allEmployees.filter(function(emp){return emp.visible===true;});
+if(visibleEmployees.length===0)throw new Error('No visible employees found in the data');
+var shifts=Array.isArray(results[1])?results[1]:[];
+var jobs=Array.isArray(results[2])?results[2]:[];
+var roles=Array.isArray(results[3])?results[3]:[];
+var forecastSummary=results[4];
+var slsProjected=results[5];
+var timeOff=Array.isArray(results[6])?results[6]:[];
+var timeOffStatuses=Array.isArray(results[7])?results[7]:[];
+var availability=Array.isArray(results[8])?results[8]:[];
+var payload={employees:visibleEmployees,shifts:shifts,jobs:jobs,roles:roles,bootstrap:{currentWeekStartDate:bootstrap.currentWeekStartDate,utcOffset:bootstrap.utcOffset,tz:bootstrap.tz,scheduleMinuteInterval:bootstrap.scheduleMinuteInterval,clientWorkWeekStart:bootstrap.clientWorkWeekStart,userJobs:bootstrap.userJobs||[],jobs:bootstrap.jobs||[],schedules:bootstrap.schedules||[]},forecasts:{daily:forecastSummary&&forecastSummary.projectedVolume?forecastSummary.projectedVolume:[],intervals:[],benchmarks:[]},slsProjected:Array.isArray(slsProjected)?slsProjected:[],timeOff:timeOff,timeOffStatuses:timeOffStatuses,availability:availability,weekStartDate:weekStart,location_id:locationId,org_id:orgId};
+loadingDiv.textContent='Syncing to Levelset...';
+return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+});
+}).then(function(r){if(!r.ok){return r.json().then(function(data){throw new Error(data.error||'Sync failed');});}return r.json();}).then(function(data){loadingDiv.remove();var resultDiv=document.createElement('div');resultDiv.style.cssText='position:fixed;top:20px;right:20px;background:'+(data.success?'#10b981':'#ef4444')+';color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';if(data.success){var msg='<strong>Sync Successful!</strong><br><br>Employees: '+data.stats.new+' new, '+data.stats.modified+' updated, '+data.stats.terminated+' terminated';if(data.stats.shifts_received){msg+='<br>Shifts: '+data.stats.shifts_received+' captured';}if(data.stats.jobs_received){msg+='<br>Jobs: '+data.stats.jobs_received;}resultDiv.innerHTML=msg;}else{resultDiv.innerHTML='<strong>Sync Failed</strong><br><br>'+data.error+(data.details?'<br><br>Details: '+data.details:'');}document.body.appendChild(resultDiv);setTimeout(function(){resultDiv.remove();},8000);}).catch(function(err){loadingDiv.remove();var errorDiv=document.createElement('div');errorDiv.style.cssText='position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';errorDiv.innerHTML='<strong>Error</strong><br><br>'+err.message;document.body.appendChild(errorDiv);setTimeout(function(){errorDiv.remove();},8000);});
 })();`;
-    
+
     return code;
   }, [baseUrl, locationId, orgId]);
 
@@ -694,7 +760,12 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               modalOpenTime: modalOpenTime.toISOString(),
             });
             setNotification(data.notification);
-            setCurrentPage('review');
+            // Go to config page if scheduling data is present and org has scheduling feature
+            if (data.notification.sync_data?.has_scheduling_data && hasSchedulingFeature) {
+              setCurrentPage('config');
+            } else {
+              setCurrentPage('review');
+            }
           } else {
             console.log('[SyncEmployeesModal] Ignoring old notification', {
               notificationTime: notificationTime.toISOString(),
@@ -708,7 +779,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     }, 2500); // Poll every 2.5 seconds
 
     return () => clearInterval(pollInterval);
-  }, [currentPage, locationId, open, modalOpenTime]);
+  }, [currentPage, locationId, open, modalOpenTime, hasSchedulingFeature]);
 
   // Reset state when modal opens/closes
   React.useEffect(() => {
@@ -722,6 +793,11 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
       setModalOpenTime(null);
       setExistingEmployees([]);
       setManualMatches(new Map());
+      setScheduleToggle(false);
+      setPositionMappings(new Map());
+      setOrgPositions([]);
+      setScheduleStats(null);
+      setScheduleSyncing(false);
     }
   }, [open]);
 
@@ -801,7 +877,18 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
 
       const data = await response.json();
       setConfirmationStats(data.stats);
-      setCurrentPage('confirmation');
+
+      // Route to next step based on schedule toggle
+      if (scheduleToggle && notification.sync_data?.scheduling) {
+        const unmapped = notification.sync_data.scheduling.unmapped_jobs || [];
+        if (unmapped.length > 0) {
+          setCurrentPage('position_mapping');
+        } else {
+          setCurrentPage('schedule_review');
+        }
+      } else {
+        setCurrentPage('confirmation');
+      }
     } catch (error) {
       console.error('Error confirming sync:', error);
       alert('Failed to confirm sync. Please try again.');
@@ -949,7 +1036,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
               <ol style={{ fontFamily, paddingLeft: '20px', marginTop: '8px' }}>
                 <li style={{ marginBottom: '8px' }}>
                   <Typography variant="body2" component="span" sx={{ fontFamily }}>
-                    Navigate to the Scheduling page
+                    Navigate to the <strong>Scheduling page</strong> in HotSchedules
                   </Typography>
                 </li>
                 <li style={{ marginBottom: '8px' }}>
@@ -959,7 +1046,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                 </li>
                 <li>
                   <Typography variant="body2" component="span" sx={{ fontFamily }}>
-                    The bookmark will automatically extract employee data and sync it to Levelset
+                    The bookmarklet will automatically capture employee and scheduling data and sync it to Levelset
                   </Typography>
                 </li>
               </ol>
@@ -1510,9 +1597,401 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
     );
   };
 
+  // Render Config Page: Sync Configuration
+  const renderConfigPage = () => {
+    if (!notification) return null;
+
+    const weekStart = notification.sync_data?.week_start_date;
+    let weekLabel = '';
+    if (weekStart) {
+      const start = new Date(weekStart + 'T00:00:00');
+      const end = new Date(weekStart + 'T00:00:00');
+      end.setDate(end.getDate() + 6);
+      const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      weekLabel = `${fmt(start)} – ${fmt(end)}`;
+    }
+
+    return (
+      <Box sx={{ py: 2 }}>
+        <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', mb: 3 }}>
+          Sync Configuration
+        </Typography>
+
+        {weekLabel && (
+          <Box sx={{
+            border: '1px solid var(--ls-color-border)',
+            borderRadius: '8px',
+            p: 2,
+            mb: 3,
+            backgroundColor: 'var(--ls-color-muted-soft)',
+          }}>
+            <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)', mb: 0.5 }}>
+              Detected Schedule Week
+            </Typography>
+            <Typography sx={{ fontFamily, fontSize: 16, fontWeight: 600 }}>
+              {weekLabel}
+            </Typography>
+          </Box>
+        )}
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            border: '1px solid var(--ls-color-border)', borderRadius: '8px', p: 2,
+          }}>
+            <Box>
+              <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 600 }}>
+                Roster Sync
+              </Typography>
+              <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)' }}>
+                Sync employee roster data from HotSchedules
+              </Typography>
+            </Box>
+            <Switch checked={true} disabled sx={{
+              '& .MuiSwitch-switchBase.Mui-checked': { color: levelsetGreen },
+              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: levelsetGreen },
+            }} />
+          </Box>
+
+          {hasSchedulingFeature && (
+            <Box sx={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              border: '1px solid var(--ls-color-border)', borderRadius: '8px', p: 2,
+            }}>
+              <Box>
+                <Typography sx={{ fontFamily, fontSize: 15, fontWeight: 600 }}>
+                  Schedule Sync
+                </Typography>
+                <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)' }}>
+                  Import shifts and assignments for the detected week
+                </Typography>
+              </Box>
+              <Switch
+                checked={scheduleToggle}
+                onChange={(e) => setScheduleToggle(e.target.checked)}
+                sx={{
+                  '& .MuiSwitch-switchBase.Mui-checked': { color: levelsetGreen },
+                  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: levelsetGreen },
+                }}
+              />
+            </Box>
+          )}
+        </Box>
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            variant="contained"
+            onClick={() => setCurrentPage('review')}
+            sx={{
+              fontFamily, fontSize: 14, fontWeight: 500, textTransform: 'none',
+              backgroundColor: levelsetGreen, color: '#ffffff', px: 4, py: 1.5, borderRadius: '8px',
+              '&:hover': { backgroundColor: '#2d5a42' },
+            }}
+          >
+            Continue
+          </Button>
+        </Box>
+      </Box>
+    );
+  };
+
+  // Fetch org positions when schedule toggle turns on
+  React.useEffect(() => {
+    if (!scheduleToggle || !orgId) return;
+
+    const fetchPositions = async () => {
+      const supabase = createSupabaseClient();
+      const { data } = await supabase
+        .from('org_positions')
+        .select('id, name, zone')
+        .eq('org_id', orgId)
+        .eq('is_active', true)
+        .eq('scheduling_enabled', true)
+        .order('zone', { ascending: true })
+        .order('display_order', { ascending: true });
+
+      setOrgPositions(data || []);
+    };
+
+    fetchPositions();
+  }, [scheduleToggle, orgId]);
+
+  // Render Position Mapping Page
+  const renderPositionMappingPage = () => {
+    if (!notification?.sync_data?.scheduling) return null;
+    const scheduling = notification.sync_data.scheduling;
+    const allJobs = scheduling.hs_jobs_used || [];
+
+    // Pre-populate mappings from already-mapped jobs
+    const getMappingForJob = (hsJobId: number): string | null => {
+      if (positionMappings.has(hsJobId)) return positionMappings.get(hsJobId) ?? null;
+      const mapped = scheduling.mapped_jobs?.find((m: any) => m.hs_job_id === hsJobId);
+      return mapped?.position_id || null;
+    };
+
+    const handleMappingChange = (hsJobId: number, positionId: string | null) => {
+      const newMappings = new Map(positionMappings);
+      newMappings.set(hsJobId, positionId);
+      setPositionMappings(newMappings);
+    };
+
+    const handlePositionMappingConfirm = () => {
+      setCurrentPage('schedule_review');
+    };
+
+    return (
+      <Box sx={{ py: 2 }}>
+        <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', mb: 1 }}>
+          Position Mapping
+        </Typography>
+        <Typography sx={{ fontFamily, fontSize: 13, color: 'var(--ls-color-muted)', mb: 3 }}>
+          Map HotSchedules jobs to Levelset positions. Unmapped jobs will have positions auto-created.
+        </Typography>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {allJobs.map((job: any) => {
+            const currentMapping = getMappingForJob(job.hs_job_id);
+
+            return (
+              <Box key={job.hs_job_id} sx={{
+                display: 'flex', alignItems: 'center', gap: 2,
+                border: '1px solid var(--ls-color-border)', borderRadius: '8px', p: 2,
+              }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600 }}>
+                    {job.hs_job_name}
+                  </Typography>
+                  <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)' }}>
+                    {job.hs_role_name} · {job.shift_count} shift{job.shift_count !== 1 ? 's' : ''}
+                  </Typography>
+                </Box>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                  <Select
+                    value={currentMapping || '__auto__'}
+                    onChange={(e) => {
+                      const val = e.target.value as string;
+                      handleMappingChange(job.hs_job_id, val === '__auto__' ? null : val);
+                    }}
+                    sx={{ fontFamily, fontSize: 13 }}
+                  >
+                    <MenuItem value="__auto__" sx={{ fontFamily, fontSize: 13, fontStyle: 'italic' }}>
+                      Auto-create position
+                    </MenuItem>
+                    {orgPositions.map(pos => (
+                      <MenuItem key={pos.id} value={pos.id} sx={{ fontFamily, fontSize: 13 }}>
+                        {pos.name} ({pos.zone})
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            );
+          })}
+        </Box>
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            variant="contained"
+            onClick={handlePositionMappingConfirm}
+            sx={{
+              fontFamily, fontSize: 14, fontWeight: 500, textTransform: 'none',
+              backgroundColor: levelsetGreen, color: '#ffffff', px: 4, py: 1.5, borderRadius: '8px',
+              '&:hover': { backgroundColor: '#2d5a42' },
+            }}
+          >
+            Continue to Schedule Review
+          </Button>
+        </Box>
+      </Box>
+    );
+  };
+
+  // Render Schedule Review Page
+  const renderScheduleReviewPage = () => {
+    if (!notification?.sync_data?.scheduling) return null;
+    const scheduling = notification.sync_data.scheduling;
+    const shiftsByEmployee = scheduling.shifts_by_employee || [];
+
+    // Summary stats
+    const totalShifts = scheduling.total_shifts;
+    const totalEmployees = scheduling.total_employees_scheduled;
+    const totalHours = scheduling.total_hours;
+
+    const handleScheduleConfirm = async () => {
+      if (!notification) return;
+      setScheduleSyncing(true);
+      try {
+        // Build position_mappings array from user selections + existing mapped jobs
+        const allJobs = scheduling.hs_jobs_used || [];
+        const mappingsPayload = allJobs.map((job: any) => {
+          const userMapping = positionMappings.get(job.hs_job_id);
+          const existingMapping = scheduling.mapped_jobs?.find((m: any) => m.hs_job_id === job.hs_job_id);
+
+          return {
+            hs_job_id: job.hs_job_id,
+            hs_job_name: job.hs_job_name,
+            hs_role_id: job.hs_role_id,
+            hs_role_name: job.hs_role_name,
+            position_id: userMapping !== undefined ? userMapping : (existingMapping?.position_id || null),
+          };
+        });
+
+        const response = await fetch('/api/scheduling/sync-confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            notification_id: notification.id,
+            week_start_date: notification.sync_data.week_start_date,
+            location_id: locationId,
+            org_id: orgId,
+            position_mappings: mappingsPayload,
+          }),
+        });
+
+        if (!response.ok) throw new Error('Failed to sync schedule');
+
+        const data = await response.json();
+        setScheduleStats(data);
+        setCurrentPage('confirmation');
+      } catch (error) {
+        console.error('Error syncing schedule:', error);
+        alert('Failed to sync schedule. Please try again.');
+      } finally {
+        setScheduleSyncing(false);
+      }
+    };
+
+    return (
+      <Box sx={{ py: 2 }}>
+        <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-neutral-soft-foreground)', mb: 2 }}>
+          Schedule Review
+        </Typography>
+
+        {/* Summary bar */}
+        <Box sx={{
+          display: 'flex', gap: 3, mb: 3, p: 2, borderRadius: '8px',
+          backgroundColor: 'var(--ls-color-muted-soft)',
+          border: '1px solid var(--ls-color-border)',
+        }}>
+          <Box>
+            <Typography sx={{ fontFamily, fontSize: 22, fontWeight: 700, color: levelsetGreen }}>
+              {totalShifts}
+            </Typography>
+            <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)' }}>Shifts</Typography>
+          </Box>
+          <Box>
+            <Typography sx={{ fontFamily, fontSize: 22, fontWeight: 700, color: levelsetGreen }}>
+              {totalEmployees}
+            </Typography>
+            <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)' }}>Employees</Typography>
+          </Box>
+          <Box>
+            <Typography sx={{ fontFamily, fontSize: 22, fontWeight: 700, color: levelsetGreen }}>
+              {totalHours.toFixed(1)}
+            </Typography>
+            <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)' }}>Hours</Typography>
+          </Box>
+          {scheduling.total_estimated_cost > 0 && (
+            <Box>
+              <Typography sx={{ fontFamily, fontSize: 22, fontWeight: 700, color: levelsetGreen }}>
+                ${scheduling.total_estimated_cost.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </Typography>
+              <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-muted)' }}>Est. Cost</Typography>
+            </Box>
+          )}
+        </Box>
+
+        {/* Shifts grouped by employee */}
+        {shiftsByEmployee.map((group: any) => (
+          <Accordion
+            key={group.hs_employee_id}
+            defaultExpanded={false}
+            sx={{
+              mb: 1,
+              '&:before': { display: 'none' },
+              border: '1px solid var(--ls-color-border)',
+              borderRadius: '8px !important',
+              overflow: 'hidden',
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1 } }}
+            >
+              <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600 }}>
+                {group.employee_name}
+              </Typography>
+              <Box sx={{
+                backgroundColor: levelsetGreen, color: 'white', borderRadius: '12px',
+                px: 1.5, py: 0.25, fontSize: 12, fontFamily, fontWeight: 600,
+              }}>
+                {group.shifts.length}
+              </Box>
+              {!group.levelset_employee_id && group.hs_employee_id !== 0 && (
+                <Typography sx={{ fontFamily, fontSize: 11, color: warningColor, fontStyle: 'italic' }}>
+                  Not matched
+                </Typography>
+              )}
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontFamily, fontSize: 13 }}>
+                <Box component="thead">
+                  <Box component="tr" sx={{ backgroundColor: 'var(--ls-color-muted-soft)' }}>
+                    <Box component="th" sx={{ textAlign: 'left', p: 1, pl: 2, fontWeight: 600 }}>Day</Box>
+                    <Box component="th" sx={{ textAlign: 'left', p: 1, fontWeight: 600 }}>Start</Box>
+                    <Box component="th" sx={{ textAlign: 'left', p: 1, fontWeight: 600 }}>End</Box>
+                    <Box component="th" sx={{ textAlign: 'left', p: 1, fontWeight: 600 }}>Position</Box>
+                    <Box component="th" sx={{ textAlign: 'right', p: 1, pr: 2, fontWeight: 600 }}>Hours</Box>
+                  </Box>
+                </Box>
+                <Box component="tbody">
+                  {group.shifts.map((shift: any) => {
+                    const shiftDate = new Date(shift.date + 'T00:00:00');
+                    const dayName = shiftDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    const netHours = ((shift.duration_minutes - shift.break_minutes) / 60).toFixed(1);
+
+                    return (
+                      <Box key={shift.hs_shift_id} component="tr" sx={{
+                        backgroundColor: 'rgba(49, 102, 74, 0.04)',
+                        '&:hover': { backgroundColor: 'rgba(49, 102, 74, 0.08)' },
+                      }}>
+                        <Box component="td" sx={{ p: 1, pl: 2 }}>{dayName}</Box>
+                        <Box component="td" sx={{ p: 1, fontFamily: 'monospace', fontSize: 12 }}>{shift.start_time}</Box>
+                        <Box component="td" sx={{ p: 1, fontFamily: 'monospace', fontSize: 12 }}>{shift.end_time}</Box>
+                        <Box component="td" sx={{ p: 1 }}>{shift.hs_job_name}</Box>
+                        <Box component="td" sx={{ p: 1, pr: 2, textAlign: 'right' }}>{netHours}h</Box>
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        ))}
+
+        {/* Apply Schedule Button */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            variant="contained"
+            onClick={handleScheduleConfirm}
+            disabled={scheduleSyncing}
+            sx={{
+              fontFamily, fontSize: 14, fontWeight: 500, textTransform: 'none',
+              backgroundColor: levelsetGreen, color: '#ffffff', px: 4, py: 1.5, borderRadius: '8px',
+              '&:hover': { backgroundColor: '#2d5a42' },
+              '&:disabled': { backgroundColor: 'var(--ls-color-disabled-text)' },
+            }}
+          >
+            {scheduleSyncing ? <CircularProgress size={20} sx={{ color: 'white' }} /> : 'Apply Schedule'}
+          </Button>
+        </Box>
+      </Box>
+    );
+  };
+
   // Render Page 3: Confirmation Summary
   const renderConfirmationPage = () => {
-    if (!confirmationStats) return null;
+    if (!confirmationStats && !scheduleStats) return null;
 
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -1521,20 +2000,37 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
         </Typography>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
-          {confirmationStats.created > 0 && (
+          {confirmationStats && confirmationStats.created > 0 && (
             <Typography sx={{ fontFamily, fontSize: 16, color: levelsetGreen, fontWeight: 500 }}>
               {confirmationStats.created} new {confirmationStats.created === 1 ? 'employee was' : 'employees were'} added to your roster
             </Typography>
           )}
-          {confirmationStats.updated > 0 && (
+          {confirmationStats && confirmationStats.updated > 0 && (
             <Typography sx={{ fontFamily, fontSize: 16, color: warningColor, fontWeight: 500 }}>
               {confirmationStats.updated} {confirmationStats.updated === 1 ? 'employee was' : 'employees were'} modified in your roster
             </Typography>
           )}
-          {confirmationStats.deactivated > 0 && (
+          {confirmationStats && confirmationStats.deactivated > 0 && (
             <Typography sx={{ fontFamily, fontSize: 16, color: destructiveColor, fontWeight: 500 }}>
               {confirmationStats.deactivated} {confirmationStats.deactivated === 1 ? 'employee was' : 'employees were'} removed from your roster
             </Typography>
+          )}
+
+          {scheduleStats && (
+            <>
+              <Box sx={{ borderTop: '1px solid var(--ls-color-border)', pt: 2, mt: 1 }} />
+              <Typography sx={{ fontFamily, fontSize: 16, color: levelsetGreen, fontWeight: 500 }}>
+                {scheduleStats.shifts_created} shifts synced ({scheduleStats.total_hours} hours)
+              </Typography>
+              <Typography sx={{ fontFamily, fontSize: 16, color: levelsetGreen, fontWeight: 500 }}>
+                {scheduleStats.assignments_created} shift assignments created
+              </Typography>
+              {scheduleStats.total_cost > 0 && (
+                <Typography sx={{ fontFamily, fontSize: 16, color: 'var(--ls-color-muted)', fontWeight: 500 }}>
+                  Est. labor cost: ${scheduleStats.total_cost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Typography>
+              )}
+            </>
           )}
         </Box>
 
@@ -1550,13 +2046,13 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
             color: '#ffffff',
             px: 4,
             py: 1.5,
-            borderRadius: '8px', // 4px default + 4px = 8px
+            borderRadius: '8px',
             '&:hover': {
               backgroundColor: '#2d5a42',
             },
           }}
         >
-          Back to Roster
+          Done
         </Button>
       </Box>
     );
@@ -1590,7 +2086,7 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
                 color: "#181d27",
               }}
             >
-              Sync Employees from HotSchedules
+              Sync from HotSchedules
             </Typography>
           </Box>
           <IconButton
@@ -1608,8 +2104,11 @@ fetch(apiUrl,{method:'GET',credentials:'include',headers:{'Accept':'application/
 
         <ScrollableContent>
           {currentPage === 'instructions' && renderInstructionsPage()}
+          {currentPage === 'config' && notification && renderConfigPage()}
           {currentPage === 'review' && notification && renderReviewPage()}
-          {currentPage === 'confirmation' && confirmationStats && renderConfirmationPage()}
+          {currentPage === 'position_mapping' && notification && renderPositionMappingPage()}
+          {currentPage === 'schedule_review' && notification && renderScheduleReviewPage()}
+          {currentPage === 'confirmation' && (confirmationStats || scheduleStats) && renderConfirmationPage()}
         </ScrollableContent>
       </StyledDialog>
 
