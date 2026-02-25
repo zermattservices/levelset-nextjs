@@ -214,17 +214,38 @@ export function AddActionModal({
             console.log('[AddActionModal] Fetched app_user data:', appUserData);
             
             if (!appUserError && appUserData) {
-              const fullName = `${appUserData.first_name || ''} ${appUserData.last_name || ''}`.trim();
+              // acting_leader must be an employee.id, not an app_user.id
+              if (!appUserData.employee_id) {
+                console.error('[AddActionModal] app_user has no employee_id! Cannot record action.');
+                setActingLeader(null);
+                setLoadingLeader(false);
+                return;
+              }
+
+              // Fetch the actual employee record
+              const { data: employeeData, error: employeeError } = await supabase
+                .from('employees')
+                .select('*')
+                .eq('id', appUserData.employee_id)
+                .maybeSingle();
+
+              if (employeeError || !employeeData) {
+                console.error('[AddActionModal] Error fetching employee:', employeeError);
+                setActingLeader(null);
+                setLoadingLeader(false);
+                return;
+              }
+
               const employeeLike: Employee = {
-                id: appUserData.id,
-                full_name: fullName || appUserData.email || 'Unknown User',
-                role: appUserData.role || 'User',
-                org_id: appUserData.org_id,
-                location_id: appUserData.location_id || locationId,
-                active: true,
+                id: employeeData.id,
+                full_name: employeeData.full_name || `${employeeData.first_name || ''} ${employeeData.last_name || ''}`.trim() || appUserData.email || 'Unknown User',
+                role: employeeData.role || 'User',
+                org_id: employeeData.org_id,
+                location_id: employeeData.location_id || locationId,
+                active: employeeData.active ?? true,
               };
               setActingLeader(employeeLike);
-              setActingLeaderId(appUserData.id);
+              setActingLeaderId(employeeData.id);
             }
           }
           setLoadingLeader(false);
