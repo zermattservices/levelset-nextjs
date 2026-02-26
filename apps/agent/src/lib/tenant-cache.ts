@@ -40,7 +40,7 @@ export type CacheScope = 'team' | 'ratings' | 'infractions' | 'org_config' | 'al
 /** Scope → key prefix mapping for targeted invalidation */
 const SCOPE_PREFIXES: Record<CacheScope, string[]> = {
   team: ['employees:', 'team:', 'profile:'],
-  ratings: ['ratings:', 'rankings:', 'profile:'],
+  ratings: ['ratings:', 'rankings:', 'profile:', 'pillars:'],
   infractions: ['infractions:', 'discipline:', 'profile:'],
   org_config: ['org_context:'],
   all: [], // special: clears everything

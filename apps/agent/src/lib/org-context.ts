@@ -24,6 +24,7 @@ export interface OrgContext {
   infractionRubric: { action: string; points: number }[];
   disciplineRubric: { action: string; points_threshold: number }[];
   employeeCount: number;
+  pillars: { name: string; weight: number; display_order: number }[];
 }
 
 /**
@@ -57,6 +58,7 @@ async function _loadOrgContext(
     disciplineRubricResult,
     locationResult,
     employeeCountResult,
+    pillarsResult,
   ] = await Promise.all([
     // 1. Org roles (or location-specific role hierarchy)
     locationId
@@ -131,6 +133,12 @@ async function _loadOrgContext(
       if (locationId) q = q.eq('location_id', locationId);
       return q;
     })(),
+
+    // 9. OE Pillars (global — 5 rows)
+    supabase
+      .from('oe_pillars')
+      .select('name, weight, display_order')
+      .order('display_order', { ascending: true }),
   ]);
 
   // Parse roles
@@ -180,6 +188,13 @@ async function _loadOrgContext(
   const locationName = (locationResult.data as any)?.name ?? 'Unknown Location';
   const locationNumber = (locationResult.data as any)?.location_number ?? undefined;
 
+  // Parse OE pillars
+  const pillars = (pillarsResult.data ?? []).map((p: any) => ({
+    name: p.name as string,
+    weight: (p.weight as number) ?? 0,
+    display_order: p.display_order as number,
+  }));
+
   return {
     orgId,
     locationId,
@@ -192,5 +207,6 @@ async function _loadOrgContext(
     infractionRubric,
     disciplineRubric,
     employeeCount: employeeCountResult.count ?? 0,
+    pillars,
   };
 }

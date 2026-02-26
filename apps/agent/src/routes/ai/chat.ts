@@ -51,6 +51,7 @@ import { getEmployeeProfile } from '../../tools/data/profile.js';
 import { getTeamOverview } from '../../tools/data/team.js';
 import { getDisciplineSummary } from '../../tools/data/discipline.js';
 import { getPositionRankings } from '../../tools/data/rankings.js';
+import { getPillarScores } from '../../tools/data/pillars.js';
 // UI blocks are now emitted by display tools (show_employee_list, show_employee_card)
 // called by the LLM, not auto-generated from data tool results.
 
@@ -168,6 +169,10 @@ function getToolCallLabel(name: string, input: Record<string, unknown>): string 
     case 'get_position_rankings': {
       const pos = input.position || '';
       return pos ? `Ranking employees for ${pos}` : 'Ranking employees by position';
+    }
+    case 'get_pillar_scores': {
+      if (input.pillar) return `Checking ${input.pillar} scores`;
+      return 'Loading OE pillar scores';
     }
     case 'show_employee_list':
     case 'show_employee_card':
@@ -290,6 +295,21 @@ function buildTools(
       }),
       execute: async (input: Record<string, unknown>) => {
         return await getPositionRankings(input, orgId, locationId);
+      },
+    }),
+
+    get_pillar_scores: tool({
+      description:
+        'Get Operational Excellence pillar scores (Great Food, Quick & Accurate, Creating Moments, Caring Interactions, Inviting Atmosphere). Without employee_id: location-level scores + top/bottom performers. With employee_id: per-pillar scores with position breakdown and criteria mapping.',
+      inputSchema: z.object({
+        employee_id: z.string().optional().describe('UUID of a specific employee. Omit for location-wide scores.'),
+        pillar: z.string().optional().describe('Filter to specific pillar name (e.g. "Great Food")'),
+        days: z.number().optional().describe('Lookback period in days (default: 30)'),
+        start_date: z.string().optional().describe('Explicit start date YYYY-MM-DD (overrides days)'),
+        end_date: z.string().optional().describe('Explicit end date YYYY-MM-DD (default: today)'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getPillarScores(input, orgId, locationId);
       },
     }),
 
