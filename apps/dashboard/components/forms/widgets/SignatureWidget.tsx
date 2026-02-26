@@ -7,7 +7,7 @@ const fontFamily = '"Satoshi", sans-serif';
 
 /**
  * Signature widget for RJSF forms.
- * Uses an HTML canvas for simple signature capture.
+ * Uses an HTML canvas for multi-stroke signature capture.
  * Stores as base64 data URL string.
  */
 export function SignatureWidget(props: WidgetProps) {
@@ -16,13 +16,37 @@ export function SignatureWidget(props: WidgetProps) {
   const isDrawingRef = React.useRef(false);
   const [hasSignature, setHasSignature] = React.useState(!!value);
 
-  // Draw existing signature on load
-  React.useEffect(() => {
-    if (value && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+  // Track the last value WE sent via onChange so the useEffect
+  // only redraws on *external* value changes (initial load, form reset).
+  const lastEmittedRef = React.useRef<string>(value ?? '');
 
+  // Scale canvas for high-DPI screens so strokes aren't blurry
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+  }, []);
+
+  // Redraw canvas only when value is set externally (not by our own onChange)
+  React.useEffect(() => {
+    if (!canvasRef.current) return;
+
+    // If we emitted this value ourselves, skip — canvas is already correct.
+    if (value === lastEmittedRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    if (value) {
       const img = new Image();
       img.onload = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -30,41 +54,56 @@ export function SignatureWidget(props: WidgetProps) {
       };
       img.src = value;
       setHasSignature(true);
+    } else {
+      // External clear (form reset)
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      setHasSignature(false);
     }
+
+    lastEmittedRef.current = value ?? '';
   }, [value]);
+
+  /** Get touch/mouse coordinates relative to the canvas CSS box */
+  const getPoint = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const raw = 'touches' in e ? e.touches[0] : e;
+    return {
+      x: raw.clientX - rect.left,
+      y: raw.clientY - rect.top,
+    };
+  };
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (disabled || readonly) return;
+    e.preventDefault(); // Prevent scroll on touch devices
     isDrawingRef.current = true;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const point = 'touches' in e ? e.touches[0] : e;
-    const x = point.clientX - rect.left;
-    const y = point.clientY - rect.top;
-
+    const { x, y } = getPoint(e);
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.strokeStyle = '#000';
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current || disabled || readonly) return;
+    e.preventDefault();
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const point = 'touches' in e ? e.touches[0] : e;
-    const x = point.clientX - rect.left;
-    const y = point.clientY - rect.top;
-
+    const { x, y } = getPoint(e);
     ctx.lineTo(x, y);
     ctx.stroke();
   };
@@ -77,6 +116,7 @@ export function SignatureWidget(props: WidgetProps) {
     const canvas = canvasRef.current;
     if (canvas) {
       const dataUrl = canvas.toDataURL('image/png');
+      lastEmittedRef.current = dataUrl;
       onChange(dataUrl);
     }
   };
@@ -90,6 +130,7 @@ export function SignatureWidget(props: WidgetProps) {
       }
     }
     setHasSignature(false);
+    lastEmittedRef.current = '';
     onChange('');
   };
 
