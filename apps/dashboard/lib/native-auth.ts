@@ -44,7 +44,25 @@ export async function validateLocationAccess(
 
   if (locError || !location) return null;
 
-  // 2. Get the app_user record for this auth user + org
+  const loc: NativeLocation = {
+    id: location.id,
+    name: location.name,
+    location_number: location.location_number,
+    org_id: location.org_id,
+  };
+
+  // 2. Check if user is a Levelset Admin in ANY org (bypasses all location checks)
+  const { count: adminCount } = await supabase
+    .from('app_users')
+    .select('id', { count: 'exact', head: true })
+    .eq('auth_user_id', authUserId)
+    .eq('role', 'Levelset Admin');
+
+  if ((adminCount ?? 0) > 0) {
+    return loc;
+  }
+
+  // 3. Get the app_user record for this auth user + org
   const { data: appUser } = await supabase
     .from('app_users')
     .select('id, location_id, role')
@@ -53,18 +71,6 @@ export async function validateLocationAccess(
     .maybeSingle();
 
   if (!appUser) return null;
-
-  const loc: NativeLocation = {
-    id: location.id,
-    name: location.name,
-    location_number: location.location_number,
-    org_id: location.org_id,
-  };
-
-  // 3. Levelset Admin bypasses location access check
-  if (appUser.role === 'Levelset Admin') {
-    return loc;
-  }
 
   // 4. Check: is this the user's assigned location?
   if (appUser.location_id === locationId) {
