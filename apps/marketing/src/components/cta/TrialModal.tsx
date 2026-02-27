@@ -306,7 +306,7 @@ export function TrialModal({ onClose }: TrialModalProps) {
 
           {/* Footer note */}
           <p className="text-center text-xs text-gray-400 mt-6">
-            No credit card required. Cancel anytime during your trial.
+            Credit card required to start trial. Cancel anytime &mdash; you won&apos;t be charged during your {TRIAL_DAYS}-day trial.
           </p>
         </div>
       </div>

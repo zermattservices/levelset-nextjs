@@ -1,0 +1,222 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: var(--ls-color-muted-soft);
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+}
+
+.container {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  background-color: var(--ls-color-bg-container);
+}
+
+.logo {
+  height: 32px;
+  width: auto;
+}
+
+.logoFallback {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ls-color-brand);
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  display: none;
+  margin: 0;
+}
+
+.content {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.card {
+  background: var(--ls-color-bg-container);
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 16px;
+  padding: 36px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background-color: var(--ls-color-success-soft);
+  color: var(--ls-color-success);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.badgeIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ls-color-neutral-foreground);
+  font-family: "Mont", "Satoshi", system-ui, sans-serif;
+  margin: 0 0 8px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: var(--ls-color-muted);
+  line-height: 1.6;
+  margin: 0 0 28px;
+}
+
+.features {
+  margin-bottom: 24px;
+}
+
+.featuresTitle {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ls-color-muted);
+  margin: 0 0 12px;
+}
+
+.featureList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ls-color-neutral-foreground);
+}
+
+.checkIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--ls-color-brand);
+  flex-shrink: 0;
+}
+
+.billingInfo {
+  background-color: var(--ls-color-muted-soft);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.billingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.billingLabel {
+  font-size: 14px;
+  color: var(--ls-color-muted);
+}
+
+.billingValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-foreground);
+}
+
+.billingDivider {
+  height: 1px;
+  background-color: var(--ls-color-muted-border);
+  margin: 12px 0;
+}
+
+.error {
+  background-color: var(--ls-color-destructive-soft);
+  color: var(--ls-color-destructive);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.ctaButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--ls-color-brand);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.ctaButton:hover:not(:disabled) {
+  background-color: var(--ls-color-brand-hover);
+}
+
+.ctaButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.finePrint {
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  text-align: center;
+  margin: 16px 0 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .content {
+    padding: 24px 16px;
+  }
+
+  .card {
+    padding: 24px 20px;
+  }
+
+  .featureList {
+    grid-template-columns: 1fr;
+  }
+}

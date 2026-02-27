@@ -156,7 +156,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { data: org, error: orgError } = await supabase
       .from('orgs')
       .insert({
-        name: locations[0].locationName,
+        name: resolvedOperatorName,
         operator_name: resolvedOperatorName,
         trial_ends_at: new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString(),
         is_multi_unit: isMultiUnit,
@@ -316,17 +316,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await supabase.from('org_roles').insert(defaultRoles);
 
-    // 6. Create Stripe customer + Ultimate trial subscription
+    // 6. Link existing Stripe customer (from billing setup) + create trial subscription
     let stripeCustomerId: string | null = null;
     try {
       const stripe = getStripe();
 
-      const customer = await stripe.customers.create({
-        name: resolvedOperatorName || fullName,
-        email,
-        metadata: { org_id: orgId },
-      });
-      stripeCustomerId = customer.id;
+      // Find Stripe customer created during billing setup
+      const existingCustomers = await stripe.customers.list({ email, limit: 1 });
+
+      if (existingCustomers.data.length > 0) {
+        stripeCustomerId = existingCustomers.data[0].id;
+
+        // Verify payment method exists (server-side billing gate enforcement)
+        const paymentMethods = await stripe.paymentMethods.list({
+          customer: stripeCustomerId,
+          type: 'card',
+          limit: 1,
+        });
+
+        if (paymentMethods.data.length === 0) {
+          return res.status(400).json({ error: 'Payment method required. Please complete billing setup.' });
+        }
+
+        // Update customer with org metadata
+        await stripe.customers.update(stripeCustomerId, {
+          name: resolvedOperatorName || fullName,
+          metadata: { org_id: orgId },
+        });
+      } else {
+        // Fallback: create customer (shouldn't happen with billing gate, but keeps backwards compat)
+        const customer = await stripe.customers.create({
+          name: resolvedOperatorName || fullName,
+          email,
+          metadata: { org_id: orgId },
+        });
+        stripeCustomerId = customer.id;
+      }
 
       await supabase
         .from('orgs')
@@ -335,16 +360,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const priceId = getStripePriceId('pro', 'monthly');
 
+      // Get the default payment method to attach to the subscription
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: stripeCustomerId,
+        type: 'card',
+        limit: 1,
+      });
+
       await stripe.subscriptions.create({
         customer: stripeCustomerId,
-        items: [{ price: priceId, quantity: 1 }],
+        items: [{ price: priceId, quantity: locations.length }],
         trial_period_days: TRIAL_DAYS,
+        default_payment_method: paymentMethods.data[0]?.id || undefined,
         metadata: { org_id: orgId, plan_tier: 'pro' },
       });
 
       // Sync features for pro tier (webhook may also do this, but sync immediately)
       await syncFeaturesFromTier(supabase, orgId, 'pro');
-    } catch (stripeError) {
+    } catch (stripeError: any) {
+      // If it's our own validation error (payment method required), re-throw
+      if (stripeError?.message?.includes('Payment method required')) {
+        throw stripeError;
+      }
       // Log but don't fail the whole signup — Stripe can be retried
       console.error('Stripe setup error (non-fatal):', stripeError);
     }

@@ -18,6 +18,7 @@ import {
   type PlanTierConfig,
 } from '@/lib/billing/constants';
 import { PlanComparisonModal } from './PlanComparisonModal';
+import { CancelSubscriptionModal } from './CancelSubscriptionModal';
 import styles from './BillingTab.module.css';
 
 interface BillingTabProps {
@@ -81,6 +82,7 @@ export function BillingTab({ orgId }: BillingTabProps) {
   const [loading, setLoading] = React.useState(true);
   const [portalLoading, setPortalLoading] = React.useState(false);
   const [showPlanModal, setShowPlanModal] = React.useState(false);
+  const [showCancelModal, setShowCancelModal] = React.useState(false);
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
 
@@ -199,6 +201,16 @@ export function BillingTab({ orgId }: BillingTabProps) {
   const monthlyTotal = (plan.monthlyPriceCents * locationCount) / 100;
   const tierConfig = PLAN_TIERS[plan.tier];
   const hasPro = plan.tier === 'pro';
+  const isTrialing = sub.status === 'trialing';
+  const isCancelPending = sub.cancel_at_period_end;
+
+  // Calculate days remaining in trial
+  const trialDaysRemaining = React.useMemo(() => {
+    if (!isTrialing || !sub.trial_end) return 0;
+    const now = new Date();
+    const end = new Date(sub.trial_end);
+    return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  }, [isTrialing, sub.trial_end]);
 
   return (
     <div className={styles.container}>
@@ -206,6 +218,57 @@ export function BillingTab({ orgId }: BillingTabProps) {
         <h2 className={styles.title}>Billing</h2>
         <p className={styles.description}>Manage your subscription and payment details.</p>
       </div>
+
+      {/* Trial Banner */}
+      {isTrialing && !isCancelPending && (
+        <div className={styles.trialBanner}>
+          <div className={styles.trialBannerHeader}>
+            <div className={styles.trialBannerInfo}>
+              <h3 className={styles.trialBannerTitle}>
+                You&apos;re on a free trial
+              </h3>
+              <p className={styles.trialBannerText}>
+                <span className={styles.trialBannerDays}>{trialDaysRemaining}</span>{' '}
+                days remaining &mdash; your trial ends on{' '}
+                <strong>{sub.trial_end ? formatDate(sub.trial_end) : 'N/A'}</strong>.
+                You&apos;ll be automatically charged {formatPrice(plan.monthlyPriceCents)}/location/mo
+                on the {plan.name} plan unless you cancel or switch plans.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancellation Pending Banner */}
+      {isCancelPending && (
+        <div className={styles.cancelBanner}>
+          <p className={styles.cancelBannerText}>
+            Your subscription is set to cancel on{' '}
+            <strong>
+              {isTrialing && sub.trial_end
+                ? formatDate(sub.trial_end)
+                : formatDate(sub.current_period_end)}
+            </strong>.
+            You&apos;ll retain access until then.
+          </p>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={openStripePortal}
+            disabled={portalLoading}
+            sx={{
+              fontFamily,
+              textTransform: 'none',
+              borderColor: '#fde68a',
+              color: '#92400e',
+              whiteSpace: 'nowrap',
+              '&:hover': { borderColor: '#f59e0b', backgroundColor: '#fffbeb' },
+            }}
+          >
+            Reactivate
+          </Button>
+        </div>
+      )}
 
       {/* Current Plan Card */}
       <div className={styles.planCard}>
@@ -282,6 +345,21 @@ export function BillingTab({ orgId }: BillingTabProps) {
           >
             Change Plan
           </Button>
+          {!isCancelPending && (
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => setShowCancelModal(true)}
+              sx={{
+                fontFamily,
+                textTransform: 'none',
+                color: '#999',
+                '&:hover': { color: 'var(--ls-color-destructive)', backgroundColor: 'var(--ls-color-destructive-soft)' },
+              }}
+            >
+              Cancel Subscription
+            </Button>
+          )}
         </div>
       </div>
 
@@ -394,6 +472,16 @@ export function BillingTab({ orgId }: BillingTabProps) {
         currentTier={plan.tier}
         orgId={orgId}
         locationCount={locationCount}
+      />
+
+      {/* Cancel Subscription Modal */}
+      <CancelSubscriptionModal
+        open={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        orgId={orgId}
+        isTrialing={isTrialing}
+        trialEndDate={sub.trial_end}
+        periodEndDate={sub.current_period_end}
       />
     </div>
   );

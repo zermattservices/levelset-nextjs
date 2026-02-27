@@ -11,6 +11,7 @@ import { DisciplineStep } from '@/components/onboarding/DisciplineStep';
 import { EmployeeImportStep } from '@/components/onboarding/EmployeeImportStep';
 import { InviteLeadersStep } from '@/components/onboarding/InviteLeadersStep';
 import { CompletionModal } from '@/components/onboarding/CompletionModal';
+import { BillingSetupModal } from '@/components/onboarding/BillingSetupModal';
 import styles from './OnboardingPage.module.css';
 
 interface OrgRole {
@@ -78,6 +79,9 @@ export function OnboardingPage() {
   // Completion modal
   const [showCompletion, setShowCompletion] = React.useState(false);
 
+  // Billing setup gate (before Step 1)
+  const [billingComplete, setBillingComplete] = React.useState(false);
+
   // Get a fresh access token (handles expiry)
   const getFreshToken = async (): Promise<string | null> => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -93,6 +97,16 @@ export function OnboardingPage() {
   // Check auth and load session
   React.useEffect(() => {
     const init = async () => {
+      // Check if returning from Stripe Checkout (billing setup complete)
+      if (router.query.billing_complete === 'true') {
+        setBillingComplete(true);
+        localStorage.setItem('ls_billing_setup_complete', 'true');
+        // Clean up URL param
+        router.replace('/onboarding', undefined, { shallow: true });
+      } else if (typeof window !== 'undefined' && localStorage.getItem('ls_billing_setup_complete') === 'true') {
+        setBillingComplete(true);
+      }
+
       const token = await getFreshToken();
       if (!token) return;
       await loadSession(token);
@@ -189,6 +203,8 @@ export function OnboardingPage() {
   const handleStepComplete = async (step: number, result?: any) => {
     if (step === 1) {
       // Step 1 handled by create-org API — reload session to get new data
+      // Clear billing setup flag from localStorage (org is now created)
+      localStorage.removeItem('ls_billing_setup_complete');
       const token = await getFreshToken();
       if (token) {
         setLoading(true);
@@ -336,6 +352,17 @@ export function OnboardingPage() {
           accessToken={accessToken!}
           orgId={sessionData?.org?.id || ''}
         />
+      </>
+    );
+  }
+
+  // Billing gate: show billing setup modal before Step 1 if payment not yet collected
+  if (sessionData?.needsSetup && !billingComplete) {
+    return (
+      <>
+        <Head><title>Levelset | Start Your Trial</title></Head>
+        <style>{`body { margin: 0; }`}</style>
+        <BillingSetupModal accessToken={accessToken!} />
       </>
     );
   }
