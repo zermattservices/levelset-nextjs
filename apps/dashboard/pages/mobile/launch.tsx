@@ -1,10 +1,14 @@
 import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { Box, Button, CircularProgress, Typography } from '@mui/material';
 
 const STORAGE_KEY = 'levelset.mobile.lastToken';
 
+/**
+ * Mobile launch page — checks for a saved location token and redirects.
+ *
+ * Note: Uses plain HTML/CSS instead of MUI to avoid prerender errors (no ThemeProvider at SSG time).
+ */
 export default function MobileLaunchPage() {
   const router = useRouter();
   const [state, setState] = React.useState<'checking' | 'missing'>('checking');
@@ -34,68 +38,85 @@ export default function MobileLaunchPage() {
         <link rel="manifest" href={`/api/mobile/manifest/${router.query.token ?? ''}`} />
         <link rel="icon" href="/Levelset Icon Non Trans.png" />
       </Head>
-      <Box
-        sx={{
+      <div
+        style={{
           minHeight: '100vh',
           backgroundColor: '#f2f5f4',
           padding: '32px 16px 48px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         }}
       >
         {state === 'checking' ? (
-          <CircularProgress color="inherit" />
+          <div className="launch-spinner" />
         ) : (
-          <Box
-            sx={{
-              backgroundColor: 'var(--ls-color-bg-container)',
-              borderRadius: '16px',
-              border: '1px solid var(--ls-color-muted-border)',
+          <div
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 16,
+              border: '1px solid #e5e5e5',
               padding: '32px 28px',
               maxWidth: 420,
               textAlign: 'center',
               boxShadow: '0 16px 40px rgba(17, 24, 39, 0.12)',
               display: 'flex',
               flexDirection: 'column',
-              gap: 2,
+              gap: 16,
             }}
           >
-            <Typography
-              sx={{
-                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            <div
+              style={{
                 fontSize: 22,
                 fontWeight: 700,
-                color: 'var(--ls-color-neutral-soft-foreground)',
+                color: '#333',
               }}
             >
               Link Required
-            </Typography>
-            <Typography
-              sx={{
-                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            </div>
+            <div
+              style={{
                 fontSize: 15,
-                color: 'var(--ls-color-text-secondary)',
+                color: '#666',
+                lineHeight: 1.5,
               }}
             >
               Open the Levelset mobile portal from the original location link to register your device for quick access.
-            </Typography>
-            <Button
-              variant="contained"
+            </div>
+            <button
               onClick={() => router.push('/')}
-              sx={{
-                textTransform: 'none',
-                backgroundColor: 'var(--ls-color-brand)',
-                borderRadius: '8px',
-                '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
-                fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              style={{
+                backgroundColor: '#2563eb',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                padding: '10px 20px',
+                fontSize: 15,
+                fontWeight: 600,
+                fontFamily: 'inherit',
+                cursor: 'pointer',
+                marginTop: 8,
               }}
             >
               Return to Levelset
-            </Button>
-          </Box>
+            </button>
+          </div>
         )}
-      </Box>
+      </div>
+      <style jsx>{`
+        .launch-spinner {
+          width: 32px;
+          height: 32px;
+          border: 3px solid #e5e7eb;
+          border-top-color: #2563eb;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </>
   );
 }

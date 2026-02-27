@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { useRouter } from 'next/router';
 import { createSupabaseClient } from '@/util/supabase/component';
-import { Box, CircularProgress } from '@mui/material';
 
 /**
  * Bridge page to transfer auth session from app.levelset.io to roadmap.levelset.io
  * Usage: https://app.levelset.io/auth/bridge?redirect=https://roadmap.levelset.io/path
+ *
+ * Note: Uses plain HTML/CSS instead of MUI to avoid prerender errors (no ThemeProvider at SSG time).
  */
 export default function AuthBridge() {
   const router = useRouter();
@@ -52,37 +53,44 @@ export default function AuthBridge() {
   }, [router.isReady, router.query.redirect]);
 
   return (
-    <Box
-      sx={{
+    <div
+      style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
         width: '100%',
-        backgroundColor: 'var(--ls-color-muted-soft)',
+        backgroundColor: '#f5f5f5',
         fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
       }}
     >
       {status === 'error' ? (
         <>
-          <Box sx={{ color: '#dc2626', marginBottom: 2 }}>{error || 'An error occurred'}</Box>
-          <Box sx={{ color: 'var(--ls-color-muted)', fontSize: 14 }}>Redirecting to login...</Box>
+          <div style={{ color: '#dc2626', marginBottom: 16 }}>{error || 'An error occurred'}</div>
+          <div style={{ color: '#888', fontSize: 14 }}>Redirecting to login...</div>
         </>
       ) : (
         <>
-          <CircularProgress
-            size={32}
-            sx={{
-              color: 'var(--ls-color-brand)',
-              marginBottom: 2,
-            }}
-          />
-          <Box sx={{ color: 'var(--ls-color-muted)', fontSize: 14 }}>
+          <div className="auth-spinner" />
+          <div style={{ color: '#888', fontSize: 14, marginTop: 16 }}>
             {status === 'checking' ? 'Checking authentication...' : 'Redirecting...'}
-          </Box>
+          </div>
         </>
       )}
-    </Box>
+      <style jsx>{`
+        .auth-spinner {
+          width: 32px;
+          height: 32px;
+          border: 3px solid #e5e7eb;
+          border-top-color: #2563eb;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
   );
 }
