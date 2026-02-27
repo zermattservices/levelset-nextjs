@@ -342,7 +342,7 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
 
     setUploading(true);
     try {
-      const token = await getAccessToken();
+      const headers = await authHeaders();
       let createData: any = null;
 
       if (uploadMode === 'file' && uploadFile) {
@@ -355,8 +355,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
         const urlRes = await fetch(`${config.apiBasePath}/upload-url`, {
           method: 'POST',
           headers: {
+            ...headers,
             'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             filename: uploadFile.name,
@@ -389,8 +389,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
         const createRes = await fetch(config.apiBasePath, {
           method: 'POST',
           headers: {
+            ...headers,
             'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             intent: 'create',
@@ -416,8 +416,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
         const createRes = await fetch(config.apiBasePath, {
           method: 'POST',
           headers: {
+            ...headers,
             'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             intent: 'create',
@@ -440,8 +440,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
         const createRes = await fetch(config.apiBasePath, {
           method: 'POST',
           headers: {
+            ...headers,
             'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             intent: 'create',
@@ -472,8 +472,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
         fetch(`${config.apiBasePath}/process`, {
           method: 'POST',
           headers: {
+            ...headers,
             'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({ document_id: docId }),
         }).catch(() => {
@@ -593,14 +593,14 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
         throw new Error('File exceeds 100MB limit');
       }
 
-      const token = await getAccessToken();
+      const headers = await authHeaders();
 
       // Step 1: Get signed URL for replacement
       const urlRes = await fetch(`${config.apiBasePath}/${selectedDocument.id}/replace-url`, {
         method: 'POST',
         headers: {
+          ...headers,
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           filename: file.name,
@@ -633,8 +633,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
       const finalizeRes = await fetch(`${config.apiBasePath}/${selectedDocument.id}/replace`, {
         method: 'POST',
         headers: {
+          ...headers,
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           intent: 'finalize',
@@ -657,12 +657,11 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
       fetchDocuments();
 
       // Trigger document processing in the background (fire-and-forget)
-      const token2 = await getAccessToken();
       fetch(`${config.apiBasePath}/process`, {
         method: 'POST',
         headers: {
+          ...headers,
           'Content-Type': 'application/json',
-          ...(token2 ? { Authorization: `Bearer ${token2}` } : {}),
         },
         body: JSON.stringify({ document_id: selectedDocument.id }),
       }).catch(() => {

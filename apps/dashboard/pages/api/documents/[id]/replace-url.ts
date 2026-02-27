@@ -42,8 +42,7 @@ export default async function handler(
   } = await supabase.auth.getUser(token);
   if (authError || !user) return res.status(401).json({ error: 'Unauthorized' });
 
-  // Get app user and verify Levelset Admin
-  // Use x-org-id header to scope to the correct org when user has multiple
+  // Get app user and resolve org
   const requestedOrgId = req.headers['x-org-id'] as string | undefined;
 
   const { data: appUsers } = await supabase
@@ -53,15 +52,16 @@ export default async function handler(
     .order('created_at');
 
   let appUser = requestedOrgId
-    ? appUsers?.find((u) => u.org_id === requestedOrgId && u.role === 'Levelset Admin')
-    : appUsers?.find((u) => u.role === 'Levelset Admin');
+    ? appUsers?.find((u) => u.org_id === requestedOrgId)
+    : null;
   if (!appUser) appUser = appUsers?.[0] ?? null;
   if (!appUser?.org_id)
     return res.status(403).json({ error: 'No organization found' });
-  if (appUser.role !== 'Levelset Admin')
-    return res.status(403).json({ error: 'Insufficient permissions' });
 
-  const orgId = appUser.org_id;
+  // Levelset Admins can scope to any org via x-org-id header
+  const orgId = (appUser.role === 'Levelset Admin' && requestedOrgId)
+    ? requestedOrgId
+    : appUser.org_id;
 
   // Verify document exists and belongs to org
   const { data: doc, error: docError } = await supabase
