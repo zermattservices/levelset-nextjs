@@ -397,6 +397,62 @@ export async function uploadInfractionDocumentAuth(
 }
 
 // =============================================================================
+// Submissions API Types (JWT-based, authenticated)
+// =============================================================================
+
+export interface SubmissionRecord {
+  id: string;
+  form_type: 'ratings' | 'infractions' | 'disc_actions';
+  created_at: string;
+  submitted_by_name: string;
+  employee_name: string;
+  position?: string;
+  overall_score?: number;
+  infraction_name?: string;
+  point_value?: number;
+  action_name?: string;
+}
+
+export interface SubmissionsFilters {
+  form_type?: string;
+  employee_id?: string;
+  submitted_by?: string;
+  start_date?: string;
+  end_date?: string;
+}
+
+export interface SubmissionsResponse {
+  submissions: SubmissionRecord[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+/**
+ * Fetch unified submissions list for a location (authenticated)
+ */
+export async function fetchSubmissionsAuth(
+  accessToken: string,
+  locationId: string,
+  filters?: SubmissionsFilters,
+  page: number = 1
+): Promise<SubmissionsResponse> {
+  const params = new URLSearchParams({
+    location_id: locationId,
+    page: String(page),
+  });
+  if (filters?.form_type) params.set("form_type", filters.form_type);
+  if (filters?.employee_id) params.set("employee_id", filters.employee_id);
+  if (filters?.submitted_by) params.set("submitted_by", filters.submitted_by);
+  if (filters?.start_date) params.set("start_date", filters.start_date);
+  if (filters?.end_date) params.set("end_date", filters.end_date);
+
+  const url = `${API_BASE_URL}/api/native/forms/submissions?${params}`;
+  const response = await fetch(url, { headers: authHeaders(accessToken) });
+  return handleResponse<SubmissionsResponse>(response);
+}
+
+// =============================================================================
 // Employee API Types (JWT-based, authenticated)
 // =============================================================================
 
@@ -562,6 +618,8 @@ export default {
   fetchInfractionDataAuth,
   submitInfractionAuth,
   uploadInfractionDocumentAuth,
+  // Submissions API (JWT-based, authenticated)
+  fetchSubmissionsAuth,
   // Schedule API (JWT-based, authenticated)
   fetchMyScheduleAuth,
   // Employee API (JWT-based, authenticated)
