@@ -41,6 +41,14 @@ export const FEATURES: MarketingFeature[] = [
     screenshotReady: true,
   },
   {
+    slug: 'mobile-app',
+    name: 'Mobile App',
+    shortDescription: 'Your team data in your pocket — rate, search, manage.',
+    icon: 'smartphone',
+    tier: 'core',
+    screenshotReady: false,
+  },
+  {
     slug: 'scheduling',
     name: 'Scheduling',
     shortDescription: 'Build schedules with position coverage visibility.',
@@ -70,14 +78,6 @@ export const FEATURES: MarketingFeature[] = [
     shortDescription: 'AI-powered insights about your team, on demand.',
     icon: 'sparkles',
     tier: 'pro',
-    screenshotReady: false,
-  },
-  {
-    slug: 'mobile-app',
-    name: 'Mobile App',
-    shortDescription: 'Your team data in your pocket — rate, search, manage.',
-    icon: 'smartphone',
-    tier: 'core',
     screenshotReady: false,
   },
 ];

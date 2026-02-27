@@ -91,6 +91,9 @@ export function Header() {
           <Link href="/pricing" className={linkClass}>
             Pricing
           </Link>
+          <Link href="/integrations" className={linkClass}>
+            Integrations
+          </Link>
           <Link href="/about" className={linkClass}>
             About
           </Link>
@@ -141,6 +144,9 @@ export function Header() {
 
             <Link href="/pricing" className="py-2.5 px-3 text-text-secondary hover:text-brand transition-colors font-medium" onClick={() => setMobileOpen(false)}>
               Pricing
+            </Link>
+            <Link href="/integrations" className="py-2.5 px-3 text-text-secondary hover:text-brand transition-colors font-medium" onClick={() => setMobileOpen(false)}>
+              Integrations
             </Link>
             <Link href="/about" className="py-2.5 px-3 text-text-secondary hover:text-brand transition-colors font-medium" onClick={() => setMobileOpen(false)}>
               About
