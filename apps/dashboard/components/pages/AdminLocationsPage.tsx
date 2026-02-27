@@ -10,6 +10,7 @@ import { AdminModeSidebar } from '@/components/AdminMode/AdminModeSidebar';
 import { UserTestingPage } from '@/components/AdminMode/UserTestingPage';
 import { OrganizationsPage } from '@/components/AdminMode/OrganizationsPage';
 import { FeatureRequestsPage } from '@/components/AdminMode/FeatureRequestsPage';
+import { TaskBoardPage } from '@/components/AdminMode/TaskBoardPage';
 import { ComingSoonPlaceholder } from '@/components/OrgSettings/ComingSoonPlaceholder';
 import styles from './AdminLocationsPage.module.css';
 
@@ -17,7 +18,7 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-const VALID_SECTIONS = ['user-testing', 'organizations', 'feature-requests'];
+const VALID_SECTIONS = ['user-testing', 'organizations', 'feature-requests', 'task-board'];
 
 export function AdminLocationsPage() {
   const router = useRouter();
@@ -55,6 +56,8 @@ export function AdminLocationsPage() {
         return <OrganizationsPage />;
       case 'feature-requests':
         return <FeatureRequestsPage />;
+      case 'task-board':
+        return <TaskBoardPage />;
       default:
         return <UserTestingPage />;
     }
@@ -150,21 +153,23 @@ export function AdminLocationsPage() {
           userRole={auth.role}
         />
 
-        {/* Header section */}
-        <div className={styles.headerSection}>
-          <div className={styles.headerContent}>
-            <div className={styles.headerTextContainer}>
-              <h1 className={styles.pageTitle}>Admin Mode</h1>
-              <p className={styles.pageSubtitle}>
-                Test as users, manage locations, and configure clients across the Levelset platform.
-              </p>
+        {/* Header section - hidden on task board for full-screen layout */}
+        {activeSection !== 'task-board' && (
+          <div className={styles.headerSection}>
+            <div className={styles.headerContent}>
+              <div className={styles.headerTextContainer}>
+                <h1 className={styles.pageTitle}>Admin Mode</h1>
+                <p className={styles.pageSubtitle}>
+                  Test as users, manage locations, and configure clients across the Levelset platform.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Main content with sidebar */}
-        <div className={styles.mainContent}>
-          <div className={styles.contentContainer}>
+        <div className={`${styles.mainContent} ${activeSection === 'task-board' ? styles.mainContentFullWidth : ''}`}>
+          <div className={`${styles.contentContainer} ${activeSection === 'task-board' ? styles.contentContainerFullWidth : ''}`}>
             <AdminModeSidebar
               activeSection={activeSection}
               onSectionChange={setActiveSection}

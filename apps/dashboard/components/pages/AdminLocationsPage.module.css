@@ -125,6 +125,16 @@
   color: #999;
 }
 
+/* Full-width modifiers for Task Board */
+.contentContainerFullWidth {
+  max-width: none;
+  gap: 16px;
+}
+
+.mainContentFullWidth {
+  padding: 8px 16px;
+}
+
 /* Access Denied styles */
 .accessDeniedContainer {
   display: flex;
