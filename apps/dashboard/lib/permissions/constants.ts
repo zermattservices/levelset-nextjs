@@ -89,6 +89,7 @@ export const P = {
   SCHED_VIEW: 'scheduling.view_schedule',
   SCHED_MANAGE: 'scheduling.manage_schedule',
   SCHED_MANAGE_SETTINGS: 'scheduling.manage_settings',
+  SCHED_MANAGE_APPROVALS: 'scheduling.manage_approvals',
 
   // Form Management
   FM_VIEW_FORMS: 'form_management.view_forms',
@@ -493,6 +494,12 @@ export const SUB_ITEM_METADATA: Record<PermissionKey, SubItemMetadata> = {
     name: 'Manage Scheduling Settings',
     description: 'Configure break rules, position setup, and scheduling preferences',
     order: 3,
+    module: PERMISSION_MODULES.SCHEDULING,
+  },
+  [P.SCHED_MANAGE_APPROVALS]: {
+    name: 'Manage Approvals',
+    description: 'Approve or deny shift trades, time off requests, and availability changes',
+    order: 4,
     module: PERMISSION_MODULES.SCHEDULING,
   },
 

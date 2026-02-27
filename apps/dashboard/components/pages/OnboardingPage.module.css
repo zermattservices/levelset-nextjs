@@ -1,0 +1,100 @@
+.container {
+  height: 100vh;
+  background-color: var(--ls-color-muted-soft);
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  background-color: var(--ls-color-bg-container);
+}
+
+.logo {
+  height: 32px;
+  width: auto;
+}
+
+.logoFallback {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ls-color-brand);
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  display: none;
+  margin: 0;
+}
+
+.headerRight {
+  font-size: 13px;
+  color: var(--ls-color-muted);
+}
+
+.stepperSection {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px 0;
+}
+
+.content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 24px 48px;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 16px;
+}
+
+.loadingText {
+  font-size: 14px;
+  color: var(--ls-color-muted);
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+.errorText {
+  font-size: 16px;
+  color: var(--ls-color-destructive);
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 0;
+}
+
+.backBtn:hover {
+  color: var(--ls-color-neutral-soft-foreground);
+}

@@ -1,0 +1,163 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background-color: var(--ls-color-bg-container);
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.successIcon {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-family: "Mont", system-ui, -apple-system, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-muted);
+  margin: 0 0 28px 0;
+  line-height: 1.5;
+}
+
+/* Next steps list */
+.nextStepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 28px;
+  text-align: left;
+}
+
+.nextStepItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  width: 100%;
+}
+
+.nextStepItem:hover {
+  border-color: var(--ls-color-brand-border);
+  background-color: var(--ls-color-brand-soft);
+}
+
+.nextStepIcon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ls-color-muted-soft);
+  border-radius: 8px;
+  color: var(--ls-color-brand);
+}
+
+.nextStepContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.nextStepTitle {
+  display: block;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin-bottom: 2px;
+}
+
+.nextStepDescription {
+  display: block;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  line-height: 1.4;
+}
+
+.nextStepArrow {
+  font-size: 20px;
+  color: var(--ls-color-muted);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.nextStepItem:hover .nextStepArrow {
+  color: var(--ls-color-brand);
+}
+
+/* Primary CTA */
+.primaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 24px;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: var(--ls-color-brand);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

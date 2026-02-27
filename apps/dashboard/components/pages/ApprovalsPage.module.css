@@ -1,0 +1,361 @@
+/* ================================================================== */
+/*  ApprovalsPage                                                       */
+/* ================================================================== */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--ls-color-bg-page, #f8faf9);
+}
+
+.content {
+  max-width: var(--ls-max-content-width);
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-family: var(--ls-font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+/* ── Tabs ── */
+.tabBar {
+  margin-bottom: 20px;
+}
+
+/* ── Card list ── */
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Request card base ── */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--ls-color-bg-container);
+  border: 1px solid var(--ls-color-muted-soft);
+  border-radius: 12px;
+  transition: box-shadow 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cardType {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ls-font-heading);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.cardTypeShiftTrade {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.cardTypeTimeOff {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.cardTypeAvailability {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.cardSubtype {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  text-transform: capitalize;
+}
+
+.cardTimestamp {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  color: var(--ls-color-disabled-text);
+  white-space: nowrap;
+}
+
+/* ── Card body ── */
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.employeeName {
+  font-family: var(--ls-font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.shiftInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.shiftDate {
+  font-weight: 600;
+}
+
+.shiftTime {
+  color: var(--ls-color-muted);
+}
+
+.shiftPosition {
+  font-weight: 500;
+  color: var(--ls-color-brand);
+}
+
+.swapArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--ls-color-muted);
+}
+
+.swapContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.swapSide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  background: var(--ls-color-bg-page, #f8faf9);
+  border-radius: 8px;
+}
+
+.swapLabel {
+  font-family: var(--ls-font-body);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ls-color-disabled-text);
+}
+
+.openStatus {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ls-color-warning-base, #d97706);
+}
+
+/* ── Time off specific ── */
+.dateRange {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.requestNote {
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  font-style: italic;
+  padding: 6px 10px;
+  background: var(--ls-color-bg-page, #f8faf9);
+  border-radius: 6px;
+}
+
+/* ── Availability diff ── */
+.availDiff {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 4px 12px;
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+}
+
+.availDiffHeader {
+  font-weight: 600;
+  color: var(--ls-color-disabled-text);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-bottom: 4px;
+}
+
+.availDay {
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.availTime {
+  color: var(--ls-color-muted);
+}
+
+.availTimeNew {
+  color: var(--ls-color-brand);
+  font-weight: 600;
+}
+
+/* ── Card footer ── */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--ls-color-muted-soft);
+}
+
+.approveBtn {
+  font-family: var(--ls-font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--ls-color-brand);
+  color: white;
+  transition: background-color 0.15s ease;
+}
+
+.approveBtn:hover {
+  background: var(--ls-color-brand-hover);
+}
+
+.approveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.denyBtn {
+  font-family: var(--ls-font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border: 1px solid var(--ls-color-destructive-border, #fca5a5);
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--ls-color-destructive-base, #e53e3e);
+  transition: all 0.15s ease;
+}
+
+.denyBtn:hover {
+  background: var(--ls-color-destructive-soft, #fef2f2);
+}
+
+.denyBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Status badges (history tab) ── */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--ls-font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.statusApproved {
+  background: var(--ls-color-success-soft, #dcfce7);
+  color: var(--ls-color-success-base, #16a34a);
+}
+
+.statusDenied {
+  background: var(--ls-color-destructive-soft, #fef2f2);
+  color: var(--ls-color-destructive-base, #e53e3e);
+}
+
+.reviewInfo {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  color: var(--ls-color-disabled-text);
+}
+
+/* ── Empty state ── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  gap: 8px;
+}
+
+.emptyIcon {
+  color: var(--ls-color-muted-border);
+  margin-bottom: 4px;
+}
+
+.emptyText {
+  font-family: var(--ls-font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.emptySubText {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  color: var(--ls-color-disabled-text);
+}
+
+/* ── Loading ── */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+}

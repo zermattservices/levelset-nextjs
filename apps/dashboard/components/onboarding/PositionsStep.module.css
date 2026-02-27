@@ -1,0 +1,462 @@
+.card {
+  background-color: var(--ls-color-bg-container);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.sectionTitle {
+  font-family: "Mont", system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin: 0 0 8px 0;
+}
+
+.sectionDescription {
+  font-size: 14px;
+  color: var(--ls-color-muted);
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.infoBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background-color: var(--ls-color-brand-soft);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: var(--ls-color-brand-soft-foreground);
+  line-height: 1.5;
+}
+
+.infoBannerIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  padding-bottom: 0;
+}
+
+.tab {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+}
+
+.tab:hover {
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.tabActive {
+  color: var(--ls-color-brand);
+  border-bottom-color: var(--ls-color-brand);
+  font-weight: 600;
+}
+
+.zoneHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  margin-top: 24px;
+}
+
+.zoneHeader:first-of-type {
+  margin-top: 0;
+}
+
+.zoneLabel {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.addPositionBtn {
+  background: none;
+  border: none;
+  color: var(--ls-color-brand);
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.addPositionBtn:hover {
+  background-color: var(--ls-color-brand-soft);
+}
+
+/* Position card — now a column layout to support expanded criteria */
+.positionCard {
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: border-color 0.15s;
+  overflow: hidden;
+}
+
+.positionCard:hover {
+  border-color: var(--ls-color-brand-border);
+}
+
+.positionCardExpanded {
+  border-color: var(--ls-color-brand-border);
+  box-shadow: 0 0 0 1px var(--ls-color-brand-border);
+}
+
+.positionCardError {
+  border-color: var(--ls-color-destructive);
+}
+
+.positionCardMain {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 14px 16px;
+}
+
+.expandToggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--ls-color-muted);
+  transition: color 0.15s;
+}
+
+.expandToggle:hover {
+  color: var(--ls-color-brand);
+}
+
+.expandIcon {
+  display: inline-block;
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.expandIconOpen {
+  transform: rotate(90deg);
+}
+
+.positionNumber {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--ls-color-muted-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.positionContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.positionNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.positionName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ls-color-neutral-soft-foreground);
+  border: none;
+  background: none;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  outline: none;
+  padding: 2px 0;
+  width: 100%;
+}
+
+.positionName:focus {
+  border-bottom: 1px solid var(--ls-color-brand);
+}
+
+.templateBadge {
+  display: inline-flex;
+  padding: 2px 6px;
+  background-color: var(--ls-color-success-soft);
+  color: var(--ls-color-success-soft-foreground);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.positionErrorHint {
+  font-size: 12px;
+  color: var(--ls-color-destructive);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.positionDescription {
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.deleteBtn:hover {
+  color: var(--ls-color-destructive);
+  background-color: var(--ls-color-destructive-soft);
+}
+
+/* Criteria section (expanded) */
+.criteriaSection {
+  padding: 16px 16px 20px;
+  border-top: 1px solid var(--ls-color-muted-border);
+  background-color: var(--ls-color-muted-soft);
+}
+
+.posDescriptionField {
+  margin-bottom: 16px;
+}
+
+.posDescriptionLabel {
+  display: block;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+}
+
+.posDescriptionInput {
+  width: 100%;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-neutral-soft-foreground);
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background-color: var(--ls-color-bg-container);
+  outline: none;
+  resize: vertical;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.posDescriptionInput:focus {
+  border-color: var(--ls-color-brand);
+}
+
+.criteriaHeader {
+  margin-bottom: 12px;
+}
+
+.criteriaTitle {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.criteriaSubtitle {
+  display: block;
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  margin-top: 2px;
+}
+
+.criterionRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.criterionNumber {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--ls-color-brand-soft);
+  color: var(--ls-color-brand-soft-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.criterionNumberError {
+  background-color: var(--ls-color-destructive-soft);
+  color: var(--ls-color-destructive);
+}
+
+.criterionFields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.criterionName {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-neutral-soft-foreground);
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background-color: var(--ls-color-bg-container);
+  outline: none;
+}
+
+.criterionName:focus {
+  border-color: var(--ls-color-brand);
+}
+
+.criterionNameError {
+  border-color: var(--ls-color-destructive);
+  background-color: #fef2f2;
+}
+
+.criterionNameError:focus {
+  border-color: var(--ls-color-destructive);
+}
+
+.criterionNameError::placeholder {
+  color: var(--ls-color-destructive);
+  opacity: 0.6;
+}
+
+.criterionDescription {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background-color: var(--ls-color-bg-container);
+  outline: none;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.criterionDescription:focus {
+  border-color: var(--ls-color-brand);
+}
+
+.criteriaNote {
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  margin: 12px 0 0 0;
+  line-height: 1.4;
+}
+
+.navRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.stepBackBtn {
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  background: none;
+  border: 1.5px solid var(--ls-color-muted-border);
+  border-radius: 8px;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.stepBackBtn:hover {
+  border-color: var(--ls-color-neutral-soft-foreground);
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.submitBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: var(--ls-color-brand);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.errorBanner {
+  padding: 12px 16px;
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 14px;
+  margin-bottom: 16px;
+}

@@ -1,0 +1,236 @@
+.card {
+  background-color: var(--ls-color-bg-container);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.sectionTitle {
+  font-family: "Mont", system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin: 0 0 8px 0;
+}
+
+.sectionDescription {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-muted);
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.infoBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background-color: var(--ls-color-brand-soft);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-brand-soft-foreground);
+  line-height: 1.5;
+}
+
+.infoBannerIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Select All row */
+.selectAllRow {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  margin-bottom: 4px;
+}
+
+.selectAllText {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ls-color-brand);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Leader list */
+.leaderList {
+  display: flex;
+  flex-direction: column;
+}
+
+.leaderRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  transition: background-color 0.15s;
+}
+
+.leaderRow:last-child {
+  border-bottom: none;
+}
+
+.leaderRowSelected {
+  /* subtle selected state */
+}
+
+.leaderInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.leaderNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.leaderName {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background-color: var(--ls-color-brand-soft);
+  color: var(--ls-color-brand-soft-foreground);
+  border-radius: 4px;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.emailInput {
+  width: 100%;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-neutral-soft-foreground);
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background-color: var(--ls-color-bg-container);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.emailInput:focus {
+  border-color: var(--ls-color-brand);
+}
+
+.emailInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emailInput::placeholder {
+  color: var(--ls-color-muted);
+}
+
+/* Footer */
+.footerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.stepBackBtn {
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  background: none;
+  border: 1.5px solid var(--ls-color-muted-border);
+  border-radius: 8px;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.stepBackBtn:hover {
+  border-color: var(--ls-color-neutral-soft-foreground);
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.skipLink {
+  background: none;
+  border: none;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 0;
+  margin-left: auto;
+}
+
+.skipLink:hover {
+  text-decoration: underline;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.submitBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 48px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: var(--ls-color-brand);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.errorBanner {
+  padding: 12px 16px;
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  margin-bottom: 16px;
+}

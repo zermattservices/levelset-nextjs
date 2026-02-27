@@ -20,6 +20,7 @@ export interface AppUser {
   created_at?: string;
   updated_at?: string;
   profile_image?: string;
+  onboarding_completed?: boolean;
 }
 
 // Auth context data shape - matches SupabaseUserSession exactly

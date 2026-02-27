@@ -1,0 +1,399 @@
+.card {
+  background-color: var(--ls-color-bg-container);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.sectionTitle {
+  font-family: "Mont", system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin: 0 0 8px 0;
+}
+
+.sectionDescription {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-muted);
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+/* Info banner */
+.infoBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background-color: var(--ls-color-brand-soft);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-brand-soft-foreground);
+  line-height: 1.5;
+}
+
+.infoBannerIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Action bar */
+.actionBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+/* Documents table */
+.documentsTable {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.th {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ls-color-muted);
+  text-align: left;
+  padding: 10px 14px;
+  background-color: var(--ls-color-neutral-foreground);
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  white-space: nowrap;
+}
+
+.tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.tr:hover {
+  background-color: var(--ls-color-brand-soft);
+}
+
+.tr:not(:last-child) .td {
+  border-bottom: 1px solid var(--ls-color-muted-border);
+}
+
+.td {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-text-primary);
+  padding: 10px 14px;
+  vertical-align: middle;
+}
+
+.tdMuted {
+  color: var(--ls-color-muted);
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.docName {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Loading state */
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  gap: 12px;
+}
+
+.loadingText {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-muted);
+}
+
+/* Empty state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 10px;
+  border: 2px dashed var(--ls-color-muted-border);
+  border-radius: 10px;
+  background: var(--ls-color-neutral-foreground);
+}
+
+.emptyStateTitle {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ls-color-text-primary);
+  margin: 0;
+}
+
+.emptyStateDescription {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-muted);
+  margin: 0;
+  max-width: 380px;
+  line-height: 1.5;
+}
+
+/* Upload drop zone (dialog) */
+.uploadDropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  border: 2px dashed var(--ls-color-muted-border);
+  border-radius: 10px;
+  background: var(--ls-color-neutral-foreground);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  margin-bottom: 16px;
+}
+
+.uploadDropZone:hover {
+  border-color: var(--ls-color-brand);
+  background: var(--ls-color-brand-soft);
+}
+
+.uploadDropZoneActive {
+  border-color: var(--ls-color-brand);
+  background: var(--ls-color-brand-soft);
+}
+
+/* Drawer */
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.drawerHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+  gap: 8px;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+}
+
+.drawerActions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  flex-wrap: wrap;
+}
+
+.drawerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ls-color-muted-border);
+}
+
+.drawerSectionLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ls-color-muted);
+}
+
+.drawerSectionValue {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-text-primary);
+  line-height: 1.5;
+}
+
+.drawerDetailGrid {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 8px 12px;
+  align-items: start;
+}
+
+.drawerDetailLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+}
+
+.drawerDetailValue {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-text-primary);
+  word-break: break-word;
+}
+
+/* Analyzing overlay */
+.analyzingOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 32px;
+  text-align: center;
+  background-color: var(--ls-color-bg-container);
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.analyzingSpinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--ls-color-muted-border);
+  border-top-color: var(--ls-color-brand);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.analyzingText {
+  font-family: "Mont", system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin-bottom: 8px;
+}
+
+.analyzingSubtext {
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-muted);
+  max-width: 360px;
+  line-height: 1.5;
+}
+
+/* Footer with back/skip/continue */
+.footerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.stepBackBtn {
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  background: none;
+  border: 1.5px solid var(--ls-color-muted-border);
+  border-radius: 8px;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.stepBackBtn:hover {
+  border-color: var(--ls-color-neutral-soft-foreground);
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.skipLink {
+  background: none;
+  border: none;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 0;
+  margin-left: auto;
+}
+
+.skipLink:hover {
+  text-decoration: underline;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.submitBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 48px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: var(--ls-color-brand);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Error banner */
+.errorBanner {
+  padding: 12px 16px;
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .hideMobile {
+    display: none;
+  }
+
+  .card {
+    padding: 20px;
+  }
+}

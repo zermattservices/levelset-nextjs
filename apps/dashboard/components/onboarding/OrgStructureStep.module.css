@@ -1,0 +1,228 @@
+.card {
+  background-color: var(--ls-color-bg-container);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.sectionTitle {
+  font-family: "Mont", system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  margin: 0 0 8px 0;
+}
+
+.sectionDescription {
+  font-size: 14px;
+  color: var(--ls-color-muted);
+  margin: 0 0 28px 0;
+  line-height: 1.5;
+}
+
+/* ── Grid layout: inputs left, chart right ── */
+.layoutGrid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  column-gap: 16px;
+}
+
+/* ── Left column: input rows ── */
+.inputCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.levelIndicator {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.roleInputWrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background-color 0.15s;
+}
+
+.inputCell:hover .removeBtn {
+  opacity: 1;
+}
+
+.removeBtn:hover {
+  color: var(--ls-color-destructive);
+  background-color: var(--ls-color-destructive-soft);
+}
+
+.addBtnCell {
+  padding: 8px 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.addLevelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 14px;
+  border: 1.5px dashed var(--ls-color-muted-border);
+  border-radius: 8px;
+  background: none;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.addLevelBtn:hover {
+  border-color: var(--ls-color-brand);
+  color: var(--ls-color-brand);
+  background-color: var(--ls-color-brand-soft);
+}
+
+/* ── Right column: org chart ── */
+.chartCell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.chartBox {
+  flex: 1;
+  max-width: 140px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  border: 1.5px solid;
+  text-align: center;
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: var(--ls-color-bg-container);
+}
+
+.chartBoxOperator {
+  max-width: 180px;
+}
+
+.chartBoxEmpty {
+  opacity: 0.4;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Connector SVG between chart levels */
+.connectorCell {
+  display: flex;
+  align-items: stretch;
+}
+
+.connectorSvg {
+  display: block;
+  width: 100%;
+}
+
+/* ── Navigation ── */
+.navRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.stepBackBtn {
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  background: none;
+  border: 1.5px solid var(--ls-color-muted-border);
+  border-radius: 8px;
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.stepBackBtn:hover {
+  border-color: var(--ls-color-neutral-soft-foreground);
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+.submitBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: var(--ls-color-brand);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Satoshi", system-ui, -apple-system, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.errorBanner {
+  padding: 12px 16px;
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .layoutGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .chartCell,
+  .connectorCell {
+    display: none;
+  }
+}
