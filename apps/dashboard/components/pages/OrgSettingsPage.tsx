@@ -23,6 +23,7 @@ import { SchedulingSettings } from '@/components/OrgSettings/SchedulingSettings'
 import { BillingTab } from '@/components/OrgSettings/BillingTab';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
+import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -49,11 +50,11 @@ const VALID_SECTIONS = [
 export function OrgSettingsPage() {
   const router = useRouter();
   const auth = useAuth();
-  const { selectedLocationId, selectedLocationOrgId, userHierarchyLevel } = useLocationContext();
+  const { selectedLocationId, selectedLocationOrgId, userHierarchyLevel, loading: locationLoading } = useLocationContext();
   const [level1RoleName, setLevel1RoleName] = React.useState<string>('');
   
   const supabase = React.useMemo(() => createSupabaseClient(), []);
-  const { has, loading: permissionsLoading } = usePermissions();
+  const { has, hierarchyLevel: permHierarchyLevel, loading: permissionsLoading } = usePermissions();
 
   // Get active section from URL query parameter, default to 'positional-excellence'
   const activeSection = React.useMemo(() => {
@@ -124,16 +125,19 @@ export function OrgSettingsPage() {
   // Check if user can view organization settings
   const canViewOrgSettings = has(P.ORG_VIEW_SETTINGS);
 
-  // Scheduling is restricted to Levelset Admin only (matches nav bar restriction)
-  const isLevelsetAdmin = auth.role === 'Levelset Admin';
+  const { hasFeature } = useOrgFeatures();
+  const hasScheduling = hasFeature(F.SCHEDULING);
   
   // Determine if user can edit settings
-  // Uses permissions system - specific permissions are checked in child components
+  // Uses the PermissionsProvider which correctly handles both regular roles and admin profiles.
+  // Specific sub-permissions are checked in child components.
   const canEdit = React.useMemo(() => {
     if (auth.role === 'Levelset Admin') return true;
-    if (userHierarchyLevel === null) return false;
-    return userHierarchyLevel <= 1;
-  }, [auth.role, userHierarchyLevel]);
+    // Check actual management permissions from PermissionsProvider.
+    // This works for regular leadership roles (via org_roles) AND admin profiles
+    // (which get their permissions from permission_profile_access).
+    return has(P.ORG_MANAGE_LOCATION) || has(P.ORG_MANAGE_ORG);
+  }, [auth.role, has]);
 
   // Fetch level 1 role name for warning message
   React.useEffect(() => {
@@ -176,8 +180,7 @@ export function OrgSettingsPage() {
         { id: 'roster-settings', label: 'Roster', status: 'active' },
         { id: 'pathway', label: 'Pathway', status: 'coming-soon' },
         { id: 'evaluations', label: 'Evaluations', status: 'coming-soon' },
-        // Scheduling is restricted to Levelset Admin only
-        ...(isLevelsetAdmin ? [{ id: 'scheduling', label: 'Scheduling', status: 'active' as const }] : []),
+        ...(hasScheduling ? [{ id: 'scheduling', label: 'Scheduling', status: 'active' as const }] : []),
       ],
     },
     {
@@ -217,8 +220,7 @@ export function OrgSettingsPage() {
       case 'evaluations':
         return <ComingSoonPlaceholder title="Evaluations" description="Performance evaluation scheduling and tracking coming soon." />;
       case 'scheduling':
-        // Scheduling settings restricted to Levelset Admin only
-        if (!isLevelsetAdmin) return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
+        if (!hasScheduling) return <PositionalExcellenceSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
         return <SchedulingSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
       case 'users':
         return <UsersTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
@@ -241,8 +243,8 @@ export function OrgSettingsPage() {
     }
   };
 
-  // Show loading while checking auth
-  if (!auth.isLoaded || (auth.authUser && userHierarchyLevel === null)) {
+  // Show loading while auth, location, or permissions data is still loading
+  if (!auth.isLoaded || locationLoading || permissionsLoading) {
     return (
       <div className={sty.loadingContainer}>
         <div className={sty.loadingSpinner} />

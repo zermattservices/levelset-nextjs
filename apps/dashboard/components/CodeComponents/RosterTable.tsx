@@ -86,14 +86,12 @@ export function RosterTable(props: RosterTableProps) {
   const canTerminate = has(P.ROSTER_TERMINATE);
   
   // Determine if user can edit more than just FOH/BOH
-  // Level 0, 1, and Levelset Admin can edit everything
-  // Level 2+ can only edit FOH/BOH (and view evaluations/PIP read-only)
-  // Replaced with permission-based checks above
+  // Uses PermissionsProvider which correctly handles both regular roles and admin profiles
   const canEditFullRoster = React.useMemo(() => {
     if (currentUserRoleProp === 'Levelset Admin') return true;
-    if (userHierarchyLevel === null) return false;
-    return userHierarchyLevel <= 1;
-  }, [currentUserRoleProp, userHierarchyLevel]);
+    // Use actual permission checks — works for regular leadership and admin profiles
+    return canEditEmployee || canEditRoles || canEditAvailability;
+  }, [currentUserRoleProp, canEditEmployee, canEditRoles, canEditAvailability]);
 
   // Fetch feature toggles for the current organization
   React.useEffect(() => {
@@ -545,16 +543,20 @@ function EmployeesTableView({
   onEmployeeDelete,
   featureToggles,
 }: RosterTableProps & { featureToggles?: OrgFeatureToggles }) {
-  const { selectedLocationOrgId, userHierarchyLevel } = useLocationContext();
-  
+  const { selectedLocationOrgId } = useLocationContext();
+  const { has } = usePermissions();
+
+  // Permission-based access control for roster operations
+  const canEditEmployee = has(P.ROSTER_EDIT_EMPLOYEE);
+  const canEditRoles = has(P.ROSTER_EDIT_ROLES);
+  const canEditAvailability = has(P.ROSTER_EDIT_AVAILABILITY);
+
   // Determine if user can edit more than just FOH/BOH
-  // Level 0, 1, and Levelset Admin can edit everything
-  // Level 2+ can only edit FOH/BOH
+  // Uses PermissionsProvider which correctly handles both regular roles and admin profiles
   const canEditFullRoster = React.useMemo(() => {
     if (currentUserRoleProp === 'Levelset Admin') return true;
-    if (userHierarchyLevel === null) return false;
-    return userHierarchyLevel <= 1;
-  }, [currentUserRoleProp, userHierarchyLevel]);
+    return canEditEmployee || canEditRoles || canEditAvailability;
+  }, [currentUserRoleProp, canEditEmployee, canEditRoles, canEditAvailability]);
   const [data, setData] = React.useState<RosterEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);

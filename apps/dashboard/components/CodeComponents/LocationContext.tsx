@@ -266,19 +266,40 @@ export function LocationProvider({ children }: { children?: React.ReactNode }) {
 
         if (hierarchyError) {
           console.error('[LocationProvider] Failed to fetch hierarchy level', hierarchyError);
-          setUserHierarchyLevel(null);
+        }
+
+        if (hierarchyData?.hierarchy_level != null) {
+          setUserHierarchyLevel(hierarchyData.hierarchy_level);
           return;
         }
 
-        setUserHierarchyLevel(hierarchyData?.hierarchy_level ?? null);
+        // Role not found in org_roles (e.g. "Administrator" for admin-only users).
+        // Fall back to the user's permission profile hierarchy level.
+        if (userId) {
+          const { data: profileData } = await supabase
+            .from('app_users')
+            .select('permission_profiles(hierarchy_level)')
+            .eq('auth_user_id', userId)
+            .eq('org_id', selectedLocationOrgId)
+            .maybeSingle();
+
+          const profileLevel = (profileData as any)?.permission_profiles?.hierarchy_level;
+          if (profileLevel != null) {
+            setUserHierarchyLevel(profileLevel);
+            return;
+          }
+        }
+
+        // No org_role match and no permission profile — default to read-only
+        setUserHierarchyLevel(999);
       } catch (err) {
         console.error('[LocationProvider] Error fetching hierarchy level', err);
-        setUserHierarchyLevel(null);
+        setUserHierarchyLevel(999);
       }
     }
 
     fetchHierarchyLevel();
-  }, [selectedLocationOrgId, userRole, supabase]);
+  }, [selectedLocationOrgId, userRole, userId, supabase]);
 
   React.useEffect(() => {
     loadLocations();
