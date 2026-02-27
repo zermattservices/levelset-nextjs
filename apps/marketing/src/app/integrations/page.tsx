@@ -99,7 +99,7 @@ export default function IntegrationsPage() {
                 <div className="flex items-start justify-between mb-5">
                   <div className="w-12 h-12 rounded-xl bg-white border border-neutral-200/80 flex items-center justify-center shadow-sm">
                     <Image
-                      src={`/integrations/${integration.slug}.svg`}
+                      src={`/integrations/${integration.slug}.png`}
                       alt={integration.name}
                       width={28}
                       height={28}
@@ -171,7 +171,7 @@ export default function IntegrationsPage() {
                 <div className="flex items-start justify-between mb-5">
                   <div className="w-12 h-12 rounded-xl bg-neutral-50 border border-neutral-200/80 flex items-center justify-center">
                     <Image
-                      src={`/integrations/${integration.slug}.svg`}
+                      src={`/integrations/${integration.slug}.png`}
                       alt={integration.name}
                       width={28}
                       height={28}

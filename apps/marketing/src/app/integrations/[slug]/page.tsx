@@ -125,7 +125,7 @@ export default function IntegrationDetailPage({ params }: Props) {
               <div className="flex items-center gap-4 mb-5">
                 <div className="w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center">
                   <Image
-                    src={`/integrations/${integration.slug}.svg`}
+                    src={`/integrations/${integration.slug}.png`}
                     alt={integration.name}
                     width={32}
                     height={32}
@@ -159,7 +159,7 @@ export default function IntegrationDetailPage({ params }: Props) {
               <div className="relative flex flex-col items-center text-center">
                 <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-5">
                   <Image
-                    src={`/integrations/${integration.slug}.svg`}
+                    src={`/integrations/${integration.slug}.png`}
                     alt={integration.name}
                     width={44}
                     height={44}
@@ -246,7 +246,7 @@ export default function IntegrationDetailPage({ params }: Props) {
               >
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white border border-neutral-200/60 flex items-center justify-center">
                   <Image
-                    src={`/integrations/${i.slug}.svg`}
+                    src={`/integrations/${i.slug}.png`}
                     alt={i.name}
                     width={22}
                     height={22}
