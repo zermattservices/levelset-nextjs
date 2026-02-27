@@ -232,6 +232,9 @@ importers:
       '@levelset/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@levelset/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@supabase/supabase-js':
         specifier: ^2.49.1
         version: 2.95.3

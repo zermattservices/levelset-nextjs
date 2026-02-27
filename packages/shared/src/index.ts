@@ -7,4 +7,6 @@
 
 // Supabase types will be generated here via `pnpm db:gen-types`
 // For now, consumers should import directly from apps/dashboard/lib/supabase.types
-export {};
+
+// Billing constants (used by marketing site, dashboard billing, etc.)
+export * from './billing/constants';

@@ -4,6 +4,7 @@ import { mont, satoshi } from '@/lib/fonts';
 import { getFBPixelScript } from '@/lib/analytics';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { TrialModalProvider } from '@/components/cta/TrialModalProvider';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -60,9 +61,11 @@ export default function RootLayout({
         </noscript>
       </head>
       <body className="font-body antialiased">
-        <Header />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+        <TrialModalProvider>
+          <Header />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+        </TrialModalProvider>
       </body>
     </html>
   );

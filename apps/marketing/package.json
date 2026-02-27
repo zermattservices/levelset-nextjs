@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@levelset/design-tokens": "workspace:*",
+    "@levelset/shared": "workspace:*",
     "@supabase/supabase-js": "^2.49.1",
     "next": "14.2.26",
     "react": "^18.3.1",
