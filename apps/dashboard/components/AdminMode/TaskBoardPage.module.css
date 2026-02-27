@@ -1,0 +1,348 @@
+/* TaskBoardPage.module.css */
+
+.boardRoot {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+
+.boardHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e5e5;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.boardTitle {
+  margin: 0;
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #0d1b14;
+}
+
+.filterChips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.searchField {
+  /* kept small via sx prop */
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ls-color-brand-base);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.addButton:hover {
+  background: var(--ls-color-brand-hover);
+}
+
+/* ─── Columns ─────────────────────────────────────────────────────────────── */
+
+.columnsContainer {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 16px;
+  min-height: 0;
+}
+
+.column {
+  width: 280px;
+  min-width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  border-radius: 12px;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.columnHeader {
+  padding: 12px 16px;
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0d1b14;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.columnCount {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #999;
+  background: #e5e5e5;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+.columnBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 60px;
+}
+
+/* Custom thin scrollbar */
+.columnBody::-webkit-scrollbar {
+  width: 4px;
+}
+
+.columnBody::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.columnBody::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 2px;
+}
+
+/* Column drop target highlight */
+.columnDropTarget {
+  background: #f0fdf4;
+}
+
+/* ─── Card ────────────────────────────────────────────────────────────────── */
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 12px;
+  padding-left: 15px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+  position: relative;
+}
+
+.card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.cardDragging {
+  opacity: 0.5;
+}
+
+.cardOverlay {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  padding-left: 15px;
+  border: 1px solid #e5e5e5;
+  position: relative;
+}
+
+.cardPriorityBorder {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 8px 0 0 8px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0d1b14;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.workstreamDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dueDateBadge {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 11px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dueDateOverdue {
+  color: var(--ls-color-destructive-base);
+  font-weight: 600;
+}
+
+.blockedBadge {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 10px;
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.roadmapBadge {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 10px;
+  color: var(--ls-color-brand-base);
+  background: var(--ls-color-brand-soft, #ecfdf5);
+  padding: 1px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* ─── Empty Column ────────────────────────────────────────────────────────── */
+
+.emptyColumn {
+  padding: 24px 12px;
+  text-align: center;
+  border: 2px dashed #e5e5e5;
+  border-radius: 8px;
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  color: #999;
+  margin: 0 4px;
+}
+
+/* ─── Color Swatches (Workstream Dialog) ──────────────────────────────────── */
+
+.colorSwatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.colorSwatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.colorSwatch:hover {
+  border-color: #ccc;
+}
+
+.colorSwatchSelected {
+  border-color: #0d1b14;
+}
+
+/* ─── Workstream Dialog Buttons ───────────────────────────────────────────── */
+
+.wsCancelButton {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  background: none;
+  border: 1px solid #e5e5e5;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wsCancelButton:hover {
+  background: #f5f5f5;
+}
+
+.wsCancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wsSaveButton {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ls-color-brand-base);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wsSaveButton:hover {
+  background: var(--ls-color-brand-hover);
+}
+
+.wsSaveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wsDeleteButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-destructive-base);
+  background: none;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wsDeleteButton:hover {
+  background: var(--ls-color-destructive-soft, #fee2e2);
+}
+
+.wsDeleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -8,6 +8,7 @@ import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import BusinessIcon from '@mui/icons-material/Business';
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
+import ViewKanbanOutlinedIcon from '@mui/icons-material/ViewKanbanOutlined';
 import styles from './AdminModeSidebar.module.css';
 
 export interface AdminMenuItem {
@@ -41,6 +42,12 @@ const menuGroups: MenuGroup[] = [
         id: 'feature-requests',
         label: 'Feature Requests',
         icon: <LightbulbOutlinedIcon sx={{ fontSize: 18 }} />,
+        status: 'active',
+      },
+      {
+        id: 'task-board',
+        label: 'Task Board',
+        icon: <ViewKanbanOutlinedIcon sx={{ fontSize: 18 }} />,
         status: 'active',
       },
     ],
