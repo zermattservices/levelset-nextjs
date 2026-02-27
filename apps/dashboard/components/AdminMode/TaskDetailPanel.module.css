@@ -67,7 +67,7 @@
 }
 
 .dateInput:focus {
-  border-color: var(--ls-color-brand-base);
+  border-color: var(--ls-color-brand, #31664A);
 }
 
 /* ─── Dependencies ────────────────────────────────────────────────────────── */
@@ -110,12 +110,12 @@
 /* ─── Roadmap Link ────────────────────────────────────────────────────────── */
 
 .roadmapLink {
-  background: var(--ls-color-brand-soft, #ecfdf5);
+  background: var(--ls-color-brand-soft, #DBEAFE);
   border-radius: 8px;
   padding: 12px;
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
-  color: var(--ls-color-brand-base);
+  color: var(--ls-color-brand, #31664A);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -158,7 +158,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--ls-color-destructive-base);
+  color: var(--ls-color-destructive, #D23230);
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
   background: none;
@@ -170,7 +170,7 @@
 }
 
 .deleteButton:hover {
-  background: var(--ls-color-destructive-soft, #fee2e2);
+  background: var(--ls-color-destructive-soft, #F7ABAA);
 }
 
 .saveButton {
@@ -178,7 +178,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #fff;
-  background: var(--ls-color-brand-base);
+  background: var(--ls-color-brand, #31664A);
   border: none;
   padding: 8px 20px;
   border-radius: 8px;
@@ -187,7 +187,7 @@
 }
 
 .saveButton:hover {
-  background: var(--ls-color-brand-hover);
+  background: var(--ls-color-brand-hover, #264D38);
 }
 
 .saveButton:disabled {
@@ -224,7 +224,7 @@
   font-size: 13px;
   font-weight: 600;
   color: #fff;
-  background: var(--ls-color-destructive-base);
+  background: var(--ls-color-destructive, #D23230);
   border: none;
   padding: 6px 14px;
   border-radius: 8px;

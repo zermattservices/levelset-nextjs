@@ -676,12 +676,12 @@ export function TaskBoardPage() {
                 fontSize: 13,
                 fontWeight: selectedWorkstreamId === null ? 600 : 400,
                 backgroundColor:
-                  selectedWorkstreamId === null ? 'var(--ls-color-brand-base)' : undefined,
+                  selectedWorkstreamId === null ? 'var(--ls-color-brand, #31664A)' : undefined,
                 color: selectedWorkstreamId === null ? '#fff' : undefined,
                 '&:hover': {
                   backgroundColor:
                     selectedWorkstreamId === null
-                      ? 'var(--ls-color-brand-hover)'
+                      ? 'var(--ls-color-brand-hover, #264D38)'
                       : undefined,
                 },
               }}
