@@ -1,4 +1,6 @@
 import { Hero } from '@/components/sections/Hero';
+import { PainPoints } from '@/components/sections/PainPoints';
+import { FeaturesOverview } from '@/components/sections/FeaturesOverview';
 import { About } from '@/components/sections/About';
 import { Stats } from '@/components/sections/Stats';
 import { FAQ } from '@/components/sections/FAQ';
@@ -8,6 +10,8 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <PainPoints />
+      <FeaturesOverview />
       <About />
       <Stats />
       <FAQ />

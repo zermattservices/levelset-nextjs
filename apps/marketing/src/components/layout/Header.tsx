@@ -2,17 +2,32 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { FeaturesDropdown, FeaturesMenuItems } from './FeaturesDropdown';
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [featuresOpen, setFeaturesOpen] = useState(false);
+  const featuresTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close features dropdown when clicking outside
+  useEffect(() => {
+    if (!featuresOpen) return;
+    const handleClick = () => setFeaturesOpen(false);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [featuresOpen]);
+
+  const linkClass = `text-sm font-medium transition-colors duration-200 ${
+    scrolled ? 'text-text-secondary hover:text-brand' : 'text-white/70 hover:text-white'
+  }`;
 
   return (
     <header
@@ -37,28 +52,47 @@ export function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
-          <Link
-            href="/#about"
-            className={`text-sm font-medium transition-colors duration-200 ${
-              scrolled ? 'text-text-secondary hover:text-brand' : 'text-white/70 hover:text-white'
-            }`}
+          {/* Features dropdown */}
+          <div
+            className="relative"
+            onMouseEnter={() => {
+              if (featuresTimeout.current) clearTimeout(featuresTimeout.current);
+              setFeaturesOpen(true);
+            }}
+            onMouseLeave={() => {
+              featuresTimeout.current = setTimeout(() => setFeaturesOpen(false), 150);
+            }}
+            onClick={(e) => e.stopPropagation()}
           >
+            <button
+              className={`${linkClass} flex items-center gap-1`}
+              onClick={() => setFeaturesOpen(!featuresOpen)}
+            >
+              Features
+              <svg
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${featuresOpen ? 'rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <FeaturesDropdown
+              open={featuresOpen}
+              onClose={() => setFeaturesOpen(false)}
+              scrolled={scrolled}
+            />
+          </div>
+
+          <Link href="/pricing" className={linkClass}>
+            Pricing
+          </Link>
+          <Link href="/about" className={linkClass}>
             About
           </Link>
-          <Link
-            href="/#faq"
-            className={`text-sm font-medium transition-colors duration-200 ${
-              scrolled ? 'text-text-secondary hover:text-brand' : 'text-white/70 hover:text-white'
-            }`}
-          >
-            FAQ
-          </Link>
-          <Link
-            href="/contact"
-            className={`text-sm font-medium transition-colors duration-200 ${
-              scrolled ? 'text-text-secondary hover:text-brand' : 'text-white/70 hover:text-white'
-            }`}
-          >
+          <Link href="/contact" className={linkClass}>
             Contact
           </Link>
           <button
@@ -76,7 +110,7 @@ export function Header() {
                 : 'bg-white/15 text-white border border-white/25 hover:bg-white/25 backdrop-blur-sm'
             }`}
           >
-            Join Waitlist
+            Get Started
           </button>
         </nav>
 
@@ -98,15 +132,25 @@ export function Header() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-neutral-border/50 shadow-lg">
-          <nav className="max-w-content mx-auto px-6 py-4 flex flex-col gap-3">
-            <Link href="/#about" className="py-2 text-text-secondary hover:text-brand transition-colors" onClick={() => setMobileOpen(false)}>
+        <div className="md:hidden bg-white border-t border-neutral-border/50 shadow-lg max-h-[80vh] overflow-y-auto">
+          <nav className="max-w-content mx-auto px-6 py-4 flex flex-col gap-1">
+            {/* Features section */}
+            <div className="py-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 px-3">
+                Features
+              </span>
+              <FeaturesMenuItems onItemClick={() => setMobileOpen(false)} />
+            </div>
+
+            <div className="border-t border-neutral-100 my-2" />
+
+            <Link href="/pricing" className="py-2.5 px-3 text-text-secondary hover:text-brand transition-colors font-medium" onClick={() => setMobileOpen(false)}>
+              Pricing
+            </Link>
+            <Link href="/about" className="py-2.5 px-3 text-text-secondary hover:text-brand transition-colors font-medium" onClick={() => setMobileOpen(false)}>
               About
             </Link>
-            <Link href="/#faq" className="py-2 text-text-secondary hover:text-brand transition-colors" onClick={() => setMobileOpen(false)}>
-              FAQ
-            </Link>
-            <Link href="/contact" className="py-2 text-text-secondary hover:text-brand transition-colors" onClick={() => setMobileOpen(false)}>
+            <Link href="/contact" className="py-2.5 px-3 text-text-secondary hover:text-brand transition-colors font-medium" onClick={() => setMobileOpen(false)}>
               Contact
             </Link>
             <button
@@ -121,7 +165,7 @@ export function Header() {
                 }
               }}
             >
-              Join Waitlist
+              Get Started
             </button>
           </nav>
         </div>

@@ -23,14 +23,24 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Links */}
+          {/* Product */}
           <div>
             <h4 className="text-white font-medium text-sm mb-4 uppercase tracking-wider">
-              Company
+              Product
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/#about" className="text-sm hover:text-white transition-colors duration-200">
+                <Link href="/features/positional-ratings" className="text-sm hover:text-white transition-colors duration-200">
+                  Features
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing" className="text-sm hover:text-white transition-colors duration-200">
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="text-sm hover:text-white transition-colors duration-200">
                   About
                 </Link>
               </li>
