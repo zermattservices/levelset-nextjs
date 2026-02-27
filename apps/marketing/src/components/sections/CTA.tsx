@@ -1,4 +1,6 @@
-import { WaitlistForm } from '@/components/forms/WaitlistForm';
+'use client';
+
+import { TrialCTA } from '@/components/cta/TrialCTA';
 
 export function CTA() {
   return (
@@ -19,12 +21,10 @@ export function CTA() {
             Ready to ditch the spreadsheets?
           </h2>
           <p className="text-lg text-white/70 mb-10 max-w-xl mx-auto">
-            Join the waitlist and be among the first Chick-fil-A operators to run their team on Levelset.
+            Start your free trial and see how Levelset connects your positions, discipline, and team roster in one platform.
           </p>
           <div className="flex justify-center">
-            <div className="bg-white rounded-2xl p-8 shadow-2xl shadow-black/20 w-full max-w-md">
-              <WaitlistForm />
-            </div>
+            <TrialCTA dark />
           </div>
         </div>
       </div>

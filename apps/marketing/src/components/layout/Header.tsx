@@ -4,12 +4,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { FeaturesDropdown, FeaturesMenuItems } from './FeaturesDropdown';
+import { useTrialModal } from '@/components/cta/TrialModalProvider';
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
   const featuresTimeout = useRef<NodeJS.Timeout | null>(null);
+  const { openModal } = useTrialModal();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -96,14 +98,7 @@ export function Header() {
             Contact
           </Link>
           <button
-            onClick={() => {
-              const el = document.getElementById('waitlist');
-              if (el) {
-                el.scrollIntoView({ behavior: 'smooth' });
-              } else {
-                window.location.href = '/#waitlist';
-              }
-            }}
+            onClick={openModal}
             className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
               scrolled
                 ? 'bg-[#31664A] text-white hover:bg-[#264D38]'
@@ -157,12 +152,7 @@ export function Header() {
               className="mt-2 px-5 py-2.5 rounded-lg bg-[#31664A] text-white font-semibold text-sm hover:bg-[#264D38] transition-colors"
               onClick={() => {
                 setMobileOpen(false);
-                const el = document.getElementById('waitlist');
-                if (el) {
-                  el.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  window.location.href = '/#waitlist';
-                }
+                openModal();
               }}
             >
               Get Started

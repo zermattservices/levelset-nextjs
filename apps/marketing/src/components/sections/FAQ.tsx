@@ -14,7 +14,7 @@ const faqItems = [
   {
     question: 'How do I get access?',
     answer:
-      'Levelset is currently in early access with a small group of operators. Join the waitlist and we\'ll reach out when we\'re ready to bring you on. Early access operators help shape the product and get priority onboarding.',
+      'Levelset offers a 30-day free trial — no credit card required. Click "Get Started" to choose a plan and set up your organization. You\'ll have full access to all features during your trial period.',
   },
 ];
 

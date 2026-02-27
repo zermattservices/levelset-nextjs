@@ -1,6 +1,6 @@
 'use client';
 
-import { WaitlistForm } from '@/components/forms/WaitlistForm';
+import { TrialCTA } from '@/components/cta/TrialCTA';
 
 export function Hero() {
   return (
@@ -38,12 +38,8 @@ export function Hero() {
           </p>
 
           <div className="flex justify-center">
-            <WaitlistForm dark />
+            <TrialCTA dark />
           </div>
-
-          <p className="text-sm text-white/40 mt-4">
-            Join the waitlist — no spam, just updates.
-          </p>
         </div>
       </div>
     </section>
