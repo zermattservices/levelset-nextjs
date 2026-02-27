@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const ASSIGNMENT_SELECT = `
   *,
-  employee:employees(id, full_name, calculated_pay),
+  employee:employees(id, full_name, calculated_pay, actual_pay, actual_pay_type, actual_pay_annual),
   position:org_positions(id, name, zone),
   shift:shifts(id, start_time, end_time, position_id)
 `;

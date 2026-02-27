@@ -8,7 +8,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { HouseShiftsTab } from './HouseShiftsTab';
 import { ScheduleSummaryTab } from './ScheduleSummaryTab';
-import type { Shift, Position, LaborSummary, TimeViewMode } from '@/lib/scheduling.types';
+import type { Shift, Position, LaborSummary, TimeViewMode, SalesForecast } from '@/lib/scheduling.types';
 
 const LaborSpreadTab = dynamic(
   () => import('./LaborSpreadTab').then(mod => ({ default: mod.LaborSpreadTab })),
@@ -31,6 +31,8 @@ interface BottomPanelProps {
   externalHoverMinute?: number | null;
   /** Called when the LaborSpreadTab hover changes */
   onHoverMinuteChange?: (minute: number | null) => void;
+  /** Sales forecast data for the current week */
+  forecasts?: SalesForecast[];
 }
 
 const MIN_CONTENT_HEIGHT = 100;
@@ -42,6 +44,7 @@ export function BottomPanel({
   timeViewMode, selectedDay,
   onDeleteShift,
   externalHoverMinute, onHoverMinuteChange,
+  forecasts,
 }: BottomPanelProps) {
   const [activeTab, setActiveTab] = React.useState<BottomTab>('house_shifts');
   const [expanded, setExpanded] = React.useState(true);
@@ -129,6 +132,8 @@ export function BottomPanel({
               positions={positions}
               laborSummary={laborSummary}
               canViewPay={canViewPay}
+              forecasts={forecasts}
+              days={days}
             />
           )}
           {activeTab === 'labor_spread' && (
@@ -141,6 +146,7 @@ export function BottomPanel({
               selectedDay={selectedDay}
               externalHoverMinute={externalHoverMinute}
               onHoverMinuteChange={onHoverMinuteChange}
+              forecasts={forecasts}
             />
           )}
         </div>

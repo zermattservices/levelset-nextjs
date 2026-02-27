@@ -23,7 +23,7 @@ import ReAnimated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
+import { useGlass } from "../../hooks/useGlass";
 import { useColors } from "../../context/ThemeContext";
 import { borderRadius, spacing, haptics } from "../../lib/theme";
 import { typography } from "../../lib/fonts";
@@ -49,7 +49,6 @@ export function GlassModal({
 }: GlassModalProps) {
   const colors = useColors();
   const { GlassView } = useGlass();
-  const useGlassEffect = isGlassAvailable();
   const insets = useSafeAreaInsets();
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
 
@@ -136,11 +135,9 @@ export function GlassModal({
 
         {/* Modal Content */}
         <ReAnimated.View style={[styles.animatedContainer, contentAnimStyle]}>
-          {useGlassEffect && GlassView ? (
+          {GlassView ? (
             <GlassView
               style={containerStyle}
-              glassEffectStyle="regular"
-              tintColor={colors.glassTintLight}
             >
               {modalContent}
             </GlassView>

@@ -90,7 +90,8 @@
   gap: 8px;
   padding: 8px 10px;
   border-radius: var(--ls-radius-md);
-  border: 1px solid transparent;
+  border: 1px solid var(--ls-color-neutral-border);
+  background: var(--ls-color-bg-container);
   cursor: grab;
   transition: all 0.12s ease;
   user-select: none;
@@ -98,7 +99,8 @@
 
 .employeeCard:hover {
   background: var(--ls-color-muted-soft);
-  border-color: var(--ls-color-neutral-border);
+  border-color: var(--ls-color-muted);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .employeeCard:active {
@@ -134,6 +136,11 @@
   font-family: var(--ls-font-body);
   font-size: 11px;
   color: var(--ls-color-muted);
+}
+
+.positionLabel {
+  color: var(--ls-color-neutral-soft-foreground);
+  font-weight: 500;
 }
 
 .assignedBadge {

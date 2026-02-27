@@ -42,6 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       new_employees: any[];
       modified_employees: any[];
       terminated_employees: any[];
+      pay_rates?: Record<string, { rate: number; rate_cents?: number; type: 'hourly' | 'salary' }>;
     };
 
     const locationId = notification.location_id;
@@ -191,6 +192,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Error deactivating terminated employees:', deactivateError);
       } else {
         deactivatedCount = terminatedEmployees.length;
+      }
+    }
+
+    // Apply pay rates from HS bootstrap data to newly created employees
+    // HS payRate values are in DOLLARS (e.g. 9 = $9/hr, 22 = $22/hr)
+    if (syncData.pay_rates && createdCount > 0) {
+      try {
+        // Fetch all employees with hs_id at this location to apply pay rates
+        const { data: allEmployees } = await supabase
+          .from('employees')
+          .select('id, hs_id')
+          .eq('location_id', locationId)
+          .eq('active', true)
+          .not('hs_id', 'is', null);
+
+        let payUpdated = 0;
+        for (const emp of allEmployees || []) {
+          if (!emp.hs_id) continue;
+          const payInfo = syncData.pay_rates[String(emp.hs_id)];
+          if (!payInfo) continue;
+
+          // Support both old (rate_cents) and new (rate) field names
+          // Old notifications stored rate_cents but values were actually dollars
+          const rateDollars = payInfo.rate ?? payInfo.rate_cents ?? 0;
+          if (rateDollars <= 0) continue;
+
+          if (payInfo.type === 'salary') {
+            await supabase
+              .from('employees')
+              .update({ actual_pay: null, actual_pay_type: 'salary', actual_pay_annual: rateDollars })
+              .eq('id', emp.id);
+            payUpdated++;
+          } else {
+            await supabase
+              .from('employees')
+              .update({ actual_pay: rateDollars, actual_pay_type: 'hourly', actual_pay_annual: null })
+              .eq('id', emp.id);
+            payUpdated++;
+          }
+        }
+        if (payUpdated > 0) {
+          console.log(`[ConfirmSync] Applied pay rates to ${payUpdated} employees from HS data`);
+        }
+      } catch (payErr) {
+        console.error('[ConfirmSync] Failed to apply pay rates (non-fatal):', payErr);
       }
     }
 

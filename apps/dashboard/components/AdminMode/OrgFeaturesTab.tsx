@@ -177,13 +177,11 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
   };
 
   // Get tier badge color
-  const getTierColor = (tier: 'core' | 'pro' | 'ultimate') => {
+  const getTierColor = (tier: 'core' | 'pro') => {
     switch (tier) {
       case 'core':
         return { bg: '#f0fdf4', text: '#166534', border: '#bbf7d0' };
       case 'pro':
-        return { bg: '#fef3c7', text: '#92400e', border: '#fcd34d' };
-      case 'ultimate':
         return { bg: '#f3e8ff', text: '#6b21a8', border: '#d8b4fe' };
       default:
         return { bg: 'var(--ls-color-muted-soft)', text: 'var(--ls-color-neutral)', border: 'var(--ls-color-border)' };

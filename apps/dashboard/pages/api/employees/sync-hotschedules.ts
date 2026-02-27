@@ -410,6 +410,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         weekStartDate,
         finalLocationId,
         existingEmployees || [],
+        bootstrap?.id || hsClientId,
       );
     }
 
@@ -418,7 +419,203 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await updateActualPayRates(supabase, bootstrap.userJobs, existingEmployeesByHsId);
     }
 
+    // Step 7g: Persist forecast data to sales_forecasts + intervals
+    let forecastsUpserted = 0;
+    let intervalsUpserted = 0;
+    const forecastDaily: HotSchedulesForecastDaily[] = forecasts.daily || [];
+    const forecastIntervals = forecasts.intervals || [];
+
+    if (forecastDaily.length > 0) {
+      try {
+        // Filter to sales forecasts only (storeType 0)
+        const salesForecasts = forecastDaily.filter(
+          (f: HotSchedulesForecastDaily) => f.storeType === 0 || f.storeName === 'Sales'
+        );
+        const transactionForecasts = forecastDaily.filter(
+          (f: HotSchedulesForecastDaily) => f.storeType === 6 || f.storeName === 'Transactions'
+        );
+
+        // Build a map of date → { sales, transactions }
+        const forecastByDate = new Map<string, { sales: number; transactions: number }>();
+        salesForecasts.forEach((f: HotSchedulesForecastDaily) => {
+          const existing = forecastByDate.get(f.date) || { sales: 0, transactions: 0 };
+          existing.sales = f.volume;
+          forecastByDate.set(f.date, existing);
+        });
+        transactionForecasts.forEach((f: HotSchedulesForecastDaily) => {
+          const existing = forecastByDate.get(f.date) || { sales: 0, transactions: 0 };
+          existing.transactions = f.volume;
+          forecastByDate.set(f.date, existing);
+        });
+
+        // Upsert daily forecasts
+        for (const [date, values] of Array.from(forecastByDate.entries())) {
+          const { data: upserted, error: upsertErr } = await supabase
+            .from('sales_forecasts')
+            .upsert({
+              org_id: finalOrgId,
+              location_id: finalLocationId,
+              forecast_date: date,
+              projected_sales: values.sales,
+              projected_transactions: values.transactions || null,
+              source: 'hotschedules',
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'location_id,forecast_date' })
+            .select('id')
+            .single();
+
+          if (upsertErr) {
+            console.error(`[Sync] Error upserting forecast for ${date}:`, upsertErr);
+            continue;
+          }
+          forecastsUpserted++;
+
+          // Upsert 15-min intervals for this date via RPC (atomic delete+insert)
+          if (upserted && forecastIntervals.length > 0) {
+            const dateIntervals = forecastIntervals.filter((fi: any) => {
+              const fiDate = fi.dateTime?.split('T')[0];
+              return fiDate === date && (fi.volumeTypeId === 0 || fi.volumeTypeId === undefined);
+            });
+
+            if (dateIntervals.length > 0) {
+              const intervalRows = dateIntervals.map((fi: any) => {
+                const timePart = fi.dateTime?.split('T')[1]?.substring(0, 5) || '00:00';
+                return {
+                  interval_start: timePart,
+                  sales_amount: fi.storeVolume,
+                  transaction_count: null,
+                };
+              });
+
+              const { data: count, error: intervalErr } = await supabase
+                .rpc('sync_forecast_intervals', {
+                  p_forecast_id: upserted.id,
+                  p_intervals: intervalRows,
+                });
+
+              if (intervalErr) {
+                console.error(`[Sync] Error syncing intervals for ${date}:`, intervalErr);
+              } else {
+                intervalsUpserted += (count as number) || intervalRows.length;
+              }
+            }
+          }
+        }
+
+        console.log(`[Sync] Forecast data persisted: ${forecastsUpserted} days, ${intervalsUpserted} intervals`);
+      } catch (e) {
+        console.error('[Sync] Error persisting forecast data:', e);
+      }
+    }
+
+    // Step 7h: Persist time off requests via RPC (atomic upsert by hs_id)
+    let timeOffUpserted = 0;
+    if (timeOff.length > 0) {
+      try {
+        // Build status lookup
+        const statusByRangeId = new Map<number, string>();
+        timeOffStatuses.forEach((ts: HotSchedulesTimeOffStatus) => {
+          statusByRangeId.set(ts.timeoffRangeId, ts.status.toLowerCase());
+        });
+
+        for (const to of timeOff) {
+          // Map HS employee to Levelset employee
+          const levelsetEmp = existingEmployeesByHsId.get(Number(to.employeeId));
+          if (!levelsetEmp) {
+            console.log(`[Sync] Skipping time off for unknown HS employee ${to.employeeId}`);
+            continue;
+          }
+
+          // Map status: HS uses "Approved"/"Pending"/"Denied"
+          const rawStatus = statusByRangeId.get(to.id) || 'pending';
+          const status = rawStatus === 'approved' ? 'approved' : rawStatus === 'denied' ? 'denied' : 'pending';
+
+          const { error: toErr } = await supabase
+            .rpc('upsert_time_off_request', {
+              p_org_id: finalOrgId,
+              p_employee_id: levelsetEmp.id,
+              p_location_id: finalLocationId,
+              p_start_datetime: to.startDateTime,
+              p_end_datetime: to.endDateTime,
+              p_status: status,
+              p_note: to.note || null,
+              p_is_paid: false,
+              p_hs_id: to.id,
+            });
+
+          if (toErr) {
+            console.error(`[Sync] Error upserting time off hs_id=${to.id}:`, toErr);
+          } else {
+            timeOffUpserted++;
+          }
+        }
+
+        console.log(`[Sync] Time off data persisted: ${timeOffUpserted} requests`);
+      } catch (e) {
+        console.error('[Sync] Error persisting time off data:', e);
+      }
+    }
+
+    // Step 7i: Persist employee availability via RPC (atomic delete+insert per employee)
+    let availabilityUpdated = 0;
+    if (availability.length > 0) {
+      try {
+        for (const avail of availability) {
+          const levelsetEmp = existingEmployeesByHsId.get(Number(avail.employeeId));
+          if (!levelsetEmp) continue;
+
+          // Build ranges array for the RPC
+          const ranges = (avail.ranges || []).map((r: any) => ({
+            day_of_week: (r.weekDay - 1) % 7, // HS: 1=Sun..7=Sat → 0=Sun..6=Sat
+            start_time: r.startTime,
+            end_time: r.endTime,
+          }));
+
+          const { error: availErr } = await supabase
+            .rpc('sync_employee_availability', {
+              p_employee_id: levelsetEmp.id,
+              p_org_id: finalOrgId,
+              p_ranges: ranges,
+              p_max_hours_week: avail.threshold?.hoursInWeekMax ?? null,
+              p_max_days_week: avail.threshold?.daysInWeekMax ?? null,
+            });
+
+          if (availErr) {
+            console.error(`[Sync] Error syncing availability for employee ${levelsetEmp.id}:`, availErr);
+          } else {
+            availabilityUpdated++;
+          }
+        }
+
+        console.log(`[Sync] Availability data persisted: ${availabilityUpdated} employees`);
+      } catch (e) {
+        console.error('[Sync] Error persisting availability data:', e);
+      }
+    }
+
     // Step 8: Create sync notification record
+    // Build pay rates map from bootstrap.userJobs for use by confirm-sync
+    // (employees may not exist yet when updateActualPayRates runs)
+    // HS payRate values are in DOLLARS (e.g. 9 = $9/hr, 22 = $22/hr)
+    const payRates: Record<string, { rate: number; type: 'hourly' | 'salary' }> = {};
+    if (bootstrap?.userJobs && bootstrap.userJobs.length > 0) {
+      const bestRate = new Map<number, number>();
+      const primaryRateMap = new Map<number, number>();
+      for (const uj of bootstrap.userJobs) {
+        if (!uj.employeeId || !uj.payRate) continue;
+        if (uj.primary) primaryRateMap.set(uj.employeeId, uj.payRate);
+        const current = bestRate.get(uj.employeeId) || 0;
+        if (uj.payRate > current) bestRate.set(uj.employeeId, uj.payRate);
+      }
+      for (const [hsEmpId, highest] of Array.from(bestRate.entries())) {
+        const rateDollars = primaryRateMap.get(hsEmpId) ?? highest;
+        payRates[String(hsEmpId)] = {
+          rate: rateDollars,
+          type: rateDollars > 100 ? 'salary' : 'hourly', // $100/hr threshold
+        };
+      }
+    }
+
     const syncData: Record<string, any> = {
       new_employees: newEmployees,
       modified_employees: modifiedEmployees,
@@ -426,6 +623,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       has_scheduling_data: shifts.length > 0,
       week_start_date: weekStartDate || null,
       scheduling: schedulingAnalysis || null,
+      pay_rates: Object.keys(payRates).length > 0 ? payRates : null,
+      forecasts_synced: forecastsUpserted,
+      forecast_intervals_synced: intervalsUpserted,
+      time_off_synced: timeOffUpserted,
+      availability_synced: availabilityUpdated,
     };
 
     const { data: notification, error: notificationError } = await supabase
@@ -498,6 +700,7 @@ async function analyzeSchedulingData(
   weekStartDate: string,
   locationId: string,
   existingEmployees: Employee[],
+  localClientId?: number,
 ): Promise<SchedulingSyncAnalysis> {
   // Build lookup maps
   const jobMap = new Map<number, HotSchedulesJob>();
@@ -516,10 +719,21 @@ async function analyzeSchedulingData(
   const weekEnd = new Date(weekStartDate + 'T00:00:00');
   weekEnd.setDate(weekEnd.getDate() + 6);
 
-  const weekShifts = shifts.filter(s => {
+  const weekShiftsAll = shifts.filter(s => {
     const shiftDate = new Date(s.startDate + 'T00:00:00');
     return shiftDate >= weekStart && shiftDate <= weekEnd;
   });
+
+  // Filter out cross-client shifts (visiting leaders from other HS locations).
+  // These have a different clientId than the local store's and their job definitions
+  // don't exist in the local jobs list, producing orphan "Job {id}" positions.
+  const weekShifts = localClientId
+    ? weekShiftsAll.filter(s => s.clientId === localClientId)
+    : weekShiftsAll;
+
+  if (weekShiftsAll.length !== weekShifts.length) {
+    console.log(`[Sync] Filtered out ${weekShiftsAll.length - weekShifts.length} cross-client shifts (local clientId: ${localClientId})`);
+  }
 
   console.log(`[Sync] Scheduling analysis: ${weekShifts.length} shifts in target week (${weekStartDate})`);
 
@@ -648,16 +862,17 @@ async function analyzeSchedulingData(
  * Extract actual pay rates from HS bootstrap.userJobs and write to employees table.
  * Each employee may have multiple userJobs — pick the primary job's rate,
  * or the highest rate if none is marked primary.
- * Rates > $100/hr (10000 cents) are treated as annual salaries.
+ * HS payRate values are in DOLLARS (e.g. 9 = $9/hr, 22 = $22/hr).
+ * Rates > $100/hr are treated as annual salaries.
  */
-const SALARY_THRESHOLD_CENTS = 10000; // $100/hr — anything above is treated as salary
+const SALARY_THRESHOLD_DOLLARS = 100; // $100/hr — anything above is treated as salary
 
 async function updateActualPayRates(
   supabase: ReturnType<typeof createServerSupabaseClient>,
   userJobs: HotSchedulesUserJob[],
   employeesByHsId: Map<number, Employee>,
 ): Promise<void> {
-  // Build map: HS employeeId → best payRate (cents)
+  // Build map: HS employeeId → best payRate (dollars)
   const bestRate = new Map<number, number>();
   const primaryRate = new Map<number, number>();
 
@@ -680,17 +895,17 @@ async function updateActualPayRates(
     if (!levelsetEmp) continue;
 
     // Use primary job rate if available, otherwise highest
-    const payRateCents = primaryRate.get(hsEmpId) ?? highestRate;
+    // HS payRate is already in dollars
+    const payRateDollars = primaryRate.get(hsEmpId) ?? highestRate;
 
-    if (payRateCents > SALARY_THRESHOLD_CENTS) {
-      // Salary: the rate represents an annual salary in cents
-      const annualDollars = Math.round(payRateCents) / 100;
+    if (payRateDollars > SALARY_THRESHOLD_DOLLARS) {
+      // Salary: the rate represents an annual salary in dollars
       const { error } = await supabase
         .from('employees')
         .update({
           actual_pay: null,
           actual_pay_type: 'salary',
-          actual_pay_annual: annualDollars,
+          actual_pay_annual: payRateDollars,
         })
         .eq('id', levelsetEmp.id);
 
@@ -700,12 +915,11 @@ async function updateActualPayRates(
         updated++;
       }
     } else {
-      // Hourly: convert cents to dollars
-      const hourlyDollars = Math.round(payRateCents) / 100;
+      // Hourly: payRate is already in dollars
       const { error } = await supabase
         .from('employees')
         .update({
-          actual_pay: hourlyDollars,
+          actual_pay: payRateDollars,
           actual_pay_type: 'hourly',
           actual_pay_annual: null,
         })

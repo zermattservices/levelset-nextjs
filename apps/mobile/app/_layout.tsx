@@ -2,7 +2,7 @@ import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -11,7 +11,12 @@ import { LocationProvider } from "../src/context/LocationContext";
 import { EmployeesProvider } from "../src/context/EmployeesContext";
 import { FormsProvider } from "../src/context/FormsContext";
 import { ThemeProvider, useColors, useTheme } from "../src/context/ThemeContext";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator, StyleSheet, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useIsLeader } from "../src/hooks/useIsLeader";
+import { ActionButton } from "../src/components/ui/ActionButton";
+import { ActionMenu, ActionMenuItem } from "../src/components/ui/ActionMenu";
+import { spacing } from "../src/lib/theme";
 import "react-native-reanimated";
 
 export {
@@ -33,6 +38,9 @@ function RootLayoutNav() {
   const { isDark } = useTheme();
   const segments = useSegments();
   const router = useRouter();
+  const { isLeader } = useIsLeader();
+  const insets = useSafeAreaInsets();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Sync native root background with theme so transitions/sheets don't flash white
   useEffect(() => {
@@ -53,6 +61,75 @@ function RootLayoutNav() {
     }
   }, [isLoading, isAuthenticated, segments]);
 
+  // Determine which tab is active and whether to show the FAB
+  const activeTab = useMemo(() => {
+    if (segments[0] === "(tabs)" && segments[1]) {
+      // Extract tab name from segment like "(home)", "(levi)", "(schedule)"
+      return segments[1] as string;
+    }
+    return null;
+  }, [segments]);
+
+  const isInTabs = segments[0] === "(tabs)";
+
+  // FAB visibility: only on Home and Schedule tabs, only for leaders
+  const showFab = isLeader && isInTabs && (activeTab === "(home)" || activeTab === "(schedule)");
+
+  // Context-aware menu items based on active tab
+  const menuItems: ActionMenuItem[] = useMemo(() => {
+    if (activeTab === "(home)") {
+      return [
+        {
+          icon: "star.fill",
+          label: "Submit Rating",
+          onPress: () => router.push("/forms/ratings"),
+        },
+        {
+          icon: "doc.text.fill",
+          label: "Record Infraction",
+          onPress: () => router.push("/forms/infractions"),
+        },
+        {
+          icon: "checkmark.clipboard.fill",
+          label: "Submit Evaluation",
+          disabled: true,
+          badge: "Coming Soon",
+        },
+        {
+          icon: "square.grid.2x2.fill",
+          label: "View all Forms",
+          onPress: () => router.push("/forms-hub"),
+        },
+      ];
+    }
+
+    if (activeTab === "(schedule)") {
+      return [
+        {
+          icon: "calendar.badge.plus",
+          label: "Create Shift",
+          disabled: true,
+          badge: "Coming Soon",
+        },
+      ];
+    }
+
+    return [];
+  }, [activeTab, router]);
+
+  const handleToggleMenu = useCallback(() => {
+    setMenuOpen((prev) => !prev);
+  }, []);
+
+  const handleCloseMenu = useCallback(() => {
+    setMenuOpen(false);
+  }, []);
+
+  // Close menu when navigating away
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [segments]);
+
   if (isLoading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
@@ -62,24 +139,68 @@ function RootLayoutNav() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen
-        name="modal"
-        options={{
-          presentation: "modal",
-          headerShown: true,
-          headerTitle: "",
-        }}
-      />
-      <Stack.Screen
-        name="forms"
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack>
+    <View style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="modal"
+          options={{
+            presentation: "modal",
+            headerShown: true,
+            headerTitle: "",
+          }}
+        />
+        <Stack.Screen
+          name="forms"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="forms-hub"
+          options={{
+            headerShown: false,
+            presentation: "card",
+          }}
+        />
+      </Stack>
+
+      {/* Floating Action Button + Menu — bottom-right, aligned with search button */}
+      {showFab && (
+        <>
+          {/* Transparent full-screen tap catcher to dismiss menu (no darkening) */}
+          {menuOpen && (
+            <Pressable
+              style={StyleSheet.absoluteFillObject}
+              onPress={handleCloseMenu}
+            />
+          )}
+
+          {/* FAB area — right edge aligned with card margins (spacing[5] = 20pt).
+              Menu REPLACES the button: only one is rendered at a time. */}
+          <View
+            style={{
+              position: "absolute",
+              bottom: insets.bottom + 62,
+              right: spacing[5] + 2,
+              alignItems: "flex-end",
+            }}
+            pointerEvents="box-none"
+          >
+            {menuOpen ? (
+              <ActionMenu
+                visible={true}
+                onClose={handleCloseMenu}
+                items={menuItems}
+              />
+            ) : (
+              <ActionButton onPress={handleToggleMenu} />
+            )}
+          </View>
+        </>
+      )}
+    </View>
   );
 }
 

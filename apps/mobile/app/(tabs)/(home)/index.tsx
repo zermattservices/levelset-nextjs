@@ -22,10 +22,12 @@ import { useAuth } from "../../../src/context/AuthContext";
 import { useForms } from "../../../src/context/FormsContext";
 import { useLocation } from "../../../src/context/LocationContext";
 import { useColors } from "../../../src/context/ThemeContext";
+import { useIsLeader } from "../../../src/hooks/useIsLeader";
 import { typography, fontWeights, fontSizes } from "../../../src/lib/fonts";
 import { spacing, borderRadius, haptics } from "../../../src/lib/theme";
 import { AppIcon } from "../../../src/components/ui";
 import { GlassCard } from "../../../src/components/glass";
+import { ComingSoonScreen } from "../../../src/components/screens/ComingSoonScreen";
 import "../../../src/lib/i18n";
 
 export default function HomeScreen() {
@@ -43,6 +45,7 @@ export default function HomeScreen() {
     locations,
   } = useLocation();
 
+  const { isLeader } = useIsLeader();
   const firstName = fullName?.split(" ")[0] || "there";
   const greeting = getGreeting(t);
   const singleLocation = !hasMultipleLocations && !!selectedLocation;
@@ -117,7 +120,11 @@ export default function HomeScreen() {
         <View style={styles.headerSpacer} />
       </View>
 
-      {/* Scrollable content */}
+      {/* Team members see Coming Soon */}
+      {!isLeader ? (
+        <ComingSoonScreen />
+      ) : (
+      /* Scrollable content */
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         style={{ flex: 1 }}
@@ -156,8 +163,10 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* Quick Actions */}
-      <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.actionsSection}>
+      {/* Quick Actions — no opacity-based entering animations on GlassView
+           parents. FadeInDown animates opacity 0→1 which permanently breaks
+           UIGlassEffect on iOS 26 (expo/expo#41024, Apple WWDC25-284). */}
+      <View style={styles.actionsSection}>
         {/* Submit a Rating */}
         <GlassCard
           style={styles.actionCard}
@@ -203,24 +212,23 @@ export default function HomeScreen() {
         </GlassCard>
 
         {/* Manage Team */}
-        <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-          <GlassCard style={styles.actionCard}>
-            <View style={styles.actionContent}>
-              <View style={[styles.iconBadge, { backgroundColor: colors.infoTransparent }]}>
-                <AppIcon name="person.2" size={22} tintColor={colors.info} />
-              </View>
-              <View style={styles.actionInfo}>
-                <Text style={[styles.actionTitle, { color: colors.onSurface }]}>{t("home.manageTeam")}</Text>
-                <Text style={[styles.actionDescription, { color: colors.onSurfaceVariant }]}>
-                  {t("common.comingSoon")}
-                </Text>
-              </View>
-              <AppIcon name="chevron.right" size={16} tintColor={colors.onSurfaceDisabled} />
+        <GlassCard style={styles.actionCard}>
+          <View style={styles.actionContent}>
+            <View style={[styles.iconBadge, { backgroundColor: colors.infoTransparent }]}>
+              <AppIcon name="person.2" size={22} tintColor={colors.info} />
             </View>
-          </GlassCard>
-        </Animated.View>
-      </Animated.View>
+            <View style={styles.actionInfo}>
+              <Text style={[styles.actionTitle, { color: colors.onSurface }]}>{t("home.manageTeam")}</Text>
+              <Text style={[styles.actionDescription, { color: colors.onSurfaceVariant }]}>
+                {t("common.comingSoon")}
+              </Text>
+            </View>
+            <AppIcon name="chevron.right" size={16} tintColor={colors.onSurfaceDisabled} />
+          </View>
+        </GlassCard>
+      </View>
     </ScrollView>
+      )}
     </View>
   );
 }

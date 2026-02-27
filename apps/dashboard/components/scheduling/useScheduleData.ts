@@ -5,7 +5,15 @@ import { useAuth } from '@/lib/providers/AuthProvider';
 import type {
   Schedule, Shift, Position,
   GridViewMode, TimeViewMode, ZoneFilter, LaborSummary,
+  SalesForecast,
 } from '@/lib/scheduling.types';
+import {
+  calculateWeeklyOvertime,
+  DEFAULT_OT_RULES,
+  type OvertimeRule,
+  type ShiftForOT,
+  type WeeklyOTSummary,
+} from '@/lib/scheduling/overtime';
 
 interface Employee {
   id: string;
@@ -107,6 +115,7 @@ export function useScheduleData() {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [forecasts, setForecasts] = useState<SalesForecast[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Snap weekStart to Sunday
@@ -166,12 +175,90 @@ export function useScheduleData() {
     }
   }, [selectedLocationId]);
 
+  // ── Fetch forecasts ──
+  const fetchForecasts = useCallback(async () => {
+    if (!selectedLocationId) return;
+    try {
+      const res = await fetch(
+        `/api/scheduling/forecasts?location_id=${selectedLocationId}&week_start=${weekStartStr}`,
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      setForecasts(data.forecasts ?? []);
+    } catch {
+      // Silently fail — forecast data is non-critical
+    }
+  }, [selectedLocationId, weekStartStr]);
+
+  // ── Fetch overtime rules for the location's state ──
+  const [otRules, setOtRules] = useState<OvertimeRule[]>(DEFAULT_OT_RULES);
+
+  useEffect(() => {
+    if (!selectedLocationId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/scheduling/overtime-rules?location_id=${selectedLocationId}`,
+        );
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (!cancelled && data.rules?.length > 0) {
+          setOtRules(data.rules);
+        }
+      } catch {
+        // Use defaults on error
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [selectedLocationId]);
+
+  // ── Detect pending HS scheduling data for first-time import ──
+  const [hsCheckDone, setHsCheckDone] = useState(false);
+  const [pendingHsNotificationId, setPendingHsNotificationId] = useState<string | null>(null);
+
+  // Reset when location changes
+  useEffect(() => {
+    setHsCheckDone(false);
+    setPendingHsNotificationId(null);
+  }, [selectedLocationId]);
+
+  // After initial load completes with no schedule, check for pending HS scheduling data
+  useEffect(() => {
+    if (hsCheckDone || isLoading || schedule || !selectedLocationId) return;
+    setHsCheckDone(true);
+
+    // Check if there's an unprocessed HS sync notification with scheduling data
+    const checkPendingHs = async () => {
+      try {
+        const res = await fetch(`/api/employees/sync-notification?location_id=${selectedLocationId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.notification?.sync_data?.has_scheduling_data && data.notification?.sync_data?.scheduling) {
+          setPendingHsNotificationId(data.notification.id);
+        }
+      } catch {
+        // Silently fail
+      }
+    };
+
+    checkPendingHs();
+  }, [hsCheckDone, isLoading, schedule, selectedLocationId]);
+
+  // Called when the schedule import modal completes
+  const clearPendingHsImport = useCallback(() => {
+    setPendingHsNotificationId(null);
+    fetchSchedule();
+    fetchPositions();
+  }, [fetchSchedule, fetchPositions]);
+
   // Refetch when location or week changes
   useEffect(() => {
     fetchSchedule();
     fetchPositions();
     fetchEmployees();
-  }, [fetchSchedule, fetchPositions, fetchEmployees]);
+    fetchForecasts();
+  }, [fetchSchedule, fetchPositions, fetchEmployees, fetchForecasts]);
 
   const refetch = useCallback(() => {
     fetchSchedule();
@@ -201,6 +288,29 @@ export function useScheduleData() {
     });
   }, [shifts, zoneFilter]);
 
+  // ── Overtime calculation for the week ──
+  const otSummary = useMemo<WeeklyOTSummary | null>(() => {
+    // Build ShiftForOT[] from all shifts (not zone-filtered — OT is per-employee across all zones)
+    const otShifts: ShiftForOT[] = [];
+    for (const shift of shifts) {
+      if (!shift.assignment?.employee_id) continue;
+      const emp = shift.assignment.employee as any;
+      const hourlyRate = emp?.actual_pay ?? emp?.calculated_pay ?? 0;
+      if (!hourlyRate || emp?.actual_pay_type === 'salary') continue;
+      otShifts.push({
+        id: shift.id,
+        employee_id: shift.assignment.employee_id,
+        shift_date: shift.shift_date,
+        start_time: shift.start_time,
+        end_time: shift.end_time,
+        break_minutes: shift.break_minutes || 0,
+        hourly_rate: hourlyRate,
+      });
+    }
+    if (otShifts.length === 0) return null;
+    return calculateWeeklyOvertime(otShifts, otRules);
+  }, [shifts, otRules]);
+
   // ── Labor summary ──
   const laborSummary = useMemo<LaborSummary>(() => {
     let totalHours = 0;
@@ -214,7 +324,13 @@ export function useScheduleData() {
 
     for (const shift of filteredShifts) {
       const hours = shiftNetHours(shift);
-      const cost = shift.assignment?.projected_cost ?? 0;
+      const baseCost = shift.assignment?.projected_cost ?? 0;
+
+      // Add per-shift OT premium if available
+      const shiftOT = otSummary?.by_employee[shift.assignment?.employee_id ?? '']
+        ?.by_shift[shift.id];
+      const otPremium = shiftOT?.ot_premium ?? 0;
+      const cost = baseCost + otPremium;
 
       totalHours += hours;
       totalCost += cost;
@@ -237,8 +353,34 @@ export function useScheduleData() {
       byPosition[posId].cost += cost;
     }
 
-    return { total_hours: totalHours, total_cost: totalCost, by_day: byDay, by_position: byPosition };
-  }, [filteredShifts, days]);
+    // OT aggregate (scoped to current zone filter)
+    let regularHours = totalHours;
+    let otHours = 0;
+    let totalOTPremium = 0;
+    if (otSummary) {
+      // Sum OT from shifts that are in the current zone filter
+      for (const shift of filteredShifts) {
+        const empId = shift.assignment?.employee_id;
+        if (!empId) continue;
+        const shiftOT = otSummary.by_employee[empId]?.by_shift[shift.id];
+        if (shiftOT) {
+          otHours += shiftOT.ot_hours_15x + shiftOT.ot_hours_2x;
+          totalOTPremium += shiftOT.ot_premium;
+        }
+      }
+      regularHours = totalHours - otHours;
+    }
+
+    return {
+      total_hours: totalHours,
+      total_cost: totalCost,
+      regular_hours: regularHours,
+      ot_hours: otHours,
+      ot_premium: totalOTPremium,
+      by_day: byDay,
+      by_position: byPosition,
+    };
+  }, [filteredShifts, days, otSummary]);
 
   // ── Ensure schedule exists (auto-create draft if needed) ──
   const ensureSchedule = useCallback(async (): Promise<Schedule> => {
@@ -455,7 +597,10 @@ export function useScheduleData() {
     employees: filteredEmployees,
     allPositions: positions,
     laborSummary,
+    forecasts,
     isLoading,
+    pendingHsNotificationId,
+    clearPendingHsImport,
     days,
     weekStartStr,
 
@@ -489,6 +634,9 @@ export function useScheduleData() {
     // Schedule actions
     publishSchedule,
     unpublishSchedule,
+
+    // Overtime
+    otSummary,
 
     // Misc
     refetch,

@@ -330,6 +330,13 @@ export function useSetupBoardData({
 
     return employees
       .filter((emp) => employeesWithShifts.has(emp.id))
+      // Apply zone filter so employee list matches position grid
+      .filter((emp) => {
+        if (zoneFilter === 'all') return true;
+        if (zoneFilter === 'FOH') return emp.is_foh;
+        if (zoneFilter === 'BOH') return emp.is_boh;
+        return true;
+      })
       .map((emp) => {
         const shift = employeesWithShifts.get(emp.id)!;
         const assignment = assignments.find((a) => a.employee_id === emp.id);
@@ -340,12 +347,15 @@ export function useSetupBoardData({
         };
       })
       .sort((a, b) => {
-        // Unassigned first, then alphabetical
+        // Unassigned first, then by earliest shift start time
         if (a.currentAssignment && !b.currentAssignment) return 1;
         if (!a.currentAssignment && b.currentAssignment) return -1;
+        const aStart = parseTime(a.shift.start_time);
+        const bStart = parseTime(b.shift.start_time);
+        if (aStart !== bStart) return aStart - bStart;
         return a.full_name.localeCompare(b.full_name);
       });
-  }, [employees, shifts, assignments, activeDaypart, selectedDay]);
+  }, [employees, shifts, assignments, activeDaypart, selectedDay, zoneFilter]);
 
   const isLoading = templatesLoading || resolvedLoading || assignmentsLoading;
 

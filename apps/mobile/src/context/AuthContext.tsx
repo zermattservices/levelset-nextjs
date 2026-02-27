@@ -41,6 +41,8 @@ export interface AppUser {
   created_at?: string;
   updated_at?: string;
   profile_image?: string;
+  permission_profile_id?: string;
+  use_role_default?: boolean;
 }
 
 // Employee data joined from employees table

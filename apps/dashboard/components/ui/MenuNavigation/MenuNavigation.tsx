@@ -200,10 +200,32 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
     }, 200);
   }, []);
 
-  const menuButtons: { type: MenuType; label: string }[] = [
+  // Pending approval count for badge
+  const [pendingCount, setPendingCount] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!hasFeature(F.SCHEDULING) || !auth.org_id) return;
+    const fetchPendingCount = async () => {
+      try {
+        const params = new URLSearchParams({ org_id: auth.org_id! });
+        if (selectedLocationId) params.set('location_id', selectedLocationId);
+        const resp = await fetch(`/api/scheduling/pending-count?${params}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          setPendingCount(data.total || 0);
+        }
+      } catch {
+        // Silently fail — badge is non-critical
+      }
+    };
+    fetchPendingCount();
+  }, [hasFeature, auth.org_id, selectedLocationId]);
+
+  const menuButtons: { type: MenuType; label: string; featureFlag?: any }[] = [
     { type: 'operations', label: 'Operations' },
     { type: 'analytics', label: 'Analytics' },
     { type: 'hr', label: 'HR' },
+    { type: 'scheduling', label: 'Scheduling', featureFlag: F.SCHEDULING },
   ];
 
   return (
@@ -250,51 +272,50 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
 
           {/* Navigation buttons */}
           <div className={sty.navButtons} ref={navButtonsRef}>
-            {menuButtons.map(({ type, label }) => (
-              <div
-                key={type}
-                className={sty.navButtonContainer}
-                onMouseEnter={(e) => handleMenuEnter(type, e.currentTarget)}
-                onMouseLeave={handleMenuLeave}
-              >
-                <button 
-                  className={classNames(sty.navButton, activeMenu === type && sty.navButtonActive)}
-                >
-                  <span className={sty.navButtonText}>{label}</span>
-                  <KeyboardArrowDownIcon 
-                    sx={{ 
-                      fontSize: 18, 
-                      color: activeMenu === type ? 'var(--ls-color-brand)' : 'var(--ls-color-muted)',
-                      transition: 'transform 0.2s ease, color 0.15s ease',
-                      transform: activeMenu === type ? 'rotate(180deg)' : 'rotate(0deg)',
-                    }} 
-                  />
-                </button>
-                
-                {/* Submenu positioned under this button */}
-                {activeMenu === type && (
-                  <div 
-                    ref={submenuRef}
-                    className={sty.submenuContainer}
-                    style={{ transform: `translateX(calc(-50% + ${submenuOffset}px))` }}
-                  >
-                    <NavSubmenu 
-                      menuType={type} 
-                      isClosing={isClosing}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
+            {menuButtons.map(({ type, label, featureFlag }) => {
+              // Skip feature-flagged menus if not enabled
+              if (featureFlag && !hasFeature(featureFlag)) return null;
 
-            {/* Scheduling - direct link, feature flag gated */}
-            {hasFeature(F.SCHEDULING) && (
-              <div className={sty.navButtonContainer}>
-                <Link href="/schedule" className={classNames(sty.navButton, sty.navButtonDirect)}>
-                  <span className={sty.navButtonText}>Scheduling</span>
-                </Link>
-              </div>
-            )}
+              return (
+                <div
+                  key={type}
+                  className={sty.navButtonContainer}
+                  onMouseEnter={(e) => handleMenuEnter(type, e.currentTarget)}
+                  onMouseLeave={handleMenuLeave}
+                >
+                  <button
+                    className={classNames(sty.navButton, activeMenu === type && sty.navButtonActive)}
+                  >
+                    <span className={sty.navButtonText}>{label}</span>
+                    {type === 'scheduling' && pendingCount > 0 && (
+                      <span className={sty.pendingBadge}>{pendingCount}</span>
+                    )}
+                    <KeyboardArrowDownIcon
+                      sx={{
+                        fontSize: 18,
+                        color: activeMenu === type ? 'var(--ls-color-brand)' : 'var(--ls-color-muted)',
+                        transition: 'transform 0.2s ease, color 0.15s ease',
+                        transform: activeMenu === type ? 'rotate(180deg)' : 'rotate(0deg)',
+                      }}
+                    />
+                  </button>
+
+                  {/* Submenu positioned under this button */}
+                  {activeMenu === type && (
+                    <div
+                      ref={submenuRef}
+                      className={sty.submenuContainer}
+                      style={{ transform: `translateX(calc(-50% + ${submenuOffset}px))` }}
+                    >
+                      <NavSubmenu
+                        menuType={type}
+                        isClosing={isClosing}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
             {/* Levi AI - direct link, feature flag gated */}
             {hasFeature(F.LEVI_AI) && (

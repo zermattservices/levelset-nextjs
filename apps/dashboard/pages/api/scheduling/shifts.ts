@@ -69,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           })
           .select(`
             *,
-            employee:employees(id, full_name, role, is_foh, is_boh, calculated_pay)
+            employee:employees(id, full_name, role, is_foh, is_boh, calculated_pay, actual_pay, actual_pay_type, actual_pay_annual)
           `)
           .single();
 
@@ -112,7 +112,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           position:org_positions(id, name, zone, display_order),
           assignment:shift_assignments(
             id, employee_id, assigned_by, projected_cost,
-            employee:employees(id, full_name, role, is_foh, is_boh, calculated_pay)
+            employee:employees(id, full_name, role, is_foh, is_boh, calculated_pay, actual_pay, actual_pay_type, actual_pay_annual)
           )
         `)
         .single();

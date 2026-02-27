@@ -18,6 +18,9 @@ import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
+import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -50,7 +53,7 @@ export interface NavMenuItem {
   requiredFeature?: FeatureKey;
 }
 
-export type MenuType = 'operations' | 'analytics' | 'hr';
+export type MenuType = 'operations' | 'analytics' | 'hr' | 'scheduling';
 
 // Menu definitions
 export const menuItems: Record<MenuType, NavMenuItem[]> = {
@@ -100,6 +103,30 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       description: 'Analyze team member turnover',
       icon: <TrendingUpOutlinedIcon sx={{ fontSize: 22 }} />,
       disabled: true,
+    },
+  ],
+  scheduling: [
+    {
+      label: 'Schedule',
+      description: 'View and manage shifts',
+      href: '/schedule',
+      icon: <CalendarMonthOutlinedIcon sx={{ fontSize: 22 }} />,
+      requiredFeature: F.SCHEDULING,
+    },
+    {
+      label: 'Setup',
+      description: 'Position templates and settings',
+      href: '/schedule?mode=setup',
+      icon: <TuneOutlinedIcon sx={{ fontSize: 22 }} />,
+      requiredFeature: F.SCHEDULING,
+    },
+    {
+      label: 'Approvals',
+      description: 'Shift trades, time off, availability',
+      href: '/approvals',
+      icon: <TaskAltOutlinedIcon sx={{ fontSize: 22 }} />,
+      requiredFeature: F.SCHEDULING,
+      requiredPermission: P.SCHED_MANAGE_APPROVALS,
     },
   ],
   hr: [
@@ -156,6 +183,7 @@ export function NavSubmenu({ menuType, isClosing, className }: NavSubmenuProps) 
     return has(item.requiredPermission);
   });
   const isTwoColumn = menuType === 'operations' || menuType === 'hr';
+  // scheduling uses single column (3 items)
   const isRoadmapSubdomain = useIsRoadmapSubdomain();
 
   // Helper to get the correct link URL

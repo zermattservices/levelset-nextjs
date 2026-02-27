@@ -32,6 +32,8 @@ import { useSlidingMenu } from "../../../src/context/SlidingMenuContext";
 import { useLocation } from "../../../src/context/LocationContext";
 import { AppIcon } from "../../../src/components/ui";
 import { useColors } from "../../../src/context/ThemeContext";
+import { useIsLeader } from "../../../src/hooks/useIsLeader";
+import { ComingSoonScreen } from "../../../src/components/screens/ComingSoonScreen";
 import { typography, fontWeights, fontSizes } from "../../../src/lib/fonts";
 import { spacing, haptics } from "../../../src/lib/theme";
 import { useGlass, isGlassAvailable } from "../../../src/hooks/useGlass";
@@ -182,6 +184,7 @@ export default function ScheduleTab() {
   const colors = useColors();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const { isMenuOpen, openMenu, closeMenu } = useSlidingMenu();
+  const { isLeader } = useIsLeader();
 
   // How far the content panel slides right (50% of screen, matches Levi)
   const DRAWER_WIDTH = SCREEN_WIDTH * 0.5;
@@ -252,6 +255,15 @@ export default function ScheduleTab() {
       openMenu();
     }
   };
+
+  // Team members see Coming Soon
+  if (!isLeader) {
+    return (
+      <View style={[styles.root, { backgroundColor: colors.background }]}>
+        <ComingSoonScreen />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.root, { backgroundColor: colors.surfaceVariant }]}>

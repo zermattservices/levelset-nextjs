@@ -198,7 +198,7 @@ export function BillingTab({ orgId }: BillingTabProps) {
   const statusDisplay = getStatusDisplay(sub.status);
   const monthlyTotal = (plan.monthlyPriceCents * locationCount) / 100;
   const tierConfig = PLAN_TIERS[plan.tier];
-  const isUltimate = plan.tier === 'ultimate';
+  const hasPro = plan.tier === 'pro';
 
   return (
     <div className={styles.container}>
@@ -298,8 +298,8 @@ export function BillingTab({ orgId }: BillingTabProps) {
         </div>
       </div>
 
-      {/* AI Usage (Ultimate only) */}
-      {isUltimate && usage && (
+      {/* AI Usage (Pro only) */}
+      {hasPro && usage && (
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>AI Usage This Period</h3>
           <div className={styles.usageCard}>

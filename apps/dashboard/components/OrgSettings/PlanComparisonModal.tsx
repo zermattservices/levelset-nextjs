@@ -76,8 +76,7 @@ export function PlanComparisonModal({
 
   const tierColors: Record<PlanTier, { border: string; bg: string; text: string }> = {
     core: { border: '#bbf7d0', bg: '#f0fdf4', text: '#166534' },
-    pro: { border: '#fcd34d', bg: '#fef3c7', text: '#92400e' },
-    ultimate: { border: '#d8b4fe', bg: '#f3e8ff', text: '#6b21a8' },
+    pro: { border: '#d8b4fe', bg: '#f3e8ff', text: '#6b21a8' },
   };
 
   return (
@@ -148,7 +147,7 @@ export function PlanComparisonModal({
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
             gap: 3,
           }}
         >
@@ -271,7 +270,7 @@ export function PlanComparisonModal({
                   >
                     /loc/mo
                   </Typography>
-                  {tier === 'ultimate' && (
+                  {tier === 'pro' && (
                     <Typography
                       sx={{
                         fontFamily,

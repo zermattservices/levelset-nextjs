@@ -11,7 +11,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
+import { useGlass } from "../../hooks/useGlass";
 import { useLeviMenu, type LeviMenuTab } from "../../context/LeviMenuContext";
 import { AppIcon } from "../../components/ui";
 import { useColors } from "../../context/ThemeContext";
@@ -27,7 +27,6 @@ export function LeviSlidingMenu() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { GlassView } = useGlass();
-  const glassAvailable = isGlassAvailable();
 
   const {
     closeMenu,
@@ -120,7 +119,7 @@ export function LeviSlidingMenu() {
 
       {/* Settings button — full width, liquid glass */}
       <View style={styles.settingsContainer}>
-        {glassAvailable && GlassView ? (
+        {GlassView ? (
           <GlassView isInteractive style={styles.glassButton}>
             {settingsButtonContent}
           </GlassView>

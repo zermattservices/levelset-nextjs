@@ -101,6 +101,7 @@ function DraggableEmployeeCard({ employee }: { employee: AvailableEmployee }) {
   });
 
   const shiftTime = `${formatTime12(employee.shift.start_time)} – ${formatTime12(employee.shift.end_time)}`;
+  const positionName = employee.shift.position?.name;
   const assignedTo = employee.currentAssignment?.position?.name;
 
   return (
@@ -112,7 +113,10 @@ function DraggableEmployeeCard({ employee }: { employee: AvailableEmployee }) {
     >
       <div className={sty.employeeInfo}>
         <span className={sty.employeeName}>{employee.full_name}</span>
-        <span className={sty.employeeShift}>{shiftTime}</span>
+        <span className={sty.employeeShift}>
+          {shiftTime}
+          {positionName && <span className={sty.positionLabel}> · {positionName}</span>}
+        </span>
       </div>
       {assignedTo && (
         <span className={sty.assignedBadge}>→ {assignedTo}</span>

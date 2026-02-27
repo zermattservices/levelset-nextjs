@@ -23,7 +23,7 @@ import ReAnimated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
+import { useGlass } from "../../hooks/useGlass";
 import { useColors } from "../../context/ThemeContext";
 import { borderRadius, spacing, haptics } from "../../lib/theme";
 import { typography } from "../../lib/fonts";
@@ -51,7 +51,6 @@ export function GlassDrawer({
 }: GlassDrawerProps) {
   const colors = useColors();
   const { GlassView } = useGlass();
-  const useGlassEffect = isGlassAvailable();
   const insets = useSafeAreaInsets();
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
 
@@ -141,11 +140,9 @@ export function GlassDrawer({
             contentAnimStyle,
           ]}
         >
-          {useGlassEffect && GlassView ? (
+          {GlassView ? (
             <GlassView
               style={containerStyle}
-              glassEffectStyle="regular"
-              tintColor={colors.glassTintLight}
             >
               {drawerContent}
             </GlassView>

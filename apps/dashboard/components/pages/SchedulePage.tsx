@@ -7,6 +7,7 @@ import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
 import { AuthLoadingScreen } from '@/components/CodeComponents/AuthLoadingScreen';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
+import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useScheduleData } from '@/components/scheduling/useScheduleData';
 import { useColumnConfig } from '@/components/scheduling/useColumnConfig';
@@ -17,6 +18,7 @@ import { BottomPanel } from '@/components/scheduling/BottomPanel';
 import { SetupBoardView } from '@/components/scheduling/setup/SetupBoardView';
 import { SetupTemplateManager } from '@/components/scheduling/setup/SetupTemplateManager';
 import { useSetupBoardData } from '@/components/scheduling/setup/useSetupBoardData';
+import { SyncEmployeesModal } from '@/components/CodeComponents/SyncEmployeesModal';
 import CircularProgress from '@mui/material/CircularProgress';
 import type { Shift } from '@/lib/scheduling.types';
 import type { PendingShiftPreview } from '@/components/scheduling/ScheduleGrid';
@@ -31,8 +33,9 @@ export function SchedulePage() {
   const auth = useAuth();
   const { selectedLocationId, selectedLocationOrgId } = useLocationContext();
 
-  const isLevelsetAdmin = auth.role === 'Levelset Admin';
   const { has } = usePermissions();
+  const { hasFeature } = useOrgFeatures();
+  const canViewSchedule = hasFeature(F.SCHEDULING) && has(P.SCHED_VIEW);
   const canViewPay = has(P.ROSTER_MANAGE_PAY);
   const { config: columnConfig, updateConfig: updateColumnConfig } = useColumnConfig();
 
@@ -95,8 +98,8 @@ export function SchedulePage() {
     return <AuthLoadingScreen />;
   }
 
-  // Show unauthorized message if user is not Levelset Admin
-  if (!isLevelsetAdmin) {
+  // Show unauthorized message if user lacks scheduling feature or permission
+  if (!canViewSchedule) {
     return (
       <>
         <Head>
@@ -347,6 +350,7 @@ export function SchedulePage() {
                     onDeleteShift={data.deleteShift}
                     externalHoverMinute={gridHoverMinute}
                     onHoverMinuteChange={setChartHoverMinute}
+                    forecasts={data.forecasts}
                   />
                 )}
               </>
@@ -415,6 +419,16 @@ export function SchedulePage() {
         onDelete={data.deleteShift}
         onAssign={data.assignEmployee}
         onUnassign={data.unassignEmployee}
+      />
+
+      {/* First-time HS schedule import modal */}
+      <SyncEmployeesModal
+        open={!!data.pendingHsNotificationId}
+        onClose={() => data.clearPendingHsImport()}
+        locationId={selectedLocationId}
+        orgId={selectedLocationOrgId ?? auth.org_id}
+        scheduleImportMode
+        onSyncComplete={() => data.clearPendingHsImport()}
       />
     </>
   );

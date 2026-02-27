@@ -113,6 +113,22 @@
   color: var(--ls-color-brand);
 }
 
+.pendingBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background-color: var(--ls-color-destructive-base, #e53e3e);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  margin-left: 2px;
+}
+
 .submenuContainer {
   position: absolute;
   top: 100%;

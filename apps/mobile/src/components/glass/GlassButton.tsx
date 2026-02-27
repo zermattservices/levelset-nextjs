@@ -6,7 +6,7 @@
 import React from "react";
 import {
   View,
-  TouchableOpacity,
+  Pressable,
   Text,
   StyleSheet,
   ViewStyle,
@@ -14,7 +14,7 @@ import {
   StyleProp,
   ActivityIndicator,
 } from "react-native";
-import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
+import { useGlass } from "../../hooks/useGlass";
 import { useColors } from "../../context/ThemeContext";
 import { spacing, borderRadius, haptics } from "../../lib/theme";
 import { typography, fontWeights, fontSizes } from "../../lib/fonts";
@@ -49,7 +49,6 @@ export function GlassButton({
 }: GlassButtonProps) {
   const colors = useColors();
   const { GlassView } = useGlass();
-  const useGlassEffect = isGlassAvailable();
 
   const { containerStyle, labelStyle, tintColor } = getVariantStyles(variant, colors);
   const sizeStyles = getSizeStyles(size);
@@ -101,37 +100,36 @@ export function GlassButton({
   );
 
   // Glass effect version (iOS with glass available)
-  if (useGlassEffect && GlassView && variant === "default") {
+  // Pressable goes INSIDE GlassView — wrapping GlassView in TouchableOpacity
+  // breaks the native glass rendering layer
+  if (GlassView && variant === "default") {
     return (
-      <TouchableOpacity
-        onPress={handlePress}
-        disabled={isDisabled}
-        activeOpacity={0.7}
-        style={[fullWidth && styles.fullWidth]}
+      <GlassView
+        style={[
+          styles.glassContainer,
+          sizeStyles.container,
+          isDisabled && styles.containerDisabled,
+          fullWidth && styles.fullWidth,
+          style,
+        ]}
+        isInteractive
       >
-        <GlassView
-          style={[
-            styles.glassContainer,
-            sizeStyles.container,
-            isDisabled && styles.containerDisabled,
-            style,
-          ]}
-          glassEffectStyle="regular"
-          tintColor={tintColor}
-          isInteractive
+        <Pressable
+          onPress={handlePress}
+          disabled={isDisabled}
+          style={styles.contentRow}
         >
-          <View style={styles.contentRow}>{buttonContent}</View>
-        </GlassView>
-      </TouchableOpacity>
+          {buttonContent}
+        </Pressable>
+      </GlassView>
     );
   }
 
   // Fallback version (non-iOS, glass not available, or non-default variant)
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={handlePress}
       disabled={isDisabled}
-      activeOpacity={0.7}
       style={[fullWidth && styles.fullWidth]}
     >
       <View
@@ -145,7 +143,7 @@ export function GlassButton({
       >
         <View style={styles.contentRow}>{buttonContent}</View>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 

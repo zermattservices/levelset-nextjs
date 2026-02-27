@@ -30,10 +30,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq('org_id', org_id)
       .single();
 
-    if (!subscription || subscription.plan_tier !== 'ultimate') {
+    if (!subscription || subscription.plan_tier !== 'pro') {
       return res.status(200).json({
         usage: null,
-        message: 'AI usage tracking is only available for Ultimate tier',
+        message: 'AI usage tracking is only available for Pro tier',
       });
     }
 

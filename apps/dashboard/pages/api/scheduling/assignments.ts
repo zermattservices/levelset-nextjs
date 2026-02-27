@@ -72,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
         .select(`
           *,
-          employee:employees(id, full_name, role, is_foh, is_boh, calculated_pay)
+          employee:employees(id, full_name, role, is_foh, is_boh, calculated_pay, actual_pay, actual_pay_type, actual_pay_annual)
         `)
         .single();
 
@@ -160,7 +160,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
         .select(`
           *,
-          employee:employees(id, full_name, role, is_foh, is_boh, calculated_pay)
+          employee:employees(id, full_name, role, is_foh, is_boh, calculated_pay, actual_pay, actual_pay_type, actual_pay_annual)
         `)
         .single();
 

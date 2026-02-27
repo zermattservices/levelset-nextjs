@@ -50,6 +50,11 @@ function makeBlankTemplate(): EditingTemplate {
   };
 }
 
+/** Normalize DB time "HH:MM:SS" to grid-compatible "HH:MM". */
+function normalizeTime(t: string): string {
+  return t.substring(0, 5);
+}
+
 function templateToEditing(t: SetupTemplate): EditingTemplate {
   return {
     id: t.id,
@@ -58,12 +63,12 @@ function templateToEditing(t: SetupTemplate): EditingTemplate {
     priority: t.priority,
     schedules: (t.schedules ?? []).map(s => ({
       day_of_week: [...s.day_of_week],
-      start_time: s.start_time,
-      end_time: s.end_time,
+      start_time: normalizeTime(s.start_time),
+      end_time: normalizeTime(s.end_time),
     })),
     slots: (t.slots ?? []).map(s => ({
       position_id: s.position_id,
-      time_slot: s.time_slot,
+      time_slot: normalizeTime(s.time_slot),
       slot_count: s.slot_count,
       is_required: s.is_required,
     })),

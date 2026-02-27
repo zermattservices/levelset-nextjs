@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import type { Shift, LaborSummary, TimeViewMode } from '@/lib/scheduling.types';
+import type { Shift, LaborSummary, TimeViewMode, SalesForecast } from '@/lib/scheduling.types';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -28,6 +28,8 @@ interface LaborSpreadTabProps {
   externalHoverMinute?: number | null;
   /** Called when user hovers inside the chart — passes minutes-of-day */
   onHoverMinuteChange?: (minute: number | null) => void;
+  /** Sales forecast data for the current week */
+  forecasts?: SalesForecast[];
 }
 
 interface IntervalDataPoint {
@@ -45,6 +47,8 @@ interface IntervalDataPoint {
   isDayBoundary: boolean;
   /** Minute-of-day this interval starts at (0-1410) */
   minuteOfDay: number;
+  /** Forecasted sales for this 15-min interval (dollars) */
+  forecastSales?: number;
 }
 
 /* ------------------------------------------------------------------ */
@@ -208,11 +212,11 @@ function CustomTooltip({ active, payload }: any) {
             </div>
           );
         }
-        if (entry.dataKey === 'scheduledCost' && entry.value > 0) {
+        if (entry.dataKey === 'forecastSales' && entry.value > 0) {
           return (
             <div key={i} className={sty.tooltipRow}>
-              <span className={sty.tooltipDot} style={{ background: '#b91c1c' }} />
-              <span>Labor Cost: <strong>{formatCurrency(entry.value)}</strong></span>
+              <span className={sty.tooltipDot} style={{ background: '#7c3aed' }} />
+              <span>Forecast Sales: <strong>{formatCurrency(entry.value)}</strong></span>
             </div>
           );
         }
@@ -284,29 +288,19 @@ function HourlyTick({ x, y, payload, data }: any) {
 /*  Legend items                                                        */
 /* ------------------------------------------------------------------ */
 
-function ChartLegend({ canViewPay }: { canViewPay: boolean }) {
+function ChartLegend({ hasForecast }: { hasForecast: boolean }) {
   return (
     <div className={sty.legend}>
       <div className={sty.legendItem}>
         <span className={sty.legendSwatch} style={{ background: '#2c5f8a' }} />
         <span>Scheduled</span>
       </div>
-      {canViewPay && (
+      {hasForecast && (
         <div className={sty.legendItem}>
-          <span className={sty.legendSwatchLine} style={{ borderColor: '#b91c1c' }} />
-          <span>Labor Cost</span>
+          <span className={sty.legendSwatch} style={{ background: 'rgba(124, 58, 237, 0.2)' }} />
+          <span>Forecast Sales</span>
         </div>
       )}
-      {/* Benchmark items hidden for now — keep code for later */}
-      {/* <div className={sty.legendItem}>
-        <span className={sty.legendSwatchLine} style={{ borderColor: '#c0392b' }} />
-        <span>Scheduled All</span>
-      </div>
-      <div className={sty.legendItem}>
-        <span className={sty.legendSwatch} style={{ background: '#93c5fd80' }} />
-        <span>Benchmark Hrs</span>
-      </div>
-      <div className={sty.legendItemMuted}>Benchmark Allocation</div> */}
     </div>
   );
 }
@@ -319,6 +313,7 @@ export function LaborSpreadTab({
   shifts, laborSummary, days, canViewPay,
   timeViewMode, selectedDay,
   externalHoverMinute, onHoverMinuteChange,
+  forecasts,
 }: LaborSpreadTabProps) {
   const isDayView = timeViewMode === 'day';
 
@@ -328,10 +323,36 @@ export function LaborSpreadTab({
     [isDayView, selectedDay, days],
   );
 
-  const intervalData = React.useMemo(
-    () => buildIntervalData(shifts, chartDays, canViewPay),
-    [shifts, chartDays, canViewPay],
-  );
+  // Build a lookup of forecast intervals keyed by "date|HH:MM"
+  const forecastLookup = React.useMemo(() => {
+    const map = new Map<string, number>();
+    if (!forecasts?.length) return map;
+    for (const fc of forecasts) {
+      if (!fc.intervals?.length) continue;
+      for (const iv of fc.intervals) {
+        // interval_start is "HH:MM:SS" from DB — normalize to "HH:MM"
+        const time = iv.interval_start.substring(0, 5);
+        map.set(`${fc.forecast_date}|${time}`, iv.sales_amount ?? 0);
+      }
+    }
+    return map;
+  }, [forecasts]);
+
+  const hasForecast = forecastLookup.size > 0;
+
+  const intervalData = React.useMemo(() => {
+    const data = buildIntervalData(shifts, chartDays, canViewPay);
+    if (!hasForecast) return data;
+    // Merge forecast data into each interval
+    for (const point of data) {
+      const h = Math.floor(point.minuteOfDay / 60);
+      const m = point.minuteOfDay % 60;
+      const key = `${point.date}|${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      const sales = forecastLookup.get(key);
+      if (sales != null) point.forecastSales = sales;
+    }
+    return data;
+  }, [shifts, chartDays, canViewPay, forecastLookup, hasForecast]);
 
   // Find the max headcount for Y-axis domain
   const maxHeadcount = React.useMemo(() => {
@@ -341,6 +362,16 @@ export function LaborSpreadTab({
     }
     return Math.max(4, Math.ceil(max * 1.2)); // At least 4, 20% padding
   }, [intervalData]);
+
+  // Find max forecast value to scale Y-axis appropriately
+  const maxForecast = React.useMemo(() => {
+    if (!hasForecast) return 0;
+    let max = 0;
+    for (const d of intervalData) {
+      if (d.forecastSales && d.forecastSales > max) max = d.forecastSales;
+    }
+    return Math.ceil(max * 1.05); // 5% padding above peak
+  }, [intervalData, hasForecast]);
 
   // Find day boundary indices for reference lines (week view only)
   const dayBoundaries = React.useMemo(
@@ -390,15 +421,15 @@ export function LaborSpreadTab({
       <div className={sty.chartRow}>
         {/* Legend sidebar */}
         <div className={sty.legendSidebar}>
-          <ChartLegend canViewPay={canViewPay} />
+          <ChartLegend hasForecast={hasForecast} />
         </div>
 
         {/* Chart */}
         <div className={sty.chartContainer}>
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={intervalData}
-              margin={{ top: 8, right: canViewPay ? 48 : 16, bottom: 4, left: 0 }}
+              margin={{ top: 8, right: hasForecast ? 48 : 16, bottom: 4, left: 0 }}
               onMouseMove={handleChartMouseMove}
               onMouseLeave={handleChartMouseLeave}
             >
@@ -406,6 +437,10 @@ export function LaborSpreadTab({
                 <linearGradient id="scheduledGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#93c5fd" stopOpacity={0.5} />
                   <stop offset="100%" stopColor="#93c5fd" stopOpacity={0.15} />
+                </linearGradient>
+                <linearGradient id="forecastGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#7c3aed" stopOpacity={0.2} />
+                  <stop offset="100%" stopColor="#7c3aed" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
 
@@ -473,10 +508,11 @@ export function LaborSpreadTab({
                 }}
               />
 
-              {canViewPay && (
+              {hasForecast && (
                 <YAxis
                   yAxisId="cost"
                   orientation="right"
+                  domain={[0, maxForecast]}
                   tick={{
                     fontSize: 11,
                     fontFamily: 'var(--ls-font-heading)',
@@ -485,7 +521,7 @@ export function LaborSpreadTab({
                   axisLine={false}
                   tickLine={false}
                   width={42}
-                  tickFormatter={(v) => formatCurrency(v)}
+                  tickFormatter={(v) => `$${Math.round(v)}`}
                 />
               )}
 
@@ -493,6 +529,21 @@ export function LaborSpreadTab({
                 content={<CustomTooltip />}
                 cursor={{ stroke: 'var(--ls-color-brand)', strokeWidth: 1 }}
               />
+
+              {/* Forecast sales area (purple, behind everything) */}
+              {hasForecast && (
+                <Area
+                  yAxisId="cost"
+                  dataKey="forecastSales"
+                  fill="url(#forecastGradient)"
+                  stroke="#7c3aed"
+                  strokeWidth={1}
+                  strokeOpacity={0.4}
+                  type="monotone"
+                  isAnimationActive={false}
+                  connectNulls={false}
+                />
+              )}
 
               {/* Scheduled area fill (light blue) */}
               <Area
@@ -515,18 +566,6 @@ export function LaborSpreadTab({
                 isAnimationActive={false}
               />
 
-              {/* Cost line (red, if pay visible) */}
-              {canViewPay && (
-                <Line
-                  yAxisId="cost"
-                  dataKey="scheduledCost"
-                  stroke="#b91c1c"
-                  strokeWidth={1.5}
-                  type="monotone"
-                  dot={false}
-                  isAnimationActive={false}
-                />
-              )}
             </ComposedChart>
           </ResponsiveContainer>
         </div>

@@ -1,68 +1,63 @@
 /**
  * useGlass Hook
- * Provides Liquid Glass effect availability detection and components
- * Falls back gracefully on non-iOS or older iOS versions
+ * Provides Liquid Glass effect availability detection and components.
+ * Falls back gracefully on non-iOS or older iOS versions.
+ *
+ * ## IMPORTANT: opacity breaks glass on iOS 26
+ *
+ * Never animate opacity on a parent view of GlassView (or GlassView
+ * itself). On iOS 26, UIGlassEffect permanently stops rendering when
+ * any ancestor has opacity < 1 — it does NOT recover after the
+ * animation completes. Only a view-controller visibility change
+ * (e.g. tab switch) forces UIKit to re-evaluate the backdrop.
+ *
+ * Avoid: FadeIn, FadeInDown, or any Reanimated entering animation
+ * that touches opacity on a view wrapping GlassView.
+ *
+ * Safe alternatives: SlideInDown, translateY-only custom animations,
+ * or apply fade animations to GlassView's *children* instead.
+ *
+ * References:
+ * - expo/expo#41024 (animated parent opacity breaks glass)
+ * - Apple WWDC25 session 284 (UIGlassEffect + opacity guidance)
  */
 
-import { useState, useEffect } from "react";
 import { Platform } from "react-native";
 
-// Dynamic imports for glass effect
-let GlassView: any = null;
-let isGlassEffectAPIAvailable: () => boolean = () => false;
-let isLiquidGlassAvailable: () => boolean = () => false;
+// Module-level references loaded once at import time
+let GlassViewComponent: any = null;
+let _isLiquidGlassAvailable: () => boolean = () => false;
 
-// Only attempt to load glass effect on iOS
 if (Platform.OS === "ios") {
   try {
     const glassEffect = require("expo-glass-effect");
-    GlassView = glassEffect.GlassView;
-    isGlassEffectAPIAvailable =
-      glassEffect.isGlassEffectAPIAvailable || (() => false);
-    isLiquidGlassAvailable =
+    GlassViewComponent = glassEffect.GlassView;
+    _isLiquidGlassAvailable =
       glassEffect.isLiquidGlassAvailable || (() => false);
   } catch (e) {
-    // Glass effect not available, will use fallbacks
-    console.log("expo-glass-effect not available, using fallbacks");
+    console.log("[useGlass] expo-glass-effect not available, using fallbacks", e);
   }
 }
 
-/**
- * Check if glass effects are available on current device
- */
-export function isGlassAvailable(): boolean {
-  if (Platform.OS !== "ios") return false;
-  if (!GlassView) return false;
-
-  try {
-    return isGlassEffectAPIAvailable() || isLiquidGlassAvailable();
-  } catch {
-    return false;
-  }
-}
+const _hasGlassComponent = Platform.OS === "ios" && GlassViewComponent !== null;
 
 /**
- * Hook to access glass effect components and availability
- * Re-checks availability after mount to handle late native bridge initialization
+ * Hook to access glass effect components and availability.
+ *
+ * Returns the native `GlassView` component on iOS whenever the
+ * package loaded successfully, `null` otherwise.
  */
 export function useGlass() {
-  const [available, setAvailable] = useState(() => isGlassAvailable());
-
-  useEffect(() => {
-    // Re-check availability after mount — the native bridge may not
-    // have been ready during the initial synchronous render pass
-    const checked = isGlassAvailable();
-    if (checked !== available) {
-      setAvailable(checked);
-    }
-  }, []);
-
   return {
-    GlassView,
-    isGlassAvailable: available,
+    /** The GlassView component — `null` when not on iOS or package failed to load. */
+    GlassView: _hasGlassComponent ? GlassViewComponent : null,
+    /** Whether we have a working GlassView component. */
+    isGlassAvailable: _hasGlassComponent,
     isIOS: Platform.OS === "ios",
   };
 }
 
-export { GlassView };
+/** Synchronous check — uses the package's cached availability flag. */
+export const isGlassAvailable = () => _hasGlassComponent;
+export const GlassView = GlassViewComponent;
 export default useGlass;

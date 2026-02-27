@@ -6,12 +6,12 @@
 import React from "react";
 import {
   View,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   ViewStyle,
   StyleProp,
 } from "react-native";
-import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
+import { useGlass } from "../../hooks/useGlass";
 import { useColors } from "../../context/ThemeContext";
 import { spacing, borderRadius, haptics } from "../../lib/theme";
 
@@ -32,15 +32,13 @@ export function GlassCard({
   onPress,
   style,
   contentStyle,
-  tintColor,
+  tintColor: _tintColor, // kept for API compat, not passed to GlassView
   disabled = false,
   variant = "default",
 }: GlassCardProps) {
   const colors = useColors();
   const { GlassView } = useGlass();
-  const useGlassEffect = isGlassAvailable();
 
-  const resolvedTintColor = tintColor ?? colors.glassTintLight;
   const variantStyles = getVariantStyles(variant, colors);
 
   const handlePress = onPress
@@ -51,31 +49,25 @@ export function GlassCard({
     : undefined;
 
   // Glass effect version (iOS with glass available)
-  if (useGlassEffect && GlassView) {
-    const glassContent = (
+  if (GlassView) {
+    return (
       <GlassView
         style={[styles.glassContainer, variantStyles.container, style]}
-        glassEffectStyle="regular"
-        tintColor={resolvedTintColor}
         isInteractive={!!onPress}
       >
-        <View style={[styles.content, contentStyle]}>{children}</View>
+        {handlePress ? (
+          <Pressable
+            onPress={handlePress}
+            disabled={disabled}
+            style={[styles.content, contentStyle]}
+          >
+            {children}
+          </Pressable>
+        ) : (
+          <View style={[styles.content, contentStyle]}>{children}</View>
+        )}
       </GlassView>
     );
-
-    if (handlePress) {
-      return (
-        <TouchableOpacity
-          onPress={handlePress}
-          disabled={disabled}
-          activeOpacity={0.8}
-        >
-          {glassContent}
-        </TouchableOpacity>
-      );
-    }
-
-    return glassContent;
   }
 
   // Fallback version (non-iOS or glass not available)
@@ -87,13 +79,12 @@ export function GlassCard({
 
   if (handlePress) {
     return (
-      <TouchableOpacity
+      <Pressable
         onPress={handlePress}
         disabled={disabled}
-        activeOpacity={0.8}
       >
         {fallbackContent}
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 

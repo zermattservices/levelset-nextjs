@@ -44,6 +44,8 @@ export interface SyncEmployeesModalProps {
   orgId?: string;
   className?: string;
   onSyncComplete?: () => void; // Callback to refresh RosterTable
+  /** When true, skips employee review and goes directly to position mapping + schedule import */
+  scheduleImportMode?: boolean;
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -587,6 +589,7 @@ export function SyncEmployeesModal({
   orgId,
   className = "",
   onSyncComplete,
+  scheduleImportMode = false,
 }: SyncEmployeesModalProps) {
   console.log('[SyncEmployeesModal] Component render start', { open, renderId: Math.random() });
   
@@ -694,7 +697,8 @@ safeFetch('/hs/spring/forecast/forecast-summary/'+weekStart),
 safeFetch('/hs/spring/forecast/sls-projected-total/?weekStartDate='+weekStart),
 safeFetch('/hs/rest-session/timeoff/range/?start='+weekStart+'T00:00:00&end='+weekEndStr+'T23:59:59'),
 safeFetch('/hs/rest-session/timeoff/range/status/?start='+weekStart+'T00:00:00&end='+weekEndStr+'T23:59:59'),
-safeFetch('/hs/rest-session/availability-calendar/?minStatus=0&start='+weekStart+'T00:00:00&end='+weekEndStr+'T23:59:59')
+safeFetch('/hs/rest-session/availability-calendar/?minStatus=0&start='+weekStart+'T00:00:00&end='+weekEndStr+'T23:59:59'),
+safeFetch('/hs/spring/forecast/lp-forecast/?date='+weekStart)
 ]).then(function(results){
 var allEmployees=results[0];
 if(!Array.isArray(allEmployees)||allEmployees.length===0)throw new Error('No employee data received from HotSchedules API');
@@ -708,9 +712,16 @@ var slsProjected=results[5];
 var timeOff=Array.isArray(results[6])?results[6]:[];
 var timeOffStatuses=Array.isArray(results[7])?results[7]:[];
 var availability=Array.isArray(results[8])?results[8]:[];
-var payload={employees:visibleEmployees,shifts:shifts,jobs:jobs,roles:roles,bootstrap:{id:bootstrap.id,currentWeekStartDate:bootstrap.currentWeekStartDate,utcOffset:bootstrap.utcOffset,tz:bootstrap.tz,scheduleMinuteInterval:bootstrap.scheduleMinuteInterval,clientWorkWeekStart:bootstrap.clientWorkWeekStart,userJobs:bootstrap.userJobs||[],jobs:bootstrap.jobs||[],schedules:bootstrap.schedules||[]},forecasts:{daily:forecastSummary&&forecastSummary.projectedVolume?forecastSummary.projectedVolume:[],intervals:[],benchmarks:[]},slsProjected:Array.isArray(slsProjected)?slsProjected:[],timeOff:timeOff,timeOffStatuses:timeOffStatuses,availability:availability,weekStartDate:weekStart,hs_client_id:hsClientId||bootstrap.id,hs_location_number:hsLocationNumber,hs_location_display:hsLocationDisplay};
+var lpForecast=results[9];
+var forecastId=null;
+if(Array.isArray(lpForecast)&&lpForecast.length>0&&lpForecast[0].forecastId){forecastId=lpForecast[0].forecastId;}
+loadingDiv.textContent='Fetching forecast intervals...';
+return (forecastId?safeFetch('/hs/spring/forecast/lp-store-volume-data/?forecastId='+forecastId):Promise.resolve([])).then(function(intervals){
+var forecastIntervals=Array.isArray(intervals)?intervals:[];
+var payload={employees:visibleEmployees,shifts:shifts,jobs:jobs,roles:roles,bootstrap:{id:bootstrap.id,currentWeekStartDate:bootstrap.currentWeekStartDate,utcOffset:bootstrap.utcOffset,tz:bootstrap.tz,scheduleMinuteInterval:bootstrap.scheduleMinuteInterval,clientWorkWeekStart:bootstrap.clientWorkWeekStart,userJobs:bootstrap.userJobs||[],jobs:bootstrap.jobs||[],schedules:bootstrap.schedules||[]},forecasts:{daily:forecastSummary&&forecastSummary.projectedVolume?forecastSummary.projectedVolume:[],intervals:forecastIntervals,benchmarks:[]},slsProjected:Array.isArray(slsProjected)?slsProjected:[],timeOff:timeOff,timeOffStatuses:timeOffStatuses,availability:availability,weekStartDate:weekStart,hs_client_id:hsClientId||bootstrap.id,hs_location_number:hsLocationNumber,hs_location_display:hsLocationDisplay};
 loadingDiv.textContent='Syncing to Levelset...';
 return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+});
 });
 }).then(function(r){if(!r.ok){return r.json().then(function(data){throw new Error(data.error||'Sync failed');});}return r.json();}).then(function(data){loadingDiv.remove();var resultDiv=document.createElement('div');resultDiv.style.cssText='position:fixed;top:20px;right:20px;background:'+(data.success?'#10b981':'#ef4444')+';color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';if(data.success){var msg='<strong>Sync Successful!</strong><br><br>Employees: '+data.stats.new+' new, '+data.stats.modified+' updated, '+data.stats.terminated+' terminated';if(data.stats.shifts_received){msg+='<br>Shifts: '+data.stats.shifts_received+' captured';}if(data.stats.jobs_received){msg+='<br>Jobs: '+data.stats.jobs_received;}resultDiv.innerHTML=msg;}else{resultDiv.innerHTML='<strong>Sync Failed</strong><br><br>'+data.error+(data.details?'<br><br>Details: '+data.details:'');}document.body.appendChild(resultDiv);setTimeout(function(){resultDiv.remove();},8000);}).catch(function(err){loadingDiv.remove();var errorDiv=document.createElement('div');errorDiv.style.cssText='position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:20px;border-radius:8px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:system-ui,sans-serif;max-width:400px;';errorDiv.innerHTML='<strong>Error</strong><br><br>'+err.message;document.body.appendChild(errorDiv);setTimeout(function(){errorDiv.remove();},8000);});
 })();`;
@@ -809,6 +820,30 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
     }
   }, [open]);
 
+  // Schedule Import Mode: load latest notification and jump to position_mapping
+  React.useEffect(() => {
+    if (!open || !scheduleImportMode || !locationId || !orgId) return;
+    // Skip if already loaded
+    if (notification && currentPage !== 'instructions') return;
+
+    const loadNotification = async () => {
+      try {
+        const res = await fetch(`/api/employees/sync-notification?location_id=${locationId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.notification?.sync_data?.has_scheduling_data && data.notification?.sync_data?.scheduling) {
+          setNotification(data.notification);
+          setScheduleToggle(true);
+          setCurrentPage('position_mapping');
+        }
+      } catch (err) {
+        console.error('[SyncEmployeesModal] Failed to load notification for schedule import:', err);
+      }
+    };
+
+    loadNotification();
+  }, [open, scheduleImportMode, locationId, orgId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Fetch existing employees when we receive a notification
   React.useEffect(() => {
     if (!notification || !locationId) return;
@@ -838,7 +873,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
   }, [notification, locationId]);
 
   const handleClose = () => {
-    if (currentPage === 'instructions') {
+    if (currentPage === 'instructions' || currentPage === 'confirmation') {
       onClose();
     } else {
       setExitConfirmOpen(true);
@@ -2094,7 +2129,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
                 color: "#181d27",
               }}
             >
-              Sync from HotSchedules
+              {scheduleImportMode ? 'Import Schedule from HotSchedules' : 'Sync from HotSchedules'}
             </Typography>
           </Box>
           <IconButton

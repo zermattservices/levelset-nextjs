@@ -15,7 +15,7 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-import { useGlass, isGlassAvailable } from "../../hooks/useGlass";
+import { useGlass } from "../../hooks/useGlass";
 import { AppIcon } from "../ui";
 import { useLeviMenu } from "../../context/LeviMenuContext";
 import { useLeviChat } from "../../context/LeviChatContext";
@@ -28,7 +28,6 @@ export function LeviSettingsModal() {
   const { t, i18n } = useTranslation();
   const colors = useColors();
   const { GlassView } = useGlass();
-  const glassAvail = isGlassAvailable();
   const { settingsModalVisible, closeSettings } = useLeviMenu();
   const { clearHistory } = useLeviChat();
 
@@ -151,7 +150,7 @@ export function LeviSettingsModal() {
       >
         {/* Card — centered, stop propagation */}
         <Pressable onPress={(e) => e.stopPropagation()}>
-          {glassAvail && GlassView ? (
+          {GlassView ? (
             <GlassView style={styles.card}>
               {modalContent}
             </GlassView>

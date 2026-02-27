@@ -7,6 +7,7 @@ import {
 } from "expo-router/unstable-native-tabs";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useColors } from "../../src/context/ThemeContext";
+import { useIsLeader } from "../../src/hooks/useIsLeader";
 
 export const unstable_settings = {
   initialRouteName: "(home)",
@@ -14,6 +15,7 @@ export const unstable_settings = {
 
 export default function TabLayout() {
   const colors = useColors();
+  const { isLeader } = useIsLeader();
 
   return (
     <NativeTabs tintColor={colors.primary} minimizeBehavior="onScrollDown">
@@ -25,23 +27,15 @@ export default function TabLayout() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="(levi)">
-        <Label>Levi</Label>
-        <Icon
-          sf={{ default: "cpu", selected: "cpu.fill" }}
-          androidSrc={<VectorIcon family={Ionicons} name="hardware-chip" />}
-        />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="(iforms)">
-        <Label>Forms</Label>
-        <Icon
-          sf={{ default: "doc.text", selected: "doc.text.fill" }}
-          androidSrc={
-            <VectorIcon family={Ionicons} name="document-text" />
-          }
-        />
-      </NativeTabs.Trigger>
+      {isLeader && (
+        <NativeTabs.Trigger name="(levi)">
+          <Label>Levi</Label>
+          <Icon
+            sf={{ default: "cpu", selected: "cpu.fill" }}
+            androidSrc={<VectorIcon family={Ionicons} name="hardware-chip" />}
+          />
+        </NativeTabs.Trigger>
+      )}
 
       <NativeTabs.Trigger name="(schedule)">
         <Label>Schedule</Label>
@@ -50,6 +44,8 @@ export default function TabLayout() {
           androidSrc={<VectorIcon family={Ionicons} name="calendar" />}
         />
       </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="(search)" role="search" />
     </NativeTabs>
   );
 }

@@ -42,17 +42,10 @@ const TIERS: TierConfig[] = [
   },
   {
     productName: 'Levelset Pro',
-    description: 'Advanced operations — Core + Certifications, OE, Scheduling, Forms, Documents, Multi-Unit',
-    monthlyPriceCents: 17900,
-    annualPriceCents: 16100,
-    tier: 'pro',
-  },
-  {
-    productName: 'Levelset Ultimate',
-    description: 'Full platform with AI — Pro + Levi AI assistant with included query allowance',
+    description: 'Full platform with AI — Core + Certifications, OE, Scheduling, Forms, Documents, Multi-Unit, Levi AI',
     monthlyPriceCents: 24900,
     annualPriceCents: 22400,
-    tier: 'ultimate',
+    tier: 'pro',
   },
 ];
 
@@ -199,8 +192,8 @@ async function main() {
     );
     envVars[`STRIPE_PRICE_${config.tier.toUpperCase()}_ANNUAL`] = annualPrice.id;
 
-    // For Ultimate: add metered AI overage price
-    if (config.tier === 'ultimate') {
+    // For Pro: add metered AI overage price
+    if (config.tier === 'pro') {
       const meteredPrice = await findOrCreateMeteredPrice(product.id);
       if (meteredPrice) {
         envVars['STRIPE_PRICE_AI_OVERAGE'] = meteredPrice.id;
