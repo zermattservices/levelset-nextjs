@@ -39,6 +39,7 @@ import styles from './TaskDetailPanel.module.css';
 const STATUS_OPTIONS = [
   { value: 'backlog', label: 'Backlog' },
   { value: 'todo', label: 'To Do' },
+  { value: 'waiting', label: 'Waiting' },
   { value: 'in_progress', label: 'In Progress' },
   { value: 'done', label: 'Done' },
 ] as const;
@@ -53,6 +54,7 @@ const PRIORITY_OPTIONS = [
 const STATUS_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
   backlog: { bg: '#f3f4f6', text: '#6b7280' },
   todo: { bg: '#fef3c7', text: '#92400e' },
+  waiting: { bg: '#fed7aa', text: '#9a3412' },
   in_progress: { bg: '#dbeafe', text: '#1e40af' },
   done: { bg: '#d1fae5', text: '#065f46' },
 };

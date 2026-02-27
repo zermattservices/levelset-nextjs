@@ -229,13 +229,74 @@
 .roadmapBadge {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 10px;
-  color: var(--ls-color-brand-base);
-  background: var(--ls-color-brand-soft, #ecfdf5);
+  color: #7c3aed;
+  background: #ede9fe;
   padding: 1px 6px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 2px;
+}
+
+/* ─── View Toggle ────────────────────────────────────────────────────────── */
+
+.viewToggle {
+  display: flex;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.viewToggleBtn {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  background: #fff;
+  border: none;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.viewToggleBtn:hover {
+  background: #f5f5f5;
+}
+
+.viewToggleBtnActive {
+  background: var(--ls-color-brand-base);
+  color: #fff;
+  font-weight: 600;
+}
+
+.viewToggleBtnActive:hover {
+  background: var(--ls-color-brand-hover);
+}
+
+/* ─── Workstream View ────────────────────────────────────────────────────── */
+
+.wsColumnTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wsColorIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusChip {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 /* ─── Empty Column ────────────────────────────────────────────────────────── */

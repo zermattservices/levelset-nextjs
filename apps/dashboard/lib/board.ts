@@ -6,7 +6,7 @@ export interface BoardTask {
   id: string;
   title: string;
   description: string | null;
-  status: 'backlog' | 'todo' | 'in_progress' | 'done' | 'archived';
+  status: 'backlog' | 'todo' | 'waiting' | 'in_progress' | 'done' | 'archived';
   priority: 'critical' | 'high' | 'medium' | 'low';
   position: number;
   due_date: string | null;
@@ -39,6 +39,7 @@ export interface BoardWorkstream {
 const BOARD_TO_ROADMAP_STATUS: Record<string, string> = {
   backlog: 'idea',
   todo: 'planned',
+  waiting: 'in_progress',
   in_progress: 'in_progress',
   done: 'completed',
   archived: 'cancelled',
@@ -212,6 +213,21 @@ export async function updateTask(id: string, updates: Partial<BoardTask>): Promi
   if (error) {
     console.error('Error updating board task:', error);
     return null;
+  }
+
+  // If status was changed and task is linked to a roadmap feature, sync the roadmap status
+  if (updates.status && data.roadmap_feature_id && BOARD_TO_ROADMAP_STATUS[updates.status]) {
+    const { error: rmError } = await supabase
+      .from('roadmap_features')
+      .update({
+        status: BOARD_TO_ROADMAP_STATUS[updates.status],
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', data.roadmap_feature_id);
+
+    if (rmError) {
+      console.error('Error syncing roadmap feature status:', rmError);
+    }
   }
 
   return data;

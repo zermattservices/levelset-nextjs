@@ -5,6 +5,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 const BOARD_TO_ROADMAP_STATUS: Record<string, string> = {
   backlog: 'idea',
   todo: 'planned',
+  waiting: 'in_progress',
   in_progress: 'in_progress',
   done: 'completed',
   archived: 'cancelled',
