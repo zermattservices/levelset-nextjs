@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { recalculateEngagementScore } from '@/lib/crm/engagement';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 // Maps Resend event types to the corresponding email_sends timestamp columns
@@ -115,6 +116,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Error creating lead event for email tracking:', eventError);
         // Don't fail the webhook response
       }
+
+      // Recalculate engagement score on email events
+      recalculateEngagementScore(emailSend.lead_id).catch((err) =>
+        console.error('Engagement score recalc error:', err)
+      );
     }
 
     return res.status(200).json({ received: true, processed: true });

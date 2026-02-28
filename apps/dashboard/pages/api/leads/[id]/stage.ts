@@ -1,4 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { recalculateEngagementScore } from '@/lib/crm/engagement';
+import { recalculateLeadValue, recalculateStoreValues } from '@/lib/crm/value';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 // Maps pipeline stages to their corresponding timestamp columns
@@ -85,6 +87,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (eventError) {
       console.error('Error creating stage change event:', eventError);
       // Don't fail the request -- the stage update already succeeded
+    }
+
+    // Recalculate engagement score and value after stage change
+    recalculateEngagementScore(id as string).catch((err) =>
+      console.error('Engagement score recalc error:', err)
+    );
+    recalculateLeadValue(id as string).catch((err) =>
+      console.error('Value recalc error:', err)
+    );
+
+    // If lead has a store_number, recalculate values for all leads at that store
+    if (updatedLead.store_number) {
+      recalculateStoreValues(updatedLead.store_number).catch((err) =>
+        console.error('Store values recalc error:', err)
+      );
     }
 
     return res.status(200).json(updatedLead);
