@@ -40,7 +40,7 @@ At 1,000 restaurant locations with 15 sensors each:
                          │     └── "downsampled" bucket (2-year)    │
                          │        │                                 │
                          │        ▼                                 │
-                         │   Grafana / Levelset Dashboard           │
+                         │   Grafana / SensorCo Dashboard           │
                          │                                          │
                          │   Tailscale (on the server too)          │
                          │   Cost: ~$35-45/month                    │
@@ -100,7 +100,7 @@ You do NOT need a bigger server or horizontal scaling until:
 | **AWS EC2** | t3.xlarge | 4 vCPU, 16 GB | ~$120/mo + EBS | 3-4x Hetzner cost |
 | **Fly.io** | — | — | — | **Not recommended** — poor fit for stateful data infrastructure |
 
-**Fly.io** excels at stateless app containers (like the Levelset agent). But persistent NVMe storage for InfluxDB belongs on a dedicated VPS or bare metal.
+**Fly.io** excels at stateless app containers (like the SensorCo backend). But persistent NVMe storage for InfluxDB belongs on a dedicated VPS or bare metal.
 
 ---
 

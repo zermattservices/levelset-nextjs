@@ -94,7 +94,7 @@ The EM320-TH is explicitly listed as a supported sensor in the integration docum
 | Pool Services | Must be enabled (Network → IP Port) |
 | API access | HTTP Basic Auth with admin credentials |
 
-### Relevance to Levelset Temperature Monitoring
+### Relevance to SensorCo Temperature Monitoring
 
 **Not recommended for our use case.** Niagara Framework is:
 
@@ -105,7 +105,7 @@ The EM320-TH is explicitly listed as a supported sensor in the integration docum
 
 **However**, this integration is useful context because:
 
-1. **Enterprise upsell path**: If a Levelset customer already runs Niagara for their building, they could integrate our sensors into their existing BMS instead of (or alongside) the Levelset dashboard
+1. **Enterprise upsell path**: If a SensorCo customer already runs Niagara for their building, they could integrate our sensors into their existing BMS instead of (or alongside) the SensorCo dashboard
 2. **Competitor awareness**: ComplianceMate and EcoLab may integrate with Niagara for large enterprise accounts. Knowing this capability exists is valuable for sales conversations
 3. **Protocol flexibility**: The UG65's BACnet support confirms it's a full-featured gateway, not just a simple LoRaWAN forwarder
 
@@ -113,9 +113,9 @@ The EM320-TH is explicitly listed as a supported sensor in the integration docum
 
 | Scenario | Use Niagara? |
 |----------|-------------|
-| Independent restaurant with 1 location | No — use Levelset directly |
-| Restaurant chain with 50 locations | No — use Levelset directly |
+| Independent restaurant with 1 location | No — use SensorCo directly |
+| Restaurant chain with 50 locations | No — use SensorCo directly |
 | Restaurant inside a corporate campus with existing BMS | Maybe — offer as integration option |
 | Large enterprise with Niagara managing 500+ buildings | Yes — position as BMS-integrated sensor add-on |
 
-For 99% of Levelset's target market (independent restaurants and small chains), Niagara is irrelevant. The direct HTTP POST or MQTT approach documented in `09-cloud-hosted-architecture.md` is the right path.
+For 99% of SensorCo's target market (independent restaurants and small chains), Niagara is irrelevant. The direct HTTP POST or MQTT approach documented in `09-cloud-hosted-architecture.md` is the right path.

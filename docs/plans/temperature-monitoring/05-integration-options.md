@@ -1,176 +1,156 @@
-# Integration Options — Levelset vs Standalone
+# SensorCo Platform Architecture & Partner Integration
 
-Two approaches for the customer-facing dashboard. Both share the same backend infrastructure (gateway → MQTT → InfluxDB). The difference is where the UI lives and how tightly it integrates with Levelset.
-
----
-
-## Option A: Built into Levelset Dashboard
-
-### How It Works
-
-Add temperature monitoring as a new module in the existing Next.js dashboard at `app.levelset.io`, alongside PEA ratings, scheduling, and discipline.
-
-### Architecture
-
-```
-InfluxDB ←── Levelset API route (/api/temperature/*) ←── Dashboard components
-                                                              │
-                                                     PermissionsProvider
-                                                     (P.TEMP_VIEW_DATA, etc.)
-```
-
-**Data flow**:
-1. API routes in `pages/api/temperature/` query InfluxDB for sensor data
-2. Components in `components/pages/TemperatureMonitoring/` display dashboards, charts, alerts
-3. Permission checks via existing `PermissionsProvider` with new permission module constants
-4. Org/location scoping via existing `AuthProvider` and `LocationProvider`
-
-### What Gets Built
-
-| Component | Location |
-|-----------|----------|
-| Page wrapper | `pages/temperature.tsx` |
-| Page component | `components/pages/TemperatureMonitoring/TemperatureMonitoring.tsx` |
-| Sensor list view | `components/pages/TemperatureMonitoring/SensorList.tsx` |
-| Temperature chart | `components/pages/TemperatureMonitoring/TemperatureChart.tsx` |
-| Alert configuration | `components/pages/TemperatureMonitoring/AlertSettings.tsx` |
-| API routes | `pages/api/temperature/readings.ts`, `alerts.ts`, `sensors.ts` |
-| Permission constants | Add to `packages/permissions/src/constants.ts` |
-| Sidebar nav item | Update `components/shared/Sidebar/` |
-| Supabase tables | `sensor_devices`, `sensor_alerts`, `sensor_alert_rules` (metadata only — readings stay in InfluxDB) |
-| i18n strings | `locales/{en,es}/common.json` — add temperature monitoring labels |
-
-### Advantages
-
-- Customers already use Levelset — one login, one app
-- Leverages existing auth, permissions, org/location scoping
-- Cross-feature value: temperature data alongside employee performance, scheduling, discipline
-- Faster to market if UI is simple (tables + charts)
-- MUI DataGrid Pro and charting libraries already available
-
-### Disadvantages
-
-- Dashboard is Next.js Pages Router — no SSR for time-series data, all client-side fetching
-- Need to add InfluxDB client to the Next.js backend (new dependency)
-- Real-time updates would require WebSocket or polling (no existing pattern for this in the dashboard)
-- If temperature monitoring grows complex, it could bloat the dashboard codebase
-
-### InfluxDB Client in Next.js API Routes
-
-```typescript
-// lib/influxdb.ts
-import { InfluxDB } from '@influxdata/influxdb-client';
-
-const influxDB = new InfluxDB({
-  url: process.env.INFLUXDB_URL!,
-  token: process.env.INFLUXDB_TOKEN!,
-});
-
-export function getQueryApi(org: string = '') {
-  return influxDB.getQueryApi(org);
-}
-```
-
-```typescript
-// pages/api/temperature/readings.ts
-import { createServerSupabaseClient } from '@/lib/supabase-server';
-import { getQueryApi } from '@/lib/influxdb';
-import type { NextApiRequest, NextApiResponse } from 'next';
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const supabase = createServerSupabaseClient();
-  // ... auth check, get orgId, locationId ...
-
-  const queryApi = getQueryApi();
-  const query = `
-    from(bucket: "sensor_data")
-      |> range(start: -24h)
-      |> filter(fn: (r) => r["org_id"] == "${orgId}" and r["location_id"] == "${locationId}")
-  `;
-
-  const results = [];
-  // ... execute query, collect results ...
-
-  return res.status(200).json({ readings: results });
-}
-```
+SensorCo is a standalone sensor monitoring platform. It has its own infrastructure, dashboard, and API. Partners like Levelset integrate via the SensorCo API to embed sensor data into their own products.
 
 ---
 
-## Option B: Standalone Product
+## SensorCo Platform Components
 
-### How It Works
+### SensorCo Dashboard (Direct Customers)
 
-Separate frontend application with its own domain (e.g., `sensors.levelset.io` or `monitor.levelset.io`). Shares Supabase for auth/user management but has its own UI and potentially its own backend.
+For customers who buy directly from SensorCo, the SensorCo dashboard is the primary interface.
 
-### Architecture
+**Stack**: Next.js (or similar), hosted on Vercel, backed by SensorCo's own Supabase project.
+
+**Features**:
+- Temperature/humidity charts per sensor
+- Current status grid — all sensors at a glance
+- Alert configuration — set thresholds per sensor
+- Compliance log export (CSV/PDF for health department audits)
+- Sensor management — rename, disable, view history
+- Multi-location support with per-location views
+
+### SensorCo API (Partner Integration)
+
+For partners like Levelset, SensorCo exposes a REST API. Partners read sensor data, configure alerts, and manage devices through this API, then display the data in their own dashboards and mobile apps.
 
 ```
-InfluxDB ←── Standalone API (Hono or Next.js) ←── Standalone Frontend
-                      │
-               Supabase (shared auth)
+SensorCo API
+    │
+    ├── GET  /api/v1/locations/{id}/sensors         — list sensors at a location
+    ├── GET  /api/v1/sensors/{id}/readings           — get readings (time range, pagination)
+    ├── GET  /api/v1/sensors/{id}/status             — current status + last reading
+    ├── PUT  /api/v1/sensors/{id}/config             — update thresholds, reporting interval
+    ├── GET  /api/v1/locations/{id}/alerts            — list active/historical alerts
+    ├── POST /api/v1/alerts/{id}/acknowledge          — acknowledge an alert
+    ├── POST /api/v1/webhooks                         — register webhook for alert delivery
+    └── GET  /api/v1/locations/{id}/compliance-report  — generate compliance export
 ```
 
-### What Gets Built
+**Authentication**: API key per partner, scoped to their customer/location set. Partners only see data for locations they manage.
 
-| Component | Notes |
-|-----------|-------|
-| New Next.js or Vite app | Separate from dashboard codebase |
-| Auth integration | Use shared Supabase auth (SSO with Levelset dashboard) |
-| Temperature dashboard | Custom UI optimized for monitoring (large displays, kiosk mode) |
-| Alert management | Custom alert rules UI |
-| API layer | Could be Hono.js (like agent) or Next.js API routes |
-| Deployment | Vercel (consistent with dashboard) or Fly.io |
+### SensorCo Mobile App
 
-### Advantages
+SensorCo's own mobile app handles:
+1. **Gateway WiFi setup** — the critical onboarding flow (see [04-provisioning-and-setup.md](./04-provisioning-and-setup.md))
+2. **Push notifications** for alerts
+3. **Quick status view** for direct customers
 
-- Clean separation — temperature monitoring complexity doesn't affect the main dashboard
-- Can optimize UI for monitoring use case (real-time updates, large-screen displays, kiosk mode)
-- Could be sold to non-Levelset customers as a standalone product
-- Easier to iterate rapidly without worrying about dashboard regressions
-- Could use a more modern stack (App Router, React Server Components) without conflicting with dashboard constraints
-
-### Disadvantages
-
-- More infrastructure to maintain
-- Customers need to context-switch between two apps
-- Duplicated auth/permissions logic
-- Longer time to market
-- Loses the cross-feature integration value
+Partners may also build the WiFi setup flow into their own apps using the gateway's internal API (documented in [11-gateway-api-reference.md](./11-gateway-api-reference.md)). Levelset, for example, would integrate the WiFi setup flow into the Levelset mobile app so CFA operators never need to download a separate app.
 
 ---
 
-## Recommendation
+## How Levelset Integrates (First Partner)
 
-**Start with Option A** (built into Levelset). Here's why:
+Levelset is SensorCo's first customer/partner. The integration looks like this:
 
-1. The initial UI is straightforward — sensor list, temperature charts, alert config. This doesn't require a separate app
-2. Cross-feature integration is a competitive advantage over ComplianceMate (which is standalone)
-3. Existing auth, permissions, and org/location scoping eliminates weeks of work
-4. If temperature monitoring grows complex enough to warrant separation, extract it later
-5. The InfluxDB API routes are the same either way — the frontend choice doesn't affect the backend
+```
+Levelset Dashboard (app.levelset.io)
+    │
+    │ API calls to SensorCo
+    │
+    ▼
+SensorCo API (api.sensorco.com)
+    │
+    │ Reads from SensorCo's Supabase
+    │
+    ▼
+SensorCo Supabase Postgres
+    (sensor_readings, sensor_devices, sensor_alerts, etc.)
+```
 
-**If Option B is needed later**: The InfluxDB integration, MQTT infrastructure, and Tailscale networking are all backend concerns that remain the same. Only the frontend would change. This makes extraction straightforward.
+### What Levelset Builds
+
+| Component | Location | Description |
+|-----------|----------|-------------|
+| Temperature page | `components/pages/TemperatureMonitoring/` | Dashboard UI showing sensor data from SensorCo API |
+| API proxy routes | `pages/api/temperature/` | Thin proxy that calls SensorCo API with Levelset's API key |
+| Permission constants | `packages/permissions/` | `TEMP_VIEW_DASHBOARD`, `TEMP_MANAGE_ALERTS`, etc. |
+| Sidebar nav item | `components/shared/Sidebar/` | Link to temperature monitoring page |
+| i18n strings | `locales/{en,es}/common.json` | Temperature monitoring labels |
+| Mobile WiFi setup | `apps/mobile/` | Gateway onboarding flow (calls gateway directly, not SensorCo API) |
+| Alert webhook handler | `pages/api/webhooks/sensorco-alerts.ts` | Receives alert webhooks from SensorCo |
+
+### What Levelset Does NOT Build
+
+- Sensor data ingestion (SensorCo handles gateway → API → database)
+- Alert threshold evaluation (SensorCo's alert engine)
+- Device management / gateway communication (SensorCo via Tailscale)
+- Compliance report generation (SensorCo API provides this)
+
+### Levelset Permission Module
+
+Add temperature monitoring permissions to Levelset's existing permission system:
+
+| Module | Sub-Item Key | Description |
+|--------|-------------|-------------|
+| Temperature Monitoring | `TEMP_VIEW_DASHBOARD` | View temperature dashboard and readings |
+| Temperature Monitoring | `TEMP_MANAGE_SENSORS` | Configure sensor names and settings |
+| Temperature Monitoring | `TEMP_MANAGE_ALERTS` | Configure alert rules and thresholds |
+| Temperature Monitoring | `TEMP_ACKNOWLEDGE_ALERTS` | Acknowledge and resolve alerts |
+| Temperature Monitoring | `TEMP_EXPORT_DATA` | Export temperature logs for compliance audits |
+
+These would be added to `packages/permissions/src/constants.ts` and seeded via `scripts/seed-permission-modules.ts`.
 
 ---
 
-## Supabase Tables (Needed Either Way)
+## SensorCo Database Schema
 
-Sensor readings live in InfluxDB (time-series optimized). But metadata, configuration, and alert rules belong in Supabase alongside the rest of the Levelset data.
+SensorCo has its own Supabase project. These tables live in SensorCo's database, NOT in Levelset's.
+
+### customers
+
+```sql
+CREATE TABLE customers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,                          -- "Levelset", "Joe's Pizza", etc.
+  customer_type TEXT NOT NULL DEFAULT 'direct', -- 'partner' or 'direct'
+  api_key TEXT UNIQUE,                          -- for API access
+  webhook_url TEXT,                             -- for alert delivery
+  contact_email TEXT,
+  contact_phone TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+### customer_locations
+
+```sql
+CREATE TABLE customer_locations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id),
+  name TEXT NOT NULL,                           -- "CFA #12345 - Main St"
+  address TEXT,
+  external_id TEXT,                             -- partner's internal ID (e.g., Levelset location_id)
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
 
 ### sensor_devices
 
 ```sql
 CREATE TABLE sensor_devices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id UUID NOT NULL REFERENCES orgs(id),
-  location_id UUID NOT NULL REFERENCES locations(id),
+  customer_id UUID NOT NULL REFERENCES customers(id),
+  location_id UUID NOT NULL REFERENCES customer_locations(id),
   dev_eui TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,                    -- "Walk-In Cooler", "Freezer #1"
   sensor_type TEXT NOT NULL DEFAULT 'temperature_humidity',
   gateway_id UUID REFERENCES sensor_gateways(id),
-  temp_min_threshold NUMERIC,           -- alert if below (°F or °C based on org setting)
-  temp_max_threshold NUMERIC,           -- alert if above
+  temp_min_threshold NUMERIC,           -- alert if below (°C)
+  temp_max_threshold NUMERIC,           -- alert if above (°C)
   humidity_min_threshold NUMERIC,
   humidity_max_threshold NUMERIC,
   reporting_interval_minutes INT DEFAULT 10,
@@ -189,16 +169,36 @@ CREATE TABLE sensor_devices (
 ```sql
 CREATE TABLE sensor_gateways (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id UUID NOT NULL REFERENCES orgs(id),
-  location_id UUID NOT NULL REFERENCES locations(id),
+  customer_id UUID NOT NULL REFERENCES customers(id),
+  location_id UUID NOT NULL REFERENCES customer_locations(id),
   mac_address TEXT NOT NULL UNIQUE,
   tailscale_ip TEXT,
   hostname TEXT,                         -- "gw-{locationId}"
   firmware_version TEXT,
+  api_key TEXT,                          -- per-location API key for ingest auth
   is_online BOOLEAN DEFAULT false,
   last_seen_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+### sensor_readings
+
+```sql
+CREATE TABLE sensor_readings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id),
+  location_id UUID NOT NULL REFERENCES customer_locations(id),
+  sensor_id UUID NOT NULL REFERENCES sensor_devices(id),
+  dev_eui TEXT NOT NULL,
+  temperature NUMERIC,
+  humidity NUMERIC,
+  battery_pct INT,
+  rssi INT,
+  snr NUMERIC,
+  recorded_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
 );
 ```
 
@@ -207,15 +207,16 @@ CREATE TABLE sensor_gateways (
 ```sql
 CREATE TABLE sensor_alert_rules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id UUID NOT NULL REFERENCES orgs(id),
-  location_id UUID REFERENCES locations(id),    -- NULL = org-wide default
-  sensor_id UUID REFERENCES sensor_devices(id), -- NULL = all sensors at location
-  rule_type TEXT NOT NULL,                       -- 'temp_high', 'temp_low', 'humidity_high', 'battery_low', 'offline'
+  customer_id UUID NOT NULL REFERENCES customers(id),
+  location_id UUID REFERENCES customer_locations(id),    -- NULL = customer-wide default
+  sensor_id UUID REFERENCES sensor_devices(id),           -- NULL = all sensors at location
+  rule_type TEXT NOT NULL,                                 -- 'temp_high', 'temp_low', 'humidity_high', 'battery_low', 'offline'
   threshold_value NUMERIC,
-  duration_minutes INT DEFAULT 5,               -- must exceed threshold for N minutes before alerting
+  duration_minutes INT DEFAULT 5,                          -- must exceed threshold for N minutes before alerting
   notify_email BOOLEAN DEFAULT true,
   notify_sms BOOLEAN DEFAULT false,
   notify_push BOOLEAN DEFAULT true,
+  notify_webhook BOOLEAN DEFAULT true,                     -- send to partner webhook
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
@@ -227,8 +228,8 @@ CREATE TABLE sensor_alert_rules (
 ```sql
 CREATE TABLE sensor_alerts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id UUID NOT NULL REFERENCES orgs(id),
-  location_id UUID NOT NULL REFERENCES locations(id),
+  customer_id UUID NOT NULL REFERENCES customers(id),
+  location_id UUID NOT NULL REFERENCES customer_locations(id),
   sensor_id UUID REFERENCES sensor_devices(id),
   rule_id UUID REFERENCES sensor_alert_rules(id),
   alert_type TEXT NOT NULL,
@@ -236,7 +237,7 @@ CREATE TABLE sensor_alerts (
   threshold_value NUMERIC,
   message TEXT,
   acknowledged_at TIMESTAMPTZ,
-  acknowledged_by UUID REFERENCES app_users(id),
+  acknowledged_by TEXT,                                    -- user identifier (could be partner user ID)
   resolved_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -244,29 +245,20 @@ CREATE TABLE sensor_alerts (
 
 ---
 
-## Permission Module
-
-Add a new permission module for temperature monitoring:
-
-| Module | Sub-Item Key | Description |
-|--------|-------------|-------------|
-| Temperature Monitoring | `TEMP_VIEW_DASHBOARD` | View temperature dashboard and readings |
-| Temperature Monitoring | `TEMP_MANAGE_SENSORS` | Add/edit/remove sensors and gateways |
-| Temperature Monitoring | `TEMP_MANAGE_ALERTS` | Configure alert rules and thresholds |
-| Temperature Monitoring | `TEMP_ACKNOWLEDGE_ALERTS` | Acknowledge and resolve alerts |
-| Temperature Monitoring | `TEMP_EXPORT_DATA` | Export temperature logs for compliance audits |
-
-These would be added to `packages/permissions/src/constants.ts` and seeded via `scripts/seed-permission-modules.ts`.
-
----
-
 ## Mobile App Integration
 
-The Levelset mobile app (Expo/React Native) would need:
+### SensorCo Mobile App (Direct Customers)
 
+SensorCo builds its own mobile app for direct customers:
 1. **Gateway WiFi setup flow** — connect to gateway AP, configure WiFi credentials
 2. **Sensor status view** — list of sensors with current temps, battery, last seen
-3. **Push notifications** — for temperature alerts (already have push infra via Expo)
+3. **Push notifications** — for temperature alerts
 4. **Quick actions** — acknowledge alerts, view recent history
 
-This would use the native API routes pattern (`/api/native/forms/temperature/`) with JWT auth and permission checks.
+### Partner Mobile Integration (Levelset)
+
+Partners like Levelset integrate the WiFi setup flow into their own mobile apps. The setup flow talks directly to the gateway hardware (not through SensorCo's API) since the phone needs to be on the gateway's local WiFi AP during setup.
+
+For ongoing sensor status and alerts, the Levelset mobile app calls SensorCo's API through Levelset's own API proxy routes.
+
+See [11-gateway-api-reference.md](./11-gateway-api-reference.md) for the WiFi setup API details.

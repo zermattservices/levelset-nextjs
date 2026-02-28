@@ -1,13 +1,25 @@
-# Product Overview — Temperature Monitoring
+# Product Overview — SensorCo Temperature Monitoring
 
 ## Vision
 
-Add automated temperature monitoring as a Levelset product module. Restaurants need continuous temperature logging for food safety compliance (health department, HACCP, corporate brand standards). The current market leaders — ComplianceMate and EcoLab — are expensive, require long contracts, and use proprietary hardware. Levelset can undercut them on price by 35-40% while offering a simpler setup experience and tighter integration with the tools operators already use.
+SensorCo is a separate company (Zermatt Business Services as managing member) that builds and sells IoT sensor monitoring as a service. The first product is automated temperature monitoring for restaurants — continuous logging for food safety compliance (health department, HACCP, corporate brand standards).
+
+The current market leaders — ComplianceMate and EcoLab — are expensive, require long contracts, and use proprietary hardware. SensorCo can undercut them on price by 35-40% while offering a simpler setup experience. SensorCo sells directly to restaurants and through partners like Levelset who integrate SensorCo's platform into their own products.
+
+**Long-term vision**: Expand beyond temperature to all industrial IoT sensors (humidity, air quality, water quality, energy monitoring, etc.). The Milesight sensor ecosystem covers dozens of sensor types at compelling price points vs the incumbent market.
+
+## Business Structure
+
+- **SensorCo**: Separate LLC (name TBD, "SensorCo" is placeholder)
+- **Ownership**: Zermatt Business Services as managing member. Potential co-founders: Mac (mjshiggins) and possibly a third partner.
+- **Relationship to Levelset**: Levelset is SensorCo's first customer. Levelset pays SensorCo for sensor monitoring services for its Chick-fil-A restaurant clients.
+- **Independence**: SensorCo has its own infrastructure, codebase, API, and customer relationships. It is not a Levelset product module.
 
 ## Target Market
 
-- **Primary**: Chick-fil-A operators (existing Levelset relationship)
-- **Secondary**: Any restaurant client using Levelset for workforce management
+- **First customer**: Levelset (Chick-fil-A operators — existing Levelset relationship)
+- **Direct sales**: Any restaurant needing temperature compliance monitoring
+- **Partner channel**: SaaS platforms serving restaurants (like Levelset) that want to offer sensor monitoring as part of their product
 - **Sweet spot**: Multi-unit operators who need per-location monitoring without enterprise pricing
 
 ## Competitive Landscape
@@ -39,7 +51,7 @@ Add automated temperature monitoring as a Levelset product module. Restaurants n
 | Sonicu | Custom quote | Strong in healthcare crossover |
 | MOCREO | Budget-friendly | Consumer/SMB-grade, not enterprise |
 
-### Market Pain Points (Our Opportunities)
+### Market Pain Points (SensorCo's Opportunities)
 
 1. **Overnight blind spots**: Equipment failures happen overnight with no staff present. A compressor dying at midnight destroys an entire walk-in by morning
 2. **Manual logging is unreliable**: 30-40% of restaurants produce incomplete/unreliable manual temp logs. Staff spend 30-60 min/day on manual checks
@@ -50,12 +62,24 @@ Add automated temperature monitoring as a Levelset product module. Restaurants n
 
 ## Pricing Model (Proposed)
 
-### Revenue Per Restaurant
+### SensorCo Direct Sales (Per Restaurant)
 
 | Line Item | Amount | Frequency |
 |-----------|--------|-----------|
 | Sensors (15 per location) | $75/sensor = **$1,125** | One-time upfront |
 | Dashboard/monitoring subscription | **$60/month ($720/year)** | Recurring |
+
+### Partner Channel (e.g., Levelset)
+
+SensorCo can offer partners like Levelset:
+- **Wholesale pricing** on hardware (at or near cost)
+- **Revenue share** or **wholesale SaaS rate** on the monthly subscription
+- Partner integrates via SensorCo's API and may mark up to their end customers
+
+The exact partner pricing model is TBD. Options include:
+1. Levelset buys at wholesale and resells at retail (margin for Levelset)
+2. SensorCo bills end customers directly, pays Levelset a referral fee
+3. Levelset pays SensorCo a flat per-location fee, handles its own customer billing
 
 ### Hardware COGS Per Restaurant
 
@@ -70,19 +94,19 @@ Using EM320-TH sensors at $37/unit (pre-volume discount):
 
 > Note: These are pre-volume/partner pricing. The Milesight Partner Ecosystem program offers volume discounts. Apply at [milesight.com/partner/ecosystem](https://www.milesight.com/partner/ecosystem).
 
-### Margin Analysis
+### Margin Analysis (Direct Sales)
 
 | Period | Revenue | COGS | Gross Profit | Margin |
 |--------|---------|------|-------------|--------|
 | Year 1 | $1,845 | ~$845-920 | ~$925-1,000 | ~50-54% |
 | Year 2+ | $720/yr | ~$0 | ~$720/yr | ~100%* |
 
-*Before software hosting/support costs.
+*Before software hosting/support costs. SensorCo will have its own infrastructure costs (see [09-cloud-hosted-architecture.md](./09-cloud-hosted-architecture.md)).
 
 ### Price Comparison vs ComplianceMate
 
-| Period | ComplianceMate | Levelset | Savings | % Cheaper |
-|--------|---------------|----------|---------|-----------|
+| Period | ComplianceMate | SensorCo | Savings | % Cheaper |
+|--------|---------------|----------|---------|-----------
 | Year 1 | $2,850 | $1,845 | $1,005 | 35% cheaper |
 | Year 2 | $1,275 | $720 | $555 | 44% cheaper |
 | 2-Year Total | $4,125 | $2,565 | $1,560 | 38% cheaper |
@@ -98,3 +122,4 @@ Using EM320-TH sensors at $37/unit (pre-volume discount):
 - Food temperature monitoring market: ~$2.5B (2023), growing at 7.3% CAGR toward ~$4.8B by 2032
 - "Integrated hardware + cloud SaaS" segment holds ~45% market share
 - Modern wireless IoT systems deploy in 2-3 hours per location with no construction or wiring
+- **Beyond temperature**: The broader industrial IoT sensor market is significantly larger. SensorCo's platform architecture (gateway + API + dashboard) is sensor-agnostic — the same infrastructure supports any Milesight sensor type.

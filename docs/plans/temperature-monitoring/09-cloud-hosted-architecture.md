@@ -4,19 +4,19 @@
 
 ```
 DATA PATH (standard internet):
-  Gateway ──(HTTP POST over HTTPS)──> Levelset API ──> Supabase Postgres
+  Gateway ──(HTTP POST over HTTPS)──> SensorCo API ──> SensorCo Supabase Postgres
 
 MANAGEMENT PATH (Tailscale):
-  Levelset API ──(SSH/REST over Tailscale)──> Gateway ──(downlink)──> Sensors
+  SensorCo API ──(SSH/REST over Tailscale)──> Gateway ──(downlink)──> Sensors
 ```
 
-**Data transport**: Gateway HTTP POSTs decoded JSON to the Levelset API over standard HTTPS. No MQTT broker, no InfluxDB, no self-hosted server. Works through any firewall — it's just an outbound HTTPS request.
+**Data transport**: Gateway HTTP POSTs decoded JSON to the SensorCo API over standard HTTPS. No MQTT broker, no InfluxDB, no self-hosted server. Works through any firewall — it's just an outbound HTTPS request.
 
 **Remote management**: Tailscale on every gateway for SSH access and REST API calls. Used on-demand to send downlink commands (config changes) and troubleshoot. Not involved in data transport.
 
-**Storage**: Supabase Postgres for everything — already paid for, no additional infrastructure.
+**Storage**: SensorCo's own Supabase Postgres instance — separate from Levelset's Supabase. SensorCo manages its own infrastructure.
 
-**Customer WiFi setup**: Native flow in the Levelset mobile app using the gateway's internal WiFi API (see [11-gateway-api-reference.md](./11-gateway-api-reference.md)).
+**Customer WiFi setup**: Native flow in SensorCo's mobile app (or partner app like Levelset) using the gateway's internal WiFi API (see [11-gateway-api-reference.md](./11-gateway-api-reference.md)).
 
 ---
 
@@ -32,43 +32,48 @@ MANAGEMENT PATH (Tailscale):
 | **AWS IoT Core** | Overkill complexity. $300/mo for something Supabase does. |
 | **Tailscale for data transport** | Not needed. Standard HTTPS works. Keep Tailscale for management only. |
 | **No Tailscale at all** | Need SSH access for remote sensor config and troubleshooting. No technical staff on-site. |
+| **Build inside Levelset's infrastructure** | SensorCo is a separate company — needs its own infrastructure, codebase, and database. |
 
-### Why Gateway HTTP POST + Supabase Wins
+### Why Gateway HTTP POST + SensorCo Supabase Wins
 
-1. **Zero additional infrastructure** — runs on Vercel + Supabase, which we already pay for
-2. **Single data store** — sensor readings, device config, alerts all in Postgres alongside existing Levelset data
-3. **Fully integrated** — no iframe embeds, no external dashboards, no separate auth systems
+1. **Minimal infrastructure** — runs on Vercel + Supabase, standard SaaS stack
+2. **Single data store** — sensor readings, device config, alerts all in Postgres
+3. **Fully independent** — SensorCo's infrastructure is separate from any partner's
 4. **Simplest deployment** — one API route, one set of tables, one codebase
-5. **$0 incremental cost** at launch
+5. **Partner-ready** — API-first design means any partner can integrate
+6. **Low startup cost** — Supabase Pro ($25/mo) + Vercel Pro ($20/mo) = $45/mo base
 
 ---
 
-## Monthly Costs
+## Monthly Costs (SensorCo's Infrastructure)
 
 ### At Launch (10 locations, 150 sensors)
 
 | Component | Monthly Cost |
 |-----------|-------------|
-| Vercel (already paid) | $0 |
-| Supabase Pro (already paid) | $0 |
+| Vercel Pro | $20 |
+| Supabase Pro | $25 |
 | Tailscale Free (100 devices) | $0 |
-| **Total additional infrastructure** | **$0** |
+| Domain + DNS | ~$0 (Cloudflare free) |
+| **Total SensorCo infrastructure** | **~$45** |
 
 ### At 100 Locations (1,500 sensors)
 
 | Component | Monthly Cost |
 |-----------|-------------|
-| Supabase (already paid, may need compute add-on) | ~$0-50 |
-| Tailscale Starter ($6/user × ~10 users) | ~$60 |
-| **Total** | **~$60-110** |
+| Vercel Pro | $20 |
+| Supabase Pro (may need compute add-on) | ~$25-75 |
+| Tailscale Starter ($6/user x ~10 users) | ~$60 |
+| **Total** | **~$105-155** |
 
 ### At 1,000 Locations (15,000 sensors)
 
 | Component | Monthly Cost |
 |-----------|-------------|
+| Vercel Pro | $20 |
 | Supabase (compute add-on for query volume) | ~$100-200 |
 | Tailscale Enterprise (custom IoT pricing) | ~$500-800 |
-| **Total** | **~$600-1,000** |
+| **Total** | **~$620-1,020** |
 | **Revenue at $60/location** | **$60,000/mo** |
 | **SaaS gross margin** | **~98%** |
 
@@ -87,7 +92,7 @@ At 1,000 locations with 15 sensors each, reporting every 10 minutes:
 | Raw data per month | ~12 GB |
 | 90-day retention | ~36 GB |
 
-**Supabase Pro** includes 8 GB database space on the base plan. At scale, you'd add compute and storage add-ons (~$50-200/mo depending on usage). This is well within Supabase's capabilities for structured query patterns (queries are always scoped by `org_id` + `location_id` + time range).
+**Supabase Pro** includes 8 GB database space on the base plan. At scale, you'd add compute and storage add-ons (~$50-200/mo depending on usage). This is well within Supabase's capabilities for structured query patterns (queries are always scoped by `customer_id` + `location_id` + time range).
 
 ### When to Add InfluxDB Cloud
 
@@ -107,9 +112,9 @@ This is a scaling optimization, not a launch requirement.
 
 In the gateway web UI:
 
-1. **Network Server → Applications** → create "Levelset Sensors"
+1. **Network Server → Applications** → create "SensorCo"
 2. **Data Transmission** → add HTTP integration:
-   - **URL**: `https://app.levelset.io/api/sensors/ingest`
+   - **URL**: `https://api.sensorco.com/api/sensors/ingest`
    - **Auth**: API key header (unique per location)
    - **Payload Codec**: Enabled
 3. Save and Apply
@@ -119,7 +124,7 @@ In the gateway web UI:
 ```json
 {
   "applicationID": 1,
-  "applicationName": "Levelset Sensors",
+  "applicationName": "SensorCo",
   "deviceName": "walk-in-cooler-1",
   "devEUI": "24e124126a148401",
   "fPort": 85,
@@ -139,7 +144,7 @@ In the gateway web UI:
 
 The `object` field contains the decoded sensor values (decoded by the gateway's built-in codec). The `data` field contains the raw Base64-encoded LoRaWAN payload as a fallback.
 
-### Levelset API Route (`/api/sensors/ingest`)
+### SensorCo API Route (`/api/sensors/ingest`)
 
 ```typescript
 // Pseudocode — actual implementation TBD
@@ -157,7 +162,7 @@ export default async function handler(req, res) {
     location_id: locationId,
     temperature,
     humidity,
-    battery,
+    battery_pct: battery,
     rssi: rxInfo?.rssi,
     snr: rxInfo?.loRaSNR,
     recorded_at: rxInfo?.time || new Date().toISOString(),
@@ -178,7 +183,8 @@ export default async function handler(req, res) {
       value: temperature,
       threshold: temperature > rules.max_temp ? rules.max_temp : rules.min_temp,
     });
-    // Send push notification, email, etc.
+
+    // Send push notification, email, webhook to partner, etc.
   }
 
   return res.status(200).json({ ok: true });
@@ -205,7 +211,8 @@ Tailscale is installed on every gateway **solely** for remote SSH access and RES
 
 - Sensor data readings (HTTP POST over standard internet)
 - Dashboard queries (Supabase over standard internet)
-- Mobile app interactions (Supabase + Levelset API over standard internet)
+- Partner API calls (standard internet)
+- Mobile app interactions (SensorCo API over standard internet)
 
 ### Tailscale Is Free at Launch
 
