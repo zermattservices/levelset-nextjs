@@ -197,11 +197,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
           return (
             <span
               className={styles.stageChip}
-              style={{
-                backgroundColor: `${color}18`,
-                color: color,
-                borderColor: `${color}40`,
-              }}
+              style={{ color }}
             >
               {STAGE_LABELS[stage] || stage}
             </span>
