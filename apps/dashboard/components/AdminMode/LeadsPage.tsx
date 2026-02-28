@@ -150,8 +150,8 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
       {
         field: 'name',
         headerName: 'Name',
-        flex: 1.2,
-        minWidth: 160,
+        flex: 1,
+        minWidth: 120,
         valueGetter: (_value: unknown, row: Lead) => {
           const first = row.first_name || '';
           const last = row.last_name || '';
@@ -164,8 +164,8 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
       {
         field: 'email',
         headerName: 'Email',
-        flex: 1.4,
-        minWidth: 200,
+        flex: 1.5,
+        minWidth: 160,
         renderCell: (params) => (
           <span className={styles.cellEmail}>{params.value}</span>
         ),
@@ -173,7 +173,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
       {
         field: 'store_number',
         headerName: 'Store #',
-        width: 90,
+        width: 80,
         renderCell: (params) => (
           <span className={styles.cellMuted}>{params.value || '--'}</span>
         ),
@@ -182,7 +182,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
         field: 'operator_name',
         headerName: 'Operator',
         flex: 1,
-        minWidth: 130,
+        minWidth: 100,
         renderCell: (params) => (
           <span className={styles.cellMuted}>{params.value || '--'}</span>
         ),
@@ -190,7 +190,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
       {
         field: 'pipeline_stage',
         headerName: 'Stage',
-        width: 120,
+        width: 100,
         renderCell: (params) => {
           const stage = params.value as string;
           const color = STAGE_COLORS[stage] || '#999';
@@ -207,7 +207,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
       {
         field: 'engagement_score',
         headerName: 'Engagement',
-        width: 110,
+        width: 100,
         headerAlign: 'center' as const,
         align: 'center' as const,
         renderCell: (params) => (
@@ -217,7 +217,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
       {
         field: 'estimated_value_cents',
         headerName: 'Est. Value',
-        width: 110,
+        width: 100,
         headerAlign: 'right' as const,
         align: 'right' as const,
         renderCell: (params) => (
@@ -229,7 +229,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
       {
         field: 'source',
         headerName: 'Source',
-        width: 100,
+        width: 90,
         renderCell: (params) => (
           <span className={styles.cellSource}>{params.value || '--'}</span>
         ),
@@ -237,7 +237,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
       {
         field: 'created_at',
         headerName: 'Created',
-        width: 110,
+        width: 100,
         renderCell: (params) => (
           <span className={styles.cellDate}>{relativeDate(params.value)}</span>
         ),

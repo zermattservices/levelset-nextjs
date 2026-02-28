@@ -183,6 +183,7 @@ export function AdminLocationsPage() {
         <MenuNavigation
           firstName={auth.first_name}
           userRole={auth.role}
+          fullWidth
         />
 
         {/* Header section - hidden on task board for full-screen layout */}
