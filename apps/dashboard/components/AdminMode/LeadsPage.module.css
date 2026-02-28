@@ -111,6 +111,8 @@
   background-color: #ffffff;
   flex: 1;
   min-height: 400px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .gridRow {

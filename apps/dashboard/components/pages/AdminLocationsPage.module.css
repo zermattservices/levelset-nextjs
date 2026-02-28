@@ -86,8 +86,8 @@
 }
 
 .contentArea {
-  flex: 1;
-  min-width: 0;
+  flex-grow: 1;
+  width: 0;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
