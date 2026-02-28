@@ -5,6 +5,7 @@ import { getFBPixelScript } from '@/lib/analytics';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { TrialModalProvider } from '@/components/cta/TrialModalProvider';
+import { VisitorTracker } from '@/components/analytics/VisitorTracker';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -62,6 +63,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <TrialModalProvider>
+          <VisitorTracker />
           <Header />
           <main className="min-h-screen">{children}</main>
           <Footer />

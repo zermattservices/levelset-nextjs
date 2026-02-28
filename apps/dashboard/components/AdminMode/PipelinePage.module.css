@@ -1,0 +1,472 @@
+/* PipelinePage.module.css */
+
+.container {
+  padding: 0;
+  width: 100%;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 20px;
+  color: #6b7280;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ─── Summary Cards ───────────────────────────────────────────────────────── */
+
+.summaryCards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summaryCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  background-color: #fafafa;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+}
+
+.summaryLabel {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.summaryValue {
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.1;
+}
+
+/* ─── Card Container ──────────────────────────────────────────────────────── */
+
+.card {
+  background-color: #fafafa;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.cardTitle {
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 20px;
+}
+
+/* ─── Pipeline Funnel ─────────────────────────────────────────────────────── */
+
+.funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.funnelRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.funnelLabel {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  min-width: 100px;
+  text-align: right;
+}
+
+.funnelBarTrack {
+  flex: 1;
+  height: 32px;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.funnelBar {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.4s ease;
+  min-width: 4px;
+}
+
+.funnelCount {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  min-width: 80px;
+  text-align: left;
+}
+
+.funnelPct {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+/* ─── Stage-to-Stage Conversion ───────────────────────────────────────────── */
+
+.conversions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.conversionRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.conversionStages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 260px;
+}
+
+.conversionStageBadge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.conversionArrow {
+  font-size: 18px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.conversionRateContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.conversionRateTrack {
+  flex: 1;
+  height: 8px;
+  background-color: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.conversionRateFill {
+  height: 100%;
+  background-color: var(--ls-color-brand, #31664A);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+
+.conversionRateValue {
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  min-width: 48px;
+  text-align: right;
+}
+
+/* ─── Two Column Layout ───────────────────────────────────────────────────── */
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.twoCol > .card {
+  margin-bottom: 0;
+}
+
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rightCol > .card {
+  margin-bottom: 0;
+}
+
+/* ─── Value by Stage Table ────────────────────────────────────────────────── */
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Satoshi", system-ui, sans-serif;
+}
+
+.table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table th:not(:first-child) {
+  text-align: right;
+}
+
+.table td {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #111827;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.table td:not(:first-child) {
+  text-align: right;
+}
+
+.table td:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.stageDot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.totalRow {
+  border-top: 2px solid #e5e7eb;
+}
+
+.totalRow td {
+  font-weight: 700;
+  color: #111827;
+  padding-top: 14px;
+}
+
+.totalRow td:first-child {
+  font-family: "Mont", system-ui, sans-serif;
+}
+
+/* ─── Lost Reasons ────────────────────────────────────────────────────────── */
+
+.lostList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lostItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background-color: #fff;
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+}
+
+.lostReason {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 14px;
+  color: #374151;
+}
+
+.lostCount {
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #F44336;
+  background-color: #FEF2F2;
+  padding: 2px 10px;
+  border-radius: 100px;
+}
+
+/* ─── Recent Activity ─────────────────────────────────────────────────────── */
+
+.activityList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.activityItem:last-child {
+  border-bottom: none;
+}
+
+.activityDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--ls-color-brand, #31664A);
+  flex-shrink: 0;
+}
+
+.activityContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.activityType {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.activityLead {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activityTime {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 12px;
+  color: #9ca3af;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.emptyState {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 14px;
+  color: #9ca3af;
+  text-align: center;
+  padding: 20px 0;
+  margin: 0;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .summaryCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .funnelLabel {
+    min-width: 80px;
+    font-size: 13px;
+  }
+
+  .funnelCount {
+    min-width: 60px;
+    font-size: 13px;
+  }
+
+  .conversionRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .conversionStages {
+    min-width: unset;
+  }
+}
+
+@media (max-width: 480px) {
+  .summaryCards {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryCard {
+    padding: 16px;
+  }
+
+  .summaryValue {
+    font-size: 24px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+}

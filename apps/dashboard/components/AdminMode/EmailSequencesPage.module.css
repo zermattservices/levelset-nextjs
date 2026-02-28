@@ -1,0 +1,388 @@
+/* EmailSequencesPage.module.css */
+
+.container {
+  padding: 0;
+  width: 100%;
+}
+
+/* ─── Loading ────────────────────────────────────────────────────────────── */
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 20px;
+}
+
+.loadingText {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0d1b14;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 15px;
+  color: #666;
+  margin: 0;
+}
+
+/* ─── Summary Cards ──────────────────────────────────────────────────────── */
+
+.summaryCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summaryCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  background-color: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+}
+
+.summaryLabel {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.summaryValue {
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #0d1b14;
+  line-height: 1.1;
+}
+
+/* ─── Sequence List ──────────────────────────────────────────────────────── */
+
+.sequenceList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Sequence Card ──────────────────────────────────────────────────────── */
+
+.sequenceCard {
+  background-color: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sequenceCard:hover {
+  border-color: #d1d5db;
+}
+
+.sequenceCardExpanded {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.sequenceCardInactive {
+  opacity: 0.65;
+}
+
+.sequenceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  cursor: pointer;
+  gap: 16px;
+}
+
+.sequenceHeader:hover {
+  background-color: #f5f5f5;
+}
+
+.sequenceInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sequenceNameRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sequenceName {
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0d1b14;
+  margin: 0;
+}
+
+.sequenceMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stepCount {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0d1b14;
+}
+
+.stepCountDetail {
+  font-weight: 400;
+  color: #999;
+}
+
+.sequenceDate {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  color: #999;
+}
+
+.sequenceActions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* ─── Trigger Badge ──────────────────────────────────────────────────────── */
+
+.triggerBadge {
+  display: inline-flex;
+  align-items: center;
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Steps Container ────────────────────────────────────────────────────── */
+
+.stepsContainer {
+  padding: 0 24px 24px;
+}
+
+.stepsDivider {
+  height: 1px;
+  background-color: #e5e5e5;
+  margin-bottom: 20px;
+}
+
+.noSteps {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 14px;
+  color: #999;
+  text-align: center;
+  padding: 16px 0;
+  margin: 0;
+}
+
+/* ─── Timeline ───────────────────────────────────────────────────────────── */
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.timelineStep {
+  display: flex;
+  gap: 16px;
+  min-height: 56px;
+}
+
+.timelineStepInactive {
+  opacity: 0.5;
+}
+
+/* Timeline track (dot + line) */
+.timelineTrack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 32px;
+}
+
+.timelineDot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--ls-color-brand, #31664A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.timelineNumber {
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.timelineLine {
+  width: 2px;
+  flex: 1;
+  min-height: 24px;
+  background-color: #e5e5e5;
+}
+
+/* Step content */
+.stepContent {
+  flex: 1;
+  padding-bottom: 20px;
+  min-width: 0;
+}
+
+.stepHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.stepInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.stepTemplate {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0d1b14;
+  word-break: break-word;
+}
+
+.stepDelay {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  color: #666;
+}
+
+.stepToggle {
+  flex-shrink: 0;
+}
+
+/* ─── Empty State ────────────────────────────────────────────────────────── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  background-color: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+}
+
+.emptyStateText {
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .summaryCards {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryCard {
+    padding: 16px;
+  }
+
+  .summaryValue {
+    font-size: 24px;
+  }
+
+  .sequenceHeader {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .sequenceActions {
+    align-self: flex-end;
+  }
+
+  .sequenceNameRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .sequenceMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .stepsContainer {
+    padding: 0 16px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 22px;
+  }
+
+  .stepHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .stepToggle {
+    align-self: flex-end;
+  }
+}

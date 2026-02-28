@@ -11,6 +11,11 @@ import { UserTestingPage } from '@/components/AdminMode/UserTestingPage';
 import { OrganizationsPage } from '@/components/AdminMode/OrganizationsPage';
 import { FeatureRequestsPage } from '@/components/AdminMode/FeatureRequestsPage';
 import { TaskBoardPage } from '@/components/AdminMode/TaskBoardPage';
+import { LeadsPage } from '@/components/AdminMode/LeadsPage';
+import { LeadDetailPanel } from '@/components/AdminMode/LeadDetailPanel';
+import { PipelinePage } from '@/components/AdminMode/PipelinePage';
+import { EmailTemplatesPage } from '@/components/AdminMode/EmailTemplatesPage';
+import { EmailSequencesPage } from '@/components/AdminMode/EmailSequencesPage';
 import { ComingSoonPlaceholder } from '@/components/OrgSettings/ComingSoonPlaceholder';
 import styles from './AdminLocationsPage.module.css';
 
@@ -18,7 +23,7 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-const VALID_SECTIONS = ['user-testing', 'organizations', 'feature-requests', 'task-board'];
+const VALID_SECTIONS = ['user-testing', 'organizations', 'feature-requests', 'task-board', 'leads', 'pipeline', 'email-templates', 'email-sequences'];
 
 export function AdminLocationsPage() {
   const router = useRouter();
@@ -47,6 +52,25 @@ export function AdminLocationsPage() {
 
   const isLevelsetAdmin = auth.role === 'Levelset Admin';
 
+  // Lead detail panel state
+  const [selectedLeadId, setSelectedLeadId] = React.useState<string | null>(null);
+  const [leadDetailOpen, setLeadDetailOpen] = React.useState(false);
+  const [leadsRefreshKey, setLeadsRefreshKey] = React.useState(0);
+
+  const handleSelectLead = React.useCallback((leadId: string) => {
+    setSelectedLeadId(leadId);
+    setLeadDetailOpen(true);
+  }, []);
+
+  const handleLeadDetailClose = React.useCallback(() => {
+    setLeadDetailOpen(false);
+    setSelectedLeadId(null);
+  }, []);
+
+  const handleStageChange = React.useCallback(() => {
+    setLeadsRefreshKey((k) => k + 1);
+  }, []);
+
   // Render content based on active section
   const renderContent = () => {
     switch (activeSection) {
@@ -58,6 +82,14 @@ export function AdminLocationsPage() {
         return <FeatureRequestsPage />;
       case 'task-board':
         return <TaskBoardPage />;
+      case 'leads':
+        return <LeadsPage key={leadsRefreshKey} onSelectLead={handleSelectLead} />;
+      case 'pipeline':
+        return <PipelinePage />;
+      case 'email-templates':
+        return <EmailTemplatesPage />;
+      case 'email-sequences':
+        return <EmailSequencesPage />;
       default:
         return <UserTestingPage />;
     }
@@ -179,6 +211,14 @@ export function AdminLocationsPage() {
             </div>
           </div>
         </div>
+
+        {/* Lead Detail Panel (shared across Leads and Pipeline pages) */}
+        <LeadDetailPanel
+          leadId={selectedLeadId}
+          open={leadDetailOpen}
+          onClose={handleLeadDetailClose}
+          onStageChange={handleStageChange}
+        />
       </div>
     </>
   );

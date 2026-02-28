@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { trackLead } from '@/lib/analytics';
+import { getVisitorId } from '@/lib/tracking';
 
 type Step = 'email' | 'operator' | 'store' | 'multiUnit';
 
@@ -32,6 +33,7 @@ export function WaitlistForm({ dark = false }: { dark?: boolean }) {
           storeNumber: storeNumber || undefined,
           isMultiUnit,
           source: 'website',
+          visitorId: getVisitorId() || undefined,
         }),
       });
 

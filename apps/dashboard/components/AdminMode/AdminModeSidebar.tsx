@@ -9,6 +9,10 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import BusinessIcon from '@mui/icons-material/Business';
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import ViewKanbanOutlinedIcon from '@mui/icons-material/ViewKanbanOutlined';
+import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
+import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import AutoFixHighOutlinedIcon from '@mui/icons-material/AutoFixHighOutlined';
 import styles from './AdminModeSidebar.module.css';
 
 export interface AdminMenuItem {
@@ -48,6 +52,35 @@ const menuGroups: MenuGroup[] = [
         id: 'task-board',
         label: 'Task Board',
         icon: <ViewKanbanOutlinedIcon sx={{ fontSize: 18 }} />,
+        status: 'active',
+      },
+    ],
+  },
+  {
+    title: 'Marketing',
+    items: [
+      {
+        id: 'leads',
+        label: 'Leads',
+        icon: <PeopleOutlinedIcon sx={{ fontSize: 18 }} />,
+        status: 'active',
+      },
+      {
+        id: 'pipeline',
+        label: 'Pipeline',
+        icon: <TimelineOutlinedIcon sx={{ fontSize: 18 }} />,
+        status: 'active',
+      },
+      {
+        id: 'email-templates',
+        label: 'Email Templates',
+        icon: <EmailOutlinedIcon sx={{ fontSize: 18 }} />,
+        status: 'active',
+      },
+      {
+        id: 'email-sequences',
+        label: 'Email Sequences',
+        icon: <AutoFixHighOutlinedIcon sx={{ fontSize: 18 }} />,
         status: 'active',
       },
     ],
