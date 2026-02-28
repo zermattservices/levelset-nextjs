@@ -43,9 +43,9 @@
 
 /* Summary cards */
 .summaryRow {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .summaryCard {
@@ -54,33 +54,24 @@
   gap: 4px;
   padding: 18px 24px;
   background-color: #ffffff;
-  border: 1px solid #e8e8ec;
-  border-radius: 14px;
-  position: relative;
-  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  flex: 1;
+  min-width: 120px;
+  max-width: 200px;
+  border-top: 3px solid var(--ls-color-brand-base, #31664A);
 }
 
-.summaryCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background-color: var(--ls-color-brand-base, #31664A);
-  border-radius: 3px 0 0 3px;
+.summaryCard:nth-child(2) {
+  border-top-color: #4CAF50;
 }
 
-.summaryCard:nth-child(2)::before {
-  background-color: #4CAF50;
+.summaryCard:nth-child(3) {
+  border-top-color: #7c3aed;
 }
 
-.summaryCard:nth-child(3)::before {
-  background-color: #7c3aed;
-}
-
-.summaryCard:nth-child(4)::before {
-  background-color: #2563eb;
+.summaryCard:nth-child(4) {
+  border-top-color: #2563eb;
 }
 
 .summaryValue {
@@ -109,7 +100,7 @@
 
 .filterSelect {
   padding: 10px 36px 10px 14px;
-  border: 1px solid #e8e8ec;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
@@ -144,8 +135,8 @@
 /* Individual card */
 .card {
   background-color: #ffffff;
-  border: 1px solid #e8e8ec;
-  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 20px 24px;
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -240,7 +231,7 @@
 .toggleContainer {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .toggleLabel {
@@ -281,7 +272,7 @@
 .cardDetails {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e8e8ec;
+  border-top: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -335,11 +326,11 @@
 /* Responsive */
 @media (max-width: 768px) {
   .summaryRow {
-    grid-template-columns: repeat(2, 1fr);
+    flex-direction: column;
   }
 
   .summaryCard {
-    min-width: unset;
+    max-width: 100%;
   }
 
   .filterBar {
@@ -363,6 +354,10 @@
 
 @media (max-width: 480px) {
   .summaryRow {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .summaryCard {
+    max-width: 100%;
   }
 }

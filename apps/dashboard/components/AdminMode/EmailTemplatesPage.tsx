@@ -6,8 +6,9 @@
  */
 
 import * as React from 'react';
-import { CircularProgress, Switch } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { BrandSwitch } from './BrandSwitch';
 import styles from './EmailTemplatesPage.module.css';
 
 // ---------------------------------------------------------------------------
@@ -246,19 +247,10 @@ export function EmailTemplatesPage() {
                       <span className={styles.toggleLabel}>
                         {template.active ? 'Active' : 'Inactive'}
                       </span>
-                      <Switch
+                      <BrandSwitch
                         checked={template.active}
                         onChange={(e) => handleToggleActive(template, e)}
                         disabled={togglingIds.has(template.id)}
-                        size="small"
-                        sx={{
-                          '& .MuiSwitch-switchBase.Mui-checked': {
-                            color: 'var(--ls-color-brand-base)',
-                          },
-                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                            backgroundColor: 'var(--ls-color-brand-base)',
-                          },
-                        }}
                       />
                     </div>
                   </div>

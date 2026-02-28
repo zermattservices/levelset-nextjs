@@ -11,15 +11,15 @@
 .headerSection {
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 100%;
-  padding: 16px 16px;
+  padding: 20px 24px;
   background: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
 }
 
 @media (max-width: 1280px) {
   .headerSection {
-    padding: 16px 8px;
+    padding: 20px 16px;
   }
 }
 
@@ -27,8 +27,6 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e5e5e5;
 }
 
 .headerContentConstrained {

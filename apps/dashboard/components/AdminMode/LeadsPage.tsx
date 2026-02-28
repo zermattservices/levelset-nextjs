@@ -348,7 +348,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
             fontSize: 14,
             '& .MuiDataGrid-columnHeaders': {
               backgroundColor: '#fafafa',
-              borderBottom: '1px solid #e8e8ec',
+              borderBottom: '1px solid #e2e8f0',
             },
             '& .MuiDataGrid-columnHeaderTitle': {
               fontFamily: '"Satoshi", sans-serif',
@@ -359,7 +359,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
               letterSpacing: '0.05em',
             },
             '& .MuiDataGrid-cell': {
-              borderBottom: '1px solid #f5f5f7',
+              borderBottom: '1px solid #f1f5f9',
               padding: '0 16px',
             },
             '& .MuiDataGrid-row': {
@@ -369,7 +369,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
               },
             },
             '& .MuiDataGrid-footerContainer': {
-              borderTop: '1px solid #e8e8ec',
+              borderTop: '1px solid #e2e8f0',
             },
             '& .MuiTablePagination-root': {
               fontFamily: '"Satoshi", sans-serif',

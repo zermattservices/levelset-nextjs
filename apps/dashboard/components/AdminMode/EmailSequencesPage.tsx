@@ -5,8 +5,9 @@
  */
 
 import * as React from 'react';
-import { CircularProgress, Switch } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { BrandSwitch } from './BrandSwitch';
 import styles from './EmailSequencesPage.module.css';
 
 // ---------------------------------------------------------------------------
@@ -285,21 +286,12 @@ export function EmailSequencesPage() {
                     className={styles.sequenceActions}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <Switch
+                    <BrandSwitch
                       checked={sequence.active}
                       onChange={() =>
                         handleToggleSequence(sequence.id, sequence.active)
                       }
                       disabled={togglingSequence === sequence.id}
-                      size="small"
-                      sx={{
-                        '& .MuiSwitch-switchBase.Mui-checked': {
-                          color: 'var(--ls-color-brand, #31664A)',
-                        },
-                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                          backgroundColor: 'var(--ls-color-brand, #31664A)',
-                        },
-                      }}
                     />
                   </div>
                 </div>
@@ -349,7 +341,7 @@ export function EmailSequencesPage() {
                                     className={styles.stepToggle}
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    <Switch
+                                    <BrandSwitch
                                       checked={step.active}
                                       onChange={() =>
                                         handleToggleStep(
@@ -359,17 +351,6 @@ export function EmailSequencesPage() {
                                         )
                                       }
                                       disabled={togglingStep === step.id}
-                                      size="small"
-                                      sx={{
-                                        '& .MuiSwitch-switchBase.Mui-checked': {
-                                          color: 'var(--ls-color-brand, #31664A)',
-                                        },
-                                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track':
-                                          {
-                                            backgroundColor:
-                                              'var(--ls-color-brand, #31664A)',
-                                          },
-                                      }}
                                     />
                                   </div>
                                 </div>

@@ -29,6 +29,7 @@
 .summaryRow {
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .summaryCard {
@@ -37,33 +38,24 @@
   gap: 4px;
   padding: 18px 24px;
   background-color: #ffffff;
-  border: 1px solid #e8e8ec;
-  border-radius: 14px;
-  min-width: 160px;
-  position: relative;
-  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  flex: 1;
+  min-width: 150px;
+  max-width: 240px;
+  border-top: 3px solid var(--ls-color-brand-base, #31664A);
 }
 
-.summaryCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background-color: var(--ls-color-brand-base, #31664A);
-  border-radius: 3px 0 0 3px;
-}
-
-.summaryCard:nth-child(2)::before {
-  background-color: #2196F3;
+.summaryCard:nth-child(2) {
+  border-top-color: #2196F3;
 }
 
 .summaryValue {
   font-family: "Mont", system-ui, sans-serif;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: #0d1b14;
+  line-height: 1.1;
 }
 
 .summaryLabel {
@@ -90,7 +82,7 @@
 
 .filterSelect {
   padding: 10px 36px 10px 14px;
-  border: 1px solid #e8e8ec;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
@@ -106,16 +98,17 @@
 
 .filterSelect:focus {
   outline: none;
-  border-color: var(--ls-color-brand-base);
+  border-color: var(--ls-color-brand-base, #31664A);
 }
 
 /* DataGrid container */
 .gridContainer {
-  border: 1px solid #e8e8ec;
-  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   overflow: hidden;
   background-color: #ffffff;
-  height: 640px;
+  flex: 1;
+  min-height: 400px;
 }
 
 .gridRow {
@@ -237,7 +230,11 @@
     flex-direction: column;
   }
 
+  .summaryCard {
+    max-width: 100%;
+  }
+
   .gridContainer {
-    height: 500px;
+    min-height: 300px;
   }
 }

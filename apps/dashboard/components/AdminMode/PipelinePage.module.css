@@ -42,9 +42,9 @@
 /* ─── Summary Cards ───────────────────────────────────────────────────────── */
 
 .summaryCards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
   gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 28px;
 }
 
@@ -52,35 +52,26 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 20px 24px;
+  padding: 18px 24px;
   background-color: #ffffff;
-  border: 1px solid #e8e8ec;
-  border-radius: 14px;
-  position: relative;
-  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  flex: 1;
+  min-width: 150px;
+  max-width: 240px;
+  border-top: 3px solid var(--ls-color-brand-base, #31664A);
 }
 
-.summaryCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background-color: var(--ls-color-brand-base, #31664A);
-  border-radius: 3px 0 0 3px;
+.summaryCard:nth-child(2) {
+  border-top-color: #2196F3;
 }
 
-.summaryCard:nth-child(2)::before {
-  background-color: #2196F3;
+.summaryCard:nth-child(3) {
+  border-top-color: #4CAF50;
 }
 
-.summaryCard:nth-child(3)::before {
-  background-color: #4CAF50;
-}
-
-.summaryCard:nth-child(4)::before {
-  background-color: #FF9800;
+.summaryCard:nth-child(4) {
+  border-top-color: #FF9800;
 }
 
 .summaryLabel {
@@ -104,8 +95,8 @@
 
 .card {
   background-color: #ffffff;
-  border: 1px solid #e8e8ec;
-  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;
 }
@@ -297,7 +288,7 @@
   color: #999;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid #e8e8ec;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .table th:not(:first-child) {
@@ -335,7 +326,7 @@
 }
 
 .totalRow {
-  border-top: 2px solid #e8e8ec;
+  border-top: 2px solid #e2e8f0;
 }
 
 .totalRow td {
@@ -467,7 +458,11 @@
 
 @media (max-width: 768px) {
   .summaryCards {
-    grid-template-columns: repeat(2, 1fr);
+    flex-direction: column;
+  }
+
+  .summaryCard {
+    max-width: 100%;
   }
 
   .funnelLabel {
@@ -493,11 +488,12 @@
 
 @media (max-width: 480px) {
   .summaryCards {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .summaryCard {
     padding: 16px;
+    max-width: 100%;
   }
 
   .summaryValue {

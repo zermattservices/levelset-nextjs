@@ -49,9 +49,9 @@
 /* ─── Summary Cards ──────────────────────────────────────────────────────── */
 
 .summaryCards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 28px;
 }
 
@@ -59,31 +59,22 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 20px 24px;
+  padding: 18px 24px;
   background-color: #ffffff;
-  border: 1px solid #e8e8ec;
-  border-radius: 14px;
-  position: relative;
-  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  flex: 1;
+  min-width: 140px;
+  max-width: 220px;
+  border-top: 3px solid var(--ls-color-brand-base, #31664A);
 }
 
-.summaryCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background-color: var(--ls-color-brand-base, #31664A);
-  border-radius: 3px 0 0 3px;
+.summaryCard:nth-child(2) {
+  border-top-color: #4CAF50;
 }
 
-.summaryCard:nth-child(2)::before {
-  background-color: #4CAF50;
-}
-
-.summaryCard:nth-child(3)::before {
-  background-color: #2196F3;
+.summaryCard:nth-child(3) {
+  border-top-color: #2196F3;
 }
 
 .summaryLabel {
@@ -115,8 +106,8 @@
 
 .sequenceCard {
   background-color: #ffffff;
-  border: 1px solid #e8e8ec;
-  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   overflow: hidden;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -223,7 +214,7 @@
 
 .stepsDivider {
   height: 1px;
-  background-color: #e8e8ec;
+  background-color: #e2e8f0;
   margin-bottom: 20px;
 }
 
@@ -285,7 +276,7 @@
   width: 2px;
   flex: 1;
   min-height: 24px;
-  background-color: #e8e8ec;
+  background-color: #e2e8f0;
 }
 
 /* Step content */
@@ -338,8 +329,8 @@
   padding: 48px;
   text-align: center;
   background-color: #ffffff;
-  border: 1px solid #e8e8ec;
-  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
 }
 
 .emptyStateText {
@@ -353,15 +344,11 @@
 
 @media (max-width: 768px) {
   .summaryCards {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .summaryCard {
-    padding: 16px;
-  }
-
-  .summaryValue {
-    font-size: 22px;
+    max-width: 100%;
   }
 
   .sequenceHeader {
