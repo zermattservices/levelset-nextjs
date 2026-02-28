@@ -1,6 +1,6 @@
 # UG65 Gateway REST API Reference
 
-The UG65 has an HTTP REST API on port 8080 for programmatic management. This is how the Levelset backend sends downlink commands to sensors and how the mobile app will configure WiFi.
+The UG65 has an HTTP REST API on port 8080 for programmatic management. This is how the SensorCo backend sends downlink commands to sensors and how the mobile app will configure WiFi.
 
 **Official API Spec PDF**: [resource.milesight.com/.../ug-http-api-documentation-en.pdf](https://resource.milesight.com/milesight/iot/document/ug-http-api-documentation-en.pdf)
 
@@ -58,7 +58,7 @@ During pre-shipping, configure a dedicated API account in the gateway web UI:
 
 ## Device Management Endpoints
 
-These are the endpoints used by the Levelset API to manage sensors remotely over Tailscale.
+These are the endpoints used by the SensorCo API to manage sensors remotely over Tailscale.
 
 ### List All Devices
 
@@ -105,7 +105,7 @@ Authorization: Bearer {jwt}
 
 ## Downlink Commands (Critical for Remote Config)
 
-This is the most important API for Levelset. It sends configuration changes to sensors without any physical access.
+This is the most important API for SensorCo. It sends configuration changes to sensors without any physical access.
 
 ### Send Downlink to Device
 
@@ -294,7 +294,7 @@ The gateway runs OpenWrt with a LuCI-based web interface. LuCI typically exposes
 
 If the internal WiFi API proves unreliable or changes between firmware versions, the mobile app can achieve the same result via SSH:
 
-**From the Levelset API or a pre-installed script on the gateway**:
+**From the SensorCo API or a pre-installed script on the gateway**:
 
 ```bash
 # Scan for available networks
@@ -324,7 +324,7 @@ During pre-shipping, install a simple WiFi setup helper script on the gateway:
 ```bash
 #!/bin/sh
 # /usr/local/bin/wifi-setup-api.sh
-# Called by the Levelset mobile app during customer setup
+# Called by the SensorCo mobile app (or partner app) during customer setup
 
 case "$1" in
   scan)
@@ -366,31 +366,31 @@ This script would be exposed via the gateway's built-in Node-RED (which has HTTP
 
 5. Gateway connects to restaurant WiFi
    └─ AP mode turns off, gateway joins CFA-Guest network
-   └─ HTTP POST to Levelset API starts flowing
+   └─ HTTP POST to SensorCo API starts flowing
    └─ Tailscale auto-connects
 
 6. App confirms setup complete
    └─ App reconnects phone to regular WiFi
-   └─ App polls Levelset API for first sensor readings
+   └─ App polls SensorCo API for first sensor readings
    └─ Shows "Your sensors are online!" when data arrives
 ```
 
 ---
 
-## Levelset API → Gateway Communication
+## SensorCo API → Gateway Communication
 
-### How the Levelset Backend Reaches Gateways
+### How the SensorCo Backend Reaches Gateways
 
-The Levelset API server (Vercel) sends commands to gateways through Tailscale. Since Vercel is serverless and can't run Tailscale directly, you need a small relay:
+The SensorCo API server (Vercel) sends commands to gateways through Tailscale. Since Vercel is serverless and can't run Tailscale directly, you need a small relay:
 
 **Option A — Tailscale Funnel/Proxy**:
-Run a lightweight proxy on Fly.io (where the Levelset agent already lives) with Tailscale installed. The API route calls the proxy, which forwards to the gateway over Tailscale.
+Run a lightweight proxy on Fly.io with Tailscale installed. The API route calls the proxy, which forwards to the gateway over Tailscale.
 
 **Option B — Tailscale API**:
 Use Tailscale's SSH API or machine-to-machine API to execute commands on gateways without a persistent connection.
 
-**Option C — Gateway polls Levelset**:
-Instead of push, the gateway periodically checks a Levelset API endpoint for pending commands. Simpler but adds latency (commands not instant).
+**Option C — Gateway polls SensorCo**:
+Instead of push, the gateway periodically checks a SensorCo API endpoint for pending commands. Simpler but adds latency (commands not instant).
 
 This is an implementation detail to resolve during the build phase.
 
@@ -398,7 +398,7 @@ This is an implementation detail to resolve during the build phase.
 
 ## API Endpoints Summary
 
-| Category | Endpoint Pattern | Levelset Use Case |
+| Category | Endpoint Pattern | SensorCo Use Case |
 |----------|-----------------|-------------------|
 | **Auth** | `POST /api/internal/login` | Authenticate before any API call |
 | **Devices** | `GET/POST/PUT/DELETE /api/urdevices` | List sensors, add/remove sensors |

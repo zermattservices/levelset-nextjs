@@ -274,7 +274,7 @@ Applications group devices for data transmission. Each application can have one 
 1. Navigate to Network Server > Applications
 2. Click "+" to add a new application
 3. Fill in:
-   - **Name**: Application name (e.g., "Levelset Sensors")
+   - **Name**: Application name (e.g., "SensorCo Sensors")
    - **Description**: Optional description
    - **Metadata**: Optional checkboxes for including devEUI, deviceName, applicationID, gatewayTime, cellularIP in payloads
 
@@ -448,7 +448,7 @@ Built-in test functionality:
 | ClassCB-ABP | ABP | A + B + C |
 | ClassCB-OTAA | OTAA | A + B + C |
 
-**For Levelset temperature sensors**: Use **ClassA-OTAA** (the EM320-TH is Class A with OTAA join).
+**For SensorCo temperature sensors**: Use **ClassA-OTAA** (the EM320-TH is Class A with OTAA join).
 
 ### 7.2 Profile Settings
 
@@ -758,7 +758,7 @@ This is the end-to-end procedure for setting up a UG65 to receive data from EM32
 
 1. Go to **Network Server > Applications**
 2. Click "+" to add a new application
-3. Enter **Name**: e.g., "Levelset Sensors"
+3. Enter **Name**: e.g., "SensorCo Sensors"
 4. Enter **Description**: e.g., "Temperature monitoring"
 5. Optionally enable **Metadata** checkboxes (devEUI, deviceName recommended)
 6. Click **Save**
@@ -786,11 +786,11 @@ This is the end-to-end procedure for setting up a UG65 to receive data from EM32
    - Upload CA File, Client Certificate File, Client Key File
    - SSL Secure: Checked
 8. Configure **Topics**:
-   - Uplink data: `/levelset/{orgId}/{locationId}/uplink` — QoS 1, Retain off
-   - Downlink data: `/levelset/{orgId}/{locationId}/downlink` — QoS 1
-   - Join notification: `/levelset/{orgId}/{locationId}/join` — QoS 0
-   - ACK notification: `/levelset/{orgId}/{locationId}/ack` — QoS 0
-   - Error notification: `/levelset/{orgId}/{locationId}/error` — QoS 0
+   - Uplink data: `/sensorco/{customerId}/{locationId}/uplink` — QoS 1, Retain off
+   - Downlink data: `/sensorco/{customerId}/{locationId}/downlink` — QoS 1
+   - Join notification: `/sensorco/{customerId}/{locationId}/join` — QoS 0
+   - ACK notification: `/sensorco/{customerId}/{locationId}/ack` — QoS 0
+   - Error notification: `/sensorco/{customerId}/{locationId}/error` — QoS 0
 9. Click **Save**
 
 #### Step 6: Add End Devices (Sensors)
@@ -804,7 +804,7 @@ For each EM320-TH sensor:
    - **Description**: Optional
    - **Device EUI**: 16-char hex from sensor label
    - **Device-Profile**: ClassA-OTAA
-   - **Application**: Select "Levelset Sensors"
+   - **Application**: Select "SensorCo Sensors"
    - **Payload Codec**: Select EM320-TH model from dropdown
    - **fPort**: 85
    - **Application Key**: Default Value (uses `5572404C696E6B4C6F52613230313823`)

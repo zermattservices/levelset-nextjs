@@ -10,16 +10,16 @@ Two phases:
 
 ### Goal
 
-Ship a fully pre-configured kit. Sensors paired to gateway, Tailscale installed, HTTP POST endpoint configured. The customer's only job is plug in the gateway, open the Levelset app, connect WiFi, and place sensors.
+Ship a fully pre-configured kit. Sensors paired to gateway, Tailscale installed, HTTP POST endpoint configured. The customer's only job is plug in the gateway, open the SensorCo app (or partner app like Levelset), connect WiFi, and place sensors.
 
 ### Step 1: Receive and Label Hardware
 
 1. Receive sensors and gateway from Milesight
 2. **Engrave or label each sensor** with the customer's chosen names (e.g., "Walk-In Cooler", "Freezer #1", "Prep Line Reach-In")
-   - Customer provides sensor names during ordering (in the Levelset app or order form)
+   - Customer provides sensor names during ordering (in the SensorCo app or order form)
    - Use a label maker or engraving service for durability
 3. Record each sensor's **DevEUI** (printed on the sensor label/box) and map it to the customer's name
-4. Store this mapping in Supabase: `sensor_devices` table with `{ dev_eui, name, org_id, location_id }`
+4. Store this mapping in SensorCo's Supabase: `sensor_devices` table with `{ dev_eui, name, customer_id, location_id }`
 
 ### Step 2: Configure Sensors via ToolBox App (~8 min for 15 sensors)
 
@@ -36,15 +36,15 @@ For the first sensor:
    - **Data Retransmission**: Enabled (default)
    - **Password**: Change from default `123456` to a secure password
 4. Tap **Write** to save
-5. Tap **Set Template** → name it (e.g., "Levelset Standard")
+5. Tap **Set Template** → name it (e.g., "SensorCo Standard")
 
 For all remaining sensors:
 1. Go to **Device → Template** in ToolBox
-2. Select "Levelset Standard" template
+2. Select "SensorCo Standard" template
 3. Hold phone to sensor → tap **Write**
 4. ~10 seconds per sensor
 
-**This is the only time NFC/physical access is ever needed.** After shipping, all config changes happen remotely via downlink commands through the Levelset dashboard.
+**This is the only time NFC/physical access is ever needed.** After shipping, all config changes happen remotely via downlink commands through the SensorCo dashboard.
 
 ### Step 3: Configure Gateway
 
@@ -60,7 +60,7 @@ For all remaining sensors:
 
 1. **Packet Forwarder → General**: Enable localhost server, Save & Apply
 2. **Network Server → General**: Enable, Save & Apply
-3. **Network Server → Applications**: Create application "Levelset Sensors"
+3. **Network Server → Applications**: Create application "SensorCo"
 4. **Network Server → Profiles**: Create device profile — OTAA, Class A
 
 #### 3c. Add All Sensors to the Gateway
@@ -73,11 +73,11 @@ For each sensor:
 4. Select the device profile and application
 5. Set a **device name** matching the customer's label (e.g., "walk-in-cooler-1")
 
-#### 3d. Configure HTTP POST to Levelset API
+#### 3d. Configure HTTP POST to SensorCo API
 
 1. In the application settings, add a **Data Transmission** integration:
    - **Type**: HTTP
-   - **URL**: `https://app.levelset.io/api/sensors/ingest`
+   - **URL**: `https://api.sensorco.com/api/sensors/ingest`
    - **Auth**: API key header (pre-generated for this location)
    - **Payload Codec**: Enabled (decoded JSON output)
 2. Save and Apply
@@ -94,7 +94,7 @@ For each sensor:
 2. Wait ~2-5 minutes for each to send a Join Request
 3. Check **Network Server → Devices** — all sensors should show "Activated"
 4. Check **Network Server → Packets** to verify uplink data arriving
-5. Check the Levelset dashboard — sensor readings should appear within 10 minutes
+5. Check the SensorCo dashboard — sensor readings should appear within 10 minutes
 
 ### Step 4: Install Tailscale on Gateway
 
@@ -146,14 +146,14 @@ Then on the gateway:
 
 #### 4e. Record Tailscale IP
 
-The gateway now has a stable Tailscale IP (100.x.y.z). Record this in Supabase `sensor_gateways` table. This IP is used by the Levelset API to SSH into the gateway for remote management.
+The gateway now has a stable Tailscale IP (100.x.y.z). Record this in Supabase SensorCo's `sensor_gateways` table. This IP is used by the SensorCo API to SSH into the gateway for remote management.
 
 ### Step 5: Final Verification
 
 Before shipping, confirm:
 
 1. All sensors show "Activated" in the gateway network server
-2. Gateway is HTTP POSTing data to the Levelset API (check dashboard for readings)
+2. Gateway is HTTP POSTing data to the SensorCo API (check dashboard for readings)
 3. Tailscale shows the gateway online (`/usr/local/sbin/tailscale-gw status`)
 4. You can SSH into the gateway over Tailscale from your laptop
 5. Gateway REST API responds at `http://100.x.y.z:8080` over Tailscale
@@ -163,8 +163,8 @@ Before shipping, confirm:
 - Place all sensors in individual bags, labeled with their names
 - Include the gateway with power adapter
 - Include a **setup card** (laminated, one page) with:
-  - QR code linking to the Levelset app setup wizard
-  - Simple instruction: "Plug in gateway → Open Levelset app → Tap Setup Sensors → Connect WiFi"
+  - QR code linking to the SensorCo app (or partner app like Levelset) setup wizard
+  - Simple instruction: "Plug in gateway → Open SensorCo app (or partner app like Levelset) → Tap Setup Sensors → Connect WiFi"
   - Support phone number
 
 ---
@@ -181,11 +181,11 @@ Before shipping, confirm:
 
 Place the gateway in a central location (near the kitchen, within range of all sensors). Plug in the power adapter. Status LED turns on. The gateway broadcasts a WiFi hotspot (`Gateway_XXXXXX`).
 
-### Step 2: Connect Gateway to WiFi via Levelset App (3 minutes)
+### Step 2: Connect Gateway to WiFi via Mobile App (3 minutes)
 
-This is the critical UX flow built into the Levelset mobile app:
+This is the critical UX flow built into the SensorCo mobile app (or a partner app like Levelset):
 
-1. Open the Levelset app → navigate to **Temperature Monitoring → Setup Sensors**
+1. Open the SensorCo app (or partner app like Levelset) → navigate to **Temperature Monitoring → Setup Sensors**
 2. App detects the `Gateway_XXXXXX` WiFi network and prompts user to connect
 3. User taps to connect (app uses `react-native-wifi-reborn` or similar to auto-join with the pre-set password)
 4. App calls the gateway's internal WiFi API at `192.168.1.1` to scan for available networks
@@ -195,7 +195,7 @@ This is the critical UX flow built into the Levelset mobile app:
 8. Gateway switches from AP mode to Client mode — connects to restaurant WiFi
 9. App shows "Connected!" confirmation
 
-**After this point, the gateway AP hotspot disappears** — the gateway is now a regular device on the restaurant's WiFi. HTTP POST data starts flowing to Levelset, and Tailscale auto-connects for remote management.
+**After this point, the gateway AP hotspot disappears** — the gateway is now a regular device on the restaurant's WiFi. HTTP POST data starts flowing to SensorCo, and Tailscale auto-connects for remote management.
 
 See [11-gateway-api-reference.md](./11-gateway-api-reference.md) for the technical details on the WiFi configuration API.
 
@@ -208,7 +208,7 @@ Place each labeled sensor in its designated spot. Magnetic versions stick direct
 ### Post-Setup Verification
 
 Within 15-20 minutes:
-- The Levelset dashboard shows all sensors online with current readings
+- The SensorCo dashboard shows all sensors online with current readings
 - Push notification confirms "Your sensors are online"
 - If a sensor isn't reporting, it may be out of range — move closer to the gateway
 
@@ -216,13 +216,13 @@ Within 15-20 minutes:
 
 ## Remote Sensor Configuration (Post-Setup)
 
-After deployment, all sensor configuration changes happen through the Levelset dashboard. **No one at the restaurant needs to do anything.**
+After deployment, all sensor configuration changes happen through the SensorCo dashboard. **No one at the restaurant needs to do anything.**
 
 ### How It Works
 
-1. Manager opens Levelset dashboard → Temperature Monitoring → Sensor Settings
+1. Manager opens SensorCo dashboard → Temperature Monitoring → Sensor Settings
 2. Changes a threshold (e.g., Walk-In Cooler max temp from 8°C to 6°C)
-3. Levelset API sends the downlink command to the gateway over Tailscale:
+3. SensorCo API sends the downlink command to the gateway over Tailscale:
    - SSH into gateway at `100.x.y.z`, OR
    - HTTP POST to gateway REST API at `http://100.x.y.z:8080/api/urdevices/{devEUI}/downlink`
 4. Gateway queues the downlink command
@@ -258,7 +258,7 @@ These are set once during pre-shipping and never need to change in the field.
 
 | What | How |
 |------|-----|
-| Check if sensor is reporting | Query `sensor_readings` in Supabase — last timestamp per DevEUI |
+| Check if sensor is reporting | Query SensorCo's `sensor_readings` in Supabase — last timestamp per DevEUI |
 | Check battery level | Battery % included in every uplink reading |
 | Check signal strength | RSSI/SNR included in every uplink reading |
 | Check gateway status | SSH into gateway over Tailscale, or check Tailscale admin panel |
@@ -277,7 +277,7 @@ These are set once during pre-shipping and never need to change in the field.
 | Battery dying | Battery % dropping below 20% | Alert customer to replace batteries (ER14505 Li-SOCl2, ~$3 each, 2 per sensor) |
 | Temperature spike | Alert fires in dashboard | Query historical data to determine if brief spike or sustained issue |
 | All sensors at one location offline | No data from any sensor | Gateway likely lost internet — SSH in to check WiFi status. May need customer to restart router |
-| Sensor reading inaccurate | Temperature doesn't match expectations | Apply software-side calibration offset in Levelset (preferred over NFC recalibration) |
+| Sensor reading inaccurate | Temperature doesn't match expectations | Apply software-side calibration offset in SensorCo dashboard (preferred over NFC recalibration) |
 | Gateway unreachable via Tailscale | Can't SSH in | Gateway lost internet or Tailscale crashed. Customer needs to check gateway power/internet. Last resort: factory reset and re-provision |
 
 ### What Requires Customer Action
@@ -285,9 +285,9 @@ These are set once during pre-shipping and never need to change in the field.
 Only two scenarios require someone at the restaurant to physically do something:
 
 1. **Battery replacement** (~every 5-10 years) — swap two ER14505 batteries
-2. **Gateway WiFi password changed** — reconnect gateway to new WiFi (open Levelset app → Setup Sensors flow again)
+2. **Gateway WiFi password changed** — reconnect gateway to new WiFi (open SensorCo app (or partner app like Levelset) → Setup Sensors flow again)
 
-Everything else is handled remotely through the Levelset dashboard and Tailscale.
+Everything else is handled remotely through the SensorCo dashboard and Tailscale.
 
 ---
 
@@ -295,7 +295,7 @@ Everything else is handled remotely through the Levelset dashboard and Tailscale
 
 ### ACL Configuration
 
-Gateways can only reach the Levelset server, not each other:
+Gateways can only reach the SensorCo server, not each other:
 
 ```json
 {

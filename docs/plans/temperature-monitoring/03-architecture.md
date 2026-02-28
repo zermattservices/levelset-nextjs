@@ -4,11 +4,12 @@
 
 These are locked in based on our research and operational requirements:
 
-1. **Data transport**: Gateway HTTP POSTs decoded JSON to Levelset API — no MQTT broker, no InfluxDB, no self-hosted infrastructure
+1. **Data transport**: Gateway HTTP POSTs decoded JSON to SensorCo API — no MQTT broker, no InfluxDB, no self-hosted infrastructure
 2. **Remote management**: Tailscale on every gateway for SSH access — used on-demand for remote config changes and troubleshooting
 3. **Sensor config**: All sensor configuration changes happen remotely via downlink commands sent through the gateway's REST API over Tailscale — zero on-site technical work
-4. **Customer setup**: Native mobile app flow — user plugs in gateway, opens Levelset app, connects gateway to WiFi through a native UI
-5. **Storage**: Supabase Postgres for everything — sensor readings, device registry, alert rules, alert history
+4. **Customer setup**: Native mobile app flow — user plugs in gateway, opens SensorCo app (or partner app like Levelset), connects gateway to WiFi through a native UI
+5. **Storage**: SensorCo's own Supabase Postgres for everything — sensor readings, device registry, alert rules, alert history
+6. **Partner integration**: SensorCo exposes a REST API for partners like Levelset to read sensor data, configure alerts, and manage devices within their own applications
 
 ## End-to-End Data Flow
 
@@ -30,12 +31,13 @@ EM320-TH Sensors ──(LoRaWAN 915MHz)──> UG65 Gateway
                                     └───────┬────────┘
                                             │
                                     ┌───────┴────────┐
-                                    │ Levelset API    │
+                                    │ SensorCo API    │
                                     │ /api/sensors/   │
                                     │   ingest        │
                                     └───────┬────────┘
                                             │
                                     ┌───────┴────────┐
+                                    │ SensorCo        │
                                     │ Supabase        │
                                     │ Postgres        │
                                     │ (sensor_readings│
@@ -46,20 +48,22 @@ EM320-TH Sensors ──(LoRaWAN 915MHz)──> UG65 Gateway
                               ┌─────────────┼─────────────┐
                               │             │             │
                         ┌─────┴─────┐ ┌────┴────┐ ┌─────┴─────┐
-                        │ Dashboard  │ │ Alerts  │ │ Mobile    │
-                        │ (Levelset) │ │ Engine  │ │ App       │
-                        └───────────┘ └─────────┘ └───────────┘
+                        │ SensorCo  │ │ Alerts  │ │ Partner   │
+                        │ Dashboard │ │ Engine  │ │ API       │
+                        └───────────┘ └─────────┘ │(Levelset  │
+                                                  │ etc.)     │
+                                                  └───────────┘
 ```
 
 ## Remote Management Flow (Separate from Data)
 
 ```
-Levelset Dashboard / API
+SensorCo Dashboard / Partner Dashboard
     │
     │ (user changes sensor threshold or config)
     │
     ▼
-Levelset API Route (/api/sensors/config)
+SensorCo API Route (/api/sensors/config)
     │
     │ (SSH over Tailscale to gateway at 100.x.y.z)
     │ (or HTTP to gateway REST API at 100.x.y.z:8080)
@@ -114,11 +118,11 @@ The gateway transforms raw binary like `01 75 5C 03 67 34 01 04 68 65` into:
 }
 ```
 
-### Layer 3: Gateway → Levelset API (HTTP POST)
+### Layer 3: Gateway → SensorCo API (HTTP POST)
 
-The gateway HTTP POSTs decoded JSON to `https://app.levelset.io/api/sensors/ingest` over standard HTTPS (port 443). This works through any restaurant firewall — it's just an outbound HTTPS request, same as loading a web page.
+The gateway HTTP POSTs decoded JSON to `https://api.sensorco.com/api/sensors/ingest` over standard HTTPS (port 443). This works through any restaurant firewall — it's just an outbound HTTPS request, same as loading a web page.
 
-**What Levelset receives**:
+**What SensorCo receives**:
 ```json
 {
   "applicationID": 1,
@@ -141,9 +145,9 @@ The gateway HTTP POSTs decoded JSON to `https://app.levelset.io/api/sensors/inge
 ```
 
 **Gateway configuration** (pre-shipping, in web UI):
-1. Network Server → Applications → create "Levelset Sensors"
+1. Network Server → Applications → create "SensorCo"
 2. Data Transmission → set Type: HTTP
-3. Set URL: `https://app.levelset.io/api/sensors/ingest`
+3. Set URL: `https://api.sensorco.com/api/sensors/ingest`
 4. Set Auth: API key header (unique per location)
 5. Enable Payload Codec for decoded JSON output
 
@@ -167,19 +171,20 @@ Tailscale is installed on every gateway **solely for remote management** — SSH
 - Sensor data (flows over standard HTTPS)
 - Dashboard queries (standard Supabase)
 
-### Layer 5: Supabase (Storage + Auth)
+### Layer 5: SensorCo Supabase (Storage + Auth)
 
-All data lives in Supabase Postgres:
+SensorCo has its own Supabase project, separate from Levelset's. All sensor data lives here.
 
 **Tables** (see [05-integration-options.md](./05-integration-options.md) for full schemas):
 
 | Table | Purpose |
 |-------|---------|
-| `sensor_devices` | Device registry — maps DevEUI to sensor name, org, location |
+| `sensor_devices` | Device registry — maps DevEUI to sensor name, customer, location |
 | `sensor_gateways` | Gateway registry — Tailscale IP, firmware version, status |
 | `sensor_readings` | Time-series data — temperature, humidity, battery, RSSI per reading |
 | `sensor_alert_rules` | Configurable thresholds per sensor |
 | `sensor_alerts` | Alert history — when thresholds were breached |
+| `customers` | SensorCo's customer registry (Levelset, direct customers, etc.) |
 
 ### Layer 6: Alerting
 
@@ -188,25 +193,34 @@ On every ingest, the API route checks the sensor's configured thresholds:
 1. Gateway POSTs reading to `/api/sensors/ingest`
 2. API inserts into `sensor_readings`
 3. API queries `sensor_alert_rules` for this sensor's thresholds
-4. If temperature > max or < min → insert into `sensor_alerts` + send push notification
+4. If temperature > max or < min → insert into `sensor_alerts` + send notification
 5. Dashboard shows active alerts with acknowledgment workflow
 
 Alert delivery:
 - Push notification via mobile app
 - Email (optional)
 - SMS (optional, via Twilio)
+- Webhook to partner systems (e.g., Levelset can receive alert webhooks)
 - Dashboard banner/badge
 
-### Layer 7: Dashboard + Mobile App
+### Layer 7: Dashboard + Partner API + Mobile App
 
-**Dashboard** (web):
+**SensorCo Dashboard** (web):
 - Temperature charts per sensor (Recharts or similar)
 - Current status grid — all sensors at a glance with color-coded status
 - Alert configuration — set thresholds per sensor
 - Compliance log export (CSV/PDF for health department audits)
 - Sensor management — rename, disable, view history
+- Customer management (multi-tenant)
 
-**Mobile app** (Expo/React Native):
+**Partner API** (for Levelset and other partners):
+- REST API with API key or OAuth authentication
+- Read sensor data, alerts, device status
+- Configure thresholds and alert rules
+- Webhooks for real-time alert delivery
+- Partners embed SensorCo data into their own dashboards
+
+**Mobile app** (SensorCo's own, or integrated into partner apps):
 - WiFi setup flow for new gateways (see [04-provisioning-and-setup.md](./04-provisioning-and-setup.md))
 - Push notification alerts
 - Quick status view — all sensors with current readings
@@ -218,11 +232,11 @@ Alert delivery:
 
 | Component | Why Not |
 |-----------|---------|
-| MQTT broker (Mosquitto) | Gateway posts directly to Levelset API via HTTP |
+| MQTT broker (Mosquitto) | Gateway posts directly to SensorCo API via HTTP |
 | Telegraf | No MQTT → InfluxDB pipeline needed |
 | InfluxDB | Supabase Postgres handles the volume at launch; add later if needed |
-| Grafana | Dashboard built natively in Levelset |
-| Self-hosted server (Hetzner) | Everything runs on Vercel + Supabase (existing infra) |
+| Grafana | Dashboard built natively in SensorCo's app |
+| Self-hosted server (Hetzner) | Everything runs on Vercel + Supabase |
 | ChirpStack / TTN | Gateway has built-in network server |
 | VPN for data transport | Standard HTTPS from gateway to API |
 
