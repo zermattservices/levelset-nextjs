@@ -158,7 +158,7 @@ export function EmailTemplatesPage() {
     <div className={styles.container}>
       {/* Header */}
       <div className={styles.intro}>
-        <h2 className={styles.title}>Email Templates</h2>
+        <h1 className={styles.title}>Email Templates</h1>
         <p className={styles.description}>
           Manage email template metadata, toggle active status, and review template details.
         </p>

@@ -270,7 +270,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
     <div className={styles.container}>
       {/* Header */}
       <div className={styles.intro}>
-        <h2 className={styles.title}>Leads</h2>
+        <h1 className={styles.title}>Leads</h1>
         <p className={styles.description}>
           Track and manage all inbound marketing leads through the pipeline.
         </p>
@@ -348,18 +348,18 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
             fontSize: 14,
             '& .MuiDataGrid-columnHeaders': {
               backgroundColor: '#fafafa',
-              borderBottom: '1px solid #e5e5e5',
+              borderBottom: '1px solid #e8e8ec',
             },
             '& .MuiDataGrid-columnHeaderTitle': {
               fontFamily: '"Satoshi", sans-serif',
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: 600,
-              color: '#666',
+              color: '#999',
               textTransform: 'uppercase',
-              letterSpacing: '0.5px',
+              letterSpacing: '0.05em',
             },
             '& .MuiDataGrid-cell': {
-              borderBottom: '1px solid #f0f0f0',
+              borderBottom: '1px solid #f5f5f7',
               padding: '0 16px',
             },
             '& .MuiDataGrid-row': {
@@ -369,7 +369,7 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
               },
             },
             '& .MuiDataGrid-footerContainer': {
-              borderTop: '1px solid #e5e5e5',
+              borderTop: '1px solid #e8e8ec',
             },
             '& .MuiTablePagination-root': {
               fontFamily: '"Satoshi", sans-serif',

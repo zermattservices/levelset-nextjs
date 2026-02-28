@@ -200,8 +200,8 @@ export function AdminLocationsPage() {
         )}
 
         {/* Main content with sidebar */}
-        <div className={`${styles.mainContent} ${activeSection === 'task-board' ? styles.mainContentFullWidth : ''}`}>
-          <div className={`${styles.contentContainer} ${activeSection === 'task-board' ? styles.contentContainerFullWidth : ''}`}>
+        <div className={classNames(styles.mainContent, activeSection === 'task-board' && styles.mainContentCompact)}>
+          <div className={classNames(styles.contentContainer, activeSection === 'task-board' && styles.contentContainerCompact)}>
             <AdminModeSidebar
               activeSection={activeSection}
               onSectionChange={setActiveSection}

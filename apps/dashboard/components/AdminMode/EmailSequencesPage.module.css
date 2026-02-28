@@ -19,7 +19,7 @@
 .loadingText {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
-  color: #6b7280;
+  color: #888;
 }
 
 /* ─── Header ─────────────────────────────────────────────────────────────── */
@@ -28,21 +28,21 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .title {
   font-family: "Mont", system-ui, sans-serif;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #0d1b14;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 
 .subtitle {
   font-family: "Satoshi", system-ui, sans-serif;
-  font-size: 15px;
-  color: #666;
+  font-size: 14px;
+  color: #888;
   margin: 0;
 }
 
@@ -52,31 +52,52 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .summaryCard {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 24px;
-  background-color: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: 16px;
+  gap: 6px;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border: 1px solid #e8e8ec;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.summaryCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background-color: var(--ls-color-brand-base, #31664A);
+  border-radius: 3px 0 0 3px;
+}
+
+.summaryCard:nth-child(2)::before {
+  background-color: #4CAF50;
+}
+
+.summaryCard:nth-child(3)::before {
+  background-color: #2196F3;
 }
 
 .summaryLabel {
   font-family: "Satoshi", system-ui, sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: #666;
+  color: #888;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .summaryValue {
   font-family: "Mont", system-ui, sans-serif;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   color: #0d1b14;
   line-height: 1.1;
@@ -93,9 +114,9 @@
 /* ─── Sequence Card ──────────────────────────────────────────────────────── */
 
 .sequenceCard {
-  background-color: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: 16px;
+  background-color: #ffffff;
+  border: 1px solid #e8e8ec;
+  border-radius: 14px;
   overflow: hidden;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -105,8 +126,8 @@
 }
 
 .sequenceCardExpanded {
-  border-color: #d1d5db;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-color: var(--ls-color-brand-base, #31664A);
+  box-shadow: 0 0 0 1px var(--ls-color-brand-base, #31664A);
 }
 
 .sequenceCardInactive {
@@ -123,7 +144,7 @@
 }
 
 .sequenceHeader:hover {
-  background-color: #f5f5f5;
+  background-color: #fafafa;
 }
 
 .sequenceInfo {
@@ -164,13 +185,13 @@
 
 .stepCountDetail {
   font-weight: 400;
-  color: #999;
+  color: #aaa;
 }
 
 .sequenceDate {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
-  color: #999;
+  color: #aaa;
 }
 
 .sequenceActions {
@@ -202,14 +223,14 @@
 
 .stepsDivider {
   height: 1px;
-  background-color: #e5e5e5;
+  background-color: #e8e8ec;
   margin-bottom: 20px;
 }
 
 .noSteps {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
-  color: #999;
+  color: #aaa;
   text-align: center;
   padding: 16px 0;
   margin: 0;
@@ -245,7 +266,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background-color: var(--ls-color-brand, #31664A);
+  background-color: var(--ls-color-brand-base, #31664A);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -264,7 +285,7 @@
   width: 2px;
   flex: 1;
   min-height: 24px;
-  background-color: #e5e5e5;
+  background-color: #e8e8ec;
 }
 
 /* Step content */
@@ -300,7 +321,7 @@
 .stepDelay {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
-  color: #666;
+  color: #888;
 }
 
 .stepToggle {
@@ -316,15 +337,15 @@
   justify-content: center;
   padding: 48px;
   text-align: center;
-  background-color: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: 16px;
+  background-color: #ffffff;
+  border: 1px solid #e8e8ec;
+  border-radius: 14px;
 }
 
 .emptyStateText {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
-  color: #999;
+  color: #aaa;
   margin: 0;
 }
 
@@ -340,7 +361,7 @@
   }
 
   .summaryValue {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .sequenceHeader {

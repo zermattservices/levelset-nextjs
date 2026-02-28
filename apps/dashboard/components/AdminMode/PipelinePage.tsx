@@ -280,7 +280,7 @@ export function PipelinePage() {
         <div className={styles.funnel}>
           {STAGES.map((stage) => {
             const count = stageCounts[stage];
-            const pct = maxStageCount > 0 ? Math.max((count / maxStageCount) * 100, 2) : 2;
+            const pct = maxStageCount > 0 ? Math.max((count / maxStageCount) * 100, 4) : 4;
             const totalAll = leads.length || 1;
             const sharePct = Math.round((count / totalAll) * 100);
             return (
@@ -293,10 +293,14 @@ export function PipelinePage() {
                       width: `${pct}%`,
                       backgroundColor: STAGE_COLORS[stage],
                     }}
-                  />
+                  >
+                    {count > 0 && (
+                      <span className={styles.funnelBarCount}>{count}</span>
+                    )}
+                  </div>
                 </div>
                 <span className={styles.funnelCount}>
-                  {count} <span className={styles.funnelPct}>({sharePct}%)</span>
+                  <span className={styles.funnelPct}>{sharePct}%</span>
                 </span>
               </div>
             );

@@ -16,22 +16,20 @@
 .loadingText {
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
-  color: #666;
+  color: #888;
 }
 
 /* Header */
 .intro {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e5e5e5;
+  gap: 6px;
 }
 
 .title {
-  font-family: "Mont", "Satoshi", sans-serif;
-  font-size: 18px;
-  font-weight: 600;
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
   color: #0d1b14;
   margin: 0;
 }
@@ -39,13 +37,14 @@
 .description {
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
-  color: #666;
+  color: #888;
   margin: 0;
 }
 
 /* Summary cards */
 .summaryRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
 
@@ -53,15 +52,39 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 16px 24px;
-  background-color: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
-  min-width: 120px;
+  padding: 18px 24px;
+  background-color: #ffffff;
+  border: 1px solid #e8e8ec;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.summaryCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background-color: var(--ls-color-brand-base, #31664A);
+  border-radius: 3px 0 0 3px;
+}
+
+.summaryCard:nth-child(2)::before {
+  background-color: #4CAF50;
+}
+
+.summaryCard:nth-child(3)::before {
+  background-color: #7c3aed;
+}
+
+.summaryCard:nth-child(4)::before {
+  background-color: #2563eb;
 }
 
 .summaryValue {
-  font-family: "Mont", "Satoshi", sans-serif;
+  font-family: "Mont", system-ui, sans-serif;
   font-size: 24px;
   font-weight: 700;
   color: #0d1b14;
@@ -69,9 +92,11 @@
 
 .summaryLabel {
   font-family: "Satoshi", sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: #666;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Filter bar */
@@ -84,7 +109,7 @@
 
 .filterSelect {
   padding: 10px 36px 10px 14px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e8e8ec;
   border-radius: 8px;
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
@@ -100,13 +125,13 @@
 
 .filterSelect:focus {
   outline: none;
-  border-color: var(--ls-color-brand);
+  border-color: var(--ls-color-brand-base);
 }
 
 .filterCount {
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
-  color: #999;
+  color: #aaa;
 }
 
 /* Template card list */
@@ -118,22 +143,22 @@
 
 /* Individual card */
 .card {
-  background-color: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: 16px;
+  background-color: #ffffff;
+  border: 1px solid #e8e8ec;
+  border-radius: 14px;
   padding: 20px 24px;
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .card:hover {
-  border-color: #ccc;
+  border-color: #d1d5db;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .cardExpanded {
-  border-color: var(--ls-color-brand-base, #2e6b4a);
-  background-color: #ffffff;
+  border-color: var(--ls-color-brand-base, #31664A);
+  box-shadow: 0 0 0 1px var(--ls-color-brand-base, #31664A);
 }
 
 /* Card header */
@@ -158,7 +183,7 @@
 }
 
 .cardName {
-  font-family: "Mont", "Satoshi", sans-serif;
+  font-family: "Mont", system-ui, sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: #0d1b14;
@@ -175,7 +200,7 @@
 .cardPreview {
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
-  color: #999;
+  color: #aaa;
   margin: 0;
   line-height: 1.4;
 }
@@ -222,7 +247,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: #666;
+  color: #888;
   white-space: nowrap;
 }
 
@@ -233,21 +258,21 @@
   gap: 8px;
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #f0f0f2;
 }
 
 .slugLabel {
   font-family: "Satoshi", sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: #999;
+  color: #aaa;
 }
 
 .slugValue {
   font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
   font-size: 12px;
   color: #666;
-  background-color: #f3f4f6;
+  background-color: #f5f5f7;
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -256,7 +281,7 @@
 .cardDetails {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid #e8e8ec;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -270,11 +295,11 @@
 
 .detailLabel {
   font-family: "Satoshi", sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: #999;
+  color: #aaa;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.05em;
 }
 
 .detailValue {
@@ -304,13 +329,13 @@
 .emptyStateText {
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
-  color: #999;
+  color: #aaa;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .summaryRow {
-    flex-direction: column;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .summaryCard {
@@ -332,6 +357,12 @@
   }
 
   .detailDates {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .summaryRow {
     grid-template-columns: 1fr;
   }
 }

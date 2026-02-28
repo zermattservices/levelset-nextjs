@@ -21,21 +21,21 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .title {
   font-family: "Mont", system-ui, sans-serif;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  color: #111827;
-  margin: 0 0 8px;
+  color: #0d1b14;
+  margin: 0 0 6px;
 }
 
 .subtitle {
   font-family: "Satoshi", system-ui, sans-serif;
-  font-size: 15px;
-  color: #6b7280;
+  font-size: 14px;
+  color: #888;
   margin: 0;
 }
 
@@ -45,51 +45,76 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .summaryCard {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 24px;
-  background-color: #fafafa;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
+  gap: 6px;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border: 1px solid #e8e8ec;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.summaryCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background-color: var(--ls-color-brand-base, #31664A);
+  border-radius: 3px 0 0 3px;
+}
+
+.summaryCard:nth-child(2)::before {
+  background-color: #2196F3;
+}
+
+.summaryCard:nth-child(3)::before {
+  background-color: #4CAF50;
+}
+
+.summaryCard:nth-child(4)::before {
+  background-color: #FF9800;
 }
 
 .summaryLabel {
   font-family: "Satoshi", system-ui, sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: #6b7280;
+  color: #888;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .summaryValue {
   font-family: "Mont", system-ui, sans-serif;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  color: #111827;
+  color: #0d1b14;
   line-height: 1.1;
 }
 
 /* ─── Card Container ──────────────────────────────────────────────────────── */
 
 .card {
-  background-color: #fafafa;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
+  background-color: #ffffff;
+  border: 1px solid #e8e8ec;
+  border-radius: 14px;
   padding: 24px;
   margin-bottom: 24px;
 }
 
 .cardTitle {
   font-family: "Mont", system-ui, sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  color: #111827;
+  color: #0d1b14;
   margin: 0 0 20px;
 }
 
@@ -98,52 +123,65 @@
 .funnel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .funnelRow {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .funnelLabel {
   font-family: "Satoshi", system-ui, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #374151;
-  min-width: 100px;
+  color: #555;
+  min-width: 90px;
   text-align: right;
 }
 
 .funnelBarTrack {
   flex: 1;
-  height: 32px;
-  background-color: #f3f4f6;
+  height: 36px;
+  background-color: #f5f5f7;
   border-radius: 8px;
   overflow: hidden;
+  position: relative;
 }
 
 .funnelBar {
   height: 100%;
   border-radius: 8px;
-  transition: width 0.4s ease;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 4px;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+}
+
+.funnelBarCount {
+  font-family: "Mont", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
 }
 
 .funnelCount {
   font-family: "Satoshi", system-ui, sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  color: #111827;
-  min-width: 80px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0d1b14;
+  min-width: 70px;
   text-align: left;
 }
 
 .funnelPct {
   font-weight: 400;
-  color: #9ca3af;
-  font-size: 13px;
+  color: #aaa;
+  font-size: 12px;
 }
 
 /* ─── Stage-to-Stage Conversion ───────────────────────────────────────────── */
@@ -151,7 +189,7 @@
 .conversions {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .conversionRow {
@@ -164,7 +202,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 260px;
+  min-width: 240px;
 }
 
 .conversionStageBadge {
@@ -179,8 +217,8 @@
 }
 
 .conversionArrow {
-  font-size: 18px;
-  color: #9ca3af;
+  font-size: 16px;
+  color: #ccc;
   flex-shrink: 0;
 }
 
@@ -194,25 +232,25 @@
 .conversionRateTrack {
   flex: 1;
   height: 8px;
-  background-color: #f3f4f6;
+  background-color: #f5f5f7;
   border-radius: 4px;
   overflow: hidden;
 }
 
 .conversionRateFill {
   height: 100%;
-  background-color: var(--ls-color-brand, #31664A);
+  background-color: var(--ls-color-brand-base, #31664A);
   border-radius: 4px;
-  transition: width 0.4s ease;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 2px;
 }
 
 .conversionRateValue {
   font-family: "Mont", system-ui, sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  color: #111827;
-  min-width: 48px;
+  color: #0d1b14;
+  min-width: 44px;
   text-align: right;
 }
 
@@ -254,12 +292,12 @@
 .table th {
   text-align: left;
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: #6b7280;
+  color: #999;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-bottom: 1px solid #e5e7eb;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e8e8ec;
 }
 
 .table th:not(:first-child) {
@@ -269,8 +307,8 @@
 .table td {
   padding: 10px 12px;
   font-size: 14px;
-  color: #111827;
-  border-bottom: 1px solid #f3f4f6;
+  color: #0d1b14;
+  border-bottom: 1px solid #f5f5f7;
 }
 
 .table td:not(:first-child) {
@@ -297,12 +335,12 @@
 }
 
 .totalRow {
-  border-top: 2px solid #e5e7eb;
+  border-top: 2px solid #e8e8ec;
 }
 
 .totalRow td {
   font-weight: 700;
-  color: #111827;
+  color: #0d1b14;
   padding-top: 14px;
 }
 
@@ -326,8 +364,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background-color: #fff;
-  border: 1px solid #f3f4f6;
+  background-color: #fafafa;
+  border: 1px solid #f0f0f0;
   border-radius: 8px;
 }
 
@@ -339,10 +377,10 @@
 
 .lostCount {
   font-family: "Mont", system-ui, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
-  color: #F44336;
-  background-color: #FEF2F2;
+  color: #dc2626;
+  background-color: #fef2f2;
   padding: 2px 10px;
   border-radius: 100px;
 }
@@ -363,7 +401,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #f5f5f7;
 }
 
 .activityItem:last-child {
@@ -374,7 +412,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: var(--ls-color-brand, #31664A);
+  background-color: var(--ls-color-brand-base, #31664A);
   flex-shrink: 0;
 }
 
@@ -390,13 +428,13 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  color: #0d1b14;
 }
 
 .activityLead {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
-  color: #6b7280;
+  color: #888;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -405,7 +443,7 @@
 .activityTime {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 12px;
-  color: #9ca3af;
+  color: #aaa;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -413,7 +451,7 @@
 .emptyState {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
-  color: #9ca3af;
+  color: #aaa;
   text-align: center;
   padding: 20px 0;
   margin: 0;
@@ -434,7 +472,7 @@
 
   .funnelLabel {
     min-width: 80px;
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .funnelCount {
@@ -463,7 +501,7 @@
   }
 
   .summaryValue {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .card {

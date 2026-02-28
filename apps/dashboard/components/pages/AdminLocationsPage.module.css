@@ -27,9 +27,12 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  max-width: var(--ls-max-content-width);
   padding-bottom: 16px;
   border-bottom: 1px solid #e5e5e5;
+}
+
+.headerContentConstrained {
+  max-width: var(--ls-max-content-width);
 }
 
 .headerTextContainer {
@@ -75,10 +78,13 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  max-width: var(--ls-max-content-width);
   gap: 32px;
   height: 100%;
   min-height: 0;
+}
+
+.contentContainerConstrained {
+  max-width: var(--ls-max-content-width);
 }
 
 .contentArea {
@@ -125,14 +131,13 @@
   color: #999;
 }
 
-/* Full-width modifiers for Task Board */
-.contentContainerFullWidth {
-  max-width: none;
-  gap: 16px;
+/* Compact padding for Task Board */
+.mainContentCompact {
+  padding: 8px 16px;
 }
 
-.mainContentFullWidth {
-  padding: 8px 16px;
+.contentContainerCompact {
+  gap: 16px;
 }
 
 /* Access Denied styles */
