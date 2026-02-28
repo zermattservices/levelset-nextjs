@@ -1,268 +1,212 @@
-# Cloud-Hosted Architecture — Eliminating Self-Managed Infrastructure
+# Cloud-Hosted Architecture — Final Decision
 
-## Key Insight: Tailscale Is Not Required
+## Architecture Summary
 
-The UG65 gateway natively supports **MQTT over TLS** and **HTTP POST** to any cloud endpoint. Tailscale was one approach to simplify networking, but the gateway can connect directly to cloud-hosted brokers or APIs over standard internet — no VPN tunnel needed.
+```
+DATA PATH (standard internet):
+  Gateway ──(HTTP POST over HTTPS)──> Levelset API ──> Supabase Postgres
 
-The gateway's built-in capabilities:
-- **MQTT client**: Publish to any MQTT broker with TLS (port 8883)
-- **HTTP POST**: Send decoded JSON payloads to any HTTPS endpoint
-- **Node-RED**: Built-in edge processing for data transformation before forwarding
-- **Built-in LoRaWAN Network Server**: No external LoRaWAN infrastructure needed
+MANAGEMENT PATH (Tailscale):
+  Levelset API ──(SSH/REST over Tailscale)──> Gateway ──(downlink)──> Sensors
+```
 
-This means the entire backend can be cloud-hosted with zero self-managed servers.
+**Data transport**: Gateway HTTP POSTs decoded JSON to the Levelset API over standard HTTPS. No MQTT broker, no InfluxDB, no self-hosted server. Works through any firewall — it's just an outbound HTTPS request.
+
+**Remote management**: Tailscale on every gateway for SSH access and REST API calls. Used on-demand to send downlink commands (config changes) and troubleshoot. Not involved in data transport.
+
+**Storage**: Supabase Postgres for everything — already paid for, no additional infrastructure.
+
+**Customer WiFi setup**: Native flow in the Levelset mobile app using the gateway's internal WiFi API (see [11-gateway-api-reference.md](./11-gateway-api-reference.md)).
 
 ---
 
-## Architecture Options
+## Why This Architecture
 
-### Option A: Gateway → Levelset API Route (Simplest)
+### What We Considered and Rejected
 
-```
-EM320-TH sensors
-    | (LoRaWAN)
-    v
-UG65 Gateway (built-in network server + payload codec)
-    | (HTTP POST, decoded JSON, over HTTPS)
-    v
-Levelset API Route (Next.js /api/sensors/ingest)
-    | (validate + insert)
-    v
-Supabase Postgres (sensor_readings table)
-    | (query from dashboard)
-    v
-Levelset Dashboard (charts, alerts, compliance reports)
-```
+| Option | Why Rejected |
+|--------|-------------|
+| **Self-hosted Mosquitto + InfluxDB + Grafana** (doc 08) | Unnecessary server to manage. Gateway can POST directly to our API. |
+| **MQTT to cloud broker + InfluxDB Cloud** | Extra services and cost. Postgres handles the volume at our scale. |
+| **Milesight Development Platform** | Adds a middleman dependency for $83/mo. We can go direct. |
+| **AWS IoT Core** | Overkill complexity. $300/mo for something Supabase does. |
+| **Tailscale for data transport** | Not needed. Standard HTTPS works. Keep Tailscale for management only. |
+| **No Tailscale at all** | Need SSH access for remote sensor config and troubleshooting. No technical staff on-site. |
 
-**How it works**: The UG65 decodes LoRaWAN payloads using its built-in codec, then HTTP POSTs the decoded JSON directly to a Levelset API endpoint. The API route validates, stores in Supabase, and triggers alerts.
+### Why Gateway HTTP POST + Supabase Wins
 
-| Pros | Cons |
-|------|------|
-| Zero additional infrastructure | Supabase Postgres not optimized for time-series |
-| Fully integrated with Levelset | API route must handle high message volume |
-| Single codebase | No built-in downsampling or retention policies |
-| Cheapest option | Need to build charting/alerting from scratch |
-
-**Estimated cost**: ~$25-80/month (Supabase Pro plan, already paid for)
+1. **Zero additional infrastructure** — runs on Vercel + Supabase, which we already pay for
+2. **Single data store** — sensor readings, device config, alerts all in Postgres alongside existing Levelset data
+3. **Fully integrated** — no iframe embeds, no external dashboards, no separate auth systems
+4. **Simplest deployment** — one API route, one set of tables, one codebase
+5. **$0 incremental cost** at launch
 
 ---
 
-### Option B: Gateway → MQTT Broker → InfluxDB Cloud
+## Monthly Costs
 
-```
-EM320-TH sensors
-    | (LoRaWAN)
-    v
-UG65 Gateway (built-in network server)
-    | (MQTT over TLS, port 8883)
-    v
-HiveMQ Cloud / EMQX Cloud (managed MQTT broker)
-    | (rule engine or Telegraf bridge)
-    v
-InfluxDB Cloud (time-series storage)
-    | (Grafana Cloud or InfluxDB UI for dashboards)
-    v
-Levelset Dashboard (embedded Grafana panels or API queries)
-```
+### At Launch (10 locations, 150 sensors)
 
-**How it works**: Gateway publishes raw MQTT messages to a managed broker. A Telegraf instance or broker rule engine routes data to InfluxDB Cloud. Grafana Cloud provides dashboards, optionally embedded in Levelset.
+| Component | Monthly Cost |
+|-----------|-------------|
+| Vercel (already paid) | $0 |
+| Supabase Pro (already paid) | $0 |
+| Tailscale Free (100 devices) | $0 |
+| **Total additional infrastructure** | **$0** |
 
-| Pros | Cons |
-|------|------|
-| Purpose-built time-series storage | Multiple services to manage |
-| Native downsampling and retention | Monthly cost adds up |
-| Grafana dashboards are excellent | Integration with Levelset requires embedding |
-| Scales effortlessly | Customer data lives outside Supabase |
+### At 100 Locations (1,500 sensors)
 
-**Estimated cost at 1,000 locations**:
+| Component | Monthly Cost |
+|-----------|-------------|
+| Supabase (already paid, may need compute add-on) | ~$0-50 |
+| Tailscale Starter ($6/user × ~10 users) | ~$60 |
+| **Total** | **~$60-110** |
 
-| Service | Monthly Cost |
-|---------|-------------|
-| InfluxDB Cloud (usage-based) | ~$143 |
-| HiveMQ Cloud (Starter) | ~$52 |
-| Grafana Cloud (Pro) | ~$50 |
-| Telegraf (runs on any small VM or container) | ~$5-10 |
-| **Total** | **~$250-255/month** |
+### At 1,000 Locations (15,000 sensors)
+
+| Component | Monthly Cost |
+|-----------|-------------|
+| Supabase (compute add-on for query volume) | ~$100-200 |
+| Tailscale Enterprise (custom IoT pricing) | ~$500-800 |
+| **Total** | **~$600-1,000** |
+| **Revenue at $60/location** | **$60,000/mo** |
+| **SaaS gross margin** | **~98%** |
 
 ---
 
-### Option C: Gateway → Milesight Development Platform → Levelset
+## Data Volume Analysis
 
-```
-EM320-TH sensors
-    | (LoRaWAN)
-    v
-UG65 Gateway (built-in network server)
-    | (MQTT to Milesight cloud)
-    v
-Milesight Development Platform ($1/device/year)
-    | (REST API + webhooks)
-    v
-Levelset API Route (webhook receiver)
-    | (process + store)
-    v
-Supabase Postgres + Levelset Dashboard
-```
+At 1,000 locations with 15 sensors each, reporting every 10 minutes:
 
-**How it works**: The gateway forwards data to Milesight's Development Platform, which provides device management, data storage, and a REST API. Levelset receives data via webhooks and stores it in Supabase.
+| Metric | Value |
+|--------|-------|
+| Messages per second | 25 |
+| Rows per day | 2,160,000 |
+| Rows per month | ~64,800,000 |
+| Row size (estimated) | ~200 bytes |
+| Raw data per month | ~12 GB |
+| 90-day retention | ~36 GB |
 
-| Pros | Cons |
-|------|------|
-| $1/device/year — extremely cheap | Dependency on Milesight's platform |
-| Full REST API for device management | Extra hop adds latency |
-| Webhook push to any endpoint | Limited data retention on their side |
-| Device provisioning UI included | Less control over data pipeline |
+**Supabase Pro** includes 8 GB database space on the base plan. At scale, you'd add compute and storage add-ons (~$50-200/mo depending on usage). This is well within Supabase's capabilities for structured query patterns (queries are always scoped by `org_id` + `location_id` + time range).
 
-**Important**: The Milesight **IoT Cloud** (different product) has NO API — it's dashboard-only and a dead end for integration. The **Development Platform** is the one with full API access.
+### When to Add InfluxDB Cloud
 
-**Estimated cost at 1,000 locations**:
+If historical query performance becomes an issue (e.g., rendering 90-day charts across 15 sensors is slow), add InfluxDB Cloud (~$143/mo) as a dedicated time-series store:
 
-| Service | Monthly Cost |
-|---------|-------------|
-| Milesight Development Platform (1,000 gateways) | ~$83 ($1/device/year) |
-| Supabase (already paid) | $0 incremental |
-| **Total** | **~$83/month** |
+- API route dual-writes: Supabase for config/alerts, InfluxDB for time-series
+- Dashboard queries hit InfluxDB for charts, Supabase for everything else
+- No architectural change needed — just add a second write target in the ingest endpoint
+
+This is a scaling optimization, not a launch requirement.
 
 ---
 
-### Option D: AWS IoT Core (Enterprise Path)
+## Gateway Configuration
 
-```
-EM320-TH sensors
-    | (LoRaWAN)
-    v
-UG65 Gateway (built-in network server)
-    | (MQTT over TLS to AWS IoT Core endpoint)
-    v
-AWS IoT Core (managed MQTT + rules engine)
-    | (IoT Rules → Lambda → TimeStream or DynamoDB)
-    v
-AWS TimeStream or RDS Postgres
-    | (API Gateway + Lambda for dashboard queries)
-    v
-Levelset Dashboard (API integration)
-```
+### HTTP POST Setup (Pre-Shipping)
 
-| Pros | Cons |
-|------|------|
-| Enterprise-grade reliability | Most expensive option |
-| IoT Rules engine for routing/filtering | AWS complexity and vendor lock-in |
-| Native device shadow for state management | Requires AWS expertise |
-| Scales to millions of devices | Overkill for restaurant monitoring |
+In the gateway web UI:
 
-**Estimated cost at 1,000 locations**:
+1. **Network Server → Applications** → create "Levelset Sensors"
+2. **Data Transmission** → add HTTP integration:
+   - **URL**: `https://app.levelset.io/api/sensors/ingest`
+   - **Auth**: API key header (unique per location)
+   - **Payload Codec**: Enabled
+3. Save and Apply
 
-| Service | Monthly Cost |
-|---------|-------------|
-| AWS IoT Core (messages + connections) | ~$78 |
-| AWS TimeStream | ~$100-200 |
-| Lambda + API Gateway | ~$20-50 |
-| **Total** | **~$200-330/month** |
-
----
-
-## Recommendation
-
-### Start: Option A (Gateway → Levelset API)
-
-For launch through ~100 locations, the simplest path is having gateways HTTP POST directly to a Levelset API route. This requires:
-- One API route (`/api/sensors/ingest`) to receive and store data
-- A `sensor_readings` table in Supabase
-- Dashboard components for temperature charts and alerts
-- Zero additional infrastructure or monthly costs
-
-### Scale: Option B (Add InfluxDB Cloud)
-
-When time-series query performance matters (100+ locations, compliance reporting, historical trends), add InfluxDB Cloud as the time-series store while keeping Supabase as the source of truth for device configuration and alert rules. The API route becomes a dual-write endpoint.
-
-### Avoid: Option D (AWS IoT Core)
-
-Unnecessary complexity for this use case. Only consider if an enterprise customer requires AWS-hosted infrastructure.
-
----
-
-## Gateway HTTP POST Configuration
-
-The UG65 can be configured to POST decoded JSON directly to an HTTPS endpoint:
-
-### Gateway Setup (Web UI)
-
-1. Navigate to **Network Server → Application**
-2. Set **Type**: HTTP
-3. Set **URL**: `https://app.levelset.io/api/sensors/ingest`
-4. Set **Auth**: Bearer token or API key header
-5. Set **Payload Format**: JSON (decoded by built-in codec)
-
-### Payload Example (What Levelset Receives)
+### What the API Receives
 
 ```json
 {
-  "devEUI": "24E124710B002A3F",
-  "deviceName": "Walk-in Cooler",
-  "applicationName": "Temperature Sensors",
-  "timestamp": "2026-02-27T14:30:00Z",
+  "applicationID": 1,
+  "applicationName": "Levelset Sensors",
+  "deviceName": "walk-in-cooler-1",
+  "devEUI": "24e124126a148401",
   "fPort": 85,
-  "data": {
-    "temperature": 3.2,
-    "humidity": 65.4,
-    "battery": 98
+  "data": "AXVcA2c0AQRoZQ==",
+  "object": {
+    "temperature": 30.8,
+    "humidity": 50.5,
+    "battery": 92
+  },
+  "rxInfo": {
+    "rssi": -45,
+    "loRaSNR": 8.5,
+    "time": "2026-02-27T12:00:00Z"
   }
 }
 ```
 
-The gateway's built-in payload codec decodes the raw LoRaWAN bytes into human-readable JSON before forwarding. No server-side decoding needed.
+The `object` field contains the decoded sensor values (decoded by the gateway's built-in codec). The `data` field contains the raw Base64-encoded LoRaWAN payload as a fallback.
 
-### Gateway Node-RED Alternative
+### Levelset API Route (`/api/sensors/ingest`)
 
-For more complex routing, the UG65's built-in Node-RED can:
-- Add authentication headers
-- Batch multiple sensor readings
-- Filter out duplicate or stale data
-- Route different sensors to different endpoints
-- Add location/organization metadata before forwarding
+```typescript
+// Pseudocode — actual implementation TBD
+export default async function handler(req, res) {
+  // 1. Validate API key (unique per location)
+  const locationId = validateApiKey(req.headers['x-api-key']);
+
+  // 2. Extract sensor data
+  const { devEUI, object, rxInfo } = req.body;
+  const { temperature, humidity, battery } = object;
+
+  // 3. Insert reading
+  await supabase.from('sensor_readings').insert({
+    dev_eui: devEUI,
+    location_id: locationId,
+    temperature,
+    humidity,
+    battery,
+    rssi: rxInfo?.rssi,
+    snr: rxInfo?.loRaSNR,
+    recorded_at: rxInfo?.time || new Date().toISOString(),
+  });
+
+  // 4. Check alert thresholds
+  const rules = await supabase
+    .from('sensor_alert_rules')
+    .select('*')
+    .eq('dev_eui', devEUI)
+    .single();
+
+  if (rules && (temperature > rules.max_temp || temperature < rules.min_temp)) {
+    await supabase.from('sensor_alerts').insert({
+      dev_eui: devEUI,
+      location_id: locationId,
+      alert_type: temperature > rules.max_temp ? 'temp_high' : 'temp_low',
+      value: temperature,
+      threshold: temperature > rules.max_temp ? rules.max_temp : rules.min_temp,
+    });
+    // Send push notification, email, etc.
+  }
+
+  return res.status(200).json({ ok: true });
+}
+```
 
 ---
 
-## Gateway MQTT Direct-to-Cloud Configuration
+## Tailscale Role (Management Only)
 
-For Option B (InfluxDB Cloud via managed MQTT):
+Tailscale is installed on every gateway **solely** for remote SSH access and REST API calls. It is NOT involved in data transport.
 
-### Gateway Setup (Web UI)
+### What Flows Over Tailscale
 
-1. Navigate to **Network Server → Application**
-2. Set **Type**: MQTT
-3. Set **Server**: `broker.hivemq.cloud` (or any cloud MQTT broker)
-4. Set **Port**: 8883 (TLS)
-5. Set **Username/Password**: Broker credentials
-6. Set **Client ID**: Gateway serial number
-7. Set **Topic**: `levelset/{orgId}/{locationId}/sensors`
+| Action | How |
+|--------|-----|
+| Send downlink to sensor | `POST http://100.x.y.z:8080/api/urdevices/{devEUI}/downlink` |
+| List paired sensors | `GET http://100.x.y.z:8080/api/urdevices` |
+| Check gateway status | `ssh root@100.x.y.z` |
+| Push firmware update | `scp firmware.bin root@100.x.y.z:/tmp/` |
+| Debug connectivity | `ssh root@100.x.y.z ping google.com` |
 
-The gateway publishes to the cloud MQTT broker over TLS — no Tailscale, no VPN, no port forwarding needed. The broker handles routing to InfluxDB via Telegraf or a rule engine.
+### What Does NOT Flow Over Tailscale
 
----
+- Sensor data readings (HTTP POST over standard internet)
+- Dashboard queries (Supabase over standard internet)
+- Mobile app interactions (Supabase + Levelset API over standard internet)
 
-## Cloud vs Self-Hosted Comparison
+### Tailscale Is Free at Launch
 
-| Factor | Self-Hosted (Doc 08) | Cloud Option A | Cloud Option B | Cloud Option C |
-|--------|---------------------|----------------|----------------|----------------|
-| Monthly cost (1K locations) | ~$700 | ~$25-80 | ~$250 | ~$83 |
-| Infrastructure to manage | Hetzner + Tailscale | None | MQTT + InfluxDB configs | Webhook endpoint |
-| Time-series performance | Excellent (InfluxDB) | Adequate (Postgres) | Excellent (InfluxDB) | Adequate |
-| Setup complexity | High | Low | Medium | Low |
-| Tailscale required | Yes | No | No | No |
-| Data sovereignty | Full control | Supabase | InfluxDB Cloud regions | Milesight servers |
-| Vendor dependency | Minimal | Minimal | InfluxDB + Grafana | Milesight |
-| Gateway config | MQTT to Tailscale IP | HTTP POST to URL | MQTT to cloud broker | MQTT to Milesight |
-
----
-
-## WiFi Setup (Same Simplicity, No Tailscale)
-
-Without Tailscale, the customer setup is equally simple:
-
-1. **Gateway ships pre-configured**: HTTP POST or MQTT endpoint pre-set, authentication baked in
-2. **Customer plugs in gateway** and connects to WiFi (via app or web UI)
-3. **Gateway connects to WiFi → HTTPS/MQTT starts flowing** — standard outbound HTTPS (port 443) or MQTTS (port 8883) works through any firewall
-4. **No port forwarding, no VPN, no static IPs** — outbound connections only, works behind any NAT/firewall
-
-The customer experience is identical to the Tailscale approach. The difference is purely backend architecture.
+Tailscale Free tier includes 100 devices. At 10 locations (10 gateways + 1 server = 11 devices), you're well within limits. Paid plans only needed past ~99 locations.

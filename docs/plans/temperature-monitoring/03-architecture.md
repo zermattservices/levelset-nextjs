@@ -1,78 +1,109 @@
-# Architecture — Full Technical Stack
+# Architecture — Finalized Technical Stack
+
+## Design Decisions
+
+These are locked in based on our research and operational requirements:
+
+1. **Data transport**: Gateway HTTP POSTs decoded JSON to Levelset API — no MQTT broker, no InfluxDB, no self-hosted infrastructure
+2. **Remote management**: Tailscale on every gateway for SSH access — used on-demand for remote config changes and troubleshooting
+3. **Sensor config**: All sensor configuration changes happen remotely via downlink commands sent through the gateway's REST API over Tailscale — zero on-site technical work
+4. **Customer setup**: Native mobile app flow — user plugs in gateway, opens Levelset app, connects gateway to WiFi through a native UI
+5. **Storage**: Supabase Postgres for everything — sensor readings, device registry, alert rules, alert history
 
 ## End-to-End Data Flow
 
 ```
-EM320-TH Sensors ──(LoRaWAN 915MHz radio)──> UG65 Gateway
-                                                  │
-                                          ┌───────┴────────┐
-                                          │ Built-in        │
-                                          │ Network Server  │
-                                          │ (decode payload)│
-                                          └───────┬────────┘
-                                                  │
-                                          ┌───────┴────────┐
-                                          │ MQTT Publisher   │
-                                          │ (on gateway)     │
-                                          └───────┬────────┘
-                                                  │
-                                      ╔═══════════╧═══════════╗
-                                      ║   Tailscale Tunnel     ║
-                                      ║   (WireGuard mesh)     ║
-                                      ╚═══════════╤═══════════╝
-                                                  │
-                                          ┌───────┴────────┐
-                                          │ Mosquitto MQTT  │
-                                          │ Broker          │
-                                          │ (central server)│
-                                          └───────┬────────┘
-                                                  │
-                                          ┌───────┴────────┐
-                                          │ Telegraf         │
-                                          │ (MQTT consumer)  │
-                                          └───────┬────────┘
-                                                  │
-                                          ┌───────┴────────┐
-                                          │ InfluxDB         │
-                                          │ (time-series DB) │
-                                          └───────┬────────┘
-                                                  │
-                                    ┌─────────────┼─────────────┐
-                                    │             │             │
-                              ┌─────┴─────┐ ┌────┴────┐ ┌─────┴─────┐
-                              │ Dashboard  │ │ Alerts  │ │ Grafana   │
-                              │ (Levelset  │ │ Engine  │ │ (internal │
-                              │  or custom)│ │         │ │  only)    │
-                              └───────────┘ └─────────┘ └───────────┘
+EM320-TH Sensors ──(LoRaWAN 915MHz)──> UG65 Gateway
+                                            │
+                                    ┌───────┴────────┐
+                                    │ Built-in        │
+                                    │ Network Server  │
+                                    │ + Payload Codec │
+                                    │ (binary → JSON) │
+                                    └───────┬────────┘
+                                            │
+                                    ┌───────┴────────┐
+                                    │ HTTP POST       │
+                                    │ (HTTPS, port 443│
+                                    │  standard       │
+                                    │  internet)      │
+                                    └───────┬────────┘
+                                            │
+                                    ┌───────┴────────┐
+                                    │ Levelset API    │
+                                    │ /api/sensors/   │
+                                    │   ingest        │
+                                    └───────┬────────┘
+                                            │
+                                    ┌───────┴────────┐
+                                    │ Supabase        │
+                                    │ Postgres        │
+                                    │ (sensor_readings│
+                                    │  + device       │
+                                    │  registry)      │
+                                    └───────┬────────┘
+                                            │
+                              ┌─────────────┼─────────────┐
+                              │             │             │
+                        ┌─────┴─────┐ ┌────┴────┐ ┌─────┴─────┐
+                        │ Dashboard  │ │ Alerts  │ │ Mobile    │
+                        │ (Levelset) │ │ Engine  │ │ App       │
+                        └───────────┘ └─────────┘ └───────────┘
 ```
+
+## Remote Management Flow (Separate from Data)
+
+```
+Levelset Dashboard / API
+    │
+    │ (user changes sensor threshold or config)
+    │
+    ▼
+Levelset API Route (/api/sensors/config)
+    │
+    │ (SSH over Tailscale to gateway at 100.x.y.z)
+    │ (or HTTP to gateway REST API at 100.x.y.z:8080)
+    │
+    ▼
+UG65 Gateway REST API (port 8080)
+    │
+    │ POST /api/urdevices/{devEUI}/downlink
+    │ (downlink command queued)
+    │
+    ▼
+EM320-TH Sensor
+    (receives command on next uplink, within 10 min)
+```
+
+**Data flows over standard internet (HTTP POST). Management flows over Tailscale (SSH/API). These are completely separate paths.**
+
+---
 
 ## Layer-by-Layer Breakdown
 
 ### Layer 1: Sensors → Gateway (LoRaWAN)
 
-**Protocol**: LoRaWAN over 915 MHz radio (US915 band)
+**Protocol**: LoRaWAN over 915 MHz radio (US915 band, channels 8-15)
 
-The EM320-TH sensors transmit temperature and humidity readings at a configurable interval (default: 10 minutes). Each transmission includes battery level. The sensors use **Class A** operation: they send data, then open two short receive windows for any pending downlink commands from the gateway.
+The EM320-TH sensors transmit temperature and humidity readings at a configurable interval (default: 10 minutes). Each transmission includes battery level. The sensors use **Class A** operation: they send data, then open two short receive windows for any pending downlink commands.
 
 **Join process (OTAA)**:
-1. Sensor transmits Join Request with its DevEUI and AppEUI
-2. Gateway/network server validates the AppKey
+1. Sensor transmits Join Request with DevEUI and AppEUI
+2. Gateway's built-in network server validates the AppKey
 3. Session keys generated (NwkSKey, AppSKey)
 4. Dynamic Device Address assigned
 5. Sensor begins periodic data transmission
 
-**Resilience**: If the sensor temporarily loses gateway connectivity, it stores up to 3,000 readings with timestamps and retransmits them when reconnected.
+**Resilience**: If the sensor temporarily loses gateway connectivity, it stores up to 3,000 readings with timestamps and retransmits them when reconnected (Data Retransmission is enabled by default).
 
-**US915 channel config**: Channel index must be set to 8-15 when using the Milesight gateway's default settings.
+### Layer 2: Gateway (Decode + Forward)
 
-### Layer 2: Gateway Network Server (Decode)
-
-The UG65 has a **built-in LoRaWAN network server** — no external ChirpStack or TTN required. This simplifies the architecture significantly.
+The UG65 has a **built-in LoRaWAN network server** — no external ChirpStack or TTN required.
 
 **On the gateway**:
 1. **Packet Forwarder** receives raw LoRa packets
 2. **Network Server** handles device authentication and session management
-3. **Payload Codec** decodes binary payloads to JSON using Milesight's decoder scripts
+3. **Payload Codec** decodes binary payloads to JSON
 
 The gateway transforms raw binary like `01 75 5C 03 67 34 01 04 68 65` into:
 ```json
@@ -83,11 +114,11 @@ The gateway transforms raw binary like `01 75 5C 03 67 34 01 04 68 65` into:
 }
 ```
 
-### Layer 3: Gateway → MQTT (Data Forwarding)
+### Layer 3: Gateway → Levelset API (HTTP POST)
 
-The gateway publishes decoded JSON to an MQTT broker. This can be configured in the gateway web GUI under Network Server > Applications > Data Transmission.
+The gateway HTTP POSTs decoded JSON to `https://app.levelset.io/api/sensors/ingest` over standard HTTPS (port 443). This works through any restaurant firewall — it's just an outbound HTTPS request, same as loading a web page.
 
-**MQTT message format** (published by gateway):
+**What Levelset receives**:
 ```json
 {
   "applicationID": 1,
@@ -97,9 +128,9 @@ The gateway publishes decoded JSON to an MQTT broker. This can be configured in 
   "fPort": 85,
   "data": "base64_encoded_raw",
   "object": {
-    "battery": 92,
     "temperature": 30.8,
-    "humidity": 50.5
+    "humidity": 50.5,
+    "battery": 92
   },
   "rxInfo": {
     "rssi": -45,
@@ -109,159 +140,103 @@ The gateway publishes decoded JSON to an MQTT broker. This can be configured in 
 }
 ```
 
-**Topic structure**: `/milesight/uplink/{devEUI}` or `application/{app_id}/device/{dev_eui}/event/up`
+**Gateway configuration** (pre-shipping, in web UI):
+1. Network Server → Applications → create "Levelset Sensors"
+2. Data Transmission → set Type: HTTP
+3. Set URL: `https://app.levelset.io/api/sensors/ingest`
+4. Set Auth: API key header (unique per location)
+5. Enable Payload Codec for decoded JSON output
 
-**Downlink** (commands back to sensors): `/milesight/downlink/{devEUI}`
+### Layer 4: Tailscale (Management Only)
 
-### Layer 4: Tailscale (Secure Networking)
+Tailscale is installed on every gateway **solely for remote management** — SSH access and REST API calls. It is NOT used for data transport.
 
-Tailscale provides the secure overlay network connecting each restaurant's gateway to the central server. It uses WireGuard tunnels under the hood.
+**Why Tailscale for management**:
+- SSH into any gateway from anywhere (no customer involvement)
+- Hit the gateway's REST API at `100.x.y.z:8080` for sending downlink commands
+- Survives router changes, IP changes, NAT — always reachable
+- Pre-authenticated before shipping (auth keys with `tag:sensor-gateway`)
+- Costs nothing on the free tier up to 100 gateways
 
-**Why Tailscale (not VPN/port forwarding)**:
-- Zero configuration for the customer — gateway auto-connects on power-up
-- NAT traversal works automatically, even behind restaurant firewalls
-- No static IPs or port forwarding needed
-- Each gateway gets a stable 100.x.y.z address on the tailnet
-- Pre-authenticated before shipping (auth keys)
-- Can SSH into any gateway remotely for troubleshooting
+**What flows over Tailscale**:
+- SSH sessions for troubleshooting
+- Gateway REST API calls for sensor config changes (downlinks)
+- Firmware updates (when needed)
 
-See [04-provisioning-and-setup.md](./04-provisioning-and-setup.md) for Tailscale installation details.
+**What does NOT flow over Tailscale**:
+- Sensor data (flows over standard HTTPS)
+- Dashboard queries (standard Supabase)
 
-### Layer 5: MQTT Broker (Central Server)
+### Layer 5: Supabase (Storage + Auth)
 
-**Mosquitto** MQTT broker on the central server receives messages from all restaurant gateways.
+All data lives in Supabase Postgres:
 
-```conf
-# /etc/mosquitto/mosquitto.conf
-listener 1883
-protocol mqtt
-allow_anonymous false
-password_file /mosquitto/config/password_file
-persistence true
-persistence_location /mosquitto/data/
-autosave_interval 300
-log_dest file /mosquitto/log/mosquitto.log
-```
+**Tables** (see [05-integration-options.md](./05-integration-options.md) for full schemas):
 
-**User setup**:
-```bash
-# Create users for gateway and Telegraf
-mosquitto_passwd -c /mosquitto/config/password_file gateway_user
-mosquitto_passwd /mosquitto/config/password_file telegraf_user
-```
+| Table | Purpose |
+|-------|---------|
+| `sensor_devices` | Device registry — maps DevEUI to sensor name, org, location |
+| `sensor_gateways` | Gateway registry — Tailscale IP, firmware version, status |
+| `sensor_readings` | Time-series data — temperature, humidity, battery, RSSI per reading |
+| `sensor_alert_rules` | Configurable thresholds per sensor |
+| `sensor_alerts` | Alert history — when thresholds were breached |
 
-**MQTT bridge option**: Instead of the gateway publishing directly to the central Mosquitto, you can run Mosquitto locally on the gateway and use an MQTT bridge to forward messages to the central server. This adds resilience — if the internet drops, messages queue locally.
+### Layer 6: Alerting
 
-```conf
-# Gateway mosquitto.conf bridge
-connection central-bridge
-address 100.x.y.z:1883  # Tailscale IP of central server
-topic application/# out 1
-remote_username bridge_user
-remote_password bridge_password
-```
+On every ingest, the API route checks the sensor's configured thresholds:
 
-### Layer 6: Telegraf (Data Pipeline)
+1. Gateway POSTs reading to `/api/sensors/ingest`
+2. API inserts into `sensor_readings`
+3. API queries `sensor_alert_rules` for this sensor's thresholds
+4. If temperature > max or < min → insert into `sensor_alerts` + send push notification
+5. Dashboard shows active alerts with acknowledgment workflow
 
-**Telegraf** subscribes to the MQTT broker and writes data to InfluxDB. It handles JSON parsing, field extraction, and tagging.
+Alert delivery:
+- Push notification via mobile app
+- Email (optional)
+- SMS (optional, via Twilio)
+- Dashboard banner/badge
 
-```toml
-# /etc/telegraf/telegraf.conf
+### Layer 7: Dashboard + Mobile App
 
-[[inputs.mqtt_consumer]]
-  servers = ["tcp://localhost:1883"]
-  topics = ["application/+/device/+/event/up"]
-  username = "telegraf_user"
-  password = "telegraf_password"
-  data_format = "json"
+**Dashboard** (web):
+- Temperature charts per sensor (Recharts or similar)
+- Current status grid — all sensors at a glance with color-coded status
+- Alert configuration — set thresholds per sensor
+- Compliance log export (CSV/PDF for health department audits)
+- Sensor management — rename, disable, view history
 
-  [[inputs.mqtt_consumer.topic_parsing]]
-    topic = "application/+/device/+/event/+"
-    measurement = "measurement/_/_/_/_"
-    tags = "_/app_id/_/dev_eui/_/event"
-
-[[outputs.influxdb_v2]]
-  urls = ["http://localhost:8181"]
-  token = "your-influxdb-token"
-  organization = ""
-  bucket = "sensor_data"
-```
-
-### Layer 7: InfluxDB (Time-Series Storage)
-
-**InfluxDB** stores all sensor readings as time-series data. Natural fit for temperature monitoring — optimized for timestamped measurements with efficient compression and fast range queries.
-
-**Data model**:
-- **Measurement**: `sensor_data`
-- **Tags** (indexed): `dev_eui`, `location_id`, `sensor_name`, `org_id`
-- **Fields** (values): `temperature`, `humidity`, `battery`, `rssi`
-- **Timestamp**: Automatically captured from MQTT message
-
-**Retention**: Raw data for 90 days (configurable), downsampled 15-min averages for 2+ years (for compliance audits).
-
-```bash
-# Create database
-influxdb3 create database sensor_data
-
-# Query example
-influxdb3 query --database sensor_data \
-  "SELECT time, temperature, humidity FROM sensor_data WHERE dev_eui = '24e124126a148401' AND time > now() - 24h"
-```
-
-### Layer 8: Alerting
-
-Three approaches, not mutually exclusive:
-
-**Option A — InfluxDB 3 native alerts (Python plugins)**:
-```bash
-influxdb3 create trigger \
-  --database sensor_data \
-  --plugin-filename alert.py \
-  --trigger-spec "table:sensor_data" \
-  --trigger-arguments "name=temp_high,threshold=40,field_name=temperature,endpoint_type=slack" \
-  temp_high_alert
-```
-
-**Option B — Grafana alert rules**:
-- Create dashboard panel querying InfluxDB
-- Define alert condition: `WHEN avg(temperature) IS ABOVE 40 FOR 5m`
-- Send to Slack, email, PagerDuty, SMS, webhook
-
-**Option C — Custom alerting in Levelset backend**:
-- Telegraf writes to both InfluxDB and a webhook/Supabase
-- Levelset API route checks thresholds and sends push notifications via the mobile app
-- Most tightly integrated option, but requires more custom development
-
-### Layer 9: Dashboard / Visualization
-
-**Grafana** (for internal use / rapid prototyping):
-- Connects directly to InfluxDB
-- Pre-built dashboard templates for sensor data
-- Good for initial testing and Mac's existing infrastructure
-
-**Levelset Dashboard** (for customer-facing product):
-- Build temperature monitoring as a new module in the Next.js dashboard
-- Or build a standalone frontend that queries InfluxDB/Supabase
-- See [05-integration-options.md](./05-integration-options.md) for detailed options
+**Mobile app** (Expo/React Native):
+- WiFi setup flow for new gateways (see [04-provisioning-and-setup.md](./04-provisioning-and-setup.md))
+- Push notification alerts
+- Quick status view — all sensors with current readings
+- Sensor config — change thresholds, reporting intervals
 
 ---
 
-## Central Server Requirements
+## What This Architecture Does NOT Need
 
-The MQTT broker, Telegraf, InfluxDB, and Grafana all run on a single central server.
+| Component | Why Not |
+|-----------|---------|
+| MQTT broker (Mosquitto) | Gateway posts directly to Levelset API via HTTP |
+| Telegraf | No MQTT → InfluxDB pipeline needed |
+| InfluxDB | Supabase Postgres handles the volume at launch; add later if needed |
+| Grafana | Dashboard built natively in Levelset |
+| Self-hosted server (Hetzner) | Everything runs on Vercel + Supabase (existing infra) |
+| ChirpStack / TTN | Gateway has built-in network server |
+| VPN for data transport | Standard HTTPS from gateway to API |
 
-**Minimum specs** (for up to ~50 restaurant locations):
-- 2 vCPUs
-- 4 GB RAM
-- 50 GB SSD
-- Linux (Ubuntu 22.04+ recommended)
+---
 
-**Hosting options**:
-- Fly.io (consistent with Levelset agent deployment)
-- Hetzner/DigitalOcean (cost-effective)
-- AWS/GCP (enterprise, if needed)
+## Scaling Path
 
-**Tailscale** must also be installed on the central server so it's part of the same tailnet as all gateways.
+| Scale | Sensors | Data Volume | Storage Strategy |
+|-------|---------|-------------|-----------------|
+| **Launch** (10 locations) | 150 | ~216K rows/month | Supabase Postgres only |
+| **Growth** (100 locations) | 1,500 | ~2.16M rows/month | Supabase Postgres + partitioning |
+| **Scale** (1,000 locations) | 15,000 | ~21.6M rows/month | Add InfluxDB Cloud for time-series, keep Supabase for config |
+
+At 1,000 locations with 10-minute reporting, you're writing 25 rows/second to Postgres. Supabase Pro handles this easily. The main concern at scale is historical query performance (e.g., "show me 90 days of data for all 15 sensors"), which is when you'd add InfluxDB Cloud as a dedicated time-series store.
 
 ---
 
@@ -269,11 +244,9 @@ The MQTT broker, Telegraf, InfluxDB, and Grafana all run on a single central ser
 
 | Resource | URL |
 |----------|-----|
+| UG65 HTTP API Specification | [resource.milesight.com/.../ug-http-api-documentation-en.pdf](https://resource.milesight.com/milesight/iot/document/ug-http-api-documentation-en.pdf) |
 | Milesight SensorDecoders | [github.com/Milesight-IoT/SensorDecoders](https://github.com/Milesight-IoT/SensorDecoders) |
 | EM320-TH User Guide | [resource.milesight.com/.../em320-th-user-guide-en.pdf](https://resource.milesight.com/milesight/iot/document/em320-th-user-guide-en.pdf) |
 | UG65 User Guide | [resource.milesight.com/.../ug65-user-guide-en.pdf](https://resource.milesight.com/milesight/iot/document/ug65-user-guide-en.pdf) |
-| Milesight MQTT Integration Guide | [support.milesight-iot.com/.../mqtt-broker](https://support.milesight-iot.com/support/solutions/articles/73000514193) |
-| Milesight Gateway MQTT API | [support.milesight-iot.com/.../mqtt-api](https://support.milesight-iot.com/support/solutions/articles/73000617705) |
-| Telegraf MQTT Consumer Plugin | [docs.influxdata.com/.../mqtt_consumer](https://docs.influxdata.com/telegraf/v1/input-plugins/mqtt_consumer/) |
-| InfluxDB 3 Alerting | [influxdata.com/blog/core-enterprise-alerting-influxdb3](https://www.influxdata.com/blog/core-enterprise-alerting-influxdb3/) |
 | Tailscale Auth Keys | [tailscale.com/kb/1085/auth-keys](https://tailscale.com/kb/1085/auth-keys) |
+| Python Gateway API Client | [github.com/corgan2222/Milesight-Gateway-API](https://github.com/corgan2222/Milesight-Gateway-API) |
