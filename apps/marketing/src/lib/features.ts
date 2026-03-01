@@ -80,6 +80,14 @@ export const FEATURES: MarketingFeature[] = [
     tier: 'pro',
     screenshotReady: false,
   },
+  {
+    slug: 'oe-pillars',
+    name: 'OE Pillars',
+    shortDescription: 'See your operational excellence score across all five CFA pillars.',
+    icon: 'bar-chart',
+    tier: 'pro',
+    screenshotReady: false,
+  },
 ];
 
 /** Get a feature by slug */

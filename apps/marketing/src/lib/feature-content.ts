@@ -385,6 +385,42 @@ const CONTENT: Record<string, FeatureContent> = {
     ],
     screenshots: [],
   },
+
+  'oe-pillars': {
+    tagline:
+      'Your five pillars of operational excellence — measured, tracked, and visible to every leader.',
+    problem:
+      'CFA measures operational excellence across five pillars, but most operators track them loosely — if at all. There\'s no single place to see how your team is performing against each pillar, and no way to connect those pillars back to the individual position-level performance that drives them.',
+    solution:
+      'Levelset aggregates your positional rating data into the five OE pillars automatically. Each pillar score is calculated from the positions that feed into it — so when your Drive-Thru team improves, your Speed of Service pillar reflects it in real time. Leaders see one dashboard that connects individual performance to operational outcomes.',
+    capabilities: [
+      {
+        icon: 'bar-chart',
+        title: 'Five Pillars, One Dashboard',
+        description:
+          'See your overall OE score and each individual pillar at a glance. Know exactly where your operation is strong and where it needs focus.',
+      },
+      {
+        icon: 'link',
+        title: 'Connected to Position Ratings',
+        description:
+          'Pillar scores aren\'t manually entered — they\'re calculated from your positional excellence data. Improve a position, and the pillar score updates automatically.',
+      },
+      {
+        icon: 'trending-up',
+        title: 'Track Progress Over Time',
+        description:
+          'See how each pillar has trended over weeks and months. Identify whether your coaching investments are moving the needle.',
+      },
+      {
+        icon: 'users',
+        title: 'Aligned to CFA\'s Framework',
+        description:
+          'The five pillars mirror Chick-fil-A\'s operational excellence framework — so your data speaks the same language as your business.',
+      },
+    ],
+    screenshots: [],
+  },
 };
 
 export function getFeatureContent(slug: string): FeatureContent | undefined {
