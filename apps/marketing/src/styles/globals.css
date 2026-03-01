@@ -1,8 +1,7 @@
+@import 'tailwindcss';
 @import '@levelset/design-tokens/css/variables.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config '../../tailwind.config.ts';
 
 /* Font face declarations */
 @font-face {
