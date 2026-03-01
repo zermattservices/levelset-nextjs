@@ -85,6 +85,13 @@
 | **Multi-Unit** | An organization with multiple locations. |
 | **Location Number** | A short identifier for a location (e.g., "20001", "FSU-01"). |
 
+## CFA-Specific Terms (External, Not Levelset)
+
+| Term | Definition |
+|------|-----------|
+| **CARES** | Chick-fil-A's customer complaint/resolution department. Customers "send a CARES" when they complain to corporate. CARES handles customer issues and escalates food safety or severe cases to the restaurant. **This is NOT a discipline or HR term — do not use it to describe Levelset's discipline system.** |
+| **PEA** | "Positional Excellence Assessment" — a term specific to the Reece Howard organization for their rating system. NOT a CFA-wide term. Levelset uses "Positional Excellence" or "ratings" instead. |
+
 ## Feature Flags
 
 | Term | Definition |

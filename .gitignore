@@ -15,3 +15,12 @@ next-env.d.ts
 .vercel
 .env*.local
 .turbo
+
+# Accidentally dropped files
+*.bin
+deputy.html
+.claude/worktrees/
+.cursor/
+
+# Secrets
+apps/agent/.env
