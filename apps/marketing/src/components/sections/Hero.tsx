@@ -26,7 +26,7 @@ export function Hero() {
       <div className="max-w-content mx-auto px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 text-sm font-medium mb-8 backdrop-blur-sm">
-            Now in Early Access
+            Built Exclusively for Chick-fil-A
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-[3.75rem] font-heading font-bold text-white mb-6 leading-[1.08] tracking-tight">
