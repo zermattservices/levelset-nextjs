@@ -7,7 +7,7 @@ export function Footer() {
   return (
     <footer className="bg-[#1a1a1a] text-white/70">
       <div className="max-w-content mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="md:col-span-2">
             <Image
@@ -21,6 +21,30 @@ export function Footer() {
               Positional ratings, discipline tracking, and complete team management
               — built exclusively for Chick-fil-A operators.
             </p>
+          </div>
+
+          {/* Solutions */}
+          <div>
+            <h4 className="text-white font-medium text-sm mb-4 uppercase tracking-wider">
+              Solutions
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/solutions/development" className="text-sm hover:text-white transition-colors duration-200">
+                  Team Development
+                </Link>
+              </li>
+              <li>
+                <Link href="/solutions/operations" className="text-sm hover:text-white transition-colors duration-200">
+                  Operations
+                </Link>
+              </li>
+              <li>
+                <Link href="/solutions/intelligence" className="text-sm hover:text-white transition-colors duration-200">
+                  Intelligence
+                </Link>
+              </li>
+            </ul>
           </div>
 
           {/* Product */}

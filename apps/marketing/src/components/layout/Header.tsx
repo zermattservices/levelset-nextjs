@@ -6,11 +6,19 @@ import { useState, useEffect, useRef } from 'react';
 import { FeaturesDropdown, FeaturesMenuItems } from './FeaturesDropdown';
 import { useTrialModal } from '@/components/cta/TrialModalProvider';
 
+const SOLUTIONS = [
+  { name: 'Team Development', href: '/solutions/development', description: 'Ratings, evaluations, and growth plans' },
+  { name: 'Operations', href: '/solutions/operations', description: 'Scheduling, setups, forms, and OE' },
+  { name: 'Intelligence', href: '/solutions/intelligence', description: 'AI insights and analytics' },
+];
+
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
+  const [solutionsOpen, setSolutionsOpen] = useState(false);
   const featuresTimeout = useRef<NodeJS.Timeout | null>(null);
+  const solutionsTimeout = useRef<NodeJS.Timeout | null>(null);
   const { openModal } = useTrialModal();
 
   useEffect(() => {
@@ -19,13 +27,16 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close features dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
-    if (!featuresOpen) return;
-    const handleClick = () => setFeaturesOpen(false);
+    if (!featuresOpen && !solutionsOpen) return;
+    const handleClick = () => {
+      setFeaturesOpen(false);
+      setSolutionsOpen(false);
+    };
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
-  }, [featuresOpen]);
+  }, [featuresOpen, solutionsOpen]);
 
   const linkClass = `text-sm font-medium transition-colors duration-200 ${
     scrolled ? 'text-text-secondary hover:text-brand' : 'text-white/70 hover:text-white'
@@ -88,6 +99,62 @@ export function Header() {
             />
           </div>
 
+          {/* Solutions dropdown */}
+          <div
+            className="relative"
+            onMouseEnter={() => {
+              if (solutionsTimeout.current) clearTimeout(solutionsTimeout.current);
+              setSolutionsOpen(true);
+            }}
+            onMouseLeave={() => {
+              solutionsTimeout.current = setTimeout(() => setSolutionsOpen(false), 150);
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className={`${linkClass} flex items-center gap-1`}
+              onClick={() => setSolutionsOpen(!solutionsOpen)}
+            >
+              Solutions
+              <svg
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${solutionsOpen ? 'rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div
+              className={`absolute top-full left-1/2 -translate-x-1/2 w-[280px] pt-[22px] transition-all duration-200 ease-out ${
+                solutionsOpen
+                  ? 'opacity-100 translate-y-0 pointer-events-auto'
+                  : 'opacity-0 -translate-y-2 pointer-events-none'
+              }`}
+              role="menu"
+              aria-hidden={!solutionsOpen}
+            >
+              <div className="bg-white rounded-xl shadow-2xl shadow-black/10 border border-neutral-200 overflow-hidden py-2">
+                {SOLUTIONS.map((solution) => (
+                  <Link
+                    key={solution.href}
+                    href={solution.href}
+                    onClick={() => setSolutionsOpen(false)}
+                    className="group flex flex-col px-4 py-2.5 hover:bg-neutral-50 transition-colors duration-150"
+                  >
+                    <span className="text-[13px] font-semibold text-neutral-800 group-hover:text-[#31664A] transition-colors duration-150">
+                      {solution.name}
+                    </span>
+                    <span className="text-[12px] text-neutral-400 mt-0.5">
+                      {solution.description}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <Link href="/pricing" className={linkClass}>
             Pricing
           </Link>
@@ -132,6 +199,32 @@ export function Header() {
       {mobileOpen && (
         <div className="md:hidden bg-white border-t border-neutral-border/50 shadow-lg max-h-[80vh] overflow-y-auto">
           <nav className="max-w-content mx-auto px-6 py-4 flex flex-col gap-1">
+            {/* Solutions section */}
+            <div className="py-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 px-3">
+                Solutions
+              </span>
+              <div className="flex flex-col py-1">
+                {SOLUTIONS.map((solution) => (
+                  <Link
+                    key={solution.href}
+                    href={solution.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex flex-col px-3 py-2.5 rounded-lg hover:bg-neutral-50 transition-colors duration-150"
+                  >
+                    <span className="text-sm font-semibold text-neutral-800">
+                      {solution.name}
+                    </span>
+                    <span className="text-xs text-neutral-400 mt-0.5">
+                      {solution.description}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t border-neutral-100 my-2" />
+
             {/* Features section */}
             <div className="py-2">
               <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 px-3">
