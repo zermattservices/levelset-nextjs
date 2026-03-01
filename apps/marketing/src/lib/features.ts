@@ -88,6 +88,46 @@ export const FEATURES: MarketingFeature[] = [
     tier: 'pro',
     screenshotReady: false,
   },
+  {
+    slug: 'org-chart',
+    name: 'Org Chart',
+    shortDescription: 'See your team structure at a glance — who reports to whom.',
+    icon: 'git-branch',
+    tier: 'pro',
+    screenshotReady: false,
+  },
+  {
+    slug: 'documents',
+    name: 'Documents',
+    shortDescription: 'Your organization\'s knowledge hub — policies, guides, and resources.',
+    icon: 'folder',
+    tier: 'pro',
+    screenshotReady: false,
+  },
+  {
+    slug: 'pay',
+    name: 'Pay System',
+    shortDescription: 'Transparent, performance-linked pay that your team can see and trust.',
+    icon: 'dollar-sign',
+    tier: 'pro',
+    screenshotReady: false,
+  },
+  {
+    slug: 'goal-tracking',
+    name: 'Goal Tracking',
+    shortDescription: 'Set goals at every level — employee, team, location, org.',
+    icon: 'target',
+    tier: 'pro',
+    screenshotReady: false,
+  },
+  {
+    slug: 'development-plans',
+    name: 'Development Plans',
+    shortDescription: 'Build the roadmap for every team member\'s growth.',
+    icon: 'map',
+    tier: 'pro',
+    screenshotReady: false,
+  },
 ];
 
 /** Get a feature by slug */

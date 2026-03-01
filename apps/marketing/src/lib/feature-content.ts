@@ -392,7 +392,7 @@ const CONTENT: Record<string, FeatureContent> = {
     problem:
       'CFA measures operational excellence across five pillars, but most operators track them loosely — if at all. There\'s no single place to see how your team is performing against each pillar, and no way to connect those pillars back to the individual position-level performance that drives them.',
     solution:
-      'Levelset aggregates your positional rating data into the five OE pillars automatically. Each pillar score is calculated from the positions that feed into it — so when your Drive-Thru team improves, your Speed of Service pillar reflects it in real time. Leaders see one dashboard that connects individual performance to operational outcomes.',
+      'Levelset aggregates your positional rating data into the five OE pillars — Great Food, Quick & Accurate, Creating Moments, Caring Interactions, and Inviting Atmosphere — automatically. Each pillar score is calculated from the position criteria that map to it, so when your team improves on mapped positions, the pillar scores reflect it. Leaders see one dashboard that connects individual performance to operational outcomes.',
     capabilities: [
       {
         icon: 'bar-chart',
@@ -417,6 +417,180 @@ const CONTENT: Record<string, FeatureContent> = {
         title: 'Aligned to CFA\'s Framework',
         description:
           'The five pillars mirror Chick-fil-A\'s operational excellence framework — so your data speaks the same language as your business.',
+      },
+    ],
+    screenshots: [],
+  },
+
+  'org-chart': {
+    tagline:
+      'Your team structure, visible to everyone — so new team members know who to go to and leaders know who they\'re responsible for.',
+    problem:
+      'New team members don\'t know the chain of command. A Team Lead asks "who\'s my Director?" The org structure lives in people\'s heads — or on a whiteboard that hasn\'t been updated in three months. When someone gets promoted or someone leaves, nobody updates the chart because there isn\'t one.',
+    solution:
+      'Levelset automatically generates your org chart from your roster data. Promote someone? The chart updates. Hire a new Team Lead? They appear in the right spot. Every team member can see the structure, and every leader knows exactly who falls under their responsibility.',
+    capabilities: [
+      {
+        icon: 'git-branch',
+        title: 'Auto-Generated from Your Roster',
+        description:
+          'No manual drawing or dragging boxes. The org chart builds itself from your employee roles and reporting relationships.',
+      },
+      {
+        icon: 'refresh-cw',
+        title: 'Always Up to Date',
+        description:
+          'Promotions, new hires, and terminations update the chart automatically. It\'s never stale.',
+      },
+      {
+        icon: 'eye',
+        title: 'Visible to the Whole Team',
+        description:
+          'Team members can see where they sit in the organization and who they report to — great for onboarding and orientation.',
+      },
+    ],
+    screenshots: [],
+  },
+
+  'documents': {
+    tagline:
+      'Stop digging through shared drives and binders. Your team\'s important documents live here.',
+    problem:
+      'Your opening checklist is in a Google Doc. Your training materials are in a binder. Your policies are in an email from six months ago. When a new team member asks "where do I find the uniform policy?" nobody has the same answer. Information is scattered, outdated, and impossible to find when you need it.',
+    solution:
+      'Levelset Documents gives your organization a single, organized hub for every document your team needs. Upload policies, training guides, standard operating procedures, and reference materials. Organize by category, assign to roles, and know that every team member has access to the same up-to-date information.',
+    capabilities: [
+      {
+        icon: 'folder',
+        title: 'Organized by Category',
+        description:
+          'Group documents by topic — policies, training, SOPs, reference materials. No more hunting through a messy shared drive.',
+      },
+      {
+        icon: 'upload',
+        title: 'Upload Anything',
+        description:
+          'PDFs, images, Word docs, spreadsheets — upload whatever your team needs. Everything is stored and accessible from one place.',
+      },
+      {
+        icon: 'users',
+        title: 'Role-Based Visibility',
+        description:
+          'Control which documents are visible to which roles. Leadership docs stay with leadership. Team-wide policies are available to everyone.',
+      },
+      {
+        icon: 'search',
+        title: 'Always Findable',
+        description:
+          'Search across all your documents instantly. When someone asks "where\'s the food safety policy?" the answer is always the same: Levelset.',
+      },
+    ],
+    screenshots: [],
+  },
+
+  'pay': {
+    tagline:
+      'Pay that makes sense — tied to performance, role, and availability. No more "why does she make more than me?"',
+    problem:
+      'Pay decisions happen in a back office with no clear logic. Team members don\'t understand why they make what they make. Leaders can\'t explain it either. When someone asks for a raise, there\'s no system to reference — it\'s a gut call. And the team talks, so inconsistencies breed resentment.',
+    solution:
+      'Levelset\'s pay system lets you define transparent rules: base pay by role, adjustments for availability (full-time vs. part-time), bumps for performance zone (green, yellow, red), and premiums for certifications. The system calculates suggested pay automatically. Team members see a clear connection between their performance and their paycheck.',
+    capabilities: [
+      {
+        icon: 'settings',
+        title: 'Configurable Pay Rules',
+        description:
+          'Define base rates by role, then layer adjustments for availability, performance zone, and certifications. You set the rules — the system applies them consistently.',
+      },
+      {
+        icon: 'link',
+        title: 'Connected to Performance',
+        description:
+          'When a team member moves from yellow to green, their suggested pay updates. Performance has a direct, visible impact on compensation.',
+      },
+      {
+        icon: 'eye',
+        title: 'Transparent to Leaders',
+        description:
+          'Leaders can see exactly how pay is calculated for any team member. No black boxes, no guessing.',
+      },
+      {
+        icon: 'shield',
+        title: 'Fair and Documented',
+        description:
+          'Every pay rate has a clear rationale. When a team member asks "why?" you have an answer backed by rules, not opinion.',
+      },
+    ],
+    screenshots: [],
+  },
+
+  'goal-tracking': {
+    tagline:
+      'From individual growth goals to org-wide targets — set them, track them, and tie them to real performance.',
+    problem:
+      'Goals get set in a meeting and forgotten by the next week. There\'s no system to track progress, no connection to actual performance data, and no accountability. When evaluation time comes, nobody remembers what the goals were — let alone whether they were met.',
+    solution:
+      'Levelset Goal Tracking lets you set goals at every level: individual team members, teams, locations, and the whole organization. Goals connect to your performance data — so progress updates itself as ratings come in. Tie goals to evaluations so review conversations are grounded in what was actually accomplished.',
+    capabilities: [
+      {
+        icon: 'target',
+        title: 'Goals at Every Level',
+        description:
+          'Set goals for individual team members, teams, locations, or the entire organization. Everyone knows what they\'re working toward.',
+      },
+      {
+        icon: 'link',
+        title: 'Connected to Performance Data',
+        description:
+          'Goals can reference positional ratings, OE pillar scores, or custom metrics. Progress updates as real data comes in — no manual check-ins needed.',
+      },
+      {
+        icon: 'calendar-text',
+        title: 'Tied to Evaluations',
+        description:
+          'When it\'s evaluation time, the team member\'s goals and their progress are right there. Reviews become conversations about real outcomes.',
+      },
+      {
+        icon: 'trending-up',
+        title: 'Track Progress Over Time',
+        description:
+          'See how goals are trending — on track, at risk, or completed. Leaders can intervene early instead of discovering missed targets at year-end.',
+      },
+    ],
+    screenshots: [],
+  },
+
+  'development-plans': {
+    tagline:
+      'Every team member gets a roadmap. Every leader knows the next step. Growth stops being a conversation and becomes a plan.',
+    problem:
+      'A team member asks "what do I need to do to become a Team Lead?" and the answer depends on which leader they ask. Development conversations happen verbally and never get documented. There\'s no follow-through because there\'s no system. Promising team members leave because they don\'t see a path forward.',
+    solution:
+      'Levelset Development Plans give every team member a documented, trackable path to growth. Define milestones, set checkpoints, and tie the plan to real performance data. From Team Member to Trainer, Trainer to Team Lead, Team Lead to Director — every step is visible, every checkpoint is tracked, and every leader is aligned on what "ready" looks like.',
+    capabilities: [
+      {
+        icon: 'map',
+        title: 'Custom Roadmaps per Employee',
+        description:
+          'Build personalized development plans with milestones and checkpoints. Each team member sees exactly what they need to do to advance.',
+      },
+      {
+        icon: 'check-circle',
+        title: 'Milestone Checkpoints',
+        description:
+          'Define what "ready" looks like at each stage. Leaders mark checkpoints as complete, and progress is visible to the team member.',
+      },
+      {
+        icon: 'link',
+        title: 'Connected to Ratings and Evaluations',
+        description:
+          'Development plans reference real performance data. When a team member hits green on all Drive-Thru criteria, it shows in their plan — automatically.',
+      },
+      {
+        icon: 'git-branch',
+        title: 'Role-to-Role Advancement',
+        description:
+          'Define advancement paths: Team Member → Trainer → Team Lead → Director. Each transition has clear requirements so promotions are earned, not guessed.',
       },
     ],
     screenshots: [],
