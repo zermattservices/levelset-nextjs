@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@levelset/design-tokens": "workspace:*",
+    "@levelset/notifications": "workspace:*",
     "@levelset/shared": "workspace:*",
     "@supabase/supabase-js": "^2.49.1",
     "lucide-react": "^0.575.0",

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { getResendClient } from '@/lib/resend';
+import { notifyLead } from '@levelset/notifications';
 
 interface SubmitBody {
   first_name: string;
@@ -87,6 +88,21 @@ export async function POST(request: NextRequest) {
     // Send internal notification (non-blocking)
     sendInternalNotification(body, enrichedLocations).catch((err) => {
       console.error('Approach internal notification error:', err);
+    });
+
+    // Slack notification (fire-and-forget)
+    notifyLead({
+      email: body.email.trim().toLowerCase(),
+      name: `${body.first_name.trim()} ${body.last_name.trim()}`,
+      source: 'the_approach',
+      isOperator: body.is_operator,
+      role: body.role?.trim() || undefined,
+      isMultiUnit: body.is_multi_unit,
+      locations: enrichedLocations.map((l) => ({
+        store_number: l.store_number,
+        location_name: l.location_name || undefined,
+        state: l.state || undefined,
+      })),
     });
 
     return NextResponse.json({ success: true });

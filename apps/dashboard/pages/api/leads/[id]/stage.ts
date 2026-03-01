@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { recalculateEngagementScore } from '@/lib/crm/engagement';
 import { recalculateLeadValue, recalculateStoreValues } from '@/lib/crm/value';
+import { notifyStageChange } from '@levelset/notifications';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 // Maps pipeline stages to their corresponding timestamp columns
@@ -103,6 +104,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Store values recalc error:', err)
       );
     }
+
+    // Slack notification (fire-and-forget)
+    notifyStageChange({
+      leadId: id as string,
+      email: updatedLead.email,
+      name: [updatedLead.first_name, updatedLead.last_name].filter(Boolean).join(' ') || undefined,
+      oldStage: oldStage || 'new',
+      newStage: stage,
+      lostReason: stage === 'lost' ? reason : undefined,
+    });
 
     return res.status(200).json(updatedLead);
   }

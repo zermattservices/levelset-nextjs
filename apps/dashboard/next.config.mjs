@@ -30,6 +30,7 @@ const nextConfig = {
   // Transpile Ant Design packages to fix ESM module resolution issues
   transpilePackages: [
     '@levelset/design-tokens',
+    '@levelset/notifications',
     'antd',
     '@ant-design/icons',
     '@ant-design/icons-svg',

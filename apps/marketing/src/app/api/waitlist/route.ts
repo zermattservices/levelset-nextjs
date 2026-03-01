@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { sendWaitlistNotification } from '@/lib/resend';
+import { notifyLead } from '@levelset/notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -130,6 +131,16 @@ export async function POST(request: NextRequest) {
       source: source || 'website',
     }).catch((err) => {
       console.error('Email notification error:', err);
+    });
+
+    // Slack notification (fire-and-forget)
+    notifyLead({
+      email: normalizedEmail,
+      name: trimmedName || undefined,
+      source: source || 'website',
+      storeNumber: storeNumber?.trim() || undefined,
+      isMultiUnit: isMultiUnit ?? undefined,
+      message: message?.trim() || undefined,
     });
 
     return NextResponse.json({ success: true });

@@ -1,12 +1,14 @@
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import SettingsIcon from '@mui/icons-material/Settings';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
+import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import sty from './MenuNavigation.module.css';
 import projectcss from '@/styles/base.module.css';
@@ -15,6 +17,7 @@ import { LogoutButton } from '../LogoutButton/LogoutButton';
 import { NavSubmenu, type MenuType } from '../NavSubmenu/NavSubmenu';
 import { LocationSelectDropdown } from '@/components/CodeComponents/LocationSelectDropdown';
 import { ProfileModal } from '../ProfileModal/ProfileModal';
+import { BugReportModal } from '../BugReportModal/BugReportModal';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
@@ -56,11 +59,13 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
   const { has } = usePermissions();
   const { hasFeature } = useOrgFeatures();
   const isRoadmapSubdomain = useIsRoadmapSubdomain();
+  const router = useRouter();
   const [activeMenu, setActiveMenu] = React.useState<MenuType | null>(null);
   const [isClosing, setIsClosing] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
   const [helpDropdownOpen, setHelpDropdownOpen] = React.useState(false);
   const [profileModalOpen, setProfileModalOpen] = React.useState(false);
+  const [bugModalOpen, setBugModalOpen] = React.useState(false);
   const [submenuOffset, setSubmenuOffset] = React.useState<number>(0);
   const profileDropdownRef = React.useRef<HTMLDivElement>(null);
   const helpDropdownRef = React.useRef<HTMLDivElement>(null);
@@ -387,7 +392,23 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
                         <span className={sty.helpItemDescription}>Browse documentation and guides</span>
                       </div>
                     </a>
-                    <a 
+                    <button
+                      className={sty.helpMenuCard}
+                      onClick={() => {
+                        setHelpDropdownOpen(false);
+                        setBugModalOpen(true);
+                      }}
+                      style={{ border: 'none', background: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+                    >
+                      <div className={sty.helpIconContainer}>
+                        <BugReportOutlinedIcon sx={{ fontSize: 22 }} />
+                      </div>
+                      <div className={sty.helpTextContainer}>
+                        <span className={sty.helpItemLabel}>Submit a Bug</span>
+                        <span className={sty.helpItemDescription}>Report an issue you&apos;ve found</span>
+                      </div>
+                    </button>
+                    <a
                       href={`https://roadmap.levelset.io/features${selectedLocationId ? `?location=${selectedLocationId}` : ''}`}
                       className={sty.helpMenuCard}
                     >
@@ -396,7 +417,7 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
                       </div>
                       <div className={sty.helpTextContainer}>
                         <span className={sty.helpItemLabel}>Roadmap</span>
-                        <span className={sty.helpItemDescription}>Vote on features and report bugs</span>
+                        <span className={sty.helpItemDescription}>Vote on features and request improvements</span>
                       </div>
                     </a>
                   </div>
@@ -482,6 +503,13 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
       <ProfileModal
         open={profileModalOpen}
         onClose={() => setProfileModalOpen(false)}
+      />
+
+      {/* Bug Report Modal */}
+      <BugReportModal
+        open={bugModalOpen}
+        onClose={() => setBugModalOpen(false)}
+        currentPage={router.pathname}
       />
     </div>
   );

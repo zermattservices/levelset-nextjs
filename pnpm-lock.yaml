@@ -81,6 +81,9 @@ importers:
       '@levelset/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@levelset/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
       '@mui/icons-material':
         specifier: ^7.3.4
         version: 7.3.8(@mui/material@7.3.8(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.28)(react@18.3.1)
@@ -250,6 +253,9 @@ importers:
       '@levelset/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@levelset/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
       '@levelset/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -295,6 +301,12 @@ importers:
         version: 5.9.3
 
   packages/design-tokens:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
+  packages/notifications:
     devDependencies:
       typescript:
         specifier: ^5.7.3

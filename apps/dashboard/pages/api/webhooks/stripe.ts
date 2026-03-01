@@ -14,6 +14,12 @@ import { getStripe } from '@/lib/stripe';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { getTierFromPriceId, PlanTier } from '@/lib/billing/constants';
 import { handleSubscriptionStatusChange } from '@/lib/billing/sync-features';
+import {
+  notifySubscriptionCreated,
+  notifySubscriptionCanceled,
+  notifyInvoicePaid,
+  notifyInvoiceFailed,
+} from '@levelset/notifications';
 
 // Disable Next.js body parsing — we need the raw body for Stripe signature verification
 export const config = {
@@ -60,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpsert(supabase, stripe, subscription);
+        await handleSubscriptionUpsert(supabase, stripe, subscription, event.type);
         break;
       }
 
@@ -102,7 +108,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 async function handleSubscriptionUpsert(
   supabase: ReturnType<typeof createServerSupabaseClient>,
   stripe: Stripe,
-  subscription: Stripe.Subscription
+  subscription: Stripe.Subscription,
+  eventType: string
 ) {
   // Find the org by stripe_customer_id
   const customerId = typeof subscription.customer === 'string'
@@ -169,6 +176,16 @@ async function handleSubscriptionUpsert(
     planTier,
     subscription.status as any
   );
+
+  // Only notify on creation (not every update)
+  if (eventType === 'customer.subscription.created') {
+    notifySubscriptionCreated({
+      orgId: org.id,
+      planTier,
+      status: subscription.status,
+      quantity: subscription.items.data[0]?.quantity || 1,
+    });
+  }
 }
 
 async function handleSubscriptionDeleted(
@@ -203,6 +220,12 @@ async function handleSubscriptionDeleted(
 
   // Clear features (unless custom pricing)
   await handleSubscriptionStatusChange(supabase, org.id, 'core', 'canceled');
+
+  notifySubscriptionCanceled({
+    orgId: org.id,
+    planTier: 'core',
+    canceledAt: new Date().toISOString(),
+  });
 }
 
 async function handleInvoiceEvent(
@@ -250,9 +273,22 @@ async function handleInvoiceEvent(
       { onConflict: 'stripe_invoice_id' }
     );
 
-  // If payment failed, also update subscription status
+  // Slack notifications for invoice events
+  if (invoice.status === 'paid') {
+    notifyInvoicePaid({
+      orgId: org.id,
+      amountCents: invoice.amount_paid || 0,
+      currency: invoice.currency || 'usd',
+      invoiceUrl: invoice.hosted_invoice_url || undefined,
+    });
+  }
   if (invoice.status === 'uncollectible' || invoice.status === 'open') {
-    // The subscription.updated webhook will handle the status change
+    notifyInvoiceFailed({
+      orgId: org.id,
+      amountCents: invoice.amount_due || 0,
+      currency: invoice.currency || 'usd',
+      invoiceUrl: invoice.hosted_invoice_url || undefined,
+    });
   }
 }
 

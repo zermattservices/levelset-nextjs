@@ -18,6 +18,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@levelset/design-tokens": "workspace:*",
+    "@levelset/notifications": "workspace:*",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
     "@mui/x-data-grid-pro": "^8.16.0",
