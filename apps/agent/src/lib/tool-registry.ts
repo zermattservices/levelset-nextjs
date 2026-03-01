@@ -25,9 +25,6 @@ import { getOrgChart } from '../tools/data/org-chart.js';
 import { getScheduleOverview, getEmployeeSchedule, getLaborSummary } from '../tools/data/schedule.js';
 import { getEvaluationStatus } from '../tools/data/evaluations.js';
 
-// Legacy tools — still imported for now, removed in Task 13
-import { getEmployeeRatings } from '../tools/data/ratings.js';
-import { getEmployeeInfractions } from '../tools/data/infractions.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -211,12 +208,6 @@ export async function executeTool(
     case 'get_evaluation_status':
       return getEvaluationStatus(args, orgId, locationId);
 
-    // Legacy tools (removed in Task 13)
-    case 'get_employee_ratings':
-      return getEmployeeRatings(args, orgId, locationId);
-    case 'get_employee_infractions':
-      return getEmployeeInfractions(args, orgId, locationId);
-
     default:
       return JSON.stringify({ error: `Unknown tool: ${name}` });
   }
@@ -236,14 +227,6 @@ export function getToolCallLabel(name: string, input: Record<string, unknown>): 
     }
     case 'list_employees':
       return 'Listing employees';
-    case 'get_employee_ratings': {
-      const empName = input.employee_name || '';
-      return empName ? `Checking ratings for ${empName}` : 'Checking employee ratings';
-    }
-    case 'get_employee_infractions': {
-      const empName = input.employee_name || '';
-      return empName ? `Checking infractions for ${empName}` : 'Checking employee infractions';
-    }
     case 'get_employee_profile':
       return 'Loading employee profile';
     case 'get_team_overview':
@@ -385,31 +368,9 @@ export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
         return await listEmployees(input, orgId, locationId);
       },
     }),
-    get_employee_ratings: tool({
-      description:
-        'Get detailed rating history for ONE specific employee — individual ratings with scores, dates, and positions. Requires employee_id (use lookup_employee first). For team-wide rating data, use get_team_overview instead. Prefer get_employee_profile if you also need discipline data.',
-      inputSchema: z.object({
-        employee_id: z.string().describe('The UUID of the employee'),
-        limit: z.number().optional().describe('Maximum number of ratings to return (default: 10)'),
-      }),
-      execute: async (input: Record<string, unknown>) => {
-        return await getEmployeeRatings(input, orgId, locationId);
-      },
-    }),
-    get_employee_infractions: tool({
-      description:
-        'Get infraction history for ONE specific employee. Requires employee_id (use lookup_employee first). For team-wide discipline data, use get_discipline_summary instead.',
-      inputSchema: z.object({
-        employee_id: z.string().describe('The UUID of the employee'),
-        limit: z.number().optional().describe('Maximum number of infractions to return (default: 10)'),
-      }),
-      execute: async (input: Record<string, unknown>) => {
-        return await getEmployeeInfractions(input, orgId, locationId);
-      },
-    }),
     get_employee_profile: tool({
       description:
-        'Get a comprehensive profile for ONE employee: details, recent ratings with trend, infractions, and discipline actions — all in one call. Requires employee_id (use lookup_employee first). After calling this, do NOT also call get_employee_ratings or get_employee_infractions.',
+        'Get a comprehensive profile for ONE employee: details, recent ratings with trend, infractions, and discipline actions — all in one call. Requires employee_id (use lookup_employee first).',
       inputSchema: z.object({
         employee_id: z.string().describe('The UUID of the employee'),
       }),

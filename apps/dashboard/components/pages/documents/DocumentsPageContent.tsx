@@ -232,9 +232,13 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
   }, [fetchFolders, fetchDocuments]);
 
   React.useEffect(() => {
-    if (!auth.isLoaded || !auth.authUser || !auth.appUser || auth.role !== 'Levelset Admin') return;
+    if (!auth.isLoaded || !auth.authUser || !auth.appUser) return;
+    // Wait for location context to fully resolve (loading done AND org_id available)
+    // so we send the correct x-org-id header on the first fetch.
+    if (locationCtx.loading) return;
+    if (config.mode === 'org' && !locationCtx.selectedLocationOrgId) return;
     fetchAll();
-  }, [auth.isLoaded, auth.authUser, auth.appUser, auth.role, fetchAll]);
+  }, [auth.isLoaded, auth.authUser, auth.appUser, locationCtx.loading, locationCtx.selectedLocationOrgId, config.mode, fetchAll]);
 
   /* ---------------------------------------------------------------- */
   /*  Folder navigation                                                */
@@ -253,7 +257,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
 
   // Refetch when folder or filters change
   React.useEffect(() => {
-    if (!auth.isLoaded || !auth.authUser || auth.role !== 'Levelset Admin') return;
+    if (!auth.isLoaded || !auth.authUser) return;
+    if (config.mode === 'org' && !locationCtx.selectedLocationOrgId) return;
     fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentFolderId, categoryFilter, searchQuery]);
@@ -1109,28 +1114,26 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
                   : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
               }}
             />
-            {config.mode === 'global' && (
-              <Chip
-                label="Paste Text"
-                icon={<ArticleOutlinedIcon sx={{ fontSize: 16 }} />}
-                variant={uploadMode === 'text' ? 'filled' : 'outlined'}
-                onClick={() => setUploadMode('text')}
-                sx={{
-                  fontFamily,
-                  fontSize: 12,
-                  fontWeight: 500,
-                  px: 1,
-                  ...(uploadMode === 'text'
-                    ? {
-                        backgroundColor: 'var(--ls-color-brand)',
-                        color: '#fff',
-                        '& .MuiChip-icon': { color: '#fff' },
-                        '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
-                      }
-                    : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
-                }}
-              />
-            )}
+            <Chip
+              label="Paste Text"
+              icon={<ArticleOutlinedIcon sx={{ fontSize: 16 }} />}
+              variant={uploadMode === 'text' ? 'filled' : 'outlined'}
+              onClick={() => setUploadMode('text')}
+              sx={{
+                fontFamily,
+                fontSize: 12,
+                fontWeight: 500,
+                px: 1,
+                ...(uploadMode === 'text'
+                  ? {
+                      backgroundColor: 'var(--ls-color-brand)',
+                      color: '#fff',
+                      '& .MuiChip-icon': { color: '#fff' },
+                      '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
+                    }
+                  : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
+              }}
+            />
           </div>
 
           {/* File drop zone */}

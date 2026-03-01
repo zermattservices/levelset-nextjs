@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const supabase = createServerSupabaseClient();
-    const { notification_id, new_employees, kept_employees } = req.body;
+    const { notification_id, new_employees, kept_employees, termination_reasons } = req.body;
 
     if (!notification_id) {
       return res.status(400).json({ error: 'notification_id is required' });
@@ -182,16 +182,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
 
     if (terminatedEmployees.length > 0) {
-      const terminatedIds = terminatedEmployees.map((emp: any) => emp.id);
-      const { error: deactivateError } = await supabase
-        .from('employees')
-        .update({ active: false })
-        .in('id', terminatedIds);
+      const terminationReasonsMap: Record<number, string> = termination_reasons || {};
+      const today = new Date().toISOString().split('T')[0];
 
-      if (deactivateError) {
-        console.error('Error deactivating terminated employees:', deactivateError);
-      } else {
-        deactivatedCount = terminatedEmployees.length;
+      for (const emp of terminatedEmployees) {
+        const hsId = Number(emp.hs_id);
+        const reason = terminationReasonsMap[hsId] || null;
+        const { error: deactivateError } = await supabase
+          .from('employees')
+          .update({
+            active: false,
+            termination_date: today,
+            termination_reason: reason,
+          })
+          .eq('id', emp.id);
+
+        if (deactivateError) {
+          console.error(`Error deactivating employee ${emp.id}:`, deactivateError);
+        } else {
+          deactivatedCount++;
+        }
       }
     }
 

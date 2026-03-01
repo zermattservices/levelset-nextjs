@@ -16,6 +16,7 @@ import {
   FormControl,
   InputLabel,
   Select,
+  ListSubheader,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -584,6 +585,7 @@ function EmployeesTableView({
   const [terminateConfirmOpen, setTerminateConfirmOpen] = React.useState(false);
   const [employeeToTerminate, setEmployeeToTerminate] = React.useState<{ id: string; name: string } | null>(null);
   const [terminationReason, setTerminationReason] = React.useState<string>('');
+  const [terminationReasons, setTerminationReasons] = React.useState<Array<{ id: string; reason: string; category: string }>>([]);
 
   // Get current user's role and employee_id from props (passed from parent component)
   const currentUserRole = currentUserRoleProp || '';
@@ -607,6 +609,22 @@ function EmployeesTableView({
     }
     
     fetchOrgRoles();
+  }, [selectedLocationOrgId]);
+
+  // Fetch termination reasons for this org
+  React.useEffect(() => {
+    async function fetchTerminationReasons() {
+      if (!selectedLocationOrgId) return;
+      const supabase = createSupabaseClient();
+      const { data } = await supabase
+        .from('termination_reasons')
+        .select('id, reason, category, display_order')
+        .eq('org_id', selectedLocationOrgId)
+        .eq('active', true)
+        .order('display_order', { ascending: true });
+      setTerminationReasons(data || []);
+    }
+    fetchTerminationReasons();
   }, [selectedLocationOrgId]);
 
   // Get all role names sorted by hierarchy level
@@ -1706,16 +1724,16 @@ function EmployeesTableView({
             Are you sure you want to terminate {employeeToTerminate?.name}? This will mark them as inactive in your roster.
           </Typography>
           <FormControl fullWidth sx={{ mb: 3 }}>
-            <InputLabel 
+            <InputLabel
               id="termination-reason-label"
               sx={{ fontFamily, fontSize: 14 }}
             >
-              Termination Reason (optional)
+              Termination Reason
             </InputLabel>
             <Select
               labelId="termination-reason-label"
               value={terminationReason}
-              label="Termination Reason (optional)"
+              label="Termination Reason"
               onChange={(e) => setTerminationReason(e.target.value)}
               sx={{
                 fontFamily,
@@ -1723,18 +1741,18 @@ function EmployeesTableView({
                 borderRadius: '8px',
               }}
             >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value="Voluntary - Resignation">Voluntary - Resignation</MenuItem>
-              <MenuItem value="Voluntary - Job Abandonment">Voluntary - Job Abandonment</MenuItem>
-              <MenuItem value="Involuntary - Performance">Involuntary - Performance</MenuItem>
-              <MenuItem value="Involuntary - Attendance">Involuntary - Attendance</MenuItem>
-              <MenuItem value="Involuntary - Policy Violation">Involuntary - Policy Violation</MenuItem>
-              <MenuItem value="Involuntary - Other">Involuntary - Other</MenuItem>
-              <MenuItem value="End of Seasonal Employment">End of Seasonal Employment</MenuItem>
-              <MenuItem value="Transfer">Transfer</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
+              {['Voluntary', 'Involuntary', 'Other'].map(category => {
+                const categoryReasons = terminationReasons.filter(r => r.category === category);
+                if (categoryReasons.length === 0) return null;
+                return [
+                  <ListSubheader key={category} sx={{ fontFamily, fontSize: 12, fontWeight: 600, lineHeight: '32px' }}>
+                    {category}
+                  </ListSubheader>,
+                  ...categoryReasons.map(r => (
+                    <MenuItem key={r.id} value={r.reason}>{r.reason}</MenuItem>
+                  )),
+                ];
+              })}
             </Select>
           </FormControl>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
@@ -1761,6 +1779,7 @@ function EmployeesTableView({
             <Button
               variant="contained"
               onClick={handleConfirmTerminate}
+              disabled={!terminationReason}
               sx={{
                 fontFamily,
                 fontSize: 14,
@@ -1771,6 +1790,10 @@ function EmployeesTableView({
                 borderRadius: '8px',
                 '&:hover': {
                   backgroundColor: '#b91c1c',
+                },
+                '&.Mui-disabled': {
+                  backgroundColor: '#e0e0e0',
+                  color: '#9ca3af',
                 },
               }}
             >

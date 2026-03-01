@@ -342,9 +342,16 @@ async function _getPillarScores(
   }
 
   // ── LOCATION-LEVEL RESPONSE ──
+  // Build zone map for position breakdown
+  const positionIdToZone = new Map<string, string>();
+  for (const p of positions) {
+    positionIdToZone.set(p.id as string, (p.zone as string) || '');
+  }
+
   return _buildLocationResponse(
     ratings, employeeMap, pillarDefs, criteriaByPosition,
-    positionNameToId, pillarIdToName, filteredPillarId,
+    positionNameToId, positionIdToName, positionIdToZone,
+    pillarIdToName, filteredPillarId,
     startDate, endDate
   );
 }
@@ -359,6 +366,8 @@ function _buildLocationResponse(
   pillarDefs: PillarDef[],
   criteriaByPosition: Map<string, CriteriaMapping[]>,
   positionNameToId: Map<string, string>,
+  positionIdToName: Map<string, string>,
+  positionIdToZone: Map<string, string>,
   pillarIdToName: Map<string, string>,
   filteredPillarId: string | undefined,
   startDate: string,
@@ -382,7 +391,71 @@ function _buildLocationResponse(
     };
   });
 
-  // Compute per-employee scores for top/bottom performers
+  // ── Per-position pillar breakdown ──
+  const ratingsByPosition = new Map<string, RatingRow[]>();
+  for (const r of ratings) {
+    const posId = r.position_id || positionNameToId.get(r.position) || r.position;
+    const arr = ratingsByPosition.get(posId) || [];
+    arr.push(r);
+    ratingsByPosition.set(posId, arr);
+  }
+
+  const positionBreakdowns: Array<{
+    name: string;
+    zone: string;
+    rating_count: number;
+    overall_score: number;
+    pillar_scores: Record<string, number>;
+    criteria: Array<{ slot: number; name: string; pillar: string; pillar_2?: string }>;
+  }> = [];
+
+  for (const [posKey, posRatings] of ratingsByPosition) {
+    const posContributions: Record<string, PillarAccumulator> = {};
+    for (const r of posRatings) {
+      distributeRatingToPillars(r, criteriaByPosition, positionNameToId, posContributions);
+    }
+    const posScores = computePillarScores(posContributions, pillarDefs);
+
+    // Resolve position name
+    let posName = positionIdToName.get(posKey) ?? posKey;
+    if (posName === posKey && posRatings[0]) {
+      posName = posRatings[0].position;
+    }
+
+    const pillarScoresNamed: Record<string, number> = {};
+    for (const p of pillarDefs) {
+      pillarScoresNamed[p.name] = round1(posScores.pillarScores[p.id] ?? 0);
+    }
+
+    // Build criteria info for this position
+    const criteria = (criteriaByPosition.get(posKey) || [])
+      .sort((a, b) => a.criteria_order - b.criteria_order)
+      .map((c) => {
+        const entry: { slot: number; name: string; pillar: string; pillar_2?: string } = {
+          slot: c.criteria_order,
+          name: c.name,
+          pillar: c.pillar_1_id ? (pillarIdToName.get(c.pillar_1_id) ?? '') : '',
+        };
+        if (c.pillar_2_id) {
+          entry.pillar_2 = pillarIdToName.get(c.pillar_2_id) ?? '';
+        }
+        return entry;
+      });
+
+    positionBreakdowns.push({
+      name: posName,
+      zone: positionIdToZone.get(posKey) || '',
+      rating_count: posRatings.length,
+      overall_score: round1(posScores.overallScore),
+      pillar_scores: pillarScoresNamed,
+      criteria,
+    });
+  }
+
+  // Sort positions by overall score ascending (weakest first)
+  positionBreakdowns.sort((a, b) => a.overall_score - b.overall_score);
+
+  // ── Per-employee scores for top/bottom performers ──
   const ratingsByEmployee = new Map<string, RatingRow[]>();
   for (const r of ratings) {
     const arr = ratingsByEmployee.get(r.employee_id) || [];
@@ -453,6 +526,7 @@ function _buildLocationResponse(
     period: { start: startDate, end: endDate, rating_count: ratings.length },
     overall_score: round1(locationScores.overallScore),
     pillars,
+    position_breakdown: positionBreakdowns,
     top_performers: topPerformers,
     needs_improvement: needsImprovement,
   };

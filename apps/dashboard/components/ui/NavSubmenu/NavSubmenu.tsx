@@ -159,8 +159,9 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
     {
       label: 'Org Chart',
       description: 'Visualize team structure',
+      href: '/org-chart',
       icon: <AccountTreeOutlinedIcon sx={{ fontSize: 22 }} />,
-      disabled: true,
+      requiredFeature: F.ORG_CHART,
     },
   ],
 };

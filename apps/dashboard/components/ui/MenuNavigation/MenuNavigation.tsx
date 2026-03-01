@@ -18,6 +18,7 @@ import { ProfileModal } from '../ProfileModal/ProfileModal';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
+import { createSupabaseClient } from '@/util/supabase/component';
 import { useImpersonation } from '@/lib/providers/ImpersonationProvider';
 import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
 
@@ -207,9 +208,15 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
     if (!hasFeature(F.SCHEDULING) || !auth.org_id) return;
     const fetchPendingCount = async () => {
       try {
+        const supabase = createSupabaseClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+
         const params = new URLSearchParams({ org_id: auth.org_id! });
         if (selectedLocationId) params.set('location_id', selectedLocationId);
-        const resp = await fetch(`/api/scheduling/pending-count?${params}`);
+        const resp = await fetch(`/api/scheduling/pending-count?${params}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
         if (resp.ok) {
           const data = await resp.json();
           setPendingCount(data.total || 0);

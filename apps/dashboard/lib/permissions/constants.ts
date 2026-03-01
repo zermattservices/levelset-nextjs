@@ -18,6 +18,7 @@ export const PERMISSION_MODULES = {
   SCHEDULING: 'scheduling',
   FORM_MANAGEMENT: 'form_management',
   DOCUMENTS: 'documents',
+  ORG_CHART: 'org_chart',
 } as const;
 
 // All permission keys as const for type safety
@@ -54,6 +55,7 @@ export const P = {
   ROSTER_TERMINATE: 'roster.terminate_employees',
   ROSTER_SYNC: 'roster.sync_employees',
   ROSTER_MANAGE_PAY: 'roster.manage_pay_settings',
+  ROSTER_MANAGE_TERMINATION: 'roster.manage_termination_reasons',
 
   // Organization Settings
   ORG_VIEW_SETTINGS: 'org_settings.view_settings',
@@ -105,6 +107,10 @@ export const P = {
   DOCS_EDIT: 'documents.edit_documents',
   DOCS_DELETE: 'documents.delete_documents',
   DOCS_MANAGE_FOLDERS: 'documents.manage_folders',
+
+  // Org Chart
+  OC_VIEW: 'org_chart.view_org_chart',
+  OC_EDIT: 'org_chart.edit_org_chart',
 } as const;
 
 // Type for any valid permission key
@@ -185,6 +191,11 @@ export const MODULE_METADATA: Record<string, ModuleMetadata> = {
     name: 'Documents',
     description: 'Organization document management and storage',
     order: 13,
+  },
+  [PERMISSION_MODULES.ORG_CHART]: {
+    name: 'Org Chart',
+    description: 'Organizational chart visualization and configuration',
+    order: 14,
   },
 };
 
@@ -363,6 +374,12 @@ export const SUB_ITEM_METADATA: Record<PermissionKey, SubItemMetadata> = {
     name: 'Manage Pay Settings',
     description: 'Configure suggested pay rates and pay calculation rules',
     order: 9,
+    module: PERMISSION_MODULES.ROSTER,
+  },
+  [P.ROSTER_MANAGE_TERMINATION]: {
+    name: 'Manage Termination Reasons',
+    description: 'Configure termination reason options for the organization',
+    order: 10,
     module: PERMISSION_MODULES.ROSTER,
   },
 
@@ -571,6 +588,21 @@ export const SUB_ITEM_METADATA: Record<PermissionKey, SubItemMetadata> = {
     description: 'Ability to create, rename, and delete document folders',
     order: 5,
     module: PERMISSION_MODULES.DOCUMENTS,
+  },
+
+  // Org Chart
+  [P.OC_VIEW]: {
+    name: 'View Org Chart',
+    description: 'Access to view the organizational chart',
+    order: 1,
+    module: PERMISSION_MODULES.ORG_CHART,
+  },
+  [P.OC_EDIT]: {
+    name: 'Edit Org Chart',
+    description: 'Ability to configure departments, groups, and supervisor relationships (scoped by hierarchy level)',
+    order: 2,
+    module: PERMISSION_MODULES.ORG_CHART,
+    dependsOn: P.OC_VIEW,
   },
 };
 

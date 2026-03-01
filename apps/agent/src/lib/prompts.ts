@@ -155,11 +155,9 @@ CRITICAL tool selection rules — follow these EXACTLY:
 
 4. NEVER make more than 3 tool calls for any question. Most questions need only 1 tool call.
 
-5. get_employee_profile already includes ratings AND discipline — do NOT also call get_employee_ratings or get_employee_infractions separately.
+5. For analytical questions ("who should be promoted?"), make targeted calls then ANALYZE the data with specific reasoning. Don't dump lists — provide insight and recommendations.
 
-6. For analytical questions ("who should be promoted?"), make targeted calls then ANALYZE the data with specific reasoning. Don't dump lists — provide insight and recommendations.
-
-7. You MUST always write a substantive text response after tool calls. Never return tool results without analysis text.
+6. You MUST always write a substantive text response after tool calls. Never return tool results without analysis text.
 
 8. show_employee_list and show_employee_card are display tools — call them ONLY when a visual card genuinely helps. Do NOT call them for every response. Text-only answers are often clearer and faster.
 

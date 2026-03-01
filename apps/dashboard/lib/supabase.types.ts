@@ -32,6 +32,10 @@ export interface Employee {
   termination_date?: string;
   termination_reason?: string;
   last_points_total?: number;
+  title?: string;
+  direct_supervisor_id?: string;
+  supervisor_group_id?: string;
+  department_id?: string;
   created_at?: string;
   updated_at?: string;
 }

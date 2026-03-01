@@ -89,7 +89,7 @@ export function LocationSelectDropdown({
       }}
     >
       <Select
-        value={selectedLocationId ?? ''}
+        value={loading ? '' : (selectedLocationId ?? '')}
         displayEmpty
         IconComponent={ExpandMoreIcon}
         renderValue={(value) => {

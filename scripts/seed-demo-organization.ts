@@ -309,6 +309,11 @@ async function seed() {
   await copyActionsRubric(orgId);
   console.log('   ✅ Rubrics copied\n');
 
+  // Step 5b: Seed termination reasons
+  console.log('📋 Seeding termination reasons...');
+  await seedTerminationReasons(orgId);
+  console.log('   ✅ Termination reasons seeded\n');
+
   // Step 6: Create employees
   console.log('👥 Creating employees...');
   const employees = await createEmployees(orgId, eastLocationId, westLocationId);
@@ -583,6 +588,29 @@ async function copyInfractionsRubric(orgId: string) {
   }
 
   console.log(`   ✅ Copied ${infractions.length} infractions from Reece Howard`);
+}
+
+async function seedTerminationReasons(orgId: string) {
+  const defaultReasons = [
+    { reason: 'Left for another job', category: 'Voluntary', display_order: 1 },
+    { reason: 'Moved away', category: 'Voluntary', display_order: 2 },
+    { reason: 'End of Seasonal Employment', category: 'Voluntary', display_order: 3 },
+    { reason: 'Conflict with another team member', category: 'Voluntary', display_order: 4 },
+    { reason: 'Job Abandonment', category: 'Voluntary', display_order: 5 },
+    { reason: 'Other - Voluntary', category: 'Voluntary', display_order: 6 },
+    { reason: 'Discipline Point Limit Reached', category: 'Involuntary', display_order: 7 },
+    { reason: 'Not a cultural fit', category: 'Involuntary', display_order: 8 },
+    { reason: 'Performance', category: 'Involuntary', display_order: 9 },
+    { reason: 'Other - Involuntary', category: 'Involuntary', display_order: 10 },
+  ];
+
+  for (const r of defaultReasons) {
+    await supabase.from('termination_reasons').insert({
+      id: randomUUID(),
+      org_id: orgId,
+      ...r,
+    });
+  }
 }
 
 async function copyActionsRubric(orgId: string) {

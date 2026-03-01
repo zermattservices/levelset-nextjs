@@ -18,7 +18,7 @@ import { OrganizationDetails } from '@/components/OrgSettings/OrganizationDetail
 import { UsersTab } from '@/components/OrgSettings/UsersTab';
 import { RolesTab } from '@/components/OrgSettings/RolesTab';
 import { PermissionsSettings } from '@/components/OrgSettings/PermissionsSettings';
-import { PaySettingsTab } from '@/components/OrgSettings/PaySettingsTab';
+import { RosterSettings } from '@/components/OrgSettings/RosterSettings';
 import { SchedulingSettings } from '@/components/OrgSettings/SchedulingSettings';
 import { BillingTab } from '@/components/OrgSettings/BillingTab';
 import { createSupabaseClient } from '@/util/supabase/component';
@@ -214,7 +214,7 @@ export function OrgSettingsPage() {
       case 'discipline':
         return <DisciplineSettings orgId={selectedLocationOrgId} locationId={selectedLocationId} onNavigate={setActiveSection} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
       case 'roster-settings':
-        return <PaySettingsTab orgId={selectedLocationOrgId} disabled={!canEdit} />;
+        return <RosterSettings orgId={selectedLocationOrgId} disabled={!canEdit} activeSubTab={activeSubTab} onSubTabChange={setActiveSubTab} />;
       case 'pathway':
         return <ComingSoonPlaceholder title="Pathway" description="Career pathway and development tracking coming soon." />;
       case 'evaluations':

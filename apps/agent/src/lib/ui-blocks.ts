@@ -38,10 +38,6 @@ export function toolResultToUIBlocks(
         return lookupEmployeeBlocks(data);
       case 'list_employees':
         return listEmployeesBlocks(data);
-      case 'get_employee_ratings':
-        return employeeRatingsBlocks(data, toolInput);
-      case 'get_employee_infractions':
-        return employeeInfractionsBlocks(data);
       case 'get_employee_profile':
         return employeeProfileBlocks(data, userMessage);
       case 'get_position_rankings':
@@ -97,32 +93,6 @@ function listEmployeesBlocks(data: any): UIBlock[] {
       },
     },
   ];
-}
-
-function employeeRatingsBlocks(_data: any, _toolInput: Record<string, unknown>): UIBlock[] {
-  // Per-position rating-summary cards are noisy for individual employee lookups
-  // (can produce 10+ cards per employee). The LLM's text analysis is more useful.
-  // For rich employee UI, use get_employee_profile which generates a single
-  // employee-card with overall average instead.
-  return [];
-}
-
-function employeeInfractionsBlocks(data: any): UIBlock[] {
-  const infractions = data.infractions;
-  if (!Array.isArray(infractions) || infractions.length === 0) return [];
-
-  return infractions.slice(0, 5).map((inf: any) => ({
-    blockType: 'infraction-card' as const,
-    blockId: `tool-inf-${inf.id}`,
-    payload: {
-      id: inf.id,
-      employee_name: '', // Not available from infractions tool alone
-      infraction: inf.infraction,
-      date: inf.infraction_date,
-      points: inf.points,
-      leader_name: inf.leader_name,
-    },
-  }));
 }
 
 /**

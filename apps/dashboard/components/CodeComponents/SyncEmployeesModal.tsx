@@ -610,7 +610,11 @@ export function SyncEmployeesModal({
   
   const [keptEmployees, setKeptEmployees] = React.useState<Set<number>>(new Set());
   console.log('[SyncEmployeesModal] useState: keptEmployees size =', keptEmployees.size);
-  
+
+  // Termination reason state
+  const [terminationReasons, setTerminationReasons] = React.useState<Array<{ id: string; reason: string; category: string }>>([]);
+  const [terminationReasonSelections, setTerminationReasonSelections] = React.useState<Map<number, string>>(new Map());
+
   const [confirming, setConfirming] = React.useState(false);
   console.log('[SyncEmployeesModal] useState: confirming =', confirming);
   
@@ -651,6 +655,18 @@ export function SyncEmployeesModal({
     supabase.from('org_features').select('enabled')
       .eq('org_id', orgId).eq('feature_key', 'scheduling').maybeSingle()
       .then(({ data }) => setHasSchedulingFeature(data?.enabled === true));
+  }, [orgId]);
+
+  // Fetch termination reasons for this org
+  React.useEffect(() => {
+    if (!orgId) return;
+    const supabase = createSupabaseClient();
+    supabase.from('termination_reasons')
+      .select('id, reason, category, display_order')
+      .eq('org_id', orgId)
+      .eq('active', true)
+      .order('display_order', { ascending: true })
+      .then(({ data }) => setTerminationReasons(data || []));
   }, [orgId]);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -817,6 +833,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
       setOrgPositions([]);
       setScheduleStats(null);
       setScheduleSyncing(false);
+      setTerminationReasonSelections(new Map());
     }
   }, [open]);
 
@@ -885,9 +902,21 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
     onClose();
   };
 
+  // Check if all non-kept terminated employees have a termination reason selected
+  const allTerminatedHaveReasons = React.useMemo(() => {
+    if (!notification || currentPage !== 'review') return true;
+    const terminated = notification.sync_data.terminated_employees || [];
+    for (const emp of terminated) {
+      const hsId = Number(emp.hs_id);
+      if (keptEmployees.has(hsId)) continue;
+      if (!terminationReasonSelections.get(hsId)) return false;
+    }
+    return true;
+  }, [notification, currentPage, keptEmployees, terminationReasonSelections]);
+
   const handleConfirmSync = async () => {
     if (!notification) return;
-    
+
     setConfirming(true);
     try {
       // For new employees, use email or hs_id as key (they don't have IDs yet)
@@ -906,6 +935,12 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
         };
       });
 
+      // Build termination reasons map (hs_id -> reason string)
+      const terminationReasonsMap: Record<number, string> = {};
+      terminationReasonSelections.forEach((reason, hsId) => {
+        if (reason) terminationReasonsMap[hsId] = reason;
+      });
+
       const response = await fetch('/api/employees/confirm-sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -913,6 +948,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
           notification_id: notification.id,
           new_employees: newEmployeesUpdates,
           kept_employees: Array.from(keptEmployees),
+          termination_reasons: terminationReasonsMap,
         }),
       });
 
@@ -1251,6 +1287,63 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
     setKeptEmployees,
   ]);
 
+  // Columns for terminated employees DataGrid — extends readOnlyColumns with a termination reason selector
+  const terminatedColumnsWithReason = React.useMemo<GridColDef[]>(() => {
+    // Insert the reason column before the last column (the "Keep" button)
+    const cols = [...readOnlyColumns];
+    const reasonColumn: GridColDef = {
+      field: 'termination_reason',
+      headerName: 'Reason',
+      width: 220,
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: (params) => {
+        const hsId = Number(params.row.hs_id);
+        const isKept = keptEmployees.has(hsId);
+        if (isKept) return null;
+        const selected = terminationReasonSelections.get(hsId) || '';
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <Select
+                value={selected}
+                displayEmpty
+                onChange={(e) => {
+                  setTerminationReasonSelections(prev => {
+                    const next = new Map(prev);
+                    next.set(hsId, e.target.value as string);
+                    return next;
+                  });
+                }}
+                sx={{
+                  fontFamily,
+                  fontSize: 12,
+                  height: 32,
+                  backgroundColor: selected ? '#fff' : '#fff5f5',
+                  '& .MuiSelect-select': {
+                    padding: '4px 8px',
+                  },
+                }}
+              >
+                <MenuItem value="" disabled>
+                  <em style={{ fontSize: 12 }}>Select reason</em>
+                </MenuItem>
+                {terminationReasons.map(r => (
+                  <MenuItem key={r.id} value={r.reason} sx={{ fontFamily, fontSize: 12 }}>
+                    {r.reason}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        );
+      },
+    };
+    // Insert before the last column (Keep button)
+    cols.splice(cols.length - 1, 0, reasonColumn);
+    return cols;
+  }, [readOnlyColumns, keptEmployees, terminationReasonSelections, terminationReasons]);
+
   // CRITICAL: Move useMemo hooks out of renderReviewPage to component body
   // This ensures hooks are always called in the same order, preventing hook order violations
   const syncData = notification?.sync_data;
@@ -1558,12 +1651,12 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
                 }}>
                   <DataGridPro
                     rows={terminatedEmployeesData}
-                    columns={readOnlyColumns}
+                    columns={terminatedColumnsWithReason}
                     disableRowSelectionOnClick
                     hideFooter
                     rowHeight={48}
                     columnHeaderHeight={56}
-                    getRowClassName={(params) => 
+                    getRowClassName={(params) =>
                       keptEmployees.has(Number(params.row.hs_id)) ? '' : 'terminated-row'
                     }
                     sx={{
@@ -1610,11 +1703,16 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
         </Accordion>
 
         {/* Confirm Button */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        {!allTerminatedHaveReasons && terminatedCount > 0 && (
+          <Typography sx={{ fontFamily, fontSize: 13, color: destructiveColor, textAlign: 'center', mt: 2 }}>
+            Please select a termination reason for all terminated employees before confirming.
+          </Typography>
+        )}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <Button
             variant="contained"
             onClick={handleConfirmSync}
-            disabled={confirming}
+            disabled={confirming || !allTerminatedHaveReasons}
             sx={{
               fontFamily,
               fontSize: 14,
@@ -1624,7 +1722,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
               color: '#ffffff',
               px: 4,
               py: 1.5,
-              borderRadius: '8px', // 4px default + 4px = 8px
+              borderRadius: '8px',
               '&:hover': {
                 backgroundColor: '#2d5a42',
               },

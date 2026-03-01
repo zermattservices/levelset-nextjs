@@ -197,6 +197,10 @@ export function SyncHireDateModal({
   const [allEmployees, setAllEmployees] = React.useState<Employee[]>([]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Termination reason state
+  const [terminationReasons, setTerminationReasons] = React.useState<Array<{ id: string; reason: string; category: string }>>([]);
+  const [terminationReasonSelections, setTerminationReasonSelections] = React.useState<Map<string, string>>(new Map());
+
   // Fetch has_synced_before flag and all employees
   React.useEffect(() => {
     if (!locationId || !open) return;
@@ -228,6 +232,18 @@ export function SyncHireDateModal({
     fetchData();
   }, [locationId, open]);
 
+  // Fetch termination reasons for this org
+  React.useEffect(() => {
+    if (!orgId) return;
+    const supabase = createSupabaseClient();
+    supabase.from('termination_reasons')
+      .select('id, reason, category, display_order')
+      .eq('org_id', orgId)
+      .eq('active', true)
+      .order('display_order', { ascending: true })
+      .then(({ data }) => setTerminationReasons(data || []));
+  }, [orgId]);
+
   // Reset state when modal opens/closes
   React.useEffect(() => {
     if (!open) {
@@ -239,6 +255,7 @@ export function SyncHireDateModal({
       setConfirmationStats(null);
       setExitConfirmOpen(false);
       setProcessing(false);
+      setTerminationReasonSelections(new Map());
     }
   }, [open]);
 
@@ -355,9 +372,15 @@ export function SyncHireDateModal({
 
   const handleConfirmSync = async () => {
     if (!notification) return;
-    
+
     setConfirming(true);
     try {
+      // Build termination reasons map (employee id -> reason string)
+      const terminationReasonsMap: Record<string, string> = {};
+      terminationReasonSelections.forEach((reason, empId) => {
+        if (reason) terminationReasonsMap[empId] = reason;
+      });
+
       const response = await fetch('/api/employees/confirm-hire-date-sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -366,6 +389,7 @@ export function SyncHireDateModal({
           unmatched_mappings: unmatchedMappings,
           employee_edits: Array.from(employeeEdits.values()),
           kept_employees: Array.from(keptEmployees),
+          termination_reasons: terminationReasonsMap,
         }),
       });
 
@@ -967,6 +991,53 @@ export function SyncHireDateModal({
         ),
       },
       {
+        field: 'termination_reason',
+        headerName: 'Reason',
+        width: 220,
+        align: 'center',
+        headerAlign: 'center',
+        renderCell: (params) => {
+          const isKept = keptEmployees.has(params.row.id);
+          if (isKept) return null;
+          const selected = terminationReasonSelections.get(params.row.id) || '';
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <Select
+                  value={selected}
+                  displayEmpty
+                  onChange={(e) => {
+                    setTerminationReasonSelections(prev => {
+                      const next = new Map(prev);
+                      next.set(params.row.id, e.target.value as string);
+                      return next;
+                    });
+                  }}
+                  sx={{
+                    fontFamily,
+                    fontSize: 12,
+                    height: 32,
+                    backgroundColor: selected ? '#fff' : '#fff5f5',
+                    '& .MuiSelect-select': {
+                      padding: '4px 8px',
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    <em style={{ fontSize: 12 }}>Select reason</em>
+                  </MenuItem>
+                  {terminationReasons.map(r => (
+                    <MenuItem key={r.id} value={r.reason} sx={{ fontFamily, fontSize: 12 }}>
+                      {r.reason}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          );
+        },
+      },
+      {
         field: 'actions',
         headerName: '',
         width: 100,
@@ -1021,7 +1092,18 @@ export function SyncHireDateModal({
         },
       },
     ];
-  }, [currentPage, keptEmployees]);
+  }, [currentPage, keptEmployees, terminationReasonSelections, terminationReasons]);
+
+  // Check if all non-kept terminated employees have a termination reason selected
+  const allTerminatedHaveReasons = React.useMemo(() => {
+    if (!notification || currentPage !== 'review') return true;
+    const terminated = notification.sync_data.terminated_employees || [];
+    for (const emp of terminated) {
+      if (keptEmployees.has(emp.id)) continue;
+      if (!terminationReasonSelections.get(emp.id)) return false;
+    }
+    return true;
+  }, [notification, currentPage, keptEmployees, terminationReasonSelections]);
 
   // Render Page 2: Review Changes
   const renderReviewPage = () => {
@@ -1490,11 +1572,16 @@ export function SyncHireDateModal({
         </Accordion>
 
         {/* Confirm Button */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        {!allTerminatedHaveReasons && terminatedCount > 0 && (
+          <Typography sx={{ fontFamily, fontSize: 13, color: destructiveColor, textAlign: 'center', mt: 2 }}>
+            Please select a termination reason for all terminated employees before confirming.
+          </Typography>
+        )}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <Button
             variant="contained"
             onClick={handleConfirmSync}
-            disabled={confirming}
+            disabled={confirming || !allTerminatedHaveReasons}
             sx={{
               fontFamily,
               fontSize: 14,

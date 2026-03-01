@@ -51,6 +51,7 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
       { key: 'form_management', label: 'Form Management', description: 'Create and manage custom forms' },
       { key: 'documents', label: 'Documents', description: 'Organization document hub' },
       { key: 'levi_ai', label: 'Levi AI', description: 'AI-powered assistant' },
+      { key: 'org_chart', label: 'Org Chart', description: 'Team structure visualization' },
     ],
   },
 ];

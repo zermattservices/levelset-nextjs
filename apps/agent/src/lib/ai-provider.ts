@@ -5,9 +5,10 @@
  * with the AI SDK's @ai-sdk/openai-compatible provider.
  *
  * Model aliases:
- *   primary    → MiniMax M2.5 (~85% of requests)
- *   escalation → Claude Sonnet 4.5 (complex tasks or primary failure)
- *   batch      → Gemini 2.5 Flash (large context, future use)
+ *   primary      → MiniMax M2.5 (worker — synthesis & streaming)
+ *   escalation   → Claude Sonnet 4.5 (fallback on primary failure)
+ *   batch        → Gemini 2.5 Flash (large context, future use)
+ *   orchestrator → Claude Opus 4.6 (plan generation via generateObject)
  */
 
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
@@ -35,6 +36,7 @@ export const models = customProvider({
     primary: openrouter('minimax/minimax-m2.5'),
     escalation: openrouter('anthropic/claude-sonnet-4.5'),
     batch: openrouter('google/gemini-2.5-flash'),
+    orchestrator: openrouter('anthropic/claude-opus-4.6'),
   },
 });
 
