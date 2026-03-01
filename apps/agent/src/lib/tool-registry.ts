@@ -21,10 +21,9 @@ import { getTeamOverview } from '../tools/data/team.js';
 import { getDisciplineSummary } from '../tools/data/discipline.js';
 import { getPositionRankings } from '../tools/data/rankings.js';
 import { getPillarScores } from '../tools/data/pillars.js';
-// New tools — will be imported as they are created in Tasks 4-6
-// import { getOrgChart } from '../tools/data/org-chart.js';
-// import { getScheduleOverview, getEmployeeSchedule, getLaborSummary } from '../tools/data/schedule.js';
-// import { getEvaluationStatus } from '../tools/data/evaluations.js';
+import { getOrgChart } from '../tools/data/org-chart.js';
+import { getScheduleOverview, getEmployeeSchedule, getLaborSummary } from '../tools/data/schedule.js';
+import { getEvaluationStatus } from '../tools/data/evaluations.js';
 
 // Legacy tools — still imported for now, removed in Task 13
 import { getEmployeeRatings } from '../tools/data/ratings.js';
@@ -201,17 +200,16 @@ export async function executeTool(
     case 'get_pillar_scores':
       return getPillarScores(args, orgId, locationId);
 
-    // New tools — uncomment as they are created
-    // case 'get_org_chart':
-    //   return getOrgChart(args, orgId, locationId);
-    // case 'get_schedule_overview':
-    //   return getScheduleOverview(args, orgId, locationId);
-    // case 'get_employee_schedule':
-    //   return getEmployeeSchedule(args, orgId, locationId);
-    // case 'get_labor_summary':
-    //   return getLaborSummary(args, orgId, locationId);
-    // case 'get_evaluation_status':
-    //   return getEvaluationStatus(args, orgId, locationId);
+    case 'get_org_chart':
+      return getOrgChart(args, orgId, locationId);
+    case 'get_schedule_overview':
+      return getScheduleOverview(args, orgId, locationId);
+    case 'get_employee_schedule':
+      return getEmployeeSchedule(args, orgId, locationId);
+    case 'get_labor_summary':
+      return getLaborSummary(args, orgId, locationId);
+    case 'get_evaluation_status':
+      return getEvaluationStatus(args, orgId, locationId);
 
     // Legacy tools (removed in Task 13)
     case 'get_employee_ratings':
@@ -481,6 +479,78 @@ export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
         return await getPillarScores(input, orgId, locationId);
       },
     }),
+
+    // New tools — org chart, schedule, evaluations
+    ...(features?.orgChart
+      ? {
+          get_org_chart: tool({
+            description:
+              'Get the org chart tree: departments, groups (with members), supervisors, and direct reports for all employees. Shows hierarchy and reporting structure. Only available when org chart is configured.',
+            inputSchema: z.object({}),
+            execute: async () => {
+              return await getOrgChart({}, orgId, locationId);
+            },
+          }),
+        }
+      : {}),
+    get_schedule_overview: tool({
+      description:
+        'Get the schedule for a week: shift counts, assigned/unassigned shifts, total hours, daily coverage breakdown. Defaults to current week. Use for "how does the schedule look?" or "are we fully staffed?"',
+      inputSchema: z.object({
+        week_start: z
+          .string()
+          .optional()
+          .describe('Start of week (YYYY-MM-DD, defaults to current Monday)'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getScheduleOverview(input, orgId, locationId);
+      },
+    }),
+    get_employee_schedule: tool({
+      description:
+        'Get upcoming shifts for ONE specific employee. Requires employee_id (use lookup_employee first). Shows shift dates, times, positions, and total hours.',
+      inputSchema: z.object({
+        employee_id: z.string().describe('The UUID of the employee'),
+        weeks: z.number().optional().describe('Number of weeks to look ahead (default: 2)'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getEmployeeSchedule(input, orgId, locationId);
+      },
+    }),
+    get_labor_summary: tool({
+      description:
+        'Get labor cost breakdown for a week: total hours, total cost, FOH/BOH split, overtime alerts. Use for "what are labor costs?" or "who is in overtime?"',
+      inputSchema: z.object({
+        week_start: z
+          .string()
+          .optional()
+          .describe('Start of week (YYYY-MM-DD, defaults to current Monday)'),
+        zone: z
+          .enum(['FOH', 'BOH'])
+          .optional()
+          .describe('Filter to front-of-house or back-of-house only'),
+      }),
+      execute: async (input: Record<string, unknown>) => {
+        return await getLaborSummary(input, orgId, locationId);
+      },
+    }),
+    ...(features?.evaluations
+      ? {
+          get_evaluation_status: tool({
+            description:
+              'Get evaluation status. Without employee_id: location-wide overview (upcoming, completed, by status, certification changes). With employee_id: individual evaluation history + certification audit trail.',
+            inputSchema: z.object({
+              employee_id: z
+                .string()
+                .optional()
+                .describe('Optional UUID. Omit for location-wide overview.'),
+            }),
+            execute: async (input: Record<string, unknown>) => {
+              return await getEvaluationStatus(input, orgId, locationId);
+            },
+          }),
+        }
+      : {}),
 
     // Display tools
     ...buildDisplayTools(),
