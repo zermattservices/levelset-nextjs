@@ -1,6 +1,6 @@
 'use client';
 
-import { PLAN_TIERS, TIER_ORDER, FEATURE_GROUPS, TRIAL_DAYS, formatPrice, type PlanTier } from '@levelset/shared';
+import { PLAN_TIERS, TIER_ORDER, FEATURE_GROUPS, TRIAL_DAYS, formatPrice, type PlanTier, type FeatureStatus } from '@levelset/shared';
 import { useState } from 'react';
 import { PricingTable } from '@/components/pricing/PricingTable';
 import { useTrialModal } from '@/components/cta/TrialModalProvider';
@@ -143,7 +143,18 @@ function FeatureGroupRows({ group }: { group: typeof FEATURE_GROUPS[number] }) {
       </tr>
       {group.features.map(feature => (
         <tr key={feature.key} className="border-b border-neutral-border/30">
-          <td className="py-3 pr-4 text-sm text-text-primary">{feature.label}</td>
+          <td className="py-3 pr-4 text-sm text-text-primary">
+            <span className="flex items-center gap-1.5">
+              {feature.label}
+              {feature.status && feature.status !== 'live' && (
+                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none ${
+                  feature.status === 'beta' ? 'bg-amber-100 text-amber-700' : 'bg-neutral-100 text-neutral-500'
+                }`}>
+                  {feature.status === 'beta' ? 'Beta' : 'Soon'}
+                </span>
+              )}
+            </span>
+          </td>
           {TIER_ORDER.map((tier, i) => (
             <td key={tier} className="py-3 px-4 text-center">
               {i >= tierIndex ? (

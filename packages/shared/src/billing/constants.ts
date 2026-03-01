@@ -12,10 +12,14 @@
 // Feature definitions
 // ---------------------------------------------------------------------------
 
+export type FeatureStatus = 'live' | 'beta' | 'coming-soon';
+
 export interface FeatureDefinition {
   key: string;
   label: string;
   description: string;
+  /** Feature availability status. Defaults to 'live' if omitted. */
+  status?: FeatureStatus;
 }
 
 export interface FeatureGroup {
@@ -30,12 +34,11 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
     tier: 'core',
     features: [
       { key: 'dashboard_access', label: 'Dashboard Access', description: 'Access to the main dashboard' },
-      { key: 'positional_excellence', label: 'Positional Ratings Dashboard', description: 'Position-based ratings and analytics' },
-      { key: 'positional_excellence_classic', label: 'Positional Ratings Classic', description: 'Classic ratings interface' },
-      { key: 'discipline_dashboard', label: 'Discipline Dashboard', description: 'Discipline tracking and management' },
-      { key: 'roster_management', label: 'Roster Management', description: 'Employee roster management' },
-      { key: 'roster_sync', label: 'Roster Sync', description: 'HotSchedules roster synchronization' },
-      { key: 'mobile_app_access', label: 'Mobile App Access', description: 'Access to Levelset mobile app' },
+      { key: 'positional_excellence', label: 'Positional Ratings', description: 'Position-based ratings and analytics' },
+      { key: 'discipline_dashboard', label: 'Discipline', description: 'Progressive discipline tracking and management' },
+      { key: 'roster_management', label: 'Roster', description: 'Employee roster management and sync' },
+      { key: 'evaluations', label: 'Evaluations', description: 'Formal evaluations connected to performance data', status: 'coming-soon' },
+      { key: 'mobile_app_access', label: 'Mobile App', description: 'Access to Levelset mobile app', status: 'coming-soon' },
       { key: 'organization_settings', label: 'Organization Settings', description: 'Configure organization settings' },
     ],
   },
@@ -43,15 +46,18 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
     name: 'Pro Features',
     tier: 'pro',
     features: [
-      { key: 'certifications', label: 'Certifications', description: 'Employee certification tracking' },
-      { key: 'roster_suggested_pay', label: 'Roster Suggested Pay', description: 'Automated pay recommendations' },
-      { key: 'multi_unit', label: 'Multi-Unit Functionality', description: 'Manage multiple locations' },
-      { key: 'operational_excellence', label: 'OE Pillars', description: 'Operational Excellence pillar analytics and scoring' },
       { key: 'scheduling', label: 'Scheduling', description: 'Shift scheduling and management' },
-      { key: 'form_management', label: 'Form Management', description: 'Create and manage custom forms' },
-      { key: 'documents', label: 'Documents', description: 'Organization document hub' },
-      { key: 'levi_ai', label: 'Levi AI', description: 'AI-powered assistant' },
+      { key: 'setups', label: 'Setups', description: 'Consistent shift setup assignments' },
+      { key: 'form_management', label: 'Forms', description: 'Custom digital forms — trackable and mobile' },
+      { key: 'operational_excellence', label: 'OE Pillars', description: 'Operational Excellence pillar analytics and scoring' },
       { key: 'org_chart', label: 'Org Chart', description: 'Team structure visualization' },
+      { key: 'documents', label: 'Documents', description: 'Organization document hub' },
+      { key: 'roster_suggested_pay', label: 'Pay System', description: 'Performance-linked pay recommendations' },
+      { key: 'certifications', label: 'Certifications', description: 'Employee certification tracking' },
+      { key: 'multi_unit', label: 'Multi-Unit', description: 'Manage multiple locations' },
+      { key: 'levi_ai', label: 'Levi AI', description: 'AI-powered assistant', status: 'beta' },
+      { key: 'goal_tracking', label: 'Goal Tracking', description: 'Goals at every level — employee, team, location, org', status: 'coming-soon' },
+      { key: 'development_plans', label: 'Development Plans', description: 'Roadmap for every team member\'s growth', status: 'coming-soon' },
     ],
   },
 ];

@@ -1,3 +1,5 @@
+export type FeatureStatus = 'live' | 'beta' | 'coming-soon';
+
 export interface MarketingFeature {
   slug: string;
   name: string;
@@ -5,6 +7,7 @@ export interface MarketingFeature {
   icon: string;
   tier: 'core' | 'pro';
   screenshotReady: boolean;
+  status: FeatureStatus;
 }
 
 export const FEATURES: MarketingFeature[] = [
@@ -15,6 +18,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'rocket',
     tier: 'core',
     screenshotReady: true,
+    status: 'live',
   },
   {
     slug: 'discipline',
@@ -23,6 +27,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'gavel',
     tier: 'core',
     screenshotReady: true,
+    status: 'live',
   },
   {
     slug: 'roster',
@@ -31,6 +36,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'users',
     tier: 'core',
     screenshotReady: true,
+    status: 'live',
   },
   {
     slug: 'evaluations',
@@ -39,6 +45,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'calendar-check',
     tier: 'core',
     screenshotReady: true,
+    status: 'coming-soon',
   },
   {
     slug: 'mobile-app',
@@ -47,6 +54,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'smartphone',
     tier: 'core',
     screenshotReady: false,
+    status: 'coming-soon',
   },
   {
     slug: 'scheduling',
@@ -55,6 +63,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'calendar-days',
     tier: 'pro',
     screenshotReady: true,
+    status: 'live',
   },
   {
     slug: 'setups',
@@ -63,6 +72,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'captions',
     tier: 'pro',
     screenshotReady: true,
+    status: 'live',
   },
   {
     slug: 'forms',
@@ -71,6 +81,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'file-text',
     tier: 'pro',
     screenshotReady: false,
+    status: 'live',
   },
   {
     slug: 'levi-ai',
@@ -79,6 +90,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'sparkles',
     tier: 'pro',
     screenshotReady: false,
+    status: 'beta',
   },
   {
     slug: 'oe-pillars',
@@ -87,6 +99,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'star',
     tier: 'pro',
     screenshotReady: false,
+    status: 'live',
   },
   {
     slug: 'org-chart',
@@ -95,6 +108,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'network',
     tier: 'pro',
     screenshotReady: false,
+    status: 'live',
   },
   {
     slug: 'documents',
@@ -103,6 +117,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'folder',
     tier: 'pro',
     screenshotReady: false,
+    status: 'live',
   },
   {
     slug: 'pay',
@@ -111,6 +126,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'dollar-sign',
     tier: 'pro',
     screenshotReady: false,
+    status: 'live',
   },
   {
     slug: 'goal-tracking',
@@ -119,6 +135,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'target',
     tier: 'pro',
     screenshotReady: false,
+    status: 'coming-soon',
   },
   {
     slug: 'development-plans',
@@ -127,6 +144,7 @@ export const FEATURES: MarketingFeature[] = [
     icon: 'map',
     tier: 'pro',
     screenshotReady: false,
+    status: 'coming-soon',
   },
 ];
 

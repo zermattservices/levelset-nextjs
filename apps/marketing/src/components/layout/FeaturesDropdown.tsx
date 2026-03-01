@@ -1,8 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import { FEATURES, type MarketingFeature } from '@/lib/features';
+import { FEATURES, type MarketingFeature, type FeatureStatus } from '@/lib/features';
 import { Icon } from '@/components/ui/Icon';
+
+function StatusBadge({ status }: { status: FeatureStatus }) {
+  if (status === 'live') return null;
+  const styles =
+    status === 'beta'
+      ? 'bg-amber-100 text-amber-700'
+      : 'bg-neutral-100 text-neutral-500';
+  const label = status === 'beta' ? 'Beta' : 'Coming Soon';
+  return (
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none ${styles}`}>
+      {label}
+    </span>
+  );
+}
 
 /* ─── Tier grouping ──────────────────────────────────────────────── */
 
@@ -88,10 +102,11 @@ export function FeaturesDropdown({ open, onClose }: FeaturesDropdownProps) {
                           className="text-neutral-500 group-hover:text-white transition-colors duration-150"
                         />
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 flex items-center gap-1.5">
                         <span className="text-[13px] font-semibold text-neutral-800 group-hover:text-[#31664A] transition-colors duration-150">
                           {feature.name}
                         </span>
+                        <StatusBadge status={feature.status} />
                       </div>
                     </Link>
                   ))}
@@ -152,9 +167,12 @@ export function FeaturesMenuItems({ onItemClick }: FeaturesMenuItemsProps) {
                   <Icon name={feature.icon} size={15} className="text-neutral-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-neutral-800">
-                    {feature.name}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-semibold text-neutral-800">
+                      {feature.name}
+                    </span>
+                    <StatusBadge status={feature.status} />
+                  </div>
                   <p className="text-xs text-neutral-400 leading-snug mt-0.5 line-clamp-1">
                     {feature.shortDescription}
                   </p>

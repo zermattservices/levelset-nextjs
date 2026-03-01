@@ -6,8 +6,23 @@ import {
   TRIAL_DAYS,
   formatPrice,
   type PlanTier,
+  type FeatureStatus,
 } from '@levelset/shared';
 import { Icon } from '@/components/ui/Icon';
+
+function StatusBadge({ status }: { status?: FeatureStatus }) {
+  if (!status || status === 'live') return null;
+  const styles =
+    status === 'beta'
+      ? 'bg-amber-100 text-amber-700'
+      : 'bg-neutral-100 text-neutral-500';
+  const label = status === 'beta' ? 'Beta' : 'Soon';
+  return (
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none ${styles}`}>
+      {label}
+    </span>
+  );
+}
 
 interface PricingCardProps {
   tier: PlanTier;
@@ -139,7 +154,10 @@ export function PricingCard({ tier, period, onSelect, compact = false }: Pricing
                 size={compact ? 14 : 16}
                 className="text-[#31664A] mt-0.5 flex-shrink-0"
               />
-              <span className="text-gray-700">{feature.label}</span>
+              <span className="text-gray-700 flex items-center gap-1.5">
+                {feature.label}
+                <StatusBadge status={feature.status} />
+              </span>
             </li>
           ))}
         </ul>
