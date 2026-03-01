@@ -45,7 +45,7 @@ const CONTENT: Record<string, FeatureContent> = {
     screenshots: [
       {
         src: '/screenshots/pe-dashboard.png',
-        alt: 'Positional Excellence dashboard showing color-coded team ratings by position',
+        alt: 'Positional Ratings dashboard showing color-coded team ratings by position',
         caption:
           'Your entire team\'s position readiness — one screen, every position.',
       },
