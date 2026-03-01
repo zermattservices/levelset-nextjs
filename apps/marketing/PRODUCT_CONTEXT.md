@@ -10,7 +10,7 @@ The key value proposition: **operators bring their own operational playbook** (p
 
 ## Core Features (Available to All Users)
 
-### 1. Positional Ratings (PEA)
+### 1. Positional Ratings (Positional Excellence)
 
 - Team members are rated **by position** (not a single overall rating)
 - Each position has its own set of behavioral criteria (the "Big 5" — configurable per org)
@@ -72,6 +72,6 @@ The key value proposition: **operators bring their own operational playbook** (p
 - **Operator**: A Chick-fil-A franchise owner (a person, not a location)
 - **Location**: A single restaurant
 - **Multi-unit**: An operator who runs multiple locations
-- **PEA**: Positional Excellence Assessment — the rating system
+- **Positional Excellence**: The rating system — position-based performance evaluation. (Note: "PEA" is a Reece Howard org-specific term, not CFA-wide.)
 - **Big 5**: The 5 behavioral criteria rated per position (configurable per org)
 - **FOH / BOH**: Front of House / Back of House
