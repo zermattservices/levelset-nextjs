@@ -1,8 +1,12 @@
 /**
  * Chat endpoint — main orchestrator for Levi AI conversations.
  *
+ * Pipeline: Orchestrator (Opus) → Tool Executor → Worker (MiniMax)
+ * Fallback: Legacy single-model path (MiniMax with all tools)
+ *
  * Built on the Vercel AI SDK:
- *   - streamText() for LLM calls with automatic multi-step tool execution
+ *   - generateObject() for structured plan generation (orchestrator)
+ *   - streamText() for LLM response synthesis (worker + legacy fallback)
  *   - createUIMessageStream for structured SSE streaming
  *   - smoothStream for word-by-word streaming effect
  *   - tool() + Zod for type-safe tool definitions
@@ -12,20 +16,19 @@
  *
  * Custom data parts:
  *   data-tool-status — human-readable labels for tool call progress
+ *   data-ui-block — display tool visual cards (employee list, employee card)
  */
 
 import { Hono } from 'hono';
 import {
   streamText,
   generateText,
-  tool,
   smoothStream,
   createUIMessageStream,
   createUIMessageStreamResponse,
   stepCountIs,
 } from 'ai';
 import type { ModelMessage } from 'ai';
-import { z } from 'zod';
 import { isLevelsetAdmin } from '@levelset/permissions';
 import type { UserContext, ChatMessage } from '../../lib/types.js';
 import { models } from '../../lib/ai-provider.js';
@@ -41,21 +44,17 @@ import {
 } from '../../lib/conversation-manager.js';
 import { retrieveContext } from '../../lib/context-retriever.js';
 import { logUsage, checkRateLimit } from '../../lib/usage-tracker.js';
-import {
-  lookupEmployee,
-  listEmployees,
-} from '../../tools/data/employee.js';
-import { getEmployeeRatings } from '../../tools/data/ratings.js';
-import { getEmployeeInfractions } from '../../tools/data/infractions.js';
-import { getEmployeeProfile } from '../../tools/data/profile.js';
-import { getTeamOverview } from '../../tools/data/team.js';
-import { getDisciplineSummary } from '../../tools/data/discipline.js';
-import { getPositionRankings } from '../../tools/data/rankings.js';
-import { getPillarScores } from '../../tools/data/pillars.js';
-// UI blocks are now emitted by display tools (show_employee_list, show_employee_card)
-// called by the LLM, not auto-generated from data tool results.
+
+// Pipeline imports
+import { generatePlan, summarizeConversation } from '../../lib/orchestrator.js';
+import { executePlan } from '../../lib/tool-executor.js';
+import type { ToolResult } from '../../lib/tool-executor.js';
+import { synthesizeResponse } from '../../lib/worker.js';
+import { buildAllTools, getToolCallLabel } from '../../lib/tool-registry.js';
+import type { ToolRegistryContext } from '../../lib/tool-registry.js';
 
 const MAX_TOOL_STEPS = 5;
+const DISPLAY_TOOLS = new Set(['show_employee_list', 'show_employee_card']);
 
 /* ── Convert DB ChatMessages to AI SDK ModelMessages ──────── */
 
@@ -142,242 +141,6 @@ function toModelMessages(messages: ChatMessage[]): ModelMessage[] {
   return result;
 }
 
-/* ── Human-readable tool labels ─────────────────────────────── */
-
-function getToolCallLabel(name: string, input: Record<string, unknown>): string {
-  switch (name) {
-    case 'lookup_employee': {
-      const q = input.name || input.query || '';
-      return q ? `Looking up ${q}` : 'Looking up employee';
-    }
-    case 'list_employees':
-      return 'Listing employees';
-    case 'get_employee_ratings': {
-      const empName = input.employee_name || '';
-      return empName ? `Checking ratings for ${empName}` : 'Checking employee ratings';
-    }
-    case 'get_employee_infractions': {
-      const empName = input.employee_name || '';
-      return empName ? `Checking infractions for ${empName}` : 'Checking employee infractions';
-    }
-    case 'get_employee_profile':
-      return 'Loading employee profile';
-    case 'get_team_overview':
-      return 'Loading team overview';
-    case 'get_discipline_summary':
-      return input.employee_id ? 'Loading discipline details' : 'Loading discipline overview';
-    case 'get_position_rankings': {
-      const pos = input.position || '';
-      return pos ? `Ranking employees for ${pos}` : 'Ranking employees by position';
-    }
-    case 'get_pillar_scores': {
-      if (input.pillar) return `Checking ${input.pillar} scores`;
-      return 'Loading OE pillar scores';
-    }
-    case 'show_employee_list':
-    case 'show_employee_card':
-      return ''; // Display tools — no label needed (handled silently)
-    default:
-      return `Running ${name.replace(/_/g, ' ')}`;
-  }
-}
-
-/* ── Build tool definitions ─────────────────────────────────── */
-
-function buildTools(
-  orgId: string,
-  locationId?: string,
-  features?: { certifications: boolean; evaluations: boolean; pip: boolean; customRoles: boolean }
-) {
-  return {
-    lookup_employee: tool({
-      description:
-        'Search for an employee by name and return their basic details (role, hire date, leader/trainer status). Use this to find an employee ID before calling other tools. For a full profile, call get_employee_profile after this.',
-      inputSchema: z.object({
-        name: z.string().describe('Full or partial name of the employee to search for'),
-        role: z.string().optional().describe('Filter by role name (e.g. "Team Leader")'),
-      }),
-      execute: async ({ name, role }: { name: string; role?: string }) => {
-        return await lookupEmployee({ name, role }, orgId, locationId);
-      },
-    }),
-    list_employees: tool({
-      description:
-        'List employees with optional filters. Use for counting or listing employees by role, zone (FOH/BOH), leaders, or trainers. Does NOT include ratings or discipline data — use get_team_overview for that.',
-      inputSchema: z.object({
-        active_only: z.boolean().optional().describe('Only return active employees (default: true)'),
-        is_leader: z.boolean().optional().describe('Filter for leaders only'),
-        is_boh: z.boolean().optional().describe('Filter for back-of-house employees'),
-        is_foh: z.boolean().optional().describe('Filter for front-of-house employees'),
-        is_trainer: z.boolean().optional().describe('Filter for trainers only'),
-        role: z.string().optional().describe('Filter by role name'),
-        limit: z.number().optional().describe('Maximum number of employees to return (default: 20, max: 50)'),
-      }),
-      execute: async (input: Record<string, unknown>) => {
-        return await listEmployees(input, orgId, locationId);
-      },
-    }),
-    get_employee_ratings: tool({
-      description:
-        'Get detailed rating history for ONE specific employee — individual ratings with scores, dates, and positions. Requires employee_id (use lookup_employee first). For team-wide rating data, use get_team_overview instead. Prefer get_employee_profile if you also need discipline data.',
-      inputSchema: z.object({
-        employee_id: z.string().describe('The UUID of the employee'),
-        limit: z.number().optional().describe('Maximum number of ratings to return (default: 10)'),
-      }),
-      execute: async (input: Record<string, unknown>) => {
-        return await getEmployeeRatings(input, orgId, locationId);
-      },
-    }),
-    get_employee_infractions: tool({
-      description:
-        'Get infraction history for ONE specific employee. Requires employee_id (use lookup_employee first). For team-wide discipline data, use get_discipline_summary instead.',
-      inputSchema: z.object({
-        employee_id: z.string().describe('The UUID of the employee'),
-        limit: z.number().optional().describe('Maximum number of infractions to return (default: 10)'),
-      }),
-      execute: async (input: Record<string, unknown>) => {
-        return await getEmployeeInfractions(input, orgId, locationId);
-      },
-    }),
-    get_employee_profile: tool({
-      description:
-        'Get a comprehensive profile for ONE employee: details, recent ratings with trend, infractions, and discipline actions — all in one call. Requires employee_id (use lookup_employee first). After calling this, do NOT also call get_employee_ratings or get_employee_infractions.',
-      inputSchema: z.object({
-        employee_id: z.string().describe('The UUID of the employee'),
-      }),
-      execute: async (input: Record<string, unknown>) => {
-        return await getEmployeeProfile(input, orgId, locationId);
-      },
-    }),
-    get_team_overview: tool({
-      description:
-        'Get the full team overview: rating averages by position, top/bottom performers by rating, team structure (roles, zones, leaders, trainers), discipline attention items, and recent hires. This is the go-to tool for broad questions about the team, ratings trends, team performance, or "how is the team doing?".',
-      inputSchema: z.object({
-        zone: z
-          .enum(['FOH', 'BOH'])
-          .optional()
-          .describe('Filter to front-of-house or back-of-house employees only'),
-      }),
-      execute: async (input: Record<string, unknown>) => {
-        return await getTeamOverview(input, orgId, locationId, {
-          certificationsEnabled: features?.certifications ?? false,
-        });
-      },
-    }),
-    get_discipline_summary: tool({
-      description:
-        'Get discipline data. With employee_id: detailed discipline history (infractions, actions, pending recommendations). Without employee_id: location-wide overview (top point holders, infraction breakdown, recent actions). Use this for discipline-specific questions — not for ratings.',
-      inputSchema: z.object({
-        employee_id: z
-          .string()
-          .optional()
-          .describe('Optional UUID of a specific employee. Omit for location-wide overview.'),
-      }),
-      execute: async (input: Record<string, unknown>) => {
-        return await getDisciplineSummary(input, orgId, locationId);
-      },
-    }),
-    get_position_rankings: tool({
-      description:
-        'Rank employees for a SINGLE position the user explicitly named (e.g. "who is the best host?"). NEVER call this tool more than once — if the user asks about ratings in general, trends, or overall performance, call get_team_overview instead. get_team_overview already includes per-position averages and top/bottom performers.',
-      inputSchema: z.object({
-        position: z
-          .string()
-          .describe('Position name to rank by (e.g., "Bagging", "iPOS", "Host", "Breader")'),
-        limit: z
-          .number()
-          .optional()
-          .describe('Maximum number of ranked employees to return (default: 5)'),
-        sort: z
-          .enum(['best', 'worst'])
-          .optional()
-          .describe('Sort order: "best" (highest first) or "worst" (lowest first). Default: "best"'),
-      }),
-      execute: async (input: Record<string, unknown>) => {
-        return await getPositionRankings(input, orgId, locationId);
-      },
-    }),
-
-    get_pillar_scores: tool({
-      description:
-        'Get Operational Excellence pillar scores (Great Food, Quick & Accurate, Creating Moments, Caring Interactions, Inviting Atmosphere). Without employee_id: location-level scores + top/bottom performers. With employee_id: per-pillar scores with position breakdown and criteria mapping.',
-      inputSchema: z.object({
-        employee_id: z.string().optional().describe('UUID of a specific employee. Omit for location-wide scores.'),
-        pillar: z.string().optional().describe('Filter to specific pillar name (e.g. "Great Food")'),
-        days: z.number().optional().describe('Lookback period in days (default: 30)'),
-        start_date: z.string().optional().describe('Explicit start date YYYY-MM-DD (overrides days)'),
-        end_date: z.string().optional().describe('Explicit end date YYYY-MM-DD (default: today)'),
-      }),
-      execute: async (input: Record<string, unknown>) => {
-        return await getPillarScores(input, orgId, locationId);
-      },
-    }),
-
-    // ── Display tools — the LLM decides when to show visual cards ──
-
-    show_employee_list: tool({
-      description:
-        'Display a visual ranked-list card in the chat. Use this when you want to highlight a group of employees — top performers, employees needing improvement, position rankings, etc. Only call AFTER you have fetched data and want to present a visual summary. Not every response needs a card — only use when the visual genuinely adds value.',
-      inputSchema: z.object({
-        title: z.string().describe('Card title (e.g. "Top Performers", "Needs Improvement", "Top iPOS")'),
-        employees: z.array(
-          z.object({
-            employee_id: z.string().optional().describe('Employee UUID if available from the data'),
-            name: z.string().describe('Employee full name'),
-            role: z.string().optional().describe('Employee role'),
-            metric_label: z.string().optional().describe('Label for the metric (e.g. "Avg Rating", "Points")'),
-            metric_value: z.number().optional().describe('Numeric value for the metric'),
-          })
-        ).describe('Employees to display (max 10)'),
-      }),
-      execute: async ({ title, employees }: { title: string; employees: Array<{ employee_id?: string; name: string; role?: string; metric_label?: string; metric_value?: number }> }) => {
-        return {
-          __display: true,
-          blockType: 'employee-list',
-          blockId: `list-${Date.now()}`,
-          payload: {
-            title,
-            employees: employees.slice(0, 10).map((e, i) => ({
-              employee_id: e.employee_id || '',
-              name: e.name,
-              role: e.role || '',
-              rank: i + 1,
-              metric_label: e.metric_label,
-              metric_value: e.metric_value,
-            })),
-          },
-        };
-      },
-    }),
-
-    show_employee_card: tool({
-      description:
-        'Display a visual card for a single employee. Use this when looking up or highlighting one specific employee. Only call AFTER you have fetched data about the employee.',
-      inputSchema: z.object({
-        employee_id: z.string().optional().describe('Employee UUID if available from the data'),
-        name: z.string().describe('Employee full name'),
-        role: z.string().optional().describe('Employee role'),
-        rating_avg: z.number().optional().describe('Overall rating average if available'),
-        current_points: z.number().optional().describe('Current discipline points if relevant'),
-      }),
-      execute: async (input: { employee_id?: string; name: string; role?: string; rating_avg?: number; current_points?: number }) => {
-        return {
-          __display: true,
-          blockType: 'employee-card',
-          blockId: `card-${input.employee_id || Date.now()}`,
-          payload: {
-            employee_id: input.employee_id || '',
-            name: input.name,
-            role: input.role || '',
-            rating_avg: input.rating_avg,
-            current_points: input.current_points,
-          },
-        };
-      },
-    }),
-  };
-}
-
 export const chatRoute = new Hono();
 
 /**
@@ -432,6 +195,9 @@ chatRoute.delete('/clear', async (c) => {
 
 /**
  * POST / — Main chat endpoint with AI SDK streaming.
+ *
+ * Pipeline: Orchestrator (Opus) → Tool Executor → Worker (MiniMax)
+ * Fallback: Legacy single-model path if orchestrator fails.
  */
 chatRoute.post('/', async (c) => {
   try {
@@ -510,8 +276,12 @@ chatRoute.post('/', async (c) => {
       retrievedContext: retrievedParts.length > 0 ? retrievedParts.join('\n\n') : undefined,
     });
 
-    // 8. Build tools (location-scoped when available, feature-aware)
-    const leviTools = buildTools(orgId, locationId, orgContext?.features);
+    // 8. Build tool registry context (used by pipeline and legacy)
+    const registryCtx: ToolRegistryContext = {
+      orgId,
+      locationId,
+      features: orgContext?.features,
+    };
 
     // 9. Streaming path (default)
     if (wantsStream) {
@@ -525,160 +295,286 @@ chatRoute.post('/', async (c) => {
           let escalated = false;
           let toolCallCount = 0;
           let assistantContent = '';
+          let fallback = false;
           const allUIBlocks: Array<{ blockType: string; blockId: string; payload: Record<string, unknown> }> = [];
 
+          // Pipeline-specific tracking
+          let orchestratorModel = '';
+          let orchestratorInputTokens = 0;
+          let orchestratorOutputTokens = 0;
+          let workerModel = '';
+          let workerInputTokens = 0;
+          let workerOutputTokens = 0;
+          let toolDurationMs = 0;
+
           try {
-            const result = streamText({
-              model: models.languageModel('primary'),
-              system: systemPrompt,
-              messages: llmMessages,
-              tools: leviTools,
-              stopWhen: stepCountIs(MAX_TOOL_STEPS),
-              experimental_transform: smoothStream({ delayInMs: 15, chunking: 'word' }),
-              onStepFinish: async (step) => {
-                // Track usage from each step
-                if (step.usage) {
-                  totalInputTokens += step.usage.inputTokens ?? 0;
-                  totalOutputTokens += step.usage.outputTokens ?? 0;
-                }
+            // ── Orchestrator Pipeline ─────────────────────────────
 
-                // Emit custom tool status labels for data-fetching tools only
-                // (display tools like show_employee_list are silent)
-                const DISPLAY_TOOLS = new Set(['show_employee_list', 'show_employee_card']);
+            const conversationSummary = summarizeConversation(history);
+            const planResult = await generatePlan({
+              userMessage,
+              conversationSummary,
+              orgContext,
+              toolRegistryContext: registryCtx,
+            });
 
-                if (step.toolCalls && step.toolCalls.length > 0) {
-                  toolCallCount += step.toolCalls.length;
+            if (!planResult) {
+              throw new Error('Orchestrator failed to generate plan');
+            }
 
-                  for (let i = 0; i < step.toolCalls.length; i++) {
-                    const tc = step.toolCalls[i] as { toolCallId: string; toolName: string; input: Record<string, unknown> };
+            const { plan, usage: orchUsage } = planResult;
+            orchestratorModel = 'anthropic/claude-opus-4.6';
+            orchestratorInputTokens = orchUsage.inputTokens;
+            orchestratorOutputTokens = orchUsage.outputTokens;
+            totalInputTokens += orchUsage.inputTokens;
+            totalOutputTokens += orchUsage.outputTokens;
 
-                    if (!DISPLAY_TOOLS.has(tc.toolName)) {
-                      writer.write({
-                        type: 'data-tool-status' as any,
-                        data: {
-                          toolCallId: tc.toolCallId,
-                          toolName: tc.toolName,
-                          status: 'done',
-                          label: getToolCallLabel(tc.toolName, tc.input),
-                        },
-                      });
-                    }
-                  }
-                }
-
-                // Persist tool messages and emit UI blocks from display tools
-                if (step.toolCalls && step.toolCalls.length > 0) {
-                  // Only persist data-fetching tool calls (not display tools)
-                  const dataToolCalls = step.toolCalls
-                    .filter((tc: any) => !DISPLAY_TOOLS.has(tc.toolName))
-                    .map((tc: any) => ({
-                      id: tc.toolCallId,
-                      type: 'function' as const,
-                      function: {
-                        name: tc.toolName,
-                        arguments: JSON.stringify(tc.input),
+            // Execute plan tools (deterministic — no LLM)
+            let toolResults: ToolResult[] = [];
+            if (plan.steps.length > 0) {
+              const toolStartMs = Date.now();
+              toolResults = await executePlan(plan, registryCtx, {
+                onToolStart: (toolName, label) => {
+                  if (label) {
+                    writer.write({
+                      type: 'data-tool-status' as any,
+                      data: {
+                        toolCallId: `plan-${toolName}-${Date.now()}`,
+                        toolName,
+                        status: 'running',
+                        label,
                       },
-                    }));
-
-                  if (dataToolCalls.length > 0) {
-                    await persistMessage(conversationId, {
-                      role: 'assistant',
-                      content: step.text || '',
-                      toolCalls: dataToolCalls,
                     });
                   }
+                },
+                onToolDone: (toolName, label) => {
+                  if (label) {
+                    writer.write({
+                      type: 'data-tool-status' as any,
+                      data: {
+                        toolCallId: `plan-${toolName}-${Date.now()}`,
+                        toolName,
+                        status: 'done',
+                        label,
+                      },
+                    });
+                  }
+                },
+              });
+              toolCallCount = plan.steps.length;
+              toolDurationMs = Date.now() - toolStartMs;
+            }
 
-                  if (step.toolResults) {
-                    for (const tr of step.toolResults as Array<{ toolCallId: string; output: unknown }>) {
-                      const output = tr.output;
-                      const outputStr = typeof output === 'string'
-                        ? output
-                        : JSON.stringify(output);
-
-                      // Check if this is a display tool result (has __display flag)
-                      const isDisplay = typeof output === 'object' && output !== null && (output as any).__display;
-
-                      if (isDisplay) {
-                        // Emit as UI block directly — the LLM chose to show this
-                        const block = {
-                          blockType: (output as any).blockType as string,
-                          blockId: (output as any).blockId as string,
-                          payload: (output as any).payload as Record<string, unknown>,
-                        };
-                        allUIBlocks.push(block);
-                        writer.write({
-                          type: 'data-ui-block' as any,
-                          data: block,
-                        });
-                      } else {
-                        // Persist data tool result (display tool results are ephemeral)
-                        await persistMessage(conversationId, {
-                          role: 'tool',
-                          content: outputStr,
-                          toolCallId: tr.toolCallId,
-                        });
-                      }
+            // Worker synthesis (MiniMax streams the response)
+            const workerResult = synthesizeResponse({
+              synthesisDirective: plan.synthesisDirective,
+              responseStyle: plan.responseStyle,
+              toolResults,
+              conversationHistory: llmMessages,
+              orgContext,
+              userName: user.name,
+              coreContext: contextResult?.coreContext || undefined,
+              retrievedContext: retrievedParts.length > 0 ? retrievedParts.join('\n\n') : undefined,
+              onStepFinish: async (step: any) => {
+                // Intercept display tool results and emit UI block events
+                if (step.toolResults) {
+                  for (const tr of step.toolResults as Array<{ toolCallId: string; output: unknown }>) {
+                    const output = tr.output;
+                    const isDisplay = typeof output === 'object' && output !== null && (output as any).__display;
+                    if (isDisplay) {
+                      const block = {
+                        blockType: (output as any).blockType as string,
+                        blockId: (output as any).blockId as string,
+                        payload: (output as any).payload as Record<string, unknown>,
+                      };
+                      allUIBlocks.push(block);
+                      writer.write({
+                        type: 'data-ui-block' as any,
+                        data: block,
+                      });
                     }
                   }
                 }
               },
             });
 
-            // Merge the AI SDK stream into our UI message stream
-            writer.merge(result.toUIMessageStream({
+            // Merge the worker stream into our UI message stream
+            writer.merge(workerResult.toUIMessageStream({
               sendStart: false,
               onError: (error) => {
                 const errMsg = error instanceof Error ? error.message : String(error);
-                console.error('[Chat] Primary stream error:', { error: errMsg, model: 'primary' });
+                console.error('[Chat] Worker stream error:', { error: errMsg });
                 return "I'm having trouble right now. Please try again.";
               },
             }));
 
-            // Wait for the stream to complete to get final data
-            // streamText returns StreamTextResult where properties are PromiseLike
-            assistantContent = await result.text;
-            const response = await result.response;
-            finalModel = response?.modelId || 'minimax/minimax-m2.5';
+            // Wait for the stream to complete
+            assistantContent = await workerResult.text;
+            const workerResponse = await workerResult.response;
+            workerModel = workerResponse?.modelId || 'minimax/minimax-m2.5';
+            finalModel = workerModel; // Overall model reported is the worker
 
-            // Only set usage from final result if onStepFinish didn't fire
-            if (totalInputTokens === 0) {
-              const usage = await result.usage;
-              totalInputTokens = usage?.inputTokens ?? 0;
-              totalOutputTokens = usage?.outputTokens ?? 0;
-            }
-          } catch (primaryError) {
-            console.warn('Primary model failed, escalating:', primaryError);
-            escalated = true;
+            const wUsage = await workerResult.usage;
+            workerInputTokens = wUsage?.inputTokens ?? 0;
+            workerOutputTokens = wUsage?.outputTokens ?? 0;
+            totalInputTokens += workerInputTokens;
+            totalOutputTokens += workerOutputTokens;
+
+          } catch (pipelineError) {
+            // ── Legacy Fallback ──────────────────────────────────
+            console.warn('Pipeline failed, falling back to legacy path:', pipelineError);
+            fallback = true;
+
+            // Reset tracking from any partial pipeline run
+            totalInputTokens = 0;
+            totalOutputTokens = 0;
+            toolCallCount = 0;
+
+            const leviTools = buildAllTools(registryCtx);
 
             try {
-              const escalationResult = streamText({
-                model: models.languageModel('escalation'),
+              const result = streamText({
+                model: models.languageModel('primary'),
                 system: systemPrompt,
                 messages: llmMessages,
                 tools: leviTools,
                 stopWhen: stepCountIs(MAX_TOOL_STEPS),
                 experimental_transform: smoothStream({ delayInMs: 15, chunking: 'word' }),
+                onStepFinish: async (step) => {
+                  // Track usage from each step
+                  if (step.usage) {
+                    totalInputTokens += step.usage.inputTokens ?? 0;
+                    totalOutputTokens += step.usage.outputTokens ?? 0;
+                  }
+
+                  // Emit custom tool status labels for data-fetching tools only
+                  if (step.toolCalls && step.toolCalls.length > 0) {
+                    toolCallCount += step.toolCalls.length;
+
+                    for (let i = 0; i < step.toolCalls.length; i++) {
+                      const tc = step.toolCalls[i] as { toolCallId: string; toolName: string; input: Record<string, unknown> };
+
+                      if (!DISPLAY_TOOLS.has(tc.toolName)) {
+                        writer.write({
+                          type: 'data-tool-status' as any,
+                          data: {
+                            toolCallId: tc.toolCallId,
+                            toolName: tc.toolName,
+                            status: 'done',
+                            label: getToolCallLabel(tc.toolName, tc.input),
+                          },
+                        });
+                      }
+                    }
+                  }
+
+                  // Persist tool messages and emit UI blocks from display tools
+                  if (step.toolCalls && step.toolCalls.length > 0) {
+                    const dataToolCalls = step.toolCalls
+                      .filter((tc: any) => !DISPLAY_TOOLS.has(tc.toolName))
+                      .map((tc: any) => ({
+                        id: tc.toolCallId,
+                        type: 'function' as const,
+                        function: {
+                          name: tc.toolName,
+                          arguments: JSON.stringify(tc.input),
+                        },
+                      }));
+
+                    if (dataToolCalls.length > 0) {
+                      await persistMessage(conversationId, {
+                        role: 'assistant',
+                        content: step.text || '',
+                        toolCalls: dataToolCalls,
+                      });
+                    }
+
+                    if (step.toolResults) {
+                      for (const tr of step.toolResults as Array<{ toolCallId: string; output: unknown }>) {
+                        const output = tr.output;
+                        const outputStr = typeof output === 'string'
+                          ? output
+                          : JSON.stringify(output);
+
+                        const isDisplay = typeof output === 'object' && output !== null && (output as any).__display;
+
+                        if (isDisplay) {
+                          const block = {
+                            blockType: (output as any).blockType as string,
+                            blockId: (output as any).blockId as string,
+                            payload: (output as any).payload as Record<string, unknown>,
+                          };
+                          allUIBlocks.push(block);
+                          writer.write({
+                            type: 'data-ui-block' as any,
+                            data: block,
+                          });
+                        } else {
+                          await persistMessage(conversationId, {
+                            role: 'tool',
+                            content: outputStr,
+                            toolCallId: tr.toolCallId,
+                          });
+                        }
+                      }
+                    }
+                  }
+                },
               });
 
-              writer.merge(escalationResult.toUIMessageStream({
+              // Merge the AI SDK stream into our UI message stream
+              writer.merge(result.toUIMessageStream({
                 sendStart: false,
                 onError: (error) => {
                   const errMsg = error instanceof Error ? error.message : String(error);
-                  console.error('[Chat] Escalation stream error:', { error: errMsg, model: 'escalation' });
+                  console.error('[Chat] Primary stream error:', { error: errMsg, model: 'primary' });
                   return "I'm having trouble right now. Please try again.";
                 },
               }));
 
-              assistantContent = await escalationResult.text;
-              const escalationResponse = await escalationResult.response;
-              finalModel = escalationResponse?.modelId || 'anthropic/claude-sonnet-4.5';
+              assistantContent = await result.text;
+              const response = await result.response;
+              finalModel = response?.modelId || 'minimax/minimax-m2.5';
 
-              const escalationUsage = await escalationResult.usage;
-              totalInputTokens = escalationUsage?.inputTokens ?? 0;
-              totalOutputTokens = escalationUsage?.outputTokens ?? 0;
-            } catch (escalationError) {
-              console.error('Escalation model failed:', escalationError);
-              assistantContent = "I'm having trouble right now. Please try again.";
+              if (totalInputTokens === 0) {
+                const usage = await result.usage;
+                totalInputTokens = usage?.inputTokens ?? 0;
+                totalOutputTokens = usage?.outputTokens ?? 0;
+              }
+            } catch (primaryError) {
+              console.warn('Primary model failed, escalating:', primaryError);
+              escalated = true;
+
+              try {
+                const escalationResult = streamText({
+                  model: models.languageModel('escalation'),
+                  system: systemPrompt,
+                  messages: llmMessages,
+                  tools: leviTools,
+                  stopWhen: stepCountIs(MAX_TOOL_STEPS),
+                  experimental_transform: smoothStream({ delayInMs: 15, chunking: 'word' }),
+                });
+
+                writer.merge(escalationResult.toUIMessageStream({
+                  sendStart: false,
+                  onError: (error) => {
+                    const errMsg = error instanceof Error ? error.message : String(error);
+                    console.error('[Chat] Escalation stream error:', { error: errMsg, model: 'escalation' });
+                    return "I'm having trouble right now. Please try again.";
+                  },
+                }));
+
+                assistantContent = await escalationResult.text;
+                const escalationResponse = await escalationResult.response;
+                finalModel = escalationResponse?.modelId || 'anthropic/claude-sonnet-4.5';
+
+                const escalationUsage = await escalationResult.usage;
+                totalInputTokens = escalationUsage?.inputTokens ?? 0;
+                totalOutputTokens = escalationUsage?.outputTokens ?? 0;
+              } catch (escalationError) {
+                console.error('Escalation model failed:', escalationError);
+                assistantContent = "I'm having trouble right now. Please try again.";
+              }
             }
           }
 
@@ -690,6 +586,7 @@ chatRoute.post('/', async (c) => {
               metadata: {
                 model: finalModel,
                 escalated,
+                fallback,
                 tool_call_count: toolCallCount,
                 input_tokens: totalInputTokens,
                 output_tokens: totalOutputTokens,
@@ -704,12 +601,26 @@ chatRoute.post('/', async (c) => {
             userId,
             conversationId,
             model: finalModel,
-            tier: escalated ? 'escalation' : 'primary',
+            tier: fallback ? (escalated ? 'escalation' : 'primary') : 'pipeline',
             taskType: 'user_chat',
             inputTokens: totalInputTokens,
             outputTokens: totalOutputTokens,
             latencyMs: Date.now() - startMs,
             escalated,
+            // Pipeline-specific fields
+            ...(orchestratorModel ? {
+              orchestratorModel,
+              orchestratorInputTokens,
+              orchestratorOutputTokens,
+            } : {}),
+            ...(workerModel ? {
+              workerModel,
+              workerInputTokens,
+              workerOutputTokens,
+            } : {}),
+            toolCount: toolCallCount > 0 ? toolCallCount : undefined,
+            toolDurationMs: toolDurationMs > 0 ? toolDurationMs : undefined,
+            fallback: fallback || undefined,
           }).catch(() => {});
         },
       });
@@ -717,13 +628,15 @@ chatRoute.post('/', async (c) => {
       return createUIMessageStreamResponse({ stream });
     }
 
-    // ── Non-streaming path ──────────────────────────────────
+    // ── Non-streaming path (legacy only) ──────────────────────
     const startMs = Date.now();
     let assistantContent = '';
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
     let finalModel = '';
     let escalated = false;
+
+    const leviTools = buildAllTools(registryCtx);
 
     try {
       const result = await generateText({
@@ -784,6 +697,7 @@ chatRoute.post('/', async (c) => {
       outputTokens: totalOutputTokens,
       latencyMs: Date.now() - startMs,
       escalated,
+      fallback: true, // Non-streaming always uses legacy path
     }).catch((err) => {
       console.error('Usage logging failed:', err);
     });

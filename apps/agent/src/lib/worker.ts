@@ -96,6 +96,9 @@ export interface WorkerInput {
   userName: string;
   coreContext?: string;
   retrievedContext?: string;
+  /** Optional step callback — used by chat route to emit UI block events for display tools */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onStepFinish?: (step: any) => void | Promise<void>;
 }
 
 /**
@@ -131,5 +134,6 @@ export function synthesizeResponse(input: WorkerInput): ReturnType<typeof stream
     tools: displayTools,
     stopWhen: stepCountIs(2), // Allow 1 display tool call + final text
     experimental_transform: smoothStream({ delayInMs: 15, chunking: 'word' }),
+    onStepFinish: input.onStepFinish,
   });
 }

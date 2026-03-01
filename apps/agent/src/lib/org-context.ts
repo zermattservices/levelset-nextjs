@@ -19,7 +19,7 @@ export interface OrgContext {
   locationNumber?: string;
   roles: { role_name: string; hierarchy_level: number; is_leader: boolean; is_trainer: boolean }[];
   positions: { name: string; zone: string; criteria: string[] }[];
-  features: { certifications: boolean; evaluations: boolean; pip: boolean; customRoles: boolean };
+  features: { certifications: boolean; evaluations: boolean; pip: boolean; customRoles: boolean; orgChart: boolean };
   ratingThresholds: { green: number; yellow: number } | null;
   infractionRubric: { action: string; points: number }[];
   disciplineRubric: { action: string; points_threshold: number }[];
@@ -59,6 +59,7 @@ async function _loadOrgContext(
     locationResult,
     employeeCountResult,
     pillarsResult,
+    orgChartFeatureResult,
   ] = await Promise.all([
     // 1. Org roles (or location-specific role hierarchy)
     locationId
@@ -139,6 +140,15 @@ async function _loadOrgContext(
       .from('oe_pillars')
       .select('name, weight, display_order')
       .order('display_order', { ascending: true }),
+
+    // 10. Org chart feature flag (from org_features table)
+    supabase
+      .from('org_features')
+      .select('enabled')
+      .eq('org_id', orgId)
+      .eq('feature_key', 'org_chart')
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   // Parse roles
@@ -162,6 +172,7 @@ async function _loadOrgContext(
     evaluations: featuresResult.data?.enable_evaluations ?? false,
     pip: featuresResult.data?.enable_pip_logic ?? false,
     customRoles: featuresResult.data?.custom_roles ?? false,
+    orgChart: (orgChartFeatureResult.data as any)?.enabled ?? false,
   };
 
   // Parse rating thresholds

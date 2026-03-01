@@ -8,6 +8,7 @@ import { getServiceClient } from '@levelset/supabase-client';
 const COST_PER_MILLION: Record<string, { input: number; output: number }> = {
   'minimax/minimax-m2.5': { input: 0.3, output: 1.2 },
   'anthropic/claude-sonnet-4.5': { input: 3.0, output: 15.0 },
+  'anthropic/claude-opus-4.6': { input: 5.0, output: 25.0 },
   'google/gemini-2.5-flash': { input: 0.3, output: 2.5 },
 };
 
@@ -25,6 +26,18 @@ export interface UsageLogParams {
   latencyMs?: number;
   escalated?: boolean;
   escalationReason?: string;
+  // Pipeline-specific fields (orchestrator-worker architecture)
+  orchestratorModel?: string;
+  orchestratorInputTokens?: number;
+  orchestratorOutputTokens?: number;
+  orchestratorCostUsd?: number;
+  workerModel?: string;
+  workerInputTokens?: number;
+  workerOutputTokens?: number;
+  workerCostUsd?: number;
+  toolCount?: number;
+  toolDurationMs?: number;
+  fallback?: boolean;
 }
 
 /**
@@ -40,6 +53,20 @@ export async function logUsage(params: UsageLogParams): Promise<void> {
       params.outputTokens * pricing.output) /
     1_000_000;
 
+  // Calculate orchestrator + worker costs if provided
+  const orchestratorCost = params.orchestratorCostUsd ?? (
+    params.orchestratorModel
+      ? ((params.orchestratorInputTokens ?? 0) * (COST_PER_MILLION[params.orchestratorModel]?.input ?? 0) +
+         (params.orchestratorOutputTokens ?? 0) * (COST_PER_MILLION[params.orchestratorModel]?.output ?? 0)) / 1_000_000
+      : undefined
+  );
+  const workerCost = params.workerCostUsd ?? (
+    params.workerModel
+      ? ((params.workerInputTokens ?? 0) * (COST_PER_MILLION[params.workerModel]?.input ?? 0) +
+         (params.workerOutputTokens ?? 0) * (COST_PER_MILLION[params.workerModel]?.output ?? 0)) / 1_000_000
+      : undefined
+  );
+
   const { error } = await supabase.from('levi_usage_log').insert({
     org_id: params.orgId,
     user_id: params.userId,
@@ -53,6 +80,22 @@ export async function logUsage(params: UsageLogParams): Promise<void> {
     latency_ms: params.latencyMs ?? null,
     escalated: params.escalated ?? false,
     escalation_reason: params.escalationReason ?? null,
+    // Pipeline fields — null for legacy path, populated for orchestrator-worker
+    ...(params.orchestratorModel ? {
+      orchestrator_model: params.orchestratorModel,
+      orchestrator_input_tokens: params.orchestratorInputTokens ?? 0,
+      orchestrator_output_tokens: params.orchestratorOutputTokens ?? 0,
+      orchestrator_cost_usd: orchestratorCost ?? 0,
+    } : {}),
+    ...(params.workerModel ? {
+      worker_model: params.workerModel,
+      worker_input_tokens: params.workerInputTokens ?? 0,
+      worker_output_tokens: params.workerOutputTokens ?? 0,
+      worker_cost_usd: workerCost ?? 0,
+    } : {}),
+    ...(params.toolCount !== undefined ? { tool_count: params.toolCount } : {}),
+    ...(params.toolDurationMs !== undefined ? { tool_duration_ms: params.toolDurationMs } : {}),
+    ...(params.fallback !== undefined ? { fallback: params.fallback } : {}),
   });
 
   if (error) {
