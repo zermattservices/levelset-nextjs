@@ -3,7 +3,7 @@ import { Icon } from '@/components/ui/Icon';
 import { BrowserMockup } from '@/components/ui/BrowserMockup';
 import type { MarketingFeature, FeatureStatus } from '@/lib/features';
 import type { FeatureContent } from '@/lib/feature-content';
-import { FEATURES } from '@/lib/features';
+import { FEATURES, getFeature } from '@/lib/features';
 import { FeaturePageCTA } from './FeaturePageCTA';
 
 function StatusBadge({ status, variant = 'default' }: { status: FeatureStatus; variant?: 'default' | 'hero' }) {
@@ -232,7 +232,52 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
         </div>
       </section>
 
-      {/* ─── 4. Screenshots Gallery ────────────────────────────────── */}
+      {/* ─── 4. Works With ──────────────────────────────────────────── */}
+      {content.worksWith && content.worksWith.length > 0 && (() => {
+        const resolved = content.worksWith
+          .map((w) => ({ ...w, feature: getFeature(w.slug) }))
+          .filter((w) => w.feature);
+        if (resolved.length === 0) return null;
+        return (
+          <section className="py-12 md:py-16 bg-white border-t border-neutral-100">
+            <div className="max-w-content mx-auto px-6">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-400 mb-6">
+                Works great with
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {resolved.map((w) => (
+                  <Link
+                    key={w.slug}
+                    href={`/features/${w.slug}`}
+                    className="group flex items-start gap-4 bg-neutral-50 rounded-xl p-5 border border-neutral-200/80 hover:border-[#31664A]/20 hover:shadow-md transition-all duration-200"
+                  >
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#31664A]/10 group-hover:bg-[#31664A] flex items-center justify-center transition-colors duration-200">
+                      <Icon
+                        name={w.feature!.icon}
+                        size={18}
+                        className="text-[#31664A] group-hover:text-white transition-colors duration-200"
+                      />
+                    </div>
+                    <div>
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-sm font-bold text-neutral-800 group-hover:text-[#31664A] transition-colors duration-200">
+                          {w.feature!.name}
+                        </span>
+                        <StatusBadge status={w.feature!.status} />
+                      </span>
+                      <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                        {w.reason}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* ─── 5. Screenshots Gallery ──────────────────────────────── */}
       {content.screenshots.length > 0 && (
         <section className="py-20 md:py-28 bg-white">
           <div className="max-w-content mx-auto px-6">
@@ -266,7 +311,7 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
         </section>
       )}
 
-      {/* ─── 5. Related Features ───────────────────────────────────── */}
+      {/* ─── 6. Related Features ───────────────────────────────────── */}
       <section className="py-16 md:py-20 bg-neutral-50 border-t border-neutral-100">
         <div className="max-w-content mx-auto px-6">
           <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-400 mb-8">
@@ -303,7 +348,7 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
         </div>
       </section>
 
-      {/* ─── 6. Bottom CTA ─────────────────────────────────────────── */}
+      {/* ─── 7. Bottom CTA ─────────────────────────────────────────── */}
       <section className="py-20 md:py-28 relative overflow-hidden">
         <div
           className="absolute inset-0"

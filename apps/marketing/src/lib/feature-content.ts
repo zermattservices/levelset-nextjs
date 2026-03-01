@@ -5,6 +5,8 @@ export interface FeatureContent {
   solution: string;
   capabilities: { icon: string; title: string; description: string }[];
   screenshots: { src: string; alt: string; caption?: string }[];
+  /** Slugs of features that work well together with this one */
+  worksWith?: { slug: string; reason: string }[];
 }
 
 const CONTENT: Record<string, FeatureContent> = {
@@ -56,6 +58,10 @@ const CONTENT: Record<string, FeatureContent> = {
           'Drill into any team member to see their performance by position over time.',
       },
     ],
+    worksWith: [
+      { slug: 'evaluations', reason: 'Rating data flows directly into performance reviews' },
+      { slug: 'pay', reason: 'Performance zones drive pay adjustments automatically' },
+    ],
   },
 
   discipline: {
@@ -105,6 +111,10 @@ const CONTENT: Record<string, FeatureContent> = {
         caption:
           'The system recommends the next step — leaders can follow, override, or dismiss.',
       },
+    ],
+    worksWith: [
+      { slug: 'levi-ai', reason: 'Ask Levi about discipline history and point totals instantly' },
+      { slug: 'evaluations', reason: 'Discipline records are referenced in performance reviews' },
     ],
   },
 
@@ -156,6 +166,10 @@ const CONTENT: Record<string, FeatureContent> = {
           'Every detail about a team member, one click away.',
       },
     ],
+    worksWith: [
+      { slug: 'pay', reason: 'Pay rates are calculated and visible in each employee profile' },
+      { slug: 'positional-ratings', reason: 'Position eligibility and rating history in one profile' },
+    ],
   },
 
   evaluations: {
@@ -193,6 +207,10 @@ const CONTENT: Record<string, FeatureContent> = {
         caption:
           'Reviews backed by data — not three months of trying to remember.',
       },
+    ],
+    worksWith: [
+      { slug: 'positional-ratings', reason: 'Real rating data is embedded directly in evaluations' },
+      { slug: 'goal-tracking', reason: 'Goal progress is reviewed during evaluations' },
     ],
   },
 
@@ -238,6 +256,10 @@ const CONTENT: Record<string, FeatureContent> = {
           'Your week at a glance — with position coverage you can actually trust.',
       },
     ],
+    worksWith: [
+      { slug: 'setups', reason: 'Setup templates define position assignments within each shift' },
+      { slug: 'positional-ratings', reason: 'See who is actually ready for each scheduled position' },
+    ],
   },
 
   setups: {
@@ -276,6 +298,10 @@ const CONTENT: Record<string, FeatureContent> = {
           'Define your setup once. Use it every day.',
       },
     ],
+    worksWith: [
+      { slug: 'scheduling', reason: 'Setup templates work within your weekly schedule' },
+      { slug: 'positional-ratings', reason: 'Assign positions based on who is actually rated for them' },
+    ],
   },
 
   forms: {
@@ -312,6 +338,10 @@ const CONTENT: Record<string, FeatureContent> = {
       },
     ],
     screenshots: [],
+    worksWith: [
+      { slug: 'evaluations', reason: 'Custom forms power your evaluation templates' },
+      { slug: 'mobile-app', reason: 'Team members submit forms from their phone on the floor' },
+    ],
   },
 
   'levi-ai': {
@@ -348,6 +378,10 @@ const CONTENT: Record<string, FeatureContent> = {
       },
     ],
     screenshots: [],
+    worksWith: [
+      { slug: 'documents', reason: 'Levi answers questions using your uploaded documents' },
+      { slug: 'mobile-app', reason: 'Chat with Levi from the mobile app on the floor' },
+    ],
   },
 
   'mobile-app': {
@@ -384,6 +418,10 @@ const CONTENT: Record<string, FeatureContent> = {
       },
     ],
     screenshots: [],
+    worksWith: [
+      { slug: 'levi-ai', reason: 'Ask Levi questions about your team from the app' },
+      { slug: 'positional-ratings', reason: 'Submit ratings from your phone between rushes' },
+    ],
   },
 
   'oe-pillars': {
@@ -420,6 +458,9 @@ const CONTENT: Record<string, FeatureContent> = {
       },
     ],
     screenshots: [],
+    worksWith: [
+      { slug: 'positional-ratings', reason: 'Pillar scores are calculated from your positional ratings' },
+    ],
   },
 
   'org-chart': {
@@ -450,42 +491,48 @@ const CONTENT: Record<string, FeatureContent> = {
       },
     ],
     screenshots: [],
+    worksWith: [
+      { slug: 'roster', reason: 'Org chart builds itself from your roster data' },
+    ],
   },
 
   'documents': {
     tagline:
-      'Stop digging through shared drives and binders. Your team\'s important documents live here.',
+      'Upload your policies and guides — then let Levi answer your team\'s questions about them.',
     problem:
       'Your opening checklist is in a Google Doc. Your training materials are in a binder. Your policies are in an email from six months ago. When a new team member asks "where do I find the uniform policy?" nobody has the same answer. Information is scattered, outdated, and impossible to find when you need it.',
     solution:
-      'Levelset Documents gives your organization a single, organized hub for every document your team needs. Upload policies, training guides, standard operating procedures, and reference materials. Organize by category, assign to roles, and know that every team member has access to the same up-to-date information.',
+      'Upload your documents to Levelset and Levi learns them. When a team member asks "how do I order a new uniform shirt?" Levi answers instantly — pulling the answer from your actual uniform policy document. Your policies, training guides, and SOPs become a living knowledge base that any team member can query through Levi AI, 24/7.',
     capabilities: [
       {
-        icon: 'folder',
-        title: 'Organized by Category',
+        icon: 'sparkles',
+        title: 'Levi Learns Your Documents',
         description:
-          'Group documents by topic — policies, training, SOPs, reference materials. No more hunting through a messy shared drive.',
+          'Every document you upload is read and understood by Levi. Ask "what\'s our late policy?" and Levi pulls the answer from your actual policy document — not a generic response.',
       },
       {
         icon: 'upload',
         title: 'Upload Anything',
         description:
-          'PDFs, images, Word docs, spreadsheets — upload whatever your team needs. Everything is stored and accessible from one place.',
+          'PDFs, images, Word docs, even web links. Levelset extracts the content so Levi can reference it. Your team\'s knowledge goes from scattered files to instant answers.',
       },
       {
-        icon: 'users',
-        title: 'Role-Based Visibility',
+        icon: 'folder',
+        title: 'Organized by Category',
         description:
-          'Control which documents are visible to which roles. Leadership docs stay with leadership. Team-wide policies are available to everyone.',
+          'Group documents by topic — policies, training, SOPs, reference materials. Everything is stored and browsable, with search across all your documents.',
       },
       {
-        icon: 'search',
-        title: 'Always Findable',
+        icon: 'message-circle',
+        title: 'Questions Answered Instantly',
         description:
-          'Search across all your documents instantly. When someone asks "where\'s the food safety policy?" the answer is always the same: Levelset.',
+          '"How do I request time off?" "What\'s the dress code for spirit nights?" Instead of hunting through a binder, your team asks Levi and gets the answer in seconds.',
       },
     ],
     screenshots: [],
+    worksWith: [
+      { slug: 'levi-ai', reason: 'Levi answers team questions using your uploaded documents' },
+    ],
   },
 
   'pay': {
@@ -522,6 +569,10 @@ const CONTENT: Record<string, FeatureContent> = {
       },
     ],
     screenshots: [],
+    worksWith: [
+      { slug: 'positional-ratings', reason: 'Performance zones drive pay adjustments automatically' },
+      { slug: 'roster', reason: 'Pay rates are visible in each employee profile' },
+    ],
   },
 
   'goal-tracking': {
@@ -558,6 +609,10 @@ const CONTENT: Record<string, FeatureContent> = {
       },
     ],
     screenshots: [],
+    worksWith: [
+      { slug: 'evaluations', reason: 'Goal progress is reviewed during evaluations' },
+      { slug: 'positional-ratings', reason: 'Goals can reference real rating data for progress tracking' },
+    ],
   },
 
   'development-plans': {
@@ -594,6 +649,10 @@ const CONTENT: Record<string, FeatureContent> = {
       },
     ],
     screenshots: [],
+    worksWith: [
+      { slug: 'evaluations', reason: 'Development progress is reviewed during evaluations' },
+      { slug: 'positional-ratings', reason: 'Milestones tie to real positional rating achievements' },
+    ],
   },
 };
 
