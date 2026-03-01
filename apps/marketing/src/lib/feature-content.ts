@@ -1,10 +1,22 @@
+export type ScreenshotVariant = 'desktop' | 'mobile';
+
+export interface FeatureScreenshot {
+  src: string;
+  alt: string;
+  caption?: string;
+  /** Defaults to 'desktop' (browser mockup). Use 'mobile' for phone frame. */
+  variant?: ScreenshotVariant;
+}
+
 export interface FeatureContent {
   tagline: string;
   heroImage?: string;
+  /** Which mockup frame to use for the hero image. Defaults to 'desktop'. */
+  heroVariant?: ScreenshotVariant;
   problem: string;
   solution: string;
   capabilities: { icon: string; title: string; description: string }[];
-  screenshots: { src: string; alt: string; caption?: string }[];
+  screenshots: FeatureScreenshot[];
   /** Slugs of features that work well together with this one */
   worksWith?: { slug: string; reason: string }[];
 }
@@ -337,7 +349,18 @@ const CONTENT: Record<string, FeatureContent> = {
           'Forms can pull in Levelset data — like auto-populating the team member\'s name, role, or shift assignment — so your team fills out less and you get cleaner data.',
       },
     ],
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/forms-builder.png',
+        alt: 'Form builder interface with drag-and-drop fields',
+        caption: 'Build exactly the forms your operation needs — no coding required.',
+      },
+      {
+        src: '/screenshots/forms-submissions.png',
+        alt: 'Form submission history with timestamps and team member names',
+        caption: 'Every submission timestamped and tied to who filled it out.',
+      },
+    ],
     worksWith: [
       { slug: 'evaluations', reason: 'Custom forms power your evaluation templates' },
       { slug: 'mobile-app', reason: 'Team members submit forms from their phone on the floor' },
@@ -345,6 +368,8 @@ const CONTENT: Record<string, FeatureContent> = {
   },
 
   'levi-ai': {
+    heroVariant: 'mobile',
+    heroImage: '/screenshots/levi-chat-hero.png',
     tagline:
       '"Who\'s my strongest iPOS on the morning shift?" — answered in 3 seconds.',
     problem:
@@ -377,7 +402,20 @@ const CONTENT: Record<string, FeatureContent> = {
           'Levi only sees your team\'s data. Your conversations are private. Nothing is shared across organizations.',
       },
     ],
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/levi-chat-conversation.png',
+        alt: 'Levi AI chat showing a conversation about team performance',
+        caption: 'Ask about your team in plain English — Levi pulls from your real data.',
+        variant: 'mobile',
+      },
+      {
+        src: '/screenshots/levi-chat-analysis.png',
+        alt: 'Levi AI showing detailed analysis with data from ratings and discipline',
+        caption: 'Complex analysis delivered instantly — no reports, no filters.',
+        variant: 'mobile',
+      },
+    ],
     worksWith: [
       { slug: 'documents', reason: 'Levi answers questions using your uploaded documents' },
       { slug: 'mobile-app', reason: 'Chat with Levi from the mobile app on the floor' },
@@ -385,6 +423,8 @@ const CONTENT: Record<string, FeatureContent> = {
   },
 
   'mobile-app': {
+    heroVariant: 'mobile',
+    heroImage: '/screenshots/mobile-home.png',
     tagline:
       'Rate your team, search your roster, and check the schedule — all from your pocket.',
     problem:
@@ -417,7 +457,44 @@ const CONTENT: Record<string, FeatureContent> = {
           'Ask Levi questions about your team right from the app. "Who\'s working tomorrow morning?" — answered in seconds.',
       },
     ],
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/mobile-home.png',
+        alt: 'Mobile app home screen with quick actions and team overview',
+        caption: 'Your leadership dashboard — right in your pocket.',
+        variant: 'mobile',
+      },
+      {
+        src: '/screenshots/mobile-ratings.png',
+        alt: 'Mobile app showing positional rating submission interface',
+        caption: 'Rate your team right from the floor — between rushes, not after hours.',
+        variant: 'mobile',
+      },
+      {
+        src: '/screenshots/mobile-employee.png',
+        alt: 'Mobile app showing employee profile with ratings and details',
+        caption: 'Full team member profiles — one tap away.',
+        variant: 'mobile',
+      },
+      {
+        src: '/screenshots/mobile-search.png',
+        alt: 'Mobile app employee search with instant results',
+        caption: 'Find any team member in seconds.',
+        variant: 'mobile',
+      },
+      {
+        src: '/screenshots/mobile-levi.png',
+        alt: 'Mobile app showing Levi AI chat interface',
+        caption: 'Ask Levi anything about your team — instant answers on the go.',
+        variant: 'mobile',
+      },
+      {
+        src: '/screenshots/mobile-discipline.png',
+        alt: 'Mobile app showing discipline log and infraction details',
+        caption: 'Log infractions on the spot — don\'t wait until you get to a computer.',
+        variant: 'mobile',
+      },
+    ],
     worksWith: [
       { slug: 'levi-ai', reason: 'Ask Levi questions about your team from the app' },
       { slug: 'positional-ratings', reason: 'Submit ratings from your phone between rushes' },
@@ -457,7 +534,13 @@ const CONTENT: Record<string, FeatureContent> = {
           'The five pillars mirror Chick-fil-A\'s operational excellence framework — so your data speaks the same language as your business.',
       },
     ],
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/oe-pillars-dashboard.png',
+        alt: 'OE Pillars dashboard showing five pillar scores with trend indicators',
+        caption: 'All five pillars at a glance — know exactly where your operation stands.',
+      },
+    ],
     worksWith: [
       { slug: 'positional-ratings', reason: 'Pillar scores are calculated from your positional ratings' },
     ],
@@ -490,7 +573,13 @@ const CONTENT: Record<string, FeatureContent> = {
           'Team members can see where they sit in the organization and who they report to — great for onboarding and orientation.',
       },
     ],
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/org-chart.png',
+        alt: 'Org chart showing team hierarchy from Operator down to Team Members',
+        caption: 'Your entire team structure — auto-generated, always up to date.',
+      },
+    ],
     worksWith: [
       { slug: 'roster', reason: 'Org chart builds itself from your roster data' },
     ],
@@ -529,7 +618,13 @@ const CONTENT: Record<string, FeatureContent> = {
           '"How do I request time off?" "What\'s our dress code for spirit nights?" "How does PTO work here?" Instead of hunting through emails and shared drives, your team asks Levi and gets the answer in seconds.',
       },
     ],
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/documents-library.png',
+        alt: 'Document library showing uploaded policies and handbooks organized by category',
+        caption: 'All your store documents in one place — organized, searchable, and always available.',
+      },
+    ],
     worksWith: [
       { slug: 'levi-ai', reason: 'Levi answers team questions using your uploaded documents' },
     ],
@@ -568,7 +663,18 @@ const CONTENT: Record<string, FeatureContent> = {
           'Every pay rate has a clear rationale. When a team member asks "why?" you have an answer backed by rules, not opinion.',
       },
     ],
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/pay-config.png',
+        alt: 'Pay configuration showing base rates with performance and availability adjustments',
+        caption: 'Define your pay rules once — the system applies them to every team member.',
+      },
+      {
+        src: '/screenshots/pay-employee.png',
+        alt: 'Employee pay breakdown showing base rate, adjustments, and calculated pay',
+        caption: 'Every pay rate has a clear breakdown — no black boxes.',
+      },
+    ],
     worksWith: [
       { slug: 'positional-ratings', reason: 'Performance zones drive pay adjustments automatically' },
       { slug: 'roster', reason: 'Pay rates are visible in each employee profile' },
@@ -608,7 +714,13 @@ const CONTENT: Record<string, FeatureContent> = {
           'See how goals are trending — on track, at risk, or completed. Leaders can intervene early instead of discovering missed targets at year-end.',
       },
     ],
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/goals-dashboard.png',
+        alt: 'Goal tracking dashboard showing active goals with progress indicators',
+        caption: 'Track goals at every level — individual, team, location, organization.',
+      },
+    ],
     worksWith: [
       { slug: 'evaluations', reason: 'Goal progress is reviewed during evaluations' },
       { slug: 'positional-ratings', reason: 'Goals can reference real rating data for progress tracking' },
@@ -648,7 +760,13 @@ const CONTENT: Record<string, FeatureContent> = {
           'Define advancement paths: Team Member → Trainer → Team Lead → Director. Each transition has clear requirements so promotions are earned, not guessed.',
       },
     ],
-    screenshots: [],
+    screenshots: [
+      {
+        src: '/screenshots/dev-plan-roadmap.png',
+        alt: 'Development plan showing milestones and checkpoints for advancement',
+        caption: 'Every team member gets a clear roadmap — from hire to promotion.',
+      },
+    ],
     worksWith: [
       { slug: 'evaluations', reason: 'Development progress is reviewed during evaluations' },
       { slug: 'positional-ratings', reason: 'Milestones tie to real positional rating achievements' },

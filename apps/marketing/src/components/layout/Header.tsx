@@ -173,9 +173,6 @@ export function Header() {
           <Link href="/about" className={linkClass}>
             About
           </Link>
-          <Link href="/contact" className={linkClass}>
-            Contact
-          </Link>
           <button
             onClick={openModal}
             className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
@@ -252,9 +249,6 @@ export function Header() {
             </Link>
             <Link href="/about" className="py-2.5 px-3 text-text-secondary hover:text-brand transition-colors font-medium" onClick={() => setMobileOpen(false)}>
               About
-            </Link>
-            <Link href="/contact" className="py-2.5 px-3 text-text-secondary hover:text-brand transition-colors font-medium" onClick={() => setMobileOpen(false)}>
-              Contact
             </Link>
             <button
               className="mt-2 px-5 py-2.5 rounded-lg bg-[#31664A] text-white font-semibold text-sm hover:bg-[#264D38] transition-colors"

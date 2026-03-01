@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
 import { BrowserMockup } from '@/components/ui/BrowserMockup';
+import { PhoneMockup } from '@/components/ui/PhoneMockup';
 import type { MarketingFeature, FeatureStatus } from '@/lib/features';
-import type { FeatureContent } from '@/lib/feature-content';
+import type { FeatureContent, FeatureScreenshot } from '@/lib/feature-content';
 import { FEATURES, getFeature } from '@/lib/features';
 import { FeaturePageCTA } from './FeaturePageCTA';
 
@@ -128,7 +129,19 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
 
             {/* Right: Hero image or feature illustration */}
             <div>
-              {content.heroImage ? (
+              {content.heroImage && content.heroVariant === 'mobile' ? (
+                <div className="relative flex justify-center">
+                  <div className="absolute -inset-4 bg-white/5 rounded-2xl blur-xl" />
+                  <PhoneMockup dark>
+                    <img
+                      src={content.heroImage}
+                      alt={`${feature.name} screenshot`}
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                    />
+                  </PhoneMockup>
+                </div>
+              ) : content.heroImage ? (
                 <div className="relative">
                   <div className="absolute -inset-4 bg-white/5 rounded-2xl blur-xl" />
                   <BrowserMockup>
@@ -278,38 +291,85 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
       })()}
 
       {/* ─── 5. Screenshots Gallery ──────────────────────────────── */}
-      {content.screenshots.length > 0 && (
-        <section className="py-20 md:py-28 bg-white">
-          <div className="max-w-content mx-auto px-6">
-            <div className="mb-14">
-              <h2 className="text-3xl md:text-4xl font-heading font-bold text-neutral-900 mb-3">
-                See it in action
-              </h2>
-              <div className="w-12 h-1 rounded-full bg-[#31664A]" />
-            </div>
+      {content.screenshots.length > 0 && (() => {
+        const desktopShots = content.screenshots.filter((s) => (s.variant ?? 'desktop') === 'desktop');
+        const mobileShots = content.screenshots.filter((s) => s.variant === 'mobile');
 
-            <div className="space-y-10">
-              {content.screenshots.map((screenshot) => (
-                <div key={screenshot.src}>
-                  <BrowserMockup>
-                    <img
-                      src={screenshot.src}
-                      alt={screenshot.alt}
-                      className="w-full h-auto"
-                      loading="lazy"
-                    />
-                  </BrowserMockup>
-                  {screenshot.caption && (
-                    <p className="text-sm text-neutral-400 text-center mt-4 italic">
-                      {screenshot.caption}
-                    </p>
-                  )}
+        return (
+          <section className="py-20 md:py-28 bg-white">
+            <div className="max-w-content mx-auto px-6">
+              <div className="mb-14">
+                <h2 className="text-3xl md:text-4xl font-heading font-bold text-neutral-900 mb-3">
+                  See it in action
+                </h2>
+                <div className="w-12 h-1 rounded-full bg-[#31664A]" />
+              </div>
+
+              {/* Desktop screenshots — full-width browser mockups */}
+              {desktopShots.length > 0 && (
+                <div className="space-y-10">
+                  {desktopShots.map((screenshot) => (
+                    <div key={screenshot.src}>
+                      <BrowserMockup>
+                        <img
+                          src={screenshot.src}
+                          alt={screenshot.alt}
+                          className="w-full h-auto"
+                          loading="lazy"
+                        />
+                      </BrowserMockup>
+                      {screenshot.caption && (
+                        <p className="text-sm text-neutral-400 text-center mt-4 italic">
+                          {screenshot.caption}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+
+              {/* Mobile screenshots — phone mockups in responsive grid */}
+              {mobileShots.length > 0 && (
+                <div className={desktopShots.length > 0 ? 'mt-16' : ''}>
+                  <div
+                    className="grid justify-items-center gap-y-10 gap-x-6 md:gap-x-10"
+                    style={{
+                      gridTemplateColumns: `repeat(auto-fit, minmax(240px, 280px))`,
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {mobileShots.map((screenshot, index) => (
+                      <div
+                        key={screenshot.src}
+                        className="flex flex-col items-center"
+                        style={{
+                          transform: mobileShots.length > 1
+                            ? `translateY(${index % 2 === 1 ? '20px' : '0'})`
+                            : undefined,
+                        }}
+                      >
+                        <PhoneMockup>
+                          <img
+                            src={screenshot.src}
+                            alt={screenshot.alt}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </PhoneMockup>
+                        {screenshot.caption && (
+                          <p className="text-sm text-neutral-400 text-center mt-5 italic max-w-[240px]">
+                            {screenshot.caption}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        );
+      })()}
 
       {/* ─── 6. Related Features ───────────────────────────────────── */}
       <section className="py-16 md:py-20 bg-neutral-50 border-t border-neutral-100">
