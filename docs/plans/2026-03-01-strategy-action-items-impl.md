@@ -300,7 +300,7 @@ Add after the `'mobile-app'` entry:
     problem:
       'CFA measures operational excellence across five pillars, but most operators track them loosely — if at all. There\'s no single place to see how your team is performing against each pillar, and no way to connect those pillars back to the individual position-level performance that drives them.',
     solution:
-      'Levelset aggregates your positional rating data into the five OE pillars automatically. Each pillar score is calculated from the positions that feed into it — so when your Drive-Thru team improves, your Speed of Service pillar reflects it in real time. Leaders see one dashboard that connects individual performance to operational outcomes.',
+      'Levelset aggregates your positional rating data into the five OE pillars — Great Food, Quick & Accurate, Creating Moments, Caring Interactions, and Inviting Atmosphere — automatically. Each pillar score is calculated from the position criteria that map to it, so when your team improves on mapped positions, the pillar scores reflect it. Leaders see one dashboard that connects individual performance to operational outcomes.',
     capabilities: [
       {
         icon: 'bar-chart',
