@@ -127,14 +127,14 @@ Every session at The Approach surfaces problems that Levelset solves. Here are t
 
 | Pain Point | How It Shows Up | How Levelset Solves It |
 |------------|-----------------|----------------------|
-| **Inconsistent team evaluation** | Different managers rate people differently. No standard for "what good looks like." | PEA ratings use position-specific criteria with a clear 1-3 scale. Every rater uses the same rubric. |
+| **Inconsistent team evaluation** | Different managers rate people differently. No standard for "what good looks like." | Positional Excellence ratings use position-specific criteria with a clear 1-3 scale. Every rater uses the same rubric. |
 | **Retention beyond 90 days** | Team members leave after the honeymoon phase. No system to track engagement. | Ratings track performance trends over time. Leaders can see who's growing vs. plateauing and intervene early. |
 | **No development pipeline** | Can't identify who's ready for shift leader, trainer, or director roles. | Rolling averages and position mastery data show exactly who's crushing it and ready for more. |
-| **Discipline inconsistency** | One manager gives a warning, another fires for the same thing. | CARES progressive discipline system ensures consistent, documented accountability with recommended actions at each threshold. |
+| **Discipline inconsistency** | One manager gives a warning, another fires for the same thing. | Progressive discipline system ensures consistent, documented accountability with recommended actions at each threshold. |
 | **Spreadsheet chaos** | Ratings live in binders, discipline in folders, rosters in spreadsheets. Nothing connects. | One unified platform: roster, ratings, discipline, all linked per employee. |
 | **Multi-location visibility** | Operators with 2-3 locations can't compare performance across restaurants. | Multi-location dashboard with cross-restaurant reporting. |
 | **Employer branding** | Can't articulate or prove that they're a great place to work. | Data-driven performance culture that team members can see and feel. Position mastery gives clear growth paths. |
-| **Generational expectations** | Gen Z wants clear expectations, frequent feedback, and visible growth paths. | PEA delivers exactly this: clear criteria per position, regular ratings, and visible progress. |
+| **Generational expectations** | Gen Z wants clear expectations, frequent feedback, and visible growth paths. | Positional Excellence delivers exactly this: clear criteria per position, regular ratings, and visible progress. |
 | **Training effectiveness** | No way to measure if training programs are actually working. | Before/after rating data shows if training translates to performance improvement. |
 | **Manager accountability** | No visibility into whether supervisors are actually developing their teams. | Rater attribution shows who's rating, how often, and whether their teams are improving. |
 
@@ -168,7 +168,7 @@ Every session at The Approach surfaces problems that Levelset solves. Here are t
 
 **1. Built for CFA, not adapted to CFA**
 - Not a generic HR tool with CFA branding. Built from the ground up for CFA positions, criteria, and workflows.
-- You understand FOH/BOH, the PEA framework, CARES discipline, and shift leadership development.
+- You understand FOH/BOH, Positional Excellence, progressive discipline, and shift leadership development.
 
 **2. Consistency across your entire team**
 - Every supervisor rates using the same criteria. Every discipline decision follows the same process.
@@ -202,7 +202,7 @@ You have two real operators using Levelset. Use them:
 This is your secret weapon. When someone walks into the Talent Hub after a session, you can reference what they just learned:
 
 - After **Nido Qubein's employer branding keynote**: "He talked about making your restaurant a place people choose. Levelset gives you the data to prove you're investing in your people — clear criteria, tracked growth, fair accountability."
-- After **Tim Elmore's generational session**: "He mentioned Gen Z wants frequent feedback and clear expectations. That's literally what PEA ratings deliver — position-specific criteria rated regularly."
+- After **Tim Elmore's generational session**: "He mentioned Gen Z wants frequent feedback and clear expectations. That's literally what Positional Excellence ratings deliver — position-specific criteria rated regularly."
 - After **Chris McChesney's execution session**: "He taught the Four Disciplines of Execution. Levelset is your scoreboard — it makes team performance visible and trackable so your strategy actually gets executed."
 - After **SHRM onboarding labs**: "They covered 30/60/90 onboarding. Levelset tracks that progression with ratings data — you can see if your onboarding is actually producing capable team members."
 - After **retention/engagement labs**: "That session was about keeping people beyond day 90. Levelset shows you exactly who's plateauing so you can intervene before they disengage."
@@ -222,7 +222,7 @@ You have about 3 minutes of someone's attention at a vendor booth. Here's the op
 Open the Levelset dashboard:
 1. Show the **employee roster** — "Here's your whole team in one place."
 2. Click into an employee — "Every rating, every position, their history. No digging through binders."
-3. Show **PEA ratings** — "Your supervisors rate on your exact positions using your exact criteria. Register, drive-thru, grill — whatever your restaurant runs."
+3. Show **positional ratings** — "Your supervisors rate on your exact positions using your exact criteria. Register, drive-thru, grill — whatever your restaurant runs."
 4. Show the **rating scale** — "Simple 1-3: Not Yet, On the Rise, Crushing It. Rolling averages from the last 4 ratings so you see trends, not just snapshots."
 
 **[1:30–2:15] Wow — The Insight**
@@ -613,9 +613,9 @@ This is your quick-reference cheat sheet for what to say based on what session j
 | 11:00am+ | **Groeschel (leadership) + Cliff Robinson (CFA direction)** | Inspired about leadership. Thinking big-picture about their role. | "Groeschel talked about leading with clarity. Levelset gives your team that clarity — clear expectations per position, visible progress, consistent standards." |
 | 11:30am+ | **Lab: Onboarding 30/60/90** | How to set new hires up for success | "That lab covered the first 90 days. Levelset tracks that progression with data — you can see exactly whether your onboarding is producing capable team members." |
 | 11:30am+ | **Lab: Building Culture** | How to maintain culture as teams grow | "Culture is consistency. When every supervisor rates and coaches using the same criteria, that IS culture. Levelset makes that happen." |
-| 11:30am+ | **Lab: Generational Coaching (Elmore)** | Gen Z needs different feedback styles | "Elmore said Gen Z wants frequent feedback and clear expectations. PEA ratings deliver exactly that — position-specific criteria rated regularly. They can see their own growth." |
+| 11:30am+ | **Lab: Generational Coaching (Elmore)** | Gen Z needs different feedback styles | "Elmore said Gen Z wants frequent feedback and clear expectations. Positional Excellence ratings deliver exactly that — position-specific criteria rated regularly. They can see their own growth." |
 | 11:30am+ | **Lab: Retention/Engagement (SHRM 301)** | How to keep people beyond day 90 | "You just learned about engagement experiences. Levelset shows you who's plateauing so you can intervene before they disengage. It's retention through visibility." |
-| 3:15pm+ | **Nido Qubein (employer branding) + Andrada (talent strategy)** | How to position their restaurant as THE place to work | "Qubein talked about building a brand people choose. Your PEA data proves you invest in people — it's employer branding backed by data, not just slogans." |
+| 3:15pm+ | **Nido Qubein (employer branding) + Andrada (talent strategy)** | How to position their restaurant as THE place to work | "Qubein talked about building a brand people choose. Your ratings data proves you invest in people — it's employer branding backed by data, not just slogans." |
 | 3:30pm+ | **Lab: Talent Strategy Foundations** | Just starting to build their talent approach | "Perfect timing. You're building your talent strategy — Levelset is the tool that operationalizes it. Your strategy lives in the platform, not a binder." |
 | 3:30pm+ | **Lab: Supporting Beyond 90 Days (SHRM 201)** | Developing people for leadership roles | "That session was about growing team members into trainers and shift leaders. Levelset's position mastery data shows exactly who's ready for more responsibility." |
 | 3:30pm+ | **Lab: Future Frontline Workers (Silich)** | What the next generation of workers expects | "She talked about what's coming. Levelset is how you meet those expectations today — clear criteria, regular feedback, visible growth paths." |
