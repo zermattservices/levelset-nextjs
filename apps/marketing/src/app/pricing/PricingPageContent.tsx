@@ -9,7 +9,7 @@ import { Accordion } from '@/components/ui/Accordion';
 const PRICING_FAQ = [
   {
     question: 'What\u2019s included in the free trial?',
-    answer: `Every trial starts on the Pro plan — full access to every feature for ${TRIAL_DAYS} days. No credit card required to start. You\u2019ll have time to set up your organization, invite your leadership team, and see the platform in action.`,
+    answer: `Every trial starts on the Pro plan — full access to every feature for ${TRIAL_DAYS} days. You\u2019ll have time to set up your organization, invite your leadership team, and see the platform in action.`,
   },
   {
     question: 'What happens after the trial?',
@@ -117,7 +117,7 @@ export function PricingPageContent() {
           </h2>
           <p className="text-lg text-white/70 mb-8 max-w-xl mx-auto">
             Start your {TRIAL_DAYS}-day free trial with full access to every feature.
-            No credit card required.
+            No contracts, cancel anytime.
           </p>
           <button
             onClick={openModal}

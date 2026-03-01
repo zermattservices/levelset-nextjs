@@ -3,8 +3,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { FeaturesDropdown, FeaturesMenuItems } from './FeaturesDropdown';
 import { useTrialModal } from '@/components/cta/TrialModalProvider';
+
+/** Pages that have a light/white hero background (no dark overlay for the header to sit on). */
+const LIGHT_HERO_PAGES = ['/pricing', '/contact', '/integrations'];
 
 const SOLUTIONS = [
   { name: 'Team Development', href: '/solutions/development', description: 'Ratings, evaluations, and growth plans' },
@@ -20,6 +24,11 @@ export function Header() {
   const featuresTimeout = useRef<NodeJS.Timeout | null>(null);
   const solutionsTimeout = useRef<NodeJS.Timeout | null>(null);
   const { openModal } = useTrialModal();
+  const pathname = usePathname();
+
+  /** On light-hero pages, always render the solid (scrolled) header style. */
+  const forceSolid = LIGHT_HERO_PAGES.includes(pathname);
+  const solid = scrolled || forceSolid;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -39,13 +48,13 @@ export function Header() {
   }, [featuresOpen, solutionsOpen]);
 
   const linkClass = `text-sm font-medium transition-colors duration-200 ${
-    scrolled ? 'text-text-secondary hover:text-brand' : 'text-white/70 hover:text-white'
+    solid ? 'text-text-secondary hover:text-brand' : 'text-white/70 hover:text-white'
   }`;
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
+        solid
           ? 'bg-white/95 backdrop-blur-md border-b border-neutral-border/50 shadow-sm'
           : 'bg-transparent'
       }`}
@@ -54,7 +63,7 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <Image
-            src={scrolled ? '/logos/Levelset no margin.png' : '/logos/Levelset White no margin.png'}
+            src={solid ? '/logos/Levelset no margin.png' : '/logos/Levelset White no margin.png'}
             alt="Levelset"
             width={130}
             height={32}
@@ -95,7 +104,7 @@ export function Header() {
             <FeaturesDropdown
               open={featuresOpen}
               onClose={() => setFeaturesOpen(false)}
-              scrolled={scrolled}
+              scrolled={solid}
             />
           </div>
 
@@ -170,7 +179,7 @@ export function Header() {
           <button
             onClick={openModal}
             className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-              scrolled
+              solid
                 ? 'bg-[#31664A] text-white hover:bg-[#264D38]'
                 : 'bg-white/15 text-white border border-white/25 hover:bg-white/25 backdrop-blur-sm'
             }`}
@@ -181,7 +190,7 @@ export function Header() {
 
         {/* Mobile hamburger */}
         <button
-          className={`md:hidden p-2 transition-colors ${scrolled ? 'text-text-secondary' : 'text-white/80'}`}
+          className={`md:hidden p-2 transition-colors ${solid ? 'text-text-secondary' : 'text-white/80'}`}
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >

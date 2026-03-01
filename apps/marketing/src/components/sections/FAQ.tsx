@@ -14,7 +14,7 @@ const faqItems = [
   {
     question: 'How do I get access?',
     answer:
-      'Levelset offers a 30-day free trial — no credit card required. Click "Get Started" to choose a plan and set up your organization. You\'ll have full access to all features during your trial period.',
+      'Levelset offers a 30-day free trial with full access to every feature. Click "Get Started" to choose a plan and set up your organization. No contracts — cancel anytime.',
   },
 ];
 

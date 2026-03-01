@@ -19,19 +19,19 @@ const FEATURES = [
     name: 'Evaluations',
     href: '/features/evaluations',
     description: 'Formal reviews backed by real performance data — not three months of memory.',
-    status: 'live',
+    status: 'coming-soon',
   },
   {
     name: 'Development Plans',
     href: '/features/development-plans',
     description: 'Custom roadmaps with milestones and checkpoints for every team member.',
-    status: 'live',
+    status: 'coming-soon',
   },
   {
     name: 'Goal Tracking',
     href: '/features/goal-tracking',
     description: 'Goals at every level — individual, team, location, and org — tied to real data.',
-    status: 'live',
+    status: 'coming-soon',
   },
   {
     name: 'Pathway Tracking',
@@ -99,8 +99,13 @@ export default function DevelopmentPage() {
                   <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#264D38] transition-colors">
                     {feature.name}
                   </h3>
-                  {feature.status === 'coming-soon' && (
+                  {feature.status === 'beta' && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                      Beta
+                    </span>
+                  )}
+                  {feature.status === 'coming-soon' && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-500 font-medium">
                       Coming Soon
                     </span>
                   )}

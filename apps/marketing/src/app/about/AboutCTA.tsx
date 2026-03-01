@@ -20,7 +20,7 @@ export function AboutCTA() {
             Ready to see Levelset in action?
           </h2>
           <p className="text-lg text-white/70 mb-10 max-w-xl mx-auto">
-            Start your 30-day free trial with full access to every feature. No credit card required.
+            Start your 30-day free trial with full access to every feature. No contracts, cancel anytime.
           </p>
           <div className="flex justify-center">
             <TrialCTA dark />

@@ -77,9 +77,21 @@ export default function OperationsPage() {
                 href={feature.href}
                 className="group block p-6 rounded-xl border border-gray-200 hover:border-[#264D38]/30 hover:shadow-lg transition-all"
               >
-                <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#264D38] transition-colors mb-3">
-                  {feature.name}
-                </h3>
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#264D38] transition-colors">
+                    {feature.name}
+                  </h3>
+                  {feature.status === 'beta' && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                      Beta
+                    </span>
+                  )}
+                  {feature.status === 'coming-soon' && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-500 font-medium">
+                      Coming Soon
+                    </span>
+                  )}
+                </div>
                 <p className="text-gray-600 text-sm">{feature.description}</p>
               </Link>
             ))}

@@ -1,10 +1,36 @@
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
 import { BrowserMockup } from '@/components/ui/BrowserMockup';
-import type { MarketingFeature } from '@/lib/features';
+import type { MarketingFeature, FeatureStatus } from '@/lib/features';
 import type { FeatureContent } from '@/lib/feature-content';
 import { FEATURES } from '@/lib/features';
 import { FeaturePageCTA } from './FeaturePageCTA';
+
+function StatusBadge({ status, variant = 'default' }: { status: FeatureStatus; variant?: 'default' | 'hero' }) {
+  if (status === 'live') return null;
+  if (variant === 'hero') {
+    const styles =
+      status === 'beta'
+        ? 'bg-amber-400/20 text-amber-300 border-amber-400/30'
+        : 'bg-white/10 text-white/70 border-white/20';
+    const label = status === 'beta' ? 'Beta' : 'Coming Soon';
+    return (
+      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${styles}`}>
+        {label}
+      </span>
+    );
+  }
+  const styles =
+    status === 'beta'
+      ? 'bg-amber-100 text-amber-700'
+      : 'bg-neutral-100 text-neutral-500';
+  const label = status === 'beta' ? 'Beta' : 'Coming Soon';
+  return (
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none ${styles}`}>
+      {label}
+    </span>
+  );
+}
 
 /* ─── Tier config ────────────────────────────────────────────────── */
 
@@ -86,9 +112,12 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
                 <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center">
                   <Icon name={feature.icon} size={24} className="text-white" />
                 </div>
-                <h1 className="text-4xl md:text-5xl font-heading font-bold text-white tracking-tight">
-                  {feature.name}
-                </h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-4xl md:text-5xl font-heading font-bold text-white tracking-tight">
+                    {feature.name}
+                  </h1>
+                  <StatusBadge status={feature.status} variant="hero" />
+                </div>
               </div>
 
               {/* Tagline */}
@@ -258,8 +287,11 @@ export function FeaturePageTemplate({ feature, content }: FeaturePageTemplatePro
                   />
                 </div>
                 <div>
-                  <span className="text-sm font-bold text-neutral-800 group-hover:text-[#31664A] transition-colors duration-200">
-                    {f.name}
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold text-neutral-800 group-hover:text-[#31664A] transition-colors duration-200">
+                      {f.name}
+                    </span>
+                    <StatusBadge status={f.status} />
                   </span>
                   <p className="text-xs text-neutral-400 mt-0.5 line-clamp-1">
                     {f.shortDescription}

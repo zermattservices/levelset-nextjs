@@ -15,6 +15,7 @@
    * Colors — Brand
    * =================================================================== */
   --ls-color-brand: #31664A;
+  --ls-color-brand-base: #31664A;
   --ls-color-brand-hover: #264D38;
   --ls-color-brand-border: #458461;
   --ls-color-brand-foreground: #EFF6FF;
@@ -25,6 +26,7 @@
    * Colors — Destructive
    * =================================================================== */
   --ls-color-destructive: #D23230;
+  --ls-color-destructive-base: #D23230;
   --ls-color-destructive-border: #E64F4D;
   --ls-color-destructive-foreground: #FEF2F2;
   --ls-color-destructive-soft: #F7ABAA;
@@ -34,6 +36,7 @@
    * Colors — Success
    * =================================================================== */
   --ls-color-success: #16A34A;
+  --ls-color-success-base: #16A34A;
   --ls-color-success-border: #86EFAC;
   --ls-color-success-foreground: #F0FDF4;
   --ls-color-success-soft: #DCFCE7;
@@ -43,6 +46,7 @@
    * Colors — Warning
    * =================================================================== */
   --ls-color-warning: #FACC15;
+  --ls-color-warning-base: #FACC15;
   --ls-color-warning-border: #FDE047;
   --ls-color-warning-foreground: #422006;
   --ls-color-warning-soft: #FEF9C3;
@@ -52,6 +56,7 @@
    * Colors — Muted
    * =================================================================== */
   --ls-color-muted: #6B7280;
+  --ls-color-muted-base: #6B7280;
   --ls-color-muted-border: #E5E7EB;
   --ls-color-muted-foreground: #E5E7EB;
   --ls-color-muted-soft: #F3F4F6;
@@ -61,6 +66,7 @@
    * Colors — Neutral
    * =================================================================== */
   --ls-color-neutral: #374151;
+  --ls-color-neutral-base: #374151;
   --ls-color-neutral-border: #D1D5DB;
   --ls-color-neutral-foreground: #F9FAFB;
   --ls-color-neutral-soft: #E5E7EB;

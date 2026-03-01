@@ -29,7 +29,7 @@ export function TrialCTA({ dark = false }: TrialCTAProps) {
         Start Your 30-Day Free Trial
       </button>
       <p className={`text-xs ${dark ? 'text-white/50' : 'text-gray-400'}`}>
-        No credit card required.
+        No commitment — cancel anytime.
       </p>
     </div>
   );

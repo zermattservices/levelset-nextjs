@@ -13,7 +13,7 @@ const FEATURES = [
     name: 'Levi AI',
     href: '/features/levi-ai',
     description: 'Ask questions about your team in plain English and get instant, data-backed answers.',
-    status: 'live',
+    status: 'beta',
   },
   {
     name: 'Retention Analytics',
@@ -80,8 +80,13 @@ export default function IntelligencePage() {
                   <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#264D38] transition-colors">
                     {feature.name}
                   </h3>
-                  {feature.status === 'coming-soon' && (
+                  {feature.status === 'beta' && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                      Beta
+                    </span>
+                  )}
+                  {feature.status === 'coming-soon' && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-500 font-medium">
                       Coming Soon
                     </span>
                   )}
