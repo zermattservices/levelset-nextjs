@@ -38,7 +38,11 @@ export interface ToolRegistryContext {
     customRoles: boolean;
     orgChart: boolean;
   };
-  // Future: userId and userPermissions will be added here for action tool authorization
+  isAdmin: boolean;
+  employeeId?: string;
+  hierarchyLevel: number;
+  permissions: Set<string>;
+  accessibleLocationIds: string[];
 }
 
 export type ToolCategory = 'data' | 'display' | 'action';

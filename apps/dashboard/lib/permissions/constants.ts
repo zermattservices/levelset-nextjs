@@ -19,6 +19,7 @@ export const PERMISSION_MODULES = {
   FORM_MANAGEMENT: 'form_management',
   DOCUMENTS: 'documents',
   ORG_CHART: 'org_chart',
+  AI_ASSISTANT: 'ai_assistant',
 } as const;
 
 // All permission keys as const for type safety
@@ -111,6 +112,9 @@ export const P = {
   // Org Chart
   OC_VIEW: 'org_chart.view_org_chart',
   OC_EDIT: 'org_chart.edit_org_chart',
+
+  // AI Assistant
+  AI_USE: 'ai_assistant.use_ai_assistant',
 } as const;
 
 // Type for any valid permission key
@@ -196,6 +200,11 @@ export const MODULE_METADATA: Record<string, ModuleMetadata> = {
     name: 'Org Chart',
     description: 'Organizational chart visualization and configuration',
     order: 14,
+  },
+  [PERMISSION_MODULES.AI_ASSISTANT]: {
+    name: 'AI Assistant',
+    description: 'Access to Levi AI assistant features',
+    order: 15,
   },
 };
 
@@ -603,6 +612,14 @@ export const SUB_ITEM_METADATA: Record<PermissionKey, SubItemMetadata> = {
     order: 2,
     module: PERMISSION_MODULES.ORG_CHART,
     dependsOn: P.OC_VIEW,
+  },
+
+  // AI Assistant
+  [P.AI_USE]: {
+    name: 'Use AI Assistant',
+    description: 'Access to chat with Levi AI assistant',
+    order: 1,
+    module: PERMISSION_MODULES.AI_ASSISTANT,
   },
 };
 

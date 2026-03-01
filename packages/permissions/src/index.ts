@@ -9,6 +9,9 @@
 /** Role that bypasses all permission checks */
 export const ADMIN_ROLE = 'Levelset Admin';
 
+/** Permission key for AI assistant access */
+export const AI_USE_PERMISSION = 'ai_assistant.use_ai_assistant';
+
 /**
  * Check if a user role is the Levelset Admin role.
  * Levelset Admin bypasses all permission checks.

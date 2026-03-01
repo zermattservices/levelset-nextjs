@@ -10,6 +10,11 @@ export interface UserContext {
   locationId?: string;
   role: string;
   name: string;
+  isAdmin: boolean;
+  employeeId?: string;
+  hierarchyLevel: number;
+  permissions: Set<string>;
+  accessibleLocationIds: string[];
 }
 
 /** Task types for LLM routing */
