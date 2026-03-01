@@ -37,6 +37,62 @@ export interface ExecutorCallbacks {
   onConfirmationRequired?: (step: PlanStep) => Promise<boolean>;
 }
 
+// ─── Dependency Output Injection ─────────────────────────────────────────────
+
+/**
+ * Inject outputs from a completed dependency step into a dependent step's args.
+ *
+ * Primary pattern: lookup_employee → any tool needing employee_id
+ * When lookup_employee returns an array of employees, the first match's `id`
+ * is injected as `employee_id` into the dependent step.
+ *
+ * This solves the "plan-time unknown" problem: the orchestrator can plan
+ * lookup_employee (step 0) → get_employee_profile (step 1, dependsOn: 0)
+ * without knowing the employee_id ahead of time.
+ */
+function injectDependencyOutputs(
+  step: PlanStep,
+  dependencyResult: ToolResult
+): PlanStep {
+  // Only inject if the dependency completed successfully
+  if (dependencyResult.error || !dependencyResult.data) return step;
+
+  const updatedArgs = { ...step.args };
+
+  // Pattern: lookup_employee → inject employee_id
+  if (dependencyResult.tool === 'lookup_employee') {
+    try {
+      const parsed = JSON.parse(dependencyResult.data);
+      // lookup_employee returns an array of employee objects with `id` field
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {
+        // Only inject if employee_id is not already set
+        if (!updatedArgs.employee_id) {
+          updatedArgs.employee_id = parsed[0].id;
+        }
+      }
+    } catch {
+      // Parse failed — skip injection
+    }
+  }
+
+  // Pattern: list_employees → inject employee_id (if single match)
+  if (dependencyResult.tool === 'list_employees') {
+    try {
+      const parsed = JSON.parse(dependencyResult.data);
+      const employees = parsed.employees ?? parsed;
+      if (Array.isArray(employees) && employees.length === 1 && employees[0].id) {
+        if (!updatedArgs.employee_id) {
+          updatedArgs.employee_id = employees[0].id;
+        }
+      }
+    } catch {
+      // Parse failed — skip injection
+    }
+  }
+
+  return { ...step, args: updatedArgs };
+}
+
 // ─── Execution ───────────────────────────────────────────────────────────────
 
 /** Check if an error is transient (worth retrying) */
@@ -180,12 +236,19 @@ export async function executePlan(
       // If the dependency wasn't in the independent set, it's a chained dependency.
       // This shouldn't happen with max 4 steps, but handle it gracefully.
       console.warn(`Dependency step ${depIdx} not yet executed — executing now`);
-      results[depIdx] = await executeStep(steps[depIdx], depIdx, ctx, callbacks);
+      // Check if THIS step also has a dependency that has completed
+      const parentDep = steps[depIdx].dependsOn;
+      const stepToExecute = (parentDep !== undefined && parentDep !== null && results[parentDep])
+        ? injectDependencyOutputs(steps[depIdx], results[parentDep])
+        : steps[depIdx];
+      results[depIdx] = await executeStep(stepToExecute, depIdx, ctx, callbacks);
     }
 
     // Execute all steps that depend on this one (sequentially for safety)
+    // Inject dependency outputs into each step's args before executing
     for (const idx of depSteps) {
-      results[idx] = await executeStep(steps[idx], idx, ctx, callbacks);
+      const enrichedStep = injectDependencyOutputs(steps[idx], results[depIdx]);
+      results[idx] = await executeStep(enrichedStep, idx, ctx, callbacks);
     }
   }
 

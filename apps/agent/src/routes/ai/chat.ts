@@ -334,12 +334,12 @@ chatRoute.post('/', async (c) => {
             if (plan.steps.length > 0) {
               const toolStartMs = Date.now();
               toolResults = await executePlan(plan, registryCtx, {
-                onToolStart: (toolName, label) => {
+                onToolStart: (toolName, label, stepIndex) => {
                   if (label) {
                     writer.write({
                       type: 'data-tool-status' as any,
                       data: {
-                        toolCallId: `plan-${toolName}-${Date.now()}`,
+                        toolCallId: `plan-step-${stepIndex}`,
                         toolName,
                         status: 'running',
                         label,
@@ -347,12 +347,12 @@ chatRoute.post('/', async (c) => {
                     });
                   }
                 },
-                onToolDone: (toolName, label) => {
+                onToolDone: (toolName, label, stepIndex) => {
                   if (label) {
                     writer.write({
                       type: 'data-tool-status' as any,
                       data: {
-                        toolCallId: `plan-${toolName}-${Date.now()}`,
+                        toolCallId: `plan-step-${stepIndex}`,
                         toolName,
                         status: 'done',
                         label,
