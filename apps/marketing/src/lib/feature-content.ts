@@ -498,35 +498,35 @@ const CONTENT: Record<string, FeatureContent> = {
 
   'documents': {
     tagline:
-      'Upload your policies and guides — then let Levi answer your team\'s questions about them.',
+      'Your store policies, benefits info, and SOPs — uploaded once, answered instantly by Levi.',
     problem:
-      'Your opening checklist is in a Google Doc. Your training materials are in a binder. Your policies are in an email from six months ago. When a new team member asks "where do I find the uniform policy?" nobody has the same answer. Information is scattered, outdated, and impossible to find when you need it.',
+      'Your break policy is buried in the handbook. Benefits information lives in an email from onboarding. Store-specific SOPs are on a shared drive nobody checks. Pathway covers corporate training, but everything your location defines — policies, handbooks, benefits details — is scattered across formats and impossible to find when a team member actually needs it.',
     solution:
-      'Upload your documents to Levelset and Levi learns them. When a team member asks "how do I order a new uniform shirt?" Levi answers instantly — pulling the answer from your actual uniform policy document. Your policies, training guides, and SOPs become a living knowledge base that any team member can query through Levi AI, 24/7.',
+      'Upload your location\'s documents to Levelset and Levi learns them. When a team member asks "what\'s our break policy?" or "how does our dental plan work?" Levi answers instantly — pulling from your actual handbook, benefits documents, and store policies. Your location-specific knowledge becomes a living resource that any team member can query through Levi AI, 24/7.',
     capabilities: [
       {
         icon: 'sparkles',
         title: 'Levi Learns Your Documents',
         description:
-          'Every document you upload is read and understood by Levi. Ask "what\'s our late policy?" and Levi pulls the answer from your actual policy document — not a generic response.',
+          'Every document you upload is read and understood by Levi. Ask "what\'s our break allowance?" and Levi pulls the answer from your actual store policy — not a generic response.',
       },
       {
         icon: 'upload',
         title: 'Upload Anything',
         description:
-          'PDFs, images, Word docs, even web links. Levelset extracts the content so Levi can reference it. Your team\'s knowledge goes from scattered files to instant answers.',
+          'PDFs, images, Word docs, even web links. Upload your handbook, benefits guides, store policies, and SOPs. Levelset extracts the content so Levi can reference it instantly.',
       },
       {
         icon: 'folder',
         title: 'Organized by Category',
         description:
-          'Group documents by topic — policies, training, SOPs, reference materials. Everything is stored and browsable, with search across all your documents.',
+          'Group documents by topic — store policies, benefits, SOPs, handbooks. Everything is stored and browsable, with search across all your documents.',
       },
       {
         icon: 'message-circle',
         title: 'Questions Answered Instantly',
         description:
-          '"How do I request time off?" "What\'s the dress code for spirit nights?" Instead of hunting through a binder, your team asks Levi and gets the answer in seconds.',
+          '"How do I request time off?" "What\'s our dress code for spirit nights?" "How does PTO work here?" Instead of hunting through emails and shared drives, your team asks Levi and gets the answer in seconds.',
       },
     ],
     screenshots: [],
