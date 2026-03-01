@@ -18,6 +18,7 @@ next-env.d.ts
 
 # Accidentally dropped files
 *.bin
+*.pdf
 deputy.html
 .claude/worktrees/
 .cursor/
