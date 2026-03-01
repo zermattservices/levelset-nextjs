@@ -1,0 +1,30 @@
+.label {
+  width: 120px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--ls-space-2) var(--ls-space-3);
+  gap: 2px;
+}
+
+.level {
+  font-family: var(--ls-font-heading);
+  font-size: 22px;
+  font-weight: var(--ls-font-weight-bold);
+  opacity: 0.4;
+  line-height: 1;
+}
+
+.roleName {
+  font-family: var(--ls-font-heading);
+  font-size: 11px;
+  font-weight: var(--ls-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}

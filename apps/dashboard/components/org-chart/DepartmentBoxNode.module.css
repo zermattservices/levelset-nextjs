@@ -1,0 +1,31 @@
+.box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: var(--ls-radius-2xl);
+  pointer-events: none;
+}
+
+.bgFill {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--ls-space-2);
+  padding: var(--ls-space-1-5) var(--ls-space-3);
+}
+
+.deptName {
+  font-family: var(--ls-font-heading);
+  font-size: 12px;
+  font-weight: var(--ls-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

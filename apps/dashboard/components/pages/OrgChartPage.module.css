@@ -1,0 +1,167 @@
+.pageContainer {
+  height: 100vh;
+  background: var(--ls-color-bg-page, #f8faf9);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ls-space-4) var(--ls-space-6);
+  border-bottom: 1px solid var(--ls-color-border);
+  background: var(--ls-color-bg-container);
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--ls-space-4);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--ls-space-3);
+}
+
+.pageTitle {
+  font-family: var(--ls-font-heading);
+  font-size: var(--ls-font-size-xl);
+  font-weight: var(--ls-font-weight-bold);
+  color: var(--ls-color-text-primary);
+  margin: 0;
+}
+
+.scopeToggle {
+  display: flex;
+  align-items: center;
+  background: var(--ls-color-muted-soft);
+  border-radius: var(--ls-radius-md);
+  padding: 2px;
+  gap: 2px;
+}
+
+.scopeBtn {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-xs);
+  font-weight: var(--ls-font-weight-medium);
+  color: var(--ls-color-text-secondary);
+  background: transparent;
+  border: none;
+  padding: var(--ls-space-1) var(--ls-space-3);
+  border-radius: var(--ls-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.scopeBtn:hover {
+  color: var(--ls-color-text-primary);
+}
+
+.scopeBtnActive {
+  background: var(--ls-color-bg-container);
+  color: var(--ls-color-brand);
+  font-weight: var(--ls-font-weight-semibold);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.canvasContainer {
+  flex: 1;
+  position: relative;
+  background: var(--ls-color-bg-page, #f8faf9);
+}
+
+/* ── React Flow edge rendering fix ──
+   The global svg {} rule in globals.css was collapsing React Flow's
+   edge SVG container. These overrides ensure edges render properly. */
+.canvasContainer :global(.react-flow__edges) {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.canvasContainer :global(.react-flow__edges) svg {
+  width: unset !important;
+  height: unset !important;
+  max-width: none !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.canvasContainer :global(.react-flow__edge-path) {
+  fill: none !important;
+}
+
+.canvasContainer :global(.react-flow svg) {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+  gap: var(--ls-space-3);
+  color: var(--ls-color-text-secondary);
+}
+
+.emptyIcon {
+  font-size: 48px;
+  color: var(--ls-color-brand);
+  opacity: 0.4;
+}
+
+.emptyTitle {
+  font-family: var(--ls-font-heading);
+  font-size: var(--ls-font-size-lg);
+  font-weight: var(--ls-font-weight-semibold);
+  color: var(--ls-color-text-primary);
+  margin: 0;
+}
+
+.emptyDescription {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-sm);
+  color: var(--ls-color-text-secondary);
+  margin: 0;
+  max-width: 400px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.mobileMessage {
+  display: none;
+  padding: var(--ls-space-8);
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .canvasContainer {
+    display: none;
+  }
+
+  .mobileMessage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: var(--ls-space-3);
+    color: var(--ls-color-text-secondary);
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: var(--ls-space-2);
+  }
+}

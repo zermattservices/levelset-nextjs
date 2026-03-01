@@ -1,0 +1,121 @@
+.panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ls-space-4) var(--ls-space-5);
+  border-bottom: 1px solid var(--ls-color-border);
+}
+
+.panelTitle {
+  font-family: var(--ls-font-heading);
+  font-size: var(--ls-font-size-base);
+  font-weight: var(--ls-font-weight-bold);
+  color: var(--ls-color-text-primary);
+  margin: 0;
+}
+
+.tabContent {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--ls-space-4) var(--ls-space-5);
+  padding-bottom: var(--ls-space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ls-space-4);
+}
+
+.listItem {
+  border: 1px solid var(--ls-color-border);
+  border-radius: var(--ls-radius-lg);
+  flex-shrink: 0;
+}
+
+.listItemHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ls-space-2);
+  padding: var(--ls-space-3) var(--ls-space-3) var(--ls-space-3) var(--ls-space-4);
+  background: var(--ls-color-muted-soft);
+}
+
+.listItemName {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-sm);
+  font-weight: var(--ls-font-weight-semibold);
+  color: var(--ls-color-text-primary);
+}
+
+.listItemMeta {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-xs);
+  color: var(--ls-color-text-secondary);
+}
+
+.listItemBody {
+  padding: var(--ls-space-3) var(--ls-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ls-space-2);
+}
+
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ls-space-3);
+  padding: var(--ls-space-4);
+  border: 1px dashed var(--ls-color-border);
+  border-radius: var(--ls-radius-lg);
+}
+
+.createActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ls-space-2);
+  margin-top: var(--ls-space-2);
+}
+
+.relationshipList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ls-space-3);
+}
+
+.relItem {
+  border: 1px solid var(--ls-color-border);
+  border-radius: var(--ls-radius-lg);
+  padding: var(--ls-space-3) var(--ls-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ls-space-2);
+}
+
+.relHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--ls-space-2);
+}
+
+.relName {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-sm);
+  font-weight: var(--ls-font-weight-semibold);
+  color: var(--ls-color-text-primary);
+}
+
+.relRole {
+  font-family: var(--ls-font-body);
+  font-size: var(--ls-font-size-xs);
+  color: var(--ls-color-text-secondary);
+}
+
+.relFields {
+  display: flex;
+  gap: var(--ls-space-2);
+}
