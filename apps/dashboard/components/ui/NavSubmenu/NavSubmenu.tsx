@@ -5,22 +5,24 @@ import { usePermissions, P, type PermissionKey } from '@/lib/providers/Permissio
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useOrgFeatures, F, type FeatureKey } from '@/lib/providers/OrgFeaturesProvider';
 
-// MUI Icons
-import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
-import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
-import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
-import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
-import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
-import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
-import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
-import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
-import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
-import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
+// Lucide Icons (shared with marketing app)
+import {
+  Rocket,
+  Gavel,
+  GraduationCap,
+  CalendarCheck,
+  FileText,
+  Star,
+  TrendingUp,
+  Users,
+  Infinity,
+  Network,
+  BarChart3,
+  Folder,
+  CalendarDays,
+  Captions,
+  CircleCheckBig,
+} from 'lucide-react';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -62,31 +64,31 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       label: 'Positional Excellence',
       description: 'View position ratings',
       href: '/positional-excellence',
-      icon: <RocketLaunchOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <Rocket size={22} strokeWidth={1.5} />,
     },
     {
       label: 'Discipline',
       description: 'Manage accountability points',
       href: '/discipline',
-      icon: <GavelOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <Gavel size={22} strokeWidth={1.5} />,
     },
     {
       label: 'Pathway',
       description: 'Career development tracking',
-      icon: <SchoolOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <GraduationCap size={22} strokeWidth={1.5} />,
       disabled: true,
     },
     {
       label: 'Evaluations',
       description: 'Schedule performance reviews',
-      icon: <EventNoteOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <CalendarCheck size={22} strokeWidth={1.5} />,
       disabled: true,
     },
     {
       label: 'Form Management',
       description: 'Create and manage forms',
       href: '/form-management',
-      icon: <DescriptionOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <FileText size={22} strokeWidth={1.5} />,
       requiredFeature: F.FORM_MANAGEMENT,
     },
   ],
@@ -95,13 +97,13 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       label: 'Operational Excellence',
       description: 'Track key performance metrics',
       href: '/operational-excellence',
-      icon: <StarOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <Star size={22} strokeWidth={1.5} />,
       requiredFeature: F.OPERATIONAL_EXCELLENCE,
     },
     {
       label: 'Retention',
       description: 'Analyze team member turnover',
-      icon: <TrendingUpOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <TrendingUp size={22} strokeWidth={1.5} />,
       disabled: true,
     },
   ],
@@ -110,21 +112,21 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       label: 'Schedule',
       description: 'View and manage shifts',
       href: '/schedule',
-      icon: <CalendarMonthOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <CalendarDays size={22} strokeWidth={1.5} />,
       requiredFeature: F.SCHEDULING,
     },
     {
       label: 'Setup',
       description: 'Position templates and settings',
       href: '/schedule?mode=setup',
-      icon: <TuneOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <Captions size={22} strokeWidth={1.5} />,
       requiredFeature: F.SCHEDULING,
     },
     {
       label: 'Approvals',
       description: 'Shift trades, time off, availability',
       href: '/approvals',
-      icon: <TaskAltOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <CircleCheckBig size={22} strokeWidth={1.5} />,
       requiredFeature: F.SCHEDULING,
       requiredPermission: P.SCHED_MANAGE_APPROVALS,
     },
@@ -134,33 +136,33 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       label: 'Roster',
       description: 'View and manage team members',
       href: '/roster',
-      icon: <GroupOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <Users size={22} strokeWidth={1.5} />,
     },
     {
       label: 'Reporting',
       description: 'HR reports and analytics',
       href: '/reporting',
-      icon: <AssessmentOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <BarChart3 size={22} strokeWidth={1.5} />,
       requiredPermission: P.HR_VIEW_REPORTING,
     },
     {
       label: 'Documents',
       description: 'Organization document hub',
       href: '/documents',
-      icon: <FolderOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <Folder size={22} strokeWidth={1.5} />,
       requiredFeature: F.DOCUMENTS,
     },
     {
       label: '360 Overview',
       description: 'Complete employee profiles',
-      icon: <AllInclusiveOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <Infinity size={22} strokeWidth={1.5} />,
       disabled: true,
     },
     {
       label: 'Org Chart',
       description: 'Visualize team structure',
       href: '/org-chart',
-      icon: <AccountTreeOutlinedIcon sx={{ fontSize: 22 }} />,
+      icon: <Network size={22} strokeWidth={1.5} />,
       requiredFeature: F.ORG_CHART,
     },
   ],

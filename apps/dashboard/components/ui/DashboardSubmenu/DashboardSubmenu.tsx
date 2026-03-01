@@ -4,18 +4,20 @@ import sty from './DashboardSubmenu.module.css';
 import projectcss from '@/styles/base.module.css';
 import { usePermissions, P, type PermissionKey } from '@/lib/providers/PermissionsProvider';
 
-// MUI Icons
-import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
-import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
-import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
-import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
-import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
-import AllInclusiveOutlinedIcon from '@mui/icons-material/AllInclusiveOutlined';
-import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
-import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
+// Lucide Icons (shared with marketing app)
+import {
+  Rocket,
+  Gavel,
+  GraduationCap,
+  CalendarCheck,
+  FileText,
+  Star,
+  TrendingUp,
+  Users,
+  Infinity,
+  Network,
+  BarChart3,
+} from 'lucide-react';
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -41,26 +43,26 @@ const menuGroups: MenuGroup[] = [
       {
         label: 'Positional Excellence',
         href: '/positional-excellence',
-        icon: <RocketLaunchOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <Rocket size={18} strokeWidth={1.5} />,
       },
       {
         label: 'Discipline',
         href: '/discipline',
-        icon: <GavelOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <Gavel size={18} strokeWidth={1.5} />,
       },
       {
         label: 'Pathway',
-        icon: <SchoolOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <GraduationCap size={18} strokeWidth={1.5} />,
         disabled: true,
       },
       {
         label: 'Evaluations',
-        icon: <EventNoteOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <CalendarCheck size={18} strokeWidth={1.5} />,
         disabled: true,
       },
       {
         label: 'Form Management',
-        icon: <DescriptionOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <FileText size={18} strokeWidth={1.5} />,
         disabled: true,
       },
     ],
@@ -70,12 +72,12 @@ const menuGroups: MenuGroup[] = [
     items: [
       {
         label: 'WHED',
-        icon: <StarOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <Star size={18} strokeWidth={1.5} />,
         disabled: true,
       },
       {
         label: 'Retention',
-        icon: <TrendingUpOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <TrendingUp size={18} strokeWidth={1.5} />,
         disabled: true,
       },
     ],
@@ -86,22 +88,22 @@ const menuGroups: MenuGroup[] = [
       {
         label: 'Roster',
         href: '/roster',
-        icon: <GroupOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <Users size={18} strokeWidth={1.5} />,
       },
       {
         label: 'Reporting',
         href: '/reporting',
-        icon: <AssessmentOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <BarChart3 size={18} strokeWidth={1.5} />,
         requiredPermission: P.HR_VIEW_REPORTING,
       },
       {
         label: '360 Overview',
-        icon: <AllInclusiveOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <Infinity size={18} strokeWidth={1.5} />,
         disabled: true,
       },
       {
         label: 'Org Chart',
-        icon: <AccountTreeOutlinedIcon sx={{ fontSize: 18 }} />,
+        icon: <Network size={18} strokeWidth={1.5} />,
         disabled: true,
       },
     ],

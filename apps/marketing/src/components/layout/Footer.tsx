@@ -106,7 +106,7 @@ export function Footer() {
             &copy; {currentYear} Levelset. All rights reserved.
           </p>
           <p className="text-xs text-white/40">
-            Built for operators, by operators.
+            Built exclusively for Chick-fil-A.
           </p>
         </div>
       </div>
