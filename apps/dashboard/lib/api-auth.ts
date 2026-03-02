@@ -39,8 +39,13 @@ export async function requireLevelsetAdmin(
     .eq('auth_user_id', user.id)
     .order('created_at');
 
+  if (!appUsers || appUsers.length === 0) {
+    res.status(403).json({ error: 'No user profile found' });
+    return null;
+  }
+
   const appUser =
-    appUsers?.find((u) => u.role === 'Levelset Admin') || appUsers?.[0];
+    appUsers.find((u) => u.role === 'Levelset Admin') || appUsers[0];
   if (!appUser?.org_id) {
     res.status(403).json({ error: 'No organization found' });
     return null;

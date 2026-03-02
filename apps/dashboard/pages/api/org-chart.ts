@@ -26,7 +26,11 @@ export default async function handler(
     .eq('auth_user_id', user.id)
     .order('created_at');
 
-  const appUser = appUsers?.find((u: any) => u.role === 'Levelset Admin') || appUsers?.[0];
+  if (!appUsers || appUsers.length === 0) {
+    return res.status(403).json({ error: 'No user profile found' });
+  }
+
+  const appUser = appUsers.find((u: any) => u.role === 'Levelset Admin') || appUsers[0];
   const isLevelsetAdmin = appUser?.role === 'Levelset Admin';
 
   let orgId = appUser?.org_id;
