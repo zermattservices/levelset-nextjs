@@ -77,11 +77,12 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
   const [appUser, setAppUser] = React.useState<AppUser | null>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
 
-  // Fetch app user data when auth user changes
-  const fetchAppUserData = React.useCallback(async (authUser: User | null) => {
+  // Fetch app user data when auth user changes.
+  // Returns true if appUser was found, false otherwise.
+  const fetchAppUserData = React.useCallback(async (authUser: User | null): Promise<boolean> => {
     if (!authUser?.id) {
       setAppUser(null);
-      return;
+      return false;
     }
 
     try {
@@ -100,9 +101,11 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
       if (error) {
         console.error('Error fetching app user data:', error);
         setAppUser(null);
+        return false;
       } else if (!data) {
         console.error('No app_user found for auth_user_id:', authUser.id);
         setAppUser(null);
+        return false;
       } else {
         // If user has a Google profile image and app_user doesn't have one, save it
         const googleAvatar = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture;
@@ -112,16 +115,18 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
             .from('app_users')
             .update({ profile_image: googleAvatar })
             .eq('id', data.id);
-          
+
           if (!updateError) {
             data.profile_image = googleAvatar;
           }
         }
         setAppUser(data);
+        return true;
       }
     } catch (err) {
       console.error('Error fetching app user data:', err);
       setAppUser(null);
+      return false;
     }
   }, [supabase]);
 
@@ -177,12 +182,16 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
         setIsLoaded(true);
       } else if (["SIGNED_IN", "INITIAL_SESSION", "TOKEN_REFRESHED"].includes(event) && session) {
         setCurrentUser(session.user);
-        fetchAppUserData(session.user);
         // Only update cookies if this wasn't triggered by us setting session from cookies
         if (!isSettingSessionFromCookies) {
           setSharedCookies(session);
         }
-        setIsLoaded(true);
+        // CRITICAL: Wait for appUser to load before setting isLoaded.
+        // OnboardingGuard checks isLoaded + appUser — if isLoaded is true
+        // but appUser hasn't loaded yet, it incorrectly redirects to /onboarding.
+        fetchAppUserData(session.user).then(() => {
+          setIsLoaded(true);
+        });
       }
     });
 
@@ -196,8 +205,9 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
       if (existingSession) {
         console.log('[Auth] Found existing session');
         setCurrentUser(existingSession.user);
-        fetchAppUserData(existingSession.user);
         setSharedCookies(existingSession);
+        // CRITICAL: Wait for appUser to load before setting isLoaded.
+        await fetchAppUserData(existingSession.user);
         setIsLoaded(true);
         return;
       }
