@@ -80,6 +80,11 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
 
   const appUser = appUserRows?.[0] ?? null;
 
+  // SECURITY: No app_users record means no provisioned identity — return zero locations.
+  if (!appUser) {
+    return { userId: user.id, userRole: null, locations: [] };
+  }
+
   // If a specific location is assigned, fetch just that one
   if (appUser?.location_id) {
     const { data: location, error: locationError } = await supabase
@@ -134,8 +139,11 @@ async function fetchAccessibleLocations(supabase: ReturnType<typeof createSupaba
     .select('id, location_number, name, org_id, location_mobile_token, image_url')
     .order('location_number', { ascending: true });
 
-  // Levelset Admins can access all locations across all orgs
-  if (appUser?.role !== 'Levelset Admin' && appUser?.org_id) {
+  // Only Levelset Admins can access all locations across all orgs
+  if (appUser.role !== 'Levelset Admin') {
+    if (!appUser.org_id) {
+      return { userId: user.id, userRole: appUser.role, locations: [] };
+    }
     query.eq('org_id', appUser.org_id);
   }
 
