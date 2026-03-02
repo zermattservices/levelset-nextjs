@@ -123,13 +123,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const now = new Date().toISOString();
 
-        // Mark all unpublished/changed shifts as published
-        // A shift needs publishing if: published_at IS NULL OR updated_at > published_at
+        // Mark all shifts as published (idempotent — safe to re-stamp already-published shifts)
         const { data: updatedShifts, error: publishShiftError } = await supabase
           .from('shifts')
           .update({ published_at: now })
           .eq('schedule_id', id)
-          .or('published_at.is.null,updated_at.gt.published_at')
           .select('id');
 
         if (publishShiftError) {
