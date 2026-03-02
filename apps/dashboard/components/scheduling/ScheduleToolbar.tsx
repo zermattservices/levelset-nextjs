@@ -14,6 +14,8 @@ interface ScheduleToolbarProps {
   schedule: Schedule | null;
   laborSummary: LaborSummary;
   canViewPay?: boolean;
+  unpublishedCount: number;
+  hasShifts: boolean;
   onNavigateWeek: (dir: -1 | 1) => void;
   onNavigateDay: (dir: -1 | 1) => void;
   onGoToToday: () => void;
@@ -21,7 +23,6 @@ interface ScheduleToolbarProps {
   onGridViewChange: (mode: GridViewMode) => void;
   onZoneFilterChange: (zone: ZoneFilter) => void;
   onPublish: () => void;
-  onUnpublish: () => void;
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -67,6 +68,8 @@ export function ScheduleToolbar({
   schedule,
   laborSummary,
   canViewPay,
+  unpublishedCount,
+  hasShifts,
   onNavigateWeek,
   onNavigateDay,
   onGoToToday,
@@ -74,9 +77,8 @@ export function ScheduleToolbar({
   onGridViewChange,
   onZoneFilterChange,
   onPublish,
-  onUnpublish,
 }: ScheduleToolbarProps) {
-  const isPublished = schedule?.status === 'published';
+  const allPublished = hasShifts && unpublishedCount === 0;
   const label = timeViewMode === 'week' ? formatWeekLabel(weekStart) : formatDayLabel(selectedDay);
 
   return (
@@ -179,15 +181,17 @@ export function ScheduleToolbar({
         )}
       </div>
 
-      {/* Right: status + actions */}
+      {/* Right: status + publish action */}
       <div className={sty.actionSection}>
-        <span className={`${sty.statusChip} ${isPublished ? sty.statusPublished : sty.statusDraft}`}>
-          {isPublished ? 'Published' : 'Draft'}
-        </span>
-        {isPublished ? (
-          <button className={sty.unpublishBtn} onClick={onUnpublish}>Unpublish</button>
-        ) : (
-          <button className={sty.publishBtn} onClick={onPublish}>Publish</button>
+        {hasShifts && (
+          <span className={`${sty.statusChip} ${allPublished ? sty.statusPublished : sty.statusDraft}`}>
+            {allPublished ? 'Published' : `${unpublishedCount} unpublished`}
+          </span>
+        )}
+        {unpublishedCount > 0 && (
+          <button className={sty.publishBtn} onClick={onPublish}>
+            Publish {unpublishedCount} {unpublishedCount === 1 ? 'change' : 'changes'}
+          </button>
         )}
       </div>
     </div>

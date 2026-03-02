@@ -275,7 +275,7 @@ function WeekEmployeeView({
                 return (
                   <div key={day} className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`} onClick={() => onCellClick(day, emp.id)}>
                     {dayShifts.map((s) => (
-                      <ShiftBlock key={s.id} shift={s} viewMode="employees" isPublished={isPublished} onClick={onShiftClick} onDelete={onShiftDelete} />
+                      <ShiftBlock key={s.id} shift={s} viewMode="employees" onClick={onShiftClick} onDelete={onShiftDelete} />
                     ))}
                     {dayShifts.length === 0 && (
                       <div className={sty.addHint}><AddIcon sx={{ fontSize: 14, color: 'var(--ls-color-border)' }} /></div>
@@ -295,7 +295,7 @@ function WeekEmployeeView({
               return (
                 <div key={day} className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`} onClick={() => onCellClick(day)}>
                   {dayShifts.map((s) => (
-                    <ShiftBlock key={s.id} shift={s} viewMode="employees" isPublished={isPublished} onClick={onShiftClick} onDelete={onShiftDelete} />
+                    <ShiftBlock key={s.id} shift={s} viewMode="employees" onClick={onShiftClick} onDelete={onShiftDelete} />
                   ))}
                 </div>
               );
@@ -377,7 +377,7 @@ function WeekPositionView({
             return (
               <div key={day} className={`${sty.cell} ${isToday(day) ? sty.todayCol : ''}`} onClick={() => onCellClick(day, pos.id)}>
                 {dayShifts.map((s) => (
-                  <ShiftBlock key={s.id} shift={s} viewMode="positions" isPublished={isPublished} onClick={onShiftClick} onDelete={onShiftDelete} />
+                  <ShiftBlock key={s.id} shift={s} viewMode="positions" onClick={onShiftClick} onDelete={onShiftDelete} />
                 ))}
                 {dayShifts.length === 0 && (
                   <div className={sty.addHint}><AddIcon sx={{ fontSize: 14, color: 'var(--ls-color-border)' }} /></div>

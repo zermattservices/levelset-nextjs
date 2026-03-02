@@ -38,6 +38,8 @@ export interface Shift {
   break_minutes: number;
   is_house_shift?: boolean;
   notes?: string;
+  published_at?: string;
+  updated_at?: string;
   position?: Position;
   assignment?: ShiftAssignment;
 }

@@ -1,14 +1,12 @@
 import * as React from 'react';
 import sty from './ShiftBlock.module.css';
 import CloseIcon from '@mui/icons-material/Close';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import type { Shift, GridViewMode } from '@/lib/scheduling.types';
 import { ZONE_COLORS } from '@/lib/zoneColors';
 
 interface ShiftBlockProps {
   shift: Shift;
   viewMode: GridViewMode;
-  isPublished: boolean;
   onClick: (shift: Shift) => void;
   onDelete?: (shiftId: string) => void;
 }
@@ -37,6 +35,18 @@ function formatTimeShort(time: string): string {
 }
 
 /**
+ * Determine the per-shift publish state.
+ * - 'draft'      → never published (published_at is null)
+ * - 'changed'    → published but edited since (updated_at > published_at)
+ * - 'published'  → fully published, no pending changes
+ */
+function getShiftPublishState(shift: Shift): 'draft' | 'changed' | 'published' {
+  if (!shift.published_at) return 'draft';
+  if (shift.updated_at && shift.updated_at > shift.published_at) return 'changed';
+  return 'published';
+}
+
+/**
  * ShiftBlock renders a single shift cell within the weekly schedule grid.
  *
  * Layout (3 lines):
@@ -45,12 +55,13 @@ function formatTimeShort(time: string): string {
  *   Line 3 (muted)— Zone label (e.g. "Back of House")
  *
  * Open/unassigned shifts use a dashed border with lighter tinting and an "OPEN" label.
- * Published shifts show a lock icon; draft shifts show a delete button on hover.
+ * A small status dot indicates per-shift publish state:
+ *   - Orange dot: draft or has unpublished changes
+ *   - Green dot: fully published
  */
 export function ShiftBlock({
   shift,
   viewMode,
-  isPublished,
   onClick,
   onDelete,
 }: ShiftBlockProps) {
@@ -58,6 +69,7 @@ export function ShiftBlock({
   const zone = position?.zone;
   const posColor = zone ? (ZONE_COLORS[zone] ?? FALLBACK_COLOR) : FALLBACK_COLOR;
   const isOpen = !assignment;
+  const publishState = getShiftPublishState(shift);
 
   /* ---- Derived display strings ---- */
 
@@ -117,15 +129,20 @@ export function ShiftBlock({
           : `${primaryLabel}, ${timeStr}`
       }
     >
-      {/* Top-right action area: lock icon OR delete button */}
+      {/* Top-right action area: status dot + delete button */}
       <div className={sty.actions}>
-        {isPublished && (
-          <LockOutlinedIcon
-            sx={{ fontSize: 10, color: 'var(--ls-color-disabled-text)' }}
-            aria-label="Published"
-          />
-        )}
-        {!isPublished && onDelete && (
+        <span
+          className={sty.publishDot}
+          style={{
+            backgroundColor: publishState === 'published' ? '#22c55e' : '#f59e0b',
+          }}
+          title={
+            publishState === 'published' ? 'Published'
+              : publishState === 'changed' ? 'Unpublished changes'
+              : 'Draft'
+          }
+        />
+        {onDelete && (
           <button
             className={sty.deleteBtn}
             onClick={handleDelete}

@@ -136,10 +136,7 @@ export function SchedulePage() {
     );
   }
 
-  const isPublished = data.schedule?.status === 'published';
-
   const handleCellClick = (date: string, entityId?: string) => {
-    if (isPublished) return;
     setEditingShift(null);
     setPrefillDate(date);
     setPrefillStartTime('');
@@ -170,7 +167,6 @@ export function SchedulePage() {
   };
 
   const handleShiftDelete = async (shiftId: string) => {
-    if (isPublished) return;
     if (!window.confirm('Delete this shift?')) return;
     try {
       await data.deleteShift(shiftId);
@@ -180,7 +176,6 @@ export function SchedulePage() {
   };
 
   const handleDragCreate = (date: string, startTime: string, endTime: string, entityId?: string) => {
-    if (isPublished) return;
     setEditingShift(null);
     setPrefillDate(date);
     setPrefillStartTime(startTime);
@@ -212,7 +207,6 @@ export function SchedulePage() {
   };
 
   const handleAssignHouseShift = async (shiftId: string, employeeId: string) => {
-    if (isPublished) return;
     try {
       await data.assignEmployee(shiftId, employeeId);
       await data.updateShift(shiftId, { is_house_shift: false });
@@ -222,20 +216,12 @@ export function SchedulePage() {
   };
 
   const handlePublish = async () => {
-    if (!window.confirm('Publish this schedule? Editing will be locked until you unpublish.')) return;
+    const count = data.unpublishedCount;
+    if (!window.confirm(`Publish ${count} ${count === 1 ? 'change' : 'changes'}?`)) return;
     try {
       await data.publishSchedule();
     } catch (err) {
       console.error('Failed to publish:', err);
-    }
-  };
-
-  const handleUnpublish = async () => {
-    if (!window.confirm('Unpublish this schedule? It will return to draft status.')) return;
-    try {
-      await data.unpublishSchedule();
-    } catch (err) {
-      console.error('Failed to unpublish:', err);
     }
   };
 
@@ -282,6 +268,8 @@ export function SchedulePage() {
               schedule={data.schedule}
               laborSummary={data.laborSummary}
               canViewPay={canViewPay}
+              unpublishedCount={data.unpublishedCount}
+              hasShifts={data.shifts.length > 0}
               onNavigateWeek={data.navigateWeek}
               onNavigateDay={data.navigateDay}
               onGoToToday={data.goToToday}
@@ -289,7 +277,6 @@ export function SchedulePage() {
               onGridViewChange={data.setGridViewMode}
               onZoneFilterChange={data.setZoneFilter}
               onPublish={handlePublish}
-              onUnpublish={handleUnpublish}
             />
 
             {data.gridViewMode === 'setup' ? (
@@ -321,7 +308,7 @@ export function SchedulePage() {
                     gridViewMode={data.gridViewMode}
                     timeViewMode={data.timeViewMode}
                     laborSummary={data.laborSummary}
-                    isPublished={isPublished}
+                    isPublished={false}
                     canViewPay={canViewPay}
                     columnConfig={columnConfig}
                     onColumnConfigUpdate={updateColumnConfig}
@@ -344,7 +331,7 @@ export function SchedulePage() {
                     laborSummary={data.laborSummary}
                     days={data.days}
                     canViewPay={canViewPay}
-                    isPublished={isPublished}
+                    isPublished={false}
                     timeViewMode={data.timeViewMode}
                     selectedDay={data.selectedDay}
                     onDeleteShift={data.deleteShift}
@@ -413,7 +400,7 @@ export function SchedulePage() {
         canViewPay={canViewPay}
         positions={data.allPositions}
         employees={data.employees}
-        isPublished={isPublished}
+        isPublished={false}
         onSave={data.createShift}
         onUpdate={data.updateShift}
         onDelete={data.deleteShift}

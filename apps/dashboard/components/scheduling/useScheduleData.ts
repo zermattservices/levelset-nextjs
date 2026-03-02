@@ -528,7 +528,17 @@ export function useScheduleData() {
     await fetchSchedule();
   }, [orgId, fetchSchedule]);
 
-  // ── Publish / Unpublish ──
+  // ── Per-shift publish state ──
+  const unpublishedCount = useMemo(() => {
+    // Count shifts that are new (never published) or have unpublished changes
+    return shifts.filter((s) => {
+      if (!s.published_at) return true; // never published
+      if (s.updated_at && s.updated_at > s.published_at) return true; // edited since last publish
+      return false;
+    }).length;
+  }, [shifts]);
+
+  // ── Publish ──
   const publishSchedule = useCallback(async () => {
     if (!schedule) return;
     const res = await fetch('/api/scheduling/schedules', {
@@ -544,27 +554,9 @@ export function useScheduleData() {
       const err = await res.json();
       throw new Error(err.error || 'Failed to publish schedule');
     }
-    const data = await res.json();
-    setSchedule(data.schedule);
-  }, [schedule, auth.id]);
-
-  const unpublishSchedule = useCallback(async () => {
-    if (!schedule) return;
-    const res = await fetch('/api/scheduling/schedules', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        intent: 'unpublish',
-        id: schedule.id,
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Failed to unpublish schedule');
-    }
-    const data = await res.json();
-    setSchedule(data.schedule);
-  }, [schedule]);
+    // Refetch to get updated published_at timestamps on shifts
+    await fetchSchedule();
+  }, [schedule, auth.id, fetchSchedule]);
 
   // ── Navigation helpers ──
   const navigateWeek = useCallback((direction: -1 | 1) => {
@@ -633,7 +625,7 @@ export function useScheduleData() {
 
     // Schedule actions
     publishSchedule,
-    unpublishSchedule,
+    unpublishedCount,
 
     // Overtime
     otSummary,

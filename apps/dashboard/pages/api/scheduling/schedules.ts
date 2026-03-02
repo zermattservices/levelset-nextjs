@@ -121,8 +121,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(400).json({ error: 'id is required' });
         }
 
-        // Fetch shifts with assignment + employee pay data for OT calculation
-        const { data: shifts } = await supabase
+        const now = new Date().toISOString();
+
+        // Mark all unpublished/changed shifts as published
+        // A shift needs publishing if: published_at IS NULL OR updated_at > published_at
+        const { data: updatedShifts, error: publishShiftError } = await supabase
+          .from('shifts')
+          .update({ published_at: now })
+          .eq('schedule_id', id)
+          .or('published_at.is.null,updated_at.gt.published_at')
+          .select('id');
+
+        if (publishShiftError) {
+          console.error('Error publishing shifts:', publishShiftError);
+          return res.status(500).json({ error: 'Failed to publish shifts' });
+        }
+
+        const publishedCount = updatedShifts?.length ?? 0;
+
+        // Fetch ALL shifts for total hours/cost calculation
+        const { data: allShifts } = await supabase
           .from('shifts')
           .select(`
             id, shift_date, start_time, end_time, break_minutes,
@@ -135,11 +153,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         let totalHours = 0;
         let totalCost = 0;
-
-        // Build OT shift list for overtime calculation
         const otShifts: ShiftForOT[] = [];
 
-        for (const shift of (shifts || []) as any[]) {
+        for (const shift of (allShifts || []) as any[]) {
           const start = parseTime(shift.start_time);
           let end = parseTime(shift.end_time);
           if (end <= start) end += 24 * 60;
@@ -151,7 +167,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const assign = shift.shift_assignments[0];
             totalCost += assign.projected_cost || 0;
 
-            // Build OT shift entry
             if (assign.employee_id && assign.employees) {
               const emp = assign.employees;
               if (emp.actual_pay_type !== 'salary') {
@@ -172,88 +187,65 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
 
-        // Calculate OT premium
+        // Calculate OT premium (wrapped in try/catch to prevent 500s)
         let otPremium = 0;
-        if (otShifts.length > 0) {
-          // Get location_id from the schedule to look up state-specific OT rules
-          const { data: schedData } = await supabase
-            .from('schedules')
-            .select('location_id')
-            .eq('id', id)
-            .single();
-
-          let otRules: OvertimeRule[] = DEFAULT_OT_RULES;
-          if (schedData?.location_id) {
-            const { data: location } = await supabase
-              .from('locations')
-              .select('state')
-              .eq('id', schedData.location_id)
+        try {
+          if (otShifts.length > 0) {
+            const { data: schedData } = await supabase
+              .from('schedules')
+              .select('location_id')
+              .eq('id', id)
               .single();
 
-            if (location?.state) {
-              const { data: stateRules } = await supabase
-                .from('overtime_rules')
-                .select('rule_type, threshold_hours, multiplier, priority')
-                .eq('state_code', location.state)
-                .eq('is_active', true);
+            let otRules: OvertimeRule[] = DEFAULT_OT_RULES;
+            if (schedData?.location_id) {
+              const { data: location } = await supabase
+                .from('locations')
+                .select('state')
+                .eq('id', schedData.location_id)
+                .single();
 
-              if (stateRules && stateRules.length > 0) {
-                otRules = stateRules as OvertimeRule[];
+              if (location?.state) {
+                const { data: stateRules } = await supabase
+                  .from('overtime_rules')
+                  .select('rule_type, threshold_hours, multiplier, priority')
+                  .eq('state_code', location.state)
+                  .eq('is_active', true);
+
+                if (stateRules && stateRules.length > 0) {
+                  otRules = stateRules as OvertimeRule[];
+                }
               }
             }
-          }
 
-          const otResult = calculateWeeklyOvertime(otShifts, otRules);
-          otPremium = otResult.total_ot_premium;
+            const otResult = calculateWeeklyOvertime(otShifts, otRules);
+            otPremium = otResult.total_ot_premium;
+          }
+        } catch (otErr) {
+          console.error('[schedules] OT calculation failed, continuing without OT premium:', otErr);
         }
 
+        // Update schedule-level summary
         const { data, error } = await supabase
           .from('schedules')
           .update({
             status: 'published',
-            published_at: new Date().toISOString(),
+            published_at: now,
             published_by: user_id || null,
             total_hours: Math.round(totalHours * 100) / 100,
             total_labor_cost: Math.round((totalCost + otPremium) * 100) / 100,
-            updated_at: new Date().toISOString(),
+            updated_at: now,
           })
           .eq('id', id)
           .select()
           .single();
 
         if (error) {
-          console.error('Error publishing schedule:', error);
-          return res.status(500).json({ error: 'Failed to publish schedule' });
+          console.error('Error updating schedule after publish:', error);
+          return res.status(500).json({ error: 'Failed to update schedule' });
         }
 
-        return res.status(200).json({ schedule: data });
-      }
-
-      if (intent === 'unpublish') {
-        const { id } = req.body;
-
-        if (!id) {
-          return res.status(400).json({ error: 'id is required' });
-        }
-
-        const { data, error } = await supabase
-          .from('schedules')
-          .update({
-            status: 'draft',
-            published_at: null,
-            published_by: null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', id)
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Error unpublishing schedule:', error);
-          return res.status(500).json({ error: 'Failed to unpublish schedule' });
-        }
-
-        return res.status(200).json({ schedule: data });
+        return res.status(200).json({ schedule: data, published_count: publishedCount });
       }
 
       return res.status(400).json({ error: 'Invalid intent' });
