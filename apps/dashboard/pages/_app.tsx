@@ -17,7 +17,7 @@ import "../lib/i18n"; // Initialize i18next
 const licenseKey = process.env.NEXT_PUBLIC_MUI_X_LICENSE_KEY;
 if (licenseKey) {
   LicenseInfo.setLicenseKey(licenseKey);
-  console.log('[MUI X License] License key initialized');
+  // License key initialized successfully
 } else {
   console.warn('[MUI X License] No license key found in NEXT_PUBLIC_MUI_X_LICENSE_KEY');
 }
