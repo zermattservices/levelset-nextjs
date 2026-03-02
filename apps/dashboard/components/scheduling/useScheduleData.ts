@@ -541,13 +541,15 @@ export function useScheduleData() {
   // ── Publish ──
   const publishSchedule = useCallback(async () => {
     if (!schedule) return;
+    // published_by FK references app_users(id), so send appUser.id (not the Supabase auth uid)
+    const appUserId = auth.appUser?.id;
     const res = await fetch('/api/scheduling/schedules', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         intent: 'publish',
         id: schedule.id,
-        user_id: auth.id,
+        user_id: appUserId || null,
       }),
     });
     if (!res.ok) {
@@ -556,7 +558,7 @@ export function useScheduleData() {
     }
     // Refetch to get updated published_at timestamps on shifts
     await fetchSchedule();
-  }, [schedule, auth.id, fetchSchedule]);
+  }, [schedule, auth.appUser, fetchSchedule]);
 
   // ── Navigation helpers ──
   const navigateWeek = useCallback((direction: -1 | 1) => {
