@@ -6,7 +6,7 @@
  */
 
 import { WebClient } from '@slack/web-api';
-import { getSlackChannel, type SlackChannelName } from './channels.js';
+import { getSlackChannel, type SlackChannelName } from './channels';
 
 export interface SlackMessage {
   text: string;

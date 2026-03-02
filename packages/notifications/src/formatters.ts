@@ -13,7 +13,7 @@ import type {
   InvoicePaidEvent,
   InvoiceFailedEvent,
   BugReportedEvent,
-} from './types.js';
+} from './types';
 
 const DASHBOARD_URL = 'https://app.levelset.io';
 

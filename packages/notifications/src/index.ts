@@ -10,7 +10,7 @@
  *   notifyBugReported(...) — convenience for bug.reported
  */
 
-export { SlackChannel, type SlackChannelName } from './channels.js';
+export { SlackChannel, type SlackChannelName } from './channels';
 export type {
   NotificationEvent,
   LeadSubmittedEvent,
@@ -20,9 +20,9 @@ export type {
   InvoicePaidEvent,
   InvoiceFailedEvent,
   BugReportedEvent,
-} from './types.js';
+} from './types';
 
-import { SlackChannel, type SlackChannelName } from './channels.js';
+import { SlackChannel, type SlackChannelName } from './channels';
 import type {
   NotificationEvent,
   LeadSubmittedEvent,
@@ -32,8 +32,8 @@ import type {
   InvoicePaidEvent,
   InvoiceFailedEvent,
   BugReportedEvent,
-} from './types.js';
-import { sendToSlack, sendToMultipleChannels } from './client.js';
+} from './types';
+import { sendToSlack, sendToMultipleChannels } from './client';
 import {
   formatLeadSubmitted,
   formatStageChanged,
@@ -42,7 +42,7 @@ import {
   formatInvoicePaid,
   formatInvoiceFailed,
   formatBugReported,
-} from './formatters.js';
+} from './formatters';
 
 // Conversion stages that also go to #conversions and #all-levelset
 const CONVERSION_STAGES = new Set(['trial', 'onboarded', 'converted']);
