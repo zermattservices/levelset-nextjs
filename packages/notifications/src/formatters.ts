@@ -1,7 +1,7 @@
 /**
  * Slack Block Kit message formatters for each notification event type.
  *
- * Each formatter returns { text, blocks } suitable for Incoming Webhooks.
+ * Each formatter returns { text, blocks } suitable for Slack's chat.postMessage API.
  * `text` is the plain-text fallback; `blocks` provide rich formatting.
  */
 

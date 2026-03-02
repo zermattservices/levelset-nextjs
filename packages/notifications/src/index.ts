@@ -33,7 +33,7 @@ import type {
   InvoiceFailedEvent,
   BugReportedEvent,
 } from './types.js';
-import { sendToSlack, sendToMultipleChannels } from './slack.js';
+import { sendToSlack, sendToMultipleChannels } from './client.js';
 import {
   formatLeadSubmitted,
   formatStageChanged,

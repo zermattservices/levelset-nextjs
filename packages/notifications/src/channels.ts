@@ -1,8 +1,8 @@
 /**
- * Slack channel constants and webhook URL resolution.
+ * Slack channel constants.
  *
- * Each channel maps to an env var SLACK_WEBHOOK_<CHANNEL>.
- * If the env var is not set, the channel is silently skipped (safe for dev).
+ * Each channel maps to a Slack channel name. A single SLACK_BOT_TOKEN
+ * is used to post to any channel (no per-channel webhook URLs needed).
  */
 
 export const SlackChannel = {
@@ -16,20 +16,22 @@ export const SlackChannel = {
 
 export type SlackChannelName = (typeof SlackChannel)[keyof typeof SlackChannel];
 
-const ENV_VAR_MAP: Record<SlackChannelName, string> = {
-  LEADS: 'SLACK_WEBHOOK_LEADS',
-  CONVERSIONS: 'SLACK_WEBHOOK_CONVERSIONS',
-  BILLING: 'SLACK_WEBHOOK_BILLING',
-  PIPELINE: 'SLACK_WEBHOOK_PIPELINE',
-  BUGS: 'SLACK_WEBHOOK_BUGS',
-  ALL_LEVELSET: 'SLACK_WEBHOOK_ALL_LEVELSET',
+/**
+ * Map logical channel names to actual Slack channel names.
+ * These are the #channel names in your Slack workspace.
+ */
+const CHANNEL_NAME_MAP: Record<SlackChannelName, string> = {
+  LEADS: '#leads',
+  CONVERSIONS: '#conversions',
+  BILLING: '#billing',
+  PIPELINE: '#pipeline',
+  BUGS: '#bugs',
+  ALL_LEVELSET: '#all-levelset',
 };
 
 /**
- * Resolve the Incoming Webhook URL for a channel from process.env.
- * Returns null if the env var is not set (notifications silently skipped).
+ * Get the Slack channel name (e.g. "#leads") for a logical channel.
  */
-export function getWebhookUrl(channel: SlackChannelName): string | null {
-  const envVar = ENV_VAR_MAP[channel];
-  return process.env[envVar] || null;
+export function getSlackChannel(channel: SlackChannelName): string {
+  return CHANNEL_NAME_MAP[channel];
 }

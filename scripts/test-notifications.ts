@@ -2,7 +2,7 @@
  * Smoke test for @levelset/notifications
  *
  * Sends one of each notification type to whichever channels are configured.
- * Set SLACK_WEBHOOK_* env vars in .env.local before running.
+ * Set SLACK_BOT_TOKEN env var in .env.local before running.
  *
  * Usage:
  *   npx tsx scripts/test-notifications.ts
