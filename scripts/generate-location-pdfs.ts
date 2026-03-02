@@ -258,7 +258,7 @@ async function generatePDF(
   });
 }
 
-const STORAGE_DOMAIN = 'https://files.levelset.io';
+const STORAGE_DOMAIN = 'https://api.levelset.io';
 
 async function uploadToStorage(
   bucket: string, 

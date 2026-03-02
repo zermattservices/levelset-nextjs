@@ -44,6 +44,20 @@
         {
           "faceIDPermission": "Allow Levelset to use Face ID for secure authentication."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Levelset to access your camera for capturing signatures and documents."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "ios": {
+            "mode": "production"
+          }
+        }
       ]
     ],
     "experiments": {

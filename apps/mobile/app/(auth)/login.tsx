@@ -15,42 +15,40 @@ import {
   ScrollView,
 } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import Svg, { Path } from "react-native-svg";
 import { useAuth } from "../../src/context/AuthContext";
 import { useColors } from "../../src/context/ThemeContext";
+import { useTheme } from "../../src/context/ThemeContext";
 import { typography } from "../../src/lib/fonts";
 import { borderRadius, haptics } from "../../src/lib/theme";
 import { GlassCard } from "../../src/components/glass";
 
-const GOOGLE_COLORS = {
-  blue: "#4285F4",
-  green: "#34A853",
-  yellow: "#FBBC05",
-  red: "#EA4335",
-};
+const logoLight = require("../../assets/images/logo-light.png");
+const logoDark = require("../../assets/images/logo-dark.png");
 
-// Google Logo SVG as a simple component
-function GoogleLogo() {
+function GoogleLogo({ size = 20 }: { size?: number }) {
   return (
-    <View style={styles.googleLogoContainer}>
-      <View
-        style={[styles.googleLogoPart, { backgroundColor: GOOGLE_COLORS.blue }]}
-      />
-      <View
-        style={[
-          styles.googleLogoPart,
-          { backgroundColor: GOOGLE_COLORS.green },
-        ]}
-      />
-      <View
-        style={[
-          styles.googleLogoPart,
-          { backgroundColor: GOOGLE_COLORS.yellow },
-        ]}
-      />
-      <View
-        style={[styles.googleLogoPart, { backgroundColor: GOOGLE_COLORS.red }]}
-      />
+    <View style={{ width: size, height: size, marginRight: 12 }}>
+      <Svg viewBox="0 0 48 48" width={size} height={size}>
+        <Path
+          d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+          fill="#FFC107"
+        />
+        <Path
+          d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"
+          fill="#FF3D00"
+        />
+        <Path
+          d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0124 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
+          fill="#4CAF50"
+        />
+        <Path
+          d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 01-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
+          fill="#1976D2"
+        />
+      </Svg>
     </View>
   );
 }
@@ -58,6 +56,7 @@ function GoogleLogo() {
 export default function LoginScreen() {
   const router = useRouter();
   const colors = useColors();
+  const { isDark } = useTheme();
   const { signInWithEmail, signInWithGoogle, isLoading, error, clearError } =
     useAuth();
 
@@ -112,10 +111,11 @@ export default function LoginScreen() {
         {/* Logo */}
         <Animated.View entering={FadeIn.duration(400)}>
           <View style={styles.logoContainer}>
-            <View style={[styles.logoPlaceholder, { backgroundColor: colors.primary }]}>
-              <Text style={[styles.logoText, { color: colors.onPrimary }]}>L</Text>
-            </View>
-            <Text style={[styles.appName, { color: colors.onBackground }]}>Levelset</Text>
+            <Image
+              source={isDark ? logoDark : logoLight}
+              style={styles.logoImage}
+              contentFit="contain"
+            />
           </View>
         </Animated.View>
 
@@ -242,21 +242,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 32,
   },
-  logoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
-    borderCurve: "continuous",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
-  },
-  logoText: {
-    fontSize: 40,
-    fontWeight: "700",
-  },
-  appName: {
-    ...typography.h2,
+  logoImage: {
+    width: 200,
+    height: 60,
   },
   card: {
     paddingVertical: 24,
@@ -284,17 +272,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     marginBottom: 20,
-  },
-  googleLogoContainer: {
-    width: 20,
-    height: 20,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginRight: 12,
-  },
-  googleLogoPart: {
-    width: 10,
-    height: 10,
   },
   googleButtonText: {
     ...typography.labelLarge,

@@ -21,7 +21,7 @@ import { createSupabaseClient } from '@/util/supabase/component';
 import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 
 const fontFamily = '"Satoshi", sans-serif';
-const STORAGE_DOMAIN = 'https://files.levelset.io';
+const STORAGE_DOMAIN = 'https://api.levelset.io';
 
 const StyledTextField = styled(TextField)(() => ({
   '& .MuiOutlinedInput-root': {

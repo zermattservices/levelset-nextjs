@@ -245,6 +245,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(null);
           setAppUser(null);
           setSession(null);
+          setError(null);
           setIsLoading(false);
           initialized = true;
         } else if (event === "TOKEN_REFRESHED" && !initialized) {
@@ -258,9 +259,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
           await fetchAppUserData(currentSession.user);
           setIsLoading(false);
           initialized = true;
+        } else if (event === "INITIAL_SESSION" && !currentSession) {
+          // No valid session (e.g. expired refresh token) — show login
+          setUser(null);
+          setAppUser(null);
+          setSession(null);
+          setIsLoading(false);
+          initialized = true;
         }
       }
     );
+
+    // Clear stale refresh tokens on startup to prevent error banners
+    supabase.auth.getSession().then(({ error: sessionError }) => {
+      if (sessionError) {
+        console.log("[Auth] Stale session cleared:", sessionError.message);
+        supabase.auth.signOut();
+      }
+    });
 
     return () => {
       subscription.unsubscribe();
