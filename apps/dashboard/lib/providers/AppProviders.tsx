@@ -42,9 +42,9 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // No app_user or no org — new user, let through (signup/onboarding page handles)
-    if (!auth.appUser?.org_id) {
-      setChecked(true);
+    // No app_user or no org — redirect to onboarding
+    if (auth.authUser && !auth.appUser?.org_id) {
+      router.replace('/onboarding');
       return;
     }
 
