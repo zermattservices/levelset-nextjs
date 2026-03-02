@@ -121,24 +121,20 @@ CREATE POLICY "Users can delete infractions in their org"
   );
 
 -- ---------------------------------------------------------------------------
--- app_users (SELECT + UPDATE — has client-side profile_image update)
+-- app_users — RLS intentionally NOT enabled
 -- ---------------------------------------------------------------------------
-ALTER TABLE public.app_users ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view app_users in their org"
-  ON public.app_users FOR SELECT
-  USING (
-    public.is_levelset_admin()
-    OR org_id = public.get_user_org_id()
-    OR auth_user_id = auth.uid()
-  );
-
-CREATE POLICY "Users can update their own app_user record"
-  ON public.app_users FOR UPDATE
-  USING (
-    public.is_levelset_admin()
-    OR auth_user_id = auth.uid()
-  );
+-- app_users is the identity bootstrapping table. The AuthProvider queries it
+-- to establish the user's identity (org_id, role, etc.). Enabling RLS here
+-- creates a circular dependency: the RLS policy calls get_user_org_id() which
+-- itself queries app_users, and auth.uid() may not be available during the
+-- initial session bootstrap. This caused a production outage (infinite
+-- redirect loop to /onboarding).
+--
+-- app_users is protected at the application layer:
+--   - AuthProvider filters by auth_user_id (only fetches own record)
+--   - API routes use service role key (bypasses any RLS)
+--   - The browser client's anon key can read rows, but all sensitive
+--     operations go through authenticated API routes
 
 -- ---------------------------------------------------------------------------
 -- shifts (SELECT only — all writes go through API routes)
