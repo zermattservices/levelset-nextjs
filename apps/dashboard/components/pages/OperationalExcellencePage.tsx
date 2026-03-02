@@ -550,36 +550,31 @@ export function OperationalExcellencePage() {
         return <div className={sty.detailPanel} style={{ color: '#535862', fontFamily }}>No position data available</div>;
       }
 
-      const displayPillars = selectedPillarId
-        ? pillars.filter((p) => p.id === selectedPillarId)
-        : pillars;
-
       return (
         <div className={sty.detailPanel}>
-          <table className={sty.detailTable}>
-            <thead>
-              <tr>
-                <th>Position</th>
-                {displayPillars.map((p) => (
-                  <th key={p.id} style={{ color: pillarColorMap[p.id] }}>{p.name}</th>
-                ))}
-                <th>Ratings</th>
-              </tr>
-            </thead>
-            <tbody>
-              {emp.positions.map((pos) => (
-                <tr key={pos.positionName}>
-                  <td style={{ fontWeight: 600 }}>{pos.positionName}</td>
-                  {displayPillars.map((p) => (
-                    <td key={p.id}>
-                      {pos.pillarScores[p.id] != null ? pos.pillarScores[p.id].toFixed(1) : '—'}
-                    </td>
-                  ))}
-                  <td>{pos.ratingCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {emp.positions.map((pos, posIdx) => (
+            <div
+              key={pos.positionName}
+              className={sty.detailRow}
+              style={posIdx < emp.positions.length - 1 ? { borderBottom: '1px solid #e9eaeb' } : undefined}
+            >
+              <div className={sty.detailPositionCell}>{pos.positionName}</div>
+              {pillars.map((p) => {
+                const isSelected = selectedPillarId === p.id;
+                return (
+                  <div
+                    key={p.id}
+                    className={sty.detailPillarCell}
+                    style={isSelected ? { fontWeight: 700, color: pillarColorMap[p.id] } : undefined}
+                  >
+                    {pos.pillarScores[p.id] != null ? pos.pillarScores[p.id].toFixed(1) : '—'}
+                  </div>
+                );
+              })}
+              <div className={sty.detailChangeCell} />
+              <div className={sty.detailRatingsCell}>{pos.ratingCount}</div>
+            </div>
+          ))}
         </div>
       );
     },

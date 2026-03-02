@@ -442,36 +442,45 @@
 
 /* Expandable row detail */
 .detailPanel {
-  padding: 12px 16px 12px 48px;
   background: #fafafa;
+  padding: 4px 0;
 }
 
-.detailTable {
-  width: 100%;
-  border-collapse: collapse;
+.detailRow {
+  display: flex;
+  align-items: center;
 }
 
-.detailTable th {
+.detailPositionCell {
+  flex: 1;
+  min-width: 180px;
+  padding: 6px 12px 6px 100px;
   font-family: "Satoshi", sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: #535862;
-  text-align: left;
-  padding: 4px 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #181d27;
 }
 
-.detailTable td {
+.detailPillarCell {
+  width: 155px;
+  padding: 6px 10px;
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: #181d27;
-  padding: 6px 12px;
+  color: #535862;
 }
 
-.detailTable tr:not(:last-child) td {
-  border-bottom: 1px solid #e9eaeb;
+.detailChangeCell {
+  width: 90px;
+}
+
+.detailRatingsCell {
+  width: 80px;
+  padding: 6px 10px;
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #535862;
 }
 
 .emptyState {
@@ -541,8 +550,8 @@
 }
 
 @media (max-width: 768px) {
-  .detailPanel {
-    padding: 12px 16px 12px 16px;
+  .detailPositionCell {
+    padding-left: 48px;
   }
 
   .chartCard {

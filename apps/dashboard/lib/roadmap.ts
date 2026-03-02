@@ -420,13 +420,23 @@ export async function fetchAllFeaturesAdmin(): Promise<RoadmapFeature[]> {
   return data || [];
 }
 
+// Roadmap status -> Board status (for syncing back to board tasks)
+const ROADMAP_TO_BOARD_STATUS: Record<string, string> = {
+  submitted: 'backlog',
+  idea: 'backlog',
+  planned: 'todo',
+  in_progress: 'in_progress',
+  completed: 'done',
+  cancelled: 'archived',
+};
+
 // Update a feature (for admin)
 export async function updateFeature(
   featureId: string,
   updates: Partial<Pick<RoadmapFeature, 'title' | 'description' | 'category' | 'status' | 'priority' | 'is_public' | 'created_by' | 'agent_context'>>
 ): Promise<RoadmapFeature | null> {
   const supabase = createSupabaseClient();
-  
+
   const { data, error } = await supabase
     .from('roadmap_features')
     .update({
@@ -436,12 +446,39 @@ export async function updateFeature(
     .eq('id', featureId)
     .select()
     .single();
-  
+
   if (error) {
     console.error('Error updating feature:', error);
     return null;
   }
-  
+
+  // Sync changes to linked board task (if any)
+  const boardUpdates: Record<string, any> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (updates.title !== undefined) {
+    boardUpdates.title = updates.title;
+  }
+  if (updates.description !== undefined) {
+    boardUpdates.description = updates.description;
+  }
+  if (updates.status && ROADMAP_TO_BOARD_STATUS[updates.status]) {
+    boardUpdates.status = ROADMAP_TO_BOARD_STATUS[updates.status];
+  }
+
+  // Only update if there are actual changes beyond updated_at
+  if (Object.keys(boardUpdates).length > 1) {
+    const { error: boardError } = await supabase
+      .from('board_tasks')
+      .update(boardUpdates)
+      .eq('roadmap_feature_id', featureId);
+
+    if (boardError) {
+      console.error('Error syncing board task:', boardError);
+    }
+  }
+
   return data;
 }
 

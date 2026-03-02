@@ -215,18 +215,37 @@ export async function updateTask(id: string, updates: Partial<BoardTask>): Promi
     return null;
   }
 
-  // If status was changed and task is linked to a roadmap feature, sync the roadmap status
-  if (updates.status && data.roadmap_feature_id && BOARD_TO_ROADMAP_STATUS[updates.status]) {
-    const { error: rmError } = await supabase
-      .from('roadmap_features')
-      .update({
-        status: BOARD_TO_ROADMAP_STATUS[updates.status],
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', data.roadmap_feature_id);
+  // If the task is linked to a roadmap feature, sync changes to the roadmap
+  if (data.roadmap_feature_id) {
+    const roadmapUpdates: Record<string, any> = {
+      updated_at: new Date().toISOString(),
+    };
 
-    if (rmError) {
-      console.error('Error syncing roadmap feature status:', rmError);
+    // Sync status
+    if (updates.status && BOARD_TO_ROADMAP_STATUS[updates.status]) {
+      roadmapUpdates.status = BOARD_TO_ROADMAP_STATUS[updates.status];
+    }
+
+    // Sync title
+    if (updates.title !== undefined) {
+      roadmapUpdates.title = updates.title;
+    }
+
+    // Sync description
+    if (updates.description !== undefined) {
+      roadmapUpdates.description = updates.description;
+    }
+
+    // Only update if there are actual changes beyond updated_at
+    if (Object.keys(roadmapUpdates).length > 1) {
+      const { error: rmError } = await supabase
+        .from('roadmap_features')
+        .update(roadmapUpdates)
+        .eq('id', data.roadmap_feature_id);
+
+      if (rmError) {
+        console.error('Error syncing roadmap feature:', rmError);
+      }
     }
   }
 
