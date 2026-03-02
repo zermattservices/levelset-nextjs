@@ -389,7 +389,21 @@ export function ShiftModal({
     }
   };
 
-  const readOnly = isPublished && isEdit;
+  // A shift is "past" if its end date+time has already elapsed
+  const isPast = React.useMemo(() => {
+    if (!isEdit || !shift) return false;
+    const shiftEndDate = shift.end_date || shift.shift_date;
+    const endTimeStr = shift.end_time || '23:59';
+    try {
+      const endDateTime = new Date(`${shiftEndDate}T${endTimeStr}`);
+      return endDateTime < new Date();
+    } catch {
+      return false;
+    }
+  }, [isEdit, shift]);
+
+  const readOnly = isPast || (isPublished && isEdit);
+  const pastTooltip = isPast ? 'This shift has already passed' : undefined;
 
   /* ---------------------------------------------------------------- */
   /*  Render                                                           */
@@ -411,7 +425,12 @@ export function ShiftModal({
           </IconButton>
         </div>
 
-        {readOnly && (
+        {isPast && (
+          <div className={sty.pastBanner}>
+            This shift has already passed and cannot be edited.
+          </div>
+        )}
+        {!isPast && readOnly && (
           <div className={sty.readOnlyBanner}>
             Schedule is published. Unpublish to make edits.
           </div>
@@ -420,7 +439,7 @@ export function ShiftModal({
         {/* ---------- Form ---------- */}
         <div className={sty.form}>
           {/* Dates row: Start Date + End Date */}
-          <div className={sty.row}>
+          <div className={sty.row} title={pastTooltip}>
             <div className={sty.field}>
               <LsDatePicker
                 label="Start Date"
@@ -462,7 +481,7 @@ export function ShiftModal({
           </div>
 
           {/* Times row: Start Time + End Time */}
-          <div className={sty.row}>
+          <div className={sty.row} title={pastTooltip}>
             <div className={sty.field}>
               <label className={sty.label} htmlFor="shift-start">
                 Start Time
@@ -522,7 +541,7 @@ export function ShiftModal({
           </div>
 
           {/* Break */}
-          <div className={sty.field}>
+          <div className={sty.field} title={pastTooltip}>
             <label className={sty.label} htmlFor="shift-break">
               Break (minutes)
             </label>
@@ -539,7 +558,7 @@ export function ShiftModal({
           </div>
 
           {/* Position */}
-          <div className={sty.field}>
+          <div className={sty.field} title={pastTooltip}>
             <label className={sty.label} htmlFor="shift-position">
               Position <span style={{ color: 'var(--ls-color-destructive)' }}>*</span>
             </label>
@@ -560,7 +579,7 @@ export function ShiftModal({
           </div>
 
           {/* House Shift toggle */}
-          <label className={sty.switchRow}>
+          <label className={sty.switchRow} title={pastTooltip}>
             <span className={sty.switchLabel}>House shift</span>
             <div
               className={`${sty.switch} ${isHouseShift ? sty.switchOn : ''}`}
@@ -588,7 +607,7 @@ export function ShiftModal({
           </label>
 
           {/* Employee */}
-          <div className={sty.field}>
+          <div className={sty.field} title={pastTooltip}>
             <label className={sty.label}>Assigned Employee</label>
             <input
               type="text"
@@ -634,7 +653,7 @@ export function ShiftModal({
           )}
 
           {/* Notes */}
-          <div className={sty.field}>
+          <div className={sty.field} title={pastTooltip}>
             <label className={sty.label} htmlFor="shift-notes">
               Notes
             </label>
