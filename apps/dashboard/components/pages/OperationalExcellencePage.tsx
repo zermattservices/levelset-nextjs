@@ -52,6 +52,23 @@ const PILLAR_COLORS: Record<number, string> = {
 
 type DateRange = 'mtd' | 'qtd' | '30d' | '90d' | 'custom';
 
+/** Least-squares linear regression. Returns slope & intercept, or null if < 2 points. */
+function linearRegression(values: (number | null | undefined)[]) {
+  const pts: [number, number][] = [];
+  values.forEach((v, i) => { if (v != null) pts.push([i, v]); });
+  if (pts.length < 2) return null;
+  const n = pts.length;
+  const sx = pts.reduce((s, p) => s + p[0], 0);
+  const sy = pts.reduce((s, p) => s + p[1], 0);
+  const sxy = pts.reduce((s, p) => s + p[0] * p[1], 0);
+  const sx2 = pts.reduce((s, p) => s + p[0] * p[0], 0);
+  const denom = n * sx2 - sx * sx;
+  if (denom === 0) return null;
+  const m = (n * sxy - sx * sy) / denom;
+  const b = (sy - m * sx) / n;
+  return { m, b };
+}
+
 // ------------------------------------------------------------------
 // Styled Components (copied from PositionalRatings.tsx — single source of truth)
 // ------------------------------------------------------------------
@@ -636,6 +653,23 @@ export function OperationalExcellencePage() {
     return Math.max(0, Math.floor(Math.min(...allValues) - 5));
   })();
 
+  // Compute linear trendline for the active metric (selected pillar or OE overall)
+  const trendlineKey = selectedPillarId ? `ma_${selectedPillarId}` : 'ma_oe';
+  const trendlineColor = selectedPillarId ? (pillarColorMap[selectedPillarId] || '#6b7280') : '#181d27';
+  const trendlineReg = React.useMemo(() => {
+    if (chartData.length < 2) return null;
+    return linearRegression(chartData.map((d: any) => d[trendlineKey]));
+  }, [chartData, trendlineKey]);
+
+  // Inject trendline values into chartData (reuses same array identity per render)
+  const chartDataWithTrend = React.useMemo(() => {
+    if (!trendlineReg) return chartData;
+    return chartData.map((d: any, i: number) => ({
+      ...d,
+      trendline: Math.round((trendlineReg.m * i + trendlineReg.b) * 10) / 10,
+    }));
+  }, [chartData, trendlineReg]);
+
   // Build improvers list — only include employees who had prior period data
   const getImprovers = () => {
     return (data?.employees || [])
@@ -927,7 +961,7 @@ export function OperationalExcellencePage() {
                           <Skeleton variant="rounded" animation="wave" sx={{ height: 280, borderRadius: '8px' }} />
                         ) : chartData.length > 0 ? (
                           <ResponsiveContainer width="100%" height={280}>
-                            <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                            <LineChart data={chartDataWithTrend} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                               <CartesianGrid strokeDasharray="3 3" stroke="#e9eaeb" />
                               <XAxis
                                 dataKey="date"
@@ -1004,6 +1038,23 @@ export function OperationalExcellencePage() {
                                     stroke: '#fff',
                                   }}
                                   connectNulls={false}
+                                  legendType="none"
+                                />
+                              )}
+                              {/* Linear trendline for active metric */}
+                              {trendlineReg && (
+                                <Line
+                                  key="trendline"
+                                  type="linear"
+                                  dataKey="trendline"
+                                  name="Trend"
+                                  stroke={trendlineColor}
+                                  strokeWidth={1.5}
+                                  strokeDasharray="6 4"
+                                  strokeOpacity={0.5}
+                                  dot={false}
+                                  activeDot={false}
+                                  connectNulls
                                   legendType="none"
                                 />
                               )}
