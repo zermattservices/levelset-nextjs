@@ -160,6 +160,11 @@ export function SchedulePage() {
   };
 
   const handleShiftClick = (shift: Shift) => {
+    // Clicking a pending-delete shift restores it
+    if (shift.pending_delete) {
+      handleShiftRestore(shift.id);
+      return;
+    }
     setEditingShift(shift);
     setPrefillDate('');
     setPrefillPositionId('');
@@ -170,11 +175,18 @@ export function SchedulePage() {
   };
 
   const handleShiftDelete = async (shiftId: string) => {
-    if (!window.confirm('Delete this shift?')) return;
     try {
       await data.deleteShift(shiftId);
     } catch (err) {
       console.error('Failed to delete shift:', err);
+    }
+  };
+
+  const handleShiftRestore = async (shiftId: string) => {
+    try {
+      await data.restoreShift(shiftId);
+    } catch (err) {
+      console.error('Failed to restore shift:', err);
     }
   };
 
@@ -350,90 +362,98 @@ export function SchedulePage() {
         )}
       </div>
 
-      {/* Template Manager Modal */}
-      <SetupTemplateManager
-        open={setupData.templateManagerOpen}
-        onClose={() => setupData.setTemplateManagerOpen(false)}
-        templates={setupData.templates}
-        positions={data.allPositions}
-        onSave={async (templateData) => {
-          const orgId = selectedLocationOrgId ?? auth.org_id;
-          const res = await fetch('/api/scheduling/setup-templates', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...templateData,
-              org_id: orgId,
-            }),
-          });
-          if (!res.ok) throw new Error('Failed to save template');
-        }}
-        onDelete={async (templateId) => {
-          const res = await fetch('/api/scheduling/setup-templates', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ intent: 'delete', id: templateId }),
-          });
-          if (!res.ok) throw new Error('Failed to delete template');
-        }}
-        onRefetch={() => {
-          setupData.fetchTemplates();
-          setupData.refetchResolvedSlots();
-        }}
-      />
+      {/* Template Manager Modal — conditionally rendered to avoid aria-hidden warnings */}
+      {setupData.templateManagerOpen && (
+        <SetupTemplateManager
+          open
+          onClose={() => setupData.setTemplateManagerOpen(false)}
+          templates={setupData.templates}
+          positions={data.allPositions}
+          onSave={async (templateData) => {
+            const orgId = selectedLocationOrgId ?? auth.org_id;
+            const res = await fetch('/api/scheduling/setup-templates', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...templateData,
+                org_id: orgId,
+              }),
+            });
+            if (!res.ok) throw new Error('Failed to save template');
+          }}
+          onDelete={async (templateId) => {
+            const res = await fetch('/api/scheduling/setup-templates', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ intent: 'delete', id: templateId }),
+            });
+            if (!res.ok) throw new Error('Failed to delete template');
+          }}
+          onRefetch={() => {
+            setupData.fetchTemplates();
+            setupData.refetchResolvedSlots();
+          }}
+        />
+      )}
 
-      {/* Shift Modal */}
-      <ShiftModal
-        open={shiftModalOpen}
-        onClose={() => { setShiftModalOpen(false); setPendingShift(null); }}
-        shift={editingShift}
-        onPositionChange={(posId) => {
-          if (!pendingShift) return;
-          const pos = data.allPositions.find((p) => p.id === posId);
-          setPendingShift((prev) => prev ? { ...prev, positionZone: pos?.zone ?? null } : null);
-        }}
-        onTimeChange={(startTime, endTime) => {
-          if (!pendingShift) return;
-          setPendingShift((prev) => prev ? { ...prev, startTime, endTime } : null);
-        }}
-        prefillDate={prefillDate}
-        prefillPositionId={prefillPositionId}
-        prefillEmployeeId={prefillEmployeeId}
-        prefillStartTime={prefillStartTime}
-        prefillEndTime={prefillEndTime}
-        canViewPay={canViewPay}
-        positions={data.allPositions}
-        employees={data.employees}
-        isPublished={false}
-        onSave={data.createShift}
-        onUpdate={data.updateShift}
-        onDelete={data.deleteShift}
-        onAssign={data.assignEmployee}
-        onUnassign={data.unassignEmployee}
-      />
+      {/* Shift Modal — conditionally rendered to avoid aria-hidden warnings */}
+      {shiftModalOpen && (
+        <ShiftModal
+          open
+          onClose={() => { setShiftModalOpen(false); setPendingShift(null); }}
+          shift={editingShift}
+          onPositionChange={(posId) => {
+            if (!pendingShift) return;
+            const pos = data.allPositions.find((p) => p.id === posId);
+            setPendingShift((prev) => prev ? { ...prev, positionZone: pos?.zone ?? null } : null);
+          }}
+          onTimeChange={(startTime, endTime) => {
+            if (!pendingShift) return;
+            setPendingShift((prev) => prev ? { ...prev, startTime, endTime } : null);
+          }}
+          prefillDate={prefillDate}
+          prefillPositionId={prefillPositionId}
+          prefillEmployeeId={prefillEmployeeId}
+          prefillStartTime={prefillStartTime}
+          prefillEndTime={prefillEndTime}
+          canViewPay={canViewPay}
+          positions={data.allPositions}
+          employees={data.employees}
+          isPublished={false}
+          onSave={data.createShift}
+          onUpdate={data.updateShift}
+          onDelete={data.deleteShift}
+          onAssign={data.assignEmployee}
+          onUnassign={data.unassignEmployee}
+        />
+      )}
 
       {/* First-time HS schedule import modal (auto-triggered by notification) */}
-      <SyncEmployeesModal
-        open={!!data.pendingHsNotificationId}
-        onClose={() => data.clearPendingHsImport()}
-        locationId={selectedLocationId}
-        orgId={selectedLocationOrgId ?? auth.org_id}
-        scheduleImportMode
-        onSyncComplete={() => data.clearPendingHsImport()}
-      />
+      {!!data.pendingHsNotificationId && (
+        <SyncEmployeesModal
+          open
+          onClose={() => data.clearPendingHsImport()}
+          locationId={selectedLocationId}
+          orgId={selectedLocationOrgId ?? auth.org_id}
+          scheduleImportMode
+          onSyncComplete={() => data.clearPendingHsImport()}
+        />
+      )}
 
       {/* Manual HS sync from toolbar button */}
-      <SyncEmployeesModal
-        open={hsSyncOpen}
-        onClose={() => setHsSyncOpen(false)}
-        locationId={selectedLocationId}
-        orgId={selectedLocationOrgId ?? auth.org_id}
-        defaultScheduleSync
-        onSyncComplete={() => {
-          setHsSyncOpen(false);
-          data.refetch();
-        }}
-      />
+      {hsSyncOpen && (
+        <SyncEmployeesModal
+          open
+          onClose={() => setHsSyncOpen(false)}
+          locationId={selectedLocationId}
+          orgId={selectedLocationOrgId ?? auth.org_id}
+          defaultScheduleSync
+          onSyncComplete={() => {
+            setHsSyncOpen(false);
+            data.refetch();
+          }}
+        />
+      )}
     </>
   );
 }

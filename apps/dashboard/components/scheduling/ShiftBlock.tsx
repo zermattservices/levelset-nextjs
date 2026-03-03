@@ -36,11 +36,13 @@ function formatTimeShort(time: string): string {
 
 /**
  * Determine the per-shift publish state.
- * - 'draft'      → never published (published_at is null)
- * - 'changed'    → published but edited since (updated_at > published_at)
- * - 'published'  → fully published, no pending changes
+ * - 'pending_delete' → marked for deletion, awaiting publish
+ * - 'draft'          → never published (published_at is null)
+ * - 'changed'        → published but edited since (updated_at > published_at)
+ * - 'published'      → fully published, no pending changes
  */
-function getShiftPublishState(shift: Shift): 'draft' | 'changed' | 'published' {
+function getShiftPublishState(shift: Shift): 'pending_delete' | 'draft' | 'changed' | 'published' {
+  if (shift.pending_delete) return 'pending_delete';
   if (!shift.published_at) return 'draft';
   if (shift.updated_at && shift.updated_at > shift.published_at) return 'changed';
   return 'published';
@@ -55,8 +57,9 @@ function getShiftPublishState(shift: Shift): 'draft' | 'changed' | 'published' {
  *   Line 3 (muted)— Zone label (e.g. "Back of House")
  *
  * Open/unassigned shifts use a dashed border with lighter tinting and an "OPEN" label.
+ * Pending-delete shifts show dashed border, strikethrough text, and a red dot.
  * A small red status dot indicates unpublished shifts:
- *   - Red dot: draft or has unpublished changes
+ *   - Red dot: draft, has unpublished changes, or pending delete
  *   - No dot: fully published
  */
 export function ShiftBlock({
@@ -70,6 +73,7 @@ export function ShiftBlock({
   const posColor = zone ? (ZONE_COLORS[zone] ?? FALLBACK_COLOR) : FALLBACK_COLOR;
   const isOpen = !assignment;
   const publishState = getShiftPublishState(shift);
+  const isPendingDelete = publishState === 'pending_delete';
 
   /* ---- Derived display strings ---- */
 
@@ -106,14 +110,24 @@ export function ShiftBlock({
 
   /* ---- Inline styles driven by zone color ---- */
 
-  const blockStyle: React.CSSProperties = {
-    borderLeftColor: posColor,
-    backgroundColor: isOpen ? undefined : `${posColor}1f`, // 12% opacity hex suffix
-  };
+  const blockStyle: React.CSSProperties = isPendingDelete
+    ? {
+        borderLeftColor: posColor,
+        backgroundColor: 'var(--ls-color-neutral-foreground, #f9fafb)',
+        opacity: 0.7,
+      }
+    : {
+        borderLeftColor: posColor,
+        backgroundColor: isOpen ? undefined : `${posColor}1f`, // 12% opacity hex suffix
+      };
 
   /* ---- Class list ---- */
 
-  const classList = [sty.block, isOpen ? sty.openShift : ''].filter(Boolean).join(' ');
+  const classList = [
+    sty.block,
+    isOpen ? sty.openShift : '',
+    isPendingDelete ? sty.pendingDelete : '',
+  ].filter(Boolean).join(' ');
 
   return (
     <div
@@ -124,9 +138,11 @@ export function ShiftBlock({
       role="button"
       tabIndex={0}
       aria-label={
-        isOpen
-          ? `Open shift, ${timeStr}`
-          : `${primaryLabel}, ${timeStr}`
+        isPendingDelete
+          ? `Deleted shift (pending publish), ${timeStr}`
+          : isOpen
+            ? `Open shift, ${timeStr}`
+            : `${primaryLabel}, ${timeStr}`
       }
     >
       {/* Top-right action area: status dot + delete button */}
@@ -135,10 +151,14 @@ export function ShiftBlock({
           <span
             className={sty.publishDot}
             style={{ backgroundColor: 'var(--ls-color-destructive, #ef4444)' }}
-            title={publishState === 'changed' ? 'Unpublished changes' : 'Draft'}
+            title={
+              isPendingDelete ? 'Pending deletion'
+                : publishState === 'changed' ? 'Unpublished changes'
+                  : 'Draft'
+            }
           />
         )}
-        {onDelete && (
+        {onDelete && !isPendingDelete && (
           <button
             className={sty.deleteBtn}
             onClick={handleDelete}
@@ -152,7 +172,7 @@ export function ShiftBlock({
 
       {/* Line 1 — Primary label (position or employee name) */}
       {isOpen ? (
-        <span className={sty.openLabel}>Open</span>
+        <span className={sty.openLabel}>{isPendingDelete ? 'Deleted' : 'Open'}</span>
       ) : (
         primaryLabel && <span className={sty.primaryLabel}>{primaryLabel}</span>
       )}

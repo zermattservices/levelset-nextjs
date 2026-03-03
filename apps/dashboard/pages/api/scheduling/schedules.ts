@@ -74,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           : null,
       }));
 
-      res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=30');
+      res.setHeader('Cache-Control', 'private, no-store');
 
       return res.status(200).json({
         schedule,
@@ -134,7 +134,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const now = new Date().toISOString();
 
-        // Mark all shifts as published (idempotent — safe to re-stamp already-published shifts)
+        // Hard-delete any shifts marked pending_delete
+        const { error: hardDeleteError } = await supabase
+          .from('shifts')
+          .delete()
+          .eq('schedule_id', id)
+          .eq('pending_delete', true);
+
+        if (hardDeleteError) {
+          console.error('Error hard-deleting pending shifts:', hardDeleteError);
+          return res.status(500).json({ error: 'Failed to delete pending shifts' });
+        }
+
+        // Mark all remaining shifts as published (idempotent — safe to re-stamp already-published shifts)
         const { data: updatedShifts, error: publishShiftError } = await supabase
           .from('shifts')
           .update({ published_at: now })

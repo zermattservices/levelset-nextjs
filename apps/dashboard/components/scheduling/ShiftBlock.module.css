@@ -45,6 +45,22 @@
   background-color: var(--ls-color-neutral-foreground) !important;
 }
 
+/* ---- Pending-delete shift variant ---- */
+
+.pendingDelete {
+  border: 1px dashed var(--ls-color-destructive, #ef4444) !important;
+  border-left-width: 3px !important;
+  border-left-style: dashed !important;
+}
+
+.pendingDelete .primaryLabel,
+.pendingDelete .time,
+.pendingDelete .zoneLabel,
+.pendingDelete .openLabel {
+  text-decoration: line-through;
+  color: var(--ls-color-disabled-text);
+}
+
 /* ---- Top-right action area (lock / delete) ---- */
 
 .actions {

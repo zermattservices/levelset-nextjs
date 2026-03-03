@@ -293,6 +293,7 @@ export function useScheduleData() {
     // Build ShiftForOT[] from all shifts (not zone-filtered — OT is per-employee across all zones)
     const otShifts: ShiftForOT[] = [];
     for (const shift of shifts) {
+      if (shift.pending_delete) continue; // exclude pending-delete shifts
       if (!shift.assignment?.employee_id) continue;
       const emp = shift.assignment.employee as any;
       const hourlyRate = emp?.actual_pay ?? emp?.calculated_pay ?? 0;
@@ -323,6 +324,7 @@ export function useScheduleData() {
     }
 
     for (const shift of filteredShifts) {
+      if (shift.pending_delete) continue; // exclude pending-delete shifts from labor
       const hours = shiftNetHours(shift);
       const baseCost = shift.assignment?.projected_cost ?? 0;
 
@@ -471,6 +473,19 @@ export function useScheduleData() {
     await fetchSchedule();
   }, [fetchSchedule]);
 
+  const restoreShift = useCallback(async (id: string) => {
+    const res = await fetch('/api/scheduling/shifts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ intent: 'restore', id }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to restore shift');
+    }
+    await fetchSchedule();
+  }, [fetchSchedule]);
+
   // ── CRUD: Assignments ──
   const assignEmployee = useCallback(async (shiftId: string, employeeId: string) => {
     const res = await fetch('/api/scheduling/assignments', {
@@ -530,8 +545,9 @@ export function useScheduleData() {
 
   // ── Per-shift publish state ──
   const unpublishedCount = useMemo(() => {
-    // Count shifts that are new (never published) or have unpublished changes
+    // Count shifts that are new, have unpublished changes, or pending delete
     return shifts.filter((s) => {
+      if (s.pending_delete) return true; // pending deletion
       if (!s.published_at) return true; // never published
       if (s.updated_at && s.updated_at > s.published_at) return true; // edited since last publish
       return false;
@@ -619,6 +635,7 @@ export function useScheduleData() {
     createShift,
     updateShift,
     deleteShift,
+    restoreShift,
 
     // Assignment CRUD
     assignEmployee,

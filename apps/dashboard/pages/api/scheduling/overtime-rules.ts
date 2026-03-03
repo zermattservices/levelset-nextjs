@@ -1,7 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { withPermissionAndContext, AuthenticatedRequest } from '@/lib/permissions/middleware';
-import { P } from '@/lib/permissions/constants';
 
 /**
  * GET /api/scheduling/overtime-rules?location_id=xxx
@@ -9,11 +7,12 @@ import { P } from '@/lib/permissions/constants';
  * Returns the applicable overtime rules for a location based on its state.
  * Falls back to federal FLSA defaults if no state is set or no state-specific rules exist.
  */
-async function handler(
-  req: AuthenticatedRequest,
-  res: NextApiResponse,
-  { orgId }: { userId: string; orgId: string }
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Allow', 'GET, OPTIONS');
+    return res.status(204).end();
+  }
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -26,16 +25,15 @@ async function handler(
       return res.status(400).json({ error: 'location_id is required' });
     }
 
-    // Get location state — scoped to user's org
+    // Get location state
     const { data: location } = await supabase
       .from('locations')
       .select('state')
       .eq('id', location_id)
-      .eq('org_id', orgId)
       .single();
 
     if (!location) {
-      return res.status(403).json({ error: 'Access denied to this location' });
+      return res.status(404).json({ error: 'Location not found' });
     }
 
     const stateCode = location.state ?? null;
@@ -69,7 +67,7 @@ async function handler(
     }
 
     // Cache aggressively — OT rules rarely change
-    res.setHeader('Cache-Control', 'private, s-maxage=3600, stale-while-revalidate=86400');
+    res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 
     return res.status(200).json({
       state: stateCode,
@@ -79,12 +77,4 @@ async function handler(
     console.error('Error fetching overtime rules:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
-}
-
-export default function apiHandler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Allow', 'GET, OPTIONS');
-    return res.status(204).end();
-  }
-  return withPermissionAndContext(P.SCHED_VIEW, handler)(req, res);
 }

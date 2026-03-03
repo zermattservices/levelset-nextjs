@@ -377,7 +377,6 @@ export function ShiftModal({
 
   const handleDelete = async () => {
     if (!shift) return;
-    if (!window.confirm('Delete this shift? This cannot be undone.')) return;
     setSaving(true);
     try {
       await onDelete(shift.id);

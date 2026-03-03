@@ -161,14 +161,57 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'id is required' });
       }
 
+      // Soft-delete: mark as pending_delete so it shows visually until published
       const { error } = await supabase
         .from('shifts')
-        .delete()
+        .update({ pending_delete: true, updated_at: new Date().toISOString() })
         .eq('id', id);
 
       if (error) {
-        console.error('Error deleting shift:', error);
+        console.error('Error soft-deleting shift:', error);
         return res.status(500).json({ error: 'Failed to delete shift' });
+      }
+
+      return res.status(200).json({ success: true });
+    }
+
+    if (intent === 'restore') {
+      const { id } = req.body;
+
+      if (!id) {
+        return res.status(400).json({ error: 'id is required' });
+      }
+
+      const { error } = await supabase
+        .from('shifts')
+        .update({ pending_delete: false, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error restoring shift:', error);
+        return res.status(500).json({ error: 'Failed to restore shift' });
+      }
+
+      return res.status(200).json({ success: true });
+    }
+
+    if (intent === 'hard_delete') {
+      const { schedule_id } = req.body;
+
+      if (!schedule_id) {
+        return res.status(400).json({ error: 'schedule_id is required' });
+      }
+
+      // Actually delete all pending_delete shifts for a schedule (called during publish)
+      const { error } = await supabase
+        .from('shifts')
+        .delete()
+        .eq('schedule_id', schedule_id)
+        .eq('pending_delete', true);
+
+      if (error) {
+        console.error('Error hard-deleting shifts:', error);
+        return res.status(500).json({ error: 'Failed to delete shifts' });
       }
 
       return res.status(200).json({ success: true });

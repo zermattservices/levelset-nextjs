@@ -40,6 +40,7 @@ export interface Shift {
   notes?: string;
   published_at?: string;
   updated_at?: string;
+  pending_delete?: boolean;
   position?: Position;
   assignment?: ShiftAssignment;
 }
