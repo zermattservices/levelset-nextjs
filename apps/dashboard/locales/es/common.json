@@ -243,6 +243,11 @@
     },
     "comingSoon": "Documentos",
     "comingSoonDescription": "Suba, organice y administre los documentos de su organización. Esta función está actualmente disponible para administradores."
+  },
+  "theme": {
+    "light": "Modo Claro",
+    "dark": "Modo Oscuro",
+    "system": "Sistema"
   }
 }
 
