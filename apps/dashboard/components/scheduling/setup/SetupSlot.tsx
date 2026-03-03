@@ -28,6 +28,9 @@ export function SetupSlot({ positionId, slotIndex, isRequired, assignment }: Set
       <div ref={setNodeRef} className={`${sty.slot} ${sty.slotFilled} ${isOver ? sty.slotOver : ''}`}>
         <SetupEmployeeChip
           employeeName={assignment.employee?.full_name ?? 'Unknown'}
+          shiftStartTime={assignment.shift?.start_time}
+          shiftEndTime={assignment.shift?.end_time}
+          shiftPositionName={assignment.shift?.position?.name}
           assignmentId={assignment.id}
           employeeId={assignment.employee_id}
           positionId={positionId}

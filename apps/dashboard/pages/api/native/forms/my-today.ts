@@ -10,6 +10,13 @@
  * Response shape:
  * {
  *   status: 'working' | 'not_scheduled' | 'time_off',
+ *   shifts?: Array<{
+ *     id: string,
+ *     label: string,
+ *     start_time: string,
+ *     end_time: string,
+ *     setup_assignments: Array<{ id: string, label: string, start_time: string, end_time: string }>
+ *   }>,
  *   entries?: Array<{ type: 'position' | 'shift', label: string, start_time: string, end_time: string }>,
  *   timeOffNote?: string | null
  * }
@@ -37,69 +44,24 @@ interface ScheduleEntry {
   end_time: string;
 }
 
-/**
- * Convert a TIME string (HH:MM:SS or HH:MM) to total minutes for comparison.
- */
 function timeToMinutes(time: string): number {
   const parts = time.split(':');
   return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
 }
 
-/**
- * Convert total minutes back to HH:MM:SS format.
- */
-function minutesToTime(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+interface SetupAssignmentEntry {
+  id: string;
+  label: string;
+  start_time: string;
+  end_time: string;
 }
 
-/**
- * Find time gaps in a shift that are not covered by setup_assignments.
- * Returns an array of { start_time, end_time } intervals.
- */
-function findUncoveredGaps(
-  shiftStart: string,
-  shiftEnd: string,
-  assignments: Array<{ start_time: string; end_time: string }>
-): Array<{ start_time: string; end_time: string }> {
-  const shiftStartMin = timeToMinutes(shiftStart);
-  const shiftEndMin = timeToMinutes(shiftEnd);
-
-  if (assignments.length === 0) {
-    return [{ start_time: shiftStart, end_time: shiftEnd }];
-  }
-
-  // Sort assignments by start_time
-  const sorted = [...assignments].sort(
-    (a, b) => timeToMinutes(a.start_time) - timeToMinutes(b.start_time)
-  );
-
-  const gaps: Array<{ start_time: string; end_time: string }> = [];
-  let cursor = shiftStartMin;
-
-  for (const a of sorted) {
-    const aStart = timeToMinutes(a.start_time);
-    const aEnd = timeToMinutes(a.end_time);
-
-    if (aStart > cursor) {
-      gaps.push({
-        start_time: minutesToTime(cursor),
-        end_time: minutesToTime(aStart),
-      });
-    }
-    cursor = Math.max(cursor, aEnd);
-  }
-
-  // Check for gap after last assignment
-  if (cursor < shiftEndMin) {
-    gaps.push({
-      start_time: minutesToTime(cursor),
-      end_time: minutesToTime(shiftEndMin),
-    });
-  }
-
-  return gaps;
+interface TodayShiftEntry {
+  id: string;
+  label: string;
+  start_time: string;
+  end_time: string;
+  setup_assignments: SetupAssignmentEntry[];
 }
 
 export default withPermissionAndContext(
@@ -232,70 +194,58 @@ export default withPermissionAndContext(
       }
 
       // ---------------------------------------------------------------
-      // 5. Build entries
+      // 5. Build grouped shifts (with setup assignment children)
       // ---------------------------------------------------------------
-      const entries: ScheduleEntry[] = [];
+      const assignmentsByShift = new Map<string, any[]>();
+      for (const sa of (setupAssignments || []) as any[]) {
+        const existing = assignmentsByShift.get(sa.shift_id) || [];
+        existing.push(sa);
+        assignmentsByShift.set(sa.shift_id, existing);
+      }
 
-      if (setupAssignments && setupAssignments.length > 0) {
-        // Group setup_assignments by shift_id
-        const assignmentsByShift = new Map<string, any[]>();
-        for (const sa of setupAssignments as any[]) {
-          const existing = assignmentsByShift.get(sa.shift_id) || [];
-          existing.push(sa);
-          assignmentsByShift.set(sa.shift_id, existing);
-        }
-
-        for (const shift of shifts as any[]) {
-          const shiftAssignments = assignmentsByShift.get(shift.id) || [];
-
-          // Add position entries for setup_assignments
-          for (const sa of shiftAssignments) {
-            entries.push({
-              type: 'position',
+      const groupedShifts: TodayShiftEntry[] = (shifts as any[])
+        .map((shift) => {
+          const shiftAssignments = (assignmentsByShift.get(shift.id) || [])
+            .slice()
+            .sort((a, b) => timeToMinutes(a.start_time) - timeToMinutes(b.start_time))
+            .map((sa) => ({
+              id: sa.id,
               label: sa.position?.name || 'Position',
               start_time: sa.start_time,
               end_time: sa.end_time,
-            });
-          }
+            }));
 
-          // Find time gaps not covered by setup_assignments and add shift entries
-          const gaps = findUncoveredGaps(
-            shift.start_time,
-            shift.end_time,
-            shiftAssignments.map((sa: any) => ({
-              start_time: sa.start_time,
-              end_time: sa.end_time,
-            }))
-          );
-
-          for (const gap of gaps) {
-            entries.push({
-              type: 'shift',
-              label: shift.position?.name || 'Shift',
-              start_time: gap.start_time,
-              end_time: gap.end_time,
-            });
-          }
-        }
-
-        // Sort all entries by start_time
-        entries.sort((a, b) => timeToMinutes(a.start_time) - timeToMinutes(b.start_time));
-      } else {
-        // No setup_assignments — just show shift entries
-        for (const shift of shifts as any[]) {
-          entries.push({
-            type: 'shift',
+          return {
+            id: shift.id,
             label: shift.position?.name || 'Shift',
             start_time: shift.start_time,
             end_time: shift.end_time,
-          });
-        }
-      }
+            setup_assignments: shiftAssignments,
+          };
+        })
+        .sort((a, b) => timeToMinutes(a.start_time) - timeToMinutes(b.start_time));
+
+      // Backward-compatible flattened entries for older clients
+      const entries: ScheduleEntry[] = groupedShifts.flatMap((shift) => ([
+        {
+          type: 'shift' as const,
+          label: shift.label,
+          start_time: shift.start_time,
+          end_time: shift.end_time,
+        },
+        ...shift.setup_assignments.map((assignment) => ({
+          type: 'position' as const,
+          label: assignment.label,
+          start_time: assignment.start_time,
+          end_time: assignment.end_time,
+        })),
+      ]));
 
       res.setHeader('Cache-Control', 'private, s-maxage=120, stale-while-revalidate=300');
       res.setHeader('Vary', 'Authorization');
       return res.status(200).json({
         status: 'working',
+        shifts: groupedShifts,
         entries,
       });
     } catch (error) {

@@ -554,8 +554,24 @@ export interface TodayEntry {
   end_time: string;     // "17:00:00"
 }
 
+export interface TodaySetupAssignment {
+  id: string;
+  label: string;
+  start_time: string;
+  end_time: string;
+}
+
+export interface TodayShift {
+  id: string;
+  label: string;
+  start_time: string;
+  end_time: string;
+  setup_assignments: TodaySetupAssignment[];
+}
+
 export interface MyTodayResponse {
   status: 'working' | 'not_scheduled' | 'time_off';
+  shifts?: TodayShift[];
   entries?: TodayEntry[];
   timeOffNote?: string | null;
 }

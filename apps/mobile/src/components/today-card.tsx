@@ -19,7 +19,12 @@ import { typography, fontWeights } from "../lib/fonts";
 import { spacing, haptics } from "../lib/theme";
 import { GlassCard } from "./glass";
 import { AppIcon } from "./ui";
-import type { MyTodayResponse, TodayEntry } from "../lib/api";
+import type {
+  MyTodayResponse,
+  TodayEntry,
+  TodaySetupAssignment,
+  TodayShift,
+} from "../lib/api";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -173,11 +178,28 @@ export function TodayCard({ data, isLoading, error }: TodayCardProps) {
       );
     }
 
-    // Working — show entry rows
+    // Working — prefer grouped shift rows with setup assignment children.
+    // Fallback to flat entries for backward compatibility.
+    const shifts = data.shifts ?? [];
     const entries = data.entries ?? [];
     return (
       <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[4] }}>
-        {entries.map((entry, idx) => (
+        {shifts.length > 0
+          ? shifts.map((shift, idx) => (
+              <React.Fragment key={`shift-${shift.id}-${idx}`}>
+                <ShiftRow shift={shift} colors={colors} />
+                {idx < shifts.length - 1 && (
+                  <View
+                    style={{
+                      height: 1,
+                      backgroundColor: colors.outline,
+                      marginVertical: spacing[3],
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            ))
+          : entries.map((entry, idx) => (
           <React.Fragment key={`${entry.type}-${entry.label}-${idx}`}>
             <EntryRow entry={entry} colors={colors} />
             {idx < entries.length - 1 && (
@@ -293,6 +315,87 @@ function EntryRow({
         }}
       >
         {formatTime(entry.start_time)} – {formatTime(entry.end_time)}
+      </Text>
+    </View>
+  );
+}
+
+function ShiftRow({
+  shift,
+  colors,
+}: {
+  shift: TodayShift;
+  colors: ReturnType<typeof useColors>;
+}) {
+  return (
+    <View style={{ gap: spacing[2] }}>
+      <EntryRow
+        entry={{
+          type: "shift",
+          label: shift.label,
+          start_time: shift.start_time,
+          end_time: shift.end_time,
+        }}
+        colors={colors}
+      />
+      {shift.setup_assignments.map((assignment) => (
+        <SetupAssignmentRow
+          key={`setup-${assignment.id}`}
+          assignment={assignment}
+          colors={colors}
+        />
+      ))}
+    </View>
+  );
+}
+
+function SetupAssignmentRow({
+  assignment,
+  colors,
+}: {
+  assignment: TodaySetupAssignment;
+  colors: ReturnType<typeof useColors>;
+}) {
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: spacing[3],
+        paddingLeft: spacing[5],
+      }}
+    >
+      <View
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          borderCurve: "continuous",
+          backgroundColor: colors.primary,
+          opacity: 0.8,
+        }}
+      />
+      <Text
+        selectable
+        style={{
+          ...typography.bodySmall,
+          fontWeight: fontWeights.medium,
+          color: colors.onSurfaceVariant,
+          flex: 1,
+        }}
+        numberOfLines={1}
+      >
+        {assignment.label}
+      </Text>
+      <Text
+        selectable
+        style={{
+          ...typography.bodySmall,
+          color: colors.onSurfaceVariant,
+          fontVariant: ["tabular-nums"],
+        }}
+      >
+        {formatTime(assignment.start_time)} – {formatTime(assignment.end_time)}
       </Text>
     </View>
   );

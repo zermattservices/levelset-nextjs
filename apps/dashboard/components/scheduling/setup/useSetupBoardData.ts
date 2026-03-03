@@ -241,6 +241,8 @@ export function useSetupBoardData({
   const positionSlots = useMemo((): ResolvedPositionSlots[] => {
     if (!activeBlock) return [];
 
+    const shiftsById = new Map(shifts.map((shift) => [shift.id, shift]));
+
     return filteredPositions
       .filter((pos) => pos.id in activeBlock.positions)
       .map((pos) => {
@@ -249,7 +251,12 @@ export function useSetupBoardData({
         const isRequired = blockPos?.is_required ?? true;
 
         // Build slot array with assignments
-        const posAssignments = assignments.filter((a) => a.position_id === pos.id);
+        const posAssignments = assignments
+          .filter((a) => a.position_id === pos.id)
+          .map((assignment) => ({
+            ...assignment,
+            shift: shiftsById.get(assignment.shift_id) ?? assignment.shift,
+          }));
 
         if (slotCount === 0) {
           // Position enabled but no slots — header only, no drop targets
@@ -275,7 +282,7 @@ export function useSetupBoardData({
           slots,
         };
       });
-  }, [filteredPositions, activeBlock, assignments]);
+  }, [filteredPositions, activeBlock, assignments, shifts]);
 
   // ── Computed: employees available during this block ──
   const availableEmployees = useMemo(() => {

@@ -1,18 +1,21 @@
 .chip {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
-  background: var(--ls-color-brand);
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--ls-color-brand-border);
+  background: var(--ls-color-brand-soft);
   border-radius: var(--ls-radius-md);
   cursor: grab;
   user-select: none;
-  transition: opacity 0.12s ease, box-shadow 0.12s ease;
+  transition: opacity 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
   width: 100%;
 }
 
 .chip:hover {
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  background: var(--ls-color-brand-soft);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .chip:active {
@@ -26,16 +29,33 @@
 .chipOverlay {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
   cursor: grabbing;
-  width: auto;
-  min-width: 120px;
+  width: 220px;
 }
 
-.chipName {
+.employeeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.employeeName {
   font-family: var(--ls-font-heading);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--ls-color-neutral-soft-foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.employeeShift {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  color: var(--ls-color-muted);
+}
+
+.positionLabel {
+  color: var(--ls-color-neutral-soft-foreground);
+  font-weight: 500;
 }

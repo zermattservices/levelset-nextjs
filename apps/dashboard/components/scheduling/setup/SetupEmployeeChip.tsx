@@ -4,6 +4,9 @@ import sty from './SetupEmployeeChip.module.css';
 
 interface SetupEmployeeChipProps {
   employeeName: string;
+  shiftStartTime?: string;
+  shiftEndTime?: string;
+  shiftPositionName?: string;
   /** When inside a slot — provides assignment context for drag */
   assignmentId?: string;
   employeeId?: string;
@@ -14,6 +17,9 @@ interface SetupEmployeeChipProps {
 
 export function SetupEmployeeChip({
   employeeName,
+  shiftStartTime,
+  shiftEndTime,
+  shiftPositionName,
   assignmentId,
   employeeId,
   positionId,
@@ -23,7 +29,9 @@ export function SetupEmployeeChip({
   if (isOverlay) {
     return (
       <div className={`${sty.chip} ${sty.chipOverlay}`}>
-        <span className={sty.chipName}>{employeeName}</span>
+        <div className={sty.employeeInfo}>
+          <span className={sty.employeeName}>{employeeName}</span>
+        </div>
       </div>
     );
   }
@@ -31,6 +39,9 @@ export function SetupEmployeeChip({
   return (
     <DraggableChip
       employeeName={employeeName}
+      shiftStartTime={shiftStartTime}
+      shiftEndTime={shiftEndTime}
+      shiftPositionName={shiftPositionName}
       assignmentId={assignmentId}
       employeeId={employeeId}
       positionId={positionId}
@@ -38,13 +49,27 @@ export function SetupEmployeeChip({
   );
 }
 
+function formatTime12(time24: string): string {
+  const [h, m] = time24.split(':').map(Number);
+  const period = h >= 12 ? 'p' : 'a';
+  const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  if (m === 0) return `${hour12}${period}`;
+  return `${hour12}:${String(m).padStart(2, '0')}${period}`;
+}
+
 function DraggableChip({
   employeeName,
+  shiftStartTime,
+  shiftEndTime,
+  shiftPositionName,
   assignmentId,
   employeeId,
   positionId,
 }: {
   employeeName: string;
+  shiftStartTime?: string;
+  shiftEndTime?: string;
+  shiftPositionName?: string;
   assignmentId?: string;
   employeeId?: string;
   positionId?: string;
@@ -66,7 +91,15 @@ function DraggableChip({
       {...attributes}
       className={`${sty.chip} ${isDragging ? sty.chipDragging : ''}`}
     >
-      <span className={sty.chipName}>{employeeName}</span>
+      <div className={sty.employeeInfo}>
+        <span className={sty.employeeName}>{employeeName}</span>
+        {shiftStartTime && shiftEndTime && (
+          <span className={sty.employeeShift}>
+            {formatTime12(shiftStartTime)} - {formatTime12(shiftEndTime)}
+            {shiftPositionName && <span className={sty.positionLabel}> · {shiftPositionName}</span>}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
