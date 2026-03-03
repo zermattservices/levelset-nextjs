@@ -94,6 +94,51 @@
   --ls-color-disabled-bg: #F3F4F6;
 
   /* ===================================================================
+   * Colors — Surface & Shadow
+   * =================================================================== */
+  --ls-color-bg-page: #ffffff;
+  --ls-color-bg-surface: #fafafa;
+  --ls-color-bg-surface-alt: #f0f0f0;
+  --ls-color-bg-hover: #f3f4f6;
+  --ls-color-bg-card: #ffffff;
+  --ls-color-bg-brand-soft: #f6fffa;
+  --ls-color-shadow: rgba(0, 0, 0, 0.1);
+  --ls-color-shadow-lg: rgba(0, 0, 0, 0.08);
+
+  /* ===================================================================
+   * Colors — Extended Text
+   * =================================================================== */
+  --ls-color-text-tertiary: #666666;
+  --ls-color-text-caption: #535862;
+  --ls-color-text-placeholder: #888888;
+
+  /* ===================================================================
+   * Colors — Extended Borders
+   * =================================================================== */
+  --ls-color-border-light: #e5e5e5;
+
+  /* ===================================================================
+   * Colors — Destructive Extended
+   * =================================================================== */
+  --ls-color-destructive-vivid: #dc2626;
+  --ls-color-destructive-dark: #b91c1c;
+  --ls-color-destructive-medium: #ad2624;
+  --ls-color-destructive-light: #fee2e2;
+  --ls-color-destructive-lighter: #fecaca;
+
+  /* ===================================================================
+   * Colors — Success Extended
+   * =================================================================== */
+  --ls-color-success-vivid: #249e6b;
+  --ls-color-success-dark: #165f46;
+
+  /* ===================================================================
+   * Colors — Brand Extended
+   * =================================================================== */
+  --ls-color-brand-dark: #254d36;
+  --ls-color-brand-dark-alt: #275539;
+
+  /* ===================================================================
    * Spacing — Tailwind-inspired rem scale
    * =================================================================== */
   --ls-space-0: 0rem;
