@@ -1,0 +1,137 @@
+/**
+ * Levelset Design Tokens — Dark Mode Overrides
+ *
+ * Import after variables.css:
+ *   import '@levelset/design-tokens/css/variables-dark.css';
+ *
+ * Activated by setting data-theme="dark" on <html>.
+ */
+
+[data-theme="dark"] {
+  /* ===================================================================
+   * Colors — Brand
+   * =================================================================== */
+  --ls-color-brand: #3d8060;
+  --ls-color-brand-base: #3d8060;
+  --ls-color-brand-hover: #4a9a73;
+  --ls-color-brand-border: #2d6048;
+  --ls-color-brand-foreground: #0d2d1a;
+  --ls-color-brand-soft: #0d2d1a;
+  --ls-color-brand-soft-foreground: #4ade80;
+
+  /* ===================================================================
+   * Colors — Destructive
+   * =================================================================== */
+  --ls-color-destructive: #f85149;
+  --ls-color-destructive-base: #f85149;
+  --ls-color-destructive-border: #da3633;
+  --ls-color-destructive-foreground: #2d0d0d;
+  --ls-color-destructive-soft: #3d1111;
+  --ls-color-destructive-soft-foreground: #fca5a5;
+
+  /* ===================================================================
+   * Colors — Success
+   * =================================================================== */
+  --ls-color-success: #3fb950;
+  --ls-color-success-base: #3fb950;
+  --ls-color-success-border: #238636;
+  --ls-color-success-foreground: #0d2d1a;
+  --ls-color-success-soft: #0d2d1a;
+  --ls-color-success-soft-foreground: #7ee787;
+
+  /* ===================================================================
+   * Colors — Warning
+   * =================================================================== */
+  --ls-color-warning: #d29922;
+  --ls-color-warning-base: #d29922;
+  --ls-color-warning-border: #9e6a03;
+  --ls-color-warning-foreground: #2d1a00;
+  --ls-color-warning-soft: #2d1a00;
+  --ls-color-warning-soft-foreground: #e3b341;
+
+  /* ===================================================================
+   * Colors — Muted
+   * =================================================================== */
+  --ls-color-muted: #8b949e;
+  --ls-color-muted-base: #8b949e;
+  --ls-color-muted-border: #30363d;
+  --ls-color-muted-foreground: #21262d;
+  --ls-color-muted-soft: #21262d;
+  --ls-color-muted-soft-foreground: #8b949e;
+
+  /* ===================================================================
+   * Colors — Neutral
+   * =================================================================== */
+  --ls-color-neutral: #c9d1d9;
+  --ls-color-neutral-base: #c9d1d9;
+  --ls-color-neutral-border: #30363d;
+  --ls-color-neutral-foreground: #161b22;
+  --ls-color-neutral-soft: #21262d;
+  --ls-color-neutral-soft-foreground: #e6edf3;
+
+  /* ===================================================================
+   * Colors — Basic / Utility
+   * =================================================================== */
+  --ls-color-text-primary: #e6edf3;
+  --ls-color-text-secondary: #8b949e;
+  --ls-color-border: #30363d;
+  --ls-color-bg-container: #161b22;
+  --ls-color-bg-input: #21262d;
+  --ls-color-bg-overlay: rgba(0, 0, 0, 0.7);
+  --ls-color-ring: #484f58;
+
+  /* ===================================================================
+   * Colors — Interaction
+   * =================================================================== */
+  --ls-color-focus-ring: rgba(61, 128, 96, 0.4);
+  --ls-color-hover-overlay: rgba(61, 128, 96, 0.08);
+  --ls-color-active-overlay: rgba(61, 128, 96, 0.12);
+  --ls-color-selected-bg: #0d2d1a;
+  --ls-color-disabled-text: #484f58;
+  --ls-color-disabled-bg: #21262d;
+
+  /* ===================================================================
+   * Colors — Surface & Shadow
+   * =================================================================== */
+  --ls-color-bg-page: #0d1117;
+  --ls-color-bg-surface: #161b22;
+  --ls-color-bg-surface-alt: #1c2128;
+  --ls-color-bg-hover: #21262d;
+  --ls-color-bg-card: #161b22;
+  --ls-color-bg-brand-soft: #0d2d1a;
+  --ls-color-shadow: rgba(0, 0, 0, 0.4);
+  --ls-color-shadow-lg: rgba(0, 0, 0, 0.3);
+
+  /* ===================================================================
+   * Colors — Extended Text
+   * =================================================================== */
+  --ls-color-text-tertiary: #8b949e;
+  --ls-color-text-caption: #8b949e;
+  --ls-color-text-placeholder: #484f58;
+
+  /* ===================================================================
+   * Colors — Extended Borders
+   * =================================================================== */
+  --ls-color-border-light: #21262d;
+
+  /* ===================================================================
+   * Colors — Destructive Extended
+   * =================================================================== */
+  --ls-color-destructive-vivid: #f85149;
+  --ls-color-destructive-dark: #da3633;
+  --ls-color-destructive-medium: #f85149;
+  --ls-color-destructive-light: #3d1111;
+  --ls-color-destructive-lighter: #2d0d0d;
+
+  /* ===================================================================
+   * Colors — Success Extended
+   * =================================================================== */
+  --ls-color-success-vivid: #3fb950;
+  --ls-color-success-dark: #238636;
+
+  /* ===================================================================
+   * Colors — Brand Extended
+   * =================================================================== */
+  --ls-color-brand-dark: #2d6048;
+  --ls-color-brand-dark-alt: #3d8060;
+}
