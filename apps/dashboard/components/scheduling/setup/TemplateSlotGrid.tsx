@@ -20,6 +20,8 @@ interface TemplateSlotGridProps {
   startTime: string;
   endTime: string;
   onChange: (slots: SlotEntry[]) => void;
+  enabledCells?: Set<string>;
+  onSwitchToPositionsTab?: () => void;
 }
 
 function parseTimeToMinutes(t: string): number {
@@ -41,7 +43,10 @@ function formatTime12Short(time24: string): string {
   return `${hour12}:${String(m).padStart(2, '0')}${period}`;
 }
 
-export function TemplateSlotGrid({ positions, slots, startTime, endTime, onChange }: TemplateSlotGridProps) {
+export function TemplateSlotGrid({
+  positions, slots, startTime, endTime, onChange,
+  enabledCells, onSwitchToPositionsTab,
+}: TemplateSlotGridProps) {
   // Generate 30-min time columns
   const timeColumns = React.useMemo(() => {
     const cols: string[] = [];
@@ -52,6 +57,14 @@ export function TemplateSlotGrid({ positions, slots, startTime, endTime, onChang
     }
     return cols;
   }, [startTime, endTime]);
+
+  // When enabledCells provided, only show positions with at least one enabled cell
+  const visiblePositions = React.useMemo(() => {
+    if (!enabledCells) return positions;
+    return positions.filter(pos =>
+      timeColumns.some(tc => enabledCells.has(`${pos.id}:${tc}`))
+    );
+  }, [positions, enabledCells, timeColumns]);
 
   // Build a lookup map: "posId:timeSlot" -> SlotEntry
   const slotMap = React.useMemo(() => {
@@ -72,7 +85,18 @@ export function TemplateSlotGrid({ positions, slots, startTime, endTime, onChang
 
     let newSlots: SlotEntry[];
     if (newCount <= 0) {
-      newSlots = slots.filter(s => !(s.position_id === posId && s.time_slot === timeSlot));
+      if (enabledCells) {
+        // In two-tab mode, keep entry at count 0 (Tab 1 controls existence)
+        newSlots = existing
+          ? slots.map(s =>
+              s.position_id === posId && s.time_slot === timeSlot
+                ? { ...s, slot_count: 0 }
+                : s
+            )
+          : slots;
+      } else {
+        newSlots = slots.filter(s => !(s.position_id === posId && s.time_slot === timeSlot));
+      }
     } else if (existing) {
       newSlots = slots.map(s =>
         s.position_id === posId && s.time_slot === timeSlot
@@ -107,7 +131,21 @@ export function TemplateSlotGrid({ positions, slots, startTime, endTime, onChang
   // CSS grid template: fixed position column + equal-width time columns
   const gridTemplateColumns = `140px repeat(${timeColumns.length}, minmax(52px, 1fr))`;
 
-  if (positions.length === 0) {
+  // Empty state: enabledCells provided but no positions have enabled cells
+  if (enabledCells && visiblePositions.length === 0) {
+    return (
+      <div className={sty.emptyState}>
+        <p className={sty.emptyText}>Enable positions in the Positions tab to add slots.</p>
+        {onSwitchToPositionsTab && (
+          <button className={sty.goToPositionsBtn} onClick={onSwitchToPositionsTab}>
+            Go to Positions
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (visiblePositions.length === 0) {
     return (
       <div className={sty.empty}>
         No positions available for this zone.
@@ -127,34 +165,41 @@ export function TemplateSlotGrid({ positions, slots, startTime, endTime, onChang
         ))}
 
         {/* Position rows */}
-        {positions.map(pos => (
+        {visiblePositions.map(pos => (
           <React.Fragment key={pos.id}>
             <div className={`${sty.bodyCell} ${sty.positionCell}`}>
               <span className={sty.positionName}>{pos.name}</span>
             </div>
             {timeColumns.map(tc => {
               const count = getSlotCount(pos.id, tc);
+              const disabled = enabledCells ? !enabledCells.has(`${pos.id}:${tc}`) : false;
               return (
                 <div
                   key={tc}
-                  className={`${sty.bodyCell} ${sty.cell} ${count > 0 ? sty.cellFilled : ''}`}
+                  className={`${sty.bodyCell} ${sty.cell} ${count > 0 ? sty.cellFilled : ''} ${disabled ? sty.cellDisabled : ''}`}
                 >
-                  <button
-                    className={sty.cellBtn}
-                    onClick={(e) => handleDecrement(e, pos.id, tc)}
-                    disabled={count === 0}
-                    tabIndex={-1}
-                  >
-                    −
-                  </button>
-                  <span className={sty.cellCount}>{count}</span>
-                  <button
-                    className={sty.cellBtn}
-                    onClick={(e) => handleIncrement(e, pos.id, tc)}
-                    tabIndex={-1}
-                  >
-                    +
-                  </button>
+                  {disabled ? (
+                    <span className={sty.cellCount}>&mdash;</span>
+                  ) : (
+                    <>
+                      <button
+                        className={sty.cellBtn}
+                        onClick={(e) => handleDecrement(e, pos.id, tc)}
+                        disabled={count === 0}
+                        tabIndex={-1}
+                      >
+                        −
+                      </button>
+                      <span className={sty.cellCount}>{count}</span>
+                      <button
+                        className={sty.cellBtn}
+                        onClick={(e) => handleIncrement(e, pos.id, tc)}
+                        tabIndex={-1}
+                      >
+                        +
+                      </button>
+                    </>
+                  )}
                 </div>
               );
             })}

@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { DndContext, DragOverlay, closestCenter, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
 import sty from './SetupBoardView.module.css';
-import { SetupDaypartBar } from './SetupDaypartBar';
+import { SetupBlockBar } from './SetupBlockBar';
 import { SetupPositionGrid } from './SetupPositionGrid';
 import { SetupEmployeePanel } from './SetupEmployeePanel';
 import { SetupEmployeeChip } from './SetupEmployeeChip';
-import type { Shift, Position, SetupAssignment, ResolvedPositionSlots } from '@/lib/scheduling.types';
-import type { DaypartId } from '@/lib/scheduling/dayparts';
+import type { Shift, Position, SetupAssignment, ResolvedPositionSlots, ResolvedBlock } from '@/lib/scheduling.types';
 
 interface Employee {
   id: string;
@@ -27,10 +26,10 @@ interface AvailableEmployee extends Employee {
 }
 
 interface SetupBoardViewProps {
-  // Dayparts
-  resolvedDayparts: { id: DaypartId; label: string; start: string; end: string }[];
-  activeDaypartId: DaypartId;
-  onDaypartChange: (id: DaypartId) => void;
+  // Blocks
+  blocks: ResolvedBlock[];
+  activeBlockIndex: number;
+  onBlockChange: (index: number) => void;
 
   // Position slots
   positionSlots: ResolvedPositionSlots[];
@@ -51,9 +50,9 @@ interface SetupBoardViewProps {
 }
 
 export function SetupBoardView({
-  resolvedDayparts,
-  activeDaypartId,
-  onDaypartChange,
+  blocks,
+  activeBlockIndex,
+  onBlockChange,
   positionSlots,
   availableEmployees,
   onAssign,
@@ -145,10 +144,10 @@ export function SetupBoardView({
 
   return (
     <div className={sty.root}>
-      <SetupDaypartBar
-        dayparts={resolvedDayparts}
-        activeDaypartId={activeDaypartId}
-        onDaypartChange={onDaypartChange}
+      <SetupBlockBar
+        blocks={blocks}
+        activeBlockIndex={activeBlockIndex}
+        onBlockChange={onBlockChange}
         onManageTemplates={onManageTemplates}
       />
 

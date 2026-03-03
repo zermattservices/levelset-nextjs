@@ -144,6 +144,17 @@
   font-weight: 600;
 }
 
+/* ── Disabled cells (not enabled in Positions tab) ── */
+.cellDisabled {
+  background: rgba(0, 0, 0, 0.03);
+  cursor: default;
+}
+
+.cellDisabled .cellCount {
+  color: var(--ls-color-disabled-text);
+  font-size: 11px;
+}
+
 /* ── Empty state ── */
 .empty {
   padding: 24px 16px;
@@ -151,4 +162,38 @@
   font-family: var(--ls-font-body);
   font-size: 13px;
   color: var(--ls-color-muted);
+}
+
+.emptyState {
+  padding: 32px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.emptyText {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  color: var(--ls-color-muted);
+  margin: 0;
+}
+
+.goToPositionsBtn {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-brand);
+  background: none;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.goToPositionsBtn:hover {
+  background: var(--ls-color-hover-overlay);
+  border-color: var(--ls-color-brand);
 }

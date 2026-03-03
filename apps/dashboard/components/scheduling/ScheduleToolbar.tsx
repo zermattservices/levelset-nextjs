@@ -106,12 +106,6 @@ export function ScheduleToolbar({
         </IconButton>
 
         <button className={sty.todayBtn} onClick={onGoToToday}>Today</button>
-        {onSyncClick && (
-          <button className={sty.todayBtn} onClick={onSyncClick} title="Import from HotSchedules">
-            <img src="/hs_logo.png" alt="" style={{ width: 14, height: 14, verticalAlign: 'middle', marginRight: 4 }} />
-            Sync
-          </button>
-        )}
       </div>
 
       {/* Center: toggles + zone filter + summary */}
@@ -156,14 +150,16 @@ export function ScheduleToolbar({
           </button>
         </div>
 
-        {/* Zone filter */}
+        {/* Zone filter — hide 'All' in setup mode (setup requires FOH or BOH) */}
         <div className={sty.toggleGroup}>
-          <button
-            className={`${sty.toggleBtn} ${zoneFilter === 'all' ? sty.toggleActive : ''}`}
-            onClick={() => onZoneFilterChange('all')}
-          >
-            All
-          </button>
+          {gridViewMode !== 'setup' && (
+            <button
+              className={`${sty.toggleBtn} ${zoneFilter === 'all' ? sty.toggleActive : ''}`}
+              onClick={() => onZoneFilterChange('all')}
+            >
+              All
+            </button>
+          )}
           <button
             className={`${sty.toggleBtn} ${zoneFilter === 'FOH' ? sty.toggleActive : ''}`}
             onClick={() => onZoneFilterChange('FOH')}
@@ -186,6 +182,13 @@ export function ScheduleToolbar({
               <span className={sty.summaryChip}>{formatCurrency(laborSummary.total_cost)}</span>
             )}
           </div>
+        )}
+
+        {onSyncClick && (
+          <button className={sty.syncBtn} onClick={onSyncClick} title="Import from HotSchedules">
+            <img src="/hs_logo.png" alt="" className={sty.syncIcon} />
+            Sync
+          </button>
         )}
       </div>
 

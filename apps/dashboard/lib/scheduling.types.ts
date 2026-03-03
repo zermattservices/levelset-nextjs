@@ -114,6 +114,7 @@ export interface SetupTemplate {
   updated_at?: string;
   schedules?: SetupTemplateSchedule[];
   slots?: SetupTemplateSlot[];
+  blocks?: SetupTemplateBlock[];
 }
 
 export interface SetupTemplateSchedule {
@@ -131,6 +132,26 @@ export interface SetupTemplateSlot {
   time_slot: string;
   slot_count: number;
   is_required: boolean;
+}
+
+export interface SetupTemplateBlock {
+  id: string;
+  template_id: string;
+  block_time: string;   // HH:MM
+  is_custom: boolean;
+}
+
+/** A resolved block for display on the setup board. */
+export interface ResolvedBlock {
+  block_time: string;      // HH:MM — start of this block
+  end_time: string;        // HH:MM — start of next block or template end
+  template_id: string;
+  template_name: string;
+  zone: 'FOH' | 'BOH';
+  positions: Record<string, {
+    slot_count: number;
+    is_required: boolean;
+  }>;
 }
 
 export interface SetupAssignment {

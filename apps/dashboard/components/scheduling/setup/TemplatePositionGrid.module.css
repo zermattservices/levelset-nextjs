@@ -1,0 +1,150 @@
+.gridWrapper {
+  overflow-x: auto;
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: var(--ls-radius-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.grid {
+  display: grid;
+  min-width: max-content;
+}
+
+/* ── Shared cell base ── */
+.headerCell,
+.bodyCell {
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* ── Header cells ── */
+.headerCell {
+  background: #fafbfc;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.positionHeader {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  border-right: 1px solid var(--ls-color-muted-border);
+}
+
+.timeHeader {
+  font-family: var(--ls-font-body);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ── Body cells ── */
+.positionCell {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-right: 1px solid var(--ls-color-muted-border);
+}
+
+.positionName {
+  font-family: var(--ls-font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Checkbox cells ── */
+.cell {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s ease;
+  user-select: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.cell:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.cellChecked {
+  background: rgba(49, 102, 74, 0.1);
+}
+
+.cellChecked:hover {
+  background: rgba(49, 102, 74, 0.15);
+}
+
+/* ── Custom checkbox ── */
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.checkboxInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.checkboxBox {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--ls-color-muted-border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  transition: border-color 0.1s ease, background 0.1s ease;
+}
+
+.cell:hover .checkboxBox {
+  border-color: var(--ls-color-muted);
+}
+
+.checkboxChecked {
+  background: var(--ls-color-brand-base);
+  border-color: var(--ls-color-brand-base);
+}
+
+.cell:hover .checkboxChecked {
+  border-color: var(--ls-color-brand-hover);
+  background: var(--ls-color-brand-hover);
+}
+
+.checkIcon {
+  width: 12px;
+  height: 12px;
+  color: #fff;
+}
+
+/* ── Empty state ── */
+.empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  color: var(--ls-color-muted);
+}

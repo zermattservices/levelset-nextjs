@@ -1,19 +1,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
-import {
-  resolveDaypartTimes,
-  getCurrentDaypart,
-  type DaypartId,
-} from '@/lib/scheduling/dayparts';
 import type {
   Shift,
   Position,
   SetupTemplate,
   SetupAssignment,
   ResolvedPositionSlots,
+  ResolvedBlock,
 } from '@/lib/scheduling.types';
-import type { LocationBusinessHours } from '@/lib/supabase.types';
 
 interface Employee {
   id: string;
@@ -33,8 +28,7 @@ interface UseSetupBoardDataProps {
   shifts: Shift[];
   positions: Position[];
   employees: Employee[];
-  businessHours: LocationBusinessHours[];
-  zoneFilter: 'all' | 'FOH' | 'BOH';
+  zoneFilter: 'FOH' | 'BOH';
 }
 
 /** Parse HH:MM to minutes since midnight. */
@@ -43,32 +37,11 @@ function parseTime(t: string): number {
   return h * 60 + (m || 0);
 }
 
-/** Get business hours for a specific day. Returns open/close times. */
-function getBusinessHoursForDay(
-  businessHours: LocationBusinessHours[],
-  dateStr: string,
-): { open: string | null; close: string | null } {
-  if (!businessHours || businessHours.length === 0) return { open: null, close: null };
-
-  const dayIndex = new Date(dateStr + 'T00:00:00').getDay();
-  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const dayName = dayNames[dayIndex];
-
-  const bh = businessHours.find((h: any) => h.day === dayName);
-  if (!bh) return { open: null, close: null };
-
-  return {
-    open: (bh as any).open_time ?? null,
-    close: (bh as any).close_time ?? null,
-  };
-}
-
 export function useSetupBoardData({
   selectedDay,
   shifts,
   positions,
   employees,
-  businessHours,
   zoneFilter,
 }: UseSetupBoardDataProps) {
   const { selectedLocationOrgId } = useLocationContext();
@@ -79,41 +52,46 @@ export function useSetupBoardData({
   const [templates, setTemplates] = useState<SetupTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
 
-  // Resolved slots for the selected day
-  const [resolvedSlots, setResolvedSlots] = useState<Record<string, any>>({});
-  const [resolvedLoading, setResolvedLoading] = useState(false);
+  // Block state (replaces dayparts)
+  const [blocks, setBlocks] = useState<ResolvedBlock[]>([]);
+  const [blocksLoading, setBlocksLoading] = useState(false);
+  const [activeBlockIndex, setActiveBlockIndex] = useState(0);
 
-  // Setup assignments for the selected day + current time window
+  // Setup assignments for the active block
   const [assignments, setAssignments] = useState<SetupAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
 
   // Template manager modal state
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false);
 
-  // Active daypart
-  const { open: openTime, close: closeTime } = useMemo(
-    () => getBusinessHoursForDay(businessHours, selectedDay),
-    [businessHours, selectedDay],
+  const activeBlock = useMemo(
+    () => blocks[activeBlockIndex] ?? null,
+    [blocks, activeBlockIndex],
   );
 
-  const resolvedDayparts = useMemo(
-    () => resolveDaypartTimes(openTime, closeTime),
-    [openTime, closeTime],
-  );
-
-  const [activeDaypartId, setActiveDaypartId] = useState<DaypartId>(() =>
-    getCurrentDaypart(resolvedDayparts),
-  );
-
-  // Reset daypart to current when switching days
+  // Reset active block index when blocks change
   useEffect(() => {
-    setActiveDaypartId(getCurrentDaypart(resolvedDayparts));
-  }, [selectedDay]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const activeDaypart = useMemo(
-    () => resolvedDayparts.find((dp) => dp.id === activeDaypartId) ?? resolvedDayparts[0],
-    [resolvedDayparts, activeDaypartId],
-  );
+    if (blocks.length === 0) {
+      setActiveBlockIndex(0);
+      return;
+    }
+    // Find the block whose time range contains "now"
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    let bestIndex = 0;
+    for (let i = 0; i < blocks.length; i++) {
+      const blockStart = parseTime(blocks[i].block_time);
+      const blockEnd = parseTime(blocks[i].end_time);
+      if (nowMin >= blockStart && nowMin < blockEnd) {
+        bestIndex = i;
+        break;
+      }
+      if (blockStart <= nowMin) {
+        bestIndex = i;
+      }
+    }
+    setActiveBlockIndex(bestIndex);
+  }, [blocks]);
 
   // ── Fetch templates ──
   const fetchTemplates = useCallback(async () => {
@@ -136,36 +114,36 @@ export function useSetupBoardData({
     fetchTemplates();
   }, [fetchTemplates]);
 
-  // ── Fetch resolved slots for the day ──
-  const fetchResolvedSlots = useCallback(async () => {
-    if (!orgId || !selectedDay) return;
-    setResolvedLoading(true);
+  // ── Fetch resolved blocks for the day + zone ──
+  const fetchBlocks = useCallback(async () => {
+    if (!orgId || !selectedDay || !zoneFilter) return;
+    setBlocksLoading(true);
     try {
       const res = await fetch(
-        `/api/scheduling/setup-resolved?org_id=${orgId}&date=${selectedDay}`,
+        `/api/scheduling/setup-resolved?org_id=${orgId}&date=${selectedDay}&zone=${zoneFilter}`,
       );
-      if (!res.ok) throw new Error('Failed to fetch resolved slots');
+      if (!res.ok) throw new Error('Failed to fetch resolved blocks');
       const data = await res.json();
-      setResolvedSlots(data.resolved_slots ?? {});
+      setBlocks(data.blocks ?? []);
     } catch (err) {
-      console.error('Error fetching resolved slots:', err);
-      setResolvedSlots({});
+      console.error('Error fetching resolved blocks:', err);
+      setBlocks([]);
     } finally {
-      setResolvedLoading(false);
+      setBlocksLoading(false);
     }
-  }, [orgId, selectedDay]);
+  }, [orgId, selectedDay, zoneFilter]);
 
   useEffect(() => {
-    fetchResolvedSlots();
-  }, [fetchResolvedSlots]);
+    fetchBlocks();
+  }, [fetchBlocks]);
 
-  // ── Fetch assignments for the current daypart ──
+  // ── Fetch assignments for the active block ──
   const fetchAssignments = useCallback(async () => {
-    if (!orgId || !selectedDay || !activeDaypart) return;
+    if (!orgId || !selectedDay || !activeBlock) return;
     setAssignmentsLoading(true);
     try {
       const res = await fetch(
-        `/api/scheduling/setup-assignments?org_id=${orgId}&date=${selectedDay}&start_time=${activeDaypart.start}&end_time=${activeDaypart.end}`,
+        `/api/scheduling/setup-assignments?org_id=${orgId}&date=${selectedDay}&start_time=${activeBlock.block_time}&end_time=${activeBlock.end_time}`,
       );
       if (!res.ok) throw new Error('Failed to fetch setup assignments');
       const data = await res.json();
@@ -176,7 +154,7 @@ export function useSetupBoardData({
     } finally {
       setAssignmentsLoading(false);
     }
-  }, [orgId, selectedDay, activeDaypart]);
+  }, [orgId, selectedDay, activeBlock]);
 
   useEffect(() => {
     fetchAssignments();
@@ -185,7 +163,7 @@ export function useSetupBoardData({
   // ── CRUD: Assignments ──
   const assignEmployee = useCallback(
     async (shiftId: string, employeeId: string, positionId: string) => {
-      if (!orgId || !activeDaypart) return;
+      if (!orgId || !activeBlock) return;
       try {
         const res = await fetch('/api/scheduling/setup-assignments', {
           method: 'POST',
@@ -197,8 +175,8 @@ export function useSetupBoardData({
             employee_id: employeeId,
             position_id: positionId,
             assignment_date: selectedDay,
-            start_time: activeDaypart.start,
-            end_time: activeDaypart.end,
+            start_time: activeBlock.block_time,
+            end_time: activeBlock.end_time,
           }),
         });
         if (!res.ok) throw new Error('Failed to assign');
@@ -207,7 +185,7 @@ export function useSetupBoardData({
         console.error('Error assigning employee:', err);
       }
     },
-    [orgId, selectedDay, activeDaypart, fetchAssignments],
+    [orgId, selectedDay, activeBlock, fetchAssignments],
   );
 
   const unassignEmployee = useCallback(
@@ -248,70 +226,65 @@ export function useSetupBoardData({
     [fetchAssignments],
   );
 
-  // ── Computed: positions filtered by zone with resolved slot counts ──
+  // ── Computed: positions filtered by zone ──
   const filteredPositions = useMemo(() => {
     let filtered = positions.filter(
       (p) => p.scheduling_enabled !== false && p.is_active,
     );
-    if (zoneFilter !== 'all') {
-      filtered = filtered.filter((p) => p.zone === zoneFilter);
-    }
+    filtered = filtered.filter((p) => p.zone === zoneFilter);
     // Exclude scheduling_only (general) positions — setup board works with real positions
     filtered = filtered.filter((p) => p.position_type !== 'scheduling_only');
     return filtered;
   }, [positions, zoneFilter]);
 
-  // ── Computed: resolved position slots for the active daypart ──
+  // ── Computed: position slots from active block ──
   const positionSlots = useMemo((): ResolvedPositionSlots[] => {
-    if (!activeDaypart) return [];
+    if (!activeBlock) return [];
 
-    return filteredPositions.map((pos) => {
-      // Find the max slot count for this position across all 30-min increments in the daypart
-      let maxSlotCount = 0;
-      let isRequired = true;
-      const dpStartMin = parseTime(activeDaypart.start);
-      const dpEndMin = parseTime(activeDaypart.end);
+    return filteredPositions
+      .filter((pos) => pos.id in activeBlock.positions)
+      .map((pos) => {
+        const blockPos = activeBlock.positions[pos.id];
+        const slotCount = blockPos?.slot_count ?? 0;
+        const isRequired = blockPos?.is_required ?? true;
 
-      for (let min = dpStartMin; min < dpEndMin; min += 30) {
-        const h = Math.floor(min / 60);
-        const m = min % 60;
-        const timeKey = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-        const slotData = resolvedSlots[timeKey]?.positions?.[pos.id];
-        if (slotData) {
-          if (slotData.slot_count > maxSlotCount) {
-            maxSlotCount = slotData.slot_count;
-            isRequired = slotData.is_required;
-          }
+        // Build slot array with assignments
+        const posAssignments = assignments.filter((a) => a.position_id === pos.id);
+
+        if (slotCount === 0) {
+          // Position enabled but no slots — header only, no drop targets
+          return {
+            position_id: pos.id,
+            position_name: pos.name,
+            zone: pos.zone,
+            slots: [],
+          };
         }
-      }
 
-      // Build slot array with assignments
-      const posAssignments = assignments.filter((a) => a.position_id === pos.id);
-      // Always show at least 1 slot per position, or enough for existing assignments
-      const effectiveSlotCount = Math.max(1, maxSlotCount, posAssignments.length);
-      const slots = Array.from({ length: effectiveSlotCount }, (_, i) => ({
-        index: i,
-        is_required: i < maxSlotCount ? isRequired : false,
-        assignment: posAssignments[i] ?? undefined,
-      }));
+        const effectiveSlotCount = Math.max(slotCount, posAssignments.length);
+        const slots = Array.from({ length: effectiveSlotCount }, (_, i) => ({
+          index: i,
+          is_required: i < slotCount ? isRequired : false,
+          assignment: posAssignments[i] ?? undefined,
+        }));
 
-      return {
-        position_id: pos.id,
-        position_name: pos.name,
-        zone: pos.zone,
-        slots,
-      };
-    });
-  }, [filteredPositions, activeDaypart, resolvedSlots, assignments]);
+        return {
+          position_id: pos.id,
+          position_name: pos.name,
+          zone: pos.zone,
+          slots,
+        };
+      });
+  }, [filteredPositions, activeBlock, assignments]);
 
-  // ── Computed: employees available during this daypart ──
+  // ── Computed: employees available during this block ──
   const availableEmployees = useMemo(() => {
-    if (!activeDaypart) return [];
+    if (!activeBlock) return [];
 
-    const dpStartMin = parseTime(activeDaypart.start);
-    const dpEndMin = parseTime(activeDaypart.end);
+    const blockStartMin = parseTime(activeBlock.block_time);
+    const blockEndMin = parseTime(activeBlock.end_time);
 
-    // Find employees with shifts overlapping this daypart on this day
+    // Find employees with shifts overlapping this block on this day
     const employeesWithShifts = new Map<string, Shift>();
     for (const shift of shifts) {
       if (shift.shift_date !== selectedDay) continue;
@@ -323,16 +296,15 @@ export function useSetupBoardData({
       if (shiftEndMin <= shiftStartMin) shiftEndMin += 24 * 60;
 
       // Check overlap
-      if (shiftStartMin < dpEndMin && shiftEndMin > dpStartMin) {
+      if (shiftStartMin < blockEndMin && shiftEndMin > blockStartMin) {
         employeesWithShifts.set(shift.assignment.employee_id, shift);
       }
     }
 
     return employees
       .filter((emp) => employeesWithShifts.has(emp.id))
-      // Apply zone filter so employee list matches position grid
+      // Apply zone filter
       .filter((emp) => {
-        if (zoneFilter === 'all') return true;
         if (zoneFilter === 'FOH') return emp.is_foh;
         if (zoneFilter === 'BOH') return emp.is_boh;
         return true;
@@ -355,16 +327,16 @@ export function useSetupBoardData({
         if (aStart !== bStart) return aStart - bStart;
         return a.full_name.localeCompare(b.full_name);
       });
-  }, [employees, shifts, assignments, activeDaypart, selectedDay, zoneFilter]);
+  }, [employees, shifts, assignments, activeBlock, selectedDay, zoneFilter]);
 
-  const isLoading = templatesLoading || resolvedLoading || assignmentsLoading;
+  const isLoading = templatesLoading || blocksLoading || assignmentsLoading;
 
   return {
-    // Dayparts
-    resolvedDayparts,
-    activeDaypartId,
-    setActiveDaypartId,
-    activeDaypart,
+    // Blocks
+    blocks,
+    activeBlockIndex,
+    setActiveBlockIndex,
+    activeBlock,
 
     // Positions + slots
     positionSlots,
@@ -390,6 +362,6 @@ export function useSetupBoardData({
 
     // Refetch
     refetchAssignments: fetchAssignments,
-    refetchResolvedSlots: fetchResolvedSlots,
+    refetchBlocks: fetchBlocks,
   };
 }

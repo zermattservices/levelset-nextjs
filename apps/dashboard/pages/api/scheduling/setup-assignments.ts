@@ -68,6 +68,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(404).json({ error: 'Shift not found or does not belong to this organization' });
         }
 
+        // One-position-per-block validation: check if employee already assigned
+        // to a DIFFERENT position in this block (same date + overlapping time)
+        const { data: existingAssignments } = await supabase
+          .from('setup_assignments')
+          .select('id, position_id')
+          .eq('employee_id', employee_id)
+          .eq('assignment_date', assignment_date)
+          .eq('start_time', start_time)
+          .eq('end_time', end_time);
+
+        const conflicting = (existingAssignments || []).find(
+          (a: any) => a.position_id !== position_id
+        );
+        if (conflicting) {
+          return res.status(409).json({
+            error: 'Employee already assigned to another position in this block',
+          });
+        }
+
         const { data, error } = await supabase
           .from('setup_assignments')
           .insert({

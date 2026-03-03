@@ -79,14 +79,21 @@ export function SchedulePage() {
     return () => { cancelled = true; };
   }, [selectedLocationId]);
 
+  // When entering setup mode, force zone to FOH or BOH (not 'all')
+  React.useEffect(() => {
+    if (data.gridViewMode === 'setup' && data.zoneFilter === 'all') {
+      data.setZoneFilter('FOH');
+    }
+  }, [data.gridViewMode]);
+
   // Setup board data hook — only active when in setup view mode
+  const setupZoneFilter = data.zoneFilter === 'all' ? 'FOH' : data.zoneFilter;
   const setupData = useSetupBoardData({
     selectedDay: data.selectedDay,
     shifts: data.shifts,
     positions: data.allPositions,
     employees: data.employees,
-    businessHours,
-    zoneFilter: data.zoneFilter,
+    zoneFilter: setupZoneFilter,
   });
 
   // Redirect unauthenticated users
@@ -297,9 +304,9 @@ export function SchedulePage() {
 
             {data.gridViewMode === 'setup' ? (
               <SetupBoardView
-                resolvedDayparts={setupData.resolvedDayparts}
-                activeDaypartId={setupData.activeDaypartId}
-                onDaypartChange={setupData.setActiveDaypartId}
+                blocks={setupData.blocks}
+                activeBlockIndex={setupData.activeBlockIndex}
+                onBlockChange={setupData.setActiveBlockIndex}
                 positionSlots={setupData.positionSlots}
                 availableEmployees={setupData.availableEmployees}
                 onAssign={setupData.assignEmployee}
@@ -391,7 +398,7 @@ export function SchedulePage() {
           }}
           onRefetch={() => {
             setupData.fetchTemplates();
-            setupData.refetchResolvedSlots();
+            setupData.refetchBlocks();
           }}
         />
       )}

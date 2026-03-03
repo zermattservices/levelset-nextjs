@@ -301,12 +301,154 @@
   color: var(--ls-color-muted);
 }
 
+/* Blocks section */
+.blocksSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blocksRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.blocksEmpty {
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  font-style: italic;
+}
+
+.blockChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  font-family: var(--ls-font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  background: var(--ls-color-muted-soft);
+  border-radius: var(--ls-radius-xl);
+  white-space: nowrap;
+}
+
+.blockChipCustom {
+  background: rgba(49, 102, 74, 0.1);
+  color: var(--ls-color-brand);
+  border: 1px solid rgba(49, 102, 74, 0.25);
+}
+
+.blockChipRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 0.1s ease;
+}
+
+.blockChipRemove:hover {
+  opacity: 1;
+}
+
+.addBlockInline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.addBlockInput {
+  padding: 3px 6px;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  color: var(--ls-color-neutral-soft-foreground);
+  outline: none;
+  width: 90px;
+}
+
+.addBlockInput:focus {
+  border-color: var(--ls-color-brand);
+}
+
+.addBlockBtn {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ls-color-brand);
+  background: none;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.addBlockBtn:hover:not(:disabled) {
+  background: var(--ls-color-hover-overlay);
+  border-color: var(--ls-color-brand);
+}
+
+.addBlockBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Slot grid section */
 .slotGridSection {
   display: flex;
   flex-direction: column;
   gap: 8px;
   flex: 1;
+}
+
+/* Slot tab bar */
+.slotTabBar {
+  display: flex;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  overflow: hidden;
+  width: fit-content;
+}
+
+.slotTabBtn {
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  background: var(--ls-color-bg-container);
+  border: none;
+  padding: 5px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.slotTabBtn:not(:last-child) {
+  border-right: 1px solid var(--ls-color-neutral-border);
+}
+
+.slotTabBtnActive {
+  background: var(--ls-color-brand);
+  color: #ffffff;
+}
+
+.slotTabBtn:not(.slotTabBtnActive):hover {
+  background: var(--ls-color-muted-soft);
 }
 
 /* Footer */
