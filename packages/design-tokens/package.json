@@ -11,6 +11,7 @@
       "import": "./dist/index.js"
     },
     "./css/variables.css": "./src/css/variables.css",
+    "./css/variables-dark.css": "./src/css/variables-dark.css",
     "./css/plasmic-compat.css": "./src/css/plasmic-compat.css",
     "./native": {
       "types": "./src/native/index.ts",
