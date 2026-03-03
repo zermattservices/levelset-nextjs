@@ -34,7 +34,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
   padding: 0 8px;
 }
 
@@ -59,7 +59,7 @@
 }
 
 .menuItem:hover {
-  background-color: #f6fffa;
+  background-color: var(--ls-color-bg-brand-soft);
 }
 
 .menuItemDisabled {
@@ -75,7 +75,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   flex-shrink: 0;
 }
 
@@ -87,10 +87,10 @@
   font-family: "Satoshi";
   font-size: 14px;
   font-weight: 500;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   white-space: nowrap;
 }
 
 .menuItemDisabled .menuItemLabel {
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
 }

@@ -2,9 +2,9 @@
   display: flex;
   flex-direction: column;
   padding: 8px;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px var(--ls-color-shadow-lg);
   animation: slideDown 0.2s ease-out forwards;
 }
 
@@ -60,12 +60,12 @@
 }
 
 .menuCard:hover {
-  background-color: #f3f4f6;
+  background-color: var(--ls-color-bg-hover);
 }
 
 .menuCard:hover .iconContainer {
-  background-color: #ffffff;
-  border-color: #e5e7eb;
+  background-color: var(--ls-color-bg-card);
+  border-color: var(--ls-color-muted-border);
 }
 
 .menuCard:hover .iconContainer svg {
@@ -78,13 +78,13 @@
 }
 
 .menuCardDisabled:hover {
-  background-color: #f3f4f6;
+  background-color: var(--ls-color-bg-hover);
   opacity: 0.5;
 }
 
 .menuCardDisabled:hover .iconContainer {
-  background-color: #ffffff;
-  border-color: #e5e7eb;
+  background-color: var(--ls-color-bg-card);
+  border-color: var(--ls-color-muted-border);
 }
 
 .menuCardDisabled:hover .iconContainer svg {
@@ -99,13 +99,13 @@
   height: 44px;
   border-radius: 10px;
   background-color: transparent;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ls-color-muted-border);
   flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
 .iconContainer svg {
-  color: #6b7280;
+  color: var(--ls-color-muted);
   transition: color 0.15s ease;
 }
 
@@ -120,7 +120,7 @@
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
   line-height: 1.3;
   white-space: nowrap;
 }
@@ -129,17 +129,17 @@
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
   font-size: 12px;
   font-weight: 400;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   line-height: 1.3;
   white-space: nowrap;
 }
 
 .menuCardDisabled .itemLabel {
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
 }
 
 .menuCardDisabled .itemDescription {
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
 }
 
 /* Coming soon text - hidden by default, shown on hover */
@@ -152,7 +152,7 @@
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
