@@ -15,7 +15,7 @@ export function SetupPositionGrid({ positionSlots }: SetupPositionGridProps) {
         <span className={sty.emptyIcon}>📋</span>
         <span className={sty.emptyTitle}>No positions configured</span>
         <span className={sty.emptyText}>
-          Set up templates to define position slots for this block.
+          Use Manage Templates to configure positions and time blocks.
         </span>
       </div>
     );
