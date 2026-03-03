@@ -261,7 +261,7 @@
   border-radius: 6px;
   cursor: pointer;
   background: var(--ls-color-brand);
-  color: white;
+  color: var(--ls-color-bg-container);
   transition: background-color 0.15s ease;
 }
 

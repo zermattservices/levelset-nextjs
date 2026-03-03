@@ -6,7 +6,7 @@
   height: 100vh;
   align-items: center;
   overflow: hidden;
-  background: #ffffff;
+  background: var(--ls-color-bg-page);
 }
 
 .menuNavigation:global(.__wab_instance) {
@@ -23,7 +23,7 @@
   flex-direction: column;
   width: 100%;
   align-items: center;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   padding: 16px 16px;
   flex-shrink: 0;
 }
@@ -49,7 +49,7 @@
 .readOnlyWarning {
   font-family: "Satoshi";
   font-size: 13px;
-  color: #dc2626;
+  color: var(--ls-color-destructive-vivid);
   font-weight: 500;
   text-align: right;
   padding-top: 4px;
@@ -65,14 +65,14 @@
   font-family: "Mont";
   font-size: 24px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0;
 }
 
 .pageSubtitle {
   font-family: "Satoshi";
   font-size: 16px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   margin: 0;
 }
 
@@ -120,7 +120,7 @@
   align-items: center;
   width: 100%;
   height: 100vh;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
 }
 
 .loadingSpinner {

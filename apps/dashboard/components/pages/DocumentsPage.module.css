@@ -8,7 +8,7 @@
   justify-items: center;
   overflow-x: hidden;
   overflow-y: auto;
-  background: #ffffff;
+  background: var(--ls-color-bg-page);
   min-width: 0;
   grid-template-columns:
     var(--plsmc-viewport-gap) 1fr minmax(0, var(--plsmc-wide-chunk))
@@ -43,7 +43,7 @@
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
   padding: 8px 8px 100px;
@@ -169,7 +169,7 @@
   padding: 14px 16px;
   border: 1px solid var(--ls-color-muted-border);
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   cursor: pointer;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }

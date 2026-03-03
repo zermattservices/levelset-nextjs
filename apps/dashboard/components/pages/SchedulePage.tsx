@@ -28,6 +28,67 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
+function parseTimeToMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function getShiftEndMinute(startTime: string, endTime: string): number {
+  const start = parseTimeToMinutes(startTime);
+  let end = parseTimeToMinutes(endTime);
+  if (end <= start) end += 24 * 60;
+  return end;
+}
+
+function formatMinutesToTime(minutes: number): string {
+  const wrapped = ((Math.floor(minutes) % (24 * 60)) + (24 * 60)) % (24 * 60);
+  const h = Math.floor(wrapped / 60);
+  const m = wrapped % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function getDayCloseMinute(
+  date: string,
+  businessHours: LocationBusinessHours[],
+): number | null {
+  const dayOfWeek = new Date(date + 'T00:00:00').getDay();
+  const periods = businessHours.filter((h) => h.day_of_week === dayOfWeek);
+  if (!periods.length) return null;
+  return Math.max(
+    ...periods.map((p) => {
+      const open = p.open_hour * 60 + p.open_minute;
+      let close = p.close_hour * 60 + p.close_minute;
+      if (close <= open) close += 24 * 60;
+      return close;
+    }),
+  );
+}
+
+function getDefaultShiftWindowForDay(
+  date: string,
+  existingShiftEnds: number[],
+  businessHours: LocationBusinessHours[],
+): { start: string; end: string } {
+  const DEFAULT_LENGTH_MIN = 8 * 60;
+  const MIN_LENGTH_MIN = 15;
+
+  const latestEnd = existingShiftEnds.length ? Math.max(...existingShiftEnds) : 9 * 60;
+  const closeMinute = getDayCloseMinute(date, businessHours);
+
+  const startMinute = latestEnd;
+  let endMinute = startMinute + DEFAULT_LENGTH_MIN;
+
+  if (closeMinute != null) {
+    endMinute = Math.min(endMinute, closeMinute);
+    if (endMinute <= startMinute) endMinute = startMinute + MIN_LENGTH_MIN;
+  }
+
+  return {
+    start: formatMinutesToTime(startMinute),
+    end: formatMinutesToTime(endMinute),
+  };
+}
+
 export function SchedulePage() {
   const router = useRouter();
   const auth = useAuth();
@@ -149,8 +210,52 @@ export function SchedulePage() {
   const handleCellClick = (date: string, entityId?: string) => {
     setEditingShift(null);
     setPrefillDate(date);
-    setPrefillStartTime('');
-    setPrefillEndTime('');
+
+    const shouldUseSmartDefaults = data.timeViewMode === 'day' && !!entityId;
+    if (shouldUseSmartDefaults) {
+      const matchingShifts = data.shifts.filter((shift) => {
+        if (shift.shift_date !== date) return false;
+        if (data.gridViewMode === 'employees') {
+          return shift.assignment?.employee_id === entityId;
+        }
+        if (data.gridViewMode === 'positions' && entityId !== '__none__') {
+          return shift.position_id === entityId;
+        }
+        return false;
+      });
+      const ends = matchingShifts.map((s) => getShiftEndMinute(s.start_time, s.end_time));
+      const window = getDefaultShiftWindowForDay(date, ends, businessHours);
+      setPrefillStartTime(window.start);
+      setPrefillEndTime(window.end);
+    } else {
+      setPrefillStartTime('');
+      setPrefillEndTime('');
+    }
+
+    if (data.gridViewMode === 'positions' && entityId && entityId !== '__none__') {
+      setPrefillPositionId(entityId);
+      setPrefillEmployeeId('');
+    } else if (data.gridViewMode === 'employees' && entityId) {
+      setPrefillEmployeeId(entityId);
+      setPrefillPositionId('');
+    } else {
+      setPrefillPositionId('');
+      setPrefillEmployeeId('');
+    }
+
+    setShiftModalOpen(true);
+  };
+
+  const handleAddShiftClick = (
+    date: string,
+    entityId?: string,
+    prefillStart?: string,
+    prefillEnd?: string,
+  ) => {
+    setEditingShift(null);
+    setPrefillDate(date);
+    setPrefillStartTime(prefillStart ?? '');
+    setPrefillEndTime(prefillEnd ?? '');
 
     if (data.gridViewMode === 'positions' && entityId && entityId !== '__none__') {
       setPrefillPositionId(entityId);
@@ -336,6 +441,7 @@ export function SchedulePage() {
                     columnConfig={columnConfig}
                     onColumnConfigUpdate={updateColumnConfig}
                     onCellClick={handleCellClick}
+                    onAddShiftClick={handleAddShiftClick}
                     onShiftClick={handleShiftClick}
                     onShiftDelete={handleShiftDelete}
                     onDragCreate={handleDragCreate}
