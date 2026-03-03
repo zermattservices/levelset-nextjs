@@ -41,7 +41,7 @@ export default function MobileLaunchPage() {
       <div
         style={{
           minHeight: '100vh',
-          backgroundColor: '#f2f5f4',
+          backgroundColor: 'var(--ls-color-muted-soft)',
           padding: '32px 16px 48px',
           display: 'flex',
           justifyContent: 'center',
@@ -54,9 +54,9 @@ export default function MobileLaunchPage() {
         ) : (
           <div
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: 'var(--ls-color-bg-container)',
               borderRadius: 16,
-              border: '1px solid #e5e5e5',
+              border: '1px solid var(--ls-color-muted-border)',
               padding: '32px 28px',
               maxWidth: 420,
               textAlign: 'center',
@@ -70,7 +70,7 @@ export default function MobileLaunchPage() {
               style={{
                 fontSize: 22,
                 fontWeight: 700,
-                color: '#333',
+                color: 'var(--ls-color-text-primary)',
               }}
             >
               Link Required
@@ -78,7 +78,7 @@ export default function MobileLaunchPage() {
             <div
               style={{
                 fontSize: 15,
-                color: '#666',
+                color: 'var(--ls-color-text-tertiary)',
                 lineHeight: 1.5,
               }}
             >
@@ -87,8 +87,8 @@ export default function MobileLaunchPage() {
             <button
               onClick={() => router.push('/')}
               style={{
-                backgroundColor: '#2563eb',
-                color: '#fff',
+                backgroundColor: 'var(--ls-color-brand)',
+                color: 'var(--ls-color-bg-container)',
                 border: 'none',
                 borderRadius: 8,
                 padding: '10px 20px',

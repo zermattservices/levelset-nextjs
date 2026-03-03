@@ -219,7 +219,7 @@ export function BugReportModal({ open, onClose, currentPage }: BugReportModalPro
               textTransform: 'none',
               backgroundColor: 'var(--ls-color-brand)',
               '&:hover': {
-                backgroundColor: '#285540',
+                backgroundColor: 'var(--ls-color-brand-hover)',
               },
             }}
           >

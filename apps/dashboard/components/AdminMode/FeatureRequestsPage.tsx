@@ -573,7 +573,7 @@ export function FeatureRequestsPage() {
                         <IconButton 
                           size="small" 
                           onClick={() => handleDeleteClick(feature)}
-                          sx={{ color: '#dc2626' }}
+                          sx={{ color: 'var(--ls-color-destructive-vivid)' }}
                         >
                           <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
@@ -647,7 +647,7 @@ export function FeatureRequestsPage() {
             </div>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Agent Context</label>
-              <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 4px' }}>
+              <p style={{ fontSize: 12, color: 'var(--ls-color-muted)', margin: '0 0 4px' }}>
                 Internal notes for AI agents. Not visible on the public roadmap.
               </p>
               <textarea
@@ -799,7 +799,7 @@ export function FeatureRequestsPage() {
             </div>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Agent Context</label>
-              <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 4px' }}>
+              <p style={{ fontSize: 12, color: 'var(--ls-color-muted)', margin: '0 0 4px' }}>
                 Internal notes for AI agents. Not visible on the public roadmap.
               </p>
               <textarea
@@ -930,7 +930,7 @@ export function FeatureRequestsPage() {
         <DialogContent>
           <p>Are you sure you want to delete this feature request?</p>
           <p style={{ fontWeight: 600, marginTop: 8 }}>{selectedFeature?.title}</p>
-          <p style={{ color: '#dc2626', marginTop: 16, fontSize: 14 }}>
+          <p style={{ color: 'var(--ls-color-destructive-vivid)', marginTop: 16, fontSize: 14 }}>
             This action cannot be undone.
           </p>
           <div className={styles.modalActions}>

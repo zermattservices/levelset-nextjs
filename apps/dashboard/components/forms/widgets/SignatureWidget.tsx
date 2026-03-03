@@ -152,7 +152,7 @@ export function SignatureWidget(props: WidgetProps) {
           border: `1px solid ${rawErrors && rawErrors.length > 0 ? 'var(--ls-color-destructive)' : 'var(--ls-color-muted-border)'}`,
           borderRadius: '8px',
           overflow: 'hidden',
-          backgroundColor: isDisabled ? 'var(--ls-color-neutral-foreground)' : '#ffffff',
+          backgroundColor: isDisabled ? 'var(--ls-color-neutral-foreground)' : 'var(--ls-color-bg-container)',
         }}
       >
         <canvas

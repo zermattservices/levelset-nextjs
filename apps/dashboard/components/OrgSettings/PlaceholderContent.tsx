@@ -15,7 +15,7 @@ export function PlaceholderContent({ title, description }: PlaceholderContentPro
         <p className={sty.description}>{description}</p>
       </div>
       <div className={sty.placeholderBox}>
-        <ConstructionIcon sx={{ fontSize: 32, color: '#999' }} />
+        <ConstructionIcon sx={{ fontSize: 32, color: 'var(--ls-color-text-tertiary)' }} />
         <span className={sty.placeholderText}>Configuration options will appear here</span>
       </div>
     </div>

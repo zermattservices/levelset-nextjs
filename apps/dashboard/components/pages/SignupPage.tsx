@@ -367,10 +367,10 @@ export function SignupPage() {
                       width: '100%',
                       marginBottom: '16px',
                       padding: '12px 16px',
-                      backgroundColor: '#fef2f2',
-                      border: '1px solid #fca5a5',
+                      backgroundColor: 'var(--ls-color-destructive-light)',
+                      border: '1px solid var(--ls-color-destructive-lighter)',
                       borderRadius: '8px',
-                      color: '#b91c1c',
+                      color: 'var(--ls-color-destructive-dark)',
                       fontSize: '14px',
                     }}
                   >
@@ -385,10 +385,10 @@ export function SignupPage() {
                       width: '100%',
                       marginBottom: '16px',
                       padding: '12px 16px',
-                      backgroundColor: '#f0fdf4',
-                      border: '1px solid #86efac',
+                      backgroundColor: 'var(--ls-color-success-foreground)',
+                      border: '1px solid var(--ls-color-success-border)',
                       borderRadius: '8px',
-                      color: '#166534',
+                      color: 'var(--ls-color-success-soft-foreground)',
                       fontSize: '14px',
                     }}
                   >
@@ -528,10 +528,10 @@ export function SignupPage() {
                       width: '100%',
                       marginBottom: '16px',
                       padding: '12px 16px',
-                      backgroundColor: '#fef2f2',
-                      border: '1px solid #fca5a5',
+                      backgroundColor: 'var(--ls-color-destructive-light)',
+                      border: '1px solid var(--ls-color-destructive-lighter)',
                       borderRadius: '8px',
-                      color: '#b91c1c',
+                      color: 'var(--ls-color-destructive-dark)',
                       fontSize: '14px',
                     }}
                   >
@@ -706,7 +706,7 @@ export function SignupPage() {
                       fontSize: '16px',
                       fontWeight: '600',
                       backgroundColor: 'var(--ls-color-brand)',
-                      color: '#ffffff',
+                      color: 'var(--ls-color-bg-container)',
                       border: 'none',
                       borderRadius: '8px',
                       cursor: isLoading ? 'not-allowed' : 'pointer',

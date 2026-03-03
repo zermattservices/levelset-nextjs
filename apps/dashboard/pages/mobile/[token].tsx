@@ -265,7 +265,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         sx={{
           fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           fontSize: 16,
-          color: '#1f2937',
+          color: 'var(--ls-color-text-primary)',
         }}
       >
         {summary.employeeName}
@@ -455,7 +455,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
       <Box
         sx={{
           minHeight: '100vh',
-          backgroundColor: '#f2f5f4',
+          backgroundColor: 'var(--ls-color-muted-soft)',
           padding: '16px 16px 48px',
           display: 'flex',
           flexDirection: 'column',
@@ -628,7 +628,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                   fontWeight: 600,
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                   '&:hover': {
-                    backgroundColor: '#f0fdf4',
+                    backgroundColor: 'var(--ls-color-success-foreground)',
                     border: '4px solid var(--ls-color-brand)',
                   },
                 }}

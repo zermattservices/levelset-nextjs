@@ -198,10 +198,10 @@ export function FormDrawer({
               textTransform: 'none',
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               fontWeight: 600,
-              backgroundColor: '#b91c1c',
-              color: '#ffffff',
+              backgroundColor: 'var(--ls-color-destructive-dark)',
+              color: 'var(--ls-color-bg-container)',
               borderRadius: '8px',
-              '&:hover': { backgroundColor: '#991b1b' },
+              '&:hover': { backgroundColor: 'var(--ls-color-destructive-darker)' },
             }}
             onClick={() => {
               setConfirmOpen(false);

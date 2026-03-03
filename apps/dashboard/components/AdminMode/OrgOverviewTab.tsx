@@ -86,7 +86,7 @@ export function OrgOverviewTab({ organization, locationNames }: OrgOverviewTabPr
             fontFamily: '"Satoshi", sans-serif',
             fontSize: '16px',
             fontWeight: 600,
-            color: '#0d1b14',
+            color: 'var(--ls-color-text-primary)',
           }}
         >
           {getLocationDisplayName(selectedLocation)}
@@ -101,7 +101,7 @@ export function OrgOverviewTab({ organization, locationNames }: OrgOverviewTabPr
               fontSize: '14px',
               minWidth: 200,
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#e5e5e5',
+                borderColor: 'var(--ls-color-border-light)',
               },
               '&:hover .MuiOutlinedInput-notchedOutline': {
                 borderColor: 'var(--ls-color-brand)',

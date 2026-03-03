@@ -285,7 +285,7 @@ export function AddPermissionLevelModal({
             textTransform: 'none',
             backgroundColor: 'var(--ls-color-brand)',
             '&:hover': {
-              backgroundColor: '#285540',
+              backgroundColor: 'var(--ls-color-brand-hover)',
             },
           }}
         >

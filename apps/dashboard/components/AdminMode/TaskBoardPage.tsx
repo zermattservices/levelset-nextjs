@@ -384,7 +384,7 @@ export function TaskBoardPage() {
     if (viewMode !== 'workstreams') return [];
     const active = workstreams.filter((ws) => ws.is_active);
     return [
-      { id: 'ws__unassigned', title: 'Unassigned', color: '#9ca3af', workstreamId: null as string | null },
+      { id: 'ws__unassigned', title: 'Unassigned', color: 'var(--ls-color-neutral)', workstreamId: null as string | null },
       ...active.map((ws) => ({
         id: `ws__${ws.id}`,
         title: ws.name,
@@ -677,7 +677,7 @@ export function TaskBoardPage() {
                 fontWeight: selectedWorkstreamId === null ? 600 : 400,
                 backgroundColor:
                   selectedWorkstreamId === null ? 'var(--ls-color-brand, #31664A)' : undefined,
-                color: selectedWorkstreamId === null ? '#fff' : undefined,
+                color: selectedWorkstreamId === null ? 'var(--ls-color-bg-container)' : undefined,
                 '&:hover': {
                   backgroundColor:
                     selectedWorkstreamId === null
@@ -720,15 +720,15 @@ export function TaskBoardPage() {
                     fontWeight: selectedWorkstreamId === ws.id ? 600 : 400,
                     backgroundColor:
                       selectedWorkstreamId === ws.id ? ws.color : undefined,
-                    color: selectedWorkstreamId === ws.id ? '#fff' : undefined,
+                    color: selectedWorkstreamId === ws.id ? 'var(--ls-color-bg-container)' : undefined,
                     borderColor: ws.color,
                     '& .MuiChip-icon': { marginLeft: '6px', marginRight: '-2px' },
                     '& .MuiChip-deleteIcon': {
                       color:
                         selectedWorkstreamId === ws.id
                           ? 'rgba(255,255,255,0.7)'
-                          : '#999',
-                      '&:hover': { color: selectedWorkstreamId === ws.id ? '#fff' : '#333' },
+                          : 'var(--ls-color-text-tertiary)',
+                      '&:hover': { color: selectedWorkstreamId === ws.id ? 'var(--ls-color-bg-container)' : 'var(--ls-color-text-primary)' },
                     },
                   }}
                 />
@@ -742,8 +742,8 @@ export function TaskBoardPage() {
                 fontFamily: '"Satoshi", sans-serif',
                 fontSize: 13,
                 borderStyle: 'dashed',
-                color: '#999',
-                '&:hover': { borderColor: '#666', color: '#666' },
+                color: 'var(--ls-color-text-tertiary)',
+                '&:hover': { borderColor: 'var(--ls-color-text-tertiary)', color: 'var(--ls-color-text-tertiary)' },
               }}
             />
           </div>
@@ -761,7 +761,7 @@ export function TaskBoardPage() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ fontSize: 18, color: '#999' }} />
+                <SearchIcon sx={{ fontSize: 18, color: 'var(--ls-color-text-tertiary)' }} />
               </InputAdornment>
             ),
           }}
@@ -903,7 +903,7 @@ export function TaskBoardPage() {
                   fontFamily: '"Satoshi", sans-serif',
                   fontSize: 13,
                   fontWeight: 600,
-                  color: '#666',
+                  color: 'var(--ls-color-text-tertiary)',
                   margin: '0 0 8px',
                 }}
               >

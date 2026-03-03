@@ -17,12 +17,12 @@ export const BrandSwitch = styled(MuiSwitch)({
     '&.Mui-checked': {
       transform: 'translateX(18px)',
       '& + .MuiSwitch-track': {
-        backgroundColor: '#31664A',
+        backgroundColor: 'var(--ls-color-brand)',
         opacity: 1,
         border: 0,
       },
       '& .MuiSwitch-thumb': {
-        backgroundColor: '#fff',
+        backgroundColor: 'var(--ls-color-bg-container)',
       },
     },
     '&.Mui-disabled + .MuiSwitch-track': {
@@ -32,12 +32,12 @@ export const BrandSwitch = styled(MuiSwitch)({
   '& .MuiSwitch-thumb': {
     width: 18,
     height: 18,
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--ls-color-bg-container)',
     boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
   },
   '& .MuiSwitch-track': {
     borderRadius: 11,
-    backgroundColor: '#c9cdd4',
+    backgroundColor: 'var(--ls-color-neutral-border)',
     opacity: 1,
   },
 });

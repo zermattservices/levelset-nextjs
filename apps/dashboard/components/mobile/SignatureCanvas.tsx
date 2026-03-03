@@ -81,7 +81,7 @@ export function SignatureCanvas({
           fontFamily,
           fontSize: '14px',
           fontWeight: 500,
-          color: '#414651',
+          color: 'var(--ls-color-text-secondary)',
           display: 'block',
           mb: 1,
         }}
@@ -92,7 +92,7 @@ export function SignatureCanvas({
         sx={{
           border: '1px solid var(--ls-color-border)',
           borderRadius: '8px',
-          backgroundColor: disabled ? '#f5f5f5' : '#ffffff',
+          backgroundColor: disabled ? 'var(--ls-color-muted-soft)' : 'var(--ls-color-bg-container)',
           overflow: 'hidden',
           touchAction: 'none', // Prevent page scroll while signing
         }}

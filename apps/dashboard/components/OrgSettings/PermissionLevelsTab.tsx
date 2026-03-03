@@ -446,7 +446,7 @@ export function PermissionLevelsTab({
                               disabled={deleting === profile.id}
                               sx={{
                                 color: 'var(--ls-color-muted)',
-                                '&:hover': { color: '#dc2626' },
+                                '&:hover': { color: 'var(--ls-color-destructive-vivid)' },
                               }}
                             >
                               {deleting === profile.id ? (

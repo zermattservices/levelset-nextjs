@@ -74,7 +74,7 @@ const PillButton = styled(Box)<{ selected?: boolean }>(({ selected }) => ({
   cursor: 'pointer',
   transition: 'all 0.15s ease',
   backgroundColor: selected ? levelsetGreen : 'var(--ls-color-muted-soft)',
-  color: selected ? '#ffffff' : 'var(--ls-color-muted)',
+  color: selected ? 'var(--ls-color-bg-container)' : 'var(--ls-color-muted)',
   '&:hover': {
     backgroundColor: selected ? levelsetGreen : 'var(--ls-color-muted-border)',
   },

@@ -656,7 +656,7 @@ export function EvaluationsTable({ locationId, className, onPlannedStatusChange,
                           fontSize: 11,
                           '&.Mui-selected': {
                             backgroundColor: `${levelsetGreen} !important`,
-                            color: '#fff !important',
+                            color: 'var(--ls-color-bg-container) !important',
                           },
                         },
                       },

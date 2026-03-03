@@ -89,7 +89,7 @@ export function CancelSubscriptionModal({
           fontFamily: '"Mont", sans-serif',
           fontSize: '18px',
           fontWeight: 600,
-          color: '#0d1b14',
+          color: 'var(--ls-color-text-primary)',
           paddingBottom: 1,
         }}
       >
@@ -99,13 +99,13 @@ export function CancelSubscriptionModal({
 
       <DialogContent>
         {isTrialing ? (
-          <Typography sx={{ fontFamily, fontSize: '14px', color: '#555', lineHeight: 1.6 }}>
+          <Typography sx={{ fontFamily, fontSize: '14px', color: 'var(--ls-color-text-secondary)', lineHeight: 1.6 }}>
             Your free trial will continue until <strong>{formatDate(endDate)}</strong>.
             After that, your subscription will end and you will not be charged.
             You&apos;ll lose access to all Pro features when the trial expires.
           </Typography>
         ) : (
-          <Typography sx={{ fontFamily, fontSize: '14px', color: '#555', lineHeight: 1.6 }}>
+          <Typography sx={{ fontFamily, fontSize: '14px', color: 'var(--ls-color-text-secondary)', lineHeight: 1.6 }}>
             Your subscription will remain active until <strong>{formatDate(endDate)}</strong>.
             After that, you&apos;ll lose access to your current plan features including scheduling,
             certifications, Levi AI, and other Pro tools.
@@ -138,8 +138,8 @@ export function CancelSubscriptionModal({
             fontFamily,
             textTransform: 'none',
             borderColor: 'var(--ls-color-muted-border)',
-            color: '#333',
-            '&:hover': { borderColor: '#999' },
+            color: 'var(--ls-color-text-primary)',
+            '&:hover': { borderColor: 'var(--ls-color-text-tertiary)' },
           }}
         >
           Keep My Plan

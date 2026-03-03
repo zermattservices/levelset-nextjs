@@ -400,10 +400,10 @@ export function DisciplineAccessTab({ orgId, locationId, onNavigate, disabled = 
             sx={{ 
               fontFamily, 
               textTransform: 'none',
-              color: '#dc2626',
-              backgroundColor: '#fef2f2',
+              color: 'var(--ls-color-destructive-vivid)',
+              backgroundColor: 'var(--ls-color-destructive-foreground)',
               '&:hover': {
-                backgroundColor: '#fee2e2',
+                backgroundColor: 'var(--ls-color-destructive-light)',
               },
             }}
           >

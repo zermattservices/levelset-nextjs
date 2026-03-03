@@ -53,7 +53,7 @@ export interface SyncEmployeesModalProps {
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = 'var(--ls-color-brand)';
 const warningColor = '#FACC15';
-const destructiveColor = '#dc2626';
+const destructiveColor = 'var(--ls-color-destructive-vivid)';
 
 // Styled components matching RosterTable
 const RoleMenuItem = styled(MenuItem)(() => ({
@@ -91,8 +91,8 @@ const AvailabilityChip = styled(Box)(() => ({
   backgroundColor: "var(--ls-color-muted-soft)",
   color: "var(--ls-color-neutral-soft-foreground)",
   "&.available": {
-    backgroundColor: "#dcfce7",
-    color: "#166534",
+    backgroundColor: "var(--ls-color-success-soft)",
+    color: "var(--ls-color-success-soft-foreground)",
   },
   "&.limited": {
     backgroundColor: "#fef3c7",
@@ -251,7 +251,7 @@ function createEmployeeColumns(
                 fontSize: 12,
                 borderRadius: 6,
                 border: matchedEmployee ? '2px solid var(--ls-color-brand)' : '1px solid var(--ls-color-border)',
-                backgroundColor: matchedEmployee ? '#f0fdf4' : '#ffffff',
+                backgroundColor: matchedEmployee ? 'var(--ls-color-success-foreground)' : 'var(--ls-color-bg-card)',
                 cursor: 'pointer',
               }}
             >
@@ -517,7 +517,7 @@ function createEmployeeColumns(
               borderColor: destructiveColor,
               borderRadius: '8px', // Table button - no change
               '&:hover': {
-                backgroundColor: isKept ? '#fee2e2' : '#b91c1c',
+                backgroundColor: isKept ? 'var(--ls-color-destructive-light)' : 'var(--ls-color-destructive-dark)',
               },
             }}
           >
@@ -543,7 +543,7 @@ const BookmarkletLink = styled(Link)(() => ({
   margin: '8px 0',
   cursor: 'move',
   '&:hover': {
-    background: '#2d5a42',
+    background: 'var(--ls-color-brand-dark-alt)',
     textDecoration: 'none',
   },
 }));
@@ -571,7 +571,7 @@ const StickyHeader = styled(Box)(() => ({
   top: 0,
   zIndex: 10,
   backgroundColor: 'var(--ls-color-bg-container)',
-  borderBottom: '1px solid #e9eaeb',
+  borderBottom: '1px solid var(--ls-color-muted-border)',
   padding: '24px',
   display: 'flex',
   justifyContent: 'space-between',
@@ -1012,8 +1012,8 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
                   color: levelsetGreen,
                   borderRadius: '8px', // 4px default + 4px = 8px
                   "&:hover": {
-                    borderColor: "#2d5a42",
-                    backgroundColor: "#f0f9f4",
+                    borderColor: "var(--ls-color-brand-dark-alt)",
+                    backgroundColor: "var(--ls-color-success-foreground)",
                   },
                 }}
               >
@@ -1276,7 +1276,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
                   fontFamily,
                   fontSize: 12,
                   height: 32,
-                  backgroundColor: selected ? '#fff' : '#fff5f5',
+                  backgroundColor: selected ? 'var(--ls-color-bg-card)' : '#fff5f5',
                   '& .MuiSelect-select': {
                     padding: '4px 8px',
                   },
@@ -1623,9 +1623,9 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
                         borderBottom: '2px solid var(--ls-color-muted-border)',
                       },
                       '& .terminated-row': {
-                        backgroundColor: '#fee2e2 !important',
+                        backgroundColor: 'var(--ls-color-destructive-light) !important',
                         '& .MuiDataGrid-cell': {
-                          backgroundColor: '#fee2e2 !important',
+                          backgroundColor: 'var(--ls-color-destructive-light) !important',
                         },
                       },
                     }}
@@ -1667,12 +1667,12 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
               fontWeight: 500,
               textTransform: 'none',
               backgroundColor: levelsetGreen,
-              color: '#ffffff',
+              color: 'var(--ls-color-bg-container)',
               px: 4,
               py: 1.5,
               borderRadius: '8px',
               '&:hover': {
-                backgroundColor: '#2d5a42',
+                backgroundColor: 'var(--ls-color-brand-dark-alt)',
               },
               '&:disabled': {
                 backgroundColor: 'var(--ls-color-disabled-text)',
@@ -1773,8 +1773,8 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
             onClick={() => setCurrentPage('review')}
             sx={{
               fontFamily, fontSize: 14, fontWeight: 500, textTransform: 'none',
-              backgroundColor: levelsetGreen, color: '#ffffff', px: 4, py: 1.5, borderRadius: '8px',
-              '&:hover': { backgroundColor: '#2d5a42' },
+              backgroundColor: levelsetGreen, color: 'var(--ls-color-bg-container)', px: 4, py: 1.5, borderRadius: '8px',
+              '&:hover': { backgroundColor: 'var(--ls-color-brand-dark-alt)' },
             }}
           >
             Continue
@@ -1884,8 +1884,8 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
             onClick={handlePositionMappingConfirm}
             sx={{
               fontFamily, fontSize: 14, fontWeight: 500, textTransform: 'none',
-              backgroundColor: levelsetGreen, color: '#ffffff', px: 4, py: 1.5, borderRadius: '8px',
-              '&:hover': { backgroundColor: '#2d5a42' },
+              backgroundColor: levelsetGreen, color: 'var(--ls-color-bg-container)', px: 4, py: 1.5, borderRadius: '8px',
+              '&:hover': { backgroundColor: 'var(--ls-color-brand-dark-alt)' },
             }}
           >
             Continue to Schedule Review
@@ -2066,8 +2066,8 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
             disabled={scheduleSyncing}
             sx={{
               fontFamily, fontSize: 14, fontWeight: 500, textTransform: 'none',
-              backgroundColor: levelsetGreen, color: '#ffffff', px: 4, py: 1.5, borderRadius: '8px',
-              '&:hover': { backgroundColor: '#2d5a42' },
+              backgroundColor: levelsetGreen, color: 'var(--ls-color-bg-container)', px: 4, py: 1.5, borderRadius: '8px',
+              '&:hover': { backgroundColor: 'var(--ls-color-brand-dark-alt)' },
               '&:disabled': { backgroundColor: 'var(--ls-color-disabled-text)' },
             }}
           >
@@ -2132,12 +2132,12 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
             fontWeight: 500,
             textTransform: 'none',
             backgroundColor: levelsetGreen,
-            color: '#ffffff',
+            color: 'var(--ls-color-bg-container)',
             px: 4,
             py: 1.5,
             borderRadius: '8px',
             '&:hover': {
-              backgroundColor: '#2d5a42',
+              backgroundColor: 'var(--ls-color-brand-dark-alt)',
             },
           }}
         >
@@ -2170,7 +2170,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
                 fontFamily,
                 fontSize: "20px",
                 fontWeight: 600,
-                color: "#181d27",
+                color: "var(--ls-color-text-primary)",
               }}
             >
               {scheduleImportMode ? 'Import Schedule from HotSchedules' : 'Sync from HotSchedules'}
@@ -2243,10 +2243,10 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
               fontWeight: 500,
               textTransform: 'none',
               backgroundColor: destructiveColor,
-              color: '#ffffff',
+              color: 'var(--ls-color-bg-container)',
               borderRadius: '8px', // 4px default + 4px = 8px
               '&:hover': {
-                backgroundColor: '#b91c1c',
+                backgroundColor: 'var(--ls-color-destructive-dark)',
               },
             }}
           >

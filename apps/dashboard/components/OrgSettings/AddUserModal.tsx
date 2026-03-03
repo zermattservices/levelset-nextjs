@@ -412,7 +412,7 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
             ) : (
               <>
                 {error && (
-                  <Typography sx={{ color: '#dc2626', fontSize: 14, fontFamily }}>
+                  <Typography sx={{ color: 'var(--ls-color-destructive-vivid)', fontSize: 14, fontFamily }}>
                     {error}
                   </Typography>
                 )}
@@ -576,12 +576,12 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
 
             {isGoogleEmail && (
               <Box sx={{ 
-                backgroundColor: '#f0fdf4', 
+                backgroundColor: 'var(--ls-color-success-foreground)', 
                 borderRadius: 2, 
                 p: 2,
-                border: '1px solid #bbf7d0',
+                border: '1px solid var(--ls-color-success-border)',
               }}>
-                <Typography sx={{ fontFamily, fontSize: 14, color: '#166534', mb: 2 }}>
+                <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-success-soft-foreground)', mb: 2 }}>
                   This user has a Google email address. They can also sign in using the Google button on the login page:
                 </Typography>
                 <GoogleSignInButton />
@@ -590,12 +590,12 @@ export function AddUserModal({ open, onClose, onUserCreated, orgId, locationId }
 
             {googleCheckFailed && looksLikeGmail(createdEmail) && (
               <Box sx={{ 
-                backgroundColor: '#f0fdf4', 
+                backgroundColor: 'var(--ls-color-success-foreground)', 
                 borderRadius: 2, 
                 p: 2,
-                border: '1px solid #bbf7d0',
+                border: '1px solid var(--ls-color-success-border)',
               }}>
-                <Typography sx={{ fontFamily, fontSize: 14, color: '#166534', mb: 2 }}>
+                <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-success-soft-foreground)', mb: 2 }}>
                   This appears to be a Gmail address. The user can also sign in using the Google button on the login page:
                 </Typography>
                 <GoogleSignInButton />

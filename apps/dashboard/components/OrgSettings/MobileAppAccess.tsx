@@ -257,7 +257,7 @@ export function MobileAppAccess({ disabled = false }: MobileAppAccessProps) {
                   size="small"
                   onClick={handleCopyUrl}
                   title="Copy link"
-                  sx={{ color: copied ? 'var(--ls-color-brand)' : '#666' }}
+                  sx={{ color: copied ? 'var(--ls-color-brand)' : 'var(--ls-color-text-tertiary)' }}
                 >
                   {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
                 </IconButton>
@@ -372,10 +372,10 @@ export function MobileAppAccess({ disabled = false }: MobileAppAccessProps) {
             sx={{ 
               fontFamily, 
               textTransform: 'none',
-              color: '#dc2626',
-              backgroundColor: '#fef2f2',
+              color: 'var(--ls-color-destructive-vivid)',
+              backgroundColor: 'var(--ls-color-destructive-foreground)',
               '&:hover': {
-                backgroundColor: '#fee2e2',
+                backgroundColor: 'var(--ls-color-destructive-light)',
               },
             }}
           >

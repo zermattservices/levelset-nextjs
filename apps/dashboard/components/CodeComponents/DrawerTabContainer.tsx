@@ -24,7 +24,7 @@ interface InfractionListItemProps {
 
 function InfractionListItem({ infraction }: InfractionListItemProps) {
   const isPositive = (infraction.points || 0) < 0;
-  const pointColor = isPositive ? "#178459" : "#d23230"; // Exact colors from Plasmic
+  const pointColor = isPositive ? "#178459" : "var(--ls-color-destructive-base)"; // Exact colors from Plasmic
 
   return (
     <Box
@@ -36,7 +36,7 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
         gap: "12px",
         padding: "12px 16px",
         borderRadius: "12px",
-        border: "1px solid #e9eaeb", // --token-bGw1ZBUIaR08
+        border: "1px solid var(--ls-color-muted-border)", // --token-bGw1ZBUIaR08
         backgroundColor: "var(--ls-color-bg-container)",
         width: "100%",
         maxWidth: "491px",
@@ -49,7 +49,7 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
             fontFamily: "Satoshi",
             fontSize: "14px",
             fontWeight: 500,
-            color: "#414651", // rgba(65, 70, 81, 1)
+            color: "var(--ls-color-text-secondary)",
             lineHeight: "20px",
           }}
         >
@@ -60,13 +60,13 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
         <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px" }}>
           {/* Date */}
           <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <CalendarIcon sx={{ fontSize: "1em", color: "#535862" }} />
+            <CalendarIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)" }} />
             <Typography
               sx={{
                 fontFamily: "Satoshi",
                 fontSize: "14px",
                 fontWeight: 500,
-                color: "#535862", // rgba(83, 88, 98, 1)
+                color: "var(--ls-color-text-caption)", // rgba(83, 88, 98, 1)
                 lineHeight: "20px",
               }}
             >
@@ -79,7 +79,7 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
             sx={{
               width: "2px",
               height: "14px",
-              backgroundColor: "#e9eaeb",
+              backgroundColor: "var(--ls-color-muted-border)",
             }}
           />
 
@@ -87,13 +87,13 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
           {infraction.leader_name && (
             <>
               <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <PersonIcon sx={{ fontSize: "1em", color: "#535862" }} />
+                <PersonIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)" }} />
                 <Typography
                   sx={{
                     fontFamily: "Satoshi",
                     fontSize: "14px",
                     fontWeight: 500,
-                    color: "#535862",
+                    color: "var(--ls-color-text-caption)",
                     lineHeight: "20px",
                   }}
                 >
@@ -105,7 +105,7 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
                 sx={{
                   width: "2px",
                   height: "14px",
-                  backgroundColor: "#e9eaeb",
+                  backgroundColor: "var(--ls-color-muted-border)",
                 }}
               />
             </>
@@ -118,7 +118,7 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
                 fontFamily: "Satoshi",
                 fontSize: "14px",
                 fontWeight: 500,
-                color: "#535862",
+                color: "var(--ls-color-text-caption)",
                 lineHeight: "20px",
               }}
             >
@@ -155,7 +155,7 @@ function InfractionListItem({ infraction }: InfractionListItemProps) {
             fontFamily: "Satoshi",
             fontSize: "12px",
             fontWeight: 500,
-            color: "#414651",
+            color: "var(--ls-color-text-secondary)",
             lineHeight: "18px",
             textAlign: "center",
           }}
@@ -182,7 +182,7 @@ function DisciplinaryActionListItem({ action }: DisciplinaryActionListItemProps)
         gap: "12px",
         padding: "12px 16px",
         borderRadius: "12px",
-        border: "1px solid #e9eaeb",
+        border: "1px solid var(--ls-color-muted-border)",
         backgroundColor: "var(--ls-color-bg-container)",
         width: "100%",
         maxWidth: "491px",
@@ -195,7 +195,7 @@ function DisciplinaryActionListItem({ action }: DisciplinaryActionListItemProps)
             fontFamily: "Satoshi",
             fontSize: "14px",
             fontWeight: 500,
-            color: "#414651",
+            color: "var(--ls-color-text-secondary)",
             lineHeight: "20px",
           }}
         >
@@ -206,13 +206,13 @@ function DisciplinaryActionListItem({ action }: DisciplinaryActionListItemProps)
         <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px" }}>
           {/* Date */}
           <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <CalendarIcon sx={{ fontSize: "1em", color: "#535862" }} />
+            <CalendarIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)" }} />
             <Typography
               sx={{
                 fontFamily: "Satoshi",
                 fontSize: "14px",
                 fontWeight: 500,
-                color: "#535862",
+                color: "var(--ls-color-text-caption)",
                 lineHeight: "20px",
               }}
             >
@@ -226,7 +226,7 @@ function DisciplinaryActionListItem({ action }: DisciplinaryActionListItemProps)
               sx={{
                 width: "2px",
                 height: "14px",
-                backgroundColor: "#e9eaeb",
+                backgroundColor: "var(--ls-color-muted-border)",
               }}
             />
           )}
@@ -234,13 +234,13 @@ function DisciplinaryActionListItem({ action }: DisciplinaryActionListItemProps)
           {/* Leader */}
           {action.leader_name && (
             <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <PersonIcon sx={{ fontSize: "1em", color: "#535862" }} />
+              <PersonIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)" }} />
               <Typography
                 sx={{
                   fontFamily: "Satoshi",
                   fontSize: "14px",
                   fontWeight: 500,
-                  color: "#535862",
+                  color: "var(--ls-color-text-caption)",
                   lineHeight: "20px",
                 }}
               >
@@ -365,7 +365,7 @@ export function DrawerTabContainer({
               fontFamily: "Satoshi",
               fontSize: "14px",
               fontWeight: 600,
-              color: "#414651",
+              color: "var(--ls-color-text-secondary)",
               mb: 2,
             }}
           >
@@ -392,7 +392,7 @@ export function DrawerTabContainer({
                   fontFamily: "Satoshi",
                   fontSize: "18px",
                   fontWeight: 600,
-                  color: "#414651",
+                  color: "var(--ls-color-text-secondary)",
                   textAlign: "center",
                   lineHeight: "28px",
                 }}
@@ -404,7 +404,7 @@ export function DrawerTabContainer({
                   fontFamily: "Satoshi",
                   fontSize: "30px",
                   fontWeight: 700,
-                  color: "#414651",
+                  color: "var(--ls-color-text-secondary)",
                   textAlign: "center",
                   lineHeight: "38px",
                 }}
@@ -433,7 +433,7 @@ export function DrawerTabContainer({
                   fontFamily: "Satoshi",
                   fontSize: "18px",
                   fontWeight: 600,
-                  color: "#414651",
+                  color: "var(--ls-color-text-secondary)",
                   textAlign: "center",
                   lineHeight: "28px",
                 }}
@@ -445,7 +445,7 @@ export function DrawerTabContainer({
                   fontFamily: "Satoshi",
                   fontSize: "30px",
                   fontWeight: 700,
-                  color: "#414651",
+                  color: "var(--ls-color-text-secondary)",
                   textAlign: "center",
                   lineHeight: "38px",
                 }}
@@ -463,7 +463,7 @@ export function DrawerTabContainer({
               fontFamily: "Satoshi",
               fontSize: "14px",
               fontWeight: 600,
-              color: "#414651",
+              color: "var(--ls-color-text-secondary)",
               mb: 2,
             }}
           >
@@ -476,7 +476,7 @@ export function DrawerTabContainer({
                 flexDirection: "column",
                 padding: "12px 16px",
                 borderRadius: "12px",
-                border: "1px solid #e9eaeb",
+                border: "1px solid var(--ls-color-muted-border)",
                 backgroundColor: "var(--ls-color-bg-container)",
                 alignItems: "center",
                 justifyContent: "center",
@@ -487,7 +487,7 @@ export function DrawerTabContainer({
                 sx={{
                   fontFamily: "Satoshi",
                   fontSize: "14px",
-                  color: "#535862",
+                  color: "var(--ls-color-text-caption)",
                   textAlign: "center",
                 }}
               >
@@ -511,7 +511,7 @@ export function DrawerTabContainer({
                 fontFamily: "Satoshi",
                 fontSize: "14px",
                 fontWeight: 600,
-                color: "#414651",
+                color: "var(--ls-color-text-secondary)",
               }}
             >
               Disciplinary Actions
@@ -544,7 +544,7 @@ export function DrawerTabContainer({
                 flexDirection: "column",
                 padding: "12px 16px",
                 borderRadius: "12px",
-                border: "1px solid #e9eaeb",
+                border: "1px solid var(--ls-color-muted-border)",
                 backgroundColor: "var(--ls-color-bg-container)",
                 alignItems: "center",
                 justifyContent: "center",
@@ -555,7 +555,7 @@ export function DrawerTabContainer({
                 sx={{
                   fontFamily: "Satoshi",
                   fontSize: "14px",
-                  color: "#535862",
+                  color: "var(--ls-color-text-caption)",
                   textAlign: "center",
                 }}
               >
@@ -577,7 +577,7 @@ export function DrawerTabContainer({
   const renderPathwayTab = () => {
     return (
       <Box sx={{ p: 3, textAlign: "center" }}>
-        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "#535862" }}>
+        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "var(--ls-color-text-caption)" }}>
           Coming soon!
         </Typography>
       </Box>
@@ -587,7 +587,7 @@ export function DrawerTabContainer({
   const renderPETab = () => {
     return (
       <Box sx={{ p: 3, textAlign: "center" }}>
-        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "#535862" }}>
+        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "var(--ls-color-text-caption)" }}>
           Coming soon!
         </Typography>
       </Box>
@@ -597,7 +597,7 @@ export function DrawerTabContainer({
   const renderEvaluationsTab = () => {
     return (
       <Box sx={{ p: 3, textAlign: "center" }}>
-        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "#535862" }}>
+        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "var(--ls-color-text-caption)" }}>
           Coming soon!
         </Typography>
       </Box>
@@ -616,7 +616,7 @@ export function DrawerTabContainer({
       data-plasmic-name="drawer-tab-container"
     >
       {/* Tabs */}
-      <Box sx={{ borderBottom: "1px solid #e9eaeb", backgroundColor: "var(--ls-color-bg-container)" }}>
+      <Box sx={{ borderBottom: "1px solid var(--ls-color-muted-border)", backgroundColor: "var(--ls-color-bg-container)" }}>
         <Tabs
           value={currentTab}
           onChange={(_, newValue) => setCurrentTab(newValue)}

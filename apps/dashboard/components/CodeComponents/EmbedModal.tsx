@@ -123,7 +123,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                 px: 2,
                 py: 1.5,
                 cursor: 'pointer',
-                backgroundColor: selectedMenu === item.key ? '#ffffff' : 'transparent',
+                backgroundColor: selectedMenu === item.key ? 'var(--ls-color-bg-container)' : 'transparent',
                 borderLeft: selectedMenu === item.key ? '3px solid var(--ls-color-brand)' : '3px solid transparent',
                 color: selectedMenu === item.key ? 'var(--ls-color-brand)' : 'var(--ls-color-text-secondary)',
                 fontFamily,
@@ -131,7 +131,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                 fontWeight: selectedMenu === item.key ? 600 : 500,
                 transition: 'all 0.15s ease',
                 '&:hover': {
-                  backgroundColor: selectedMenu === item.key ? '#ffffff' : 'var(--ls-color-muted-soft)',
+                  backgroundColor: selectedMenu === item.key ? 'var(--ls-color-bg-container)' : 'var(--ls-color-muted-soft)',
                 },
               }}
             >
@@ -334,7 +334,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                         top: 8,
                         right: 8,
                         color: copiedEmbed ? '#10b981' : 'var(--ls-color-disabled-text)',
-                        '&:hover': { color: '#ffffff' },
+                        '&:hover': { color: 'var(--ls-color-bg-container)' },
                       }}
                     >
                       {copiedEmbed ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
@@ -385,7 +385,7 @@ export function EmbedModal({ open, onClose, mobileToken, locationName }: EmbedMo
                         top: 8,
                         right: 8,
                         color: copiedEmbed ? '#10b981' : 'var(--ls-color-disabled-text)',
-                        '&:hover': { color: '#ffffff' },
+                        '&:hover': { color: 'var(--ls-color-bg-container)' },
                       }}
                     >
                       {copiedEmbed ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}

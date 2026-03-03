@@ -151,13 +151,13 @@ export function PasswordModal({
               fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             },
             '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: error ? '#dc2626' : 'var(--ls-color-muted-border)',
+              borderColor: error ? 'var(--ls-color-destructive-vivid)' : 'var(--ls-color-muted-border)',
             },
             '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: error ? '#dc2626' : 'var(--ls-color-border)',
+              borderColor: error ? 'var(--ls-color-destructive-vivid)' : 'var(--ls-color-border)',
             },
             '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: error ? '#dc2626' : 'var(--ls-color-brand)',
+              borderColor: error ? 'var(--ls-color-destructive-vivid)' : 'var(--ls-color-brand)',
               borderWidth: '2px',
             },
           }}

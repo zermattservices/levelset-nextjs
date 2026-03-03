@@ -186,14 +186,14 @@ const RatingCell = styled(TableCell)<{ $rating?: number | null; $greenThreshold?
   if ($rating !== null && $rating !== undefined) {
     fontWeight = 600;
     if ($rating >= $greenThreshold) {
-      bgColor = '#249e6b';
-      textColor = '#fff';
+      bgColor = 'var(--ls-color-success-vivid)';
+      textColor = 'var(--ls-color-bg-container)';
     } else if ($rating >= $yellowThreshold) {
       bgColor = '#ffb549';
-      textColor = '#fff';
+      textColor = 'var(--ls-color-bg-container)';
     } else if ($rating >= 1.0) {
-      bgColor = '#ad2624';
-      textColor = '#fff';
+      bgColor = 'var(--ls-color-destructive-medium)';
+      textColor = 'var(--ls-color-bg-container)';
     }
   }
 
@@ -271,7 +271,7 @@ const ControlsContainer = styled(Box)<{ compact?: boolean }>(({ compact }) => ({
 }));
 
 const ExpandedContentRow = styled(TableRow)(() => ({
-  backgroundColor: '#fafafa',
+  backgroundColor: 'var(--ls-color-bg-surface)',
   '& td': {
     paddingTop: 16,
     paddingBottom: 16,
@@ -318,7 +318,7 @@ const ExpandedTable = styled(Table)(() => ({
     backgroundColor: 'var(--ls-color-muted-soft)',
   },
   '& tbody td:first-of-type': {
-    backgroundColor: '#fafafa',
+    backgroundColor: 'var(--ls-color-bg-surface)',
     boxShadow: '2px 0 4px rgba(0,0,0,0.05)',
   },
   // Date column - compact, NOT sticky
@@ -634,7 +634,7 @@ export function PEAClassic({
                 fontSize: compactControls ? 12 : 14,
                 fontWeight: 600,
                 backgroundColor: 'var(--ls-color-brand)',
-                color: '#ffffff',
+                color: 'var(--ls-color-bg-container)',
                 borderRadius: '6px',
                 textTransform: 'none',
                 padding: compactControls ? '6px 12px' : '8px 16px',

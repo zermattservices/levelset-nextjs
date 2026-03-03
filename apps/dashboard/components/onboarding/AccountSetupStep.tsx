@@ -647,7 +647,7 @@ export function AccountSetupStep({ accessToken, onComplete }: AccountSetupStepPr
       >
         {isSubmitting ? (
           <>
-            <CircularProgress size={18} sx={{ color: '#fff', mr: 1 }} />
+            <CircularProgress size={18} sx={{ color: 'var(--ls-color-bg-container)', mr: 1 }} />
             Creating your organization...
           </>
         ) : (

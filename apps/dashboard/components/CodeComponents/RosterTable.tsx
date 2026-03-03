@@ -186,10 +186,10 @@ export function RosterTable(props: RosterTableProps) {
               fontWeight: 500,
               textTransform: 'none',
               backgroundColor: 'var(--ls-color-brand)',
-              color: '#ffffff',
+              color: 'var(--ls-color-bg-container)',
               borderRadius: '8px',
               '&:hover': {
-                backgroundColor: '#2d5a42',
+                backgroundColor: 'var(--ls-color-brand-dark-alt)',
               },
             }}
           >
@@ -461,8 +461,8 @@ const AvailabilityChip = styled(Box)(() => ({
     fontSize: 16,
   },
   "&.available": {
-    backgroundColor: "#dcfce7",
-    color: "#166534",
+    backgroundColor: "var(--ls-color-success-soft)",
+    color: "var(--ls-color-success-soft-foreground)",
   },
   "&.limited": {
     backgroundColor: "#fef3c7",
@@ -505,11 +505,11 @@ const CertificationChip = styled(Box)(() => ({
   },
   "&.certified": {
     backgroundColor: "var(--ls-color-brand)",
-    color: "#ffffff",
+    color: "var(--ls-color-bg-container)",
   },
   "&.pip": {
-    backgroundColor: "#dc2626",
-    color: "#ffffff",
+    backgroundColor: "var(--ls-color-destructive-vivid)",
+    color: "var(--ls-color-bg-container)",
   },
 }));
 
@@ -1402,7 +1402,7 @@ function EmployeesTableView({
               sx={{
                 fontFamily,
                 fontWeight: 600,
-                color: pay ? "#166534" : "var(--ls-color-disabled-text)",
+                color: pay ? "var(--ls-color-success-soft-foreground)" : "var(--ls-color-disabled-text)",
                 fontSize: 14,
               }}
             >
@@ -1534,7 +1534,7 @@ function EmployeesTableView({
                 </RoleMenuItem>
                 <RoleMenuItem
                   onClick={() => handleTerminateEmployee(employeeId, employeeName)}
-                  sx={{ color: '#dc2626' }}
+                  sx={{ color: 'var(--ls-color-destructive-vivid)' }}
                 >
                   Terminate employee
                 </RoleMenuItem>
@@ -1598,7 +1598,7 @@ function EmployeesTableView({
         >
           <Typography
             variant="body2"
-            sx={{ color: "#b91c1c", fontFamily }}
+            sx={{ color: "var(--ls-color-destructive-dark)", fontFamily }}
           >
             {error}
           </Typography>
@@ -1785,15 +1785,15 @@ function EmployeesTableView({
                 fontSize: 14,
                 fontWeight: 500,
                 textTransform: 'none',
-                backgroundColor: '#dc2626',
-                color: '#ffffff',
+                backgroundColor: 'var(--ls-color-destructive-vivid)',
+                color: 'var(--ls-color-bg-container)',
                 borderRadius: '8px',
                 '&:hover': {
-                  backgroundColor: '#b91c1c',
+                  backgroundColor: 'var(--ls-color-destructive-dark)',
                 },
                 '&.Mui-disabled': {
                   backgroundColor: '#e0e0e0',
-                  color: '#9ca3af',
+                  color: 'var(--ls-color-disabled-text)',
                 },
               }}
             >

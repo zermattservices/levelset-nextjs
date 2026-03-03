@@ -73,7 +73,7 @@ export function PositionButtons({
               border: '1px solid var(--ls-color-muted-border)',
               borderRadius: '20px',
               backgroundColor: isSelected ? 'var(--ls-color-neutral-soft-foreground)' : 'var(--ls-color-muted-soft)',
-              color: isSelected ? '#ffffff' : 'var(--ls-color-neutral)',
+              color: isSelected ? 'var(--ls-color-bg-container)' : 'var(--ls-color-neutral)',
               fontSize: '14px',
               fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
               fontWeight: isSelected ? '600' : '500',

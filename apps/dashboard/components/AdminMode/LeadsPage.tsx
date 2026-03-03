@@ -340,29 +340,29 @@ export function LeadsPage({ onSelectLead }: LeadsPageProps) {
             fontFamily: '"Satoshi", sans-serif',
             fontSize: 14,
             '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: '#fafafa',
-              borderBottom: '1px solid #e2e8f0',
+              backgroundColor: 'var(--ls-color-bg-surface)',
+              borderBottom: '1px solid var(--ls-color-muted-border)',
             },
             '& .MuiDataGrid-columnHeaderTitle': {
               fontFamily: '"Satoshi", sans-serif',
               fontSize: 11,
               fontWeight: 600,
-              color: '#999',
+              color: 'var(--ls-color-text-tertiary)',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
             },
             '& .MuiDataGrid-cell': {
-              borderBottom: '1px solid #f1f5f9',
+              borderBottom: '1px solid var(--ls-color-muted-soft)',
               padding: '0 16px',
             },
             '& .MuiDataGrid-row': {
               cursor: 'pointer',
               '&:hover': {
-                backgroundColor: '#f6fffa',
+                backgroundColor: 'var(--ls-color-success-foreground)',
               },
             },
             '& .MuiDataGrid-footerContainer': {
-              borderTop: '1px solid #e2e8f0',
+              borderTop: '1px solid var(--ls-color-muted-border)',
             },
             '& .MuiTablePagination-root': {
               fontFamily: '"Satoshi", sans-serif',

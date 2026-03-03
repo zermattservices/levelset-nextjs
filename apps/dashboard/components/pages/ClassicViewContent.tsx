@@ -30,7 +30,7 @@ export function ClassicViewContent() {
         whiteSpace: 'nowrap',
         minWidth: 'auto',
         '&:hover': {
-          borderColor: '#28543d',
+          borderColor: 'var(--ls-color-brand-hover)',
           borderWidth: '2px',
           backgroundColor: 'rgba(49, 102, 74, 0.04)',
         },

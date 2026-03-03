@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
-import { useAuth } from '@/lib/providers/AuthProvider';
 import type {
   Shift,
   Position,
@@ -45,8 +44,10 @@ export function useSetupBoardData({
   zoneFilter,
 }: UseSetupBoardDataProps) {
   const { selectedLocationOrgId } = useLocationContext();
-  const auth = useAuth();
-  const orgId = selectedLocationOrgId ?? auth.org_id;
+  // Use selectedLocationOrgId directly (no auth.org_id fallback) to prevent
+  // Levelset Admins from fetching with the wrong org on initial render.
+  // This matches the guard pattern in useScheduleData.fetchPositions.
+  const orgId = selectedLocationOrgId;
 
   // Template state
   const [templates, setTemplates] = useState<SetupTemplate[]>([]);
@@ -243,6 +244,7 @@ export function useSetupBoardData({
 
     const shiftsById = new Map(shifts.map((shift) => [shift.id, shift]));
 
+    // Only show positions enabled for this block in the template.
     return filteredPositions
       .filter((pos) => pos.id in activeBlock.positions)
       .map((pos) => {
@@ -258,17 +260,11 @@ export function useSetupBoardData({
             shift: shiftsById.get(assignment.shift_id) ?? assignment.shift,
           }));
 
-        if (slotCount === 0) {
-          // Position enabled but no slots — header only, no drop targets
-          return {
-            position_id: pos.id,
-            position_name: pos.name,
-            zone: pos.zone,
-            slots: [],
-          };
-        }
-
-        const effectiveSlotCount = Math.max(slotCount, posAssignments.length);
+        // Always show at least 1 drop target, grow beyond slot count as
+        // employees are assigned (no hard cap), and keep one extra empty
+        // slot so there's always room to drop the next employee.
+        const minSlots = Math.max(slotCount, 1);
+        const effectiveSlotCount = Math.max(minSlots, posAssignments.length + 1);
         const slots = Array.from({ length: effectiveSlotCount }, (_, i) => ({
           index: i,
           is_required: i < slotCount ? isRequired : false,
@@ -279,6 +275,7 @@ export function useSetupBoardData({
           position_id: pos.id,
           position_name: pos.name,
           zone: pos.zone,
+          target_count: slotCount,
           slots,
         };
       });

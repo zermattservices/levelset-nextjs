@@ -829,8 +829,8 @@ export function DocumentUploadStep({
                 ...(uploadMode === 'file'
                   ? {
                       backgroundColor: 'var(--ls-color-brand)',
-                      color: '#fff',
-                      '& .MuiChip-icon': { color: '#fff' },
+                      color: 'var(--ls-color-bg-container)',
+                      '& .MuiChip-icon': { color: 'var(--ls-color-bg-container)' },
                       '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
                     }
                   : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
@@ -849,8 +849,8 @@ export function DocumentUploadStep({
                 ...(uploadMode === 'url'
                   ? {
                       backgroundColor: 'var(--ls-color-brand)',
-                      color: '#fff',
-                      '& .MuiChip-icon': { color: '#fff' },
+                      color: 'var(--ls-color-bg-container)',
+                      '& .MuiChip-icon': { color: 'var(--ls-color-bg-container)' },
                       '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
                     }
                   : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
@@ -966,12 +966,12 @@ export function DocumentUploadStep({
               (uploadMode === 'file' && !uploadFile) ||
               (uploadMode === 'url' && !uploadUrl.trim())
             }
-            startIcon={uploading ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : undefined}
+            startIcon={uploading ? <CircularProgress size={16} sx={{ color: 'var(--ls-color-bg-container)' }} /> : undefined}
             sx={{
               ...muiButtonSx,
               backgroundColor: 'var(--ls-color-brand)',
               '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
-              '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)', color: '#fff' },
+              '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-bg-container)' },
             }}
           >
             {uploading ? 'Uploading...' : 'Add Document'}
@@ -1353,12 +1353,12 @@ export function DocumentUploadStep({
             variant="contained"
             onClick={handleDelete}
             disabled={deleting}
-            startIcon={deleting ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : undefined}
+            startIcon={deleting ? <CircularProgress size={16} sx={{ color: 'var(--ls-color-bg-container)' }} /> : undefined}
             sx={{
               ...muiButtonSx,
               backgroundColor: 'var(--ls-color-destructive)',
               '&:hover': { backgroundColor: 'var(--ls-color-destructive-hover)' },
-              '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)', color: '#fff' },
+              '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-bg-container)' },
             }}
           >
             {deleting ? 'Deleting...' : 'Delete'}

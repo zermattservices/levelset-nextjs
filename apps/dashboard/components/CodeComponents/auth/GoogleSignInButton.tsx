@@ -76,7 +76,7 @@ export function GoogleSignInButton({
       }}
       onMouseLeave={(e) => {
         if (!disabled && !isLoading) {
-          e.currentTarget.style.backgroundColor = '#ffffff';
+          e.currentTarget.style.backgroundColor = 'var(--ls-color-bg-container)';
           e.currentTarget.style.borderColor = 'var(--ls-color-muted-border)';
         }
       }}

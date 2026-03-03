@@ -47,7 +47,7 @@ const StyledSelect = styled(Select)(() => ({
     padding: '8px 14px',
   },
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#e0e0e0',
+    borderColor: 'var(--ls-color-muted-border)',
     borderRadius: 12,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
@@ -864,7 +864,7 @@ export function RatingCriteriaTab({ orgId, disabled = false }: RatingCriteriaTab
           fontFamily, 
           fontSize: 18, 
           fontWeight: 600, 
-          color: '#0d1b14',
+          color: 'var(--ls-color-text-primary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',

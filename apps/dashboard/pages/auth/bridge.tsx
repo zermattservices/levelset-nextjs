@@ -61,19 +61,19 @@ export default function AuthBridge() {
         justifyContent: 'center',
         minHeight: '100vh',
         width: '100%',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: 'var(--ls-color-muted-soft)',
         fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
       }}
     >
       {status === 'error' ? (
         <>
-          <div style={{ color: '#dc2626', marginBottom: 16 }}>{error || 'An error occurred'}</div>
-          <div style={{ color: '#888', fontSize: 14 }}>Redirecting to login...</div>
+          <div style={{ color: 'var(--ls-color-destructive-vivid)', marginBottom: 16 }}>{error || 'An error occurred'}</div>
+          <div style={{ color: 'var(--ls-color-text-tertiary)', fontSize: 14 }}>Redirecting to login...</div>
         </>
       ) : (
         <>
           <div className="auth-spinner" />
-          <div style={{ color: '#888', fontSize: 14, marginTop: 16 }}>
+          <div style={{ color: 'var(--ls-color-text-tertiary)', fontSize: 14, marginTop: 16 }}>
             {status === 'checking' ? 'Checking authentication...' : 'Redirecting...'}
           </div>
         </>

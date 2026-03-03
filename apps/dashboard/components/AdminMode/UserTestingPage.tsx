@@ -417,7 +417,7 @@ export function UserTestingPage() {
                             title={isCurrentUser(user) ? "You cannot log in as yourself" : undefined}
                           >
                             {impersonationLoading === user.id ? (
-                              <CircularProgress size={14} sx={{ color: '#ffffff' }} />
+                              <CircularProgress size={14} sx={{ color: 'var(--ls-color-bg-container)' }} />
                             ) : (
                               <>
                                 <LoginIcon sx={{ fontSize: 16 }} />

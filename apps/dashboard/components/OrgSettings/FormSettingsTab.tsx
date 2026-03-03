@@ -185,7 +185,7 @@ export function FormSettingsTab({ orgId, disabled = false }: FormSettingsTabProp
                     backgroundColor: 'var(--ls-color-brand-hover)',
                   },
                   '&.Mui-disabled': {
-                    backgroundColor: '#e0e0e0',
+                    backgroundColor: 'var(--ls-color-muted-border)',
                   },
                 }}
               >

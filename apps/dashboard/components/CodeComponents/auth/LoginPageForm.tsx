@@ -191,10 +191,10 @@ export function LoginPageForm({
               maxWidth: '400px',
               marginBottom: '16px',
               padding: '12px 16px',
-              backgroundColor: '#fef2f2',
-              border: '1px solid #fca5a5',
+              backgroundColor: 'var(--ls-color-destructive-light)',
+              border: '1px solid var(--ls-color-destructive-lighter)',
               borderRadius: '8px',
-              color: '#b91c1c',
+              color: 'var(--ls-color-destructive-dark)',
               fontFamily: '"Satoshi", system-ui, -apple-system, sans-serif',
               fontSize: '14px',
             }}
@@ -217,7 +217,7 @@ export function LoginPageForm({
                 width: '100%',
                 padding: '12px 16px',
                 fontSize: '16px',
-                border: '1px solid ' + (errorMessage ? '#fca5a5' : 'var(--ls-color-muted-border)'),
+                border: '1px solid ' + (errorMessage ? 'var(--ls-color-destructive-lighter)' : 'var(--ls-color-muted-border)'),
                 borderRadius: '8px',
                 backgroundColor: 'var(--ls-color-bg-container)',
                 color: 'var(--ls-color-neutral-soft-foreground)',
@@ -235,7 +235,7 @@ export function LoginPageForm({
                 e.target.style.boxShadow = '0 0 0 3px rgba(49, 102, 74, 0.1)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = errorMessage ? '#fca5a5' : 'var(--ls-color-muted-border)';
+                e.target.style.borderColor = errorMessage ? 'var(--ls-color-destructive-lighter)' : 'var(--ls-color-muted-border)';
                 e.target.style.boxShadow = 'none';
               }}
               data-plasmic-name="email-input"
@@ -254,7 +254,7 @@ export function LoginPageForm({
                 width: '100%',
                 padding: '12px 16px',
                 fontSize: '16px',
-                border: '1px solid ' + (errorMessage ? '#fca5a5' : 'var(--ls-color-muted-border)'),
+                border: '1px solid ' + (errorMessage ? 'var(--ls-color-destructive-lighter)' : 'var(--ls-color-muted-border)'),
                 borderRadius: '8px',
                 backgroundColor: 'var(--ls-color-bg-container)',
                 color: 'var(--ls-color-neutral-soft-foreground)',
@@ -272,7 +272,7 @@ export function LoginPageForm({
                 e.target.style.boxShadow = '0 0 0 3px rgba(49, 102, 74, 0.1)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = errorMessage ? '#fca5a5' : 'var(--ls-color-muted-border)';
+                e.target.style.borderColor = errorMessage ? 'var(--ls-color-destructive-lighter)' : 'var(--ls-color-muted-border)';
                 e.target.style.boxShadow = 'none';
               }}
               data-plasmic-name="password-input"
@@ -289,7 +289,7 @@ export function LoginPageForm({
               fontSize: '16px',
               fontWeight: '600',
               backgroundColor: 'var(--ls-color-brand)',
-              color: '#ffffff',
+              color: 'var(--ls-color-bg-container)',
               border: 'none',
               borderRadius: '8px',
               cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -300,7 +300,7 @@ export function LoginPageForm({
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
-                e.currentTarget.style.backgroundColor = '#2a5a3f';
+                e.currentTarget.style.backgroundColor = 'var(--ls-color-brand-hover)';
               }
             }}
             onMouseLeave={(e) => {
@@ -347,7 +347,7 @@ export function LoginPageForm({
             }}
             onMouseLeave={(e) => {
               if (!googleLoading) {
-                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.backgroundColor = 'var(--ls-color-bg-container)';
                 e.currentTarget.style.borderColor = 'var(--ls-color-muted-border)';
               }
             }}

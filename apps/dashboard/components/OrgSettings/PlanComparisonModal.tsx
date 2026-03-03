@@ -75,7 +75,7 @@ export function PlanComparisonModal({
   };
 
   const tierColors: Record<PlanTier, { border: string; bg: string; text: string }> = {
-    core: { border: '#bbf7d0', bg: '#f0fdf4', text: '#166534' },
+    core: { border: 'var(--ls-color-success-border)', bg: 'var(--ls-color-success-foreground)', text: 'var(--ls-color-success-soft-foreground)' },
     pro: { border: '#d8b4fe', bg: '#f3e8ff', text: '#6b21a8' },
   };
 
@@ -98,7 +98,7 @@ export function PlanComparisonModal({
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '20px 24px',
-          borderBottom: '1px solid #e5e5e5',
+          borderBottom: '1px solid var(--ls-color-muted-border)',
         }}
       >
         <Typography
@@ -106,7 +106,7 @@ export function PlanComparisonModal({
             fontFamily: '"Mont", sans-serif',
             fontSize: '22px',
             fontWeight: 600,
-            color: '#0d1b14',
+            color: 'var(--ls-color-text-primary)',
           }}
         >
           Choose Your Plan
@@ -132,7 +132,7 @@ export function PlanComparisonModal({
                 border: '1px solid var(--ls-color-muted-border)',
                 '&.Mui-selected': {
                   backgroundColor: 'var(--ls-color-brand)',
-                  color: '#fff',
+                  color: 'var(--ls-color-bg-container)',
                   '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
                 },
               },
@@ -210,7 +210,7 @@ export function PlanComparisonModal({
                       top: -12,
                       right: 16,
                       backgroundColor: 'var(--ls-color-brand)',
-                      color: '#fff',
+                      color: 'var(--ls-color-bg-container)',
                       padding: '4px 12px',
                       borderRadius: '12px',
                       fontSize: '11px',
@@ -228,7 +228,7 @@ export function PlanComparisonModal({
                     fontFamily: '"Mont", sans-serif',
                     fontSize: '20px',
                     fontWeight: 600,
-                    color: '#0d1b14',
+                    color: 'var(--ls-color-text-primary)',
                     mb: 0.5,
                     mt: config.recommended ? 1 : 0,
                   }}
@@ -240,7 +240,7 @@ export function PlanComparisonModal({
                   sx={{
                     fontFamily,
                     fontSize: '13px',
-                    color: '#666',
+                    color: 'var(--ls-color-text-tertiary)',
                     mb: 2,
                   }}
                 >
@@ -255,7 +255,7 @@ export function PlanComparisonModal({
                       fontFamily: '"Mont", sans-serif',
                       fontSize: '32px',
                       fontWeight: 700,
-                      color: '#0d1b14',
+                      color: 'var(--ls-color-text-primary)',
                     }}
                   >
                     {formatPrice(price)}
@@ -265,7 +265,7 @@ export function PlanComparisonModal({
                     sx={{
                       fontFamily,
                       fontSize: '14px',
-                      color: '#999',
+                      color: 'var(--ls-color-text-tertiary)',
                     }}
                   >
                     /loc/mo
@@ -275,7 +275,7 @@ export function PlanComparisonModal({
                       sx={{
                         fontFamily,
                         fontSize: '12px',
-                        color: '#999',
+                        color: 'var(--ls-color-text-tertiary)',
                         mt: 0.5,
                       }}
                     >
@@ -289,7 +289,7 @@ export function PlanComparisonModal({
                   sx={{
                     fontFamily,
                     fontSize: '13px',
-                    color: '#666',
+                    color: 'var(--ls-color-text-tertiary)',
                     mb: 2,
                     padding: '8px 12px',
                     backgroundColor: 'var(--ls-color-muted-soft)',
@@ -322,7 +322,7 @@ export function PlanComparisonModal({
                         sx={{
                           fontFamily,
                           fontSize: '13px',
-                          color: '#333',
+                          color: 'var(--ls-color-text-primary)',
                         }}
                       >
                         {feature.label}
@@ -346,7 +346,7 @@ export function PlanComparisonModal({
                     ...(isCurrent
                       ? {
                           borderColor: 'var(--ls-color-muted-border)',
-                          color: '#999',
+                          color: 'var(--ls-color-text-tertiary)',
                         }
                       : {
                           backgroundColor: 'var(--ls-color-brand)',
@@ -366,7 +366,7 @@ export function PlanComparisonModal({
           sx={{
             fontFamily,
             fontSize: '13px',
-            color: '#999',
+            color: 'var(--ls-color-text-tertiary)',
             textAlign: 'center',
             mt: 3,
           }}

@@ -312,7 +312,7 @@ export function TaskDetailPanel({
                   fontFamily: '"Mont", sans-serif',
                   fontSize: 20,
                   fontWeight: 600,
-                  color: '#0d1b14',
+                  color: 'var(--ls-color-text-primary)',
                   lineHeight: 1.3,
                 },
               }}
@@ -690,7 +690,7 @@ export function TaskDetailPanel({
             style={{
               fontFamily: '"Satoshi", sans-serif',
               fontSize: 13,
-              color: '#dc2626',
+              color: 'var(--ls-color-destructive-vivid)',
               margin: '0 0 16px',
             }}
           >

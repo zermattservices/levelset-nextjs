@@ -90,7 +90,7 @@ export function ClientLoginForm({
           <h1 style={{
             fontSize: '24px',
             fontWeight: '700',
-            color: '#1e293b',
+            color: 'var(--ls-color-text-primary)',
             marginBottom: '8px',
             textAlign: 'center',
             fontFamily: '"Mont", system-ui, -apple-system, sans-serif'
@@ -100,7 +100,7 @@ export function ClientLoginForm({
 
           <p style={{
             fontSize: '14px',
-            color: '#64748b',
+            color: 'var(--ls-color-text-tertiary)',
             marginBottom: '2rem',
             textAlign: 'center'
           }}>
@@ -109,9 +109,9 @@ export function ClientLoginForm({
 
           {error && (
             <div style={{
-              backgroundColor: '#fef2f2',
-              border: '1px solid #fecaca',
-              color: '#dc2626',
+              backgroundColor: 'var(--ls-color-destructive-light)',
+              border: '1px solid var(--ls-color-destructive-lighter)',
+              color: 'var(--ls-color-destructive-vivid)',
               padding: '12px',
               borderRadius: '6px',
               marginBottom: '1rem',
@@ -181,7 +181,7 @@ export function ClientLoginForm({
                 width: '100%',
                 padding: '12px',
                 backgroundColor: 'var(--ls-color-brand)',
-                color: '#ffffff',
+                color: 'var(--ls-color-bg-container)',
                 border: 'none',
                 borderRadius: '6px',
                 fontWeight: '600',
@@ -201,7 +201,7 @@ export function ClientLoginForm({
           }}>
             <p style={{
               fontSize: '14px',
-              color: '#64748b',
+              color: 'var(--ls-color-text-tertiary)',
               margin: '0 0 1rem 0'
             }}>
               Or sign in with

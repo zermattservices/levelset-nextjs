@@ -93,11 +93,11 @@ export function DismissConfirmationModal({
             fontFamily,
             fontSize: 13,
             textTransform: "none",
-            backgroundColor: "#dc2626",
+            backgroundColor: "var(--ls-color-destructive-vivid)",
             padding: "6px 16px",
             borderRadius: '8px',
             "&:hover": {
-              backgroundColor: "#b91c1c",
+              backgroundColor: "var(--ls-color-destructive-dark)",
             },
           }}
         >

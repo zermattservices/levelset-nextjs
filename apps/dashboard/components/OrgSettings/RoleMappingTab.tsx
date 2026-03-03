@@ -20,7 +20,7 @@ const StyledSelect = styled(Select)(() => ({
   fontSize: 14,
   borderRadius: 12,
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#e0e0e0',
+    borderColor: 'var(--ls-color-muted-border)',
     borderRadius: 12,
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
@@ -307,8 +307,8 @@ export function RoleMappingTab({ orgId, disabled = false }: RoleMappingTabProps)
                                   fontFamily,
                                   fontSize: 11,
                                   height: 22,
-                                  backgroundColor: lockedRoles.has(value) ? '#f0f0f0' : '#f6fffa',
-                                  color: lockedRoles.has(value) ? '#666' : 'var(--ls-color-brand)',
+                                  backgroundColor: lockedRoles.has(value) ? 'var(--ls-color-muted-soft)' : 'var(--ls-color-success-foreground)',
+                                  color: lockedRoles.has(value) ? 'var(--ls-color-text-tertiary)' : 'var(--ls-color-brand)',
                                 }}
                               />
                             ))
