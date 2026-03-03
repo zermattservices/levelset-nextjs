@@ -9,7 +9,7 @@
   justify-self: flex-start;
 }
 .metricItem {
-  background: rgba(255, 255, 255, 1);
+  background: var(--ls-color-bg-card);
   box-shadow: inset 0px 0px 0px 1px rgba(233, 234, 235, 1);
   filter: drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05000000074505806));
   width: 100%;
@@ -44,7 +44,7 @@
   font-family: "Satoshi";
   font-size: 24px;
   font-weight: 600;
-  color: rgba(24, 29, 39, 1);
+  color: var(--ls-color-text-primary);
   line-height: 32px;
   letter-spacing: 0em;
 }
@@ -54,7 +54,7 @@
 }
 .text__yElZe {
   padding-right: 0px;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
 }
 .supportingMetrics {
   height: auto;
@@ -88,7 +88,7 @@
   font-family: "Satoshi";
   font-size: 16px;
   font-weight: 500;
-  color: rgba(83, 88, 98, 1);
+  color: var(--ls-color-text-caption);
   line-height: 24px;
   letter-spacing: 0em;
 }
@@ -103,7 +103,7 @@
   font-family: "Satoshi";
   font-size: 16px;
   font-weight: 500;
-  color: rgba(83, 88, 98, 1);
+  color: var(--ls-color-text-caption);
   line-height: 24px;
   letter-spacing: 0em;
 }
@@ -111,7 +111,7 @@
   font-family: "Inter", sans-serif;
   font-size: 16px;
   font-weight: 500;
-  color: rgba(36, 158, 107, 1);
+  color: var(--ls-color-success-vivid);
   line-height: 24px;
   letter-spacing: 0em;
 }
@@ -122,7 +122,7 @@
   font-weight: 500;
   letter-spacing: 0em;
   line-height: 24px;
-  color: rgba(83, 88, 98, 1);
+  color: var(--ls-color-text-caption);
   position: relative;
   padding-left: 0px;
 }
@@ -140,7 +140,7 @@
   font-family: "Satoshi";
   font-size: 16px;
   font-weight: 500;
-  color: rgba(83, 88, 98, 1);
+  color: var(--ls-color-text-caption);
   line-height: 24px;
   letter-spacing: 0em;
 }
