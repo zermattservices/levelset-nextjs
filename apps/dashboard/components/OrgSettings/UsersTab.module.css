@@ -19,7 +19,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
   margin: 0 0 8px 0;
 }
 
@@ -27,23 +27,23 @@
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   margin: 0;
   line-height: 1.5;
 }
 
 .errorMessage {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
+  background-color: var(--ls-color-destructive-foreground);
+  border: 1px solid var(--ls-color-destructive-lighter);
   border-radius: 8px;
   padding: 12px 16px;
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
-  color: #dc2626;
+  color: var(--ls-color-destructive-vivid);
 }
 
 .tableContainer {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ls-color-muted-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -57,29 +57,29 @@
   font-family: "Satoshi", sans-serif;
   font-size: 12px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 12px 16px;
   text-align: left;
-  background-color: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background-color: var(--ls-color-neutral-foreground);
+  border-bottom: 1px solid var(--ls-color-muted-border);
 }
 
 .headerCellActions {
   font-family: "Satoshi", sans-serif;
   font-size: 12px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   padding: 12px 16px;
   text-align: right;
-  background-color: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background-color: var(--ls-color-neutral-foreground);
+  border-bottom: 1px solid var(--ls-color-muted-border);
   width: 60px;
 }
 
 .row {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--ls-color-muted-border);
 }
 
 .row:last-child {
@@ -87,13 +87,13 @@
 }
 
 .row:hover {
-  background-color: #f9fafb;
+  background-color: var(--ls-color-neutral-foreground);
 }
 
 .cell {
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
   padding: 12px 16px;
   vertical-align: middle;
 }
@@ -128,7 +128,7 @@
 .editButton {
   opacity: 0;
   transition: opacity 0.2s;
-  color: #6b7280;
+  color: var(--ls-color-muted);
 }
 
 .emailRow:hover .editButton {
@@ -140,11 +140,11 @@
 }
 
 .deleteButton {
-  color: #6b7280;
+  color: var(--ls-color-muted);
 }
 
 .deleteButton:hover {
-  color: #dc2626;
+  color: var(--ls-color-destructive-vivid);
 }
 
 .roleBadge {
@@ -152,15 +152,15 @@
   padding: 4px 10px;
   font-size: 12px;
   font-weight: 500;
-  color: #374151;
-  background-color: #f3f4f6;
+  color: var(--ls-color-neutral-base);
+  background-color: var(--ls-color-bg-hover);
   border-radius: 6px;
 }
 
 .emptyState {
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   text-align: center;
   padding: 32px 16px;
 }
@@ -170,7 +170,7 @@
   flex-direction: column;
   gap: 12px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--ls-color-muted-border);
 }
 
 .section:first-of-type {
@@ -182,14 +182,14 @@
   font-family: "Satoshi", sans-serif;
   font-size: 15px;
   font-weight: 600;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
   margin: 0;
 }
 
 .sectionDescription {
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   margin: 0;
 }
 
@@ -209,7 +209,7 @@
 }
 
 .locationPillsClickable:hover {
-  background-color: #f3f4f6;
+  background-color: var(--ls-color-bg-hover);
 }
 
 .locationPillsClickable:focus {
@@ -226,17 +226,17 @@
   font-weight: 500;
   padding: 3px 8px;
   border-radius: 12px;
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: var(--ls-color-bg-hover);
+  color: var(--ls-color-neutral-base);
   white-space: nowrap;
 }
 
 .locationPillsClickable .locationPill {
-  background-color: #e5e7eb;
+  background-color: var(--ls-color-muted-border);
 }
 
 .locationEditIcon {
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
   margin-left: 4px;
   opacity: 0;
   transition: opacity 0.15s ease;
@@ -250,7 +250,7 @@
 .noAccessText {
   font-family: "Satoshi", sans-serif;
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
   font-style: italic;
 }
 
@@ -258,5 +258,5 @@
 .permissionLevelText {
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
 }

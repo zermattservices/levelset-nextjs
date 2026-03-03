@@ -9,21 +9,21 @@
   flex-direction: column;
   gap: 8px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
 }
 
 .introTitle {
   font-family: "Satoshi";
   font-size: 16px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0;
 }
 
 .introDescription {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   margin: 0;
   line-height: 1.5;
 }
@@ -38,14 +38,14 @@
 .errorMessage {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #dc2626;
-  background: #fef2f2;
+  color: var(--ls-color-destructive-vivid);
+  background: var(--ls-color-destructive-foreground);
   padding: 12px 16px;
   border-radius: 8px;
 }
 
 .scaleContainer {
-  background: #fafafa;
+  background: var(--ls-color-bg-surface);
   border-radius: 12px;
   padding: 24px;
   max-width: 500px;
@@ -55,7 +55,7 @@
   font-family: "Satoshi";
   font-size: 16px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0 0 20px 0;
   text-align: center;
 }
@@ -100,7 +100,7 @@
   font-family: "Satoshi";
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--ls-color-bg-container);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -116,7 +116,7 @@
 .scaleInfo {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--ls-color-border-light);
 }
 
 .rangeInfo {
@@ -141,7 +141,7 @@
 .rangeText {
   font-family: "Satoshi";
   font-size: 13px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
 }
 
 .savingIndicator {

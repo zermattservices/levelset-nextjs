@@ -9,21 +9,21 @@
   flex-direction: column;
   gap: 4px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
 }
 
 .title {
   font-family: "Satoshi";
   font-size: 18px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0;
 }
 
 .description {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   margin: 0;
 }
 

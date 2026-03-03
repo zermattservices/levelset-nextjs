@@ -9,21 +9,21 @@
   flex-direction: column;
   gap: 4px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
 }
 
 .introTitle {
   font-family: "Satoshi";
   font-size: 16px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0;
 }
 
 .introDescription {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   margin: 0;
 }
 
@@ -37,8 +37,8 @@
 .errorMessage {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #dc2626;
-  background: #fef2f2;
+  color: var(--ls-color-destructive-vivid);
+  background: var(--ls-color-destructive-foreground);
   padding: 10px 14px;
   border-radius: 8px;
 }
@@ -49,7 +49,7 @@
   flex-wrap: wrap;
   gap: 12px;
   padding: 8px 0;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
   align-items: center;
 }
 
@@ -88,7 +88,7 @@
   font-family: "Satoshi";
   font-size: 12px;
   font-weight: 500;
-  color: #999;
+  color: var(--ls-color-text-placeholder);
 }
 
 .positionsHeader {
@@ -96,7 +96,7 @@
   grid-template-columns: 1fr 120px 80px 40px;
   gap: 12px;
   padding: 6px 0;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
   align-items: center;
 }
 
@@ -104,7 +104,7 @@
   font-family: "Satoshi";
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   text-transform: uppercase;
 }
 
@@ -113,7 +113,7 @@
   grid-template-columns: 1fr 120px 80px 40px;
   gap: 12px;
   padding: 6px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ls-color-bg-surface-alt);
   align-items: center;
 }
 
@@ -121,7 +121,7 @@
   font-family: "Satoshi";
   font-size: 14px;
   font-weight: 500;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   padding: 4px 0;
 }
 
@@ -169,7 +169,7 @@
 .alwaysOn {
   font-family: "Satoshi";
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
   white-space: nowrap;
 }
 
@@ -182,19 +182,19 @@
 .emptySection {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #999;
+  color: var(--ls-color-text-placeholder);
   padding: 16px;
   text-align: center;
-  background: #fafafa;
+  background: var(--ls-color-bg-surface);
   border-radius: 8px;
 }
 
 .deleteButton {
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
 }
 
 .deleteButton:hover {
-  color: #dc2626;
+  color: var(--ls-color-destructive-vivid);
   background-color: rgba(220, 38, 38, 0.08);
 }
 
@@ -204,7 +204,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 12px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--ls-color-border-light);
 }
 
 .rightActions {

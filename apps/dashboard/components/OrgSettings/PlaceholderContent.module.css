@@ -14,14 +14,14 @@
   font-family: "Mont";
   font-size: 20px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0;
 }
 
 .description {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   margin: 0;
 }
 
@@ -32,13 +32,13 @@
   justify-content: center;
   gap: 12px;
   padding: 48px 32px;
-  background: #fafafa;
-  border: 2px dashed #e5e5e5;
+  background: var(--ls-color-bg-surface);
+  border: 2px dashed var(--ls-color-border-light);
   border-radius: 8px;
 }
 
 .placeholderText {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #999;
+  color: var(--ls-color-text-placeholder);
 }

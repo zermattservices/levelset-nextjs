@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 64px 32px;
-  background: #fafafa;
+  background: var(--ls-color-bg-surface);
   border-radius: 12px;
   text-align: center;
 }
@@ -24,14 +24,14 @@
   font-family: "Mont";
   font-size: 24px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0 0 12px 0;
 }
 
 .description {
   font-family: "Satoshi";
   font-size: 16px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   margin: 0 0 24px 0;
   max-width: 400px;
 }
