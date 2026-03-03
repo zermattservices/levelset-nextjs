@@ -55,9 +55,9 @@ function getShiftPublishState(shift: Shift): 'draft' | 'changed' | 'published' {
  *   Line 3 (muted)— Zone label (e.g. "Back of House")
  *
  * Open/unassigned shifts use a dashed border with lighter tinting and an "OPEN" label.
- * A small status dot indicates per-shift publish state:
- *   - Orange dot: draft or has unpublished changes
- *   - Green dot: fully published
+ * A small red status dot indicates unpublished shifts:
+ *   - Red dot: draft or has unpublished changes
+ *   - No dot: fully published
  */
 export function ShiftBlock({
   shift,
@@ -131,17 +131,13 @@ export function ShiftBlock({
     >
       {/* Top-right action area: status dot + delete button */}
       <div className={sty.actions}>
-        <span
-          className={sty.publishDot}
-          style={{
-            backgroundColor: publishState === 'published' ? '#22c55e' : '#f59e0b',
-          }}
-          title={
-            publishState === 'published' ? 'Published'
-              : publishState === 'changed' ? 'Unpublished changes'
-              : 'Draft'
-          }
-        />
+        {publishState !== 'published' && (
+          <span
+            className={sty.publishDot}
+            style={{ backgroundColor: 'var(--ls-color-destructive, #ef4444)' }}
+            title={publishState === 'changed' ? 'Unpublished changes' : 'Draft'}
+          />
+        )}
         {onDelete && (
           <button
             className={sty.deleteBtn}

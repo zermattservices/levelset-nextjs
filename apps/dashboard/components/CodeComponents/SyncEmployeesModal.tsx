@@ -46,6 +46,8 @@ export interface SyncEmployeesModalProps {
   onSyncComplete?: () => void; // Callback to refresh RosterTable
   /** When true, skips employee review and goes directly to position mapping + schedule import */
   scheduleImportMode?: boolean;
+  /** When true, defaults the schedule sync toggle to on */
+  defaultScheduleSync?: boolean;
 }
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -590,43 +592,26 @@ export function SyncEmployeesModal({
   className = "",
   onSyncComplete,
   scheduleImportMode = false,
+  defaultScheduleSync = false,
 }: SyncEmployeesModalProps) {
-  console.log('[SyncEmployeesModal] Component render start', { open, renderId: Math.random() });
-  
   const [currentPage, setCurrentPage] = React.useState<Page>('instructions');
-  console.log('[SyncEmployeesModal] useState: currentPage =', currentPage);
-  
   const [exitConfirmOpen, setExitConfirmOpen] = React.useState(false);
-  console.log('[SyncEmployeesModal] useState: exitConfirmOpen =', exitConfirmOpen);
-  
   const [notification, setNotification] = React.useState<SyncNotification | null>(null);
-  console.log('[SyncEmployeesModal] useState: notification =', notification ? 'exists' : 'null');
-  
   const [hasSyncedBefore, setHasSyncedBefore] = React.useState(false);
-  console.log('[SyncEmployeesModal] useState: hasSyncedBefore =', hasSyncedBefore);
-  
   const [employeeEdits, setEmployeeEdits] = React.useState<Map<string, EmployeeEdit>>(new Map());
-  console.log('[SyncEmployeesModal] useState: employeeEdits size =', employeeEdits.size);
-  
   const [keptEmployees, setKeptEmployees] = React.useState<Set<number>>(new Set());
-  console.log('[SyncEmployeesModal] useState: keptEmployees size =', keptEmployees.size);
 
   // Termination reason state
   const [terminationReasons, setTerminationReasons] = React.useState<Array<{ id: string; reason: string; category: string }>>([]);
   const [terminationReasonSelections, setTerminationReasonSelections] = React.useState<Map<number, string>>(new Map());
 
   const [confirming, setConfirming] = React.useState(false);
-  console.log('[SyncEmployeesModal] useState: confirming =', confirming);
-  
   const [editTrigger, setEditTrigger] = React.useState(0); // Force re-render when edits change
-  console.log('[SyncEmployeesModal] useState: editTrigger =', editTrigger);
-  
   const [confirmationStats, setConfirmationStats] = React.useState<{
     created: number;
     updated: number;
     deactivated: number;
   } | null>(null);
-  console.log('[SyncEmployeesModal] useState: confirmationStats =', confirmationStats);
 
   // Track when modal opened to only accept notifications created after this time
   const [modalOpenTime, setModalOpenTime] = React.useState<Date | null>(null);
@@ -636,7 +621,7 @@ export function SyncEmployeesModal({
   const [manualMatches, setManualMatches] = React.useState<Map<string, string>>(new Map()); // newEmpKey -> existingEmpId
 
   // Scheduling sync state
-  const [scheduleToggle, setScheduleToggle] = React.useState(false);
+  const [scheduleToggle, setScheduleToggle] = React.useState(defaultScheduleSync);
   const [positionMappings, setPositionMappings] = React.useState<Map<number, string | null>>(new Map());
   const [orgPositions, setOrgPositions] = React.useState<Array<{ id: string; name: string; zone: string }>>([]);
   const [scheduleStats, setScheduleStats] = React.useState<{
@@ -670,10 +655,8 @@ export function SyncEmployeesModal({
   }, [orgId]);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  console.log('[SyncEmployeesModal] baseUrl =', baseUrl);
-  
+
   const bookmarkletCode = React.useMemo(() => {
-    console.log('[SyncEmployeesModal] useMemo: bookmarkletCode called', { baseUrl });
     if (!baseUrl) return '';
 
     // Bookmarklet phases:
@@ -769,7 +752,6 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
   React.useEffect(() => {
     if (open && !modalOpenTime) {
       setModalOpenTime(new Date());
-      console.log('[SyncEmployeesModal] Modal opened, tracking time:', new Date().toISOString());
     } else if (!open && modalOpenTime) {
       setModalOpenTime(null);
     }
@@ -790,10 +772,6 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
           // Only accept notifications created after modal opened
           const notificationTime = new Date(data.notification.created_at);
           if (notificationTime > modalOpenTime) {
-            console.log('[SyncEmployeesModal] New notification received after modal opened', {
-              notificationTime: notificationTime.toISOString(),
-              modalOpenTime: modalOpenTime.toISOString(),
-            });
             setNotification(data.notification);
             // Go to config page if scheduling data is present and org has scheduling feature
             if (data.notification.sync_data?.has_scheduling_data && hasSchedulingFeature) {
@@ -802,10 +780,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
               setCurrentPage('review');
             }
           } else {
-            console.log('[SyncEmployeesModal] Ignoring old notification', {
-              notificationTime: notificationTime.toISOString(),
-              modalOpenTime: modalOpenTime.toISOString(),
-            });
+            // Ignore notifications created before modal opened
           }
         }
       } catch (error) {
@@ -828,7 +803,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
       setModalOpenTime(null);
       setExistingEmployees([]);
       setManualMatches(new Map());
-      setScheduleToggle(false);
+      setScheduleToggle(defaultScheduleSync);
       setPositionMappings(new Map());
       setOrgPositions([]);
       setScheduleStats(null);
@@ -1138,10 +1113,7 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
 
   // Menu state for role and availability dropdowns
   const [roleMenuAnchor, setRoleMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
-  console.log('[SyncEmployeesModal] useState: roleMenuAnchor keys =', Object.keys(roleMenuAnchor).length);
-  
   const [availabilityMenuAnchor, setAvailabilityMenuAnchor] = React.useState<{ [key: string]: HTMLElement | null }>({});
-  console.log('[SyncEmployeesModal] useState: availabilityMenuAnchor keys =', Object.keys(availabilityMenuAnchor).length);
 
   const roles: string[] = ['New Hire', 'Team Member', 'Trainer', 'Team Lead', 'Director', 'Executive', 'Operator'];
   const availabilities: AvailabilityType[] = ['Available', 'Limited'];
@@ -1188,25 +1160,11 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
   }, [handleAvailabilityMenuClose]);
 
 
-  // Log for debugging
-  React.useEffect(() => {
-    if (open) {
-      console.log('[SyncEmployeesModal] Modal opened', {
-        currentPage,
-        hasNotification: !!notification,
-      });
-    }
-  }, [open, currentPage, notification]);
-
-
   // CRITICAL: Always create columns unconditionally to ensure consistent hook count
   // The column structure (including Menu components in renderCell) must always be defined
   // DataGridPro will only render them when needed, but the structure is always consistent
   // This prevents React from seeing different hook counts when shouldCreateColumns changes
-  console.log('[SyncEmployeesModal] Creating columns unconditionally', { currentPage, hasNotification: !!notification });
-  
   const editableColumns = React.useMemo<GridColDef[]>(() => {
-    console.log('[SyncEmployeesModal] useMemo: editableColumns called - ALWAYS creating columns');
     return createEmployeeColumns(true, false, true, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -1250,7 +1208,6 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
   ]);
 
   const readOnlyColumns = React.useMemo<GridColDef[]>(() => {
-    console.log('[SyncEmployeesModal] useMemo: readOnlyColumns called - ALWAYS creating columns');
     return createEmployeeColumns(false, true, false, {
       roleMenuAnchor,
       handleRoleMenuOpen,
@@ -1354,10 +1311,6 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
   // Prepare new employees data with default role - reactive to edits
   // Always call useMemo, return empty array when not on review page
   const newEmployeesData = React.useMemo(() => {
-    console.log('[SyncEmployeesModal] useMemo: newEmployeesData called', { 
-      hasNotification: !!notification, 
-      newEmployeesCount: newEmployees.length 
-    });
     if (!notification || currentPage !== 'review') {
       return [];
     }
@@ -1388,10 +1341,6 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
   // Prepare terminated employees data
   // Always call useMemo, return empty array when not on review page
   const terminatedEmployeesData = React.useMemo(() => {
-    console.log('[SyncEmployeesModal] useMemo: terminatedEmployeesData called', { 
-      hasNotification: !!notification, 
-      terminatedEmployeesCount: terminatedEmployees.length 
-    });
     if (!notification || currentPage !== 'review') {
       return [];
     }
@@ -1421,7 +1370,6 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
 
   // Render Page 2: Review Changes
   const renderReviewPage = () => {
-    console.log('[SyncEmployeesModal] renderReviewPage called', { hasNotification: !!notification });
     if (!notification) return null;
 
     const hasChanges = newEmployees.length > 0 || modifiedEmployees.length > 0 || terminatedEmployees.length > 0;
@@ -2199,8 +2147,6 @@ return fetch(baseUrl+'/api/employees/sync-hotschedules',{method:'POST',headers:{
     );
   };
 
-  console.log('[SyncEmployeesModal] About to render Dialog', { open, currentPage });
-  
   return (
     <>
       <StyledDialog

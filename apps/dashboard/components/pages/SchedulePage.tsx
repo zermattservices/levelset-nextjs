@@ -49,6 +49,9 @@ export function SchedulePage() {
   const [prefillEndTime, setPrefillEndTime] = React.useState('');
   const [pendingShift, setPendingShift] = React.useState<PendingShiftPreview | null>(null);
 
+  // HotSchedules sync modal
+  const [hsSyncOpen, setHsSyncOpen] = React.useState(false);
+
   // Synchronized hover cursor between ScheduleGrid and LaborSpreadTab
   const [gridHoverMinute, setGridHoverMinute] = React.useState<number | null>(null);
   const [chartHoverMinute, setChartHoverMinute] = React.useState<number | null>(null);
@@ -277,6 +280,7 @@ export function SchedulePage() {
               onGridViewChange={data.setGridViewMode}
               onZoneFilterChange={data.setZoneFilter}
               onPublish={handlePublish}
+              onSyncClick={() => setHsSyncOpen(true)}
             />
 
             {data.gridViewMode === 'setup' ? (
@@ -408,7 +412,7 @@ export function SchedulePage() {
         onUnassign={data.unassignEmployee}
       />
 
-      {/* First-time HS schedule import modal */}
+      {/* First-time HS schedule import modal (auto-triggered by notification) */}
       <SyncEmployeesModal
         open={!!data.pendingHsNotificationId}
         onClose={() => data.clearPendingHsImport()}
@@ -416,6 +420,19 @@ export function SchedulePage() {
         orgId={selectedLocationOrgId ?? auth.org_id}
         scheduleImportMode
         onSyncComplete={() => data.clearPendingHsImport()}
+      />
+
+      {/* Manual HS sync from toolbar button */}
+      <SyncEmployeesModal
+        open={hsSyncOpen}
+        onClose={() => setHsSyncOpen(false)}
+        locationId={selectedLocationId}
+        orgId={selectedLocationOrgId ?? auth.org_id}
+        defaultScheduleSync
+        onSyncComplete={() => {
+          setHsSyncOpen(false);
+          data.refetch();
+        }}
       />
     </>
   );

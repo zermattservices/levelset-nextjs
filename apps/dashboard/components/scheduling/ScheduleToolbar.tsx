@@ -23,6 +23,7 @@ interface ScheduleToolbarProps {
   onGridViewChange: (mode: GridViewMode) => void;
   onZoneFilterChange: (zone: ZoneFilter) => void;
   onPublish: () => void;
+  onSyncClick?: () => void;
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -77,6 +78,7 @@ export function ScheduleToolbar({
   onGridViewChange,
   onZoneFilterChange,
   onPublish,
+  onSyncClick,
 }: ScheduleToolbarProps) {
   const allPublished = hasShifts && unpublishedCount === 0;
   const label = timeViewMode === 'week' ? formatWeekLabel(weekStart) : formatDayLabel(selectedDay);
@@ -104,6 +106,12 @@ export function ScheduleToolbar({
         </IconButton>
 
         <button className={sty.todayBtn} onClick={onGoToToday}>Today</button>
+        {onSyncClick && (
+          <button className={sty.todayBtn} onClick={onSyncClick} title="Import from HotSchedules">
+            <img src="/hs_logo.png" alt="" style={{ width: 14, height: 14, verticalAlign: 'middle', marginRight: 4 }} />
+            Sync
+          </button>
+        )}
       </div>
 
       {/* Center: toggles + zone filter + summary */}

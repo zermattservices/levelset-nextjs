@@ -121,6 +121,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(400).json({ error: 'id is required' });
         }
 
+        // Validate published_by is a real app_users.id (FK constraint)
+        let publishedBy: string | null = null;
+        if (user_id) {
+          const { data: appUser } = await supabase
+            .from('app_users')
+            .select('id')
+            .eq('id', user_id)
+            .maybeSingle();
+          publishedBy = appUser?.id ?? null;
+        }
+
         const now = new Date().toISOString();
 
         // Mark all shifts as published (idempotent — safe to re-stamp already-published shifts)
@@ -229,7 +240,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .update({
             status: 'published',
             published_at: now,
-            published_by: user_id || null,
+            published_by: publishedBy,
             total_hours: Math.round(totalHours * 100) / 100,
             total_labor_cost: Math.round((totalCost + otPremium) * 100) / 100,
             updated_at: now,
