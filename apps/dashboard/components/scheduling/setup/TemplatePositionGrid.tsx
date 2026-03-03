@@ -120,29 +120,22 @@ export function TemplatePositionGrid({ positions, slots, startTime, endTime, onC
                   key={tc}
                   className={`${sty.bodyCell} ${sty.cell} ${checked ? sty.cellChecked : ''}`}
                   onClick={() => handleToggle(pos.id, tc)}
+                  role="checkbox"
+                  aria-checked={checked}
                 >
-                  <label className={sty.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      className={sty.checkboxInput}
-                      checked={checked}
-                      onChange={() => handleToggle(pos.id, tc)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <span className={`${sty.checkboxBox} ${checked ? sty.checkboxChecked : ''}`}>
-                      {checked && (
-                        <svg className={sty.checkIcon} viewBox="0 0 12 12" fill="none">
-                          <path
-                            d="M2.5 6L5 8.5L9.5 3.5"
-                            stroke="currentColor"
-                            strokeWidth="1.75"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      )}
-                    </span>
-                  </label>
+                  <span className={`${sty.checkboxBox} ${checked ? sty.checkboxChecked : ''}`}>
+                    {checked && (
+                      <svg className={sty.checkIcon} viewBox="0 0 12 12" fill="none">
+                        <path
+                          d="M2.5 6L5 8.5L9.5 3.5"
+                          stroke="currentColor"
+                          strokeWidth="1.75"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </span>
                 </div>
               );
             })}

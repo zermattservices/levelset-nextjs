@@ -92,22 +92,6 @@
 }
 
 /* ── Custom checkbox ── */
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.checkboxInput {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-
 .checkboxBox {
   width: 16px;
   height: 16px;
