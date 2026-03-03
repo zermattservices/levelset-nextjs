@@ -33,6 +33,13 @@ export default function HomeLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="todays-setup"
+        options={{
+          headerShown: true,
+          title: "Today's Setup",
+        }}
+      />
     </Stack>
   );
 }
