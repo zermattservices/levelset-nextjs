@@ -111,7 +111,7 @@
 }
 
 .ratingRed {
-  background: #FEE2E2;
+  background: var(--ls-color-destructive-light);
   color: var(--ls-color-destructive);
 }
 
@@ -131,7 +131,7 @@
 .pointsBadge {
   padding: var(--ls-space-1) var(--ls-space-3);
   border-radius: var(--ls-radius-md);
-  background: #FEE2E2;
+  background: var(--ls-color-destructive-light);
 }
 
 .pointsText {

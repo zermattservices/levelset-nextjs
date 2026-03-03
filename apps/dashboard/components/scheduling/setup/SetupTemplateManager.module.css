@@ -272,7 +272,7 @@
 .dayBtnActive {
   background: var(--ls-color-brand);
   border-color: var(--ls-color-brand);
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
 }
 
 .timeRange {
@@ -444,7 +444,7 @@
 
 .slotTabBtnActive {
   background: var(--ls-color-brand);
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
 }
 
 .slotTabBtn:not(.slotTabBtnActive):hover {
@@ -471,7 +471,7 @@
   font-weight: 500;
   color: var(--ls-color-destructive);
   background: none;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--ls-color-destructive-lighter);
   border-radius: var(--ls-radius-md);
   padding: 6px 14px;
   cursor: pointer;
@@ -504,7 +504,7 @@
   font-family: var(--ls-font-body);
   font-size: 13px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
   background: var(--ls-color-brand);
   border: none;
   border-radius: var(--ls-radius-md);
@@ -514,7 +514,7 @@
 }
 
 .saveBtn:hover:not(:disabled) {
-  background: #265339;
+  background: var(--ls-color-brand-dark-alt);
 }
 
 .saveBtn:disabled {

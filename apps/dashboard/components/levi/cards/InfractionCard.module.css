@@ -15,7 +15,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #FEE2E2;
+  background: var(--ls-color-destructive-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,7 +71,7 @@
 .pointsBadge {
   padding: var(--ls-space-1) var(--ls-space-3);
   border-radius: var(--ls-radius-md);
-  background: #FEE2E2;
+  background: var(--ls-color-destructive-light);
   flex-shrink: 0;
 }
 

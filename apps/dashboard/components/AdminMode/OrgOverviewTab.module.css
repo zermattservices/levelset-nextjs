@@ -28,9 +28,9 @@
   display: flex;
   flex-direction: column;
   padding: 20px;
-  background-color: #fafafa;
+  background-color: var(--ls-color-bg-surface);
   border-radius: 12px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--ls-color-border-light);
 }
 
 .metricHeader {
@@ -44,14 +44,14 @@
   font-family: "Satoshi";
   font-size: 13px;
   font-weight: 500;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
 }
 
 .metricValue {
   font-family: "Mont";
   font-size: 32px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   line-height: 1.2;
 }
 
@@ -67,14 +67,14 @@
   font-family: "Satoshi";
   font-size: 13px;
   font-weight: 600;
-  color: #16a34a;
+  color: var(--ls-color-success-base);
 }
 
 .changeNegative {
   font-family: "Satoshi";
   font-size: 13px;
   font-weight: 600;
-  color: #dc2626;
+  color: var(--ls-color-destructive-vivid);
 }
 
 .metricPeriod {

@@ -60,7 +60,7 @@
   background: #717069;
 }
 .rootcolor_white {
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
 }
 .rootcolor_softBlue {
   background: #edf6ff;
@@ -75,7 +75,7 @@
   background: #fff0ee;
 }
 .rootcolor_softSand {
-  background: #fafafa;
+  background: var(--ls-color-bg-surface);
 }
 .rootcolor_clear {
   background: #ffffff00;
@@ -257,19 +257,19 @@
   white-space: pre;
 }
 .slotTargetChildrencolor_blue {
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
 }
 .slotTargetChildrencolor_green {
   color: #28543d;
 }
 .slotTargetChildrencolor_brand {
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
 }
 .slotTargetChildrencolor_red {
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
 }
 .slotTargetChildrencolor_sand {
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
 }
 .slotTargetChildrencolor_white {
   color: #1b1b18;
@@ -287,7 +287,7 @@
   color: #ca3214;
 }
 .slotTargetChildrencolor_softSand {
-  color: #6b7280;
+  color: var(--ls-color-muted);
 }
 .slotTargetChildrencolor_clear {
   color: #1b1b18;

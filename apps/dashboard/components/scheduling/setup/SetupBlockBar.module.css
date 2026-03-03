@@ -56,7 +56,7 @@
 }
 
 .tabActive .tabStartTime {
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
 }
 
 .tabEndTime {

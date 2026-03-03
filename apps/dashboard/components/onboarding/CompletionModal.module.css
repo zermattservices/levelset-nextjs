@@ -146,7 +146,7 @@
   font-size: 16px;
   font-weight: 600;
   background-color: var(--ls-color-brand);
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
   border: none;
   border-radius: 10px;
   cursor: pointer;

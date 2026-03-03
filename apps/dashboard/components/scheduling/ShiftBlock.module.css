@@ -23,7 +23,7 @@
 }
 
 .block:hover {
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px var(--ls-color-shadow);
 }
 
 .block:focus-visible {

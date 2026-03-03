@@ -13,7 +13,7 @@
   align-items: flex-start;
   gap: 8px;
   padding: 24px 24px 16px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
 }
 
 .titleInput {
@@ -57,10 +57,10 @@
   padding: 8px 12px;
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  background: #fff;
+  background: var(--ls-color-bg-card);
   outline: none;
   transition: border-color 0.15s;
   box-sizing: border-box;
@@ -151,7 +151,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--ls-color-border-light);
 }
 
 .deleteButton {
@@ -177,7 +177,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: var(--ls-color-bg-card);
   background: var(--ls-color-brand, #31664A);
   border: none;
   padding: 8px 20px;
@@ -201,9 +201,9 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   background: none;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--ls-color-border-light);
   padding: 6px 14px;
   border-radius: 8px;
   cursor: pointer;
@@ -223,7 +223,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #fff;
+  color: var(--ls-color-bg-card);
   background: var(--ls-color-destructive, #D23230);
   border: none;
   padding: 6px 14px;
@@ -233,7 +233,7 @@
 }
 
 .confirmDeleteButton:hover {
-  background: #b91c1c;
+  background: var(--ls-color-destructive-dark);
 }
 
 .confirmDeleteButton:disabled {

@@ -10,7 +10,7 @@
   justify-content: center;
   gap: 16px;
   padding: 80px 20px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
 }
 
 .header {
@@ -23,13 +23,13 @@
 .title {
   font-size: 28px;
   font-weight: 700;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
   margin: 0 0 8px;
 }
 
 .subtitle {
   font-size: 15px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   margin: 0;
 }
 
@@ -39,7 +39,7 @@
   gap: 6px;
   padding: 10px 16px;
   background-color: var(--ls-color-brand);
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -62,11 +62,11 @@
 
 .filterSelect {
   padding: 10px 36px 10px 14px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ls-color-muted-border);
   border-radius: 8px;
   font-size: 14px;
-  color: #111827;
-  background-color: #ffffff;
+  color: var(--ls-color-neutral-soft-foreground);
+  background-color: var(--ls-color-bg-card);
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
@@ -85,7 +85,7 @@
   display: flex;
   gap: 0;
   margin-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--ls-color-muted-border);
 }
 
 .tab {
@@ -94,7 +94,7 @@
   border: none;
   font-size: 14px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -102,7 +102,7 @@
 }
 
 .tab:hover {
-  color: #374151;
+  color: var(--ls-color-neutral-base);
 }
 
 .tabActive {
@@ -127,19 +127,19 @@
 .statNumber {
   font-size: 28px;
   font-weight: 700;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
   text-align: center;
 }
 
 .statLabel {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   text-align: center;
 }
 
 .tableContainer {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--ls-color-bg-card);
+  border: 1px solid var(--ls-color-muted-border);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -154,9 +154,9 @@
   padding: 14px 16px;
   font-size: 13px;
   font-weight: 600;
-  color: #6b7280;
-  background-color: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  color: var(--ls-color-muted);
+  background-color: var(--ls-color-neutral-foreground);
+  border-bottom: 1px solid var(--ls-color-muted-border);
 }
 
 /* Center all headers except first (Title) */
@@ -166,7 +166,7 @@
 
 .table td {
   padding: 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--ls-color-bg-hover);
   vertical-align: middle;
 }
 
@@ -180,7 +180,7 @@
 }
 
 .table tbody tr:hover {
-  background-color: #f9fafb;
+  background-color: var(--ls-color-neutral-foreground);
 }
 
 .pendingRow {
@@ -194,13 +194,13 @@
 .featureTitle {
   font-size: 15px;
   font-weight: 600;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
   margin-bottom: 4px;
 }
 
 .featureDescription {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   line-height: 1.4;
 }
 
@@ -208,11 +208,11 @@
   display: inline-block;
   padding: 4px 10px;
   border-radius: 100px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  background-color: var(--ls-color-bg-hover);
+  border: 1px solid var(--ls-color-muted-border);
   font-size: 12px;
   font-weight: 500;
-  color: #374151;
+  color: var(--ls-color-neutral-base);
 }
 
 .statusBadge {
@@ -227,12 +227,12 @@
 
 .voteCount {
   font-weight: 600;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
 }
 
 .dateCell {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   white-space: nowrap;
 }
 
@@ -244,7 +244,7 @@
 .emptyState {
   text-align: center;
   padding: 48px 20px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   font-size: 15px;
 }
 
@@ -271,16 +271,16 @@
 .formLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: var(--ls-color-neutral-base);
 }
 
 .modalInput {
   padding: 10px 14px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ls-color-muted-border);
   border-radius: 8px;
   font-size: 14px;
-  color: #111827;
-  background-color: #ffffff;
+  color: var(--ls-color-neutral-soft-foreground);
+  background-color: var(--ls-color-bg-card);
   width: 100%;
   box-sizing: border-box;
 }
@@ -292,11 +292,11 @@
 
 .modalTextarea {
   padding: 10px 14px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ls-color-muted-border);
   border-radius: 8px;
   font-size: 14px;
-  color: #111827;
-  background-color: #ffffff;
+  color: var(--ls-color-neutral-soft-foreground);
+  background-color: var(--ls-color-bg-card);
   width: 100%;
   box-sizing: border-box;
   resize: vertical;
@@ -310,11 +310,11 @@
 
 .modalSelect {
   padding: 10px 36px 10px 14px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ls-color-muted-border);
   border-radius: 8px;
   font-size: 14px;
-  color: #111827;
-  background-color: #ffffff;
+  color: var(--ls-color-neutral-soft-foreground);
+  background-color: var(--ls-color-bg-card);
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
@@ -335,13 +335,13 @@
   justify-content: flex-end;
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--ls-color-muted-border);
 }
 
 .primaryButton {
   padding: 10px 20px;
   background-color: var(--ls-color-brand);
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -361,9 +361,9 @@
 
 .cancelButton {
   padding: 10px 20px;
-  background-color: #ffffff;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background-color: var(--ls-color-bg-card);
+  color: var(--ls-color-neutral-base);
+  border: 1px solid var(--ls-color-muted-border);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -372,8 +372,8 @@
 }
 
 .cancelButton:hover:not(:disabled) {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
+  background-color: var(--ls-color-neutral-foreground);
+  border-color: var(--ls-color-border);
 }
 
 .cancelButton:disabled {
@@ -383,8 +383,8 @@
 
 .deleteButton {
   padding: 10px 20px;
-  background-color: #dc2626;
-  color: #ffffff;
+  background-color: var(--ls-color-destructive-vivid);
+  color: var(--ls-color-bg-card);
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -394,7 +394,7 @@
 }
 
 .deleteButton:hover:not(:disabled) {
-  background-color: #b91c1c;
+  background-color: var(--ls-color-destructive-dark);
 }
 
 .deleteButton:disabled {
@@ -412,8 +412,8 @@
   bottom: 100%;
   left: 0;
   right: 0;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--ls-color-bg-card);
+  border: 1px solid var(--ls-color-muted-border);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   max-height: 280px;
@@ -432,7 +432,7 @@
 }
 
 .creatorOption:hover {
-  background-color: #f3f4f6;
+  background-color: var(--ls-color-bg-hover);
 }
 
 .creatorOptionSelected {
@@ -452,13 +452,13 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #e5e7eb;
+  background-color: var(--ls-color-muted-border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--ls-color-muted);
 }
 
 .creatorInfo {
@@ -470,12 +470,12 @@
 .creatorName {
   font-size: 14px;
   font-weight: 500;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
 }
 
 .creatorEmail {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -484,7 +484,7 @@
 .creatorNoResults {
   padding: 12px;
   text-align: center;
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
   font-size: 13px;
 }
 

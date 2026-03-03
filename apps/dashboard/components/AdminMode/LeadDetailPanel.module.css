@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
+  background: var(--ls-color-bg-card);
 }
 
 /* ─── Loading / Empty ────────────────────────────────────────────────────── */
@@ -30,7 +30,7 @@
   align-items: flex-start;
   gap: 12px;
   padding: 24px 24px 16px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
 }
 
 .headerInfo {
@@ -42,7 +42,7 @@
   font-family: "Mont", system-ui, sans-serif;
   font-size: 20px;
   font-weight: 700;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0 0 4px;
   line-height: 1.3;
   word-break: break-word;
@@ -51,7 +51,7 @@
 .leadEmail {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   margin: 0;
   word-break: break-all;
 }
@@ -117,7 +117,7 @@
   font-family: "Mont", system-ui, sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0;
   line-height: 1.2;
 }
@@ -176,7 +176,7 @@
 .infoValue {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   font-weight: 500;
 }
 
@@ -215,7 +215,7 @@
 .relatedName {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   font-weight: 500;
   flex: 1;
   min-width: 0;
@@ -246,7 +246,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #fff;
+  color: var(--ls-color-bg-card);
   background: var(--ls-color-brand, #31664A);
   border: none;
   padding: 6px 16px;
@@ -292,14 +292,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--ls-color-bg-card);
   flex-shrink: 0;
 }
 
 .timelineLine {
   width: 2px;
   flex: 1;
-  background: #e5e5e5;
+  background: var(--ls-color-border-light);
   min-height: 12px;
 }
 
@@ -325,7 +325,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
 }
 
 .timelineDate {
@@ -339,7 +339,7 @@
 .timelineDesc {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   margin: 0;
   word-break: break-word;
   line-height: 1.4;

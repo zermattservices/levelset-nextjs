@@ -15,7 +15,7 @@
   justify-content: center;
   width: 80px;
   height: 80px;
-  background: #f6fffa;
+  background: var(--ls-color-bg-brand-soft);
   border-radius: 50%;
   margin-bottom: 24px;
 }
@@ -41,7 +41,7 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--ls-color-brand);
-  background: #f6fffa;
+  background: var(--ls-color-bg-brand-soft);
   padding: 6px 16px;
   border-radius: 20px;
   border: 1px solid var(--ls-color-brand);

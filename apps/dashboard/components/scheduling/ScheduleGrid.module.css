@@ -182,6 +182,28 @@
   opacity: 1;
 }
 
+.addShiftInlineBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 12px;
+  margin-top: 1px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: var(--ls-color-muted-soft);
+  color: var(--ls-color-disabled-text);
+  cursor: pointer;
+}
+.cell:hover .addShiftInlineBtn {
+  display: flex;
+}
+.addShiftInlineBtn:hover {
+  background: var(--ls-color-muted-border);
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
 /* Summary row */
 .summaryRow {
   background: var(--ls-color-neutral-foreground);
