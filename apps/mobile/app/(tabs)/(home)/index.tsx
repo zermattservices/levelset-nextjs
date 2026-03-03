@@ -65,7 +65,8 @@ export default function HomeScreen() {
       const data = await fetchMyTodayAuth(accessToken, locationId, employeeId);
       setTodayData(data);
     } catch (err: any) {
-      if (err?.status === 403) {
+      if (err?.status === 403 || err?.status === 404) {
+        // 403 = no SCHED_VIEW permission, 404 = endpoint not deployed yet
         setTodayData({ status: "not_scheduled" });
       } else {
         setTodayError(err?.message || "Failed to load");
