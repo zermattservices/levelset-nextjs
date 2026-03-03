@@ -8,7 +8,8 @@
  *   npx tsx scripts/test-notifications.ts
  */
 
-import 'dotenv/config';
+import { config } from 'dotenv';
+config({ path: '.env.local' });
 import {
   notifyLead,
   notifyStageChange,
