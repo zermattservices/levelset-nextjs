@@ -190,7 +190,7 @@
   transition: all 0.15s ease;
 }
 .publishBtn:hover {
-  background: #265339;
+  background: var(--ls-color-brand-dark-alt);
 }
 
 .unpublishBtn {
@@ -199,7 +199,7 @@
   font-weight: 600;
   color: var(--ls-color-destructive);
   background: var(--ls-color-bg-container);
-  border: 1px solid #fecaca;
+  border: 1px solid var(--ls-color-destructive-lighter);
   border-radius: var(--ls-radius-md);
   padding: 5px 12px;
   cursor: pointer;

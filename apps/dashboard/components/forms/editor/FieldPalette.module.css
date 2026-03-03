@@ -54,7 +54,7 @@
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid var(--ls-color-muted-border);
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   cursor: grab;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   user-select: none;

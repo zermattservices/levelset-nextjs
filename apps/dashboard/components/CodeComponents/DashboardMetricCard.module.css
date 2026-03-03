@@ -9,7 +9,7 @@
 }
 
 .metricItem {
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   box-shadow: inset 0 0 0 1px #e9eaeb;
   filter: drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05));
   width: 100%;
@@ -51,7 +51,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 24px;
   font-weight: 600;
-  color: #181d27;
+  color: var(--ls-color-text-primary);
   line-height: 32px;
   flex: 1;
   min-width: 0;
@@ -68,13 +68,13 @@
   font-family: "Satoshi", sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
   line-height: 28px;
 }
 
 .trendBadge.negative {
   background: #fce4e4;
-  color: #ad2624;
+  color: var(--ls-color-destructive-medium);
 }
 
 .trendIcon {
@@ -106,7 +106,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 16px;
   font-weight: 500;
-  color: #535862;
+  color: var(--ls-color-text-caption);
   line-height: 24px;
 }
 
@@ -114,7 +114,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 16px;
   font-weight: 500;
-  color: #181d27;
+  color: var(--ls-color-text-primary);
   line-height: 24px;
 }
 
@@ -122,12 +122,12 @@
   font-family: "Inter", sans-serif;
   font-size: 16px;
   font-weight: 500;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
   line-height: 24px;
 }
 
 .deltaValue.negative {
-  color: #ad2624;
+  color: var(--ls-color-destructive-medium);
 }
 
 .primaryMeta {
@@ -143,7 +143,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 16px;
   font-weight: 500;
-  color: #535862;
+  color: var(--ls-color-text-caption);
   line-height: 24px;
 }
 
@@ -157,7 +157,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 16px;
   font-weight: 500;
-  color: #535862;
+  color: var(--ls-color-text-caption);
   line-height: 24px;
 }
 
@@ -170,7 +170,7 @@
   min-height: 80px;
   font-family: "Satoshi", sans-serif;
   font-size: 16px;
-  color: #535862;
+  color: var(--ls-color-text-caption);
 }
 
 .metricItem.selected {
@@ -213,7 +213,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #535862;
+  color: var(--ls-color-text-caption);
   margin-left: 8px;
 }
 
@@ -221,7 +221,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 16px;
   font-weight: 500;
-  color: #535862;
+  color: var(--ls-color-text-caption);
 }
 
 .srOnly {

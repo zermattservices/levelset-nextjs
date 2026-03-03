@@ -53,7 +53,7 @@
   flex: 1;
   width: 100%;
   background: var(--ls-color-bg-card);
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--ls-color-muted-border);
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;

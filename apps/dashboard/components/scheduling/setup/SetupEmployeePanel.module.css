@@ -1,6 +1,7 @@
 .panel {
   width: 280px;
   flex-shrink: 0;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--ls-color-muted-border);

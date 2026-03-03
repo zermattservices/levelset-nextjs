@@ -21,7 +21,7 @@
 .loadingText {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
-  color: #888;
+  color: var(--ls-color-text-placeholder);
 }
 
 /* ─── Header ─────────────────────────────────────────────────────────────── */
@@ -37,14 +37,14 @@
   font-family: "Mont", system-ui, sans-serif;
   font-size: 24px;
   font-weight: 700;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0 0 6px;
 }
 
 .subtitle {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
-  color: #888;
+  color: var(--ls-color-text-placeholder);
   margin: 0;
 }
 
@@ -62,7 +62,7 @@
   flex-direction: column;
   gap: 6px;
   padding: 18px 24px;
-  background-color: #ffffff;
+  background-color: var(--ls-color-bg-card);
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   flex: 1;
@@ -83,7 +83,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: #888;
+  color: var(--ls-color-text-placeholder);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -92,7 +92,7 @@
   font-family: "Mont", system-ui, sans-serif;
   font-size: 28px;
   font-weight: 700;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   line-height: 1.1;
 }
 
@@ -107,7 +107,7 @@
 /* ─── Sequence Card ──────────────────────────────────────────────────────── */
 
 .sequenceCard {
-  background-color: #ffffff;
+  background-color: var(--ls-color-bg-card);
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   overflow: hidden;
@@ -115,7 +115,7 @@
 }
 
 .sequenceCard:hover {
-  border-color: #d1d5db;
+  border-color: var(--ls-color-border);
 }
 
 .sequenceCardExpanded {
@@ -137,7 +137,7 @@
 }
 
 .sequenceHeader:hover {
-  background-color: #fafafa;
+  background-color: var(--ls-color-bg-surface);
 }
 
 .sequenceInfo {
@@ -159,7 +159,7 @@
   font-family: "Mont", system-ui, sans-serif;
   font-size: 16px;
   font-weight: 700;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0;
 }
 
@@ -173,7 +173,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
 }
 
 .stepCountDetail {
@@ -270,7 +270,7 @@
   font-family: "Mont", system-ui, sans-serif;
   font-size: 12px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
   line-height: 1;
 }
 
@@ -307,14 +307,14 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   word-break: break-word;
 }
 
 .stepDelay {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
-  color: #888;
+  color: var(--ls-color-text-placeholder);
 }
 
 .stepToggle {
@@ -330,7 +330,7 @@
   justify-content: center;
   padding: 48px;
   text-align: center;
-  background-color: #ffffff;
+  background-color: var(--ls-color-bg-card);
   border: 1px solid #e2e8f0;
   border-radius: 12px;
 }

@@ -10,7 +10,7 @@
   justify-content: center;
   padding: 10px 20px;
   background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
   font-family: "Satoshi", sans-serif;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
@@ -52,7 +52,7 @@
 .userName {
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--ls-color-bg-card);
 }
 
 .userDetails {
@@ -120,7 +120,7 @@
   left: 2px;
   width: 16px;
   height: 16px;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   border-radius: 50%;
   transition: transform 0.2s ease;
 }
@@ -135,7 +135,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   color: #d32f2f;
   border: none;
   border-radius: 6px;

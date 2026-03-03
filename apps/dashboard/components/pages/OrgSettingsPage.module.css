@@ -41,7 +41,7 @@
   width: 100%;
   max-width: var(--ls-max-content-width);
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
   justify-content: space-between;
   align-items: flex-start;
 }
@@ -126,7 +126,7 @@
 .loadingSpinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #e5e5e5;
+  border: 3px solid var(--ls-color-border-light);
   border-top-color: var(--ls-color-brand);
   border-radius: 50%;
   animation: spin 1s linear infinite;

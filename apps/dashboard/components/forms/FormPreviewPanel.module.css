@@ -5,7 +5,7 @@
   border: 1px solid var(--ls-color-muted-border);
   border-radius: 12px;
   overflow: hidden;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
 }
 
 .previewToolbar {

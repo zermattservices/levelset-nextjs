@@ -538,7 +538,7 @@
   padding: 16px;
   background: var(--ls-color-neutral-foreground);
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ls-color-muted-border);
 }
 
 .pillarDescriptionHeader {

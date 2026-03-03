@@ -19,7 +19,7 @@
   border-bottom: 1px solid #e2e4e8;
   flex-shrink: 0;
   flex-wrap: wrap;
-  background: #fff;
+  background: var(--ls-color-bg-card);
 }
 
 .boardTitle {
@@ -27,7 +27,7 @@
   font-family: "Mont", system-ui, sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   letter-spacing: -0.01em;
 }
 
@@ -50,7 +50,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #fff;
+  color: var(--ls-color-bg-card);
   background: var(--ls-color-brand, #31664A);
   border: none;
   padding: 7px 16px;
@@ -95,7 +95,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 12px;
   font-weight: 700;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   display: flex;
@@ -107,7 +107,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
   background: rgba(0, 0, 0, 0.06);
   border-radius: 10px;
   padding: 1px 7px;
@@ -149,7 +149,7 @@
 /* ─── Card ────────────────────────────────────────────────────────────────── */
 
 .card {
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 8px;
   padding: 10px 12px 10px 14px;
@@ -171,7 +171,7 @@
 .cardOverlay {
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18), 0 4px 8px rgba(0, 0, 0, 0.08);
   transform: rotate(1.5deg) scale(1.02);
-  background: #fff;
+  background: var(--ls-color-bg-card);
   border-radius: 8px;
   padding: 10px 12px 10px 14px;
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -219,7 +219,7 @@
 .dueDateBadge {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 11px;
-  color: #888;
+  color: var(--ls-color-text-placeholder);
   display: flex;
   align-items: center;
   gap: 3px;
@@ -233,8 +233,8 @@
 .blockedBadge {
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 10px;
-  color: #dc2626;
-  background: #fef2f2;
+  color: var(--ls-color-destructive-vivid);
+  background: var(--ls-color-destructive-foreground);
   padding: 1px 6px;
   border-radius: 4px;
   font-weight: 600;
@@ -269,7 +269,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   background: transparent;
   border: none;
   padding: 6px 14px;
@@ -285,13 +285,13 @@
 
 .viewToggleBtnActive {
   background: var(--ls-color-brand, #31664A);
-  color: #fff;
+  color: var(--ls-color-bg-card);
   font-weight: 600;
 }
 
 .viewToggleBtnActive:hover {
   background: var(--ls-color-brand-hover, #264D38);
-  color: #fff;
+  color: var(--ls-color-bg-card);
 }
 
 /* ─── Workstream View ────────────────────────────────────────────────────── */
@@ -325,11 +325,11 @@
 .emptyColumn {
   padding: 28px 12px;
   text-align: center;
-  border: 1.5px dashed #d1d5db;
+  border: 1.5px dashed var(--ls-color-border);
   border-radius: 8px;
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
   margin: 0 4px;
 }
 
@@ -356,7 +356,7 @@
 }
 
 .colorSwatchSelected {
-  border-color: #0d1b14;
+  border-color: var(--ls-color-text-primary);
   transform: scale(1.1);
 }
 
@@ -366,9 +366,9 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   background: none;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--ls-color-border-light);
   padding: 6px 14px;
   border-radius: 8px;
   cursor: pointer;
@@ -388,7 +388,7 @@
   font-family: "Satoshi", system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #fff;
+  color: var(--ls-color-bg-card);
   background: var(--ls-color-brand, #31664A);
   border: none;
   padding: 6px 14px;

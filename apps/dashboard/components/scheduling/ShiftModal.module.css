@@ -241,7 +241,7 @@
 
 .employeeSelect option:checked {
   background: var(--ls-color-brand);
-  color: #fff;
+  color: var(--ls-color-bg-card);
 }
 
 .employeeSelect option:hover {
@@ -310,7 +310,7 @@
   left: 2px;
   width: 16px;
   height: 16px;
-  background: #fff;
+  background: var(--ls-color-bg-card);
   border-radius: 50%;
   transition: transform 0.2s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
@@ -405,7 +405,7 @@
   gap: 4px;
   color: var(--ls-color-destructive);
   background: none;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--ls-color-destructive-lighter);
   padding: 7px 14px;
 }
 
@@ -429,14 +429,14 @@
 /* Save */
 .saveBtn {
   font-weight: 600;
-  color: #fff;
+  color: var(--ls-color-bg-card);
   background: var(--ls-color-brand);
   border: none;
   padding: 8px 22px;
 }
 
 .saveBtn:hover:not(:disabled) {
-  background: #265339;
+  background: var(--ls-color-brand-dark-alt);
 }
 
 /* Disabled state for all buttons */

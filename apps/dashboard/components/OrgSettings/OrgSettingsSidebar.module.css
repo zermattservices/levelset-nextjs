@@ -129,11 +129,11 @@
 }
 
 .menuItem:hover {
-  background-color: #f6fffa;
+  background-color: var(--ls-color-bg-brand-soft);
 }
 
 .menuItemActive {
-  background-color: #f6fffa;
+  background-color: var(--ls-color-bg-brand-soft);
   color: var(--ls-color-brand);
   font-weight: 600;
 }

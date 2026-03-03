@@ -53,7 +53,7 @@
 }
 
 .ratingRed {
-  background: #FEE2E2;
+  background: var(--ls-color-destructive-light);
   color: var(--ls-color-destructive);
 }
 
