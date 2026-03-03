@@ -9,21 +9,21 @@
   flex-direction: column;
   gap: 8px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
 }
 
 .introTitle {
   font-family: "Satoshi";
   font-size: 16px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
   margin: 0;
 }
 
 .introDescription {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   margin: 0;
 }
 
@@ -37,8 +37,8 @@
 .errorMessage {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #dc2626;
-  background: #fef2f2;
+  color: var(--ls-color-destructive-vivid);
+  background: var(--ls-color-destructive-foreground);
   padding: 12px 16px;
   border-radius: 8px;
 }
@@ -75,7 +75,7 @@
   grid-template-columns: 28px 180px 1fr 60px;
   gap: 12px;
   padding: 8px 0;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
   align-items: center;
 }
 
@@ -84,7 +84,7 @@
   grid-template-columns: 180px 1fr;
   gap: 12px;
   padding: 8px 0;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--ls-color-border-light);
   align-items: center;
 }
 
@@ -95,7 +95,7 @@
   font-family: "Satoshi";
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   text-transform: uppercase;
 }
 
@@ -106,10 +106,10 @@
 .emptySection {
   font-family: "Satoshi";
   font-size: 14px;
-  color: #999;
+  color: var(--ls-color-text-placeholder);
   padding: 16px;
   text-align: center;
-  background: #fafafa;
+  background: var(--ls-color-bg-surface);
   border-radius: 8px;
 }
 
@@ -118,7 +118,7 @@
   grid-template-columns: 28px 180px 1fr 60px;
   gap: 12px;
   padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ls-color-bg-surface-alt);
   align-items: flex-start;
 }
 
@@ -127,13 +127,13 @@
   grid-template-columns: 180px 1fr;
   gap: 12px;
   padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ls-color-bg-surface-alt);
   align-items: flex-start;
 }
 
 .positionRow.dragging {
   opacity: 0.5;
-  background-color: #f0f0f0;
+  background-color: var(--ls-color-bg-surface-alt);
 }
 
 .dragHandle {
@@ -179,15 +179,15 @@
 }
 
 .descriptionField::placeholder {
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
 }
 
 .deleteButton {
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
 }
 
 .deleteButton:hover {
-  color: #dc2626;
+  color: var(--ls-color-destructive-vivid);
   background-color: rgba(220, 38, 38, 0.08);
 }
 
@@ -197,7 +197,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 16px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--ls-color-border-light);
 }
 
 .rightActions {
