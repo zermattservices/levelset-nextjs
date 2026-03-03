@@ -27,7 +27,7 @@
 .MuiDataGrid-filterFormColumnInput .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline,
 .MuiDataGrid-filterFormOperatorInput .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline,
 .MuiDataGrid-filterFormValueInput .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(0, 0, 0, 0.23) !important;
+  border-color: var(--ls-color-border) !important;
 }
 
 /* Focus state - Levelset green */
@@ -81,7 +81,7 @@
 .MuiInputLabel-root {
   font-family: var(--ls-font-body) !important;
   font-size: 16px !important;
-  color: rgba(0, 0, 0, 0.6) !important;
+  color: var(--ls-color-text-secondary) !important;
 }
 
 /* ALL Select components - Force Satoshi font */
@@ -234,7 +234,7 @@ div[class*="DatePicker"] .MuiInputLabel-root.Mui-focused {
 /* Filter indicator badge - Levelset green */
 .MuiDataGrid-toolbarContainer .MuiBadge-badge {
   background-color: var(--ls-color-brand) !important;
-  color: #fff !important;
+  color: var(--ls-color-bg-container) !important;
   font-family: var(--ls-font-body) !important;
   font-size: 10px !important;
 }
