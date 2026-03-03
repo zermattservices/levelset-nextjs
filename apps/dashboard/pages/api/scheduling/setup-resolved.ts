@@ -1,13 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-/**
- * Convert JS Date.getDay() (0=Sun..6=Sat) to DB day_of_week (0=Mon..6=Sun).
- */
-function jsDayToDbDay(jsDay: number): number {
-  return jsDay === 0 ? 6 : jsDay - 1;
-}
-
 function minutesToTimeStr(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
@@ -103,8 +96,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD.' });
     }
 
-    const jsDay = parsedDate.getDay();
-    const dbDay = jsDayToDbDay(jsDay);
+    // day_of_week in DB uses same convention as JS: 0=Sun, 1=Mon...6=Sat
+    const dayOfWeek = parsedDate.getDay();
 
     // Fetch active templates for this org + zone with schedules, slots, and blocks
     const { data: templates, error } = await supabase
@@ -134,7 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const templateDaySchedules = new Map<string, TemplateSchedule[]>();
     for (const template of typedTemplates) {
       const matchingSchedules = (template.setup_template_schedules || []).filter(
-        (sched) => sched.day_of_week.includes(dbDay)
+        (sched) => sched.day_of_week.includes(dayOfWeek)
       );
       if (matchingSchedules.length > 0) {
         templateDaySchedules.set(template.id, matchingSchedules);
