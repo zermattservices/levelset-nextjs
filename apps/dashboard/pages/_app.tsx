@@ -3,7 +3,10 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { LicenseInfo } from '@mui/x-license';
 import { AuthProvider } from '@/lib/providers/AuthProvider';
+import { ThemeProvider } from '@/lib/providers/ThemeProvider';
+import { MuiThemeWrapper } from '@/lib/providers/MuiThemeWrapper';
 import "@levelset/design-tokens/css/variables.css";
+import "@levelset/design-tokens/css/variables-dark.css";
 import "@levelset/design-tokens/css/plasmic-compat.css";
 import '@xyflow/react/dist/style.css';
 import "../styles/globals.css";
@@ -32,9 +35,6 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const content = (
     <>
       <Head>
-        {/* Force light mode */}
-        <meta name="color-scheme" content="light only" />
-        
         <link rel="icon" href="/favicon.ico" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/favicon.ico" />
@@ -64,8 +64,8 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   
   // Wrap roadmap pages in AuthProvider so useAuth works at page level
   if (isRoadmapPage) {
-    return <AuthProvider>{content}</AuthProvider>;
+    return <ThemeProvider><MuiThemeWrapper><AuthProvider>{content}</AuthProvider></MuiThemeWrapper></ThemeProvider>;
   }
-  
-  return content;
+
+  return <ThemeProvider><MuiThemeWrapper>{content}</MuiThemeWrapper></ThemeProvider>;
 }
