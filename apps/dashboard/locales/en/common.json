@@ -243,6 +243,11 @@
     },
     "comingSoon": "Documents",
     "comingSoonDescription": "Upload, organize, and manage your organization's documents. This feature is currently available to administrators."
+  },
+  "theme": {
+    "light": "Light Mode",
+    "dark": "Dark Mode",
+    "system": "System"
   }
 }
 

@@ -24,6 +24,10 @@ import { usePermissions, P } from '@/lib/providers/PermissionsProvider';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { useImpersonation } from '@/lib/providers/ImpersonationProvider';
 import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
+import { useTheme } from '@/lib/providers/ThemeProvider';
+import { useTranslation } from 'react-i18next';
+import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
+import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 
 // Check if we're on the roadmap subdomain
 function useIsRoadmapSubdomain(): boolean {
@@ -59,6 +63,8 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
   const { has } = usePermissions();
   const { hasFeature } = useOrgFeatures();
   const isRoadmapSubdomain = useIsRoadmapSubdomain();
+  const { mode, setMode, resolvedTheme } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const [activeMenu, setActiveMenu] = React.useState<MenuType | null>(null);
   const [isClosing, setIsClosing] = React.useState(false);
@@ -466,20 +472,38 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
                     }}
                     style={{ cursor: 'pointer' }}
                   >
-                    <PersonOutlineIcon sx={{ fontSize: 18, color: '#666' }} />
+                    <PersonOutlineIcon sx={{ fontSize: 18, color: 'var(--ls-color-text-tertiary)' }} />
                     <span>Profile</span>
                   </div>
-                  
+
+                  {/* Theme Toggle */}
+                  <div className={sty.profileDropdownDivider} />
+                  <div
+                    className={sty.profileDropdownItem}
+                    onClick={() => {
+                      const next = mode === 'light' ? 'dark' : mode === 'dark' ? 'system' : 'light';
+                      setMode(next);
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {resolvedTheme === 'dark' ? (
+                      <DarkModeOutlinedIcon sx={{ fontSize: 18, color: 'var(--ls-color-text-tertiary)' }} />
+                    ) : (
+                      <LightModeOutlinedIcon sx={{ fontSize: 18, color: 'var(--ls-color-text-tertiary)' }} />
+                    )}
+                    <span>{t(`theme.${mode}`)}</span>
+                  </div>
+
                   {/* Organization Settings - only show if user has access */}
                   {canAccessOrgSettings && (
                     isRoadmapSubdomain ? (
                       <a href={getAppLink('/org-settings')} className={sty.profileDropdownItem} onClick={() => setProfileDropdownOpen(false)}>
-                        <SettingsIcon sx={{ fontSize: 18, color: '#666' }} />
+                        <SettingsIcon sx={{ fontSize: 18, color: 'var(--ls-color-text-tertiary)' }} />
                         <span>Organization Settings</span>
                       </a>
                     ) : (
                       <Link href="/org-settings" className={sty.profileDropdownItem} onClick={() => setProfileDropdownOpen(false)}>
-                        <SettingsIcon sx={{ fontSize: 18, color: '#666' }} />
+                        <SettingsIcon sx={{ fontSize: 18, color: 'var(--ls-color-text-tertiary)' }} />
                         <span>Organization Settings</span>
                       </Link>
                     )
