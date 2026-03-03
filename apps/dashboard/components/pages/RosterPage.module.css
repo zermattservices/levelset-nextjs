@@ -6,7 +6,7 @@
   align-content: flex-start;
   justify-items: center;
   overflow: auto;
-  background: #ffffff;
+  background: var(--ls-color-bg-page);
   min-width: 0;
   grid-template-columns:
     var(--plsmc-viewport-gap) 1fr minmax(0, var(--plsmc-wide-chunk))
@@ -70,7 +70,7 @@
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
   padding: 8px;
@@ -150,7 +150,7 @@
   width: 100%;
   height: auto;
   max-width: 100%;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
   padding: 8px 8px 100px;

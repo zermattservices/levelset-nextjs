@@ -6,7 +6,7 @@
   height: 100vh;
   align-content: flex-start;
   justify-items: center;
-  background: #ffffff;
+  background: var(--ls-color-bg-page);
   overflow-x: hidden;
   overflow-y: auto;
   min-width: 0;

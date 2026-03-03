@@ -34,15 +34,15 @@
   grid-column-end: -1 !important;
 }
 
-/* Schedule container takes full width */
+/* Schedule container takes full width and fills remaining viewport */
 .scheduleContainer {
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-height: calc(100vh - 56px);
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
   overflow: hidden;
-  flex: 1;
 }
 
 /* Loading */

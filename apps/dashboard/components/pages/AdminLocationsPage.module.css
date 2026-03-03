@@ -4,7 +4,7 @@
   width: 100%;
   max-width: 100vw;
   height: 100vh;
-  background: #ffffff;
+  background: var(--ls-color-bg-page);
   overflow: hidden;
 }
 
@@ -13,7 +13,7 @@
   flex-direction: column;
   width: 100%;
   padding: 20px 24px;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   border-bottom: 1px solid #e5e5e5;
 }
 
@@ -44,7 +44,7 @@
   font-family: "Mont";
   font-size: 24px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
 }
 
 .pageSubtitle {
@@ -52,7 +52,7 @@
   font-family: "Satoshi";
   font-size: 16px;
   font-weight: 400;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
 }
 
 .mainContent {
@@ -98,7 +98,7 @@
 .sectionCard {
   display: flex;
   flex-direction: column;
-  background: #fafafa;
+  background: var(--ls-color-bg-surface);
   border-radius: 16px;
   padding: 24px;
   gap: 12px;
@@ -109,20 +109,20 @@
   font-family: "Mont";
   font-size: 20px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
 }
 
 .sectionDescription {
   margin: 0;
   font-family: "Satoshi";
   font-size: 14px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
 }
 
 .placeholder {
   padding: 40px;
   text-align: center;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   border: 2px dashed #e5e5e5;
   border-radius: 8px;
   font-family: "Satoshi";
@@ -155,7 +155,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background: #fafafa;
+  background: var(--ls-color-bg-surface);
   border-radius: 16px;
   padding: 48px;
   max-width: 400px;
@@ -167,12 +167,12 @@
   font-family: "Mont";
   font-size: 28px;
   font-weight: 700;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
 }
 
 .accessDeniedMessage {
   margin: 0;
   font-family: "Satoshi";
   font-size: 16px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
 }

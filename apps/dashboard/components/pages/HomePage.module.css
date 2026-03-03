@@ -6,7 +6,7 @@
   align-content: flex-start;
   justify-items: center;
   overflow: auto;
-  background: #ffffff;
+  background: var(--ls-color-bg-page);
   min-width: 0;
   grid-template-columns:
     var(--plsmc-viewport-gap) 1fr minmax(0, var(--plsmc-wide-chunk))
@@ -236,7 +236,7 @@
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
-  background: #fafafa;
+  background: var(--ls-color-bg-surface);
   row-gap: 12px;
   min-width: 0;
   border-radius: 16px;
@@ -293,7 +293,7 @@
 }
 .text__eeV7S {
   padding-right: 0px;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
 }
 .metricCard__ahd6K:global(.__wab_instance) {
   max-width: 100%;
@@ -306,7 +306,7 @@
 }
 .text__xi6Ak {
   padding-right: 0px;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
 }
 .whedStack {
   display: flex;
@@ -362,7 +362,7 @@
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
-  background: #fafafa;
+  background: var(--ls-color-bg-surface);
   row-gap: 12px;
   min-width: 0;
   border-radius: 16px;
@@ -399,7 +399,7 @@
 }
 .text___6Bd7T {
   padding-right: 0px;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
 }
 .metricCard__nLige:global(.__wab_instance) {
   max-width: 100%;
@@ -415,7 +415,7 @@
 }
 .text__lZby3 {
   padding-right: 0px;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
 }
 .metricCard__msF2:global(.__wab_instance) {
   max-width: 100%;
@@ -431,7 +431,7 @@
 }
 .text__bgmUg {
   padding-right: 0px;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
 }
 .metricCard__r453M:global(.__wab_instance) {
   max-width: 100%;
@@ -447,7 +447,7 @@
 }
 .text__g9ZqQ {
   padding-right: 0px;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
 }
 .metricCard__zoe3T:global(.__wab_instance) {
   max-width: 100%;
@@ -464,7 +464,7 @@
 }
 .text__d4Hqp {
   padding-right: 0px;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
 }
 .modal:global(.__wab_instance) {
   max-width: 100%;
@@ -523,7 +523,7 @@
 .modalSubtitle {
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
-  color: #666;
+  color: var(--ls-color-text-tertiary);
   margin: 0 0 20px 0;
   line-height: 1.5;
 }
@@ -536,7 +536,7 @@
 
 .pillarDescriptionItem {
   padding: 16px;
-  background: #f9fafb;
+  background: var(--ls-color-neutral-foreground);
   border-radius: 10px;
   border: 1px solid #e5e7eb;
 }
@@ -552,7 +552,7 @@
   font-family: "Satoshi", sans-serif;
   font-size: 15px;
   font-weight: 600;
-  color: #0d1b14;
+  color: var(--ls-color-text-primary);
 }
 
 .pillarDescriptionWeight {
@@ -560,7 +560,7 @@
   font-size: 14px;
   font-weight: 600;
   color: var(--ls-color-brand);
-  background: #dcfce7;
+  background: var(--ls-color-success-soft);
   padding: 4px 10px;
   border-radius: 100px;
 }

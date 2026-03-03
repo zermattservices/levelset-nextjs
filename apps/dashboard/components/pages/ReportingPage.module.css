@@ -6,7 +6,7 @@
   align-content: flex-start;
   justify-items: center;
   overflow: auto;
-  background: #ffffff;
+  background: var(--ls-color-bg-page);
   min-width: 0;
   grid-template-columns:
     var(--plsmc-viewport-gap) 1fr minmax(0, var(--plsmc-wide-chunk))
@@ -53,7 +53,7 @@
   max-width: 100%;
   justify-content: flex-start;
   align-items: center;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
   padding: 8px;
@@ -123,7 +123,7 @@
   font-size: var(--ls-font-size-base);
   font-family: "Satoshi";
   min-width: 0;
-  color: #6b7280;
+  color: var(--ls-color-muted);
 }
 .tabsContainer {
   display: flex;
@@ -145,23 +145,23 @@
   transition: all 0.15s ease;
   border: 1px solid transparent;
   background: transparent;
-  color: #6b7280;
+  color: var(--ls-color-muted);
 }
 
 .tab:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--ls-color-bg-hover);
+  color: var(--ls-color-neutral-base);
 }
 
 .tabActive {
   background: var(--ls-color-brand);
-  color: #ffffff;
+  color: var(--ls-color-bg-container);
   border-color: var(--ls-color-brand);
 }
 
 .tabActive:hover {
   background: #285540;
-  color: #ffffff;
+  color: var(--ls-color-bg-container);
 }
 .freeBox__xbZ1E {
   display: flex;
@@ -172,7 +172,7 @@
   width: 100%;
   height: auto;
   max-width: 100%;
-  background: #ffffff;
+  background: var(--ls-color-bg-card);
   grid-column-start: 1 !important;
   grid-column-end: -1 !important;
   padding: 8px 8px 100px;
@@ -241,14 +241,14 @@
   font-family: "Mont", "Satoshi", system-ui, -apple-system, sans-serif;
   font-size: 24px;
   font-weight: 600;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
   margin: 0;
 }
 
 .unauthorizedText {
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
   font-size: 16px;
-  color: #6b7280;
+  color: var(--ls-color-muted);
   margin: 0;
   max-width: 400px;
 }
