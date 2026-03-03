@@ -95,11 +95,11 @@ const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
   border: 'none',
   boxShadow: 'none',
   backgroundColor: selected ? levelsetGreen : 'var(--ls-color-muted-soft)',
-  color: selected ? '#ffffff !important' : 'var(--ls-color-muted)',
+  color: selected ? 'var(--ls-color-bg-container) !important' : 'var(--ls-color-muted)',
   '&:hover': {
     backgroundColor: selected ? levelsetGreen : 'var(--ls-color-muted-border)',
     boxShadow: 'none',
-    color: selected ? '#ffffff !important' : 'var(--ls-color-muted)',
+    color: selected ? 'var(--ls-color-bg-container) !important' : 'var(--ls-color-muted)',
   },
 }));
 
@@ -116,7 +116,7 @@ const AreaPill = styled(Box)<{ selected?: boolean; area: 'FOH' | 'BOH' }>(({ sel
     cursor: 'pointer',
     transition: 'all 0.15s ease',
     backgroundColor: selected ? baseColor : lightColor,
-    color: selected ? '#ffffff' : baseColor,
+    color: selected ? 'var(--ls-color-bg-container)' : baseColor,
     border: `2px solid ${baseColor}`,
     '&:hover': {
       opacity: 0.9,
@@ -169,7 +169,7 @@ const datePickerPopperSx = {
     fontFamily, fontSize: 11,
     '&.Mui-selected': {
       backgroundColor: `${levelsetGreen} !important`,
-      color: '#fff !important',
+      color: 'var(--ls-color-bg-container) !important',
       '&:hover': { backgroundColor: `${levelsetGreen} !important` },
       '&:focus': { backgroundColor: `${levelsetGreen} !important` },
     },
@@ -188,7 +188,7 @@ const datePickerPopperSx = {
     fontFamily, fontSize: 12,
     '&.Mui-selected': {
       backgroundColor: `${levelsetGreen} !important`,
-      color: '#fff !important',
+      color: 'var(--ls-color-bg-container) !important',
       '&:hover': { backgroundColor: `${levelsetGreen} !important` },
       '&:focus': { backgroundColor: `${levelsetGreen} !important` },
     },
@@ -448,7 +448,7 @@ export function OperationalExcellencePage() {
       width: 50,
       sortable: false,
       renderCell: (params) => (
-        <span style={{ fontWeight: 700, color: '#535862', fontFamily }}>{params.value}</span>
+        <span style={{ fontWeight: 700, color: 'var(--ls-color-text-caption)', fontFamily }}>{params.value}</span>
       ),
     },
     {
@@ -473,7 +473,7 @@ export function OperationalExcellencePage() {
       headerName: 'OE Score',
       width: 100,
       renderCell: (params) => (
-        <span style={{ fontWeight: 700, fontFamily, color: '#181d27' }}>{params.value.toFixed(1)}</span>
+        <span style={{ fontWeight: 700, fontFamily, color: 'var(--ls-color-text-primary)' }}>{params.value.toFixed(1)}</span>
       ),
     },
     ...pillars.map((p) => ({
@@ -487,7 +487,7 @@ export function OperationalExcellencePage() {
           <span style={{
             fontFamily,
             fontWeight: isSelected ? 700 : 500,
-            color: isSelected ? pillarColorMap[p.id] : '#535862',
+            color: isSelected ? pillarColorMap[p.id] : 'var(--ls-color-text-caption)',
           }}>
             {val != null ? val.toFixed(1) : '—'}
           </span>
@@ -501,14 +501,14 @@ export function OperationalExcellencePage() {
       renderCell: (params) => {
         const val = params.value as number | null;
         if (val === null || val === undefined) {
-          return <span style={{ fontFamily, color: '#535862' }}>—</span>;
+          return <span style={{ fontFamily, color: 'var(--ls-color-text-caption)' }}>—</span>;
         }
         const isNeg = val < 0;
         return (
           <span style={{
             fontFamily,
             fontWeight: 600,
-            color: val === 0 ? '#535862' : isNeg ? '#ad2624' : '#249e6b',
+            color: val === 0 ? 'var(--ls-color-text-caption)' : isNeg ? 'var(--ls-color-destructive-medium)' : 'var(--ls-color-success-vivid)',
           }}>
             {val > 0 ? '+' : ''}{val.toFixed(1)}
           </span>
@@ -520,7 +520,7 @@ export function OperationalExcellencePage() {
       headerName: 'Ratings',
       width: 80,
       renderCell: (params) => (
-        <span style={{ fontFamily, color: '#535862' }}>{params.value}</span>
+        <span style={{ fontFamily, color: 'var(--ls-color-text-caption)' }}>{params.value}</span>
       ),
     },
   ];
@@ -547,7 +547,7 @@ export function OperationalExcellencePage() {
     (params: GridRowParams) => {
       const emp = data?.employees.find((e) => e.employeeId === params.row.employeeId);
       if (!emp || emp.positions.length === 0) {
-        return <div className={sty.detailPanel} style={{ color: '#535862', fontFamily }}>No position data available</div>;
+        return <div className={sty.detailPanel} style={{ color: 'var(--ls-color-text-caption)', fontFamily }}>No position data available</div>;
       }
 
       return (
@@ -556,7 +556,7 @@ export function OperationalExcellencePage() {
             <div
               key={pos.positionName}
               className={sty.detailRow}
-              style={posIdx < emp.positions.length - 1 ? { borderBottom: '1px solid #e9eaeb' } : undefined}
+              style={posIdx < emp.positions.length - 1 ? { borderBottom: '1px solid var(--ls-color-muted-border)' } : undefined}
             >
               <div className={sty.detailPositionCell}>{pos.positionName}</div>
               {pillars.map((p) => {
@@ -919,25 +919,25 @@ export function OperationalExcellencePage() {
                             border: 'none',
                             fontFamily,
                             '& .MuiDataGrid-columnHeaders': {
-                              backgroundColor: '#fafafa',
-                              borderBottom: '1px solid #e9eaeb',
+                              backgroundColor: 'var(--ls-color-bg-surface)',
+                              borderBottom: '1px solid var(--ls-color-muted-border)',
                             },
                             '& .MuiDataGrid-columnHeaderTitle': {
                               fontFamily,
                               fontSize: 13,
                               fontWeight: 600,
-                              color: '#535862',
+                              color: 'var(--ls-color-text-caption)',
                             },
                             '& .MuiDataGrid-cell': {
                               fontFamily,
                               fontSize: 14,
-                              borderBottom: '1px solid #f5f5f5',
+                              borderBottom: '1px solid var(--ls-color-muted-soft)',
                             },
                             '& .MuiDataGrid-detailPanel': {
                               overflow: 'visible',
                             },
                             '& .MuiDataGrid-row:hover': {
-                              backgroundColor: '#fafafa',
+                              backgroundColor: 'var(--ls-color-bg-surface)',
                             },
                           }}
                         />
@@ -1146,7 +1146,7 @@ export function OperationalExcellencePage() {
             fontFamily,
             fontSize: 18,
             fontWeight: 600,
-            color: '#0d1b14',
+            color: 'var(--ls-color-text-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',

@@ -144,7 +144,7 @@ export function EditLocationAccessModal({
           </Typography>
 
           {error && (
-            <Typography sx={{ color: '#dc2626', fontSize: 14, fontFamily }}>
+            <Typography sx={{ color: 'var(--ls-color-destructive-vivid)', fontSize: 14, fontFamily }}>
               {error}
             </Typography>
           )}

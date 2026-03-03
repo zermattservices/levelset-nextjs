@@ -111,11 +111,11 @@ const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
   border: 'none',
   boxShadow: 'none',
   backgroundColor: selected ? levelsetGreen : 'var(--ls-color-muted-soft)',
-  color: selected ? '#ffffff !important' : 'var(--ls-color-muted)',
+  color: selected ? 'var(--ls-color-bg-container) !important' : 'var(--ls-color-muted)',
   '&:hover': {
     backgroundColor: selected ? levelsetGreen : 'var(--ls-color-muted-border)',
     boxShadow: 'none',
-    color: selected ? '#ffffff !important' : 'var(--ls-color-muted)',
+    color: selected ? 'var(--ls-color-bg-container) !important' : 'var(--ls-color-muted)',
   },
 }));
 
@@ -132,7 +132,7 @@ const AreaPill = styled(Box)<{ selected?: boolean; area: 'FOH' | 'BOH' }>(({ sel
     cursor: 'pointer',
     transition: 'all 0.15s ease',
     backgroundColor: selected ? baseColor : lightColor,
-    color: selected ? '#ffffff' : baseColor,
+    color: selected ? 'var(--ls-color-bg-container)' : baseColor,
     border: `2px solid ${baseColor}`,
     '&:hover': {
       opacity: 0.9,
@@ -147,7 +147,7 @@ const PositionChip = styled(Chip)<{ positiontype: 'FOH' | 'BOH' }>(({ positionty
     fontSize: 12,
     fontWeight: 600,
     backgroundColor: color,
-    color: '#fff',
+    color: 'var(--ls-color-bg-container)',
     borderRadius: 16,
     height: 24,
   };
@@ -274,9 +274,9 @@ const getRatingColor = (rating: number | null, thresholds?: { yellow_threshold: 
   if (rating === null || rating === undefined) return 'transparent';
   const yellowThreshold = thresholds?.yellow_threshold ?? 1.75;
   const greenThreshold = thresholds?.green_threshold ?? 2.75;
-  if (rating >= greenThreshold) return '#249e6b';
+  if (rating >= greenThreshold) return 'var(--ls-color-success-vivid)';
   if (rating >= yellowThreshold) return '#ffb549';
-  if (rating >= 1.0) return '#ad2624';
+  if (rating >= 1.0) return 'var(--ls-color-destructive-medium)';
   return 'transparent';
 };
 
@@ -1595,7 +1595,7 @@ export function PositionalRatings({
                       fontSize: 11,
                       '&.Mui-selected': {
                         backgroundColor: `${levelsetGreen} !important`,
-                        color: '#fff !important',
+                        color: 'var(--ls-color-bg-container) !important',
                         '&:hover': {
                           backgroundColor: `${levelsetGreen} !important`,
                         },
@@ -1637,7 +1637,7 @@ export function PositionalRatings({
                       fontSize: 12,
                       '&.Mui-selected': {
                         backgroundColor: `${levelsetGreen} !important`,
-                        color: '#fff !important',
+                        color: 'var(--ls-color-bg-container) !important',
                         '&:hover': {
                           backgroundColor: `${levelsetGreen} !important`,
                         },
@@ -1726,7 +1726,7 @@ export function PositionalRatings({
                       fontSize: 11,
                       '&.Mui-selected': {
                         backgroundColor: `${levelsetGreen} !important`,
-                        color: '#fff !important',
+                        color: 'var(--ls-color-bg-container) !important',
                         '&:hover': {
                           backgroundColor: `${levelsetGreen} !important`,
                         },
@@ -1768,7 +1768,7 @@ export function PositionalRatings({
                       fontSize: 12,
                       '&.Mui-selected': {
                         backgroundColor: `${levelsetGreen} !important`,
-                        color: '#fff !important',
+                        color: 'var(--ls-color-bg-container) !important',
                         '&:hover': {
                           backgroundColor: `${levelsetGreen} !important`,
                         },
@@ -2084,7 +2084,7 @@ export function PositionalRatings({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: getRatingColor(rating, thresholds || undefined),
-                color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
+                color: rating ? 'var(--ls-color-bg-container) !important' : 'var(--ls-color-neutral-soft-foreground)',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
               }}
@@ -2136,7 +2136,7 @@ export function PositionalRatings({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: getRatingColor(rating, thresholds || undefined),
-                color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
+                color: rating ? 'var(--ls-color-bg-container) !important' : 'var(--ls-color-neutral-soft-foreground)',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
               }}
@@ -2188,7 +2188,7 @@ export function PositionalRatings({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: getRatingColor(rating, thresholds || undefined),
-                color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
+                color: rating ? 'var(--ls-color-bg-container) !important' : 'var(--ls-color-neutral-soft-foreground)',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
               }}
@@ -2240,7 +2240,7 @@ export function PositionalRatings({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: getRatingColor(rating, thresholds || undefined),
-                color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
+                color: rating ? 'var(--ls-color-bg-container) !important' : 'var(--ls-color-neutral-soft-foreground)',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
               }}
@@ -2292,7 +2292,7 @@ export function PositionalRatings({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: getRatingColor(rating, thresholds || undefined),
-                color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
+                color: rating ? 'var(--ls-color-bg-container) !important' : 'var(--ls-color-neutral-soft-foreground)',
                 fontWeight: rating ? 600 : 400,
                 fontFamily,
               }}
@@ -2326,7 +2326,7 @@ export function PositionalRatings({
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: getRatingColor(rating),
-              color: rating ? '#fff !important' : 'var(--ls-color-neutral-soft-foreground)',
+              color: rating ? 'var(--ls-color-bg-container) !important' : 'var(--ls-color-neutral-soft-foreground)',
               fontWeight: rating ? 600 : 400,
               fontFamily,
             }}
@@ -2355,7 +2355,7 @@ export function PositionalRatings({
           <IconButton
             onClick={() => handleDeleteClick(row)}
             size="small"
-            sx={{ color: '#dc2626' }}
+            sx={{ color: 'var(--ls-color-destructive-vivid)' }}
           >
             <DeleteIcon fontSize="small" />
           </IconButton>
@@ -2659,7 +2659,7 @@ export function PositionalRatings({
               [`& .${gridClasses.filterFormDeleteIcon}`]: {
                 color: 'var(--ls-color-muted)',
                 '&:hover': {
-                  color: '#dc2626',
+                  color: 'var(--ls-color-destructive-vivid)',
                 },
               },
               
@@ -2874,7 +2874,7 @@ export function PositionalRatings({
                     size="small"
                     sx={{
                       backgroundColor: getRatingColor(ratingToDelete.rating_avg, thresholds || undefined),
-                      color: '#fff',
+                      color: 'var(--ls-color-bg-container)',
                       fontWeight: 600,
                       fontFamily,
                     }}
@@ -2897,8 +2897,8 @@ export function PositionalRatings({
               variant="contained"
               sx={{ 
                 fontFamily, 
-                backgroundColor: '#dc2626', 
-                '&:hover': { backgroundColor: '#b91c1c' } 
+                backgroundColor: 'var(--ls-color-destructive-vivid)', 
+                '&:hover': { backgroundColor: 'var(--ls-color-destructive-dark)' } 
               }}
             >
               {deleting ? 'Deleting...' : 'Delete'}
@@ -2961,9 +2961,9 @@ export function PositionalRatings({
               
               // Determine color based on thresholds
               const getScoreColor = (score: number) => {
-                if (score >= greenThreshold) return '#249e6b';
+                if (score >= greenThreshold) return 'var(--ls-color-success-vivid)';
                 if (score >= yellowThreshold) return '#ffb549';
-                return '#ad2624';
+                return 'var(--ls-color-destructive-medium)';
               };
               
               const scoreColor = getScoreColor(overallRating);
@@ -3064,7 +3064,7 @@ export function PositionalRatings({
                             <Box
                               sx={{
                                 backgroundColor: getRatingColor(ratingValue, thresholds || undefined),
-                                color: '#fff',
+                                color: 'var(--ls-color-bg-container)',
                                 fontWeight: 600,
                                 fontFamily,
                                 fontSize: 14,
@@ -3125,7 +3125,7 @@ export function PositionalRatings({
                         {/* Red zone (1 to yellow threshold) */}
                         <Box sx={{ 
                           width: `${yellowPos}%`, 
-                          backgroundColor: '#fecaca',
+                          backgroundColor: 'var(--ls-color-destructive-lighter)',
                           borderRight: '1px solid #fca5a5',
                         }} />
                         {/* Yellow zone (yellow threshold to green threshold) */}
@@ -3151,7 +3151,7 @@ export function PositionalRatings({
                         height: 24,
                         borderRadius: '50%',
                         backgroundColor: scoreColor,
-                        border: '3px solid #fff',
+                        border: '3px solid var(--ls-color-bg-container)',
                         boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
                         display: 'flex',
                         alignItems: 'center',

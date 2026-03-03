@@ -14,10 +14,10 @@ interface ColumnConfigPopoverProps {
 
 const switchSx = {
   '& .MuiSwitch-switchBase.Mui-checked': {
-    color: '#31664a',
+    color: 'var(--ls-color-brand)',
   },
   '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-    backgroundColor: '#31664a',
+    backgroundColor: 'var(--ls-color-brand)',
   },
 };
 

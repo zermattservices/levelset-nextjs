@@ -353,7 +353,7 @@ export function AddActionModal({
             justifyContent: "space-between",
             alignItems: "center",
             padding: "24px",
-            borderBottom: "1px solid #e9eaeb",
+            borderBottom: "1px solid var(--ls-color-muted-border)",
             backgroundColor: "var(--ls-color-bg-container)",
           }}
         >
@@ -362,7 +362,7 @@ export function AddActionModal({
               fontFamily,
               fontSize: "18px",
               fontWeight: 600,
-              color: "#181d27",
+              color: "var(--ls-color-text-primary)",
             }}
           >
             Record an action for{" "}
@@ -463,7 +463,7 @@ export function AddActionModal({
                     fontSize: 11,
                     '&.Mui-selected': {
                       backgroundColor: `${levelsetGreen} !important`,
-                      color: '#fff !important',
+                      color: 'var(--ls-color-bg-container) !important',
                       '&:hover': {
                         backgroundColor: `${levelsetGreen} !important`,
                       },
@@ -502,7 +502,7 @@ export function AddActionModal({
                     fontSize: 12,
                     '&.Mui-selected': {
                       backgroundColor: `${levelsetGreen} !important`,
-                      color: '#fff !important',
+                      color: 'var(--ls-color-bg-container) !important',
                     },
                   },
                 },
@@ -623,7 +623,7 @@ export function AddActionModal({
                 backgroundColor: levelsetGreen,
                 borderRadius: '8px',
                 "&:hover": {
-                  backgroundColor: "#254d36",
+                  backgroundColor: "var(--ls-color-brand-dark)",
                 },
                 "&:disabled": {
                   backgroundColor: "var(--ls-color-border)",

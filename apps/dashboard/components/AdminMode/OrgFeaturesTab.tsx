@@ -180,7 +180,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
   const getTierColor = (tier: 'core' | 'pro') => {
     switch (tier) {
       case 'core':
-        return { bg: '#f0fdf4', text: '#166534', border: '#bbf7d0' };
+        return { bg: 'var(--ls-color-success-foreground)', text: 'var(--ls-color-success-soft-foreground)', border: 'var(--ls-color-success-border)' };
       case 'pro':
         return { bg: '#f3e8ff', text: '#6b21a8', border: '#d8b4fe' };
       default:
@@ -196,7 +196,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
 
   // Get pill color based on count
   const getPillColor = (enabled: number, total: number) => {
-    if (enabled === total) return { bg: '#dcfce7', color: '#166534' }; // Green
+    if (enabled === total) return { bg: 'var(--ls-color-success-foreground)', color: 'var(--ls-color-success-soft-foreground)' }; // Green
     if (enabled === 0) return { bg: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-muted)' }; // Grey
     return { bg: '#fef3c7', color: '#92400e' }; // Yellow
   };
@@ -219,7 +219,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
           sx={{
             fontFamily,
             fontSize: '14px',
-            color: '#666',
+            color: 'var(--ls-color-text-tertiary)',
           }}
         >
           Configure which features this organization has access to.
@@ -375,7 +375,7 @@ export function OrgFeaturesTab({ orgId }: OrgFeaturesTabProps) {
                       sx={{
                         fontFamily,
                         fontSize: '13px',
-                        color: '#999',
+                        color: 'var(--ls-color-text-tertiary)',
                         fontStyle: 'italic',
                       }}
                     >

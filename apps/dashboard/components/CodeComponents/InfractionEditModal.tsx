@@ -494,7 +494,7 @@ export function InfractionEditModal({
             justifyContent: "space-between",
             alignItems: "center",
             padding: "24px",
-            borderBottom: "1px solid #e9eaeb",
+            borderBottom: "1px solid var(--ls-color-muted-border)",
             backgroundColor: "var(--ls-color-bg-container)",
           }}
         >
@@ -503,7 +503,7 @@ export function InfractionEditModal({
               fontFamily,
               fontSize: "20px",
               fontWeight: 600,
-              color: "#181d27",
+              color: "var(--ls-color-text-primary)",
             }}
           >
             Edit Infraction
@@ -600,7 +600,7 @@ export function InfractionEditModal({
                     fontSize: 11,
                     '&.Mui-selected': {
                       backgroundColor: `${levelsetGreen} !important`,
-                      color: '#fff !important',
+                      color: 'var(--ls-color-bg-container) !important',
                     },
                   },
                 },
@@ -685,10 +685,10 @@ export function InfractionEditModal({
                   color: 'var(--ls-color-muted)',
                   '&.Mui-selected': {
                     backgroundColor: levelsetGreen,
-                    color: '#ffffff',
+                    color: 'var(--ls-color-bg-container)',
                     fontWeight: 500,
                     '&:hover': {
-                      backgroundColor: '#254d36',
+                      backgroundColor: 'var(--ls-color-brand-dark)',
                     },
                   },
                   '&:not(.Mui-selected)': {
@@ -820,14 +820,14 @@ export function InfractionEditModal({
                 fontFamily,
                 fontSize: 13,
                 textTransform: "none",
-                color: "#dc2626",
-                borderColor: "#dc2626",
+                color: "var(--ls-color-destructive-vivid)",
+                borderColor: "var(--ls-color-destructive-vivid)",
                 border: "1px solid",
                 padding: "6px 16px",
                 borderRadius: '8px',
                 "&:hover": {
-                  backgroundColor: "#fee2e2",
-                  borderColor: "#b91c1c",
+                  backgroundColor: "var(--ls-color-destructive-light)",
+                  borderColor: "var(--ls-color-destructive-dark)",
                 },
                 "&:disabled": {
                   borderColor: "var(--ls-color-border)",
@@ -862,7 +862,7 @@ export function InfractionEditModal({
                   backgroundColor: levelsetGreen,
                   borderRadius: '8px',
                   "&:hover": {
-                    backgroundColor: "#254d36",
+                    backgroundColor: "var(--ls-color-brand-dark)",
                   },
                 }}
               >

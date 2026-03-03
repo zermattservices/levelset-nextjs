@@ -150,17 +150,19 @@ export function useScheduleData() {
   }, [selectedLocationId, weekStartStr]);
 
   // ── Fetch positions (from org_positions) ──
+  // Use selectedLocationOrgId directly (not the orgId fallback) to prevent a
+  // race condition where the admin-org fetch resolves after the correct one.
   const fetchPositions = useCallback(async () => {
-    if (!orgId) return;
+    if (!selectedLocationOrgId) return;
     try {
-      const res = await fetch(`/api/scheduling/positions?org_id=${orgId}`);
+      const res = await fetch(`/api/scheduling/positions?org_id=${selectedLocationOrgId}`);
       if (!res.ok) throw new Error('Failed to fetch positions');
       const data = await res.json();
       setPositions(data.positions ?? []);
     } catch (err) {
       console.error('Error fetching positions:', err);
     }
-  }, [orgId]);
+  }, [selectedLocationOrgId]);
 
   // ── Fetch employees ──
   const fetchEmployees = useCallback(async () => {

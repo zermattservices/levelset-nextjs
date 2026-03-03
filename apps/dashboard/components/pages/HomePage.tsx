@@ -322,7 +322,7 @@ export function HomePage() {
             fontFamily: '"Satoshi", sans-serif',
             fontSize: 18,
             fontWeight: 600,
-            color: '#0d1b14',
+            color: 'var(--ls-color-text-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',

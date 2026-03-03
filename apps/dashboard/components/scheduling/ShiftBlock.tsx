@@ -21,7 +21,7 @@ const ZONE_LABELS: Record<string, string> = {
  * Default fallback color when a shift has no position or an unmapped zone.
  * Uses a neutral gray so the block still renders with visible structure.
  */
-const FALLBACK_COLOR = '#9ca3af';
+const FALLBACK_COLOR = 'var(--ls-color-neutral)';
 
 /**
  * Format an HH:MM time string to a compact 12-hour representation.

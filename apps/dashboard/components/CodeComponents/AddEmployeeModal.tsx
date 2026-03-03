@@ -115,8 +115,8 @@ const AvailabilityChip = styled(Box)(() => ({
     fontSize: 16,
   },
   "&.available": {
-    backgroundColor: "#dcfce7",
-    color: "#166534",
+    backgroundColor: "var(--ls-color-success-soft)",
+    color: "var(--ls-color-success-soft-foreground)",
   },
   "&.limited": {
     backgroundColor: "#fef3c7",
@@ -356,7 +356,7 @@ export function AddEmployeeModal({
           justifyContent: "space-between",
           alignItems: "center",
           padding: "24px",
-          borderBottom: "1px solid #e9eaeb",
+          borderBottom: "1px solid var(--ls-color-muted-border)",
         }}
       >
         <Typography
@@ -364,7 +364,7 @@ export function AddEmployeeModal({
             fontFamily,
             fontSize: "20px",
             fontWeight: 600,
-            color: "#181d27",
+            color: "var(--ls-color-text-primary)",
           }}
         >
           Add Employee
@@ -388,7 +388,7 @@ export function AddEmployeeModal({
             sx={{
               fontFamily,
               fontSize: 14,
-              color: "#dc2626",
+              color: "var(--ls-color-destructive-vivid)",
               mb: 2,
             }}
           >
@@ -555,7 +555,7 @@ export function AddEmployeeModal({
           justifyContent: "flex-end",
           gap: 2,
           padding: "16px 24px",
-          borderTop: "1px solid #e9eaeb",
+          borderTop: "1px solid var(--ls-color-muted-border)",
         }}
       >
         <Button
@@ -581,10 +581,10 @@ export function AddEmployeeModal({
             fontWeight: 500,
             textTransform: "none",
             backgroundColor: levelsetGreen,
-            color: "#ffffff",
+            color: "var(--ls-color-bg-container)",
             borderRadius: '8px',
             "&:hover": {
-              backgroundColor: "#2d5a42",
+              backgroundColor: "var(--ls-color-brand-dark-alt)",
             },
             "&:disabled": {
               backgroundColor: "var(--ls-color-disabled-text)",

@@ -763,10 +763,10 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
                       fontFamily: '"Satoshi", sans-serif',
                       fontSize: 12,
                       textTransform: 'none',
-                      borderColor: '#dc2626',
-                      color: '#dc2626',
+                      borderColor: 'var(--ls-color-destructive-vivid)',
+                      color: 'var(--ls-color-destructive-vivid)',
                       '&:hover': {
-                        borderColor: '#dc2626',
+                        borderColor: 'var(--ls-color-destructive-vivid)',
                         backgroundColor: 'rgba(220, 38, 38, 0.08)',
                       },
                     }}
@@ -969,7 +969,7 @@ export function LocationDetails({ locationId, disabled = false }: LocationDetail
                           onClick={() => handleSelectPrediction(p)}
                           onMouseEnter={() => setHighlightedIndex(i)}
                         >
-                          <PlaceIcon sx={{ fontSize: 16, color: '#9ca3af', flexShrink: 0 }} />
+                          <PlaceIcon sx={{ fontSize: 16, color: 'var(--ls-color-disabled-text)', flexShrink: 0 }} />
                           <div className={sty.googleDropdownItemText}>
                             <span className={sty.googleDropdownMain}>{p.structured_formatting.main_text}</span>
                             <span className={sty.googleDropdownSecondary}>{p.structured_formatting.secondary_text}</span>

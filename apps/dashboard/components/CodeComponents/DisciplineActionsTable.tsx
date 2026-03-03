@@ -34,11 +34,11 @@ export interface DisciplineActionsTableProps {
 
 // Color gradient from lightest to darkest red (5 levels) - same as DisciplineTable
 const redGradient = [
-  { bg: '#fee2e2', color: '#991b1b' }, // Lightest - level 1
-  { bg: '#fecaca', color: '#991b1b' }, // Light - level 2
-  { bg: '#fca5a5', color: '#7f1d1d' }, // Medium - level 3
-  { bg: '#f87171', color: '#7f1d1d' }, // Dark - level 4
-  { bg: '#dc2626', color: '#ffffff' }, // Darkest - level 5
+  { bg: 'var(--ls-color-destructive-light)', color: '#991b1b' }, // Lightest - level 1
+  { bg: 'var(--ls-color-destructive-lighter)', color: '#991b1b' }, // Light - level 2
+  { bg: '#fca5a5', color: 'var(--ls-color-destructive-soft-foreground)' }, // Medium - level 3
+  { bg: '#f87171', color: 'var(--ls-color-destructive-soft-foreground)' }, // Dark - level 4
+  { bg: 'var(--ls-color-destructive-vivid)', color: 'var(--ls-color-bg-container)' }, // Darkest - level 5
 ];
 
 // Points threshold badge helper - uses gradient based on position in actions list

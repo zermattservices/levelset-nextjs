@@ -109,7 +109,7 @@ export function QuestionWeightEditor({
                     padding: '8px 10px',
                     borderRadius: 6,
                     border: '1px solid var(--ls-color-muted-border)',
-                    background: '#fff',
+                    background: 'var(--ls-color-bg-container)',
                   }}
                 >
                   <span
@@ -137,7 +137,7 @@ export function QuestionWeightEditor({
                       minWidth: 36,
                       borderRadius: '4px',
                       backgroundColor: scoringConfig.color,
-                      color: '#fff',
+                      color: 'var(--ls-color-bg-container)',
                       '& .MuiChip-label': { padding: '0 6px' },
                     }}
                   />

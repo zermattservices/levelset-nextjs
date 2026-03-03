@@ -45,6 +45,12 @@ interface ScheduleGridProps {
   columnConfig?: ColumnConfig;
   onColumnConfigUpdate?: (partial: Partial<ColumnConfig>) => void;
   onCellClick: (date: string, entityId?: string) => void;
+  onAddShiftClick?: (
+    date: string,
+    entityId?: string,
+    prefillStartTime?: string,
+    prefillEndTime?: string,
+  ) => void;
   onShiftClick: (shift: Shift) => void;
   onShiftDelete: (shiftId: string) => void;
   onDragCreate?: (date: string, startTime: string, endTime: string, entityId?: string) => void;
@@ -120,6 +126,66 @@ function snapTo15(minutes: number): number {
   return Math.round(minutes / 15) * 15;
 }
 
+function shiftEndMinute(shift: Shift): number {
+  const start = parseTime(shift.start_time);
+  let end = parseTime(shift.end_time);
+  if (end <= start) end += 24 * 60;
+  return end;
+}
+
+function getDayClosingMinute(
+  dateStr: string,
+  businessHours?: LocationBusinessHours[],
+): number | null {
+  if (!businessHours?.length) return null;
+  const dayOfWeek = new Date(dateStr + 'T00:00:00').getDay();
+  const todayHours = businessHours.filter((h) => h.day_of_week === dayOfWeek);
+  if (!todayHours.length) return null;
+  const closingMinutes = todayHours.map((h) => {
+    const open = h.open_hour * 60 + h.open_minute;
+    let close = h.close_hour * 60 + h.close_minute;
+    // Google periods can close after midnight; store as next-day minute span.
+    if (close <= open) close += 24 * 60;
+    return close;
+  });
+  return Math.max(...closingMinutes);
+}
+
+function getNextShiftWindow(
+  dateStr: string,
+  existingShifts: Shift[],
+  businessHours?: LocationBusinessHours[],
+): { startTime: string; endTime: string } {
+  const toDayTime = (minutes: number) => {
+    const wrapped = ((Math.floor(minutes) % (24 * 60)) + (24 * 60)) % (24 * 60);
+    return minutesToTimeStr(wrapped);
+  };
+
+  const DEFAULT_SHIFT_LENGTH_MIN = 8 * 60;
+  const MIN_SHIFT_LENGTH_MIN = 15;
+
+  const latestEnd = existingShifts.length
+    ? Math.max(...existingShifts.map(shiftEndMinute))
+    : 9 * 60;
+  const closingMinute = getDayClosingMinute(dateStr, businessHours);
+
+  const startMinute = snapTo15(latestEnd);
+  let endMinute = snapTo15(startMinute + DEFAULT_SHIFT_LENGTH_MIN);
+
+  if (closingMinute != null) {
+    endMinute = Math.min(endMinute, closingMinute);
+    if (endMinute <= startMinute) {
+      // Preserve "start at previous shift end" as the primary rule.
+      endMinute = startMinute + MIN_SHIFT_LENGTH_MIN;
+    }
+  }
+
+  return {
+    startTime: toDayTime(startMinute),
+    endTime: toDayTime(endMinute),
+  };
+}
+
 /** Format a decimal hours value compactly: 8 -> "8h", 4.5 -> "4.5h", 4.25 -> "4.25h" */
 function formatHoursCompact(h: number): string {
   if (h % 1 === 0) return `${h}h`;
@@ -182,7 +248,7 @@ function TimelineGridLines({ timeRange }: { timeRange: { minHour: number; maxHou
 function WeekEmployeeView({
   shifts, employees, days, laborSummary, isPublished,
   canViewPay, columnConfig, onColumnConfigUpdate,
-  onCellClick, onShiftClick, onShiftDelete,
+  onCellClick, onAddShiftClick, onShiftClick, onShiftDelete, businessHours,
 }: Omit<ScheduleGridProps, 'positions' | 'selectedDay' | 'gridViewMode' | 'timeViewMode' | 'onDragCreate'>) {
   const shiftMap = React.useMemo(() => {
     const map = new Map<string, Map<string, Shift[]>>();
@@ -277,6 +343,25 @@ function WeekEmployeeView({
                     {dayShifts.map((s) => (
                       <ShiftBlock key={s.id} shift={s} viewMode="employees" onClick={onShiftClick} onDelete={onShiftDelete} />
                     ))}
+                    {dayShifts.length > 0 && (
+                      <button
+                        type="button"
+                        className={sty.addShiftInlineBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const nextWindow = getNextShiftWindow(day, dayShifts, businessHours);
+                          if (onAddShiftClick) {
+                            onAddShiftClick(day, emp.id, nextWindow.startTime, nextWindow.endTime);
+                            return;
+                          }
+                          onCellClick(day, emp.id);
+                        }}
+                        aria-label="Add another shift"
+                        title="Add another shift"
+                      >
+                        <AddIcon sx={{ fontSize: 10 }} />
+                      </button>
+                    )}
                     {dayShifts.length === 0 && (
                       <div className={sty.addHint}><AddIcon sx={{ fontSize: 14, color: 'var(--ls-color-border)' }} /></div>
                     )}
@@ -466,6 +551,7 @@ function useDragToCreate(
   const timelineRef = React.useRef<HTMLDivElement>(null);
   const scrollRafRef = React.useRef<number | null>(null);
   const lastClientXRef = React.useRef(0);
+  const justCreatedByDragRef = React.useRef(false);
 
   const totalMinutes = (timeRange.maxHour - timeRange.minHour) * 60;
 
@@ -533,6 +619,7 @@ function useDragToCreate(
 
   const handleMouseDown = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (isPublished || !onDragCreate) return;
+    justCreatedByDragRef.current = false;
     const rect = e.currentTarget.getBoundingClientRect();
     const rawPct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
     // Snap the start position to 15-min
@@ -572,6 +659,9 @@ function useDragToCreate(
       if (endMin - startMin >= 15 && onDragCreate) {
         const clampedStart = Math.max(startMin, timeRange.minHour * 60);
         const clampedEnd = Math.min(endMin, timeRange.maxHour * 60);
+        // Guard against the synthetic click that follows a drag; without this,
+        // cell-click handlers can immediately reopen/reset the modal with defaults.
+        justCreatedByDragRef.current = true;
         onDragCreate(minutesToTimeStr(clampedStart), minutesToTimeStr(clampedEnd));
       }
     };
@@ -584,6 +674,12 @@ function useDragToCreate(
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragStartPct, dragEndPct, pctToMinutes, onDragCreate, timeRange.minHour, timeRange.maxHour, totalMinutes, startEdgeScroll, stopEdgeScroll]);
+
+  const consumeJustCreatedByDrag = React.useCallback(() => {
+    if (!justCreatedByDragRef.current) return false;
+    justCreatedByDragRef.current = false;
+    return true;
+  }, []);
 
   const dragPreview = React.useMemo(() => {
     if (!isDragging) return null;
@@ -601,7 +697,7 @@ function useDragToCreate(
     };
   }, [isDragging, dragStartPct, dragEndPct, pctToMinutes]);
 
-  return { timelineRef, isDragging, handleMouseDown, dragPreview };
+  return { timelineRef, isDragging, handleMouseDown, dragPreview, consumeJustCreatedByDrag };
 }
 
 // ── Day View: Employee Rows ──
@@ -667,8 +763,15 @@ function DayEmployeeView({
       const dayOfWeek = new Date(selectedDay + 'T00:00:00').getDay();
       const todayHours = businessHours.filter((h) => h.day_of_week === dayOfWeek);
       if (todayHours.length > 0) {
-        minHour = Math.min(...todayHours.map((h) => h.open_hour));
-        maxHour = Math.max(...todayHours.map((h) => h.close_hour)) + 1;
+        const openMinutes = todayHours.map((h) => h.open_hour * 60 + h.open_minute);
+        const closeMinutes = todayHours.map((h) => {
+          const open = h.open_hour * 60 + h.open_minute;
+          let close = h.close_hour * 60 + h.close_minute;
+          if (close <= open) close += 24 * 60;
+          return close;
+        });
+        minHour = Math.floor(Math.min(...openMinutes) / 60);
+        maxHour = Math.ceil(Math.max(...closeMinutes) / 60);
       }
     }
     return { minHour, maxHour };
@@ -818,7 +921,7 @@ function DayEmployeeRow({
   pendingShift?: PendingShiftPreview | null;
   gridHoverPct: number | null;
 }) {
-  const { timelineRef, isDragging, handleMouseDown, dragPreview } = useDragToCreate(
+  const { timelineRef, isDragging, handleMouseDown, dragPreview, consumeJustCreatedByDrag } = useDragToCreate(
     timeRange,
     isPublished,
     onDragCreate ? (startTime, endTime) => onDragCreate(selectedDay, startTime, endTime, emp.id) : undefined,
@@ -826,6 +929,7 @@ function DayEmployeeRow({
 
   const handleTimelineClick = (e: React.MouseEvent) => {
     if (isDragging) return;
+    if (consumeJustCreatedByDrag()) return;
     onCellClick(selectedDay, emp.id);
   };
 
@@ -1025,8 +1129,15 @@ function DayPositionView({
       const dayOfWeek = new Date(selectedDay + 'T00:00:00').getDay();
       const todayHours = businessHours.filter((h) => h.day_of_week === dayOfWeek);
       if (todayHours.length > 0) {
-        minHour = Math.min(...todayHours.map((h) => h.open_hour));
-        maxHour = Math.max(...todayHours.map((h) => h.close_hour)) + 1;
+        const openMinutes = todayHours.map((h) => h.open_hour * 60 + h.open_minute);
+        const closeMinutes = todayHours.map((h) => {
+          const open = h.open_hour * 60 + h.open_minute;
+          let close = h.close_hour * 60 + h.close_minute;
+          if (close <= open) close += 24 * 60;
+          return close;
+        });
+        minHour = Math.floor(Math.min(...openMinutes) / 60);
+        maxHour = Math.ceil(Math.max(...closeMinutes) / 60);
       }
     }
     return { minHour, maxHour };
@@ -1314,7 +1425,7 @@ function DayPositionRow({
 }) {
   const posColor = ZONE_COLORS[pos.zone] ?? 'var(--ls-color-muted)';
 
-  const { timelineRef, isDragging, handleMouseDown, dragPreview } = useDragToCreate(
+  const { timelineRef, isDragging, handleMouseDown, dragPreview, consumeJustCreatedByDrag } = useDragToCreate(
     timeRange,
     isPublished,
     onDragCreate ? (startTime, endTime) => onDragCreate(selectedDay, startTime, endTime, pos.id) : undefined,
@@ -1389,7 +1500,11 @@ function DayPositionRow({
         className={sty.timeline}
         style={{ minHeight: timelineHeight }}
         onMouseDown={handleMouseDown}
-        onClick={() => !isDragging && onCellClick(selectedDay, pos.id)}
+        onClick={() => {
+          if (isDragging) return;
+          if (consumeJustCreatedByDrag()) return;
+          onCellClick(selectedDay, pos.id);
+        }}
       >
         <TimelineGridLines timeRange={timeRange} />
         {posShifts.map((s) => {
@@ -1464,5 +1579,5 @@ export function ScheduleGrid(props: ScheduleGridProps) {
   if (gridViewMode === 'positions') {
     return <WeekPositionView shifts={shifts} positions={positions} days={days} laborSummary={laborSummary} isPublished={isPublished} canViewPay={canViewPay} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
   }
-  return <WeekEmployeeView shifts={shifts} employees={employees} days={days} laborSummary={laborSummary} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} />;
+  return <WeekEmployeeView shifts={shifts} employees={employees} days={days} laborSummary={laborSummary} isPublished={isPublished} canViewPay={canViewPay} columnConfig={columnConfig} onColumnConfigUpdate={onColumnConfigUpdate} onCellClick={onCellClick} onAddShiftClick={props.onAddShiftClick} onShiftClick={onShiftClick} onShiftDelete={onShiftDelete} businessHours={businessHours} />;
 }

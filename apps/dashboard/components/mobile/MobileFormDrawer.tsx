@@ -103,7 +103,7 @@ export function MobileFormDrawer({
               onClick={handleRequestClose}
               aria-label="Go back"
               sx={{
-                backgroundColor: '#f5f6f7',
+                backgroundColor: 'var(--ls-color-muted-soft)',
                 color: 'var(--ls-color-neutral-soft-foreground)',
                 '&:hover': {
                   backgroundColor: 'var(--ls-color-muted-border)',

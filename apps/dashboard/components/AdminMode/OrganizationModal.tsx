@@ -133,7 +133,7 @@ export function OrganizationModal({ open, organization, onClose }: OrganizationM
                 fontFamily: '"Mont", sans-serif',
                 fontSize: '24px',
                 fontWeight: 600,
-                color: '#0d1b14',
+                color: 'var(--ls-color-text-primary)',
               }}
             >
               {organization.operator_name || organization.name}
@@ -142,7 +142,7 @@ export function OrganizationModal({ open, organization, onClose }: OrganizationM
               sx={{
                 fontFamily: '"Satoshi", sans-serif',
                 fontSize: '14px',
-                color: '#666',
+                color: 'var(--ls-color-text-tertiary)',
                 marginTop: '4px',
               }}
             >
@@ -171,7 +171,7 @@ export function OrganizationModal({ open, organization, onClose }: OrganizationM
               textTransform: 'none',
               minHeight: '40px',
               padding: '8px 16px',
-              color: '#666',
+              color: 'var(--ls-color-text-tertiary)',
               '&.Mui-selected': {
                 color: 'var(--ls-color-brand)',
                 fontWeight: 600,

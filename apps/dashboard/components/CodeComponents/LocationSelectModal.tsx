@@ -99,7 +99,7 @@ export function LocationSelectModal({ className }: LocationSelectModalProps) {
                     minWidth: 0,
                     backgroundColor: 'var(--ls-color-brand)',
                     whiteSpace: 'nowrap',
-                    color: '#ffffff',
+                    color: 'var(--ls-color-bg-container)',
                     boxShadow: '0px 6px 16px rgba(49, 102, 74, 0.12)',
                     '&:hover': {
                       backgroundColor: '#28523a',

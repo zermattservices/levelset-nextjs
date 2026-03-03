@@ -425,7 +425,7 @@ export function ModifyAccessTab({
 
   // Get pill color based on count
   const getPillColor = (enabled: number, total: number) => {
-    if (enabled === total) return { bg: '#dcfce7', color: '#166534' }; // Green
+    if (enabled === total) return { bg: 'var(--ls-color-success-foreground)', color: 'var(--ls-color-success-soft-foreground)' }; // Green
     if (enabled === 0) return { bg: 'var(--ls-color-muted-soft)', color: 'var(--ls-color-muted)' }; // Grey
     return { bg: '#fef3c7', color: '#92400e' }; // Yellow
   };

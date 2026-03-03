@@ -108,7 +108,7 @@ export function PeaClassicPage() {
                         minWidth: 'auto',
                         lineHeight: 1,
                         '&:hover': {
-                          borderColor: '#28543d',
+                          borderColor: 'var(--ls-color-brand-hover)',
                           borderWidth: '2px',
                           backgroundColor: 'rgba(49, 102, 74, 0.04)',
                         },

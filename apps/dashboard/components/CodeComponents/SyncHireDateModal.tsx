@@ -50,7 +50,7 @@ export interface SyncHireDateModalProps {
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = 'var(--ls-color-brand)';
 const warningColor = '#FACC15';
-const destructiveColor = '#dc2626';
+const destructiveColor = 'var(--ls-color-destructive-vivid)';
 
 type Page = 'instructions' | 'review' | 'confirmation';
 
@@ -115,8 +115,8 @@ const AvailabilityChip = styled(Box)(() => ({
   backgroundColor: "var(--ls-color-muted-soft)",
   color: "var(--ls-color-neutral-soft-foreground)",
   "&.available": {
-    backgroundColor: "#dcfce7",
-    color: "#166534",
+    backgroundColor: "var(--ls-color-success-soft)",
+    color: "var(--ls-color-success-soft-foreground)",
   },
   "&.limited": {
     backgroundColor: "#fef3c7",
@@ -143,7 +143,7 @@ const StickyHeader = styled(Box)(() => ({
   top: 0,
   zIndex: 10,
   backgroundColor: 'var(--ls-color-bg-container)',
-  borderBottom: '1px solid #e9eaeb',
+  borderBottom: '1px solid var(--ls-color-muted-border)',
   padding: '24px',
   display: 'flex',
   justifyContent: 'space-between',
@@ -161,12 +161,12 @@ const UploadZone = styled(Box)<{ isDragging: boolean }>(({ isDragging }) => ({
   borderRadius: '12px',
   padding: '48px 24px',
   textAlign: 'center',
-  backgroundColor: isDragging ? '#f0f9f4' : 'var(--ls-color-neutral-foreground)',
+  backgroundColor: isDragging ? 'var(--ls-color-success-foreground)' : 'var(--ls-color-neutral-foreground)',
   cursor: 'pointer',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
     borderColor: levelsetGreen,
-    backgroundColor: '#f0f9f4',
+    backgroundColor: 'var(--ls-color-success-foreground)',
   },
 }));
 
@@ -525,8 +525,8 @@ export function SyncHireDateModal({
                     color: levelsetGreen,
                     borderRadius: '8px',
                     '&:hover': {
-                      borderColor: '#2d5a42',
-                      backgroundColor: '#f0f9f4',
+                      borderColor: 'var(--ls-color-brand-dark-alt)',
+                      backgroundColor: 'var(--ls-color-success-foreground)',
                     },
                   }}
                 >
@@ -1017,7 +1017,7 @@ export function SyncHireDateModal({
                     fontFamily,
                     fontSize: 12,
                     height: 32,
-                    backgroundColor: selected ? '#fff' : '#fff5f5',
+                    backgroundColor: selected ? 'var(--ls-color-bg-card)' : '#fff5f5',
                     '& .MuiSelect-select': {
                       padding: '4px 8px',
                     },
@@ -1073,14 +1073,14 @@ export function SyncHireDateModal({
                     color: levelsetGreen,
                     backgroundColor: 'transparent',
                     '&:hover': {
-                      borderColor: '#2d5a42',
-                      backgroundColor: '#f0f9f4',
+                      borderColor: 'var(--ls-color-brand-dark-alt)',
+                      backgroundColor: 'var(--ls-color-success-foreground)',
                     },
                   } : {
                     backgroundColor: levelsetGreen,
-                    color: '#ffffff',
+                    color: 'var(--ls-color-bg-container)',
                     '&:hover': {
-                      backgroundColor: '#2d5a42',
+                      backgroundColor: 'var(--ls-color-brand-dark-alt)',
                     },
                   }),
                 }}
@@ -1144,7 +1144,7 @@ export function SyncHireDateModal({
             }}
           >
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon sx={{ color: '#000000' }} />}
+              expandIcon={<ExpandMoreIcon sx={{ color: 'var(--ls-color-text-primary)' }} />}
               sx={{
                 padding: '12px 16px',
                 minHeight: 48,
@@ -1159,7 +1159,7 @@ export function SyncHireDateModal({
                 },
               }}
             >
-              <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: '#000000' }}>
+              <Typography sx={{ fontFamily, fontSize: 18, fontWeight: 600, color: 'var(--ls-color-text-primary)' }}>
                 Unmatched Employees
               </Typography>
               <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-muted)', ml: 1 }}>
@@ -1260,7 +1260,7 @@ export function SyncHireDateModal({
                                 },
                                 '&.Mui-error': {
                                   '& .MuiOutlinedInput-notchedOutline': {
-                                    borderColor: '#dc2626',
+                                    borderColor: 'var(--ls-color-destructive-vivid)',
                                   },
                                 },
                               }}
@@ -1296,7 +1296,7 @@ export function SyncHireDateModal({
                               })}
                             </Select>
                             {isDuplicate && (
-                              <Typography sx={{ fontFamily, fontSize: 12, color: '#dc2626', mt: 0.5 }}>
+                              <Typography sx={{ fontFamily, fontSize: 12, color: 'var(--ls-color-destructive-vivid)', mt: 0.5 }}>
                                 Employee already selected
                               </Typography>
                             )}
@@ -1547,9 +1547,9 @@ export function SyncHireDateModal({
                         color: 'var(--ls-color-neutral-soft-foreground)',
                       },
                       '& .terminated-row': {
-                        backgroundColor: '#fee2e2 !important',
+                        backgroundColor: 'var(--ls-color-destructive-light) !important',
                         '& .MuiDataGrid-cell': {
-                          backgroundColor: '#fee2e2 !important',
+                          backgroundColor: 'var(--ls-color-destructive-light) !important',
                         },
                       },
                     }}
@@ -1588,12 +1588,12 @@ export function SyncHireDateModal({
               fontWeight: 500,
               textTransform: 'none',
               backgroundColor: levelsetGreen,
-              color: '#ffffff',
+              color: 'var(--ls-color-bg-container)',
               px: 4,
               py: 1.5,
               borderRadius: '8px',
               '&:hover': {
-                backgroundColor: '#2d5a42',
+                backgroundColor: 'var(--ls-color-brand-dark-alt)',
               },
               '&:disabled': {
                 backgroundColor: 'var(--ls-color-disabled-text)',
@@ -1630,7 +1630,7 @@ export function SyncHireDateModal({
                 fontFamily,
                 fontSize: "20px",
                 fontWeight: 600,
-                color: "#181d27",
+                color: "var(--ls-color-text-primary)",
               }}
             >
               Sync Employees from HR/Payroll Report
@@ -1691,12 +1691,12 @@ export function SyncHireDateModal({
                   fontWeight: 500,
                   textTransform: 'none',
                   backgroundColor: levelsetGreen,
-                  color: '#ffffff',
+                  color: 'var(--ls-color-bg-container)',
                   px: 4,
                   py: 1.5,
                   borderRadius: '8px',
                   '&:hover': {
-                    backgroundColor: '#2d5a42',
+                    backgroundColor: 'var(--ls-color-brand-dark-alt)',
                   },
                 }}
               >
@@ -1751,10 +1751,10 @@ export function SyncHireDateModal({
               fontWeight: 500,
               textTransform: 'none',
               backgroundColor: destructiveColor,
-              color: '#ffffff',
+              color: 'var(--ls-color-bg-container)',
               borderRadius: '8px',
               '&:hover': {
-                backgroundColor: '#b91c1c',
+                backgroundColor: 'var(--ls-color-destructive-dark)',
               },
             }}
           >

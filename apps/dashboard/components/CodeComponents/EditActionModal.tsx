@@ -306,7 +306,7 @@ export function EditActionModal({
             justifyContent: "space-between",
             alignItems: "center",
             padding: "24px",
-            borderBottom: "1px solid #e9eaeb",
+            borderBottom: "1px solid var(--ls-color-muted-border)",
             backgroundColor: "var(--ls-color-bg-container)",
           }}
         >
@@ -315,7 +315,7 @@ export function EditActionModal({
               fontFamily,
               fontSize: "18px",
               fontWeight: 600,
-              color: "#181d27",
+              color: "var(--ls-color-text-primary)",
             }}
           >
             Edit Disciplinary Action
@@ -384,7 +384,7 @@ export function EditActionModal({
                     fontSize: 11,
                     '&.Mui-selected': {
                       backgroundColor: `${levelsetGreen} !important`,
-                      color: '#fff !important',
+                      color: 'var(--ls-color-bg-container) !important',
                       '&:hover': {
                         backgroundColor: `${levelsetGreen} !important`,
                       },
@@ -423,7 +423,7 @@ export function EditActionModal({
                     fontSize: 12,
                     '&.Mui-selected': {
                       backgroundColor: `${levelsetGreen} !important`,
-                      color: '#fff !important',
+                      color: 'var(--ls-color-bg-container) !important',
                     },
                   },
                 },
@@ -528,14 +528,14 @@ export function EditActionModal({
                 fontFamily,
                 fontSize: 13,
                 textTransform: "none",
-                color: "#dc2626",
-                borderColor: "#dc2626",
+                color: "var(--ls-color-destructive-vivid)",
+                borderColor: "var(--ls-color-destructive-vivid)",
                 border: "1px solid",
                 padding: "6px 16px",
                 borderRadius: '8px',
                 "&:hover": {
-                  backgroundColor: "#fee2e2",
-                  borderColor: "#b91c1c",
+                  backgroundColor: "var(--ls-color-destructive-light)",
+                  borderColor: "var(--ls-color-destructive-dark)",
                 },
                 "&:disabled": {
                   borderColor: "var(--ls-color-border)",
@@ -570,7 +570,7 @@ export function EditActionModal({
                   backgroundColor: levelsetGreen,
                   borderRadius: '8px',
                   "&:hover": {
-                    backgroundColor: "#254d36",
+                    backgroundColor: "var(--ls-color-brand-dark)",
                   },
                   "&:disabled": {
                     backgroundColor: "var(--ls-color-border)",

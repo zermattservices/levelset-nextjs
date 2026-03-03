@@ -416,7 +416,7 @@ export function TerminationReasonsTab({ orgId, disabled = false }: TerminationRe
                     backgroundColor: 'var(--ls-color-brand-hover)',
                   },
                   '&.Mui-disabled': {
-                    backgroundColor: '#e0e0e0',
+                    backgroundColor: 'var(--ls-color-muted-border)',
                   },
                 }}
               >

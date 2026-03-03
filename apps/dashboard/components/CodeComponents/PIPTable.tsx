@@ -203,8 +203,8 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
               sx={{
                 fontFamily,
                 fontWeight: 600,
-                backgroundColor: params.value ? '#dcfce7' : '#fee2e2',
-                color: params.value ? '#166534' : '#991b1b',
+                backgroundColor: params.value ? 'var(--ls-color-success-foreground)' : 'var(--ls-color-destructive-light)',
+                color: params.value ? 'var(--ls-color-success-soft-foreground)' : 'var(--ls-color-destructive-dark)',
                 height: 28,
               }}
             />
@@ -258,7 +258,7 @@ export function PIPTable({ locationId, className }: PIPTableProps) {
         data-plasmic-name="pip-table-container"
       >
         <Box sx={{ py: 6, px: 4, textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ color: '#b91c1c', fontFamily }}>
+          <Typography variant="body2" sx={{ color: 'var(--ls-color-destructive-dark)', fontFamily }}>
             {error}
           </Typography>
         </Box>

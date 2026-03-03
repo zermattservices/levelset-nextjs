@@ -224,7 +224,7 @@ export function DigestViewerModal({
                 size="small"
                 startIcon={
                   saving ? (
-                    <CircularProgress size={14} sx={{ color: '#fff' }} />
+                    <CircularProgress size={14} sx={{ color: 'var(--ls-color-bg-container)' }} />
                   ) : (
                     <SaveOutlinedIcon sx={{ fontSize: 16 }} />
                   )

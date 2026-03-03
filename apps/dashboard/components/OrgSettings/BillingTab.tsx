@@ -187,7 +187,7 @@ export function BillingTab({ orgId }: BillingTabProps) {
           <p className={styles.description}>Manage your subscription and payment details.</p>
         </div>
         <div className={styles.noPlanContainer}>
-          <CreditCardIcon sx={{ fontSize: 48, color: '#ccc' }} />
+          <CreditCardIcon sx={{ fontSize: 48, color: 'var(--ls-color-neutral-border)' }} />
           <h3 className={styles.noPlanTitle}>No Active Subscription</h3>
           <p className={styles.noPlanDescription}>
             Contact your Levelset representative to get started with a subscription plan.
@@ -326,8 +326,8 @@ export function BillingTab({ orgId }: BillingTabProps) {
               fontFamily,
               textTransform: 'none',
               borderColor: 'var(--ls-color-muted-border)',
-              color: '#333',
-              '&:hover': { borderColor: '#999' },
+              color: 'var(--ls-color-text-primary)',
+              '&:hover': { borderColor: 'var(--ls-color-text-tertiary)' },
             }}
           >
             Manage Payment Method
@@ -353,7 +353,7 @@ export function BillingTab({ orgId }: BillingTabProps) {
               sx={{
                 fontFamily,
                 textTransform: 'none',
-                color: '#999',
+                color: 'var(--ls-color-text-tertiary)',
                 '&:hover': { color: 'var(--ls-color-destructive)', backgroundColor: 'var(--ls-color-destructive-soft)' },
               }}
             >

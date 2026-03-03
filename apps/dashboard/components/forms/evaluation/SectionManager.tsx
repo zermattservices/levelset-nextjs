@@ -94,7 +94,7 @@ export function SectionManager({
               padding: '10px 12px',
               borderRadius: 8,
               border: `1px solid var(--ls-color-muted-border)`,
-              background: dimmed ? 'var(--ls-color-neutral-foreground)' : '#fff',
+              background: dimmed ? 'var(--ls-color-neutral-foreground)' : 'var(--ls-color-bg-container)',
               opacity: dimmed ? 0.55 : 1,
               transition: 'opacity 0.2s',
             }}

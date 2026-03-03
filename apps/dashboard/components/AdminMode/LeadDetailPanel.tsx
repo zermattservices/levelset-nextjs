@@ -430,7 +430,7 @@ export function LeadDetailPanel({
       <div className={styles.panelContent}>
         {loading ? (
           <div className={styles.loadingState}>
-            <CircularProgress size={32} sx={{ color: '#31664A' }} />
+            <CircularProgress size={32} sx={{ color: 'var(--ls-color-brand)' }} />
           </div>
         ) : !lead ? (
           <div className={styles.loadingState}>

@@ -375,7 +375,7 @@ export function BreakRulesTab({ orgId, disabled = false }: BreakRulesTabProps) {
                     backgroundColor: 'var(--ls-color-brand-hover)',
                   },
                   '&.Mui-disabled': {
-                    backgroundColor: '#e0e0e0',
+                    backgroundColor: 'var(--ls-color-muted-border)',
                   },
                 }}
               >

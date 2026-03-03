@@ -48,7 +48,7 @@ interface InfractionListItemProps {
 
 function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
   const isPositive = (infraction.points || 0) < 0;
-  const pointColor = isPositive ? "#178459" : "#d23230";
+  const pointColor = isPositive ? "#178459" : "var(--ls-color-destructive-base)";
 
   return (
     <Box
@@ -61,7 +61,7 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
         gap: "12px",
         padding: "12px 16px",
         borderRadius: "12px",
-        border: "1px solid #e9eaeb",
+        border: "1px solid var(--ls-color-muted-border)",
         backgroundColor: "var(--ls-color-bg-container)",
         minWidth: 0,
         cursor: onClick ? "pointer" : "default",
@@ -76,7 +76,7 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
             fontFamily: "Satoshi",
             fontSize: "14px",
             fontWeight: 500,
-            color: "#414651",
+            color: "var(--ls-color-text-secondary)",
             lineHeight: "20px",
           }}
         >
@@ -85,13 +85,13 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
 
         <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <CalendarIcon sx={{ fontSize: "1em", color: "#535862" }} />
+            <CalendarIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)" }} />
             <Typography
               sx={{
                 fontFamily: "Satoshi",
                 fontSize: "14px",
                 fontWeight: 500,
-                color: "#535862",
+                color: "var(--ls-color-text-caption)",
                 lineHeight: "20px",
               }}
             >
@@ -103,20 +103,20 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
             sx={{
               width: "2px",
               height: "14px",
-              backgroundColor: "#e9eaeb",
+              backgroundColor: "var(--ls-color-muted-border)",
             }}
           />
 
           {infraction.leader_name && (
             <>
               <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <PersonIcon sx={{ fontSize: "1em", color: "#535862" }} />
+                <PersonIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)" }} />
                 <Typography
                   sx={{
                     fontFamily: "Satoshi",
                     fontSize: "14px",
                     fontWeight: 500,
-                    color: "#535862",
+                    color: "var(--ls-color-text-caption)",
                     lineHeight: "20px",
                   }}
                 >
@@ -126,13 +126,13 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
             </>
           )}
 
-          <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
+          <Box sx={{ width: "2px", height: "14px", backgroundColor: "var(--ls-color-muted-border)" }} />
           <Typography
             sx={{
               fontFamily: "Satoshi",
               fontSize: "14px",
               fontWeight: 500,
-              color: infraction.ack_bool ? "#535862" : "#dc2626",
+              color: infraction.ack_bool ? "var(--ls-color-text-caption)" : "var(--ls-color-destructive-vivid)",
               lineHeight: "20px",
             }}
           >
@@ -141,15 +141,15 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
 
           {(infraction.document_count ?? 0) > 0 && (
             <>
-              <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
+              <Box sx={{ width: "2px", height: "14px", backgroundColor: "var(--ls-color-muted-border)" }} />
               <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <AttachFileIcon sx={{ fontSize: "1em", color: "#535862", transform: "rotate(45deg)" }} />
+                <AttachFileIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)", transform: "rotate(45deg)" }} />
                 <Typography
                   sx={{
                     fontFamily: "Satoshi",
                     fontSize: "14px",
                     fontWeight: 500,
-                    color: "#535862",
+                    color: "var(--ls-color-text-caption)",
                     lineHeight: "20px",
                   }}
                 >
@@ -187,7 +187,7 @@ function InfractionListItem({ infraction, onClick }: InfractionListItemProps) {
             fontFamily: "Satoshi",
             fontSize: "12px",
             fontWeight: 500,
-            color: "#414651",
+            color: "var(--ls-color-text-secondary)",
             lineHeight: "18px",
             textAlign: "center",
           }}
@@ -216,7 +216,7 @@ function DisciplinaryActionListItem({ action, onClick }: DisciplinaryActionListI
         gap: "12px",
         padding: "12px 16px",
         borderRadius: "12px",
-        border: "1px solid #e9eaeb",
+        border: "1px solid var(--ls-color-muted-border)",
         backgroundColor: "var(--ls-color-bg-container)",
         minWidth: 0,
         cursor: onClick ? "pointer" : "default",
@@ -231,7 +231,7 @@ function DisciplinaryActionListItem({ action, onClick }: DisciplinaryActionListI
             fontFamily: "Satoshi",
             fontSize: "14px",
             fontWeight: 500,
-            color: "#414651",
+            color: "var(--ls-color-text-secondary)",
             lineHeight: "20px",
           }}
         >
@@ -240,13 +240,13 @@ function DisciplinaryActionListItem({ action, onClick }: DisciplinaryActionListI
 
         <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <CalendarIcon sx={{ fontSize: "1em", color: "#535862" }} />
+            <CalendarIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)" }} />
             <Typography
               sx={{
                 fontFamily: "Satoshi",
                 fontSize: "14px",
                 fontWeight: 500,
-                color: "#535862",
+                color: "var(--ls-color-text-caption)",
                 lineHeight: "20px",
               }}
             >
@@ -260,17 +260,17 @@ function DisciplinaryActionListItem({ action, onClick }: DisciplinaryActionListI
                 sx={{
                   width: "2px",
                   height: "14px",
-                  backgroundColor: "#e9eaeb",
+                  backgroundColor: "var(--ls-color-muted-border)",
                 }}
               />
               <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <PersonIcon sx={{ fontSize: "1em", color: "#535862" }} />
+                <PersonIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)" }} />
                 <Typography
                   sx={{
                     fontFamily: "Satoshi",
                     fontSize: "14px",
                     fontWeight: 500,
-                    color: "#535862",
+                    color: "var(--ls-color-text-caption)",
                     lineHeight: "20px",
                   }}
                 >
@@ -532,7 +532,7 @@ export function EmployeeModal({
               fontFamily: "Satoshi",
               fontSize: "14px",
               fontWeight: 600,
-              color: "#414651",
+              color: "var(--ls-color-text-secondary)",
               mb: 2,
             }}
           >
@@ -561,7 +561,7 @@ export function EmployeeModal({
                   fontFamily: "Satoshi",
                   fontSize: "18px",
                   fontWeight: 600,
-                  color: "#414651",
+                  color: "var(--ls-color-text-secondary)",
                   textAlign: "center",
                   lineHeight: "28px",
                 }}
@@ -573,7 +573,7 @@ export function EmployeeModal({
                   fontFamily: "Satoshi",
                   fontSize: "30px",
                   fontWeight: 700,
-                  color: "#414651",
+                  color: "var(--ls-color-text-secondary)",
                   textAlign: "center",
                   lineHeight: "38px",
                 }}
@@ -604,7 +604,7 @@ export function EmployeeModal({
                   fontFamily: "Satoshi",
                   fontSize: "18px",
                   fontWeight: 600,
-                  color: "#414651",
+                  color: "var(--ls-color-text-secondary)",
                   textAlign: "center",
                   lineHeight: "28px",
                 }}
@@ -616,7 +616,7 @@ export function EmployeeModal({
                   fontFamily: "Satoshi",
                   fontSize: "30px",
                   fontWeight: 700,
-                  color: "#414651",
+                  color: "var(--ls-color-text-secondary)",
                   textAlign: "center",
                   lineHeight: "38px",
                 }}
@@ -637,7 +637,7 @@ export function EmployeeModal({
                   fontFamily: "Satoshi",
                   fontSize: "14px",
                   fontWeight: 600,
-                  color: "#414651",
+                  color: "var(--ls-color-text-secondary)",
                 }}
               >
                 Infractions
@@ -669,7 +669,7 @@ export function EmployeeModal({
                   flexDirection: "column",
                   padding: "12px 16px",
                   borderRadius: "12px",
-                  border: "1px solid #e9eaeb",
+                  border: "1px solid var(--ls-color-muted-border)",
                   backgroundColor: "var(--ls-color-bg-container)",
                   alignItems: "center",
                   justifyContent: "center",
@@ -680,7 +680,7 @@ export function EmployeeModal({
                   sx={{
                     fontFamily: "Satoshi",
                     fontSize: "14px",
-                    color: "#535862",
+                    color: "var(--ls-color-text-caption)",
                     textAlign: "center",
                   }}
                 >
@@ -711,7 +711,7 @@ export function EmployeeModal({
                   fontFamily: "Satoshi",
                   fontSize: "14px",
                   fontWeight: 600,
-                  color: "#414651",
+                  color: "var(--ls-color-text-secondary)",
                 }}
               >
                 Disciplinary Actions
@@ -781,7 +781,7 @@ export function EmployeeModal({
                         fontFamily: "Satoshi",
                         fontSize: "14px",
                         fontWeight: 500,
-                        color: "#414651",
+                        color: "var(--ls-color-text-secondary)",
                         lineHeight: "20px",
                       }}
                     >
@@ -843,7 +843,7 @@ export function EmployeeModal({
                         padding: "6px 16px",
                         borderRadius: '8px',
                         "&:hover": {
-                          backgroundColor: "#254d36",
+                          backgroundColor: "var(--ls-color-brand-dark)",
                         },
                       }}
                     >
@@ -861,7 +861,7 @@ export function EmployeeModal({
                     flexDirection: "column",
                     padding: "12px 16px",
                     borderRadius: "12px",
-                    border: "1px solid #e9eaeb",
+                    border: "1px solid var(--ls-color-muted-border)",
                     backgroundColor: "var(--ls-color-bg-container)",
                     alignItems: "center",
                     justifyContent: "center",
@@ -872,7 +872,7 @@ export function EmployeeModal({
                     sx={{
                       fontFamily: "Satoshi",
                       fontSize: "14px",
-                      color: "#535862",
+                      color: "var(--ls-color-text-caption)",
                       textAlign: "center",
                     }}
                   >
@@ -903,7 +903,7 @@ export function EmployeeModal({
   const renderPathwayTab = () => {
     return (
       <Box sx={{ p: 3, textAlign: "center" }}>
-        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "#535862" }}>
+        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "var(--ls-color-text-caption)" }}>
           Coming soon!
         </Typography>
       </Box>
@@ -914,7 +914,7 @@ export function EmployeeModal({
     if (!employee) {
       return (
         <Box sx={{ p: 3, textAlign: "center" }}>
-          <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "#535862" }}>
+          <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "var(--ls-color-text-caption)" }}>
             No employee selected
           </Typography>
         </Box>
@@ -932,7 +932,7 @@ export function EmployeeModal({
               display: "flex",
               alignItems: "center",
               gap: 2,
-              borderBottom: "1px solid #e9eaeb",
+              borderBottom: "1px solid var(--ls-color-muted-border)",
               backgroundColor: "var(--ls-color-bg-container)",
             }}
           >
@@ -941,7 +941,7 @@ export function EmployeeModal({
                 fontFamily: "Satoshi",
                 fontSize: "14px",
                 fontWeight: 500,
-                color: "#414651",
+                color: "var(--ls-color-text-secondary)",
               }}
             >
               View ratings as:
@@ -967,9 +967,9 @@ export function EmployeeModal({
                   padding: "6px 16px",
                   minWidth: "auto",
                   backgroundColor: peViewMode === 'employee' ? "var(--ls-color-brand)" : "transparent",
-                  color: peViewMode === 'employee' ? "#ffffff" : "var(--ls-color-muted)",
+                  color: peViewMode === 'employee' ? "var(--ls-color-bg-container)" : "var(--ls-color-muted)",
                   "&:hover": {
-                    backgroundColor: peViewMode === 'employee' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
+                    backgroundColor: peViewMode === 'employee' ? "var(--ls-color-brand-dark)" : "rgba(0, 0, 0, 0.04)",
                   },
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
@@ -987,9 +987,9 @@ export function EmployeeModal({
                   padding: "6px 16px",
                   minWidth: "auto",
                   backgroundColor: peViewMode === 'rater' ? "var(--ls-color-brand)" : "transparent",
-                  color: peViewMode === 'rater' ? "#ffffff" : "var(--ls-color-muted)",
+                  color: peViewMode === 'rater' ? "var(--ls-color-bg-container)" : "var(--ls-color-muted)",
                   "&:hover": {
-                    backgroundColor: peViewMode === 'rater' ? "#254d36" : "rgba(0, 0, 0, 0.04)",
+                    backgroundColor: peViewMode === 'rater' ? "var(--ls-color-brand-dark)" : "rgba(0, 0, 0, 0.04)",
                   },
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
@@ -1013,7 +1013,7 @@ export function EmployeeModal({
   const renderEvaluationsTab = () => {
     return (
       <Box sx={{ p: 3, textAlign: "center" }}>
-        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "#535862" }}>
+        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "var(--ls-color-text-caption)" }}>
           Coming soon!
         </Typography>
       </Box>
@@ -1044,7 +1044,7 @@ export function EmployeeModal({
           justifyContent: "space-between",
           alignItems: "flex-start",
           padding: "24px",
-          borderBottom: "1px solid #e9eaeb",
+          borderBottom: "1px solid var(--ls-color-muted-border)",
           backgroundColor: "var(--ls-color-bg-container)",
         }}
       >
@@ -1054,7 +1054,7 @@ export function EmployeeModal({
               fontFamily: "Satoshi",
               fontSize: "24px",
               fontWeight: 600,
-              color: "#181d27",
+              color: "var(--ls-color-text-primary)",
               lineHeight: "32px",
             }}
           >
@@ -1089,7 +1089,7 @@ export function EmployeeModal({
       </DialogTitle>
 
       {/* Tabs */}
-      <Box sx={{ borderBottom: "1px solid #e9eaeb", backgroundColor: "var(--ls-color-bg-container)" }}>
+      <Box sx={{ borderBottom: "1px solid var(--ls-color-muted-border)", backgroundColor: "var(--ls-color-bg-container)" }}>
         <Tabs
           value={currentTab}
           onChange={(_, newValue) => setCurrentTab(newValue)}

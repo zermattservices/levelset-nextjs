@@ -124,11 +124,11 @@ export function LocationSelectDropdown({
                 paddingY: 1,
                 paddingX: 2,
                 '&.Mui-selected': {
-                  backgroundColor: '#eef5f0',
+                  backgroundColor: 'var(--ls-color-success-foreground)',
                   color: 'var(--ls-color-brand)',
                 },
                 '&.Mui-selected:hover': {
-                  backgroundColor: '#e3efe6',
+                  backgroundColor: 'var(--ls-color-success-foreground)',
                 },
               },
             },

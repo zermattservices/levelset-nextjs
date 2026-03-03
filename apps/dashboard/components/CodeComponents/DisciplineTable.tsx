@@ -53,11 +53,11 @@ const levelsetGreen = 'var(--ls-color-brand)';
 
 // Color gradient from lightest to darkest red (5 levels)
 const redGradient = [
-  { bg: '#fee2e2', color: '#991b1b' }, // Lightest - level 1
-  { bg: '#fecaca', color: '#991b1b' }, // Light - level 2
-  { bg: '#fca5a5', color: '#7f1d1d' }, // Medium - level 3
-  { bg: '#f87171', color: '#7f1d1d' }, // Dark - level 4
-  { bg: '#dc2626', color: '#ffffff' }, // Darkest - level 5
+  { bg: 'var(--ls-color-destructive-light)', color: '#991b1b' }, // Lightest - level 1
+  { bg: 'var(--ls-color-destructive-lighter)', color: '#991b1b' }, // Light - level 2
+  { bg: '#fca5a5', color: 'var(--ls-color-destructive-soft-foreground)' }, // Medium - level 3
+  { bg: '#f87171', color: 'var(--ls-color-destructive-soft-foreground)' }, // Dark - level 4
+  { bg: 'var(--ls-color-destructive-vivid)', color: 'var(--ls-color-bg-container)' }, // Darkest - level 5
 ];
 
 // Points Badge Component - color based on relative position in org's action hierarchy
@@ -476,7 +476,7 @@ export function DisciplineTable({
   if (error && data.length === 0) {
     return (
       <Box className={className} sx={{ p: 3, textAlign: 'center' }}>
-        <Typography sx={{ fontFamily, color: '#dc2626' }}>{error}</Typography>
+        <Typography sx={{ fontFamily, color: 'var(--ls-color-destructive-vivid)' }}>{error}</Typography>
       </Box>
     );
   }

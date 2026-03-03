@@ -23,12 +23,12 @@ const OrgLevelTag = styled(Chip)(() => ({
   fontSize: 11,
   fontWeight: 500,
   height: 22,
-  backgroundColor: '#f0fdf4',
-  color: '#166534',
-  border: '1px solid #bbf7d0',
+  backgroundColor: 'var(--ls-color-success-foreground)',
+  color: 'var(--ls-color-success-soft-foreground)',
+  border: '1px solid var(--ls-color-success-border)',
   '& .MuiChip-icon': {
     fontSize: 14,
-    color: '#166534',
+    color: 'var(--ls-color-success-soft-foreground)',
   },
 }));
 

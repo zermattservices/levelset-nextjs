@@ -89,7 +89,7 @@ export function MobileShell({ location }: MobileShellProps) {
               padding: '20px 24px',
               borderRadius: '20px',
               background: 'linear-gradient(135deg, #2f7a5c 0%, #30654f 100%)',
-              color: '#ffffff',
+              color: 'var(--ls-color-bg-container)',
               boxShadow: '0 12px 24px rgba(49, 102, 74, 0.25)',
               '&:hover': {
                 background: 'linear-gradient(135deg, #29684f 0%, #28533f 100%)',
@@ -153,7 +153,7 @@ export function MobileShell({ location }: MobileShellProps) {
               padding: '14px 12px',
               borderRadius: '8px',
               '&:hover': {
-                backgroundColor: '#28533f',
+                backgroundColor: 'var(--ls-color-brand-hover)',
               },
             }}
           >
@@ -185,7 +185,7 @@ export function MobileShell({ location }: MobileShellProps) {
               padding: '14px 12px',
               borderRadius: '8px',
               '&:hover': {
-                backgroundColor: '#28533f',
+                backgroundColor: 'var(--ls-color-brand-hover)',
               },
             }}
           >

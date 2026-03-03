@@ -220,14 +220,14 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
   const getGroupStyles = React.useCallback((points: number) => {
     if (points < 0) {
       return {
-        backgroundColor: '#e6f4ea',
-        color: '#1f5132',
+        backgroundColor: 'var(--ls-color-success-foreground)',
+        color: 'var(--ls-color-success-soft-foreground)',
       };
     }
     if (points > 0) {
       return {
-        backgroundColor: '#fee2e2',
-        color: '#7f1d1d',
+        backgroundColor: 'var(--ls-color-destructive-light)',
+        color: 'var(--ls-color-destructive-darker)',
       };
     }
     return {
@@ -681,7 +681,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                         p: '4px',
                       }}
                     >
-                      <PictureAsPdfIcon sx={{ fontSize: 24, color: '#ef4444' }} />
+                      <PictureAsPdfIcon sx={{ fontSize: 24, color: 'var(--ls-color-destructive-vivid)' }} />
                       <Typography
                         sx={{
                           fontFamily,
@@ -708,7 +708,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                       top: 2,
                       right: 2,
                       backgroundColor: 'rgba(0,0,0,0.5)',
-                      color: '#fff',
+                      color: 'var(--ls-color-bg-container)',
                       width: 20,
                       height: 20,
                       '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' },
@@ -736,7 +736,7 @@ export function DisciplineInfractionForm({ controls }: DisciplineInfractionFormP
                 borderRadius: '8px',
                 py: '10px',
                 '&:hover': {
-                  borderColor: '#254d36',
+                  borderColor: 'var(--ls-color-brand-hover)',
                   backgroundColor: 'rgba(49,102,74,0.04)',
                 },
               }}

@@ -893,7 +893,7 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
                 ...(categoryFilter === null
                   ? {
                       backgroundColor: 'var(--ls-color-brand)',
-                      color: '#fff',
+                      color: 'var(--ls-color-bg-container)',
                       '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
                     }
                   : {
@@ -918,7 +918,7 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
                     ...(categoryFilter === cat
                       ? {
                           backgroundColor: color,
-                          color: '#fff',
+                          color: 'var(--ls-color-bg-container)',
                           '&:hover': { opacity: 0.9 },
                         }
                       : {
@@ -1087,8 +1087,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
                 ...(uploadMode === 'file'
                   ? {
                       backgroundColor: 'var(--ls-color-brand)',
-                      color: '#fff',
-                      '& .MuiChip-icon': { color: '#fff' },
+                      color: 'var(--ls-color-bg-container)',
+                      '& .MuiChip-icon': { color: 'var(--ls-color-bg-container)' },
                       '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
                     }
                   : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
@@ -1107,8 +1107,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
                 ...(uploadMode === 'url'
                   ? {
                       backgroundColor: 'var(--ls-color-brand)',
-                      color: '#fff',
-                      '& .MuiChip-icon': { color: '#fff' },
+                      color: 'var(--ls-color-bg-container)',
+                      '& .MuiChip-icon': { color: 'var(--ls-color-bg-container)' },
                       '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
                     }
                   : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
@@ -1127,8 +1127,8 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
                 ...(uploadMode === 'text'
                   ? {
                       backgroundColor: 'var(--ls-color-brand)',
-                      color: '#fff',
-                      '& .MuiChip-icon': { color: '#fff' },
+                      color: 'var(--ls-color-bg-container)',
+                      '& .MuiChip-icon': { color: 'var(--ls-color-bg-container)' },
                       '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
                     }
                   : { borderColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-muted)' }),
@@ -1268,12 +1268,12 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
               (uploadMode === 'url' && !uploadUrl.trim()) ||
               (uploadMode === 'text' && !uploadRawContent.trim())
             }
-            startIcon={uploading ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : undefined}
+            startIcon={uploading ? <CircularProgress size={16} sx={{ color: 'var(--ls-color-bg-container)' }} /> : undefined}
             sx={{
               ...muiButtonSx,
               backgroundColor: 'var(--ls-color-brand)',
               '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
-              '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)', color: '#fff' },
+              '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-bg-container)' },
             }}
           >
             {uploading ? 'Uploading...' : 'Add Document'}
@@ -1321,12 +1321,12 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
             variant="contained"
             onClick={handleCreateFolder}
             disabled={creatingFolder || !newFolderName.trim()}
-            startIcon={creatingFolder ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : undefined}
+            startIcon={creatingFolder ? <CircularProgress size={16} sx={{ color: 'var(--ls-color-bg-container)' }} /> : undefined}
             sx={{
               ...muiButtonSx,
               backgroundColor: 'var(--ls-color-brand)',
               '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
-              '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)', color: '#fff' },
+              '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-bg-container)' },
             }}
           >
             {creatingFolder ? 'Creating...' : 'Create'}
@@ -1755,12 +1755,12 @@ export function DocumentsPageContent({ config }: { config: DocumentsConfig }) {
             variant="contained"
             onClick={handleDelete}
             disabled={deleting}
-            startIcon={deleting ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : undefined}
+            startIcon={deleting ? <CircularProgress size={16} sx={{ color: 'var(--ls-color-bg-container)' }} /> : undefined}
             sx={{
               ...muiButtonSx,
               backgroundColor: 'var(--ls-color-destructive)',
               '&:hover': { backgroundColor: 'var(--ls-color-destructive-hover)' },
-              '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)', color: '#fff' },
+              '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)', color: 'var(--ls-color-bg-container)' },
             }}
           >
             {deleting ? 'Deleting...' : 'Delete'}

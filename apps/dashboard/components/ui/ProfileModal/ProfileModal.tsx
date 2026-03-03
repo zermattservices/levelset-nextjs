@@ -284,7 +284,7 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
                   textTransform: 'none',
                   backgroundColor: levelsetGreen,
                   '&:hover': {
-                    backgroundColor: '#285540',
+                    backgroundColor: 'var(--ls-color-brand-hover)',
                   },
                 }}
               >

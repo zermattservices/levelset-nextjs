@@ -38,7 +38,7 @@ const AreaPill = styled(Box)<{ selected?: boolean; areaType: 'FOH' | 'BOH' | 'cu
     cursor: 'pointer',
     transition: 'all 0.15s ease',
     backgroundColor: selected ? baseColor : lightColor,
-    color: selected ? '#ffffff' : baseColor,
+    color: selected ? 'var(--ls-color-bg-container)' : baseColor,
     border: `2px solid ${baseColor}`,
     '&:hover': {
       opacity: 0.9,
@@ -644,7 +644,7 @@ export function SchedulingPositionsTab({ orgId, disabled = false }: SchedulingPo
                   fontFamily, textTransform: 'none',
                   backgroundColor: 'var(--ls-color-brand)',
                   '&:hover': { backgroundColor: 'var(--ls-color-brand-hover)' },
-                  '&.Mui-disabled': { backgroundColor: '#e0e0e0' },
+                  '&.Mui-disabled': { backgroundColor: 'var(--ls-color-muted-border)' },
                 }}
               >
                 {saving ? 'Saving...' : 'Save Changes'}

@@ -48,7 +48,7 @@ function InfractionCard({
   onClick?: () => void;
 }) {
   const isPositive = (infraction.points || 0) < 0;
-  const pointColor = isPositive ? "#178459" : "#d23230";
+  const pointColor = isPositive ? "#178459" : "var(--ls-color-destructive-base)";
 
   return (
     <Box
@@ -61,7 +61,7 @@ function InfractionCard({
         gap: "12px",
         padding: "12px 16px",
         borderRadius: "12px",
-        border: "1px solid #e9eaeb",
+        border: "1px solid var(--ls-color-muted-border)",
         backgroundColor: "var(--ls-color-bg-container)",
         minWidth: 0,
         cursor: onClick ? "pointer" : "default",
@@ -92,7 +92,7 @@ function InfractionCard({
             fontFamily: "Satoshi",
             fontSize: "14px",
             fontWeight: 500,
-            color: "#414651",
+            color: "var(--ls-color-text-secondary)",
             lineHeight: "20px",
           }}
         >
@@ -101,13 +101,13 @@ function InfractionCard({
 
         <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <CalendarIcon sx={{ fontSize: "1em", color: "#535862" }} />
+            <CalendarIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)" }} />
             <Typography
               sx={{
                 fontFamily: "Satoshi",
                 fontSize: "14px",
                 fontWeight: 500,
-                color: "#535862",
+                color: "var(--ls-color-text-caption)",
                 lineHeight: "20px",
               }}
             >
@@ -117,15 +117,15 @@ function InfractionCard({
 
           {infraction.leader_name && (
             <>
-              <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
+              <Box sx={{ width: "2px", height: "14px", backgroundColor: "var(--ls-color-muted-border)" }} />
               <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <PersonIcon sx={{ fontSize: "1em", color: "#535862" }} />
+                <PersonIcon sx={{ fontSize: "1em", color: "var(--ls-color-text-caption)" }} />
                 <Typography
                   sx={{
                     fontFamily: "Satoshi",
                     fontSize: "14px",
                     fontWeight: 500,
-                    color: "#535862",
+                    color: "var(--ls-color-text-caption)",
                     lineHeight: "20px",
                   }}
                 >
@@ -135,7 +135,7 @@ function InfractionCard({
             </>
           )}
 
-          <Box sx={{ width: "2px", height: "14px", backgroundColor: "#e9eaeb" }} />
+          <Box sx={{ width: "2px", height: "14px", backgroundColor: "var(--ls-color-muted-border)" }} />
           <Typography
             sx={{
               fontFamily: "Satoshi",
@@ -176,7 +176,7 @@ function InfractionCard({
             fontFamily: "Satoshi",
             fontSize: "12px",
             fontWeight: 500,
-            color: "#414651",
+            color: "var(--ls-color-text-secondary)",
             lineHeight: "18px",
             textAlign: "center",
           }}
@@ -202,23 +202,23 @@ const PointsBadge = ({ points, disciplineActions }: { points: number; discipline
     if (applicableAction) {
       const actionName = applicableAction.action.toLowerCase();
       if (actionName.includes('documented warning')) {
-        return { bg: '#fee2e2', color: '#991b1b' };
+        return { bg: 'var(--ls-color-destructive-light)', color: '#991b1b' };
       } else if (actionName.includes('write up 1')) {
-        return { bg: '#fecaca', color: '#991b1b' };
+        return { bg: 'var(--ls-color-destructive-lighter)', color: '#991b1b' };
       } else if (actionName.includes('write up 2')) {
-        return { bg: '#fca5a5', color: '#7f1d1d' };
+        return { bg: '#fca5a5', color: 'var(--ls-color-destructive-soft-foreground)' };
       } else if (actionName.includes('write up 3')) {
-        return { bg: '#f87171', color: '#7f1d1d' };
+        return { bg: '#f87171', color: 'var(--ls-color-destructive-soft-foreground)' };
       } else if (actionName.includes('termination')) {
-        return { bg: '#dc2626', color: '#ffffff' };
+        return { bg: 'var(--ls-color-destructive-vivid)', color: 'var(--ls-color-bg-container)' };
       }
     }
     
-    if (points <= 10) return { bg: '#fee2e2', color: '#991b1b' };
-    else if (points <= 30) return { bg: '#fecaca', color: '#991b1b' };
-    else if (points <= 50) return { bg: '#fca5a5', color: '#7f1d1d' };
-    else if (points <= 75) return { bg: '#f87171', color: '#7f1d1d' };
-    else return { bg: '#dc2626', color: '#ffffff' };
+    if (points <= 10) return { bg: 'var(--ls-color-destructive-light)', color: '#991b1b' };
+    else if (points <= 30) return { bg: 'var(--ls-color-destructive-lighter)', color: '#991b1b' };
+    else if (points <= 50) return { bg: '#fca5a5', color: 'var(--ls-color-destructive-soft-foreground)' };
+    else if (points <= 75) return { bg: '#f87171', color: 'var(--ls-color-destructive-soft-foreground)' };
+    else return { bg: 'var(--ls-color-destructive-vivid)', color: 'var(--ls-color-bg-container)' };
   };
   
   const colors = getBadgeColor();
@@ -789,8 +789,8 @@ export function DisciplineNotifications({
               label="Action Required"
               size="small"
               sx={{
-                backgroundColor: '#dc2626',
-                color: '#ffffff',
+                backgroundColor: 'var(--ls-color-destructive-vivid)',
+                color: 'var(--ls-color-bg-container)',
                 fontFamily,
                 fontSize: 11,
                 fontWeight: 600,
@@ -832,7 +832,7 @@ export function DisciplineNotifications({
                   key={rec.employee_id}
                   sx={{
                     backgroundColor: "var(--ls-color-bg-container)",
-                    border: "1px solid #e9eaeb",
+                    border: "1px solid var(--ls-color-muted-border)",
                     borderRadius: "8px",
                     padding: "12px 16px",
                     display: "flex",
@@ -873,7 +873,7 @@ export function DisciplineNotifications({
                   <Box
                     sx={{
                       backgroundColor: "var(--ls-color-bg-container)",
-                      border: "1px solid #e9eaeb",
+                      border: "1px solid var(--ls-color-muted-border)",
                       borderRadius: "8px",
                       padding: "8px 12px",
                       display: 'inline-flex',

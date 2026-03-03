@@ -246,10 +246,10 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return { bg: '#dcfce7', text: '#166534' };
+      case 'active': return { bg: 'var(--ls-color-success-foreground)', text: 'var(--ls-color-success-soft-foreground)' };
       case 'trialing': return { bg: '#dbeafe', text: '#1e40af' };
       case 'past_due': return { bg: '#fef3c7', text: '#92400e' };
-      case 'canceled': return { bg: '#fecaca', text: '#991b1b' };
+      case 'canceled': return { bg: 'var(--ls-color-destructive-lighter)', text: '#991b1b' };
       default: return { bg: '#f3f4f6', text: '#374151' };
     }
   };
@@ -272,7 +272,7 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
 
       {/* Current Subscription */}
       {subscription && subscription.status !== 'canceled' ? (
-        <Box sx={{ border: '1px solid #e5e5e5', borderRadius: '12px', p: 3 }}>
+        <Box sx={{ border: '1px solid var(--ls-color-muted-border)', borderRadius: '12px', p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography sx={{ fontFamily, fontSize: '16px', fontWeight: 600 }}>
               Current Subscription
@@ -291,7 +291,7 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
 
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
             <Box>
-              <Typography sx={{ fontFamily, fontSize: '12px', color: '#999', textTransform: 'uppercase', mb: 0.5 }}>
+              <Typography sx={{ fontFamily, fontSize: '12px', color: 'var(--ls-color-text-tertiary)', textTransform: 'uppercase', mb: 0.5 }}>
                 Plan
               </Typography>
               <Typography sx={{ fontFamily, fontSize: '16px', fontWeight: 600 }}>
@@ -299,7 +299,7 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
               </Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontFamily, fontSize: '12px', color: '#999', textTransform: 'uppercase', mb: 0.5 }}>
+              <Typography sx={{ fontFamily, fontSize: '12px', color: 'var(--ls-color-text-tertiary)', textTransform: 'uppercase', mb: 0.5 }}>
                 Locations
               </Typography>
               <Typography sx={{ fontFamily, fontSize: '16px', fontWeight: 600 }}>
@@ -307,7 +307,7 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
               </Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontFamily, fontSize: '12px', color: '#999', textTransform: 'uppercase', mb: 0.5 }}>
+              <Typography sx={{ fontFamily, fontSize: '12px', color: 'var(--ls-color-text-tertiary)', textTransform: 'uppercase', mb: 0.5 }}>
                 Price per location
               </Typography>
               <Typography sx={{ fontFamily, fontSize: '16px', fontWeight: 600 }}>
@@ -318,7 +318,7 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
               </Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontFamily, fontSize: '12px', color: '#999', textTransform: 'uppercase', mb: 0.5 }}>
+              <Typography sx={{ fontFamily, fontSize: '12px', color: 'var(--ls-color-text-tertiary)', textTransform: 'uppercase', mb: 0.5 }}>
                 Next billing
               </Typography>
               <Typography sx={{ fontFamily, fontSize: '16px', fontWeight: 600 }}>
@@ -338,8 +338,8 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
           )}
 
           {subscription.cancel_at_period_end && (
-            <Box sx={{ mt: 2, p: 1.5, backgroundColor: '#fef2f2', borderRadius: '8px' }}>
-              <Typography sx={{ fontFamily, fontSize: '13px', color: '#991b1b' }}>
+            <Box sx={{ mt: 2, p: 1.5, backgroundColor: 'var(--ls-color-destructive-light)', borderRadius: '8px' }}>
+              <Typography sx={{ fontFamily, fontSize: '13px', color: 'var(--ls-color-destructive-dark)' }}>
                 Cancels at end of current period
               </Typography>
             </Box>
@@ -369,11 +369,11 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
         </Box>
       ) : (
         /* Create Subscription */
-        <Box sx={{ border: '1px solid #e5e5e5', borderRadius: '12px', p: 3 }}>
+        <Box sx={{ border: '1px solid var(--ls-color-muted-border)', borderRadius: '12px', p: 3 }}>
           <Typography sx={{ fontFamily, fontSize: '16px', fontWeight: 600, mb: 2 }}>
             Create Subscription
           </Typography>
-          <Typography sx={{ fontFamily, fontSize: '13px', color: '#666', mb: 3 }}>
+          <Typography sx={{ fontFamily, fontSize: '13px', color: 'var(--ls-color-text-tertiary)', mb: 3 }}>
             No active subscription. Create one to grant feature access.
           </Typography>
 
@@ -437,7 +437,7 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
       )}
 
       {/* Custom Pricing */}
-      <Box sx={{ border: '1px solid #e5e5e5', borderRadius: '12px', p: 3 }}>
+      <Box sx={{ border: '1px solid var(--ls-color-muted-border)', borderRadius: '12px', p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography sx={{ fontFamily, fontSize: '16px', fontWeight: 600 }}>
             Custom Pricing
@@ -457,7 +457,7 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
           />
         </Box>
 
-        <Typography sx={{ fontFamily, fontSize: '13px', color: '#666', mb: 2 }}>
+        <Typography sx={{ fontFamily, fontSize: '13px', color: 'var(--ls-color-text-tertiary)', mb: 2 }}>
           {orgData?.custom_pricing
             ? 'Custom pricing is enabled. Feature flags are managed manually in the Features tab, and this org has a custom price.'
             : 'Enable to set a custom price and manage feature flags independently from the subscription tier.'}
@@ -488,15 +488,15 @@ export function OrgSubscriptionTab({ orgId }: OrgSubscriptionTabProps) {
       </Box>
 
       {/* Stripe Customer Info */}
-      <Box sx={{ border: '1px solid #e5e5e5', borderRadius: '12px', p: 3 }}>
+      <Box sx={{ border: '1px solid var(--ls-color-muted-border)', borderRadius: '12px', p: 3 }}>
         <Typography sx={{ fontFamily, fontSize: '16px', fontWeight: 600, mb: 1 }}>
           Stripe Details
         </Typography>
-        <Typography sx={{ fontFamily, fontSize: '13px', color: '#666' }}>
+        <Typography sx={{ fontFamily, fontSize: '13px', color: 'var(--ls-color-text-tertiary)' }}>
           Customer ID: {orgData?.stripe_customer_id || 'Not linked'}
         </Typography>
         {subscription?.stripe_subscription_id && (
-          <Typography sx={{ fontFamily, fontSize: '13px', color: '#666' }}>
+          <Typography sx={{ fontFamily, fontSize: '13px', color: 'var(--ls-color-text-tertiary)' }}>
             Subscription ID: {subscription.stripe_subscription_id}
           </Typography>
         )}

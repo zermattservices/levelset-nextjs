@@ -50,7 +50,7 @@ export function ImpersonationBanner() {
         {/* User info section */}
         <div className={styles.userInfo}>
           <div className={styles.icon}>
-            <PersonIcon sx={{ fontSize: 18, color: '#ffffff' }} />
+            <PersonIcon sx={{ fontSize: 18, color: 'var(--ls-color-bg-container)' }} />
           </div>
           <div>
             <div className={styles.testingLabel}>Testing As</div>
