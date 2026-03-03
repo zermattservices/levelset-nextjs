@@ -1,6 +1,47 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+/**
+ * Derive block boundaries from template slots on the fly.
+ * Used as a fallback when a template has no rows in setup_template_blocks.
+ */
+function deriveBlocksFromSlots(
+  slots: { position_id: string; time_slot: string; slot_count: number }[],
+  scheduleStartMin: number,
+  scheduleEndMin: number,
+): string[] {
+  const slotsByTime = new Map<string, Map<string, number>>();
+  for (const s of slots) {
+    const normalizedTime = minutesToTimeStr(timeStrToMinutes(s.time_slot));
+    if (!slotsByTime.has(normalizedTime)) {
+      slotsByTime.set(normalizedTime, new Map());
+    }
+    slotsByTime.get(normalizedTime)!.set(s.position_id, s.slot_count);
+  }
+
+  const derivedBlocks: string[] = [];
+  let prevSnapshot: string | null = null;
+
+  for (let min = scheduleStartMin; min < scheduleEndMin; min += 30) {
+    const timeStr = minutesToTimeStr(min);
+    const posMap = slotsByTime.get(timeStr);
+
+    const snapshot = posMap
+      ? Array.from(posMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([k, v]) => `${k}:${v}`).join('|')
+      : '';
+
+    if (min === scheduleStartMin) {
+      derivedBlocks.push(timeStr);
+    } else if (snapshot !== prevSnapshot) {
+      derivedBlocks.push(timeStr);
+    }
+
+    prevSnapshot = snapshot;
+  }
+
+  return derivedBlocks;
+}
+
 function minutesToTimeStr(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
@@ -212,7 +253,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const ranges = templateRanges.get(template.id);
       if (!ranges) continue;
 
-      const blocks = (template.setup_template_blocks || [])
+      // If template has no blocks in DB, derive them on the fly from slots
+      let dbBlocks = template.setup_template_blocks || [];
+      if (dbBlocks.length === 0) {
+        const schedules = templateDaySchedules.get(template.id) || [];
+        if (schedules.length > 0) {
+          const schedStart = timeStrToMinutes(schedules[0].start_time);
+          const schedEnd = timeStrToMinutes(schedules[0].end_time);
+          const derivedTimes = deriveBlocksFromSlots(
+            template.setup_template_slots || [],
+            schedStart,
+            schedEnd,
+          );
+          dbBlocks = derivedTimes.map(t => ({
+            id: '',
+            template_id: template.id,
+            block_time: t,
+            is_custom: false,
+          }));
+        }
+      }
+
+      const blocks = dbBlocks
         .map(b => ({
           ...b,
           block_time: minutesToTimeStr(timeStrToMinutes(b.block_time)),
@@ -228,7 +290,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return bMin >= range.start && bMin < range.end;
         });
 
-        // If no blocks exist for this range, create one at range start
+        // If still no blocks for this range, create one at range start
         if (rangeBlocks.length === 0) {
           rangeBlocks.push({
             id: '',
