@@ -301,8 +301,24 @@ export function useSetupBoardData({
       }
     }
 
+    // Also find any shift for employees who have assignments in this block
+    // (so assigned employees always appear even if their shift times changed)
+    const assignedEmployeeIds = new Set(assignments.map((a) => a.employee_id));
+    for (const shift of shifts) {
+      if (shift.shift_date !== selectedDay) continue;
+      if (!shift.assignment?.employee_id) continue;
+      if (assignedEmployeeIds.has(shift.assignment.employee_id) && !employeesWithShifts.has(shift.assignment.employee_id)) {
+        employeesWithShifts.set(shift.assignment.employee_id, shift);
+      }
+    }
+
+    // Build the set of employee IDs that should appear
+    const relevantEmployeeIds = new Set<string>();
+    employeesWithShifts.forEach((_shift, empId) => relevantEmployeeIds.add(empId));
+    assignedEmployeeIds.forEach((empId) => relevantEmployeeIds.add(empId));
+
     return employees
-      .filter((emp) => employeesWithShifts.has(emp.id))
+      .filter((emp) => relevantEmployeeIds.has(emp.id))
       // Apply zone filter
       .filter((emp) => {
         if (zoneFilter === 'FOH') return emp.is_foh;
@@ -310,14 +326,18 @@ export function useSetupBoardData({
         return true;
       })
       .map((emp) => {
-        const shift = employeesWithShifts.get(emp.id)!;
+        // Use overlapping shift if available, otherwise find any shift for this day
+        const shift = employeesWithShifts.get(emp.id)
+          ?? shifts.find((s) => s.shift_date === selectedDay && s.assignment?.employee_id === emp.id)
+          ?? null;
         const assignment = assignments.find((a) => a.employee_id === emp.id);
         return {
           ...emp,
-          shift,
+          shift: shift as Shift,
           currentAssignment: assignment ?? null,
         };
       })
+      .filter((emp) => emp.shift != null) // must have at least one shift on this day
       .sort((a, b) => {
         // Unassigned first, then by earliest shift start time
         if (a.currentAssignment && !b.currentAssignment) return 1;

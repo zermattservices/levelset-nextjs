@@ -121,17 +121,27 @@ export function SetupBoardView({
     setActiveDragData(null);
   };
 
-  // Find the dragged employee for the overlay
-  const draggedEmployee = React.useMemo(() => {
+  // Find the dragged employee name for the overlay
+  const draggedEmployeeName = React.useMemo(() => {
     if (!activeDragData) return null;
-    if (activeDragData.type === 'employee') {
-      return availableEmployees.find(e => e.id === activeDragData.employeeId) ?? null;
+    const employeeId = activeDragData.employeeId;
+    if (!employeeId) return null;
+
+    // Try to find in available employees first
+    const found = availableEmployees.find(e => e.id === employeeId);
+    if (found) return found.full_name;
+
+    // Fallback: look in position slot assignments
+    for (const ps of positionSlots) {
+      for (const slot of ps.slots) {
+        if (slot.assignment?.employee_id === employeeId) {
+          return slot.assignment.employee?.full_name ?? 'Employee';
+        }
+      }
     }
-    if (activeDragData.type === 'assignment') {
-      return availableEmployees.find(e => e.id === activeDragData.employeeId) ?? null;
-    }
-    return null;
-  }, [activeDragData, availableEmployees]);
+
+    return 'Employee';
+  }, [activeDragData, availableEmployees, positionSlots]);
 
   if (isLoading) {
     return (
@@ -168,9 +178,9 @@ export function SetupBoardView({
         </div>
 
         <DragOverlay dropAnimation={null}>
-          {draggedEmployee && (
+          {draggedEmployeeName && (
             <SetupEmployeeChip
-              employeeName={draggedEmployee.full_name}
+              employeeName={draggedEmployeeName}
               isOverlay
             />
           )}
