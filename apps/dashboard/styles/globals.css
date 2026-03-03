@@ -1,20 +1,9 @@
-/* Force light mode across the entire app */
-:root {
-  color-scheme: light only;
-}
-
+/* Theme is controlled by data-theme attribute on <html> — see ThemeProvider */
 html {
-  color-scheme: light only;
   min-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  background-color: #ffffff;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: light only;
-  }
+  background-color: var(--ls-color-bg-page);
 }
 
 @font-face {
@@ -143,7 +132,7 @@ svg {
 .dashboard-card {
   background-color: var(--ls-color-bg-container);
   border-radius: var(--ls-radius-lg);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px 0 var(--ls-color-shadow), 0 1px 2px 0 var(--ls-color-shadow);
   border: 1px solid var(--ls-color-muted-border); /* gray-200 */
 }
 
@@ -152,7 +141,7 @@ svg {
 }
 
 .metric-card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px var(--ls-color-shadow), 0 2px 4px -1px var(--ls-color-shadow);
 }
 
 .badge-positive {
@@ -162,7 +151,7 @@ svg {
 
 .badge-negative {
   background-color: var(--ls-color-destructive-foreground); /* red-100 */
-  color: #dc2626; /* red-600 — not yet in tokens */
+  color: var(--ls-color-destructive-vivid);
 }
 
 /* Ensure minimum padding on tablet/smaller screens */
