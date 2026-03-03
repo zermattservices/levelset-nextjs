@@ -5,8 +5,47 @@ const ASSIGNMENT_SELECT = `
   *,
   employee:employees(id, full_name, calculated_pay, actual_pay, actual_pay_type, actual_pay_annual),
   position:org_positions(id, name, zone),
-  shift:shifts(id, start_time, end_time, position_id)
+  shift:shifts(id, shift_date, start_time, end_time, position_id)
 `;
+
+function parseTimeToMinutes(time: string): number {
+  const [hours, minutes] = time.split(':').map(Number);
+  return (hours || 0) * 60 + (minutes || 0);
+}
+
+function minutesToTime(minutes: number): string {
+  const normalizedMinutes = ((minutes % (24 * 60)) + (24 * 60)) % (24 * 60);
+  const h = Math.floor(normalizedMinutes / 60);
+  const m = normalizedMinutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function resolveAssignmentWindow(
+  requestedStartTime: string,
+  requestedEndTime: string,
+  shiftStartTime: string,
+  shiftEndTime: string,
+): { startTime: string; endTime: string } | null {
+  const blockStart = parseTimeToMinutes(requestedStartTime);
+  const blockEnd = parseTimeToMinutes(requestedEndTime);
+  const shiftStart = parseTimeToMinutes(shiftStartTime);
+  const shiftEnd = parseTimeToMinutes(shiftEndTime);
+
+  const start = Math.max(blockStart, shiftStart);
+  const end = Math.min(blockEnd, shiftEnd);
+
+  if (end <= start) return null;
+
+  return {
+    startTime: minutesToTime(start),
+    endTime: minutesToTime(end),
+  };
+}
+
+function hasStrictOverlap(startA: string, endA: string, startB: string, endB: string): boolean {
+  return parseTimeToMinutes(startA) < parseTimeToMinutes(endB)
+    && parseTimeToMinutes(endA) > parseTimeToMinutes(startB);
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
@@ -31,8 +70,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select(ASSIGNMENT_SELECT)
         .eq('org_id', org_id as string)
         .eq('assignment_date', date as string)
-        .gte('end_time', start_time as string)
-        .lte('start_time', end_time as string)
+        // Half-open overlap: [assignment.start, assignment.end) intersects [block.start, block.end)
+        // This prevents boundary bleed where a 14:00 assignment appears in an 11:00-14:00 block.
+        .gt('end_time', start_time as string)
+        .lt('start_time', end_time as string)
         .order('position_id')
         .order('start_time');
 
@@ -41,7 +82,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Failed to fetch setup assignments' });
       }
 
-      return res.status(200).json({ assignments: data || [] });
+      const blockStart = start_time as string;
+      const blockEnd = end_time as string;
+      const assignments = (data || [])
+        .map((assignment: any) => {
+          const shiftStart = assignment?.shift?.start_time;
+          const shiftEnd = assignment?.shift?.end_time;
+
+          if (!shiftStart || !shiftEnd) return assignment;
+
+          const clamped = resolveAssignmentWindow(
+            assignment.start_time,
+            assignment.end_time,
+            shiftStart,
+            shiftEnd,
+          );
+          if (!clamped) return null;
+
+          return {
+            ...assignment,
+            start_time: clamped.startTime,
+            end_time: clamped.endTime,
+          };
+        })
+        .filter((assignment: any) => {
+          if (!assignment) return false;
+          return hasStrictOverlap(assignment.start_time, assignment.end_time, blockStart, blockEnd);
+        });
+
+      return res.status(200).json({ assignments });
     }
 
     if (req.method === 'POST') {
@@ -59,7 +128,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Verify the shift exists and belongs to this org
         const { data: shift, error: shiftError } = await supabase
           .from('shifts')
-          .select('id, org_id')
+          .select('id, org_id, shift_date, start_time, end_time')
           .eq('id', shift_id)
           .eq('org_id', org_id)
           .single();
@@ -68,15 +137,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(404).json({ error: 'Shift not found or does not belong to this organization' });
         }
 
+        if (shift.shift_date !== assignment_date) {
+          return res.status(400).json({ error: 'assignment_date must match the shift date' });
+        }
+
+        const assignmentWindow = resolveAssignmentWindow(
+          start_time,
+          end_time,
+          shift.start_time,
+          shift.end_time,
+        );
+        if (!assignmentWindow) {
+          return res.status(409).json({
+            error: 'Selected block does not overlap this shift',
+          });
+        }
+
+        const effectiveStartTime = assignmentWindow.startTime;
+        const effectiveEndTime = assignmentWindow.endTime;
+
         // One-position-per-block validation: check if employee already assigned
         // to a DIFFERENT position in this block (same date + overlapping time)
         const { data: existingAssignments } = await supabase
           .from('setup_assignments')
-          .select('id, position_id')
+          .select('id, position_id, start_time, end_time')
           .eq('employee_id', employee_id)
           .eq('assignment_date', assignment_date)
-          .eq('start_time', start_time)
-          .eq('end_time', end_time);
+          .lt('start_time', effectiveEndTime)
+          .gt('end_time', effectiveStartTime);
 
         const conflicting = (existingAssignments || []).find(
           (a: any) => a.position_id !== position_id
@@ -95,8 +183,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             employee_id,
             position_id,
             assignment_date,
-            start_time,
-            end_time,
+            start_time: effectiveStartTime,
+            end_time: effectiveEndTime,
             assigned_by: assigned_by || null,
           })
           .select(ASSIGNMENT_SELECT)
