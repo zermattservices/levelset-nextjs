@@ -9,7 +9,7 @@
   justify-self: flex-start;
 }
 .change {
-  background: rgba(214, 245, 226, 1);
+  background: var(--ls-color-success-soft);
   width: auto;
   height: auto;
   display: flex;
@@ -22,12 +22,12 @@
   padding: 4px 16px 4px 14px;
 }
 .changenegative {
-  background: #fce4e4;
+  background: var(--ls-color-destructive-light);
 }
 .svg___1K5Ie {
   object-fit: cover;
   max-width: 100%;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
   width: 20px;
   height: 20px;
   display: block;
@@ -41,7 +41,7 @@
 .svg__t2LFa {
   object-fit: cover;
   max-width: 100%;
-  color: #ad2624;
+  color: var(--ls-color-destructive-medium);
   width: 20px;
   height: 20px;
   position: relative;
@@ -56,17 +56,17 @@
   font-family: "Satoshi";
   font-size: 18px;
   font-weight: 700;
-  color: rgba(36, 158, 107, 1);
+  color: var(--ls-color-success-vivid);
   text-align: center;
   line-height: 28px;
   letter-spacing: 0em;
 }
 .slotTargetText3negative {
-  color: #ad2624;
+  color: var(--ls-color-destructive-medium);
 }
 .text__rZw6B {
   padding-right: 0px;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
 }
 .text {
   position: relative;
@@ -75,10 +75,10 @@
   max-width: 100%;
   font-weight: 700;
   font-size: 18px;
-  color: #249e6b;
+  color: var(--ls-color-success-vivid);
   font-family: "Satoshi";
   min-width: 0;
 }
 .textnegative {
-  color: #ad2624;
+  color: var(--ls-color-destructive-medium);
 }
