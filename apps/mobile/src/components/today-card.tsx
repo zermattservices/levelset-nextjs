@@ -2,6 +2,7 @@
  * TodayCard Component
  * Shows the employee's schedule status for today on the home screen.
  * Handles loading, error, time_off, not_scheduled, and working states.
+ * Footer "Today's Setup" link is always visible.
  */
 
 import React from "react";
@@ -52,13 +53,10 @@ export function TodayCard({ data, isLoading, error }: TodayCardProps) {
   const router = useRouter();
   const { height: viewportHeight } = useWindowDimensions();
 
-  // ── Loading ──────────────────────────────────────────────────────────
-  if (isLoading) {
-    return (
-      <GlassCard
-        contentStyle={{ padding: 0 }}
-        style={{ maxHeight: viewportHeight * 0.5 }}
-      >
+  // ── Content area (changes based on state) ─────────────────────────────
+  const renderContent = () => {
+    if (isLoading) {
+      return (
         <View
           style={{
             padding: spacing[5],
@@ -69,17 +67,11 @@ export function TodayCard({ data, isLoading, error }: TodayCardProps) {
         >
           <ActivityIndicator color={colors.primary} />
         </View>
-      </GlassCard>
-    );
-  }
+      );
+    }
 
-  // ── Error ────────────────────────────────────────────────────────────
-  if (error) {
-    return (
-      <GlassCard
-        contentStyle={{ padding: 0 }}
-        style={{ maxHeight: viewportHeight * 0.5 }}
-      >
+    if (error) {
+      return (
         <View
           style={{
             padding: spacing[5],
@@ -105,17 +97,11 @@ export function TodayCard({ data, isLoading, error }: TodayCardProps) {
             Unable to load schedule
           </Text>
         </View>
-      </GlassCard>
-    );
-  }
+      );
+    }
 
-  // ── Time Off ─────────────────────────────────────────────────────────
-  if (data?.status === "time_off") {
-    return (
-      <GlassCard
-        contentStyle={{ padding: 0 }}
-        style={{ maxHeight: viewportHeight * 0.5 }}
-      >
+    if (data?.status === "time_off") {
+      return (
         <View
           style={{
             padding: spacing[5],
@@ -154,17 +140,11 @@ export function TodayCard({ data, isLoading, error }: TodayCardProps) {
             </Text>
           ) : null}
         </View>
-      </GlassCard>
-    );
-  }
+      );
+    }
 
-  // ── Not Scheduled ────────────────────────────────────────────────────
-  if (!data || data.status === "not_scheduled") {
-    return (
-      <GlassCard
-        contentStyle={{ padding: 0 }}
-        style={{ maxHeight: viewportHeight * 0.5 }}
-      >
+    if (!data || data.status === "not_scheduled") {
+      return (
         <View
           style={{
             padding: spacing[5],
@@ -190,19 +170,12 @@ export function TodayCard({ data, isLoading, error }: TodayCardProps) {
             Not scheduled today
           </Text>
         </View>
-      </GlassCard>
-    );
-  }
+      );
+    }
 
-  // ── Working ──────────────────────────────────────────────────────────
-  const entries = data.entries ?? [];
-
-  return (
-    <GlassCard
-      contentStyle={{ padding: 0 }}
-      style={{ maxHeight: viewportHeight * 0.5 }}
-    >
-      {/* Entry rows */}
+    // Working — show entry rows
+    const entries = data.entries ?? [];
+    return (
       <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[4] }}>
         {entries.map((entry, idx) => (
           <React.Fragment key={`${entry.type}-${entry.label}-${idx}`}>
@@ -219,8 +192,17 @@ export function TodayCard({ data, isLoading, error }: TodayCardProps) {
           </React.Fragment>
         ))}
       </View>
+    );
+  };
 
-      {/* Footer — Today's Setup link */}
+  return (
+    <GlassCard
+      contentStyle={{ padding: 0 }}
+      style={{ maxHeight: viewportHeight * 0.5 }}
+    >
+      {renderContent()}
+
+      {/* Footer — Today's Setup link (always visible) */}
       <Pressable
         onPress={() => {
           haptics.light();
