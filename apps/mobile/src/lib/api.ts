@@ -543,6 +543,23 @@ export interface MyScheduleResponse {
   nextWeek: WeekSchedule | null;
 }
 
+// =============================================================================
+// Today Card API Types
+// =============================================================================
+
+export interface TodayEntry {
+  type: 'position' | 'shift';
+  label: string;
+  start_time: string;  // "09:00:00"
+  end_time: string;     // "17:00:00"
+}
+
+export interface MyTodayResponse {
+  status: 'working' | 'not_scheduled' | 'time_off';
+  entries?: TodayEntry[];
+  timeOffNote?: string | null;
+}
+
 /**
  * Fetch the authenticated user's assigned shifts for this week and next week
  */
@@ -558,6 +575,23 @@ export async function fetchMyScheduleAuth(
   const url = `${API_BASE_URL}/api/native/forms/my-schedule?${params}`;
   const response = await fetch(url, { headers: authHeaders(accessToken) });
   return handleResponse<MyScheduleResponse>(response);
+}
+
+/**
+ * Fetch the authenticated user's schedule status for today
+ */
+export async function fetchMyTodayAuth(
+  accessToken: string,
+  locationId: string,
+  employeeId: string
+): Promise<MyTodayResponse> {
+  const params = new URLSearchParams({
+    location_id: locationId,
+    employee_id: employeeId,
+  });
+  const url = `${API_BASE_URL}/api/native/forms/my-today?${params}`;
+  const response = await fetch(url, { headers: authHeaders(accessToken) });
+  return handleResponse<MyTodayResponse>(response);
 }
 
 // =============================================================================
@@ -622,6 +656,7 @@ export default {
   fetchSubmissionsAuth,
   // Schedule API (JWT-based, authenticated)
   fetchMyScheduleAuth,
+  fetchMyTodayAuth,
   // Employee API (JWT-based, authenticated)
   fetchEmployeesAuth,
   fetchEmployeeProfileAuth,
