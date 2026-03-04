@@ -2,6 +2,7 @@ import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 
 interface InviteData {
   firstName: string;
@@ -14,6 +15,7 @@ interface InviteData {
 
 export function SignupPage() {
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
   const [checkingAuth, setCheckingAuth] = React.useState(true);
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -288,7 +290,7 @@ export function SignupPage() {
             {/* Logo */}
             <div style={{ marginBottom: '32px', textAlign: 'center' }}>
               <img
-                src="/logos/levelset-horizontal-lockup.png"
+                src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/levelset-horizontal-lockup.png'}
                 alt="Levelset"
                 style={{ height: '40px', width: 'auto', maxWidth: '200px' }}
                 onError={(e) => {

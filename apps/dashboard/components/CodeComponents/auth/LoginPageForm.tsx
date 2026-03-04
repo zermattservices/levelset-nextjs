@@ -1,5 +1,6 @@
 import * as React from "react";
 import { createSupabaseClient } from "@/util/supabase/component";
+import { useTheme } from '@/lib/providers/ThemeProvider';
 
 export interface LoginPageFormProps {
   className?: string;
@@ -21,6 +22,7 @@ export function LoginPageForm({
   const [isLoading, setIsLoading] = React.useState(false);
   const [googleLoading, setGoogleLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const { resolvedTheme } = useTheme();
 
   const supabase = createSupabaseClient();
 
@@ -109,7 +111,7 @@ export function LoginPageForm({
         {/* Logo */}
         <div style={{ marginBottom: '40px', textAlign: 'center' }} data-plasmic-name="logo">
           <img 
-            src="/logos/levelset-horizontal-lockup.png" 
+            src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/levelset-horizontal-lockup.png'}
             alt="Levelset" 
             style={{
               height: '40px',

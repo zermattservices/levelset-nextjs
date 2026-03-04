@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useRouter } from 'next/router';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 
 export interface ClientLoginFormProps {
   className?: string;
@@ -16,6 +17,7 @@ export function ClientLoginForm({
   const [error, setError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
 
   const supabase = createSupabaseClient();
 
@@ -82,7 +84,7 @@ export function ClientLoginForm({
           border: '1px solid var(--ls-color-muted-border)'
         }}>
           <img
-            src="/logos/levelset-horizontal-lockup.png"
+            src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/levelset-horizontal-lockup.png'}
             alt="Levelset"
             style={{ height: '40px', marginBottom: '2rem', display: 'block', margin: '0 auto 2rem auto' }}
           />
