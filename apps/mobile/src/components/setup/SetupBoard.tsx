@@ -1,10 +1,22 @@
 /**
  * SetupBoard — main orchestrator for the mobile setup page.
- * Manages state, data fetching, drag-and-drop flow, and composition.
+ *
+ * Layout follows the Levi sliding menu pattern:
+ * - Employee panel sits BEHIND main content on the RIGHT side
+ * - Main content panel slides LEFT with rounded corners to reveal it
+ * - Pan gesture on content panel to open/close
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import {
+  View, Text, ActivityIndicator, StyleSheet,
+  useWindowDimensions, Pressable,
+} from 'react-native';
+import ReAnimated, {
+  useSharedValue, useAnimatedStyle, withSpring, interpolate,
+} from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import { useColors } from '../../context/ThemeContext';
 import { spacing } from '../../lib/theme';
 import { haptics } from '../../lib/theme';
@@ -26,6 +38,15 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useLocation } from '../../context/LocationContext';
 
+// Match Levi menu spring config
+const SPRING_CONFIG = {
+  damping: 28,
+  stiffness: 280,
+  mass: 0.8,
+};
+
+const PANEL_RADIUS = 64;
+
 function parseTime(t: string): number {
   const [h, m] = t.split(':').map(Number);
   return h * 60 + (m || 0);
@@ -35,6 +56,8 @@ function SetupBoardInner() {
   const colors = useColors();
   const { session } = useAuth();
   const { selectedLocationId } = useLocation();
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
+  const DRAWER_WIDTH = SCREEN_WIDTH * 0.5;
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [zone, setZone] = useState<'FOH' | 'BOH'>('FOH');
@@ -45,6 +68,55 @@ function SetupBoardInner() {
   const [assignments, setAssignments] = useState<SetupAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [panelVisible, setPanelVisible] = useState(false);
+
+  // Sliding menu animation (0 = closed, 1 = open)
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withSpring(panelVisible ? 1 : 0, SPRING_CONFIG);
+  }, [panelVisible]);
+
+  // Pan gesture for content panel — swipe left to open, right to close
+  const panGesture = Gesture.Pan()
+    .activeOffsetX([-20, 20])
+    .failOffsetY([-15, 15])
+    .onUpdate((e) => {
+      'worklet';
+      if (panelVisible) {
+        // Panel is open — swipe right to close (positive translationX)
+        const raw = 1 + (e.translationX / DRAWER_WIDTH);
+        progress.value = Math.max(0, Math.min(1, raw));
+      } else {
+        // Panel is closed — swipe left to open (negative translationX)
+        const raw = -e.translationX / DRAWER_WIDTH;
+        progress.value = Math.max(0, Math.min(1, raw));
+      }
+    })
+    .onEnd((e) => {
+      'worklet';
+      const snapThreshold = 0.4;
+      const velocityThreshold = 500;
+      let shouldOpen: boolean;
+
+      if (panelVisible) {
+        shouldOpen = progress.value > snapThreshold && e.velocityX < velocityThreshold;
+      } else {
+        shouldOpen = progress.value > snapThreshold || e.velocityX < -velocityThreshold;
+      }
+
+      progress.value = withSpring(shouldOpen ? 1 : 0, SPRING_CONFIG);
+      runOnJS(setPanelVisible)(shouldOpen);
+    });
+
+  // Content panel animation — slides LEFT to reveal right-side drawer
+  const contentAnimatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(progress.value, [0, 1], [0, -DRAWER_WIDTH]);
+    const radius = interpolate(progress.value, [0, 1], [0, PANEL_RADIUS]);
+    return {
+      transform: [{ translateX }],
+      borderRadius: radius,
+    };
+  });
 
   const dateStr = useMemo(() => {
     const y = selectedDate.getFullYear();
@@ -111,7 +183,6 @@ function SetupBoardInner() {
           end_time: activeBlock.end_time,
         }
       );
-      // Optimistic update
       setAssignments((prev) => [...prev, assignment]);
     } catch (err) {
       console.error('Assign failed:', err);
@@ -131,10 +202,19 @@ function SetupBoardInner() {
     }
   }, [session?.access_token, selectedLocationId]);
 
-  // Zone change refetches data
+  // Zone change
   const handleZoneChange = useCallback((newZone: 'FOH' | 'BOH') => {
     setZone(newZone);
-    setPanelVisible(true);
+  }, []);
+
+  const handleTogglePanel = useCallback(() => {
+    haptics.light();
+    setPanelVisible((v) => !v);
+  }, []);
+
+  const handleOverlayPress = useCallback(() => {
+    haptics.light();
+    setPanelVisible(false);
   }, []);
 
   if (loading) {
@@ -146,34 +226,54 @@ function SetupBoardInner() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <SetupHeader
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-        blocks={blocks}
-        activeBlockIndex={activeBlockIndex}
-        onBlockChange={setActiveBlockIndex}
-        onTogglePanel={() => setPanelVisible((v) => !v)}
-      />
+    <View style={[styles.root, { backgroundColor: colors.surfaceVariant }]}>
+      {/* Sidebar layer (sits BEHIND, always mounted, on the RIGHT) */}
+      <View style={[styles.sidebarContainer, { width: DRAWER_WIDTH, right: 0 }]}>
+        <SetupEmployeePanel
+          employees={employees}
+          assignments={assignments}
+          zone={zone}
+          onZoneChange={handleZoneChange}
+          activeBlockStart={activeBlock?.block_time}
+          activeBlockEnd={activeBlock?.end_time}
+        />
+      </View>
 
-      <SetupPositionGrid
-        activeBlock={activeBlock}
-        positions={positions}
-        assignments={assignments}
-      />
+      {/* Main content panel (slides LEFT to reveal right-side sidebar) */}
+      <GestureDetector gesture={panGesture}>
+        <ReAnimated.View
+          style={[
+            styles.contentPanel,
+            { backgroundColor: colors.background },
+            contentAnimatedStyle,
+          ]}
+        >
+          <SetupHeader
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+            blocks={blocks}
+            activeBlockIndex={activeBlockIndex}
+            onBlockChange={setActiveBlockIndex}
+            onTogglePanel={handleTogglePanel}
+          />
 
-      <SetupEmployeePanel
-        visible={panelVisible}
-        onClose={() => setPanelVisible(false)}
-        employees={employees}
-        assignments={assignments}
-        zone={zone}
-        onZoneChange={handleZoneChange}
-        activeBlockStart={activeBlock?.block_time}
-        activeBlockEnd={activeBlock?.end_time}
-      />
+          <SetupPositionGrid
+            activeBlock={activeBlock}
+            positions={positions}
+            assignments={assignments}
+          />
 
-      <DragOverlay />
+          {/* Tap overlay to close when menu open */}
+          {panelVisible && (
+            <Pressable
+              style={styles.tapOverlay}
+              onPress={handleOverlayPress}
+            />
+          )}
+
+          <DragOverlay />
+        </ReAnimated.View>
+      </GestureDetector>
     </View>
   );
 }
@@ -187,12 +287,32 @@ export function SetupBoard() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
+  },
+  sidebarContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+  },
+  contentPanel: {
+    flex: 1,
+    overflow: 'hidden',
+    borderCurve: 'continuous',
+    // Shadow on the left edge of content when sliding
+    shadowColor: '#000',
+    shadowOffset: { width: -4, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 8,
   },
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  tapOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 50,
   },
 });

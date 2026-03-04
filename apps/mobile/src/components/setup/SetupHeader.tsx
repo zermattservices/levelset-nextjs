@@ -1,10 +1,16 @@
 /**
- * SetupHeader — date navigation + block picker for setup page
+ * SetupHeader — date navigation + block dropdown picker for setup page.
+ * Includes back button (left) and hamburger menu (right).
  */
 
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import {
+  View, Text, TouchableOpacity, StyleSheet, Platform,
+  Modal, FlatList, Pressable,
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '../../context/ThemeContext';
 import { typography, fontWeights } from '../../lib/fonts';
 import { spacing, borderRadius, haptics } from '../../lib/theme';
@@ -34,7 +40,10 @@ export function SetupHeader({
   onTogglePanel,
 }: SetupHeaderProps) {
   const colors = useColors();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showBlockDropdown, setShowBlockDropdown] = useState(false);
 
   const goDay = (delta: number) => {
     haptics.light();
@@ -44,7 +53,7 @@ export function SetupHeader({
   };
 
   const dateLabel = selectedDate.toLocaleDateString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+    weekday: 'short', month: 'short', day: 'numeric',
   });
   const activeBlock = blocks[activeBlockIndex];
   const blockLabel = activeBlock
@@ -52,29 +61,39 @@ export function SetupHeader({
     : 'No blocks';
 
   return (
-    <View style={[styles.container, { borderBottomColor: colors.outline }]}>
-      {/* Date row */}
-      <View style={styles.dateRow}>
-        <TouchableOpacity onPress={() => goDay(-1)} hitSlop={12}>
-          <AppIcon name="chevron.left" size={18} tintColor={colors.onSurface} />
-        </TouchableOpacity>
+    <View style={[styles.container, { paddingTop: insets.top + spacing[1], borderBottomColor: colors.outline }]}>
+      {/* Top row: back button, centered date, hamburger button */}
+      <View style={styles.topRow}>
+        {/* Back button */}
         <TouchableOpacity
-          onPress={() => { haptics.light(); setShowCalendar(true); }}
-          style={styles.dateButton}
+          onPress={() => { haptics.light(); router.back(); }}
+          style={styles.iconButton}
+          hitSlop={12}
         >
-          <Text style={[styles.dateText, { color: colors.onSurface }]}>{dateLabel}</Text>
-          <AppIcon name="calendar" size={16} tintColor={colors.primary} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => goDay(1)} hitSlop={12}>
-          <AppIcon name="chevron.right" size={18} tintColor={colors.onSurface} />
+          <AppIcon name="chevron.left" size={20} tintColor={colors.onSurface} />
         </TouchableOpacity>
 
-        <View style={{ flex: 1 }} />
+        {/* Centered date with carets */}
+        <View style={styles.dateCenter}>
+          <TouchableOpacity onPress={() => goDay(-1)} hitSlop={12}>
+            <AppIcon name="chevron.left" size={14} tintColor={colors.onSurfaceVariant} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => { haptics.light(); setShowCalendar(true); }}
+            style={styles.dateButton}
+          >
+            <Text style={[styles.dateText, { color: colors.onSurface }]}>{dateLabel}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => goDay(1)} hitSlop={12}>
+            <AppIcon name="chevron.right" size={14} tintColor={colors.onSurfaceVariant} />
+          </TouchableOpacity>
+        </View>
 
-        {/* Menu button to open employee panel */}
+        {/* Hamburger menu button */}
         <TouchableOpacity
           onPress={() => { haptics.light(); onTogglePanel(); }}
-          style={styles.menuButton}
+          style={styles.iconButton}
+          hitSlop={12}
         >
           <AppIcon name="line.3.horizontal" size={20} tintColor={colors.onSurface} />
         </TouchableOpacity>
@@ -86,21 +105,17 @@ export function SetupHeader({
           <TouchableOpacity
             onPress={() => {
               haptics.selection();
-              const next = (activeBlockIndex + 1) % blocks.length;
-              onBlockChange(next);
+              setShowBlockDropdown(true);
             }}
             style={[styles.blockPicker, { backgroundColor: colors.surfaceVariant, borderColor: colors.outline }]}
           >
             <Text style={[styles.blockLabel, { color: colors.onSurface }]}>{blockLabel}</Text>
-            <AppIcon name="chevron.up.chevron.down" size={12} tintColor={colors.onSurfaceVariant} />
+            <AppIcon name="chevron.down" size={12} tintColor={colors.onSurfaceVariant} />
           </TouchableOpacity>
-          <Text style={[styles.blockCount, { color: colors.onSurfaceVariant }]}>
-            {activeBlockIndex + 1} of {blocks.length}
-          </Text>
         </View>
       )}
 
-      {/* Calendar modal */}
+      {/* Calendar picker */}
       {showCalendar && (
         <DateTimePicker
           value={selectedDate}
@@ -112,21 +127,75 @@ export function SetupHeader({
           }}
         />
       )}
+
+      {/* Block dropdown modal */}
+      <Modal
+        visible={showBlockDropdown}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowBlockDropdown(false)}
+      >
+        <Pressable
+          style={styles.dropdownBackdrop}
+          onPress={() => setShowBlockDropdown(false)}
+        >
+          <View style={[styles.dropdownContainer, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
+            <FlatList
+              data={blocks}
+              keyExtractor={(_, i) => String(i)}
+              renderItem={({ item, index }) => {
+                const isActive = index === activeBlockIndex;
+                const label = `${formatTime12(item.block_time)} – ${formatTime12(item.end_time)}`;
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      haptics.selection();
+                      onBlockChange(index);
+                      setShowBlockDropdown(false);
+                    }}
+                    style={[
+                      styles.dropdownItem,
+                      isActive && { backgroundColor: colors.primaryTransparent },
+                    ]}
+                  >
+                    <Text style={[
+                      styles.dropdownItemText,
+                      { color: isActive ? colors.primary : colors.onSurface },
+                      isActive && { fontWeight: fontWeights.semibold },
+                    ]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing[4],
-    paddingTop: spacing[2],
+    paddingHorizontal: spacing[2],
     paddingBottom: spacing[3],
     borderBottomWidth: 1,
   },
-  dateRow: {
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[2],
+    justifyContent: 'space-between',
+  },
+  iconButton: {
+    padding: spacing[2],
+  },
+  dateCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[3],
+    flex: 1,
+    justifyContent: 'center',
   },
   dateButton: {
     flexDirection: 'row',
@@ -137,13 +206,9 @@ const styles = StyleSheet.create({
     ...typography.labelLarge,
     fontWeight: fontWeights.semibold,
   },
-  menuButton: {
-    padding: spacing[2],
-  },
   blockRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[2],
+    justifyContent: 'center',
     marginTop: spacing[2],
   },
   blockPicker: {
@@ -159,7 +224,32 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     fontWeight: fontWeights.medium,
   },
-  blockCount: {
+  dropdownBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  dropdownContainer: {
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    minWidth: 200,
+    maxHeight: 300,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  dropdownItem: {
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(128,128,128,0.15)',
+  },
+  dropdownItemText: {
     ...typography.bodySmall,
+    fontWeight: fontWeights.medium,
   },
 });

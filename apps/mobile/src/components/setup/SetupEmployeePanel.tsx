@@ -1,18 +1,19 @@
 /**
- * SetupEmployeePanel — right-side sliding panel with FOH/BOH toggle,
- * search bar, and employee list for drag-and-drop assignment.
+ * SetupEmployeePanel — Levi-style sliding drawer on the RIGHT side.
+ * The sidebar sits BEHIND the main content. The main content slides LEFT
+ * with rounded corners to reveal the employee list.
+ *
+ * This component renders the sidebar content only. The parent (SetupBoard)
+ * handles the content panel animation via the `progress` shared value.
  */
 
 import React, { useMemo, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  FlatList, StyleSheet, useWindowDimensions, Pressable,
+  FlatList, StyleSheet,
 } from 'react-native';
-import ReAnimated, {
-  useSharedValue, useAnimatedStyle, withSpring, withTiming,
-} from 'react-native-reanimated';
-import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useGlass } from '../../hooks/useGlass';
 import { useColors } from '../../context/ThemeContext';
 import { typography, fontWeights } from '../../lib/fonts';
@@ -22,7 +23,6 @@ import type { SetupEmployee, SetupAssignment } from '../../lib/api';
 
 const FOH_COLOR = '#006391';
 const BOH_COLOR = '#ffcc5b';
-const PANEL_WIDTH_RATIO = 0.6;
 
 function formatTime12Short(time24: string): string {
   const [h, m] = time24.split(':').map(Number);
@@ -44,8 +44,6 @@ function parseTime(t: string): number {
 }
 
 interface SetupEmployeePanelProps {
-  visible: boolean;
-  onClose: () => void;
   employees: SetupEmployee[];
   assignments: SetupAssignment[];
   zone: 'FOH' | 'BOH';
@@ -55,7 +53,6 @@ interface SetupEmployeePanelProps {
 }
 
 export function SetupEmployeePanel({
-  visible, onClose,
   employees, assignments,
   zone, onZoneChange,
   activeBlockStart, activeBlockEnd,
@@ -64,21 +61,7 @@ export function SetupEmployeePanel({
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { GlassView } = useGlass();
-  const { width: screenWidth } = useWindowDimensions();
-  const panelWidth = screenWidth * PANEL_WIDTH_RATIO;
   const [search, setSearch] = useState('');
-
-  const translateX = useSharedValue(panelWidth);
-
-  React.useEffect(() => {
-    translateX.value = visible
-      ? withSpring(0, { damping: 28, stiffness: 300, mass: 0.8 })
-      : withTiming(panelWidth, { duration: 200 });
-  }, [visible, panelWidth]);
-
-  const panelStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
 
   // Filter employees for this block's time range
   const blockEmployees = useMemo(() => {
@@ -118,110 +101,128 @@ export function SetupEmployeePanel({
     });
   }, [blockEmployees, search, assignedIds]);
 
-  const Container = GlassView || View;
-  const containerBg = GlassView ? {} : { backgroundColor: colors.background };
+  // FOH/BOH toggle button content
+  const toggleContent = (
+    <View style={styles.toggleRow}>
+      <TouchableOpacity
+        onPress={() => { haptics.selection(); onZoneChange('FOH'); }}
+        style={[
+          styles.toggleBtn,
+          zone === 'FOH' && { backgroundColor: FOH_COLOR },
+          zone !== 'FOH' && { backgroundColor: colors.surfaceVariant },
+        ]}
+      >
+        <Text style={[styles.toggleText, { color: zone === 'FOH' ? '#fff' : colors.onSurface }]}>
+          {t('setup.foh')}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => { haptics.selection(); onZoneChange('BOH'); }}
+        style={[
+          styles.toggleBtn,
+          zone === 'BOH' && { backgroundColor: BOH_COLOR },
+          zone !== 'BOH' && { backgroundColor: colors.surfaceVariant },
+        ]}
+      >
+        <Text style={[styles.toggleText, { color: zone === 'BOH' ? '#000' : colors.onSurface }]}>
+          {t('setup.boh')}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
-    <>
-      {/* Backdrop */}
-      {visible && (
-        <Pressable
-          style={[StyleSheet.absoluteFill, { backgroundColor: colors.scrim }]}
-          onPress={onClose}
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top + spacing[4],
+        },
+      ]}
+    >
+      {/* Title - matching Levi menu style */}
+      <Text style={[styles.title, { color: colors.onSurface }]}>
+        {t('setup.employees')}
+      </Text>
+
+      {/* FOH/BOH toggle — liquid glass style */}
+      <View style={styles.toggleContainer}>
+        {GlassView ? (
+          <GlassView isInteractive style={styles.glassToggle}>
+            {toggleContent}
+          </GlassView>
+        ) : (
+          <View style={[styles.fallbackToggle, { backgroundColor: colors.surfaceVariant }]}>
+            {toggleContent}
+          </View>
+        )}
+      </View>
+
+      {/* Search */}
+      <View style={[styles.searchContainer, { backgroundColor: colors.surfaceVariant, borderColor: colors.outline }]}>
+        <AppIcon name="magnifyingglass" size={14} tintColor={colors.onSurfaceDisabled} />
+        <TextInput
+          style={[styles.searchInput, { color: colors.onSurface }]}
+          placeholder={t('setup.searchEmployees')}
+          placeholderTextColor={colors.onSurfaceDisabled}
+          value={search}
+          onChangeText={setSearch}
         />
-      )}
+      </View>
 
-      {/* Panel */}
-      <ReAnimated.View style={[styles.panel, { width: panelWidth, right: 0 }, panelStyle]}>
-        <Container style={[styles.panelInner, containerBg, { paddingTop: insets.top + spacing[2] }]}>
-          {/* FOH/BOH toggle */}
-          <View style={styles.toggleRow}>
-            <TouchableOpacity
-              onPress={() => { haptics.selection(); onZoneChange('FOH'); }}
-              style={[
-                styles.toggleBtn,
-                zone === 'FOH' && { backgroundColor: FOH_COLOR },
-                zone !== 'FOH' && { backgroundColor: colors.surfaceVariant },
-              ]}
-            >
-              <Text style={[styles.toggleText, { color: zone === 'FOH' ? '#fff' : colors.onSurface }]}>
-                {t('setup.foh')}
+      {/* Employee list */}
+      <FlatList
+        data={filtered}
+        keyExtractor={(e) => e.id}
+        contentContainerStyle={{ paddingBottom: spacing[10] + insets.bottom }}
+        renderItem={({ item }) => {
+          const isAssigned = assignedIds.has(item.id);
+          const name = formatName(item.full_name);
+          const shiftTime = `${formatTime12Short(item.shift.start_time)} – ${formatTime12Short(item.shift.end_time)}`;
+
+          return (
+            <View style={[styles.employeeCard, isAssigned && { opacity: 0.4 }]}>
+              <Text style={[styles.empName, { color: colors.onSurface }]} numberOfLines={1}>
+                {name}
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => { haptics.selection(); onZoneChange('BOH'); }}
-              style={[
-                styles.toggleBtn,
-                zone === 'BOH' && { backgroundColor: BOH_COLOR },
-                zone !== 'BOH' && { backgroundColor: colors.surfaceVariant },
-              ]}
-            >
-              <Text style={[styles.toggleText, { color: zone === 'BOH' ? '#000' : colors.onSurface }]}>
-                {t('setup.boh')}
+              <Text style={[styles.empShift, { color: colors.onSurfaceVariant }]}>
+                {shiftTime}
               </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Search */}
-          <View style={[styles.searchContainer, { backgroundColor: colors.surfaceVariant, borderColor: colors.outline }]}>
-            <AppIcon name="magnifyingglass" size={14} tintColor={colors.onSurfaceDisabled} />
-            <TextInput
-              style={[styles.searchInput, { color: colors.onSurface }]}
-              placeholder={t('setup.searchEmployees')}
-              placeholderTextColor={colors.onSurfaceDisabled}
-              value={search}
-              onChangeText={setSearch}
-            />
-          </View>
-
-          {/* Employee list */}
-          <FlatList
-            data={filtered}
-            keyExtractor={(e) => e.id}
-            contentContainerStyle={{ paddingBottom: spacing[10] + insets.bottom }}
-            renderItem={({ item }) => {
-              const isAssigned = assignedIds.has(item.id);
-              const name = formatName(item.full_name);
-              const shiftTime = `${formatTime12Short(item.shift.start_time)} – ${formatTime12Short(item.shift.end_time)}`;
-
-              return (
-                <View style={[styles.employeeCard, isAssigned && { opacity: 0.4 }]}>
-                  <Text style={[styles.empName, { color: colors.onSurface }]} numberOfLines={1}>
-                    {name}
-                  </Text>
-                  <Text style={[styles.empShift, { color: colors.onSurfaceVariant }]}>
-                    {shiftTime}
-                  </Text>
-                </View>
-              );
-            }}
-            ListEmptyComponent={
-              <Text style={[styles.emptyText, { color: colors.onSurfaceDisabled }]}>
-                {search ? t('setup.noResults') : t('setup.noEmployees')}
-              </Text>
-            }
-          />
-        </Container>
-      </ReAnimated.View>
-    </>
+            </View>
+          );
+        }}
+        ListEmptyComponent={
+          <Text style={[styles.emptyText, { color: colors.onSurfaceDisabled }]}>
+            {search ? t('setup.noResults') : t('setup.noEmployees')}
+          </Text>
+        }
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  panel: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    zIndex: 100,
-  },
-  panelInner: {
+  container: {
     flex: 1,
+    paddingHorizontal: spacing[5],
+  },
+  title: {
+    ...typography.h1,
+    marginBottom: spacing[6],
+  },
+  toggleContainer: {
+    marginBottom: spacing[3],
+  },
+  glassToggle: {
+    borderRadius: borderRadius.full,
+  },
+  fallbackToggle: {
+    borderRadius: borderRadius.full,
   },
   toggleRow: {
     flexDirection: 'row',
-    gap: spacing[2],
-    paddingHorizontal: spacing[3],
-    marginBottom: spacing[3],
+    gap: spacing[1],
+    padding: spacing[1],
   },
   toggleBtn: {
     flex: 1,
@@ -238,7 +239,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
-    marginHorizontal: spacing[3],
     marginBottom: spacing[3],
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
@@ -251,8 +251,8 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   employeeCard: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[3],
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(128,128,128,0.15)',
   },

@@ -36,11 +36,9 @@ export function SetupPositionGrid({ activeBlock, positions, assignments }: Setup
         const slotCount = blockPos?.slot_count ?? 0;
         const isRequired = blockPos?.is_required ?? true;
 
-        // Find assignments for this position in the active block's time range
+        // Find assignments for this position (match dashboard: filter by position_id only)
         const posAssignments = assignments.filter(
           (a) => a.position_id === pos.id
-            && a.start_time < activeBlock.end_time
-            && a.end_time > activeBlock.block_time
         );
 
         const minSlots = Math.max(slotCount, 1);
