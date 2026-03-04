@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+  background: linear-gradient(135deg, var(--ls-color-destructive-base) 0%, var(--ls-color-destructive-dark) 100%);
   color: var(--ls-color-bg-card);
   font-family: "Satoshi", sans-serif;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -111,7 +111,7 @@
 }
 
 .switch.active {
-  background: #4caf50;
+  background: var(--ls-color-success-base);
 }
 
 .switchThumb {
@@ -136,7 +136,7 @@
   gap: 6px;
   padding: 8px 16px;
   background: var(--ls-color-bg-card);
-  color: #d32f2f;
+  color: var(--ls-color-destructive-base);
   border: none;
   border-radius: 6px;
   font-family: "Satoshi", sans-serif;
@@ -147,7 +147,7 @@
 }
 
 .exitButton:hover {
-  background: #ffebee;
+  background: var(--ls-color-destructive-foreground);
   transform: translateY(-1px);
 }
 

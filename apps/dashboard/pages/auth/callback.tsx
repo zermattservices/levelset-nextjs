@@ -92,7 +92,7 @@ export default function AuthCallback() {
         .auth-spinner {
           width: 32px;
           height: 32px;
-          border: 3px solid #e5e7eb;
+          border: 3px solid var(--ls-color-muted-border);
           border-top-color: #2563eb;
           border-radius: 50%;
           animation: spin 0.8s linear infinite;

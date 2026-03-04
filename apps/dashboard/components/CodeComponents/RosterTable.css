@@ -2,7 +2,7 @@
 .roster-table-container {
   border-radius: 1rem;
   background-color: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ls-color-muted-border);
   overflow: hidden;
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
   box-shadow: 0px 2px 6px rgba(15, 23, 42, 0.04);
@@ -31,7 +31,7 @@
 }
 
 .roster-table thead {
-  background-color: #f9fafb;
+  background-color: var(--ls-color-neutral-foreground);
 }
 
 .roster-table thead tr {
@@ -42,7 +42,7 @@
   text-align: center;
   padding: 0.25rem 1rem; /* Reduced padding to match data rows */
   font-weight: 600;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -64,7 +64,7 @@
 
 .roster-table td {
   padding: 0.25rem 1rem; /* Further reduced padding */
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--ls-color-muted-border);
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
   height: 42px !important; /* 42px height for all rows */
   max-height: 42px !important;
@@ -78,12 +78,12 @@
 }
 
 .roster-table tbody tr:hover {
-  background-color: #f9fafb;
+  background-color: var(--ls-color-neutral-foreground);
 }
 
 .roster-table .name-cell {
   font-weight: 500;
-  color: #111827;
+  color: var(--ls-color-neutral-soft-foreground);
   font-size: 0.875rem;
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
 }
@@ -150,15 +150,15 @@
   height: 1.75rem;
   width: 1.75rem;
   border-radius: 50%;
-  color: #9ca3af;
+  color: var(--ls-color-disabled-text);
   cursor: pointer;
   transition: all 0.15s ease-in-out;
   font-weight: 600; /* Semi-bold */
 }
 
 .actions-button:hover {
-  color: #4b5563;
-  background-color: #f3f4f6;
+  color: var(--ls-color-text-tertiary);
+  background-color: var(--ls-color-muted-soft);
 }
 
 .actions-button svg {
@@ -250,8 +250,8 @@
   position: sticky !important;
   top: 0 !important;
   z-index: 10 !important;
-  background-color: #f9fafb !important;
-  border-bottom: 1px solid #e5e7eb;
+  background-color: var(--ls-color-neutral-foreground) !important;
+  border-bottom: 1px solid var(--ls-color-muted-border);
 }
 
 /* Ensure thead itself is positioned correctly */
@@ -259,7 +259,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #f9fafb;
+  background-color: var(--ls-color-neutral-foreground);
 }
 
 /* Loading spinner styles */
@@ -267,7 +267,7 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--ls-color-muted-border);
   border-radius: 50%;
   border-top-color: var(--ls-color-brand);
   animation: spin 1s ease-in-out infinite;
@@ -292,7 +292,7 @@
   transform: translate(-50%, -50%);
   width: 32px;
   height: 32px;
-  border: 3px solid #e5e7eb;
+  border: 3px solid var(--ls-color-muted-border);
   border-radius: 50%;
   border-top-color: var(--ls-color-brand);
   animation: spin 1s ease-in-out infinite;

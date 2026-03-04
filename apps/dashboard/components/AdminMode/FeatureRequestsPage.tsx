@@ -31,6 +31,7 @@ import {
   STATUS_CONFIG,
   CATEGORIES,
 } from '@/lib/roadmap';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 import styles from './FeatureRequestsPage.module.css';
 
 const STATUSES = [
@@ -53,6 +54,7 @@ const PRIORITIES = [
 const LEVELSET_CREATOR = { id: 'levelset', label: 'Levelset' };
 
 export function FeatureRequestsPage() {
+  const { resolvedTheme } = useTheme();
   const [features, setFeatures] = React.useState<RoadmapFeature[]>([]);
   const [users, setUsers] = React.useState<AppUser[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -719,7 +721,7 @@ export function FeatureRequestsPage() {
                         onClick={() => handleSelectEditCreator('levelset')}
                       >
                         <img 
-                          src="/logos/Levelset no margin.png" 
+                          src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/Levelset no margin.png'}
                           alt="Levelset" 
                           className={styles.creatorAvatar}
                         />
@@ -871,7 +873,7 @@ export function FeatureRequestsPage() {
                         onClick={() => handleSelectCreator('levelset')}
                       >
                         <img 
-                          src="/logos/Levelset no margin.png" 
+                          src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/Levelset no margin.png'}
                           alt="Levelset" 
                           className={styles.creatorAvatar}
                         />

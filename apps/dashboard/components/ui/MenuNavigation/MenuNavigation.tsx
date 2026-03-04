@@ -266,7 +266,7 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
             <a href={getAppLink('/')} className={sty.logoLink}>
               <Image
                 className={sty.logo}
-                src="/logos/Levelset no margin.png"
+                src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/Levelset no margin.png'}
                 alt="Levelset"
                 width={100}
                 height={30}
@@ -278,7 +278,7 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
             <Link href="/" className={sty.logoLink}>
               <Image
                 className={sty.logo}
-                src="/logos/Levelset no margin.png"
+                src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/Levelset no margin.png'}
                 alt="Levelset"
                 width={100}
                 height={30}

@@ -232,7 +232,7 @@ export function LoginPageForm({
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = 'var(--ls-color-brand)';
-                e.target.style.boxShadow = '0 0 0 3px rgba(49, 102, 74, 0.1)';
+                e.target.style.boxShadow = '0 0 0 3px var(--ls-color-focus-ring)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = errorMessage ? 'var(--ls-color-destructive-lighter)' : 'var(--ls-color-muted-border)';
@@ -269,7 +269,7 @@ export function LoginPageForm({
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = 'var(--ls-color-brand)';
-                e.target.style.boxShadow = '0 0 0 3px rgba(49, 102, 74, 0.1)';
+                e.target.style.boxShadow = '0 0 0 3px var(--ls-color-focus-ring)';
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = errorMessage ? 'var(--ls-color-destructive-lighter)' : 'var(--ls-color-muted-border)';

@@ -26,6 +26,7 @@ import { DisciplineInfractionForm } from '@/components/mobile/forms/DisciplineIn
 import type { FormControlCallbacks, MobileFormKey, SubmissionSummary } from '@/components/mobile/types';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/lib/i18n';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 
 interface MobilePortalPageProps {
   location: MobileLocation;
@@ -55,6 +56,7 @@ const LANGUAGES: Array<{ code: Language; label: string; nativeLabel: string }> =
 
 function MobilePortalPage({ location, token }: MobilePortalPageProps) {
   const { t } = useTranslation(['forms', 'common'], { nsMode: 'fallback' });
+  const { resolvedTheme } = useTheme();
   const [activeForm, setActiveForm] = React.useState<MobileFormKey | null>(null);
   const [dirty, setDirty] = React.useState(false);
   const [submitDisabled, setSubmitDisabled] = React.useState(true);
@@ -303,7 +305,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
             <Box
               sx={{
                 backgroundColor: summary.positionZone === 'BOH' ? '#ffcc5b' : '#006391',
-                color: summary.positionZone === 'BOH' ? '#92400e' : '#ffffff',
+                color: summary.positionZone === 'BOH' ? '#92400e' : 'var(--ls-color-bg-container)',
                 borderRadius: '8px',
                 padding: '2px 6px',
                 fontSize: 10,
@@ -328,10 +330,10 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                 ? '#d1fae5'
                 : thresholds && summary.overallRating >= thresholds.yellow_threshold
                 ? '#fef3c7'
-                : '#fee2e2',
+                : 'var(--ls-color-destructive-light)',
             color:
               thresholds && summary.overallRating >= thresholds.green_threshold
-                ? '#065f46'
+                ? 'var(--ls-color-success-dark)'
                 : thresholds && summary.overallRating >= thresholds.yellow_threshold
                 ? '#92400e'
                 : '#991b1b',
@@ -378,8 +380,8 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
             borderRadius: '16px',
             padding: '16px 28px',
             backgroundColor:
-              summary.points < 0 ? '#d1fae5' : summary.points > 0 ? '#fee2e2' : 'var(--ls-color-muted-soft)',
-            color: summary.points < 0 ? '#065f46' : summary.points > 0 ? '#991b1b' : 'var(--ls-color-neutral)',
+              summary.points < 0 ? '#d1fae5' : summary.points > 0 ? 'var(--ls-color-destructive-light)' : 'var(--ls-color-muted-soft)',
+            color: summary.points < 0 ? 'var(--ls-color-success-dark)' : summary.points > 0 ? '#991b1b' : 'var(--ls-color-neutral)',
             fontFamily: '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             fontWeight: 700,
             fontSize: 20,
@@ -448,7 +450,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
         {/* Synchronous body background for iOS status bar transparency */}
         <style>{`
           html, body {
-            background-color: #f2f5f4 !important;
+            background-color: var(--ls-color-bg-surface) !important;
           }
         `}</style>
       </Head>
@@ -484,7 +486,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
           >
             <Box sx={{ flex: 1 }} /> {/* Spacer for centering */}
             <Image
-              src="/logos/Levelset no margin.png"
+              src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/Levelset no margin.png'}
               alt="Levelset"
               width={180}
               height={60}
@@ -529,7 +531,7 @@ function MobilePortalPage({ location, token }: MobilePortalPageProps) {
                     borderRadius: 2,
                     mt: 1,
                     minWidth: 160,
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    boxShadow: '0 4px 6px var(--ls-color-shadow)',
                   },
                 }}
               >

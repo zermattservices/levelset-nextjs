@@ -1,10 +1,13 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { Box, CircularProgress } from '@mui/material';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 export function AuthLoadingScreen() {
+  const { resolvedTheme } = useTheme();
+
   return (
     <Box
       sx={{
@@ -19,7 +22,7 @@ export function AuthLoadingScreen() {
       }}
     >
       <Image
-        src="/logos/Levelset no margin.png"
+        src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/Levelset no margin.png'}
         alt="Levelset"
         width={180}
         height={50}
