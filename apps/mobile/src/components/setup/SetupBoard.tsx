@@ -55,6 +55,44 @@ function parseTime(t: string): number {
   return h * 60 + (m || 0);
 }
 
+// ── Assignment filtering helpers (copied from dashboard setup-assignments.ts) ──
+// These replicate the exact server-side filtering the dashboard API does when
+// fetching assignments per-block. The mobile API returns ALL assignments for the
+// date, so we filter client-side using the identical logic.
+
+function parseTimeToMinutes(time: string): number {
+  const [hours, minutes] = time.split(':').map(Number);
+  return (hours || 0) * 60 + (minutes || 0);
+}
+
+function minutesToTime(minutes: number): string {
+  const normalizedMinutes = ((minutes % (24 * 60)) + (24 * 60)) % (24 * 60);
+  const h = Math.floor(normalizedMinutes / 60);
+  const m = normalizedMinutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function resolveAssignmentWindow(
+  requestedStartTime: string,
+  requestedEndTime: string,
+  shiftStartTime: string,
+  shiftEndTime: string,
+): { startTime: string; endTime: string } | null {
+  const blockStart = parseTimeToMinutes(requestedStartTime);
+  const blockEnd = parseTimeToMinutes(requestedEndTime);
+  const shiftStart = parseTimeToMinutes(shiftStartTime);
+  const shiftEnd = parseTimeToMinutes(shiftEndTime);
+  const start = Math.max(blockStart, shiftStart);
+  const end = Math.min(blockEnd, shiftEnd);
+  if (end <= start) return null;
+  return { startTime: minutesToTime(start), endTime: minutesToTime(end) };
+}
+
+function hasStrictOverlap(startA: string, endA: string, startB: string, endB: string): boolean {
+  return parseTimeToMinutes(startA) < parseTimeToMinutes(endB)
+    && parseTimeToMinutes(endA) > parseTimeToMinutes(startB);
+}
+
 function formatDateStr(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -174,6 +212,43 @@ function SetupBoardInner() {
   }, [dateStr, zone, initialLoading, session?.access_token, selectedLocationId]);
 
   const activeBlock = blocks[activeBlockIndex] ?? null;
+
+  // ── Filter assignments to the active block ──
+  // Replicates the exact 3-step filtering from the dashboard's
+  // setup-assignments.ts GET handler (lines 68-111):
+  //   1. Half-open overlap (matches DB .gt/.lt)
+  //   2. Clamp to shift window (resolveAssignmentWindow)
+  //   3. Re-check strict overlap after clamping (hasStrictOverlap)
+  const blockAssignments = useMemo(() => {
+    if (!activeBlock) return [];
+    const blockStart = activeBlock.block_time;
+    const blockEnd = activeBlock.end_time;
+
+    return assignments
+      // Step 1: half-open overlap (matches DB filter .gt('end_time', start_time).lt('start_time', end_time))
+      .filter((a) =>
+        parseTimeToMinutes(a.end_time) > parseTimeToMinutes(blockStart) &&
+        parseTimeToMinutes(a.start_time) < parseTimeToMinutes(blockEnd)
+      )
+      // Step 2+3: clamp to shift window, re-check strict overlap
+      .map((assignment) => {
+        const shiftStart = assignment.shift?.start_time;
+        const shiftEnd = assignment.shift?.end_time;
+        if (!shiftStart || !shiftEnd) return assignment;
+
+        const clamped = resolveAssignmentWindow(
+          assignment.start_time, assignment.end_time,
+          shiftStart, shiftEnd,
+        );
+        if (!clamped) return null;
+
+        return { ...assignment, start_time: clamped.startTime, end_time: clamped.endTime };
+      })
+      .filter((a): a is SetupAssignment => {
+        if (!a) return false;
+        return hasStrictOverlap(a.start_time, a.end_time, blockStart, blockEnd);
+      });
+  }, [assignments, activeBlock]);
 
   // Auto-select block containing "now"
   useEffect(() => {
@@ -317,7 +392,7 @@ function SetupBoardInner() {
       <View style={[styles.sidebarContainer, { width: DRAWER_WIDTH, right: 0 }]}>
         <SetupEmployeePanel
           employees={employees}
-          assignments={assignments}
+          assignments={blockAssignments}
           zone={zone}
           onZoneChange={handleZoneChange}
           activeBlockStart={activeBlock?.block_time}
@@ -346,7 +421,7 @@ function SetupBoardInner() {
           <SetupPositionGrid
             activeBlock={activeBlock}
             positions={positions}
-            assignments={assignments}
+            assignments={blockAssignments}
           />
 
           {/* Tap overlay to close when menu open */}
