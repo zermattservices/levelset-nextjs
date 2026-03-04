@@ -270,3 +270,123 @@ div[class*="DatePicker"] .MuiInputLabel-root.Mui-focused {
   padding: 6px 16px !important;
 }
 
+/* ===== Dark Mode Global MUI Overrides ===== */
+[data-theme="dark"] .MuiDataGrid-root {
+  background-color: var(--ls-color-bg-card) !important;
+  color: var(--ls-color-text-primary) !important;
+  border-color: var(--ls-color-muted-border) !important;
+}
+
+[data-theme="dark"] .MuiDataGrid-columnHeaders {
+  background-color: var(--ls-color-neutral-foreground) !important;
+  border-color: var(--ls-color-muted-border) !important;
+}
+
+[data-theme="dark"] .MuiDataGrid-columnHeader {
+  color: var(--ls-color-text-secondary) !important;
+}
+
+[data-theme="dark"] .MuiDataGrid-cell {
+  color: var(--ls-color-text-primary) !important;
+  border-color: var(--ls-color-muted-border) !important;
+}
+
+[data-theme="dark"] .MuiDataGrid-row:hover {
+  background-color: var(--ls-color-bg-hover) !important;
+}
+
+[data-theme="dark"] .MuiDataGrid-footerContainer {
+  background-color: var(--ls-color-bg-card) !important;
+  border-color: var(--ls-color-muted-border) !important;
+  color: var(--ls-color-text-secondary) !important;
+}
+
+[data-theme="dark"] .MuiDataGrid-toolbarContainer {
+  color: var(--ls-color-text-secondary) !important;
+}
+
+[data-theme="dark"] .MuiDataGrid-selectedRowCount {
+  color: var(--ls-color-text-secondary) !important;
+}
+
+[data-theme="dark"] .MuiTablePagination-root {
+  color: var(--ls-color-text-secondary) !important;
+}
+
+[data-theme="dark"] .MuiTablePagination-selectIcon {
+  color: var(--ls-color-text-secondary) !important;
+}
+
+/* Dark mode: Global MUI Paper/Card backgrounds */
+[data-theme="dark"] .MuiPaper-root {
+  background-color: var(--ls-color-bg-card) !important;
+  color: var(--ls-color-text-primary) !important;
+}
+
+/* Dark mode: MUI Menu/Popover */
+[data-theme="dark"] .MuiMenu-paper,
+[data-theme="dark"] .MuiPopover-paper {
+  background-color: var(--ls-color-bg-card) !important;
+  border: 1px solid var(--ls-color-muted-border) !important;
+}
+
+[data-theme="dark"] .MuiMenuItem-root:hover {
+  background-color: var(--ls-color-bg-hover) !important;
+}
+
+/* Dark mode: MUI Input/TextField backgrounds */
+[data-theme="dark"] .MuiOutlinedInput-root {
+  background-color: var(--ls-color-bg-input) !important;
+  color: var(--ls-color-text-primary) !important;
+}
+
+[data-theme="dark"] .MuiOutlinedInput-notchedOutline {
+  border-color: var(--ls-color-muted-border) !important;
+}
+
+[data-theme="dark"] .MuiInputLabel-root {
+  color: var(--ls-color-text-secondary) !important;
+}
+
+/* Dark mode: MUI Select */
+[data-theme="dark"] .MuiSelect-select {
+  color: var(--ls-color-text-primary) !important;
+}
+
+[data-theme="dark"] .MuiSelect-icon {
+  color: var(--ls-color-text-secondary) !important;
+}
+
+/* Dark mode: MUI Checkbox/Radio */
+[data-theme="dark"] .MuiCheckbox-root {
+  color: var(--ls-color-muted-border) !important;
+}
+
+[data-theme="dark"] .MuiCheckbox-root.Mui-checked {
+  color: var(--ls-color-brand) !important;
+}
+
+/* Dark mode: MUI Divider */
+[data-theme="dark"] .MuiDivider-root {
+  border-color: var(--ls-color-muted-border) !important;
+}
+
+/* Dark mode: MUI Tooltip */
+[data-theme="dark"] .MuiTooltip-tooltip {
+  background-color: var(--ls-color-neutral-soft-foreground) !important;
+}
+
+/* Dark mode: MUI Dialog */
+[data-theme="dark"] .MuiDialog-paper {
+  background-color: var(--ls-color-bg-card) !important;
+}
+
+/* Dark mode: MUI Tabs */
+[data-theme="dark"] .MuiTab-root {
+  color: var(--ls-color-text-secondary) !important;
+}
+
+[data-theme="dark"] .MuiTab-root.Mui-selected {
+  color: var(--ls-color-brand) !important;
+}
+

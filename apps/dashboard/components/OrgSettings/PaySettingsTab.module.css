@@ -204,3 +204,12 @@
   font-style: italic;
   margin: 0;
 }
+
+/* Dark mode overrides */
+[data-theme="dark"] .zoneSectionRow {
+  background: rgba(61, 128, 96, 0.15);
+}
+
+[data-theme="dark"] .zoneSectionCell {
+  color: #4ade80;
+}

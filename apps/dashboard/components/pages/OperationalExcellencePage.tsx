@@ -30,6 +30,7 @@ import { EmployeeModal } from '@/components/CodeComponents/EmployeeModal';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 import { useAuth } from '@/lib/providers/AuthProvider';
 import { useOrgFeatures, F } from '@/lib/providers/OrgFeaturesProvider';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 import { createSupabaseClient } from '@/util/supabase/component';
 
 // ------------------------------------------------------------------
@@ -78,6 +79,8 @@ const fohColor = '#006391';
 const bohColor = '#ffcc5b';
 const fohColorLight = '#eaf9ff';
 const bohColorLight = '#fffcf0';
+const fohColorLightDark = '#0d2d3d'; // dark mode FOH light
+const bohColorLightDark = '#2d2a0d'; // dark mode BOH light
 
 const DateRangeContainer = styled(Box)({
   display: 'flex',
@@ -103,9 +106,11 @@ const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
   },
 }));
 
-const AreaPill = styled(Box)<{ selected?: boolean; area: 'FOH' | 'BOH' }>(({ selected, area }) => {
+const AreaPill = styled(Box)<{ selected?: boolean; area: 'FOH' | 'BOH'; darkMode?: boolean }>(({ selected, area, darkMode }) => {
   const baseColor = area === 'FOH' ? fohColor : bohColor;
-  const lightColor = area === 'FOH' ? fohColorLight : bohColorLight;
+  const lightColor = area === 'FOH'
+    ? (darkMode ? fohColorLightDark : fohColorLight)
+    : (darkMode ? bohColorLightDark : bohColorLight);
 
   return {
     fontFamily,
@@ -263,6 +268,12 @@ export function OperationalExcellencePage() {
   const auth = useAuth();
   const { selectedLocationId } = useLocationContext();
   const { hasFeature } = useOrgFeatures();
+  const { resolvedTheme } = useTheme();
+
+  // Dark-mode aware chart colors
+  const chartGridColor = resolvedTheme === 'dark' ? '#30363d' : '#e9eaeb';
+  const chartTickColor = resolvedTheme === 'dark' ? '#8b949e' : '#535862';
+  const chartLineColor = resolvedTheme === 'dark' ? '#e6edf3' : '#181d27';
 
   // Date range state
   const [dateRange, setDateRange] = React.useState<DateRange>('90d');
@@ -650,7 +661,7 @@ export function OperationalExcellencePage() {
 
   // Compute linear trendline for the active metric (selected pillar or OE overall)
   const trendlineKey = selectedPillarId ? `ma_${selectedPillarId}` : 'ma_oe';
-  const trendlineColor = selectedPillarId ? (pillarColorMap[selectedPillarId] || '#6b7280') : '#181d27';
+  const trendlineColor = selectedPillarId ? (pillarColorMap[selectedPillarId] || '#6b7280') : chartLineColor;
   const trendlineReg = React.useMemo(() => {
     if (chartData.length < 2) return null;
     return linearRegression(chartData.map((d: any) => d[trendlineKey]));
@@ -744,6 +755,7 @@ export function OperationalExcellencePage() {
                   <AreaPill
                     selected={showFOH}
                     area="FOH"
+                    darkMode={resolvedTheme === 'dark'}
                     onClick={() => setShowFOH(!showFOH)}
                   >
                     FOH
@@ -751,6 +763,7 @@ export function OperationalExcellencePage() {
                   <AreaPill
                     selected={showBOH}
                     area="BOH"
+                    darkMode={resolvedTheme === 'dark'}
                     onClick={() => setShowBOH(!showBOH)}
                   >
                     BOH
@@ -761,7 +774,7 @@ export function OperationalExcellencePage() {
                 <Box sx={{
                   width: '1px',
                   height: '24px',
-                  backgroundColor: 'rgba(0, 0, 0, 0.23)',
+                  backgroundColor: 'var(--ls-color-border)',
                   mx: 1,
                 }} />
 
@@ -957,28 +970,31 @@ export function OperationalExcellencePage() {
                         ) : chartData.length > 0 ? (
                           <ResponsiveContainer width="100%" height={280}>
                             <LineChart data={chartDataWithTrend} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#e9eaeb" />
+                              <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} />
                               <XAxis
                                 dataKey="date"
-                                tick={{ fontSize: 11, fontFamily, fill: '#535862' }}
+                                tick={{ fontSize: 11, fontFamily, fill: chartTickColor }}
                                 tickLine={false}
-                                axisLine={{ stroke: '#e9eaeb' }}
+                                axisLine={{ stroke: chartGridColor }}
                                 interval="preserveStartEnd"
                               />
                               <YAxis
                                 domain={[chartYMin, 100]}
-                                tick={{ fontSize: 12, fontFamily, fill: '#535862' }}
+                                tick={{ fontSize: 12, fontFamily, fill: chartTickColor }}
                                 tickLine={false}
-                                axisLine={{ stroke: '#e9eaeb' }}
+                                axisLine={{ stroke: chartGridColor }}
                               />
                               <Tooltip
                                 contentStyle={{
                                   fontFamily,
                                   fontSize: 13,
                                   borderRadius: 8,
-                                  border: '1px solid #e9eaeb',
+                                  border: `1px solid ${chartGridColor}`,
                                   boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                                  backgroundColor: resolvedTheme === 'dark' ? '#161b22' : '#fff',
+                                  color: chartLineColor,
                                 }}
+                                cursor={{ stroke: resolvedTheme === 'dark' ? '#30363d' : '#fff' }}
                               />
                               <Legend
                                 wrapperStyle={{ fontFamily, fontSize: 12 }}
@@ -989,11 +1005,11 @@ export function OperationalExcellencePage() {
                                 type="monotone"
                                 dataKey="ma_oe"
                                 name="OE Score"
-                                stroke="#181d27"
+                                stroke={chartLineColor}
                                 strokeWidth={selectedPillarId ? 2 : 3.5}
                                 strokeOpacity={selectedPillarId ? 0.3 : 1}
                                 dot={false}
-                                activeDot={{ r: 5, strokeWidth: 2, fill: '#181d27' }}
+                                activeDot={{ r: 5, strokeWidth: 2, fill: chartLineColor }}
                                 connectNulls={false}
                               />
                               {/* 7-day MA lines for all pillars */}
@@ -1030,7 +1046,7 @@ export function OperationalExcellencePage() {
                                     fill: pillarColorMap[selectedPillarId] || '#6b7280',
                                     r: 5,
                                     strokeWidth: 2,
-                                    stroke: '#fff',
+                                    stroke: resolvedTheme === 'dark' ? '#30363d' : '#fff',
                                   }}
                                   connectNulls={false}
                                   legendType="none"
