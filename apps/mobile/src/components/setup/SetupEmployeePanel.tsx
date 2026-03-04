@@ -109,7 +109,7 @@ export function SetupEmployeePanel({
         style={[
           styles.toggleBtn,
           zone === 'FOH' && { backgroundColor: FOH_COLOR },
-          zone !== 'FOH' && { backgroundColor: colors.surfaceVariant },
+          zone !== 'FOH' && { backgroundColor: 'transparent' },
         ]}
       >
         <Text style={[styles.toggleText, { color: zone === 'FOH' ? '#fff' : colors.onSurface }]}>
@@ -121,7 +121,7 @@ export function SetupEmployeePanel({
         style={[
           styles.toggleBtn,
           zone === 'BOH' && { backgroundColor: BOH_COLOR },
-          zone !== 'BOH' && { backgroundColor: colors.surfaceVariant },
+          zone !== 'BOH' && { backgroundColor: 'transparent' },
         ]}
       >
         <Text style={[styles.toggleText, { color: zone === 'BOH' ? '#000' : colors.onSurface }]}>

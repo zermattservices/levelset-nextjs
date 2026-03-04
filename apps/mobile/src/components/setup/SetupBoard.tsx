@@ -5,11 +5,14 @@
  * - Employee panel sits BEHIND main content on the RIGHT side
  * - Main content panel slides LEFT with rounded corners to reveal it
  * - Pan gesture on content panel to open/close
+ *
+ * Data strategy: prefetch current + previous week for both FOH & BOH
+ * on mount so that toggling date/zone is instant with no reloads.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  View, Text, ActivityIndicator, StyleSheet,
+  View, ActivityIndicator, StyleSheet,
   useWindowDimensions, Pressable,
 } from 'react-native';
 import ReAnimated, {
@@ -27,13 +30,13 @@ import { SetupEmployeePanel } from './SetupEmployeePanel';
 import { DragOverlay } from './DragOverlay';
 import {
   fetchSetupBoardAuth,
-  invalidateSetupCache,
   setupAssignAuth,
   setupUnassignAuth,
   type SetupBlock,
   type SetupPosition,
   type SetupEmployee,
   type SetupAssignment,
+  type SetupBoardResponse,
 } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { useLocation } from '../../context/LocationContext';
@@ -52,6 +55,26 @@ function parseTime(t: string): number {
   return h * 60 + (m || 0);
 }
 
+function formatDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/** Generate date strings for current + previous week (14 days total) */
+function getPrefetchDates(): string[] {
+  const dates: string[] = [];
+  const today = new Date();
+  // Previous 7 days + today + next 6 days = cover current & prev week
+  for (let i = -7; i <= 6; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    dates.push(formatDateStr(d));
+  }
+  return dates;
+}
+
 function SetupBoardInner() {
   const colors = useColors();
   const { session } = useAuth();
@@ -66,8 +89,109 @@ function SetupBoardInner() {
   const [positions, setPositions] = useState<SetupPosition[]>([]);
   const [employees, setEmployees] = useState<SetupEmployee[]>([]);
   const [assignments, setAssignments] = useState<SetupAssignment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [panelVisible, setPanelVisible] = useState(false);
+
+  // Local cache: key = "date:zone" → SetupBoardResponse
+  const localCache = useRef<Map<string, SetupBoardResponse>>(new Map());
+  const prefetchStarted = useRef(false);
+
+  const dateStr = useMemo(() => formatDateStr(selectedDate), [selectedDate]);
+
+  // ── Prefetch current + previous week on mount ──
+  useEffect(() => {
+    if (!session?.access_token || !selectedLocationId || prefetchStarted.current) return;
+    prefetchStarted.current = true;
+
+    const dates = getPrefetchDates();
+    const zones: ('FOH' | 'BOH')[] = ['FOH', 'BOH'];
+    const todayStr = formatDateStr(new Date());
+
+    // Fetch today's data for the default zone first (blocking)
+    (async () => {
+      try {
+        const data = await fetchSetupBoardAuth(
+          session.access_token, selectedLocationId, todayStr, 'FOH'
+        );
+        localCache.current.set(`${todayStr}:FOH`, data);
+        // Apply to state immediately
+        setBlocks(data.blocks);
+        setPositions(data.positions);
+        setEmployees(data.employees);
+        setAssignments(data.assignments);
+      } catch (err) {
+        console.error('Failed to fetch initial setup data:', err);
+      } finally {
+        setInitialLoading(false);
+      }
+
+      // Background prefetch remaining combinations
+      for (const z of zones) {
+        for (const d of dates) {
+          const key = `${d}:${z}`;
+          if (localCache.current.has(key)) continue;
+          try {
+            const data = await fetchSetupBoardAuth(
+              session.access_token, selectedLocationId, d, z
+            );
+            localCache.current.set(key, data);
+          } catch {
+            // Silently skip failures for background prefetch
+          }
+        }
+      }
+    })();
+  }, [session?.access_token, selectedLocationId]);
+
+  // ── Apply cached data when date or zone changes ──
+  useEffect(() => {
+    if (initialLoading) return;
+    const key = `${dateStr}:${zone}`;
+    const cached = localCache.current.get(key);
+    if (cached) {
+      setBlocks(cached.blocks);
+      setPositions(cached.positions);
+      setEmployees(cached.employees);
+      setAssignments(cached.assignments);
+    } else {
+      // Cache miss — fetch on demand (for dates outside prefetch window)
+      if (!session?.access_token || !selectedLocationId) return;
+      (async () => {
+        try {
+          const data = await fetchSetupBoardAuth(
+            session.access_token, selectedLocationId, dateStr, zone
+          );
+          localCache.current.set(key, data);
+          setBlocks(data.blocks);
+          setPositions(data.positions);
+          setEmployees(data.employees);
+          setAssignments(data.assignments);
+        } catch (err) {
+          console.error('Failed to fetch setup data:', err);
+        }
+      })();
+    }
+  }, [dateStr, zone, initialLoading, session?.access_token, selectedLocationId]);
+
+  const activeBlock = blocks[activeBlockIndex] ?? null;
+
+  // Auto-select block containing "now"
+  useEffect(() => {
+    if (blocks.length === 0) {
+      setActiveBlockIndex(0);
+      return;
+    }
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    let best = 0;
+    for (let i = 0; i < blocks.length; i++) {
+      const start = parseTime(blocks[i].block_time);
+      const end = parseTime(blocks[i].end_time);
+      if (nowMin >= start && nowMin < end) { best = i; break; }
+      if (start <= nowMin) best = i;
+    }
+    setActiveBlockIndex(best);
+  }, [blocks]);
 
   // Sliding menu animation (0 = closed, 1 = open)
   const progress = useSharedValue(0);
@@ -83,11 +207,9 @@ function SetupBoardInner() {
     .onUpdate((e) => {
       'worklet';
       if (panelVisible) {
-        // Panel is open — swipe right to close (positive translationX)
         const raw = 1 + (e.translationX / DRAWER_WIDTH);
         progress.value = Math.max(0, Math.min(1, raw));
       } else {
-        // Panel is closed — swipe left to open (negative translationX)
         const raw = -e.translationX / DRAWER_WIDTH;
         progress.value = Math.max(0, Math.min(1, raw));
       }
@@ -118,56 +240,7 @@ function SetupBoardInner() {
     };
   });
 
-  const dateStr = useMemo(() => {
-    const y = selectedDate.getFullYear();
-    const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
-    const d = String(selectedDate.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  }, [selectedDate]);
-
-  const activeBlock = blocks[activeBlockIndex] ?? null;
-
-  // Auto-select block containing "now"
-  useEffect(() => {
-    if (blocks.length === 0) {
-      setActiveBlockIndex(0);
-      return;
-    }
-    const now = new Date();
-    const nowMin = now.getHours() * 60 + now.getMinutes();
-    let best = 0;
-    for (let i = 0; i < blocks.length; i++) {
-      const start = parseTime(blocks[i].block_time);
-      const end = parseTime(blocks[i].end_time);
-      if (nowMin >= start && nowMin < end) { best = i; break; }
-      if (start <= nowMin) best = i;
-    }
-    setActiveBlockIndex(best);
-  }, [blocks]);
-
-  // Fetch data
-  const fetchData = useCallback(async () => {
-    if (!session?.access_token || !selectedLocationId) return;
-    setLoading(true);
-    try {
-      invalidateSetupCache(selectedLocationId, dateStr, zone);
-      const data = await fetchSetupBoardAuth(
-        session.access_token, selectedLocationId, dateStr, zone
-      );
-      setBlocks(data.blocks);
-      setPositions(data.positions);
-      setEmployees(data.employees);
-      setAssignments(data.assignments);
-    } catch (err) {
-      console.error('Failed to fetch setup data:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [session?.access_token, selectedLocationId, dateStr, zone]);
-
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  // Assign handler
+  // Assign handler — also update local cache
   const handleAssign = useCallback(async (
     employeeId: string, shiftId: string, positionId: string
   ) => {
@@ -183,26 +256,39 @@ function SetupBoardInner() {
           end_time: activeBlock.end_time,
         }
       );
-      setAssignments((prev) => [...prev, assignment]);
+      setAssignments((prev) => {
+        const updated = [...prev, assignment];
+        // Update local cache too
+        const key = `${dateStr}:${zone}`;
+        const cached = localCache.current.get(key);
+        if (cached) localCache.current.set(key, { ...cached, assignments: updated });
+        return updated;
+      });
     } catch (err) {
       console.error('Assign failed:', err);
       haptics.error();
     }
-  }, [session?.access_token, selectedLocationId, activeBlock, dateStr]);
+  }, [session?.access_token, selectedLocationId, activeBlock, dateStr, zone]);
 
-  // Unassign handler
+  // Unassign handler — also update local cache
   const handleUnassign = useCallback(async (assignmentId: string) => {
     if (!session?.access_token || !selectedLocationId) return;
     try {
       await setupUnassignAuth(session.access_token, selectedLocationId, assignmentId);
-      setAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
+      setAssignments((prev) => {
+        const updated = prev.filter((a) => a.id !== assignmentId);
+        const key = `${dateStr}:${zone}`;
+        const cached = localCache.current.get(key);
+        if (cached) localCache.current.set(key, { ...cached, assignments: updated });
+        return updated;
+      });
     } catch (err) {
       console.error('Unassign failed:', err);
       haptics.error();
     }
-  }, [session?.access_token, selectedLocationId]);
+  }, [session?.access_token, selectedLocationId, dateStr, zone]);
 
-  // Zone change
+  // Zone change — no refetch needed, just switch zone
   const handleZoneChange = useCallback((newZone: 'FOH' | 'BOH') => {
     setZone(newZone);
   }, []);
@@ -217,7 +303,7 @@ function SetupBoardInner() {
     setPanelVisible(false);
   }, []);
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -299,7 +385,6 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'hidden',
     borderCurve: 'continuous',
-    // Shadow on the left edge of content when sliding
     shadowColor: '#000',
     shadowOffset: { width: -4, height: 0 },
     shadowOpacity: 0.2,
