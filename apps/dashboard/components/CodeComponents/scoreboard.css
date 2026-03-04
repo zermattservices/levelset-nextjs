@@ -561,3 +561,12 @@ td.v-red, th.v-red {
   transform: none;
 }
 
+/* Dark mode overrides */
+[data-theme="dark"] .actions-button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .actions-button:active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+

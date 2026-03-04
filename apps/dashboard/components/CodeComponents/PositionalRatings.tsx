@@ -55,6 +55,7 @@ import RatingsAnalytics from './RatingsAnalytics';
 import { pdf } from '@react-pdf/renderer';
 import PositionalRatingsPDF from './PositionalRatingsPDF';
 import { EmployeeModal } from './EmployeeModal';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const levelsetGreen = 'var(--ls-color-brand)';
@@ -119,10 +120,14 @@ const PillButton = styled(Button)<{ selected?: boolean }>(({ selected }) => ({
   },
 }));
 
-const AreaPill = styled(Box)<{ selected?: boolean; area: 'FOH' | 'BOH' }>(({ selected, area }) => {
+const AreaPill = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'darkmode',
+})<{ selected?: boolean; area: 'FOH' | 'BOH'; darkmode?: boolean }>(({ selected, area, darkmode }) => {
   const baseColor = area === 'FOH' ? fohColor : bohColor;
-  const lightColor = area === 'FOH' ? fohColorLight : bohColorLight;
-  
+  const lightColor = area === 'FOH'
+    ? (darkmode ? '#0d2d3d' : fohColorLight)
+    : (darkmode ? '#2d2a0d' : bohColorLight);
+
   return {
     fontFamily,
     fontSize: 13,
@@ -295,7 +300,7 @@ function SelectFilterInput(props: SelectFilterInputProps) {
         sx={{ 
           fontFamily: `${fontFamily} !important`,
           fontSize: '16px !important',
-          color: 'rgba(0, 0, 0, 0.6) !important',
+          color: 'var(--ls-color-muted) !important',
           '&.Mui-focused': {
             color: `${levelsetGreen} !important`,
           },
@@ -365,7 +370,7 @@ function ColumnFilterInput(props: any) {
         sx={{ 
           fontFamily: `${fontFamily} !important`,
           fontSize: '16px !important',
-          color: 'rgba(0, 0, 0, 0.6) !important',
+          color: 'var(--ls-color-muted) !important',
           '&.Mui-focused': {
             color: `${levelsetGreen} !important`,
           },
@@ -431,7 +436,7 @@ function OperatorFilterInput(props: any) {
         sx={{ 
           fontFamily: `${fontFamily} !important`,
           fontSize: '16px !important',
-          color: 'rgba(0, 0, 0, 0.6) !important',
+          color: 'var(--ls-color-muted) !important',
           '&.Mui-focused': {
             color: `${levelsetGreen} !important`,
           },
@@ -561,6 +566,9 @@ export function PositionalRatings({
   width,
   maxWidth,
 }: PositionalRatingsProps) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -1491,6 +1499,7 @@ export function PositionalRatings({
                 <AreaPill
                   selected={showFOH}
                   area="FOH"
+                  darkmode={isDark}
                   onClick={() => setShowFOH(!showFOH)}
                 >
                   FOH
@@ -1498,6 +1507,7 @@ export function PositionalRatings({
                 <AreaPill
                   selected={showBOH}
                   area="BOH"
+                  darkmode={isDark}
                   onClick={() => setShowBOH(!showBOH)}
                 >
                   BOH
@@ -1508,7 +1518,7 @@ export function PositionalRatings({
               <Box sx={{ 
                 width: '1px', 
                 height: '24px', 
-                backgroundColor: 'rgba(0, 0, 0, 0.23)', // Match unfocused input border
+                backgroundColor: 'var(--ls-color-border)',
                 mx: 1 
               }} />
             </>
@@ -1555,7 +1565,7 @@ export function PositionalRatings({
                     '& .MuiInputLabel-root': {
                       fontFamily: `${fontFamily} !important`,
                       fontSize: '16px !important',
-                      color: 'rgba(0, 0, 0, 0.6) !important',
+                      color: 'var(--ls-color-muted) !important',
                       '&.Mui-focused': {
                         color: `${levelsetGreen} !important`,
                       },
@@ -1686,7 +1696,7 @@ export function PositionalRatings({
                     '& .MuiInputLabel-root': {
                       fontFamily: `${fontFamily} !important`,
                       fontSize: '16px !important',
-                      color: 'rgba(0, 0, 0, 0.6) !important',
+                      color: 'var(--ls-color-muted) !important',
                       '&.Mui-focused': {
                         color: `${levelsetGreen} !important`,
                       },
