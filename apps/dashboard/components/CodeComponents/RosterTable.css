@@ -1,7 +1,7 @@
 /* RosterTable Component Styles */
 .roster-table-container {
   border-radius: 1rem;
-  background-color: white;
+  background-color: var(--ls-color-bg-card);
   border: 1px solid var(--ls-color-muted-border);
   overflow: hidden;
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
