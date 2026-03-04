@@ -298,3 +298,40 @@
   animation: spin 1s ease-in-out infinite;
   z-index: 20;
 }
+
+/* Dark mode role badges */
+[data-theme="dark"] .role-badge.new-hire {
+  background-color: rgba(46, 139, 87, 0.15);
+  color: #4ade80;
+  border-color: rgba(46, 139, 87, 0.3);
+}
+
+[data-theme="dark"] .role-badge.team-lead {
+  background-color: rgba(217, 119, 6, 0.15);
+  color: #fbbf24;
+  border-color: rgba(217, 119, 6, 0.3);
+}
+
+[data-theme="dark"] .role-badge.operator {
+  background-color: rgba(72, 61, 139, 0.15);
+  color: #a5b4fc;
+  border-color: rgba(72, 61, 139, 0.3);
+}
+
+[data-theme="dark"] .role-badge.trainer {
+  background-color: rgba(220, 38, 38, 0.15);
+  color: #fca5a5;
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+[data-theme="dark"] .role-badge.team-member {
+  background-color: rgba(65, 105, 225, 0.15);
+  color: #60a5fa;
+  border-color: rgba(65, 105, 225, 0.3);
+}
+
+[data-theme="dark"] .role-badge.director {
+  background-color: rgba(124, 58, 237, 0.15);
+  color: #a78bfa;
+  border-color: rgba(124, 58, 237, 0.3);
+}

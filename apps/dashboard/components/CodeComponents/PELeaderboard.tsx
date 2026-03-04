@@ -174,9 +174,20 @@ const RoleChip = styled(Chip)<{ roletype: string }>(({ roletype }) => {
     'Executive': { bg: '#F0F0FF', color: '#483D8B' },
     'Operator': { bg: '#F0F0FF', color: '#483D8B' },
   };
-  
+  const darkStyles: Record<string, { bg: string; color: string }> = {
+    'New Hire': { bg: 'rgba(46, 139, 87, 0.15)', color: '#4ade80' },
+    'Team Member': { bg: 'rgba(65, 105, 225, 0.15)', color: '#60a5fa' },
+    'Trainer': { bg: 'rgba(220, 38, 38, 0.15)', color: '#fca5a5' },
+    'Team Lead': { bg: 'rgba(217, 119, 6, 0.15)', color: '#fbbf24' },
+    'Team Leader': { bg: 'rgba(217, 119, 6, 0.15)', color: '#fbbf24' },
+    'Director': { bg: 'rgba(124, 58, 237, 0.15)', color: '#a78bfa' },
+    'Executive': { bg: 'rgba(72, 61, 139, 0.15)', color: '#a5b4fc' },
+    'Operator': { bg: 'rgba(72, 61, 139, 0.15)', color: '#a5b4fc' },
+  };
+
   const style = styles[roletype] || styles['Team Member'];
-  
+  const darkStyle = darkStyles[roletype] || darkStyles['Team Member'];
+
   return {
     fontFamily,
     fontSize: 12,
@@ -187,6 +198,10 @@ const RoleChip = styled(Chip)<{ roletype: string }>(({ roletype }) => {
     borderRadius: 12,
     '& .MuiChip-label': {
       padding: '0 8px',
+    },
+    'html[data-theme="dark"] &': {
+      backgroundColor: darkStyle.bg,
+      color: darkStyle.color,
     },
   };
 });
@@ -243,11 +258,11 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        padding: '16px',
-        borderRadius: '12px',
-        backgroundColor: 'var(--ls-color-bg-container)',
-        border: '1px solid var(--ls-color-muted-border)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+        padding: '20px',
+        borderRadius: '16px',
+        backgroundColor: 'var(--ls-color-bg-card)',
+        boxShadow: 'inset 0 0 0 1px var(--ls-color-border-light)',
+        filter: 'drop-shadow(0px 1px 1px var(--ls-color-shadow-lg))',
         flex: 1,
         minWidth: 280,
         gap: 2,
