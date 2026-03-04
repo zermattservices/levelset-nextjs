@@ -473,3 +473,283 @@
   width: auto;
   height: 1em;
 }
+
+/* ── Dark Mode Overrides ── */
+
+/* Default variant (dark gray) */
+[data-theme="dark"] .root {
+  background: #30363d;
+}
+[data-theme="dark"] .root:hover {
+  background: #3a424b;
+}
+[data-theme="dark"] .root:active {
+  background: #444c56;
+}
+
+/* Focus shadow */
+[data-theme="dark"] .root___focusVisibleWithin,
+[data-theme="dark"] .root:focus-within {
+  box-shadow:
+    0px 1px 3px 0px rgba(0, 0, 0, 0.4),
+    0px 1px 2px -1px rgba(0, 0, 0, 0.4);
+}
+
+/* Blue */
+[data-theme="dark"] .rootcolor_blue {
+  background: #1f6feb;
+}
+[data-theme="dark"] .rootcolor_blue:hover {
+  background: #388bfd;
+}
+[data-theme="dark"] .rootcolor_blue:active {
+  background: #58a6ff;
+}
+
+/* Green */
+[data-theme="dark"] .rootcolor_green {
+  background: #1a3a28;
+}
+[data-theme="dark"] .rootcolor_green:hover {
+  background: #1f4430;
+}
+[data-theme="dark"] .rootcolor_green:active {
+  background: #244f38;
+}
+
+/* Brand */
+[data-theme="dark"] .rootcolor_brand {
+  background: var(--ls-color-brand);
+}
+[data-theme="dark"] .rootcolor_brand:hover {
+  background: #28543d;
+}
+[data-theme="dark"] .rootcolor_brand:active {
+  background: #28543d;
+}
+
+/* Red */
+[data-theme="dark"] .rootcolor_red {
+  background: #b62324;
+}
+[data-theme="dark"] .rootcolor_red:hover {
+  background: #f85149;
+}
+[data-theme="dark"] .rootcolor_red:active {
+  background: #ff6e67;
+}
+
+/* Sand */
+[data-theme="dark"] .rootcolor_sand {
+  background: #6e7681;
+}
+[data-theme="dark"] .rootcolor_sand:hover {
+  background: #8b949e;
+}
+[data-theme="dark"] .rootcolor_sand:active {
+  background: #9ca5af;
+}
+
+/* White */
+[data-theme="dark"] .rootcolor_white {
+  background: #21262d;
+}
+[data-theme="dark"] .rootcolor_white:hover {
+  background: #30363d;
+}
+[data-theme="dark"] .rootcolor_white:active {
+  background: #3a424b;
+}
+
+/* Soft Blue */
+[data-theme="dark"] .rootcolor_softBlue {
+  background: #0d2d6b;
+}
+[data-theme="dark"] .rootcolor_softBlue:hover {
+  background: #11356e;
+}
+[data-theme="dark"] .rootcolor_softBlue:active {
+  background: #153d72;
+}
+
+/* Soft Green */
+[data-theme="dark"] .rootcolor_softGreen {
+  background: #0d2d1a;
+}
+[data-theme="dark"] .rootcolor_softGreen:hover {
+  background: #11351f;
+}
+[data-theme="dark"] .rootcolor_softGreen:active {
+  background: #153d24;
+}
+
+/* Soft Yellow */
+[data-theme="dark"] .rootcolor_softYellow {
+  background: #2d1a00;
+}
+[data-theme="dark"] .rootcolor_softYellow:hover {
+  background: #352000;
+}
+[data-theme="dark"] .rootcolor_softYellow:active {
+  background: #3d2600;
+}
+
+/* Soft Red */
+[data-theme="dark"] .rootcolor_softRed {
+  background: #3d1111;
+}
+[data-theme="dark"] .rootcolor_softRed:hover {
+  background: #451515;
+}
+[data-theme="dark"] .rootcolor_softRed:active {
+  background: #4d1919;
+}
+
+/* Soft Sand */
+[data-theme="dark"] .rootcolor_softSand {
+  background: #21262d;
+}
+[data-theme="dark"] .rootcolor_softSand:hover {
+  background: #2a3038;
+}
+[data-theme="dark"] .rootcolor_softSand:active {
+  background: #30363d;
+}
+
+/* Clear */
+[data-theme="dark"] .rootcolor_clear {
+  background: transparent;
+}
+[data-theme="dark"] .rootcolor_clear:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+[data-theme="dark"] .rootcolor_clear:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Brand Outline */
+[data-theme="dark"] .rootcolor_brandOutline {
+  background: transparent;
+  border-color: var(--ls-color-brand);
+}
+[data-theme="dark"] .rootcolor_brandOutline:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+[data-theme="dark"] .rootcolor_brandOutline:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Dark Mode Text & Icon Colors ── */
+
+/* Default text/icon — already light (#ededec), no override needed */
+
+/* Green text */
+[data-theme="dark"] .slotTargetChildrencolor_green {
+  color: #7ee787;
+}
+[data-theme="dark"] .slotTargetStartIconcolor_green {
+  color: #7ee787;
+}
+[data-theme="dark"] .slotTargetEndIconcolor_green {
+  color: #7ee787;
+}
+
+/* White text */
+[data-theme="dark"] .slotTargetChildrencolor_white {
+  color: #e6edf3;
+}
+[data-theme="dark"] .slotTargetStartIconcolor_white {
+  color: #e6edf3;
+}
+[data-theme="dark"] .slotTargetEndIconcolor_white {
+  color: #e6edf3;
+}
+
+/* Soft Blue text/icon */
+[data-theme="dark"] .slotTargetChildrencolor_softBlue {
+  color: #79c0ff;
+}
+[data-theme="dark"] .slotTargetStartIconcolor_softBlue {
+  color: #79c0ff;
+}
+[data-theme="dark"] .slotTargetEndIconcolor_softBlue {
+  color: #79c0ff;
+}
+
+/* Soft Green text/icon */
+[data-theme="dark"] .slotTargetChildrencolor_softGreen {
+  color: #7ee787;
+}
+[data-theme="dark"] .slotTargetStartIconcolor_softGreen {
+  color: #7ee787;
+}
+[data-theme="dark"] .slotTargetEndIconcolor_softGreen {
+  color: #7ee787;
+}
+
+/* Soft Yellow text/icon */
+[data-theme="dark"] .slotTargetChildrencolor_softYellow {
+  color: #e3b341;
+}
+[data-theme="dark"] .slotTargetStartIconcolor_softYellow {
+  color: #e3b341;
+}
+[data-theme="dark"] .slotTargetEndIconcolor_softYellow {
+  color: #e3b341;
+}
+
+/* Soft Red text/icon */
+[data-theme="dark"] .slotTargetChildrencolor_softRed {
+  color: #fca5a5;
+}
+[data-theme="dark"] .slotTargetStartIconcolor_softRed {
+  color: #fca5a5;
+}
+[data-theme="dark"] .slotTargetEndIconcolor_softRed {
+  color: #fca5a5;
+}
+
+/* Soft Sand text/icon */
+[data-theme="dark"] .slotTargetChildrencolor_softSand {
+  color: #8b949e;
+}
+[data-theme="dark"] .slotTargetStartIconcolor_softSand {
+  color: #8b949e;
+}
+[data-theme="dark"] .slotTargetEndIconcolor_softSand {
+  color: #8b949e;
+}
+
+/* Clear text/icon */
+[data-theme="dark"] .slotTargetChildrencolor_clear {
+  color: #e6edf3;
+}
+[data-theme="dark"] .slotTargetStartIconcolor_clear {
+  color: #e6edf3;
+}
+[data-theme="dark"] .slotTargetEndIconcolor_clear {
+  color: #e6edf3;
+}
+
+/* Brand Outline text/icon */
+[data-theme="dark"] .slotTargetChildrencolor_brandOutline {
+  color: var(--ls-color-brand);
+}
+[data-theme="dark"] .slotTargetStartIconcolor_brandOutline {
+  color: #58a6ff;
+}
+[data-theme="dark"] .slotTargetEndIconcolor_brandOutline {
+  color: #58a6ff;
+}
+[data-theme="dark"] .rootcolor_brandOutline:hover .slotTargetStartIconcolor_brandOutline {
+  color: #79c0ff;
+}
+[data-theme="dark"] .rootcolor_brandOutline:active .slotTargetStartIconcolor_brandOutline {
+  color: #a5d6ff;
+}
+[data-theme="dark"] .rootcolor_brandOutline:hover .slotTargetEndIconcolor_brandOutline {
+  color: #79c0ff;
+}
+[data-theme="dark"] .rootcolor_brandOutline:active .slotTargetEndIconcolor_brandOutline {
+  color: #a5d6ff;
+}

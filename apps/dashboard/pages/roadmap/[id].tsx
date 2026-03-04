@@ -18,11 +18,13 @@ import {
 } from '@/lib/roadmap';
 import styles from '@/components/roadmap/Roadmap.module.css';
 import { useAuth } from '@/lib/providers/AuthProvider';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 
 export default function FeatureDetailPage() {
   const router = useRouter();
   const { id } = router.query;
   const auth = useAuth();
+  const { resolvedTheme } = useTheme();
   
   const [feature, setFeature] = useState<RoadmapFeature | null>(null);
   const [comments, setComments] = useState<RoadmapComment[]>([]);
@@ -179,7 +181,7 @@ export default function FeatureDetailPage() {
             ) : (
               // Levelset-created feature - show logo
               <img 
-                src="/logos/Levelset no margin.png" 
+                src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/Levelset no margin.png'}
                 alt="Levelset" 
                 className={styles.authorAvatarImg}
               />

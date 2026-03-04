@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Box, Typography } from '@mui/material';
 import { PEAClassic } from '@/components/CodeComponents/PEAClassic';
 import type { MobileLocation } from '@/lib/mobile-location';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 import sty from './PublicPeaClassicPage.module.css';
 
 interface PublicPeaClassicPageProps {
@@ -12,6 +13,8 @@ interface PublicPeaClassicPageProps {
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 export function PublicPeaClassicPage({ location }: PublicPeaClassicPageProps) {
+  const { resolvedTheme } = useTheme();
+
   return (
     <div className={sty.root}>
       {/* Header with Levelset branding and location name */}
@@ -19,7 +22,7 @@ export function PublicPeaClassicPage({ location }: PublicPeaClassicPageProps) {
         <div className={sty.headerContent}>
           <div className={sty.logoContainer}>
             <Image
-              src="/logos/Levelset no margin.png"
+              src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/Levelset no margin.png'}
               alt="Levelset"
               width={100}
               height={28}

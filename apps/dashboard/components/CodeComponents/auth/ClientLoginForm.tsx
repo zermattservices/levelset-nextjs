@@ -234,7 +234,7 @@ export function ClientLoginForm({
               }}
               onMouseOut={(e) => {
                 if (!isLoading) {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.backgroundColor = 'var(--ls-color-bg-container)';
                 }
               }}
             >

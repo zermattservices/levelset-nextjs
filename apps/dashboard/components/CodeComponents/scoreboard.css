@@ -32,38 +32,36 @@
 
 /* ===== Light mode (default) ===== */
 :root {
-  --bg: #ffffff;
-  --text: #101317;
-  --muted: #6b7280;
-  --border: #e5e7eb;
-  --head: #f9fafb;
+  --bg: var(--ls-color-bg-container);
+  --text: var(--ls-color-neutral-soft-foreground);
+  --muted: var(--ls-color-muted);
+  --border: var(--ls-color-muted-border);
+  --head: var(--ls-color-neutral-foreground);
   --hover: #fafafa;
-  --green: #249e6b;
+  --green: var(--ls-color-success-vivid);
   --yellow: #ffb549;
-  --red: #ad2624;
-  --pill-bg: #f3f4f6;
-  --pill-on: #111827;
-  --pill-off: #6b7280;
-  --pill-border: #e5e7eb;
-  --divider: #9ca3af;
+  --red: var(--ls-color-destructive-medium);
+  --pill-bg: var(--ls-color-muted-soft);
+  --pill-on: var(--ls-color-neutral-soft-foreground);
+  --pill-off: var(--ls-color-muted);
+  --pill-border: var(--ls-color-muted-border);
+  --divider: var(--ls-color-disabled-text);
   --row-h: 34px;
 }
 
 /* ===== Dark override ===== */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111317;
-    --text: #e5e7eb;
-    --muted: #9ca3af;
-    --border: #2b3036;
-    --head: #1a1f24;
-    --hover: #0e1114;
-    --pill-bg: #1b2026;
-    --pill-on: #e5e7eb;
-    --pill-off: #9ca3af;
-    --pill-border: #2b3036;
-    --divider: #3b424a;
-  }
+[data-theme="dark"] {
+  --bg: #111317;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --border: #2b3036;
+  --head: #1a1f24;
+  --hover: #0e1114;
+  --pill-bg: #1b2026;
+  --pill-on: #e5e7eb;
+  --pill-off: #9ca3af;
+  --pill-border: #2b3036;
+  --divider: #3b424a;
 }
 
 html, body {
@@ -233,17 +231,17 @@ h1 {
 
 .rubric-red {
   background: var(--red);
-  color: #fff;
+  color: var(--ls-color-bg-container);
 }
 
 .rubric-yellow {
   background: var(--yellow);
-  color: #111;
+  color: var(--ls-color-neutral-soft-foreground);
 }
 
 .rubric-green {
   background: var(--green);
-  color: #fff;
+  color: var(--ls-color-bg-container);
 }
 
 .scroll {
@@ -314,7 +312,7 @@ h1 {
 }
 
 #grid thead tr.second-head th.num {
-  color: #fff;
+  color: var(--ls-color-bg-container);
 }
 
 #grid thead tr.second-head th.v-green {
@@ -385,7 +383,7 @@ tr[aria-expanded="true"] .chev {
 
 td.num, th.num {
   text-align: center;
-  color: #fff;
+  color: var(--ls-color-bg-container);
   font-weight: 600;
 }
 
@@ -395,7 +393,7 @@ td.v-green, th.v-green {
 
 td.v-yellow, th.v-yellow {
   background: var(--yellow);
-  color: #111;
+  color: var(--ls-color-neutral-soft-foreground);
 }
 
 td.v-red, th.v-red {
@@ -544,12 +542,12 @@ td.v-red, th.v-red {
 .actions-button svg {
   width: 16px;
   height: 16px;
-  color: #6b7280; /* Dark gray icon */
+  color: var(--ls-color-muted); /* Dark gray icon */
   stroke-width: 1.5;
 }
 
 .actions-button:hover svg {
-  color: #4b5563; /* Darker gray on hover */
+  color: var(--ls-color-text-tertiary); /* Darker gray on hover */
 }
 
 /* Specific button types */
