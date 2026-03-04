@@ -341,7 +341,10 @@ const LoadingOverlay = styled(Box)(() => ({
   justifyContent: 'center',
   backgroundColor: 'rgba(255, 255, 255, 0.8)',
   zIndex: 10,
-  backdropFilter: 'blur(2px)'
+  backdropFilter: 'blur(2px)',
+  'html[data-theme="dark"] &': {
+    backgroundColor: 'rgba(13, 17, 23, 0.85)',
+  },
 }));
 
 // ===== Main Component =====
