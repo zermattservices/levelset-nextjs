@@ -29,17 +29,6 @@
   background-color: var(--ls-color-bg-container);
 }
 
-.cardRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-}
-
-.cardRow + .cardRow {
-  border-top: 1px solid var(--ls-color-muted-border);
-}
-
 .scoreCircle {
   display: flex;
   align-items: center;

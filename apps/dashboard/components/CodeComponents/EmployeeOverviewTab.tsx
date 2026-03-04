@@ -176,10 +176,11 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
   const [positionAverages, setPositionAverages] = React.useState<PositionAverage[]>([]);
   const [disciplineData, setDisciplineData] = React.useState<DisciplineData | null>(null);
 
+  const supabase = createSupabaseClient();
+
   // Consolidated data fetch — all three sections load in parallel
   React.useEffect(() => {
     let cancelled = false;
-    const supabase = createSupabaseClient();
 
     async function fetchOEData(): Promise<OEData | null> {
       const now = new Date();
@@ -187,9 +188,12 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
       const startISO = start.toISOString();
       const endISO = now.toISOString();
 
-      const res = await fetch(
-        `/api/operational-excellence?location_id=${locationId}&start=${startISO}&end=${endISO}`
-      );
+      const params = new URLSearchParams({
+        location_id: locationId,
+        start: startISO,
+        end: endISO,
+      });
+      const res = await fetch(`/api/operational-excellence?${params}`);
       if (!res.ok) throw new Error('Failed to fetch OE data');
 
       const json = await res.json();
@@ -201,9 +205,12 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
     }
 
     async function fetchPositionAverages(): Promise<PositionAverage[]> {
+      // Fetch ratings across all locations (intentional — matches certification system behavior
+      // in fetch-position-averages.ts). Position averages reflect overall employee performance,
+      // not location-specific performance.
       const { data, error } = await supabase
         .from('ratings')
-        .select('position, position_id, rating_avg, created_at')
+        .select('position, rating_avg, created_at')
         .eq('employee_id', employee.id)
         .order('created_at', { ascending: false });
 
@@ -331,6 +338,10 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
       ]);
 
       if (cancelled) return;
+
+      if (oeResult.status === 'rejected') console.error('[EmployeeOverviewTab] OE fetch failed:', oeResult.reason);
+      if (positionsResult.status === 'rejected') console.error('[EmployeeOverviewTab] Positions fetch failed:', positionsResult.reason);
+      if (disciplineResult.status === 'rejected') console.error('[EmployeeOverviewTab] Discipline fetch failed:', disciplineResult.reason);
 
       // OE data — null on failure
       setOeData(oeResult.status === 'fulfilled' ? oeResult.value : null);
@@ -474,20 +485,22 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
       {/* Section 3: Discipline */}
       <Box className={styles.section}>
         <Typography className={styles.sectionTitle}>Discipline</Typography>
-        {disciplineData && disciplineData.infractionCount > 0 ? (
+        {disciplineData && disciplineData.infractionCount > 0 ? (() => {
+          const ratio = disciplineData.maxThreshold > 0
+            ? disciplineData.totalPoints / disciplineData.maxThreshold
+            : 0;
+          const ratioColor = ratio > 0.66
+            ? 'var(--ls-color-destructive-base)'
+            : ratio > 0.33
+              ? 'var(--ls-color-warning-base)'
+              : 'var(--ls-color-success-base)';
+          return (
           <Box className={styles.card}>
             <Box className={styles.twoColumn}>
               <Box>
                 <span
                   className={styles.statValue}
-                  style={{
-                    color:
-                      disciplineData.totalPoints / disciplineData.maxThreshold > 0.66
-                        ? 'var(--ls-color-destructive-base)'
-                        : disciplineData.totalPoints / disciplineData.maxThreshold > 0.33
-                          ? 'var(--ls-color-warning-base)'
-                          : 'var(--ls-color-success-base)',
-                  }}
+                  style={{ color: ratioColor }}
                 >
                   {disciplineData.totalPoints}
                 </span>
@@ -516,13 +529,8 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
               <div
                 className={styles.progressFill}
                 style={{
-                  width: `${Math.min((disciplineData.totalPoints / disciplineData.maxThreshold) * 100, 100)}%`,
-                  backgroundColor:
-                    disciplineData.totalPoints / disciplineData.maxThreshold > 0.66
-                      ? 'var(--ls-color-destructive-base)'
-                      : disciplineData.totalPoints / disciplineData.maxThreshold > 0.33
-                        ? 'var(--ls-color-warning-base)'
-                        : 'var(--ls-color-success-base)',
+                  width: `${Math.min(ratio * 100, 100)}%`,
+                  backgroundColor: ratioColor,
                 }}
               />
             </Box>
@@ -539,7 +547,8 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
               </Box>
             )}
           </Box>
-        ) : (
+          );
+        })() : (
           <Box className={styles.noData}>No infractions in the last 90 days</Box>
         )}
       </Box>
