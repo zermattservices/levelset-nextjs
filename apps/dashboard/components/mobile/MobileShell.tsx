@@ -2,6 +2,7 @@ import * as React from 'react';
 import Image from 'next/image';
 import { Box, Button, Typography } from '@mui/material';
 import { MobileFormDrawer } from './MobileFormDrawer';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 
 type ActiveForm = 'positional' | 'infraction' | null;
 
@@ -17,6 +18,7 @@ export interface MobileShellProps {
 
 export function MobileShell({ location }: MobileShellProps) {
   const [activeForm, setActiveForm] = React.useState<ActiveForm>(null);
+  const { resolvedTheme } = useTheme();
 
   const locationLabel = React.useMemo(() => {
     const parts = [];
@@ -48,7 +50,7 @@ export function MobileShell({ location }: MobileShellProps) {
         }}
       >
         <Image
-          src="/logos/levelset-horizontal-lockup.png"
+          src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/levelset-horizontal-lockup.png'}
           alt="Levelset"
           width={220}
           height={48}

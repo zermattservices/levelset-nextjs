@@ -8,6 +8,7 @@
 
 import * as React from 'react';
 import { TRIAL_DAYS } from '@/lib/billing/constants';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 import styles from './BillingSetupModal.module.css';
 
 interface BillingSetupModalProps {
@@ -17,6 +18,7 @@ interface BillingSetupModalProps {
 export function BillingSetupModal({ accessToken }: BillingSetupModalProps) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const { resolvedTheme } = useTheme();
 
   const trialEndDate = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
   const formattedDate = trialEndDate.toLocaleDateString('en-US', {
@@ -57,7 +59,7 @@ export function BillingSetupModal({ accessToken }: BillingSetupModalProps) {
         {/* Header */}
         <div className={styles.header}>
           <img
-            src="/logos/levelset-horizontal-lockup.png"
+            src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/levelset-horizontal-lockup.png'}
             alt="Levelset"
             className={styles.logo}
             onError={(e) => {

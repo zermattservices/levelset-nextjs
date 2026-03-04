@@ -2,6 +2,7 @@ import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { createSupabaseClient } from '@/util/supabase/component';
+import { useTheme } from '@/lib/providers/ThemeProvider';
 import { OnboardingStepperHeader } from '@/components/onboarding/OnboardingStepperHeader';
 import { AccountSetupStep } from '@/components/onboarding/AccountSetupStep';
 import { OrgStructureStep } from '@/components/onboarding/OrgStructureStep';
@@ -62,6 +63,7 @@ const STEP_LABELS = [
 export function OnboardingPage() {
   const router = useRouter();
   const supabase = createSupabaseClient();
+  const { resolvedTheme } = useTheme();
 
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -377,7 +379,7 @@ export function OnboardingPage() {
         <div className={styles.header}>
           <div>
             <img
-              src="/logos/levelset-horizontal-lockup.png"
+              src={resolvedTheme === 'dark' ? '/logos/Levelset White no margin.png' : '/logos/levelset-horizontal-lockup.png'}
               alt="Levelset"
               className={styles.logo}
               onError={(e) => {
