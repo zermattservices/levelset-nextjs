@@ -91,6 +91,17 @@ function getRatingColor(avg: number): string {
 }
 
 // ------------------------------------------------------------------
+// Types for discipline data
+// ------------------------------------------------------------------
+interface DisciplineData {
+  totalPoints: number;
+  maxThreshold: number;
+  infractionCount: number;
+  discActionCount: number;
+  recentInfraction: { infraction: string; infraction_date: string } | null;
+}
+
+// ------------------------------------------------------------------
 // Component
 // ------------------------------------------------------------------
 export interface EmployeeOverviewTabProps {
@@ -104,6 +115,8 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
   const [oeLoading, setOeLoading] = React.useState(true);
   const [positionAverages, setPositionAverages] = React.useState<PositionAverage[]>([]);
   const [positionsLoading, setPositionsLoading] = React.useState(true);
+  const [disciplineData, setDisciplineData] = React.useState<DisciplineData | null>(null);
+  const [disciplineLoading, setDisciplineLoading] = React.useState(true);
 
   // Fetch OE data
   React.useEffect(() => {
@@ -207,6 +220,112 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
     fetchPositionAverages();
     return () => { cancelled = true; };
   }, [employee.id]);
+
+  // Fetch discipline data
+  React.useEffect(() => {
+    let cancelled = false;
+
+    async function fetchDisciplineData() {
+      setDisciplineLoading(true);
+      try {
+        const supabase = createSupabaseClient();
+        const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0];
+
+        // Get org_id from locations table
+        const { data: locationData, error: locationError } = await supabase
+          .from('locations')
+          .select('org_id')
+          .eq('id', locationId)
+          .single();
+
+        if (locationError) throw locationError;
+        if (cancelled) return;
+
+        const orgId = locationData.org_id;
+
+        // Fetch infractions, disc_actions, and rubric in parallel
+        const [infractionsRes, discActionsRes, orgRubricRes] = await Promise.all([
+          supabase
+            .from('infractions')
+            .select('id, points, infraction_date, infraction')
+            .eq('employee_id', employee.id)
+            .eq('location_id', locationId)
+            .gte('infraction_date', ninetyDaysAgo)
+            .order('infraction_date', { ascending: false }),
+          supabase
+            .from('disc_actions')
+            .select('id')
+            .eq('employee_id', employee.id)
+            .eq('location_id', locationId)
+            .gte('action_date', ninetyDaysAgo),
+          supabase
+            .from('disc_actions_rubric')
+            .select('*')
+            .eq('org_id', orgId)
+            .is('location_id', null)
+            .order('points_threshold', { ascending: true }),
+        ]);
+
+        if (cancelled) return;
+
+        if (infractionsRes.error) throw infractionsRes.error;
+        if (discActionsRes.error) throw discActionsRes.error;
+        if (orgRubricRes.error) throw orgRubricRes.error;
+
+        // If org-level rubric is empty, fallback to location-level
+        let rubric = orgRubricRes.data || [];
+        if (rubric.length === 0) {
+          const { data: locRubric, error: locRubricError } = await supabase
+            .from('disc_actions_rubric')
+            .select('*')
+            .eq('location_id', locationId)
+            .order('points_threshold', { ascending: true });
+
+          if (locRubricError) throw locRubricError;
+          if (cancelled) return;
+          rubric = locRubric || [];
+        }
+
+        const infractions = infractionsRes.data || [];
+        const totalPoints = infractions.reduce(
+          (sum, inf) => sum + (inf.points || 0),
+          0
+        );
+        const maxThreshold =
+          rubric.length > 0
+            ? rubric[rubric.length - 1]?.points_threshold || 100
+            : 100;
+
+        const recentInfraction =
+          infractions.length > 0
+            ? {
+                infraction: infractions[0].infraction,
+                infraction_date: infractions[0].infraction_date,
+              }
+            : null;
+
+        if (!cancelled) {
+          setDisciplineData({
+            totalPoints,
+            maxThreshold,
+            infractionCount: infractions.length,
+            discActionCount: (discActionsRes.data || []).length,
+            recentInfraction,
+          });
+        }
+      } catch (err) {
+        console.error('[EmployeeOverviewTab] Discipline fetch error:', err);
+        if (!cancelled) setDisciplineData(null);
+      } finally {
+        if (!cancelled) setDisciplineLoading(false);
+      }
+    }
+
+    fetchDisciplineData();
+    return () => { cancelled = true; };
+  }, [employee.id, locationId]);
 
   if (loading) {
     return (
@@ -324,7 +443,79 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
       {/* Section 3: Discipline */}
       <Box className={styles.section}>
         <Typography className={styles.sectionTitle}>Discipline</Typography>
-        <Box className={styles.noData}>Loading...</Box>
+        {disciplineLoading ? (
+          <Skeleton variant="rounded" height={100} />
+        ) : disciplineData && disciplineData.infractionCount > 0 ? (
+          <Box className={styles.card}>
+            <Box className={styles.twoColumn}>
+              <Box>
+                <span
+                  className={styles.statValue}
+                  style={{
+                    color:
+                      disciplineData.totalPoints / disciplineData.maxThreshold > 0.66
+                        ? 'var(--ls-color-destructive-base)'
+                        : disciplineData.totalPoints / disciplineData.maxThreshold > 0.33
+                          ? 'var(--ls-color-warning-base)'
+                          : 'var(--ls-color-success-base)',
+                  }}
+                >
+                  {disciplineData.totalPoints}
+                </span>
+                <div className={styles.statLabel}>
+                  / {disciplineData.maxThreshold} pts
+                </div>
+              </Box>
+              <Box>
+                <span className={styles.statValue}>
+                  {disciplineData.infractionCount}
+                </span>
+                <div className={styles.statLabel}>
+                  infraction{disciplineData.infractionCount !== 1 ? 's' : ''}
+                </div>
+                <span className={styles.statValue} style={{ fontSize: 20, marginTop: 4, display: 'block' }}>
+                  {disciplineData.discActionCount}
+                </span>
+                <div className={styles.statLabel}>
+                  disciplinary action{disciplineData.discActionCount !== 1 ? 's' : ''}
+                </div>
+              </Box>
+            </Box>
+
+            {/* Progress bar */}
+            <Box className={styles.progressBar} sx={{ mt: 2 }}>
+              <div
+                className={styles.progressFill}
+                style={{
+                  width: `${Math.min((disciplineData.totalPoints / disciplineData.maxThreshold) * 100, 100)}%`,
+                  backgroundColor:
+                    disciplineData.totalPoints / disciplineData.maxThreshold > 0.66
+                      ? 'var(--ls-color-destructive-base)'
+                      : disciplineData.totalPoints / disciplineData.maxThreshold > 0.33
+                        ? 'var(--ls-color-warning-base)'
+                        : 'var(--ls-color-success-base)',
+                }}
+              />
+            </Box>
+
+            {/* Most recent infraction */}
+            {disciplineData.recentInfraction && (
+              <Box sx={{ mt: 2 }}>
+                <div className={styles.recentItem}>
+                  {disciplineData.recentInfraction.infraction}
+                </div>
+                <div className={styles.recentDate}>
+                  {new Date(disciplineData.recentInfraction.infraction_date + 'T00:00:00').toLocaleDateString(
+                    'en-US',
+                    { month: 'short', day: 'numeric', year: 'numeric' }
+                  )}
+                </div>
+              </Box>
+            )}
+          </Box>
+        ) : (
+          <Box className={styles.noData}>No infractions in the last 90 days</Box>
+        )}
       </Box>
 
       {/* Section 4: Evaluations (stub) */}
