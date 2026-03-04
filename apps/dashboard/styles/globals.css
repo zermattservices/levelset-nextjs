@@ -181,6 +181,15 @@ svg {
   color: var(--ls-color-neutral); /* gray-700 */
 }
 
+/* ── Theme transition ── */
+/* Smooth color transitions when switching between light/dark mode */
+html[data-theme] body,
+html[data-theme] #__next,
+html[data-theme] .dashboard-card,
+html[data-theme] .metric-card {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
 /* ── Google Maps ── */
 /* Hide "This page can't load Google Maps correctly" dialog — we only use Places Autocomplete */
 .gm-err-container,

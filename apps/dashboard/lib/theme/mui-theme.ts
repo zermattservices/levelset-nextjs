@@ -21,5 +21,53 @@ export function createLevelsetTheme(mode: 'light' | 'dark'): Theme {
       fontSize: 14,
     },
     shape: { borderRadius: 8 },
+    components: {
+      MuiTextField: {
+        defaultProps: { size: 'small', fullWidth: true },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            '&:hover fieldset': { borderColor: 'var(--ls-color-brand)' },
+            '&.Mui-focused fieldset': { borderColor: 'var(--ls-color-brand)' },
+          },
+          notchedOutline: {
+            '& legend': { fontFamily: '"Satoshi", sans-serif' },
+          },
+        },
+      },
+      MuiFormLabel: {
+        styleOverrides: {
+          root: { fontFamily: '"Satoshi", sans-serif', fontSize: 14, fontWeight: 500 },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: { fontFamily: '"Satoshi", sans-serif', textTransform: 'none' as const, fontWeight: 600, borderRadius: 8 },
+        },
+      },
+      MuiSelect: {
+        defaultProps: { size: 'small' },
+      },
+      MuiRadio: {
+        styleOverrides: {
+          root: { '&.Mui-checked': { color: 'var(--ls-color-brand)' } },
+        },
+      },
+      MuiCheckbox: {
+        styleOverrides: {
+          root: { '&.Mui-checked': { color: 'var(--ls-color-brand)' } },
+        },
+      },
+      MuiSwitch: {
+        styleOverrides: {
+          root: {
+            '& .MuiSwitch-switchBase.Mui-checked': { color: 'var(--ls-color-brand)' },
+            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: 'var(--ls-color-brand)' },
+          },
+        },
+      },
+    },
   });
 }

@@ -11,9 +11,7 @@ import Form from '@rjsf/mui';
 import validator from '@rjsf/validator-ajv8';
 import type { IChangeEvent } from '@rjsf/core';
 import type { RJSFSchema, UiSchema } from '@rjsf/utils';
-import { ThemeProvider } from '@mui/material/styles';
 import { Button } from '@mui/material';
-import { rjsfMuiTheme } from '@/lib/forms/rjsf-theme';
 import { getCustomWidgets } from '@/components/forms/widgets';
 import type { FormTemplate } from '@/lib/forms/types';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
@@ -123,8 +121,7 @@ export function FormRenderer({
   }
 
   return (
-    <ThemeProvider theme={rjsfMuiTheme}>
-      <Form
+    <Form
         schema={schema}
         uiSchema={uiSchema}
         formData={formData}
@@ -162,6 +159,5 @@ export function FormRenderer({
           </Button>
         )}
       </Form>
-    </ThemeProvider>
   );
 }
