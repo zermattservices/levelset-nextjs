@@ -76,6 +76,21 @@ function renderChange(change: number | null) {
 }
 
 // ------------------------------------------------------------------
+// Types for positional ratings
+// ------------------------------------------------------------------
+interface PositionAverage {
+  position: string;
+  average: number;
+  count: number;
+}
+
+function getRatingColor(avg: number): string {
+  if (avg >= 2.75) return 'var(--ls-color-success-base)';
+  if (avg >= 2.0) return 'var(--ls-color-warning-base)';
+  return 'var(--ls-color-destructive-base)';
+}
+
+// ------------------------------------------------------------------
 // Component
 // ------------------------------------------------------------------
 export interface EmployeeOverviewTabProps {
@@ -87,6 +102,8 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
   const [loading, setLoading] = React.useState(true);
   const [oeData, setOeData] = React.useState<OEData | null>(null);
   const [oeLoading, setOeLoading] = React.useState(true);
+  const [positionAverages, setPositionAverages] = React.useState<PositionAverage[]>([]);
+  const [positionsLoading, setPositionsLoading] = React.useState(true);
 
   // Fetch OE data
   React.useEffect(() => {
@@ -131,6 +148,65 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
     fetchOEData();
     return () => { cancelled = true; };
   }, [employee.id, locationId]);
+
+  // Fetch positional ratings
+  React.useEffect(() => {
+    let cancelled = false;
+
+    async function fetchPositionAverages() {
+      setPositionsLoading(true);
+      try {
+        const supabase = createSupabaseClient();
+        const { data, error } = await supabase
+          .from('ratings')
+          .select('position, position_id, rating_avg, created_at')
+          .eq('employee_id', employee.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (cancelled) return;
+
+        // Group by position, take last 4 per position, average their rating_avg
+        const grouped: Record<string, number[]> = {};
+        for (const row of data || []) {
+          const pos = row.position || 'Unknown';
+          if (!grouped[pos]) grouped[pos] = [];
+          // Data is already ordered by created_at desc, so just push
+          if (grouped[pos].length < 4 && row.rating_avg != null) {
+            grouped[pos].push(row.rating_avg);
+          }
+        }
+
+        // Also count total ratings per position (not just last 4)
+        const totalCounts: Record<string, number> = {};
+        for (const row of data || []) {
+          const pos = row.position || 'Unknown';
+          totalCounts[pos] = (totalCounts[pos] || 0) + 1;
+        }
+
+        const averages: PositionAverage[] = Object.entries(grouped).map(
+          ([position, scores]) => ({
+            position,
+            average: scores.reduce((sum, s) => sum + s, 0) / scores.length,
+            count: Math.min(totalCounts[position] || 0, 4),
+          })
+        );
+
+        // Sort alphabetically by position name
+        averages.sort((a, b) => a.position.localeCompare(b.position));
+
+        if (!cancelled) setPositionAverages(averages);
+      } catch (err) {
+        console.error('[EmployeeOverviewTab] Position averages fetch error:', err);
+        if (!cancelled) setPositionAverages([]);
+      } finally {
+        if (!cancelled) setPositionsLoading(false);
+      }
+    }
+
+    fetchPositionAverages();
+    return () => { cancelled = true; };
+  }, [employee.id]);
 
   if (loading) {
     return (
@@ -217,7 +293,32 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
       {/* Section 2: Positional Ratings */}
       <Box className={styles.section}>
         <Typography className={styles.sectionTitle}>Positional Ratings</Typography>
-        <Box className={styles.noData}>Loading...</Box>
+        {positionsLoading ? (
+          <Skeleton variant="rounded" height={100} />
+        ) : positionAverages.length > 0 ? (
+          <Box className={styles.card}>
+            {positionAverages.map((pos) => (
+              <Box key={pos.position} className={styles.positionRow}>
+                <span className={styles.positionName}>{pos.position}</span>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <span
+                    className={styles.positionAvg}
+                    style={{ color: getRatingColor(pos.average) }}
+                  >
+                    {pos.average.toFixed(2)}
+                  </span>
+                  {pos.count < 4 && (
+                    <span className={styles.ratingCount}>
+                      ({pos.count} of 4 ratings)
+                    </span>
+                  )}
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        ) : (
+          <Box className={styles.noData}>No ratings found</Box>
+        )}
       </Box>
 
       {/* Section 3: Discipline */}
