@@ -28,13 +28,14 @@ import { RecordActionModal } from "./RecordActionModal";
 import { DismissConfirmationModal } from "./DismissConfirmationModal";
 import { PositionalRatings } from "./PositionalRatings";
 import { RolePill } from "./shared/RolePill";
+import { EmployeeOverviewTab } from "./EmployeeOverviewTab";
 
 export interface EmployeeModalProps {
   open: boolean;
   employee: Employee | null;
   onClose: () => void;
   locationId: string;
-  initialTab?: "pathway" | "pe" | "evaluations" | "discipline";
+  initialTab?: "overview" | "pathway" | "pe" | "evaluations" | "discipline" | "schedule";
   onRecordAction?: () => void;
   currentUserId?: string; // For prefilling acting leader
   onRecommendationUpdate?: () => void; // Called when a recommendation is recorded or dismissed
@@ -291,7 +292,7 @@ export function EmployeeModal({
   onClose,
   locationId,
   onRecommendationUpdate,
-  initialTab = "discipline",
+  initialTab = "overview",
   onRecordAction,
   currentUserId,
   className = "",
@@ -1020,6 +1021,26 @@ export function EmployeeModal({
     );
   };
 
+  const renderScheduleTab = () => {
+    return (
+      <Box sx={{ p: 3, textAlign: "center" }}>
+        <Typography sx={{ fontFamily: "Satoshi", fontSize: "14px", color: "var(--ls-color-text-caption)" }}>
+          Coming soon!
+        </Typography>
+      </Box>
+    );
+  };
+
+  const renderOverviewTab = () => {
+    if (!employee) return null;
+    return (
+      <EmployeeOverviewTab
+        employee={employee}
+        locationId={locationId}
+      />
+    );
+  };
+
   return (
     <Dialog
       open={open}
@@ -1114,19 +1135,23 @@ export function EmployeeModal({
             },
           }}
         >
+          <Tab label="Overview" value="overview" />
           <Tab label="Pathway" value="pathway" />
           <Tab label="Positional Excellence" value="pe" />
           <Tab label="Evaluations" value="evaluations" />
           <Tab label="Discipline" value="discipline" />
+          <Tab label="Schedule" value="schedule" />
         </Tabs>
       </Box>
 
       {/* Tab Content */}
       <Box sx={{ overflow: "auto", flex: 1, backgroundColor: "var(--ls-color-bg-container)" }}>
+        {currentTab === "overview" && renderOverviewTab()}
         {currentTab === "pathway" && renderPathwayTab()}
         {currentTab === "pe" && renderPETab()}
         {currentTab === "evaluations" && renderEvaluationsTab()}
         {currentTab === "discipline" && renderDisciplineTab()}
+        {currentTab === "schedule" && renderScheduleTab()}
       </Box>
       
       {/* Infraction Edit Modal */}

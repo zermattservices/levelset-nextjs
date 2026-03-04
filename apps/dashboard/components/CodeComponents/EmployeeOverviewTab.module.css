@@ -1,0 +1,195 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
+  background-color: var(--ls-color-bg-container);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ls-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card {
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 12px;
+  padding: 16px;
+  background-color: var(--ls-color-bg-container);
+}
+
+.cardRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.cardRow + .cardRow {
+  border-top: 1px solid var(--ls-color-muted-border);
+}
+
+.scoreCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  font-family: "Satoshi", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.pillarsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.pillarCard {
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pillarName {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ls-color-text-caption);
+}
+
+.pillarScore {
+  font-family: "Satoshi", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.changeIndicator {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.changePositive {
+  color: var(--ls-color-success-base);
+}
+
+.changeNegative {
+  color: var(--ls-color-destructive-base);
+}
+
+.changeNeutral {
+  color: var(--ls-color-text-caption);
+}
+
+.progressBar {
+  height: 8px;
+  border-radius: 4px;
+  background-color: var(--ls-color-muted-soft);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.positionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+}
+
+.positionRow + .positionRow {
+  border-top: 1px solid var(--ls-color-muted-border);
+}
+
+.positionName {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ls-color-text-secondary);
+}
+
+.positionAvg {
+  font-family: "Satoshi", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: right;
+}
+
+.ratingCount {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  color: var(--ls-color-text-caption);
+  margin-left: 8px;
+}
+
+.stubMessage {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-text-caption);
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.twoColumn {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.statValue {
+  font-family: "Satoshi", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ls-color-text-primary);
+}
+
+.statLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  color: var(--ls-color-text-caption);
+}
+
+.recentItem {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-text-secondary);
+}
+
+.recentDate {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  color: var(--ls-color-text-caption);
+}
+
+.noData {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-text-caption);
+  padding: 16px;
+  text-align: center;
+}

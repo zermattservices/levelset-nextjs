@@ -13,7 +13,7 @@ import { useLocationContext } from "./LocationContext";
 export interface DrawerTabContainerProps {
   employee?: Employee | null;
   className?: string;
-  initialTab?: "pathway" | "pe" | "evaluations" | "discipline";
+  initialTab?: "overview" | "pathway" | "pe" | "evaluations" | "discipline" | "schedule";
   locationId?: string;
   onRecordAction?: () => void;
 }
