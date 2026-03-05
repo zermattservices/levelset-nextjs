@@ -12,7 +12,7 @@ import validator from '@rjsf/validator-ajv8';
 import type { IChangeEvent } from '@rjsf/core';
 import type { RJSFSchema, UiSchema } from '@rjsf/utils';
 import { Button } from '@mui/material';
-import { getCustomWidgets } from '@/components/forms/widgets';
+import { getCustomWidgets, getCustomFields } from '@/components/forms/widgets';
 import type { FormTemplate } from '@/lib/forms/types';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
 
@@ -45,6 +45,7 @@ export function FormRenderer({
   const { selectedLocationId } = useLocationContext();
 
   const widgets = React.useMemo(() => getCustomWidgets(), []);
+  const fields = React.useMemo(() => getCustomFields(), []);
 
   const schema: RJSFSchema = React.useMemo(() => {
     if (!template.schema || Object.keys(template.schema).length === 0) {
@@ -127,6 +128,7 @@ export function FormRenderer({
         formData={formData}
         validator={validator}
         widgets={widgets}
+        fields={fields}
         formContext={{ orgId: template.org_id, locationId: selectedLocationId, formType: template.form_type }}
         onChange={handleChange}
         onSubmit={handleSubmit}
