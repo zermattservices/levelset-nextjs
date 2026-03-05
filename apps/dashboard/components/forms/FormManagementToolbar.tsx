@@ -7,6 +7,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import CreateNewFolderOutlinedIcon from '@mui/icons-material/CreateNewFolderOutlined';
+import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import sty from './FormManagementToolbar.module.css';
 import { StyledTextField, fontFamily } from './dialogStyles';
 import type { FormType } from '@/lib/forms/types';
@@ -18,6 +19,7 @@ interface FormManagementToolbarProps {
   onTypeFilterChange: (type: FormType | null) => void;
   onCreateForm: () => void;
   onCreateGroup: () => void;
+  onImportForm: () => void;
 }
 
 const TYPE_FILTERS: { value: FormType; label: string }[] = [
@@ -34,6 +36,7 @@ export function FormManagementToolbar({
   onTypeFilterChange,
   onCreateForm,
   onCreateGroup,
+  onImportForm,
 }: FormManagementToolbarProps) {
   return (
     <div className={sty.toolbar}>
@@ -55,6 +58,28 @@ export function FormManagementToolbar({
           sx={{ flex: 1, maxWidth: 360 }}
         />
         <div className={sty.actions}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<UploadFileOutlinedIcon sx={{ fontSize: 16 }} />}
+            onClick={onImportForm}
+            sx={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 600,
+              textTransform: 'none',
+              borderColor: 'var(--ls-color-muted-border)',
+              color: 'var(--ls-color-text-primary)',
+              borderRadius: '8px',
+              padding: '6px 14px',
+              '&:hover': {
+                borderColor: 'var(--ls-color-border)',
+                backgroundColor: 'var(--ls-color-neutral-foreground)',
+              },
+            }}
+          >
+            Import Form
+          </Button>
           <Button
             variant="outlined"
             size="small"

@@ -13,6 +13,7 @@ import { FormManagementToolbar } from '@/components/forms/FormManagementToolbar'
 import { FormGroupsList } from '@/components/forms/FormGroupsList';
 import { CreateFormDialog } from '@/components/forms/CreateFormDialog';
 import { CreateGroupDialog } from '@/components/forms/CreateGroupDialog';
+import { ImportFormDialog } from '@/components/forms/ImportFormDialog';
 import { FormSubmissionsTable } from '@/components/forms/FormSubmissionsTable';
 import type { FormGroup, FormTemplate, FormType, FormSubmission } from '@/lib/forms/types';
 
@@ -41,6 +42,7 @@ export function FormManagementPage() {
   // Dialog state
   const [createFormOpen, setCreateFormOpen] = React.useState(false);
   const [createGroupOpen, setCreateGroupOpen] = React.useState(false);
+  const [importFormOpen, setImportFormOpen] = React.useState(false);
 
   // Snackbar
   const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
@@ -270,6 +272,7 @@ export function FormManagementPage() {
                         onTypeFilterChange={setTypeFilter}
                         onCreateForm={() => setCreateFormOpen(true)}
                         onCreateGroup={() => setCreateGroupOpen(true)}
+                        onImportForm={() => setImportFormOpen(true)}
                       />
 
                       {loading ? (
@@ -342,6 +345,18 @@ export function FormManagementPage() {
           setSnackbar({ open: true, message: 'Group created', severity: 'success' });
           fetchData();
         }}
+        getAccessToken={getAccessToken}
+      />
+
+      <ImportFormDialog
+        open={importFormOpen}
+        onClose={() => setImportFormOpen(false)}
+        onImported={(slug) => {
+          setImportFormOpen(false);
+          setSnackbar({ open: true, message: 'Form imported successfully', severity: 'success' });
+          router.push(`/form-management/${slug}`);
+        }}
+        groups={groups}
         getAccessToken={getAccessToken}
       />
 
