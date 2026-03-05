@@ -1,5 +1,10 @@
 # Form Import Feature Implementation Plan
 
+> **Note:** The Levelset-specific field types (employee_select, leader_select, etc.) have been
+> unified into the `select` field type with a `settings.dataSource` property. Update the AI prompt
+> in Task 1 to use `select` with dataSource instead of individual Levelset field types. Also add
+> `text_block` as an available field type.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Allow users to import forms from PDFs (drag-and-drop) or any web form platform (paste URL), using Claude AI to parse the form structure and create a Levelset form template.
