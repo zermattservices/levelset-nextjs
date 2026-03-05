@@ -13,8 +13,8 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import sty from './FieldConfigPanel.module.css';
-import { StyledTextField, StyledSelect, fontFamily, inputLabelSx } from '../dialogStyles';
-import { FIELD_TYPES, getLevelsetFieldInfo } from '@/lib/forms/field-palette';
+import { StyledTextField, StyledSelect, fontFamily, inputLabelSx, menuItemSx } from '../dialogStyles';
+import { FIELD_TYPES, DATA_SOURCE_OPTIONS } from '@/lib/forms/field-palette';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import OpenInNewOutlinedIcon from '@mui/icons-material/OpenInNewOutlined';
 import type { FormField, FieldOption } from '@/lib/forms/schema-builder';
@@ -51,8 +51,8 @@ export function FieldConfigPanel({
   }
 
   const fieldDef = FIELD_TYPES[field.type];
-  const levelsetInfo = getLevelsetFieldInfo(field.type, formType);
   const isSection = field.type === 'section';
+  const isTextBlock = field.type === 'text_block';
 
   const handleLabelChange = (value: string) => {
     onUpdateField(field.id, { label: value });
@@ -118,31 +118,6 @@ export function FieldConfigPanel({
 
       <Divider sx={{ margin: '8px 0' }} />
 
-      {levelsetInfo && (
-        <>
-          <div className={sty.levelsetInfoCard}>
-            <InfoOutlinedIcon sx={{ fontSize: 14, color: 'var(--ls-color-brand)', flexShrink: 0, mt: '1px' }} />
-            <div className={sty.levelsetInfoContent}>
-              <span className={sty.levelsetInfoText}>
-                {levelsetInfo.description}
-              </span>
-              {levelsetInfo.configLink && (
-                <a
-                  href={levelsetInfo.configLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={sty.levelsetConfigLink}
-                >
-                  {levelsetInfo.configLinkLabel}
-                  <OpenInNewOutlinedIcon sx={{ fontSize: 12, ml: '2px' }} />
-                </a>
-              )}
-            </div>
-          </div>
-          <Divider sx={{ margin: '8px 0' }} />
-        </>
-      )}
-
       {/* Label fields */}
       <div className={sty.configSection}>
         <span className={sty.sectionLabel}>Label</span>
@@ -161,6 +136,27 @@ export function FieldConfigPanel({
           size="small"
         />
       </div>
+
+      {/* Text Block Spanish Content */}
+      {isTextBlock && (
+        <>
+          <Divider sx={{ margin: '8px 0' }} />
+          <div className={sty.configSection}>
+            <span className={sty.sectionLabel}>Spanish Content</span>
+            <StyledTextField
+              label="Spanish Text (HTML)"
+              value={field.settings.contentEs || ''}
+              onChange={(e) => handleSettingsChange('contentEs', e.target.value)}
+              fullWidth
+              size="small"
+              multiline
+              rows={4}
+              InputLabelProps={{ shrink: true }}
+              helperText="HTML content for Spanish version"
+            />
+          </div>
+        </>
+      )}
 
       {/* Description (not for sections) */}
       {!isSection && (
@@ -218,8 +214,83 @@ export function FieldConfigPanel({
         </>
       )}
 
+      {/* Data Source selector (for select fields) */}
+      {fieldDef?.hasDataSource && (
+        <>
+          <Divider sx={{ margin: '8px 0' }} />
+          <div className={sty.configSection}>
+            <span className={sty.sectionLabel}>Data Source</span>
+            <FormControl fullWidth size="small">
+              <InputLabel sx={inputLabelSx}>Source</InputLabel>
+              <StyledSelect
+                value={field.settings.dataSource || 'custom'}
+                onChange={(e) => {
+                  const newSource = e.target.value as string;
+                  const updates: Partial<FormField> = {
+                    settings: {
+                      ...field.settings,
+                      dataSource: newSource as any,
+                    },
+                  };
+                  // Clear options when switching to predefined source
+                  if (newSource !== 'custom') {
+                    updates.options = undefined;
+                  } else if (!field.options || field.options.length === 0) {
+                    updates.options = [
+                      { value: 'option_1', label: 'Option 1' },
+                      { value: 'option_2', label: 'Option 2' },
+                    ];
+                  }
+                  onUpdateField(field.id, updates);
+                }}
+                label="Source"
+              >
+                {DATA_SOURCE_OPTIONS.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value} sx={menuItemSx}>
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </StyledSelect>
+            </FormControl>
+
+            {/* Data source info card */}
+            {field.settings.dataSource && field.settings.dataSource !== 'custom' && (() => {
+              const sourceInfo = DATA_SOURCE_OPTIONS.find(o => o.value === field.settings.dataSource);
+              if (!sourceInfo) return null;
+              return (
+                <div className={sty.dataSourceInfoCard}>
+                  <InfoOutlinedIcon sx={{ fontSize: 14, color: 'var(--ls-color-brand)', flexShrink: 0, mt: '1px' }} />
+                  <div className={sty.dataSourceInfoContent}>
+                    <span className={sty.dataSourceInfoText}>{sourceInfo.description}</span>
+                    {sourceInfo.configLink && (
+                      <a href={sourceInfo.configLink} target="_blank" rel="noopener noreferrer" className={sty.dataSourceConfigLink}>
+                        {sourceInfo.configLinkLabel}
+                        <OpenInNewOutlinedIcon sx={{ fontSize: 12, ml: '2px' }} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Leader hierarchy filter */}
+            {field.settings.dataSource === 'leaders' && (
+              <StyledTextField
+                label="Max Hierarchy Level"
+                type="number"
+                value={field.settings.maxHierarchyLevel ?? 2}
+                onChange={(e) => handleSettingsChange('maxHierarchyLevel', Math.max(0, Math.min(10, Number(e.target.value))))}
+                size="small"
+                slotProps={{ htmlInput: { min: 0, max: 10 } }}
+                helperText="Include roles at this hierarchy level and above (0 = top level)"
+              />
+            )}
+          </div>
+        </>
+      )}
+
       {/* Options editor (for select/radio/checkbox) */}
-      {fieldDef?.hasOptions && field.options && (
+      {fieldDef?.hasOptions && field.options && (!field.settings.dataSource || field.settings.dataSource === 'custom') && (
         <>
           <Divider sx={{ margin: '8px 0' }} />
           <div className={sty.configSection}>
@@ -293,25 +364,6 @@ export function FieldConfigPanel({
                 sx={{ flex: 1 }}
               />
             </div>
-          </div>
-        </>
-      )}
-
-      {/* Leader role filter */}
-      {field.type === 'leader_select' && (
-        <>
-          <Divider sx={{ margin: '8px 0' }} />
-          <div className={sty.configSection}>
-            <span className={sty.sectionLabel}>Role Filter</span>
-            <StyledTextField
-              label="Max Hierarchy Level"
-              type="number"
-              value={field.settings.maxHierarchyLevel ?? 2}
-              onChange={(e) => handleSettingsChange('maxHierarchyLevel', Math.max(0, Math.min(10, Number(e.target.value))))}
-              size="small"
-              slotProps={{ htmlInput: { min: 0, max: 10 } }}
-              helperText="Include roles at this hierarchy level and above (0 = top level)"
-            />
           </div>
         </>
       )}
