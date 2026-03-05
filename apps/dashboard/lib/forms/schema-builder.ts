@@ -5,7 +5,7 @@
  * and the JSON Schema + UI Schema format (stored in the database and used by RJSF).
  */
 
-import { FIELD_TYPES } from './field-palette';
+import { FIELD_TYPES, type DataSource } from './field-palette';
 
 export interface FormField {
   id: string;
@@ -15,7 +15,7 @@ export interface FormField {
   description?: string;
   descriptionEs?: string;
   required: boolean;
-  /** For select/radio/checkbox */
+  /** For select/radio/checkbox with custom options */
   options?: FieldOption[];
   /** Type-specific settings */
   settings: FieldSettings;
@@ -44,8 +44,13 @@ export interface FieldSettings {
   /** For section headers */
   sectionName?: string;
   sectionNameEs?: string;
-  /** For leader_select: max hierarchy level to include (default 2) */
+  /** For select fields: data source (default: 'custom') */
+  dataSource?: DataSource;
+  /** For leader data source: max hierarchy level to include (default 2) */
   maxHierarchyLevel?: number;
+  /** For text_block: rich text content */
+  content?: string;
+  contentEs?: string;
 }
 
 /**
@@ -92,9 +97,15 @@ export function createFieldFromType(fieldType: string): FormField {
     field.settings.rows = 3;
   }
 
-  // Set default max hierarchy level for leader select
-  if (fieldType === 'leader_select') {
-    field.settings.maxHierarchyLevel = 2;
+  // Set default data source for select
+  if (def.hasDataSource) {
+    field.settings.dataSource = 'custom';
+  }
+
+  // Set default content for text_block
+  if (fieldType === 'text_block') {
+    field.settings.content = '<p>Enter text here...</p>';
+    field.settings.contentEs = '<p>Ingrese texto aqui...</p>';
   }
 
   return field;
@@ -135,6 +146,28 @@ export function fieldsToJsonSchema(fields: FormField[]): {
       continue;
     }
 
+    // Text blocks are purely UI — store as a null-typed property with content
+    if (field.type === 'text_block') {
+      properties[field.id] = {
+        type: 'null',
+        title: field.label,
+      };
+      uiSchema[field.id] = {
+        'ui:widget': 'hidden',
+        'ui:field': 'textBlock',
+        'ui:options': {
+          content: field.settings.content || '',
+          contentEs: field.settings.contentEs || '',
+        },
+        'ui:fieldMeta': {
+          fieldType: 'text_block',
+          labelEs: field.labelEs,
+        },
+      };
+      uiSchema['ui:order'].push(field.id);
+      continue;
+    }
+
     // Build property schema from field definition and overrides
     const propSchema: Record<string, any> = {
       ...JSON.parse(JSON.stringify(fieldDef.schema)),
@@ -145,8 +178,9 @@ export function fieldsToJsonSchema(fields: FormField[]): {
       propSchema.description = field.description;
     }
 
-    // Apply options for select/radio/checkbox
-    if (field.options && field.options.length > 0) {
+    // Apply options for select/radio/checkbox (only when dataSource is custom or not set)
+    const dataSource = field.settings.dataSource || 'custom';
+    if (field.options && field.options.length > 0 && dataSource === 'custom') {
       if (field.type === 'checkbox') {
         propSchema.items = {
           type: 'string',
@@ -158,6 +192,12 @@ export function fieldsToJsonSchema(fields: FormField[]): {
         propSchema.enum = field.options.map((o) => o.value);
         propSchema.enumNames = field.options.map((o) => o.label);
       }
+    }
+
+    // For predefined data sources, clear enum from schema (widget fetches data at runtime)
+    if (field.type === 'select' && dataSource !== 'custom') {
+      delete propSchema.enum;
+      delete propSchema.enumNames;
     }
 
     // Apply range for number fields
@@ -173,7 +213,10 @@ export function fieldsToJsonSchema(fields: FormField[]): {
     // Build UI schema
     const fieldUiSchema: Record<string, any> = {};
 
-    if (fieldDef.uiWidget) {
+    // Widget selection: predefined data sources use data_select widget
+    if (field.type === 'select' && dataSource !== 'custom') {
+      fieldUiSchema['ui:widget'] = 'data_select';
+    } else if (fieldDef.uiWidget) {
       fieldUiSchema['ui:widget'] = fieldDef.uiWidget;
     }
 
@@ -198,6 +241,9 @@ export function fieldsToJsonSchema(fields: FormField[]): {
       labelEs: field.labelEs,
       descriptionEs: field.descriptionEs,
       sectionId: field.sectionId,
+      ...(field.settings.dataSource && field.settings.dataSource !== 'custom'
+        ? { dataSource: field.settings.dataSource }
+        : {}),
       ...(field.settings.weight !== undefined ? { weight: field.settings.weight } : {}),
       ...(field.settings.scoringType ? { scoringType: field.settings.scoringType } : {}),
       ...(field.settings.connectedTo ? { connectedTo: field.settings.connectedTo } : {}),
@@ -271,19 +317,38 @@ export function jsonSchemaToFields(
       field.sectionId = meta.sectionId;
     }
 
-    // Restore options for select/radio/checkbox
-    if (fieldType === 'checkbox' && propSchema.items?.enum) {
-      const labels = propSchema.items.enumNames || propSchema.items.enum;
-      field.options = propSchema.items.enum.map((val: string, i: number) => ({
-        value: val,
-        label: labels[i] || val,
-      }));
-    } else if (propSchema.enum && ['select', 'radio'].includes(fieldType)) {
-      const labels = propSchema.enumNames || propSchema.enum;
-      field.options = propSchema.enum.map((val: string, i: number) => ({
-        value: val,
-        label: labels[i] || val,
-      }));
+    // Restore text_block content
+    if (fieldType === 'text_block') {
+      field.settings.content = fieldUiSchema['ui:options']?.content || '';
+      field.settings.contentEs = fieldUiSchema['ui:options']?.contentEs || '';
+    }
+
+    // Restore section settings
+    if (fieldType === 'section') {
+      field.settings.sectionName = fieldUiSchema['ui:options']?.sectionName || field.label;
+      field.settings.sectionNameEs = fieldUiSchema['ui:options']?.sectionNameEs || field.labelEs;
+    }
+
+    // Restore data source for select fields
+    if (meta.dataSource) {
+      field.settings.dataSource = meta.dataSource;
+    }
+
+    // Restore options for select/radio/checkbox (only when custom data source)
+    if (!field.settings.dataSource || field.settings.dataSource === 'custom') {
+      if (fieldType === 'checkbox' && propSchema.items?.enum) {
+        const labels = propSchema.items.enumNames || propSchema.items.enum;
+        field.options = propSchema.items.enum.map((val: string, i: number) => ({
+          value: val,
+          label: labels[i] || val,
+        }));
+      } else if (propSchema.enum && ['select', 'radio'].includes(fieldType)) {
+        const labels = propSchema.enumNames || propSchema.enum;
+        field.options = propSchema.enum.map((val: string, i: number) => ({
+          value: val,
+          label: labels[i] || val,
+        }));
+      }
     }
 
     // Restore range settings
@@ -297,12 +362,6 @@ export function jsonSchemaToFields(
     // Restore textarea rows
     if (fieldType === 'textarea') {
       field.settings.rows = fieldUiSchema['ui:options']?.rows || 3;
-    }
-
-    // Restore section settings
-    if (fieldType === 'section') {
-      field.settings.sectionName = fieldUiSchema['ui:options']?.sectionName || field.label;
-      field.settings.sectionNameEs = fieldUiSchema['ui:options']?.sectionNameEs || field.labelEs;
     }
 
     // Restore evaluation settings from metadata
@@ -329,13 +388,10 @@ function inferFieldType(
   const field = uiSchema?.['ui:field'];
 
   if (field === 'section') return 'section';
+  if (field === 'textBlock') return 'text_block';
   if (widget === 'signature') return 'signature';
   if (widget === 'file') return 'file_upload';
-  if (widget === 'employee_select') return 'employee_select';
-  if (widget === 'leader_select') return 'leader_select';
-  if (widget === 'position_select') return 'position_select';
-  if (widget === 'infraction_select') return 'infraction_select';
-  if (widget === 'disc_action_select') return 'disc_action_select';
+  if (widget === 'data_select') return 'select';
   if (widget === 'textarea') return 'textarea';
   if (widget === 'ratingScale') {
     if (propSchema.maximum === 3) return 'rating_1_3';
