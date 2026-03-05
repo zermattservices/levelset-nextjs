@@ -229,6 +229,7 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
             selectedFieldId={readOnly ? null : selectedFieldId}
             onSelectField={readOnly ? () => {} : setSelectedFieldId}
             onDeleteField={readOnly ? () => {} : handleDeleteField}
+            onUpdateField={readOnly ? undefined : handleUpdateField}
             formType={template.form_type}
           />
 

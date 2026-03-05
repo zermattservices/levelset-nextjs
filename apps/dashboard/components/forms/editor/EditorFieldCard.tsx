@@ -18,13 +18,10 @@ import PercentOutlinedIcon from '@mui/icons-material/PercentOutlined';
 import DrawOutlinedIcon from '@mui/icons-material/DrawOutlined';
 import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
 import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
-import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
-import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
-import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
-import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined';
-import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import sty from './EditorFieldCard.module.css';
-import { FIELD_TYPES, getLevelsetFieldInfo } from '@/lib/forms/field-palette';
+import { FIELD_TYPES } from '@/lib/forms/field-palette';
+import { TextBlockEditor } from './TextBlockEditor';
 import type { FormField } from '@/lib/forms/schema-builder';
 
 const TYPE_TAG_ICON_MAP: Record<string, React.ReactNode> = {
@@ -42,11 +39,7 @@ const TYPE_TAG_ICON_MAP: Record<string, React.ReactNode> = {
   DrawOutlined: <DrawOutlinedIcon sx={{ fontSize: 12 }} />,
   AttachFileOutlined: <AttachFileOutlinedIcon sx={{ fontSize: 12 }} />,
   ViewAgendaOutlined: <ViewAgendaOutlinedIcon sx={{ fontSize: 12 }} />,
-  PersonOutlined: <PersonOutlinedIcon sx={{ fontSize: 12 }} />,
-  SupervisorAccountOutlined: <SupervisorAccountOutlinedIcon sx={{ fontSize: 12 }} />,
-  WorkOutlineOutlined: <WorkOutlineOutlinedIcon sx={{ fontSize: 12 }} />,
-  ReportProblemOutlined: <ReportProblemOutlinedIcon sx={{ fontSize: 12 }} />,
-  GavelOutlined: <GavelOutlinedIcon sx={{ fontSize: 12 }} />,
+  ArticleOutlined: <ArticleOutlinedIcon sx={{ fontSize: 12 }} />,
 };
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -56,6 +49,7 @@ interface EditorFieldCardProps {
   isSelected: boolean;
   onSelect: () => void;
   onDelete: () => void;
+  onUpdateField?: (id: string, updates: Partial<FormField>) => void;
   /** Render as overlay during drag */
   isOverlay?: boolean;
   formType?: string;
@@ -66,6 +60,7 @@ export function EditorFieldCard({
   isSelected,
   onSelect,
   onDelete,
+  onUpdateField,
   isOverlay,
   formType,
 }: EditorFieldCardProps) {
@@ -95,12 +90,6 @@ export function EditorFieldCard({
   const typeIcon = typeIconName ? TYPE_TAG_ICON_MAP[typeIconName] : null;
   const isSection = field.type === 'section';
 
-  const levelsetInfo = React.useMemo(
-    () => getLevelsetFieldInfo(field.type, formType),
-    [field.type, formType]
-  );
-  const isLevelset = levelsetInfo !== null;
-
   const handleClick = (e: React.MouseEvent) => {
     // Don't select when clicking delete
     if ((e.target as HTMLElement).closest('button')) return;
@@ -111,7 +100,7 @@ export function EditorFieldCard({
     <div
       ref={isOverlay ? undefined : setNodeRef}
       style={style}
-      className={`${sty.card} ${isSelected ? sty.cardSelected : ''} ${isSection ? sty.cardSection : ''} ${isOverlay ? sty.cardOverlay : ''} ${isLevelset ? sty.cardLevelset : ''}`}
+      className={`${sty.card} ${isSelected ? sty.cardSelected : ''} ${isSection ? sty.cardSection : ''} ${isOverlay ? sty.cardOverlay : ''}`}
       onClick={handleClick}
     >
       <div className={sty.dragHandle} {...(isOverlay ? {} : { ...listeners, ...attributes })}>
@@ -161,8 +150,15 @@ export function EditorFieldCard({
         {field.description && (
           <span className={sty.fieldDescription}>{field.description}</span>
         )}
-        {levelsetInfo && (
-          <span className={sty.levelsetDescription}>{levelsetInfo.description}</span>
+        {field.type === 'text_block' && !isOverlay && onUpdateField && (
+          <TextBlockEditor
+            content={field.settings.content || ''}
+            onChange={(html) => {
+              onUpdateField(field.id, {
+                settings: { ...field.settings, content: html },
+              });
+            }}
+          />
         )}
       </div>
 

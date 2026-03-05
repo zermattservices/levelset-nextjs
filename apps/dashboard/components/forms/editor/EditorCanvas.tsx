@@ -11,6 +11,7 @@ interface EditorCanvasProps {
   selectedFieldId: string | null;
   onSelectField: (id: string | null) => void;
   onDeleteField: (id: string) => void;
+  onUpdateField?: (id: string, updates: Partial<FormField>) => void;
   formType?: string;
 }
 
@@ -19,6 +20,7 @@ export function EditorCanvas({
   selectedFieldId,
   onSelectField,
   onDeleteField,
+  onUpdateField,
   formType,
 }: EditorCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({
@@ -57,6 +59,7 @@ export function EditorCanvas({
                 isSelected={selectedFieldId === field.id}
                 onSelect={() => onSelectField(field.id)}
                 onDelete={() => onDeleteField(field.id)}
+                onUpdateField={onUpdateField}
                 formType={formType}
               />
             ))}
