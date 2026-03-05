@@ -19,19 +19,20 @@ export interface FieldTypeDefinition {
   hasOptions?: boolean;
   /** If true, this field supports min/max configuration */
   hasRange?: boolean;
+  /** If true, this field supports a data source selector (custom vs predefined) */
+  hasDataSource?: boolean;
   /** Label shown in the type tag on the editor canvas (e.g., "Dropdown" for Levelset selects) */
   displayTypeLabel?: string;
   /** Icon name for the type tag (defaults to `icon` if not set) */
   displayTypeIcon?: string;
 }
 
-export type FieldCategory = 'basic' | 'selection' | 'advanced' | 'levelset';
+export type FieldCategory = 'basic' | 'selection' | 'advanced';
 
 export const FIELD_CATEGORIES: { key: FieldCategory; label: string; labelEs: string }[] = [
-  { key: 'basic', label: 'Basic', labelEs: 'Básico' },
-  { key: 'selection', label: 'Selection', labelEs: 'Selección' },
+  { key: 'basic', label: 'Basic', labelEs: 'Basico' },
+  { key: 'selection', label: 'Selection', labelEs: 'Seleccion' },
   { key: 'advanced', label: 'Advanced', labelEs: 'Avanzado' },
-  { key: 'levelset', label: 'Levelset', labelEs: 'Levelset' },
 ];
 
 export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
@@ -56,7 +57,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
   number: {
     type: 'number',
     label: 'Number',
-    labelEs: 'Número',
+    labelEs: 'Numero',
     icon: 'PinOutlined',
     category: 'basic',
     schema: { type: 'number' },
@@ -70,6 +71,24 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     category: 'basic',
     schema: { type: 'string', format: 'date' },
   },
+  section: {
+    type: 'section',
+    label: 'Section Header',
+    labelEs: 'Encabezado de Seccion',
+    icon: 'ViewAgendaOutlined',
+    category: 'basic',
+    schema: { type: 'null' },
+    uiWidget: 'hidden',
+  },
+  text_block: {
+    type: 'text_block',
+    label: 'Text Block',
+    labelEs: 'Bloque de Texto',
+    icon: 'ArticleOutlined',
+    category: 'basic',
+    schema: { type: 'null' },
+    uiWidget: 'hidden',
+  },
   select: {
     type: 'select',
     label: 'Dropdown',
@@ -78,6 +97,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     category: 'selection',
     schema: { type: 'string', enum: ['Option 1', 'Option 2'] },
     hasOptions: true,
+    hasDataSource: true,
   },
   radio: {
     type: 'radio',
@@ -114,7 +134,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
   rating_1_3: {
     type: 'rating_1_3',
     label: 'Rating (1-3)',
-    labelEs: 'Calificación (1-3)',
+    labelEs: 'Calificacion (1-3)',
     icon: 'StarHalfOutlined',
     category: 'advanced',
     schema: {
@@ -128,7 +148,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
   rating_1_5: {
     type: 'rating_1_5',
     label: 'Rating (1-5)',
-    labelEs: 'Calificación (1-5)',
+    labelEs: 'Calificacion (1-5)',
     icon: 'StarOutlined',
     category: 'advanced',
     schema: {
@@ -169,71 +189,64 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
     schema: { type: 'string' },
     uiWidget: 'file',
   },
-  section: {
-    type: 'section',
-    label: 'Section Header',
-    labelEs: 'Encabezado de Sección',
-    icon: 'ViewAgendaOutlined',
-    category: 'basic',
-    schema: { type: 'null' },
-    uiWidget: 'hidden',
-  },
-  employee_select: {
-    type: 'employee_select',
-    label: 'Employee',
-    labelEs: 'Empleado',
-    icon: 'PersonOutlined',
-    category: 'levelset',
-    schema: { type: 'string' },
-    uiWidget: 'employee_select',
-    displayTypeLabel: 'Dropdown',
-    displayTypeIcon: 'ArrowDropDownCircleOutlined',
-  },
-  leader_select: {
-    type: 'leader_select',
-    label: 'Leader',
-    labelEs: 'Líder',
-    icon: 'SupervisorAccountOutlined',
-    category: 'levelset',
-    schema: { type: 'string' },
-    uiWidget: 'leader_select',
-    displayTypeLabel: 'Dropdown',
-    displayTypeIcon: 'ArrowDropDownCircleOutlined',
-  },
-  position_select: {
-    type: 'position_select',
-    label: 'Position',
-    labelEs: 'Posición',
-    icon: 'WorkOutlineOutlined',
-    category: 'levelset',
-    schema: { type: 'string' },
-    uiWidget: 'position_select',
-    displayTypeLabel: 'Dropdown',
-    displayTypeIcon: 'ArrowDropDownCircleOutlined',
-  },
-  infraction_select: {
-    type: 'infraction_select',
-    label: 'Infraction Type',
-    labelEs: 'Tipo de Infracción',
-    icon: 'ReportProblemOutlined',
-    category: 'levelset',
-    schema: { type: 'string' },
-    uiWidget: 'infraction_select',
-    displayTypeLabel: 'Dropdown',
-    displayTypeIcon: 'ArrowDropDownCircleOutlined',
-  },
-  disc_action_select: {
-    type: 'disc_action_select',
-    label: 'Discipline Action',
-    labelEs: 'Acción Disciplinaria',
-    icon: 'GavelOutlined',
-    category: 'levelset',
-    schema: { type: 'string' },
-    uiWidget: 'disc_action_select',
-    displayTypeLabel: 'Dropdown',
-    displayTypeIcon: 'ArrowDropDownCircleOutlined',
-  },
 };
+
+/** Predefined data sources for the select field */
+export type DataSource = 'custom' | 'employees' | 'leaders' | 'positions' | 'infractions' | 'disc_actions';
+
+export interface DataSourceOption {
+  value: DataSource;
+  label: string;
+  labelEs: string;
+  description: string;
+  configLink?: string;
+  configLinkLabel?: string;
+}
+
+export const DATA_SOURCE_OPTIONS: DataSourceOption[] = [
+  {
+    value: 'custom',
+    label: 'Custom Options',
+    labelEs: 'Opciones Personalizadas',
+    description: 'Define your own options for this dropdown.',
+  },
+  {
+    value: 'employees',
+    label: 'Employees',
+    labelEs: 'Empleados',
+    description: 'All active team members at this location.',
+  },
+  {
+    value: 'leaders',
+    label: 'Leaders',
+    labelEs: 'Lideres',
+    description: 'Filters employees by role hierarchy level.',
+  },
+  {
+    value: 'positions',
+    label: 'Positions',
+    labelEs: 'Posiciones',
+    description: 'Positions configured for this organization.',
+    configLink: '/org-settings?tab=positional-excellence&subtab=positions',
+    configLinkLabel: 'Manage positions',
+  },
+  {
+    value: 'infractions',
+    label: 'Infractions',
+    labelEs: 'Infracciones',
+    description: 'Infraction types from the discipline rubric.',
+    configLink: '/org-settings?tab=discipline&subtab=infractions',
+    configLinkLabel: 'Manage infractions',
+  },
+  {
+    value: 'disc_actions',
+    label: 'Discipline Actions',
+    labelEs: 'Acciones Disciplinarias',
+    description: 'Discipline actions from the discipline rubric.',
+    configLink: '/org-settings?tab=discipline&subtab=actions',
+    configLinkLabel: 'Manage actions',
+  },
+];
 
 /**
  * Get field types grouped by category
@@ -243,7 +256,6 @@ export function getFieldTypesByCategory(): Record<FieldCategory, FieldTypeDefini
     basic: [],
     selection: [],
     advanced: [],
-    levelset: [],
   };
 
   for (const field of Object.values(FIELD_TYPES)) {
@@ -251,51 +263,4 @@ export function getFieldTypesByCategory(): Record<FieldCategory, FieldTypeDefini
   }
 
   return grouped;
-}
-
-export interface LevelsetFieldInfo {
-  description: string;
-  configLink?: string;
-  configLinkLabel?: string;
-}
-
-/**
- * Get context-specific description and config link for a Levelset field
- * based on the form's form_type.
- */
-export function getLevelsetFieldInfo(
-  fieldType: string,
-  formType?: string
-): LevelsetFieldInfo | null {
-  switch (fieldType) {
-    case 'employee_select':
-      return {
-        description: 'All active team members at this location',
-      };
-    case 'leader_select': {
-      return {
-        description: 'Filters employees by role hierarchy level. Adjust the max hierarchy level below to control which roles appear.',
-      };
-    }
-    case 'position_select':
-      return {
-        description: 'Positions configured for this organization.',
-        configLink: '/org-settings?tab=positional-excellence&subtab=positions',
-        configLinkLabel: 'Manage positions',
-      };
-    case 'infraction_select':
-      return {
-        description: 'Infraction types from the discipline rubric.',
-        configLink: '/org-settings?tab=discipline&subtab=infractions',
-        configLinkLabel: 'Manage infractions',
-      };
-    case 'disc_action_select':
-      return {
-        description: 'Discipline actions from the discipline rubric.',
-        configLink: '/org-settings?tab=discipline&subtab=actions',
-        configLinkLabel: 'Manage actions',
-      };
-    default:
-      return null;
-  }
 }
