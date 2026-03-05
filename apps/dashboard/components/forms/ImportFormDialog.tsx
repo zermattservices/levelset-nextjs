@@ -112,6 +112,10 @@ export function ImportFormDialog({
 
     const droppedFile = e.dataTransfer.files?.[0];
     if (droppedFile && droppedFile.type === 'application/pdf') {
+      if (droppedFile.size > 10 * 1024 * 1024) {
+        setError('File size must be under 10 MB.');
+        return;
+      }
       setFile(droppedFile);
       setError('');
     } else {

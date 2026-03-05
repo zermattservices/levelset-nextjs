@@ -33,6 +33,10 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'Form import is not configured. Missing ANTHROPIC_API_KEY.' });
+  }
+
   const supabase = createServerSupabaseClient();
 
   // ── Auth (same pattern as /api/forms/index.ts) ──
@@ -85,6 +89,10 @@ export default async function handler(
     return res.status(400).json({
       error: 'source_type, group_id, and form_type are required',
     });
+  }
+
+  if (!['pdf', 'url'].includes(source_type)) {
+    return res.status(400).json({ error: 'source_type must be "pdf" or "url"' });
   }
 
   if (source_type === 'url' && !url) {
@@ -151,6 +159,29 @@ export default async function handler(
         text: 'Parse this PDF form and extract all fields using the extract_form_fields tool. Be thorough — capture every field, option, and section header.',
       });
     } else {
+      // Validate URL to prevent SSRF
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(url);
+      } catch {
+        return res.status(400).json({ error: 'Invalid URL format' });
+      }
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        return res.status(400).json({ error: 'Only HTTP and HTTPS URLs are supported' });
+      }
+      const hostname = parsedUrl.hostname;
+      if (
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname === '0.0.0.0' ||
+        hostname.startsWith('10.') ||
+        hostname.startsWith('192.168.') ||
+        hostname === '169.254.169.254' ||
+        hostname.endsWith('.internal')
+      ) {
+        return res.status(400).json({ error: 'Internal URLs are not allowed' });
+      }
+
       // Fetch URL HTML
       let html: string;
       try {
@@ -272,8 +303,9 @@ export default async function handler(
     }
 
     // Second pass: resolve sectionId references
-    for (const field of formFields) {
-      const parsedField = parsed.fields[formFields.indexOf(field)];
+    for (let i = 0; i < formFields.length; i++) {
+      const field = formFields[i];
+      const parsedField = parsed.fields[i];
       if (parsedField.sectionId && parsedField.type !== 'section') {
         const resolvedId =
           sectionIdMap[parsedField.sectionId] ||
@@ -348,7 +380,8 @@ export default async function handler(
       .single();
 
     if (insertError) {
-      return res.status(500).json({ error: insertError.message });
+      console.error('Form template insert error:', insertError);
+      return res.status(500).json({ error: 'Failed to save the imported form. Please try again.' });
     }
 
     return res.status(201).json({
@@ -359,7 +392,7 @@ export default async function handler(
   } catch (error: any) {
     console.error('Form import error:', error);
     return res.status(500).json({
-      error: error.message || 'An unexpected error occurred during import',
+      error: 'An unexpected error occurred during import. Please try again.',
     });
   }
 }
