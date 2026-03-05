@@ -1,17 +1,14 @@
 # Form Import Feature Implementation Plan
 
-> **Note:** The Levelset-specific field types (employee_select, leader_select, etc.) have been
-> unified into the `select` field type with a `settings.dataSource` property. Update the AI prompt
-> in Task 1 to use `select` with dataSource instead of individual Levelset field types. Also add
-> `text_block` as an available field type.
-
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Allow users to import forms from PDFs (drag-and-drop) or any web form platform (paste URL), using Claude AI to parse the form structure and create a Levelset form template.
 
-**Architecture:** A single `POST /api/forms/import` endpoint handles both sources. PDFs are sent to Claude's vision API; URLs are fetched server-side and the HTML is sent as text. Claude returns structured `FormField[]` output via tool_use, which is converted to JSON Schema + UI Schema using the existing `fieldsToJsonSchema()` utility, then saved as a new form_template. For evaluation forms with scoring info in PDFs, the AI also extracts weights, rating scales, and section structure. User lands in the existing form editor to review.
+**Architecture:** A single `POST /api/forms/import` endpoint handles both sources. PDFs are sent to Claude's vision API; URLs are fetched server-side and the HTML is sent as text. Claude returns structured `FormField[]` output via tool_use, which is converted to JSON Schema + UI Schema using the existing `fieldsToJsonSchema()` utility, then saved as a form_template. For evaluation forms with scoring info in PDFs, the AI also extracts weights, rating scales, and section structure. User lands in the existing form editor to review.
 
 **Tech Stack:** Next.js API route, Anthropic Claude API (tool_use for structured output), MUI Dialog, existing form infrastructure (schema-builder, field-palette, dialogStyles)
+
+**Field Type System:** The editor uses a unified `select` field type with a `settings.dataSource` property to handle both custom dropdowns and predefined Levelset data sources (employees, leaders, positions, infractions, disc_actions). There is also a `text_block` field type for inline rich text content. The AI prompt should use `select` for all dropdown-style fields and set `dataSource` when the field clearly maps to a Levelset data source.
 
 ---
 
@@ -34,6 +31,8 @@ This module defines the system prompt and tool schema for Claude to parse forms.
  * forms from PDFs and HTML into Levelset's FormField[] format.
  */
 
+import type { DataSource } from '@/lib/forms/field-palette';
+
 export interface ParsedFormField {
   type: string;
   label: string;
@@ -50,7 +49,13 @@ export interface ParsedFormField {
     scoringType?: 'rating_1_3' | 'rating_1_5' | 'true_false' | 'percentage';
     sectionName?: string;
     sectionNameEs?: string;
+    /** For select fields with predefined data sources */
+    dataSource?: DataSource;
+    /** For leader data source: max hierarchy level to include */
     maxHierarchyLevel?: number;
+    /** For text_block: rich text HTML content */
+    content?: string;
+    contentEs?: string;
   };
   sectionId?: string;
 }
@@ -82,7 +87,9 @@ const FIELD_TYPE_DESCRIPTIONS = `
 - **date**: Date picker. Use for dates (hire date, incident date, etc.).
 
 ### Selection Fields
-- **select**: Dropdown menu with predefined options. Use when user picks ONE option from a list.
+- **select**: Dropdown menu. Use when user picks ONE option from a list.
+  - For generic dropdowns with custom options, just use type "select" with an options array.
+  - For fields that clearly reference organizational data (see Data Sources below), use type "select" AND set settings.dataSource to the appropriate source. Do NOT include an options array when using a data source.
 - **radio**: Radio buttons with predefined options. Same as select but all options visible at once.
 - **checkbox**: Checkboxes for multiple selections. Use when user can pick MULTIPLE options.
 - **true_false**: Yes/No or True/False toggle. Use for binary questions.
@@ -96,13 +103,19 @@ const FIELD_TYPE_DESCRIPTIONS = `
 
 ### Section / Layout
 - **section**: Section header (not a data field). Use to group related fields under a heading. When you detect a section header or category heading in the form, create a section field. Fields that follow this section should reference it via sectionId.
+- **text_block**: Static text content block (not a data field). Use for instructions, disclaimers, explanatory text, or any block of text that should be displayed on the form but doesn't collect data. Set settings.content to the HTML content and settings.contentEs for the Spanish version.
 
-### Levelset-Specific Fields (use when context clues match)
-- **employee_select**: Employee dropdown. Use when the field asks for an employee name, team member, or "who" in the context of selecting a person from the organization.
-- **leader_select**: Leader/manager dropdown. Use when the field asks for a supervisor, manager, leader, evaluator, or "who is conducting" this form.
-- **position_select**: Position/role dropdown. Use when the field asks for a job position, role, or station.
-- **infraction_select**: Infraction type dropdown. Use ONLY when the field asks for a type of infraction or violation from a discipline rubric.
-- **disc_action_select**: Discipline action dropdown. Use ONLY when the field asks for a disciplinary action type.
+## Data Sources (for select fields only)
+
+When a field clearly asks for organizational data, use type "select" with settings.dataSource set to one of these values:
+
+- **employees**: Use when the field asks for an employee name, team member, or "who" in the context of selecting a person from the organization.
+- **leaders**: Use when the field asks for a supervisor, manager, leader, evaluator, or "who is conducting" this form. Optionally set settings.maxHierarchyLevel (default 2) to control which roles are included.
+- **positions**: Use when the field asks for a job position, role, or station.
+- **infractions**: Use ONLY when the field asks for a type of infraction or violation from a discipline rubric.
+- **disc_actions**: Use ONLY when the field asks for a disciplinary action type.
+
+When using a data source, do NOT include an options array — the options are loaded dynamically from the organization's data.
 `;
 
 /**
@@ -124,9 +137,10 @@ export function buildSystemPrompt(options: {
 3. **Bilingual output required.** For every label, provide both English (label) and Spanish (labelEs) translations. If the source is in Spanish, still provide the English translation. If the source is in English, provide accurate Spanish translations.
 4. **Preserve form structure.** If the form has sections, groups, or categories, create section fields and assign sectionId to child fields.
 5. **Detect required fields.** If a field is marked as required (asterisk, "required" label, bold emphasis), set required: true.
-6. **Preserve options exactly.** For select/radio/checkbox fields, extract all options with their exact labels. Generate snake_case values from the labels.
+6. **Preserve options exactly.** For select/radio/checkbox fields with custom options, extract all options with their exact labels. Generate snake_case values from the labels.
 7. **Section headers are fields too.** When you see a heading that groups other fields (like "Employee Information" or "Performance Ratings"), create a section field for it. Set the sectionName in settings to the heading text.
-8. **Use Levelset-specific fields when appropriate.** If a field is clearly asking for an employee, leader/supervisor, or position, use the corresponding Levelset field type instead of a generic text or select field.
+8. **Use data sources for organizational fields.** If a field clearly asks for an employee, leader/supervisor, position, infraction type, or discipline action, use type "select" with settings.dataSource instead of a generic text or select field. Do NOT include an options array when using a data source.
+9. **Use text_block for static content.** If you see instructions, disclaimers, or explanatory text blocks on the form (not field labels/descriptions), create a text_block field with settings.content containing the HTML-formatted content.
 
 ${FIELD_TYPE_DESCRIPTIONS}`;
 
@@ -157,8 +171,10 @@ Use the extract_form_fields tool to return the parsed form structure. Every fiel
 - labelEs: Spanish translation of the label
 - required: boolean
 
-For select/radio/checkbox fields, include the options array with value (snake_case) and label pairs.
+For select/radio/checkbox fields with custom options, include the options array with value (snake_case) and label pairs.
+For select fields with a data source, set settings.dataSource and do NOT include options.
 For section fields, set settings.sectionName and settings.sectionNameEs.
+For text_block fields, set settings.content (HTML) and settings.contentEs (Spanish HTML).
 
 Also return:
 - suggestedName: A concise English name for this form (if you can infer it from the title/header)
@@ -209,9 +225,7 @@ export const FORM_PARSER_TOOL = {
                 'text', 'textarea', 'number', 'date',
                 'select', 'radio', 'checkbox', 'true_false',
                 'rating_1_3', 'rating_1_5', 'percentage',
-                'signature', 'file_upload', 'section',
-                'employee_select', 'leader_select', 'position_select',
-                'infraction_select', 'disc_action_select',
+                'signature', 'file_upload', 'section', 'text_block',
               ],
               description: 'The field type',
             },
@@ -237,7 +251,7 @@ export const FORM_PARSER_TOOL = {
             },
             options: {
               type: 'array',
-              description: 'Options for select/radio/checkbox fields',
+              description: 'Options for select/radio/checkbox fields with custom options. Do NOT include when using a data source.',
               items: {
                 type: 'object',
                 properties: {
@@ -263,7 +277,17 @@ export const FORM_PARSER_TOOL = {
                 },
                 sectionName: { type: 'string', description: 'Section heading (section fields)' },
                 sectionNameEs: { type: 'string', description: 'Spanish section heading' },
-                maxHierarchyLevel: { type: 'number', description: 'Max role hierarchy (leader_select)' },
+                dataSource: {
+                  type: 'string',
+                  enum: ['employees', 'leaders', 'positions', 'infractions', 'disc_actions'],
+                  description: 'Data source for select fields that reference organizational data. Only set for select fields. Do not set for custom-option selects.',
+                },
+                maxHierarchyLevel: {
+                  type: 'number',
+                  description: 'Max role hierarchy level for leaders data source (default 2). Only used when dataSource is "leaders".',
+                },
+                content: { type: 'string', description: 'HTML content for text_block fields (English)' },
+                contentEs: { type: 'string', description: 'HTML content for text_block fields (Spanish)' },
               },
             },
             sectionId: {
@@ -585,8 +609,23 @@ export default async function handler(
         field.settings.sectionNameEs = parsedField.settings?.sectionNameEs || parsedField.labelEs;
       }
 
-      // Add options for selection fields
-      if (parsedField.options && parsedField.options.length > 0) {
+      // Add text_block content settings
+      if (parsedField.type === 'text_block') {
+        field.settings.content = parsedField.settings?.content || '';
+        field.settings.contentEs = parsedField.settings?.contentEs || '';
+      }
+
+      // Add data source for select fields with organizational data
+      if (parsedField.type === 'select' && parsedField.settings?.dataSource) {
+        field.settings.dataSource = parsedField.settings.dataSource;
+        // Preserve maxHierarchyLevel for leaders
+        if (parsedField.settings.dataSource === 'leaders' && parsedField.settings.maxHierarchyLevel !== undefined) {
+          field.settings.maxHierarchyLevel = parsedField.settings.maxHierarchyLevel;
+        }
+      }
+
+      // Add options for selection fields (only for custom-option selects, not data source selects)
+      if (parsedField.options && parsedField.options.length > 0 && !parsedField.settings?.dataSource) {
         field.options = parsedField.options;
       }
 
@@ -1418,16 +1457,27 @@ Test the following scenarios in the browser:
    - Verify: Fields parsed correctly
 
 5. **Error Cases**
-   - Upload a non-PDF file → error message
-   - Enter an invalid URL → error message
-   - Submit without selecting a group → validation error
-   - Enter a URL that returns 404 → appropriate error
+   - Upload a non-PDF file -> error message
+   - Enter an invalid URL -> error message
+   - Submit without selecting a group -> validation error
+   - Enter a URL that returns 404 -> appropriate error
 
-6. **Field Type Accuracy**
-   - Verify Levelset-specific fields are detected when appropriate (employee name → employee_select)
-   - Verify section headers are created for form sections
-   - Verify required fields are marked correctly
-   - Verify options are preserved for selection fields
+6. **Data Source Detection**
+   - Import a PDF form that asks for "Employee Name", "Supervisor", "Position"
+   - Verify: AI creates `select` fields with `dataSource` set to `employees`, `leaders`, `positions` respectively
+   - Verify: No options array is included for data source fields
+   - Verify: In the editor, the data source dropdown shows the correct source selected
+
+7. **Text Block Detection**
+   - Import a PDF form that contains instructions or disclaimer text
+   - Verify: AI creates `text_block` fields with `content` containing the text
+   - Verify: In the editor, the text block renders inline with the TipTap editor
+
+8. **Section Structure**
+   - Import a form with clear section headings
+   - Verify: Section fields are created and child fields reference them via sectionId
+   - Verify: Required fields are marked correctly
+   - Verify: Options are preserved for selection fields
 
 ---
 
