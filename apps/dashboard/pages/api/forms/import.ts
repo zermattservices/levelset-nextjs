@@ -10,7 +10,6 @@ import {
   FORM_PARSER_TOOL,
   type ParsedFormResult,
 } from '@/lib/forms/import-prompt';
-import Anthropic from '@anthropic-ai/sdk';
 
 // Increase body size limit for PDF uploads (default is 1mb)
 export const config = {
@@ -21,9 +20,7 @@ export const config = {
   },
 };
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 export default async function handler(
   req: NextApiRequest,
@@ -33,8 +30,8 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: 'Form import is not configured. Missing ANTHROPIC_API_KEY.' });
+  if (!process.env.OPENROUTER_API_KEY) {
+    return res.status(500).json({ error: 'Form import is not configured. Missing OPENROUTER_API_KEY.' });
   }
 
   const supabase = createServerSupabaseClient();
@@ -78,7 +75,6 @@ export default async function handler(
     source_type,
     url,
     file_data,
-    file_media_type,
     name,
     description,
     group_id,
@@ -135,23 +131,22 @@ export default async function handler(
   }
 
   try {
-    // ── Build Claude messages ──
+    // ── Build messages for OpenRouter ──
     const systemPrompt = buildSystemPrompt({
       sourceType: source_type,
       formType: form_type,
       includeScoring: source_type === 'pdf' && form_type === 'evaluation',
     });
 
-    const userContent: Anthropic.Messages.ContentBlockParam[] = [];
+    const userContent: any[] = [];
 
     if (source_type === 'pdf') {
-      // Send PDF as a document to Claude's vision API
+      // Send PDF as a file content block (OpenRouter format)
       userContent.push({
-        type: 'document',
-        source: {
-          type: 'base64',
-          media_type: file_media_type || 'application/pdf',
-          data: file_data,
+        type: 'file',
+        file: {
+          filename: 'form.pdf',
+          file_data: `data:application/pdf;base64,${file_data}`,
         },
       });
       userContent.push({
@@ -219,28 +214,55 @@ export default async function handler(
       });
     }
 
-    // ── Call Claude API ──
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 8192,
-      system: systemPrompt,
-      tools: [FORM_PARSER_TOOL],
-      tool_choice: { type: 'tool', name: 'extract_form_fields' },
-      messages: [{ role: 'user', content: userContent }],
+    // ── Call Claude via OpenRouter ──
+    const openrouterResponse = await fetch(OPENROUTER_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://levelset.io',
+        'X-Title': 'Levelset Form Import',
+      },
+      body: JSON.stringify({
+        model: 'anthropic/claude-sonnet-4-20250514',
+        max_tokens: 8192,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userContent },
+        ],
+        tools: [FORM_PARSER_TOOL],
+        tool_choice: { type: 'function', function: { name: 'extract_form_fields' } },
+      }),
     });
 
-    // Extract tool use result
-    const toolUseBlock = response.content.find(
-      (block) => block.type === 'tool_use'
-    );
+    if (!openrouterResponse.ok) {
+      const errBody = await openrouterResponse.text();
+      console.error('OpenRouter API error:', openrouterResponse.status, errBody);
+      return res.status(500).json({
+        error: 'AI service is temporarily unavailable. Please try again.',
+      });
+    }
 
-    if (!toolUseBlock || toolUseBlock.type !== 'tool_use') {
+    const aiResult = await openrouterResponse.json();
+
+    // Extract tool call result from OpenAI-format response
+    const message = aiResult.choices?.[0]?.message;
+    const toolCall = message?.tool_calls?.[0];
+
+    if (!toolCall || toolCall.function?.name !== 'extract_form_fields') {
       return res.status(500).json({
         error: 'AI failed to parse the form. Please try again.',
       });
     }
 
-    const parsed = toolUseBlock.input as ParsedFormResult;
+    let parsed: ParsedFormResult;
+    try {
+      parsed = JSON.parse(toolCall.function.arguments);
+    } catch {
+      return res.status(500).json({
+        error: 'AI returned invalid data. Please try again.',
+      });
+    }
 
     if (!parsed.fields || parsed.fields.length === 0) {
       return res.status(400).json({

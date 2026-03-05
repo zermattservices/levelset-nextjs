@@ -164,13 +164,15 @@ ${includeScoring && formType === 'evaluation' ? '- evaluationSections: Array of 
 }
 
 /**
- * The tool schema for Claude's structured output.
+ * The tool schema for structured output via OpenRouter (OpenAI function calling format).
  * This defines the exact shape of the response we expect.
  */
 export const FORM_PARSER_TOOL = {
-  name: 'extract_form_fields',
-  description: 'Extract the form structure as a list of typed fields with labels, options, and settings.',
-  input_schema: {
+  type: 'function' as const,
+  function: {
+    name: 'extract_form_fields',
+    description: 'Extract the form structure as a list of typed fields with labels, options, and settings.',
+    parameters: {
     type: 'object' as const,
     properties: {
       suggestedName: {
@@ -290,5 +292,6 @@ export const FORM_PARSER_TOOL = {
       },
     },
     required: ['fields'],
+    },
   },
 };
