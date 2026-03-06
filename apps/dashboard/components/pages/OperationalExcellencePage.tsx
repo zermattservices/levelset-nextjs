@@ -141,10 +141,12 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
         fontFamily,
         fontSize: 11,
         padding: '8px 10px',
+        color: 'var(--ls-color-text-primary)',
       },
       '& .MuiInputLabel-root': {
         fontFamily,
         fontSize: 11,
+        color: 'var(--ls-color-text-secondary)',
       },
       '& .MuiOutlinedInput-notchedOutline': {
         borderColor: 'var(--ls-color-muted-border)',
@@ -796,7 +798,7 @@ export function OperationalExcellencePage() {
                           '& .MuiInputLabel-root': {
                             fontFamily: `${fontFamily} !important`,
                             fontSize: '16px !important',
-                            color: 'rgba(0, 0, 0, 0.6) !important',
+                            color: 'var(--ls-color-text-secondary) !important',
                             '&.Mui-focused': { color: `${levelsetGreen} !important` },
                           },
                           '& .MuiOutlinedInput-root': {
@@ -826,7 +828,7 @@ export function OperationalExcellencePage() {
                           '& .MuiInputLabel-root': {
                             fontFamily: `${fontFamily} !important`,
                             fontSize: '16px !important',
-                            color: 'rgba(0, 0, 0, 0.6) !important',
+                            color: 'var(--ls-color-text-secondary) !important',
                             '&.Mui-focused': { color: `${levelsetGreen} !important` },
                           },
                           '& .MuiOutlinedInput-root': {

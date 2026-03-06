@@ -427,8 +427,8 @@ export function DashboardMetricCard({
   const percent = metricState?.percent ?? 0;
 
   const isOEVariant = ['caring-interactions', 'great-food', 'quick-accurate', 'creating-moments', 'inviting-atmosphere'].includes(variant);
-  const percentRounded = Number.isFinite(percent) ? Number(percent.toFixed(1)) : 0;
-  const percentText = `${percentRounded > 0 ? '+' : percentRounded < 0 ? '' : ''}${percentRounded.toFixed(1)}%`;
+  const percentRounded = Number.isFinite(percent) ? Math.round(percent) : 0;
+  const percentText = `${percentRounded > 0 ? '+' : percentRounded < 0 ? '' : ''}${percentRounded}%`;
   const deltaText = isOEVariant
     ? `${change > 0 ? '+' : ''}${change.toFixed(1)}`
     : `${change > 0 ? '+' : ''}${formatNumber(change)}`;
@@ -466,7 +466,7 @@ export function DashboardMetricCard({
               </div>
               <div className={[styles.trendBadge, customMetric.isNegativeChange ? styles.negative : ''].filter(Boolean).join(' ')} aria-live="polite">
                 <ArrowUpIcon className={[styles.trendIcon, customMetric.percentChange < 0 ? styles.down : ''].filter(Boolean).join(' ')} />
-                <span>{`${customMetric.percentChange > 0 ? '+' : ''}${customMetric.percentChange.toFixed(1)}%`}</span>
+                <span>{`${customMetric.percentChange > 0 ? '+' : ''}${Math.round(customMetric.percentChange)}%`}</span>
               </div>
             </div>
             <div className={styles.supportingMetrics}>
