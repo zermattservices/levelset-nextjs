@@ -432,7 +432,7 @@ export function buildAllTools(ctx: ToolRegistryContext): ToolSet {
     }),
     get_pillar_scores: tool({
       description:
-        'Get Operational Excellence pillar scores (Great Food, Quick & Accurate, Creating Moments, Caring Interactions, Inviting Atmosphere). Without employee_id: location-level scores + top/bottom performers. With employee_id: per-pillar scores with position breakdown and criteria mapping.',
+        'Get Operational Excellence pillar scores (Great Food, Quick & Accurate, Creating Moments, Caring Interactions, Inviting Atmosphere). Without employee_id: location-level scores + top/bottom performers. With employee_id: per-pillar scores with position breakdown and criteria mapping. Each pillar includes has_data (boolean) — pillars with has_data=false have no ratings and are excluded from the overall weighted average. The overall score only reflects pillars the employee has been rated in.',
       inputSchema: z.object({
         employee_id: z.string().optional().describe('UUID of a specific employee. Omit for location-wide scores.'),
         pillar: z.string().optional().describe('Filter to specific pillar name (e.g. "Great Food")'),

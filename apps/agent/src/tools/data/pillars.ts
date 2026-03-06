@@ -96,7 +96,10 @@ function distributeRatingToPillars(
   }
 }
 
-/** Compute pillar scores from weighted contributions */
+/** Compute pillar scores from weighted contributions.
+ *  Overall score only includes pillars that have rating data —
+ *  pillars with no data are excluded from the weighted average
+ *  (divide by the sum of weights with data, not 100%). */
 function computePillarScores(
   contributions: Record<string, PillarAccumulator>,
   pillarDefs: PillarDef[]
@@ -110,11 +113,12 @@ function computePillarScores(
     if (acc && acc.totalWeight > 0) {
       const avg = acc.weightedSum / acc.totalWeight;
       pillarScores[pillar.id] = normalizeTo100(avg);
+      // Only include this pillar's weight in the overall average
+      overallScore += pillarScores[pillar.id] * (pillar.weight ?? 0);
+      totalPillarWeight += pillar.weight ?? 0;
     } else {
       pillarScores[pillar.id] = 0;
     }
-    overallScore += pillarScores[pillar.id] * (pillar.weight ?? 0);
-    totalPillarWeight += pillar.weight ?? 0;
   }
 
   return {

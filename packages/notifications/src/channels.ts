@@ -21,12 +21,12 @@ export type SlackChannelName = (typeof SlackChannel)[keyof typeof SlackChannel];
  * These are the #channel names in your Slack workspace.
  */
 const CHANNEL_NAME_MAP: Record<SlackChannelName, string> = {
-  LEADS: '#leads',
-  CONVERSIONS: '#conversions',
-  BILLING: '#billing',
-  PIPELINE: '#pipeline',
-  BUGS: '#bugs',
-  ALL_LEVELSET: '#all-levelset',
+  LEADS: 'leads',
+  CONVERSIONS: 'conversions',
+  BILLING: 'billing',
+  PIPELINE: 'pipeline',
+  BUGS: 'bugs',
+  ALL_LEVELSET: 'all-levelset',
 };
 
 /**
