@@ -1,18 +1,20 @@
 /**
- * SetupHeader — date navigation + block dropdown for setup page.
- * Single row: back | < date > | block dropdown | hamburger
+ * SetupHeader — date navigation + block selector for setup page.
+ * Single row: glass-back (fixed L) | < date block-selector > (centered) | glass-hamburger (fixed R)
+ * Block selector opens a popover dropdown anchored directly below the button.
  * Calendar expands below header as collapsible section.
  */
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Platform,
-  Pressable, LayoutAnimation, UIManager,
+  Pressable, LayoutAnimation, UIManager, Modal,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '../../context/ThemeContext';
+import { useGlass } from '../../hooks/useGlass';
 import { typography, fontWeights } from '../../lib/fonts';
 import { spacing, borderRadius, haptics } from '../../lib/theme';
 import { AppIcon } from '../ui';
@@ -48,8 +50,11 @@ export function SetupHeader({
   const colors = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { GlassView } = useGlass();
   const [showCalendar, setShowCalendar] = useState(false);
   const [showBlockDropdown, setShowBlockDropdown] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ x: 0, y: 0, width: 0 });
+  const blockPickerRef = useRef<View>(null);
 
   const goDay = (delta: number) => {
     haptics.light();
@@ -65,70 +70,105 @@ export function SetupHeader({
     setShowBlockDropdown(false);
   }, []);
 
-  const toggleBlockDropdown = useCallback(() => {
+  const openBlockDropdown = useCallback(() => {
+    if (blocks.length === 0) return;
     haptics.selection();
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setShowBlockDropdown((v) => !v);
     setShowCalendar(false);
-  }, []);
+    // Measure the button position to anchor the dropdown
+    blockPickerRef.current?.measureInWindow((x, y, width, height) => {
+      setDropdownPos({ x, y: y + height + 4, width: Math.max(width, 140) });
+      setShowBlockDropdown(true);
+    });
+  }, [blocks]);
 
   const dateLabel = selectedDate.toLocaleDateString('en-US', {
     weekday: 'short', month: 'short', day: 'numeric',
   });
   const activeBlock = blocks[activeBlockIndex];
-  const blockLabel = activeBlock
-    ? `${formatTime12(activeBlock.block_time)} – ${formatTime12(activeBlock.end_time)}`
-    : '';
+  const blockLabel = activeBlock ? formatTime12(activeBlock.block_time) : '';
+
+  // Liquid glass icon button — matches rating page back button pattern
+  const glassIconButton = (onPress: () => void, iconName: string) => {
+    const inner = (
+      <Pressable
+        onPress={onPress}
+        hitSlop={8}
+        style={styles.glassButtonInner}
+      >
+        <AppIcon name={iconName} size={16} tintColor={colors.onSurface} />
+      </Pressable>
+    );
+
+    if (GlassView) {
+      return (
+        <GlassView style={styles.glassButton} isInteractive>
+          {inner}
+        </GlassView>
+      );
+    }
+
+    return (
+      <Pressable
+        onPress={onPress}
+        hitSlop={8}
+        style={[styles.glassButton, { backgroundColor: colors.surfaceDisabled }]}
+      >
+        <AppIcon name={iconName} size={16} tintColor={colors.onSurface} />
+      </Pressable>
+    );
+  };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + spacing[1] }]}>
-      {/* Single header row: back | < date > | block | hamburger */}
+      {/* Header row: glass-back (fixed L) | centered date+block | glass-hamburger (fixed R) */}
       <View style={styles.headerRow}>
-        {/* Back button */}
-        <TouchableOpacity
-          onPress={() => { haptics.light(); router.back(); }}
-          style={styles.iconButton}
-          hitSlop={12}
-        >
-          <AppIcon name="chevron.left" size={20} tintColor={colors.onSurface} />
-        </TouchableOpacity>
+        {/* Back button — fixed left */}
+        {glassIconButton(
+          () => { haptics.light(); router.back(); },
+          'chevron.left',
+        )}
 
-        {/* Centered date with carets */}
-        <View style={styles.dateCenter}>
+        {/* Center group: < date block-selector > */}
+        <View style={styles.centerGroup}>
           <TouchableOpacity onPress={() => goDay(-1)} hitSlop={12}>
             <AppIcon name="chevron.left" size={14} tintColor={colors.onSurfaceVariant} />
           </TouchableOpacity>
+
           <TouchableOpacity onPress={toggleCalendar} style={styles.dateButton}>
             <Text style={[styles.dateText, { color: colors.onSurface }]}>{dateLabel}</Text>
           </TouchableOpacity>
+
+          {blocks.length > 0 && (
+            <View ref={blockPickerRef} collapsable={false}>
+              {GlassView ? (
+                <GlassView style={styles.blockPickerGlass} isInteractive>
+                  <Pressable onPress={openBlockDropdown} style={styles.blockPickerInner}>
+                    <Text style={[styles.blockLabel, { color: colors.onSurface }]}>{blockLabel}</Text>
+                    <AppIcon name="chevron.down" size={10} tintColor={colors.onSurfaceVariant} />
+                  </Pressable>
+                </GlassView>
+              ) : (
+                <Pressable
+                  onPress={openBlockDropdown}
+                  style={[styles.blockPickerGlass, { backgroundColor: colors.surfaceDisabled }]}
+                >
+                  <Text style={[styles.blockLabel, { color: colors.onSurface }]}>{blockLabel}</Text>
+                  <AppIcon name="chevron.down" size={10} tintColor={colors.onSurfaceVariant} />
+                </Pressable>
+              )}
+            </View>
+          )}
+
           <TouchableOpacity onPress={() => goDay(1)} hitSlop={12}>
             <AppIcon name="chevron.right" size={14} tintColor={colors.onSurfaceVariant} />
           </TouchableOpacity>
         </View>
 
-        {/* Block selector */}
-        {blocks.length > 0 && (
-          <TouchableOpacity
-            onPress={toggleBlockDropdown}
-            style={[styles.blockPicker, { backgroundColor: colors.surfaceVariant }]}
-          >
-            <Text style={[styles.blockLabel, { color: colors.onSurface }]}>{blockLabel}</Text>
-            <AppIcon
-              name={showBlockDropdown ? 'chevron.up' : 'chevron.down'}
-              size={10}
-              tintColor={colors.onSurfaceVariant}
-            />
-          </TouchableOpacity>
+        {/* Hamburger menu button — fixed right */}
+        {glassIconButton(
+          () => { haptics.light(); onTogglePanel(); },
+          'line.3.horizontal',
         )}
-
-        {/* Hamburger menu button */}
-        <TouchableOpacity
-          onPress={() => { haptics.light(); onTogglePanel(); }}
-          style={styles.iconButton}
-          hitSlop={12}
-        >
-          <AppIcon name="line.3.horizontal" size={20} tintColor={colors.onSurface} />
-        </TouchableOpacity>
       </View>
 
       {/* Collapsible calendar section */}
@@ -156,38 +196,79 @@ export function SetupHeader({
         </View>
       )}
 
-      {/* Collapsible block dropdown */}
-      {showBlockDropdown && (
-        <View style={[styles.blockDropdown, { borderTopColor: colors.outline }]}>
-          {blocks.map((block, index) => {
-            const isActive = index === activeBlockIndex;
-            const label = `${formatTime12(block.block_time)} – ${formatTime12(block.end_time)}`;
+      {/* Block dropdown popover — anchored to the block picker button */}
+      <Modal
+        visible={showBlockDropdown}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowBlockDropdown(false)}
+      >
+        <Pressable
+          style={styles.dropdownBackdrop}
+          onPress={() => setShowBlockDropdown(false)}
+        >
+          {(() => {
+            const dropdownItems = blocks.map((block, index) => {
+              const isActive = index === activeBlockIndex;
+              const label = formatTime12(block.block_time);
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => {
+                    haptics.selection();
+                    onBlockChange(index);
+                    setShowBlockDropdown(false);
+                  }}
+                  style={[
+                    styles.dropdownItem,
+                    isActive && { backgroundColor: colors.primaryTransparent },
+                    index < blocks.length - 1 && {
+                      borderBottomWidth: StyleSheet.hairlineWidth,
+                      borderBottomColor: 'rgba(128,128,128,0.2)',
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.dropdownItemText,
+                      { color: isActive ? colors.primary : colors.onSurface },
+                      isActive && { fontWeight: fontWeights.semibold },
+                    ]}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            });
+
+            const menuPos = {
+              top: dropdownPos.y,
+              left: dropdownPos.x,
+              minWidth: dropdownPos.width,
+            };
+
+            if (GlassView) {
+              return (
+                <GlassView style={[styles.dropdownMenu, menuPos]}>
+                  {dropdownItems}
+                </GlassView>
+              );
+            }
+
             return (
-              <TouchableOpacity
-                key={index}
-                onPress={() => {
-                  haptics.selection();
-                  onBlockChange(index);
-                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                  setShowBlockDropdown(false);
-                }}
+              <View
                 style={[
-                  styles.blockItem,
-                  isActive && { backgroundColor: colors.primaryTransparent },
+                  styles.dropdownMenu,
+                  menuPos,
+                  { backgroundColor: colors.surface, borderColor: colors.outline, borderWidth: 1 },
                 ]}
               >
-                <Text style={[
-                  styles.blockItemText,
-                  { color: isActive ? colors.primary : colors.onSurface },
-                  isActive && { fontWeight: fontWeights.semibold },
-                ]}>
-                  {label}
-                </Text>
-              </TouchableOpacity>
+                {dropdownItems}
+              </View>
             );
-          })}
-        </View>
-      )}
+          })()}
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -199,18 +280,28 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing[1],
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing[3],
     paddingBottom: spacing[2],
   },
-  iconButton: {
-    padding: spacing[2],
+  glassButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  dateCenter: {
+  glassButtonInner: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[3],
-    flex: 1,
-    justifyContent: 'center',
+    gap: spacing[2],
   },
   dateButton: {
     paddingVertical: spacing[1],
@@ -219,18 +310,24 @@ const styles = StyleSheet.create({
     ...typography.labelLarge,
     fontWeight: fontWeights.semibold,
   },
-  blockPicker: {
+  blockPickerGlass: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
-    paddingHorizontal: spacing[2],
+    paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.full,
     borderCurve: 'continuous',
+    overflow: 'hidden',
+  },
+  blockPickerInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
   },
   blockLabel: {
-    fontSize: 12,
-    fontWeight: fontWeights.medium,
+    ...typography.labelLarge,
+    fontWeight: fontWeights.semibold,
   },
   calendarSection: {
     borderTopWidth: 1,
@@ -249,15 +346,21 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
   },
-  blockDropdown: {
-    borderTopWidth: 1,
-    paddingVertical: spacing[1],
+  dropdownBackdrop: {
+    flex: 1,
   },
-  blockItem: {
-    paddingHorizontal: spacing[4],
+  dropdownMenu: {
+    position: 'absolute',
+    borderRadius: borderRadius.md,
+    borderCurve: 'continuous',
+    overflow: 'hidden',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+  },
+  dropdownItem: {
+    paddingHorizontal: spacing[3],
     paddingVertical: spacing[3],
   },
-  blockItemText: {
+  dropdownItemText: {
     ...typography.bodySmall,
     fontWeight: fontWeights.medium,
   },

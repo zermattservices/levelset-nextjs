@@ -133,6 +133,9 @@ function SetupBoardInner() {
   // Local cache: key = "date:zone" → SetupBoardResponse
   const localCache = useRef<Map<string, SetupBoardResponse>>(new Map());
   const prefetchStarted = useRef(false);
+  // Tracks desired block start time across zone changes so we can match the
+  // closest block instead of resetting to "now". null = use auto-select "now".
+  const desiredBlockStart = useRef<string | null>(null);
 
   const dateStr = useMemo(() => formatDateStr(selectedDate), [selectedDate]);
 
@@ -250,22 +253,41 @@ function SetupBoardInner() {
       });
   }, [assignments, activeBlock]);
 
-  // Auto-select block containing "now"
+  // Auto-select block: match desired start time (from zone toggle) or pick "now"
   useEffect(() => {
     if (blocks.length === 0) {
       setActiveBlockIndex(0);
       return;
     }
-    const now = new Date();
-    const nowMin = now.getHours() * 60 + now.getMinutes();
-    let best = 0;
-    for (let i = 0; i < blocks.length; i++) {
-      const start = parseTime(blocks[i].block_time);
-      const end = parseTime(blocks[i].end_time);
-      if (nowMin >= start && nowMin < end) { best = i; break; }
-      if (start <= nowMin) best = i;
+
+    const target = desiredBlockStart.current;
+    if (target) {
+      // Zone toggle: find closest block >= the previously selected start time
+      desiredBlockStart.current = null;
+      const targetMin = parseTime(target);
+      let best = 0;
+      let found = false;
+      for (let i = 0; i < blocks.length; i++) {
+        const start = parseTime(blocks[i].block_time);
+        if (start === targetMin) { best = i; found = true; break; }
+        if (start > targetMin && !found) { best = i; found = true; break; }
+      }
+      // If no block >= target, pick the last block
+      if (!found) best = blocks.length - 1;
+      setActiveBlockIndex(best);
+    } else {
+      // Initial load / date change: auto-select block containing "now"
+      const now = new Date();
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      let best = 0;
+      for (let i = 0; i < blocks.length; i++) {
+        const start = parseTime(blocks[i].block_time);
+        const end = parseTime(blocks[i].end_time);
+        if (nowMin >= start && nowMin < end) { best = i; break; }
+        if (start <= nowMin) best = i;
+      }
+      setActiveBlockIndex(best);
     }
-    setActiveBlockIndex(best);
   }, [blocks]);
 
   // Sliding menu animation (0 = closed, 1 = open)
@@ -363,10 +385,14 @@ function SetupBoardInner() {
     }
   }, [session?.access_token, selectedLocationId, dateStr, zone]);
 
-  // Zone change — no refetch needed, just switch zone
+  // Zone change — save current block start time so we can match it in the new zone
   const handleZoneChange = useCallback((newZone: 'FOH' | 'BOH') => {
+    const currentBlock = blocks[activeBlockIndex];
+    if (currentBlock) {
+      desiredBlockStart.current = currentBlock.block_time;
+    }
     setZone(newZone);
-  }, []);
+  }, [blocks, activeBlockIndex]);
 
   const handleTogglePanel = useCallback(() => {
     haptics.light();
