@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Box, Skeleton, Typography } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import { format, parseISO } from "date-fns";
 import { createSupabaseClient } from "@/util/supabase/component";
+import { DashboardMetricCard } from "@/components/CodeComponents/DashboardMetricCard";
 import type { Employee } from "@/lib/supabase.types";
 import styles from "./EmployeeOverviewTab.module.css";
 
@@ -49,34 +50,6 @@ interface OEData {
 }
 
 // ------------------------------------------------------------------
-// Helpers
-// ------------------------------------------------------------------
-function getScoreColor(score: number): string {
-  if (score < 40) return 'var(--ls-color-destructive-base)';
-  if (score < 60) return 'var(--ls-color-warning-base)';
-  if (score < 80) return 'var(--ls-color-success-base)';
-  return 'var(--ls-color-brand-base)';
-}
-
-function renderChange(change: number | null) {
-  if (change === null || change === undefined) return null;
-  const rounded = Math.round(change * 10) / 10;
-  const isPositive = rounded > 0;
-  const isNegative = rounded < 0;
-  const className = isPositive
-    ? styles.changePositive
-    : isNegative
-      ? styles.changeNegative
-      : styles.changeNeutral;
-  const prefix = isPositive ? '+' : '';
-  return (
-    <span className={`${styles.changeIndicator} ${className}`}>
-      {prefix}{rounded}
-    </span>
-  );
-}
-
-// ------------------------------------------------------------------
 // Types for positional ratings
 // ------------------------------------------------------------------
 interface PositionAverage {
@@ -85,80 +58,100 @@ interface PositionAverage {
   count: number;
 }
 
-function getRatingColor(avg: number): string {
-  if (avg >= 2.75) return 'var(--ls-color-success-base)';
-  if (avg >= 2.0) return 'var(--ls-color-warning-base)';
-  return 'var(--ls-color-destructive-base)';
-}
-
 // ------------------------------------------------------------------
 // Types for discipline data
 // ------------------------------------------------------------------
+interface TimelineItem {
+  id: string;
+  date: string;
+  type: 'infraction' | 'action';
+  label: string;
+  points: number;
+  leaderName: string;
+}
+
 interface DisciplineData {
   totalPoints: number;
   maxThreshold: number;
   infractionCount: number;
   discActionCount: number;
-  recentInfraction: { infraction: string; infraction_date: string } | null;
+  timeline: TimelineItem[];
 }
 
 // ------------------------------------------------------------------
-// Section-specific loading skeletons
+// Helpers — matches OE page buildCustomMetric pattern
 // ------------------------------------------------------------------
-function OESkeleton() {
-  return (
-    <Box className={styles.section}>
-      <Typography className={styles.sectionTitle}>Operational Excellence</Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Skeleton variant="circular" width={64} height={64} />
-        <Box sx={{ flex: 1 }}>
-          <Skeleton variant="text" width={120} height={20} />
-          <Skeleton variant="text" width={80} height={16} sx={{ mt: 0.5 }} />
-        </Box>
-      </Box>
-      <Box className={styles.pillarsGrid}>
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} variant="rounded" height={60} sx={{ borderRadius: '12px' }} />
-        ))}
-      </Box>
-    </Box>
-  );
+function buildCustomMetric(
+  title: string,
+  score: number,
+  change: number,
+  percentChange: number,
+  valueSuffix = ' /100',
+) {
+  return {
+    title,
+    percentChange,
+    isNegativeChange: change < 0,
+    primaryValue: score.toFixed(1),
+    valueSuffix,
+    changeText: `${change >= 0 ? '+' : ''}${change.toFixed(1)} pts`,
+    periodLabel: 'vs prior period',
+  };
 }
 
-function PositionsSkeleton() {
-  return (
-    <Box className={styles.section}>
-      <Typography className={styles.sectionTitle}>Positional Ratings</Typography>
-      <Box className={styles.card}>
-        {[1, 2, 3].map((i) => (
-          <Box key={i} className={styles.positionRow}>
-            <Skeleton variant="text" width={100} height={20} />
-            <Skeleton variant="text" width={50} height={20} />
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  );
+function getRatingColor(avg: number): string {
+  if (avg >= 2.75) return 'var(--ls-color-success-vivid)';
+  if (avg >= 2.0) return 'var(--ls-color-warning-base)';
+  return 'var(--ls-color-destructive-medium)';
 }
 
-function DisciplineSkeleton() {
+// ------------------------------------------------------------------
+// Loading skeleton (mirrors OE page skeleton pattern)
+// ------------------------------------------------------------------
+function OverviewSkeleton() {
   return (
-    <Box className={styles.section}>
-      <Typography className={styles.sectionTitle}>Discipline</Typography>
-      <Box className={styles.card}>
-        <Box className={styles.twoColumn}>
-          <Box>
-            <Skeleton variant="text" width={60} height={36} />
-            <Skeleton variant="text" width={80} height={16} />
-          </Box>
-          <Box>
-            <Skeleton variant="text" width={40} height={36} />
-            <Skeleton variant="text" width={70} height={16} />
-          </Box>
-        </Box>
-        <Skeleton variant="rounded" height={8} sx={{ mt: 2, borderRadius: '4px' }} />
-      </Box>
-    </Box>
+    <div className={styles.container}>
+      {/* Score cards skeleton */}
+      <div className={styles.scoreCardsSection}>
+        <div className={styles.oeCardCell}>
+          <Skeleton variant="rounded" animation="wave" sx={{ height: '100%', minHeight: 160, borderRadius: '16px' }} />
+        </div>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} variant="rounded" animation="wave" sx={{ height: 100, borderRadius: '16px' }} />
+        ))}
+      </div>
+
+      {/* Bottom section skeleton */}
+      <div className={styles.bottomSection}>
+        <div className={styles.bottomCard}>
+          <div className={styles.skeletonCard}>
+            <Skeleton variant="text" width={140} height={24} sx={{ mb: 1 }} />
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} variant="text" width="100%" height={32} sx={{ mb: 0.5 }} />
+            ))}
+          </div>
+        </div>
+        <div className={styles.bottomCard}>
+          <div className={styles.skeletonCard}>
+            <Skeleton variant="text" width={100} height={24} sx={{ mb: 1 }} />
+            <Skeleton variant="text" width={60} height={40} />
+            <Skeleton variant="rounded" width="100%" height={8} sx={{ mt: 2, borderRadius: '4px' }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Stubs */}
+      <div className={styles.stubsRow}>
+        <div className={styles.stubCard}>
+          <span className={styles.stubTitle}>Evaluations</span>
+          <span className={styles.stubBadge}>Coming Soon</span>
+        </div>
+        <div className={styles.stubCard}>
+          <span className={styles.stubTitle}>Pathway</span>
+          <span className={styles.stubBadge}>Coming Soon</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -168,9 +161,10 @@ function DisciplineSkeleton() {
 export interface EmployeeOverviewTabProps {
   employee: Employee;
   locationId: string;
+  onTabChange?: (tab: string) => void;
 }
 
-export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTabProps) {
+export function EmployeeOverviewTab({ employee, locationId, onTabChange }: EmployeeOverviewTabProps) {
   const [loading, setLoading] = React.useState(true);
   const [oeData, setOeData] = React.useState<OEData | null>(null);
   const [positionAverages, setPositionAverages] = React.useState<PositionAverage[]>([]);
@@ -265,17 +259,18 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
       const [infractionsRes, discActionsRes, orgRubricRes] = await Promise.all([
         supabase
           .from('infractions')
-          .select('id, points, infraction_date, infraction')
+          .select('id, points, infraction_date, infraction, leader_id')
           .eq('employee_id', employee.id)
           .eq('location_id', locationId)
           .gte('infraction_date', ninetyDaysAgo)
           .order('infraction_date', { ascending: false }),
         supabase
           .from('disc_actions')
-          .select('id')
+          .select('id, action_date, action_type, leader_id')
           .eq('employee_id', employee.id)
           .eq('location_id', locationId)
-          .gte('action_date', ninetyDaysAgo),
+          .gte('action_date', ninetyDaysAgo)
+          .order('action_date', { ascending: false }),
         supabase
           .from('disc_actions_rubric')
           .select('*')
@@ -302,6 +297,7 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
       }
 
       const infractions = infractionsRes.data || [];
+      const discActions = discActionsRes.data || [];
       const totalPoints = infractions.reduce(
         (sum, inf) => sum + (inf.points || 0),
         0
@@ -311,20 +307,61 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
           ? rubric[rubric.length - 1]?.points_threshold || 100
           : 100;
 
-      const recentInfraction =
-        infractions.length > 0
-          ? {
-              infraction: infractions[0].infraction,
-              infraction_date: infractions[0].infraction_date,
-            }
-          : null;
+      // Resolve leader names for timeline
+      const leaderIds = new Set<string>();
+      for (const inf of infractions) {
+        if (inf.leader_id) leaderIds.add(inf.leader_id);
+      }
+      for (const act of discActions) {
+        if (act.leader_id) leaderIds.add(act.leader_id);
+      }
+
+      const leaderMap = new Map<string, string>();
+      if (leaderIds.size > 0) {
+        const { data: leaders } = await supabase
+          .from('employees')
+          .select('id, first_name, last_name')
+          .in('id', Array.from(leaderIds));
+
+        for (const l of leaders || []) {
+          leaderMap.set(l.id, `${l.first_name} ${l.last_name}`);
+        }
+      }
+
+      // Build unified timeline
+      const timeline: TimelineItem[] = [];
+
+      for (const inf of infractions) {
+        timeline.push({
+          id: inf.id,
+          date: inf.infraction_date,
+          type: 'infraction',
+          label: inf.infraction || 'Infraction',
+          points: inf.points || 0,
+          leaderName: inf.leader_id ? (leaderMap.get(inf.leader_id) || '') : '',
+        });
+      }
+
+      for (const act of discActions) {
+        timeline.push({
+          id: act.id,
+          date: act.action_date,
+          type: 'action',
+          label: act.action_type || 'Disciplinary Action',
+          points: 0,
+          leaderName: act.leader_id ? (leaderMap.get(act.leader_id) || '') : '',
+        });
+      }
+
+      // Sort by date descending
+      timeline.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
       return {
         totalPoints,
         maxThreshold,
         infractionCount: infractions.length,
-        discActionCount: (discActionsRes.data || []).length,
-        recentInfraction,
+        discActionCount: discActions.length,
+        timeline,
       };
     }
 
@@ -363,207 +400,201 @@ export function EmployeeOverviewTab({ employee, locationId }: EmployeeOverviewTa
     return () => { cancelled = true; };
   }, [employee.id, locationId]);
 
-  // Build pillar color map by pillar id (from displayOrder)
-  const pillarColorMap: Record<string, string> = {};
-  if (oeData) {
-    for (const p of oeData.pillars) {
-      pillarColorMap[p.id] = PILLAR_COLORS[p.displayOrder] || '#6b7280';
-    }
-  }
-
   if (loading) {
-    return (
-      <Box className={styles.container}>
-        <OESkeleton />
-        <PositionsSkeleton />
-        <DisciplineSkeleton />
-
-        {/* Stubs show immediately — no skeleton needed */}
-        <Box className={styles.section}>
-          <Typography className={styles.sectionTitle}>Evaluations</Typography>
-          <Box className={styles.stubMessage}>Coming soon!</Box>
-        </Box>
-        <Box className={styles.section}>
-          <Typography className={styles.sectionTitle}>Pathway</Typography>
-          <Box className={styles.stubMessage}>Coming soon!</Box>
-        </Box>
-      </Box>
-    );
+    return <OverviewSkeleton />;
   }
+
+  // ----------------------------------------------------------------
+  // Discipline derived values
+  // ----------------------------------------------------------------
+  const discRatio = disciplineData && disciplineData.maxThreshold > 0
+    ? disciplineData.totalPoints / disciplineData.maxThreshold
+    : 0;
+  const discRatioColor = discRatio > 0.66
+    ? 'var(--ls-color-destructive-base)'
+    : discRatio > 0.33
+      ? 'var(--ls-color-warning-base)'
+      : 'var(--ls-color-success-base)';
 
   return (
-    <Box className={styles.container}>
-      {/* Section 1: Operational Excellence */}
-      <Box className={styles.section}>
-        <Typography className={styles.sectionTitle}>Operational Excellence</Typography>
+    <div className={styles.container}>
+      {/* ============================================================
+          Score Cards — identical grid to OE page
+          OE overall (large, 2-row span) + pillar cards
+          ============================================================ */}
+      <div className={styles.scoreCardsSection}>
         {oeData ? (
           <>
-            {/* Overall score + change */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box
-                className={styles.scoreCircle}
-                sx={{
-                  color: 'var(--ls-color-basic-foreground)',
-                  backgroundColor: getScoreColor(oeData.employee.overallScore),
-                }}
-              >
-                {Math.round(oeData.employee.overallScore)}
-              </Box>
-              <Box>
-                <Typography sx={{ fontFamily: '"Satoshi", sans-serif', fontWeight: 700, fontSize: 16 }}>
-                  Overall Score
-                </Typography>
-                {renderChange(oeData.employee.change)}
-                <Typography
-                  sx={{ fontFamily: '"Satoshi", sans-serif', fontSize: 12, color: 'var(--ls-color-text-caption)', mt: 0.5 }}
-                >
-                  {oeData.employee.ratingCount} rating{oeData.employee.ratingCount !== 1 ? 's' : ''} &middot; Last 90 days
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Pillar cards grid */}
-            <Box className={styles.pillarsGrid}>
-              {oeData.pillars.map((pillar) => {
-                const empScore = oeData.employee.pillarScores[pillar.id] ?? 0;
-                const priorScore = oeData.employee.priorPillarScores[pillar.id];
-                const pillarChange = priorScore !== undefined ? Math.round((empScore - priorScore) * 10) / 10 : null;
-                const borderColor = pillarColorMap[pillar.id] || '#6b7280';
-
-                return (
-                  <Box
-                    key={pillar.id}
-                    className={styles.pillarCard}
-                    sx={{ borderLeft: `4px solid ${borderColor}` }}
-                  >
-                    <span className={styles.pillarName}>{pillar.name}</span>
-                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                      <span className={styles.pillarScore} style={{ color: borderColor }}>
-                        {Math.round(empScore)}
-                      </span>
-                      {renderChange(pillarChange)}
-                    </Box>
-                  </Box>
-                );
-              })}
-            </Box>
+            <div className={styles.oeCardCell}>
+              <DashboardMetricCard
+                variant="positional-excellence"
+                size="large"
+                layout="compact"
+                customMetric={buildCustomMetric(
+                  'Operational Excellence',
+                  oeData.employee.overallScore,
+                  oeData.employee.change ?? 0,
+                  oeData.employee.change != null && oeData.employee.priorOverallScore
+                    ? ((oeData.employee.change) / oeData.employee.priorOverallScore) * 100
+                    : 0,
+                )}
+              />
+            </div>
+            {oeData.pillars.map((p) => {
+              const empScore = oeData.employee.pillarScores[p.id] ?? 0;
+              const priorScore = oeData.employee.priorPillarScores[p.id];
+              const pillarChange = priorScore !== undefined ? empScore - priorScore : 0;
+              const pillarPctChange = priorScore && priorScore > 0
+                ? (pillarChange / priorScore) * 100
+                : 0;
+              return (
+                <DashboardMetricCard
+                  key={p.id}
+                  variant="positional-excellence"
+                  layout="compact"
+                  customMetric={buildCustomMetric(p.name, empScore, pillarChange, pillarPctChange)}
+                />
+              );
+            })}
           </>
         ) : (
-          <Box className={styles.noData}>No ratings in this period</Box>
-        )}
-      </Box>
-
-      {/* Section 2: Positional Ratings */}
-      <Box className={styles.section}>
-        <Typography className={styles.sectionTitle}>Positional Ratings</Typography>
-        {positionAverages.length > 0 ? (
-          <Box className={styles.card}>
-            {positionAverages.map((pos) => (
-              <Box key={pos.position} className={styles.positionRow}>
-                <span className={styles.positionName}>{pos.position}</span>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <span
-                    className={styles.positionAvg}
-                    style={{ color: getRatingColor(pos.average) }}
-                  >
-                    {pos.average.toFixed(2)}
-                  </span>
-                  {pos.count < 4 && (
-                    <span className={styles.ratingCount}>
-                      ({pos.count} of 4 ratings)
-                    </span>
-                  )}
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        ) : (
-          <Box className={styles.noData}>No ratings found</Box>
-        )}
-      </Box>
-
-      {/* Section 3: Discipline */}
-      <Box className={styles.section}>
-        <Typography className={styles.sectionTitle}>Discipline</Typography>
-        {disciplineData && disciplineData.infractionCount > 0 ? (() => {
-          const ratio = disciplineData.maxThreshold > 0
-            ? disciplineData.totalPoints / disciplineData.maxThreshold
-            : 0;
-          const ratioColor = ratio > 0.66
-            ? 'var(--ls-color-destructive-base)'
-            : ratio > 0.33
-              ? 'var(--ls-color-warning-base)'
-              : 'var(--ls-color-success-base)';
-          return (
-          <Box className={styles.card}>
-            <Box className={styles.twoColumn}>
-              <Box>
-                <span
-                  className={styles.statValue}
-                  style={{ color: ratioColor }}
-                >
-                  {disciplineData.totalPoints}
-                </span>
-                <div className={styles.statLabel}>
-                  / {disciplineData.maxThreshold} pts
-                </div>
-              </Box>
-              <Box>
-                <span className={styles.statValue}>
-                  {disciplineData.infractionCount}
-                </span>
-                <div className={styles.statLabel}>
-                  infraction{disciplineData.infractionCount !== 1 ? 's' : ''}
-                </div>
-                <span className={styles.statValue} style={{ fontSize: 20, marginTop: 4, display: 'block' }}>
-                  {disciplineData.discActionCount}
-                </span>
-                <div className={styles.statLabel}>
-                  disciplinary action{disciplineData.discActionCount !== 1 ? 's' : ''}
-                </div>
-              </Box>
-            </Box>
-
-            {/* Progress bar */}
-            <Box className={styles.progressBar} sx={{ mt: 2 }}>
-              <div
-                className={styles.progressFill}
-                style={{
-                  width: `${Math.min(ratio * 100, 100)}%`,
-                  backgroundColor: ratioColor,
-                }}
+          <>
+            <div className={styles.oeCardCell}>
+              <DashboardMetricCard
+                variant="positional-excellence"
+                size="large"
+                layout="compact"
+                customMetric={buildCustomMetric('Operational Excellence', 0, 0, 0)}
               />
-            </Box>
-
-            {/* Most recent infraction */}
-            {disciplineData.recentInfraction && (
-              <Box sx={{ mt: 2 }}>
-                <div className={styles.recentItem}>
-                  {disciplineData.recentInfraction.infraction}
-                </div>
-                <div className={styles.recentDate}>
-                  {format(parseISO(disciplineData.recentInfraction.infraction_date), 'MMM d, yyyy')}
-                </div>
-              </Box>
-            )}
-          </Box>
-          );
-        })() : (
-          <Box className={styles.noData}>No infractions in the last 90 days</Box>
+            </div>
+            <div className={styles.noData}>No OE ratings in the last 90 days</div>
+          </>
         )}
-      </Box>
+      </div>
 
-      {/* Section 4: Evaluations (stub) */}
-      <Box className={styles.section}>
-        <Typography className={styles.sectionTitle}>Evaluations</Typography>
-        <Box className={styles.stubMessage}>Coming soon!</Box>
-      </Box>
+      {/* ============================================================
+          Bottom Section — Positional Ratings + Discipline side by side
+          Matches OE page bottomSection two-column layout
+          ============================================================ */}
+      <div className={styles.bottomSection}>
+        {/* Positional Ratings — styled like OE improversCard */}
+        <div className={styles.bottomCard}>
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>Positional Ratings</span>
+              <span className={styles.cardSubtitle}>Last 4 avg</span>
+            </div>
+            {positionAverages.length > 0 ? (
+              <div className={styles.positionsScrollArea}>
+                <table className={styles.positionsTable}>
+                  <thead>
+                    <tr>
+                      <th>Position</th>
+                      <th style={{ textAlign: 'right' }}>Average</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {positionAverages.map((pos) => (
+                      <tr key={pos.position}>
+                        <td>{pos.position}</td>
+                        <td className={styles.positionAvg} style={{ color: getRatingColor(pos.average) }}>
+                          {pos.average.toFixed(2)}
+                          {pos.count < 4 && (
+                            <span className={styles.ratingCount}>({pos.count}/4)</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className={styles.noData}>No ratings found</div>
+            )}
+          </div>
+        </div>
 
-      {/* Section 5: Pathway (stub) */}
-      <Box className={styles.section}>
-        <Typography className={styles.sectionTitle}>Pathway</Typography>
-        <Box className={styles.stubMessage}>Coming soon!</Box>
-      </Box>
-    </Box>
+        {/* Discipline — styled like OE chartCard */}
+        <div className={styles.bottomCard}>
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>Discipline</span>
+              <span className={styles.cardSubtitle}>Last 90 days</span>
+            </div>
+            {disciplineData && (disciplineData.infractionCount > 0 || disciplineData.discActionCount > 0) ? (
+              <>
+                {/* Progress bar — at top, below card header */}
+                <div className={styles.progressBar}>
+                  <div
+                    className={styles.progressFill}
+                    style={{
+                      width: `${Math.min(discRatio * 100, 100)}%`,
+                      backgroundColor: discRatio >= 0.8
+                        ? 'var(--ls-color-destructive-base)'
+                        : 'var(--ls-color-brand-base)',
+                    }}
+                  />
+                </div>
+
+                {/* Inline stats row */}
+                <div className={styles.disciplineStatsRow}>
+                  <span className={styles.statInline}>
+                    <strong>{disciplineData.totalPoints}</strong>/{disciplineData.maxThreshold} points
+                  </span>
+                  <span className={styles.statInline}>
+                    <strong>{disciplineData.infractionCount}</strong> infraction{disciplineData.infractionCount !== 1 ? 's' : ''}
+                  </span>
+                  <span className={styles.statInline}>
+                    <strong>{disciplineData.discActionCount}</strong> action{disciplineData.discActionCount !== 1 ? 's' : ''}
+                  </span>
+                </div>
+
+                {/* Timeline list */}
+                <div className={styles.timelineList}>
+                  {disciplineData.timeline.map((item) => (
+                    <div
+                      key={`${item.type}-${item.id}`}
+                      className={styles.timelineRow}
+                      onClick={() => onTabChange?.('discipline')}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter') onTabChange?.('discipline'); }}
+                    >
+                      <span className={styles.timelineDate}>
+                        {format(parseISO(item.date), 'MMM d')}
+                      </span>
+                      <span className={item.type === 'infraction' ? styles.timelineBadgeInfraction : styles.timelineBadgeAction}>
+                        {item.type === 'infraction' ? 'Infraction' : 'Action'}
+                      </span>
+                      <span className={styles.timelineLabel}>{item.label}</span>
+                      <span className={styles.timelinePoints}>
+                        {item.type === 'infraction' && item.points > 0 ? `${item.points} pts` : ''}
+                      </span>
+                      <span className={styles.timelineLeader}>{item.leaderName}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className={styles.noData}>No infractions in the last 90 days</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ============================================================
+          Stubs — Evaluations & Pathway inline cards
+          ============================================================ */}
+      <div className={styles.stubsRow}>
+        <div className={styles.stubCard}>
+          <span className={styles.stubTitle}>Evaluations</span>
+          <span className={styles.stubBadge}>Coming Soon</span>
+        </div>
+        <div className={styles.stubCard}>
+          <span className={styles.stubTitle}>Pathway</span>
+          <span className={styles.stubBadge}>Coming Soon</span>
+        </div>
+      </div>
+    </div>
   );
 }

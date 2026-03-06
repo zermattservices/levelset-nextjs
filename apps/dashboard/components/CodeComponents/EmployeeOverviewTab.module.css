@@ -1,100 +1,165 @@
+/* ---------------------------------------------------------------
+   EmployeeOverviewTab — mirrors OperationalExcellencePage styles
+   --------------------------------------------------------------- */
+
 .container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 24px;
-  overflow-y: auto;
-  background-color: var(--ls-color-bg-container);
+  gap: 20px;
+  padding: 20px 24px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.section {
+/* Score Cards — identical to OE page scoreCardsSection */
+.scoreCardsSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.scoreCardsSection > * {
+  min-width: 0;
+}
+
+.oeCardCell {
+  grid-row: 1 / 3;
+  grid-column: 1;
+  display: flex;
+  min-width: 0;
+}
+
+.oeCardCell > * {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Bottom Section — two-column layout (matches OE page bottomSection) */
+.bottomSection {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  width: 100%;
+  align-items: stretch;
+  min-width: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+.bottomCard {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
-.sectionTitle {
+/* Card — identical to OE page chartCard / improversCard */
+.card {
+  background: var(--ls-color-bg-card);
+  box-shadow: inset 0 0 0 1px #e9eaeb;
+  filter: drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05));
+  border-radius: 16px;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card header — identical to OE page chartHeader */
+.cardHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cardTitle {
   font-family: "Satoshi", sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--ls-color-text-secondary);
+  color: var(--ls-color-text-primary);
+  margin: 0;
+}
+
+.cardSubtitle {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-text-caption);
+}
+
+/* Position rows — identical to OE page improversTable style */
+.positionsTable {
+  width: 100%;
+  border-collapse: collapse;
+  flex: 1;
+}
+
+.positionsScrollArea {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.positionsTable th {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ls-color-text-caption);
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e9eaeb;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  height: 36px;
+  box-sizing: border-box;
 }
 
-.card {
-  border: 1px solid var(--ls-color-muted-border);
-  border-radius: 12px;
-  padding: 16px;
-  background-color: var(--ls-color-bg-container);
+.positionsTable th:last-child {
+  text-align: right;
 }
 
-.scoreCircle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+.positionsTable td {
   font-family: "Satoshi", sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.pillarsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 12px;
-}
-
-.pillarCard {
-  border: 1px solid var(--ls-color-muted-border);
-  border-radius: 12px;
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.pillarName {
-  font-family: "Satoshi", sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--ls-color-text-caption);
+  color: var(--ls-color-text-primary);
+  padding: 10px 8px;
+  border-bottom: 1px solid #f5f5f5;
+  height: 44px;
+  box-sizing: border-box;
 }
 
-.pillarScore {
-  font-family: "Satoshi", sans-serif;
-  font-size: 20px;
+.positionsTable tr:last-child td {
+  border-bottom: none;
+}
+
+.positionAvg {
   font-weight: 700;
+  text-align: right;
 }
 
-.changeIndicator {
-  font-family: "Satoshi", sans-serif;
+.ratingCount {
   font-size: 12px;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.changePositive {
-  color: var(--ls-color-success-base);
-}
-
-.changeNegative {
-  color: var(--ls-color-destructive-base);
-}
-
-.changeNeutral {
   color: var(--ls-color-text-caption);
+  font-weight: 400;
+  margin-left: 4px;
 }
 
+/* Discipline — progress bar */
 .progressBar {
   height: 8px;
   border-radius: 4px;
   background-color: var(--ls-color-muted-soft);
   overflow: hidden;
+  margin-bottom: 8px;
 }
 
 .progressFill {
@@ -103,82 +168,219 @@
   transition: width 0.3s ease;
 }
 
-.positionRow {
+/* Discipline — inline stats row */
+.disciplineStatsRow {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.statInline {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-text-caption);
+}
+
+.statInline strong {
+  font-weight: 700;
+  color: var(--ls-color-text-primary);
+}
+
+/* Discipline — timeline list */
+.timelineList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.timelineRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.timelineRow:hover {
+  background: var(--ls-color-muted-soft);
+}
+
+.timelineRow:last-child {
+  border-bottom: none;
+}
+
+.timelineDate {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-text-caption);
+  min-width: 72px;
+  flex-shrink: 0;
+}
+
+.timelineBadge {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.timelineBadgeInfraction {
+  composes: timelineBadge;
+  background: var(--ls-color-destructive-light);
+  color: var(--ls-color-destructive-medium);
+}
+
+.timelineBadgeAction {
+  composes: timelineBadge;
+  background: var(--ls-color-warning-soft);
+  color: var(--ls-color-text-primary);
+}
+
+.timelineLabel {
+  font-family: "Satoshi", sans-serif;
+  font-size: 14px;
+  color: var(--ls-color-text-primary);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timelinePoints {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-destructive-medium);
+  min-width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.timelineLeader {
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  color: var(--ls-color-text-caption);
+  min-width: 80px;
+  text-align: right;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Stubs row */
+.stubsRow {
+  display: flex;
+  gap: 16px;
+}
+
+.stubCard {
+  flex: 1;
+  background: var(--ls-color-bg-card);
+  box-shadow: inset 0 0 0 1px #e9eaeb;
+  filter: drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05));
+  border-radius: 16px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
 }
 
-.positionRow + .positionRow {
-  border-top: 1px solid var(--ls-color-muted-border);
-}
-
-.positionName {
-  font-family: "Satoshi", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ls-color-text-secondary);
-}
-
-.positionAvg {
+.stubTitle {
   font-family: "Satoshi", sans-serif;
   font-size: 16px;
-  font-weight: 700;
-  min-width: 40px;
-  text-align: right;
+  font-weight: 600;
+  color: var(--ls-color-text-primary);
 }
 
-.ratingCount {
+.stubBadge {
   font-family: "Satoshi", sans-serif;
-  font-size: 12px;
-  color: var(--ls-color-text-caption);
-  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  background: var(--ls-color-brand-soft);
+  padding: 4px 12px;
+  border-radius: 12px;
 }
 
-.stubMessage {
+/* Empty / no-data state */
+.noData {
   font-family: "Satoshi", sans-serif;
   font-size: 14px;
   color: var(--ls-color-text-caption);
   text-align: center;
   padding: 24px 16px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.twoColumn {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+/* Skeleton states */
+.skeletonCard {
+  background: var(--ls-color-bg-card);
+  box-shadow: inset 0 0 0 1px #e9eaeb;
+  border-radius: 16px;
+  padding: 20px;
+  flex: 1;
+  min-width: 0;
 }
 
-.statValue {
-  font-family: "Satoshi", sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--ls-color-text-primary);
+/* Responsive — tablet */
+@media (max-width: 1000px) {
+  .scoreCardsSection {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .oeCardCell {
+    grid-row: auto;
+    grid-column: 1 / -1;
+  }
 }
 
-.statLabel {
-  font-family: "Satoshi", sans-serif;
-  font-size: 12px;
-  color: var(--ls-color-text-caption);
+/* Responsive — small tablet */
+@media (max-width: 800px) {
+  .scoreCardsSection {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bottomSection {
+    flex-direction: column;
+  }
+
+  .container {
+    padding: 16px;
+    overflow-y: auto;
+  }
 }
 
-.recentItem {
-  font-family: "Satoshi", sans-serif;
-  font-size: 13px;
-  color: var(--ls-color-text-secondary);
-}
+/* Responsive — mobile */
+@media (max-width: 600px) {
+  .scoreCardsSection {
+    grid-template-columns: 1fr;
+  }
 
-.recentDate {
-  font-family: "Satoshi", sans-serif;
-  font-size: 12px;
-  color: var(--ls-color-text-caption);
-}
+  .oeCardCell {
+    grid-row: auto;
+    grid-column: auto;
+  }
 
-.noData {
-  font-family: "Satoshi", sans-serif;
-  font-size: 14px;
-  color: var(--ls-color-text-caption);
-  padding: 16px;
-  text-align: center;
+  .stubsRow {
+    flex-direction: column;
+  }
+
+  .disciplineStatsRow {
+    flex-direction: column;
+    gap: 8px;
+  }
 }

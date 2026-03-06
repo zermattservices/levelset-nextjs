@@ -1037,6 +1037,7 @@ export function EmployeeModal({
       <EmployeeOverviewTab
         employee={employee}
         locationId={locationId}
+        onTabChange={(tab) => setCurrentTab(tab as any)}
       />
     );
   };
