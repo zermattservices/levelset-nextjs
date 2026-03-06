@@ -21,11 +21,11 @@ export function AnalyticsMetricCard({
   return (
     <Box
       sx={{
-        backgroundColor: 'var(--ls-color-bg-container)',
-        borderRadius: 2,
+        backgroundColor: 'var(--ls-color-bg-card)',
+        borderRadius: '16px',
         border: '1px solid var(--ls-color-muted-border)',
         boxShadow: '0 1px 3px var(--ls-color-shadow-lg)',
-        padding: 2,
+        padding: '20px',
         display: 'flex',
         flexDirection: 'column',
         gap: 1, // 8px gap (reduced from 12px)

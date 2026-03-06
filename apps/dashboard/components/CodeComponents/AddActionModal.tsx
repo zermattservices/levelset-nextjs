@@ -164,7 +164,7 @@ export function AddActionModal({
           .select('name, org_id')
           .eq('id', locationId)
           .single();
-
+        
         if (!locError && locData) {
           setLocationName(locData.name);
           setLocationOrgId(locData.org_id ?? null);
@@ -172,7 +172,7 @@ export function AddActionModal({
 
         // Fetch disc_actions_rubric options - first try org-level, then fallback to location-level
         let rubricData: any[] | null = null;
-
+        
         // First, try org-level actions (location_id IS NULL)
         if (locData?.org_id) {
           const { data: orgRubricData, error: orgRubricError } = await supabase
@@ -181,12 +181,12 @@ export function AddActionModal({
             .eq('org_id', locData.org_id)
             .is('location_id', null)
             .order('points_threshold', { ascending: true });
-
+          
           if (!orgRubricError && orgRubricData && orgRubricData.length > 0) {
             rubricData = orgRubricData;
           }
         }
-
+        
         // Fallback to location-specific actions
         if (!rubricData || rubricData.length === 0) {
           const { data: locRubricData, error: locRubricError } = await supabase
@@ -194,12 +194,12 @@ export function AddActionModal({
             .select('*')
             .eq('location_id', locationId)
             .order('points_threshold', { ascending: true });
-
+          
           if (!locRubricError && locRubricData) {
             rubricData = locRubricData;
           }
         }
-
+        
         if (rubricData) {
           setDiscActionsRubricOptions(rubricData);
         }
@@ -639,3 +639,4 @@ export function AddActionModal({
     </LocalizationProvider>
   );
 }
+

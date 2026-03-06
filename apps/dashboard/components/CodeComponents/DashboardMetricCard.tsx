@@ -67,6 +67,10 @@ interface DashboardMetricCardProps {
   selected?: boolean;
   titleBadge?: string;
   size?: 'default' | 'large';
+  /** Compact layout: title + score/trend only (no changeText/periodLabel).
+   *  Default size: score & trend badge on same row.
+   *  Large size: score on one row, trend badge below. */
+  layout?: 'default' | 'compact';
 }
 
 interface MetricConfig {
@@ -177,6 +181,7 @@ export function DashboardMetricCard({
   selected = false,
   titleBadge,
   size = 'default',
+  layout = 'default',
 }: DashboardMetricCardProps) {
   const router = useRouter();
   const supabase = React.useMemo(() => createSupabaseClient(), []);
@@ -395,7 +400,7 @@ export function DashboardMetricCard({
 
   const isClickable = Boolean(onClick || linkHref);
   const containerClasses = [styles.root, className].filter(Boolean).join(' ');
-  const cardClasses = [styles.metricItem, isClickable ? styles.clickable : '', selected ? styles.selected : '', size === 'large' ? styles.large : '']
+  const cardClasses = [styles.metricItem, isClickable ? styles.clickable : '', selected ? styles.selected : '', size === 'large' ? styles.large : '', layout === 'compact' ? styles.compact : '']
     .filter(Boolean)
     .join(' ');
 
@@ -457,7 +462,24 @@ export function DashboardMetricCard({
         onKeyDown={isClickable ? handleKeyDown : undefined}
         aria-label={`${displayTitle} summary`}
       >
-        {customMetric ? (
+        {customMetric && layout === 'compact' ? (
+          /* ── Compact layout: title + score row with trend badge ── */
+          <>
+            <div className={styles.title}>
+              {customMetric.title}
+            </div>
+            <div className={styles.compactScoreRow}>
+              <span className={styles.primaryValue}>
+                {customMetric.primaryValue}
+                {customMetric.valueSuffix && <span className={styles.valueSuffix}>{customMetric.valueSuffix}</span>}
+              </span>
+              <div className={[styles.trendBadge, customMetric.isNegativeChange ? styles.negative : ''].filter(Boolean).join(' ')} aria-live="polite">
+                <ArrowUpIcon className={[styles.trendIcon, customMetric.percentChange < 0 ? styles.down : ''].filter(Boolean).join(' ')} />
+                <span>{`${customMetric.percentChange > 0 ? '+' : ''}${customMetric.percentChange.toFixed(1)}%`}</span>
+              </div>
+            </div>
+          </>
+        ) : customMetric ? (
           <>
             <div className={styles.titleAndTrend}>
               <div className={styles.title}>

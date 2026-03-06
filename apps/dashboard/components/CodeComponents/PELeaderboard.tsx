@@ -261,8 +261,7 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
         padding: '20px',
         borderRadius: '16px',
         backgroundColor: 'var(--ls-color-bg-card)',
-        boxShadow: 'inset 0 0 0 1px var(--ls-color-border-light)',
-        filter: 'drop-shadow(0px 1px 1px var(--ls-color-shadow-lg))',
+        border: '1px solid var(--ls-color-muted-border)',
         flex: 1,
         minWidth: 280,
         gap: 2,
@@ -454,8 +453,8 @@ export function PELeaderboard() {
             flexWrap: 'wrap',
             gap: 2,
             padding: '12px 16px',
-            backgroundColor: 'var(--ls-color-bg-container)',
-            borderRadius: '12px',
+            backgroundColor: 'var(--ls-color-bg-card)',
+            borderRadius: '16px',
             border: '1px solid var(--ls-color-muted-border)',
           }}
         >
@@ -589,8 +588,8 @@ export function PELeaderboard() {
               {rest.length > 0 && (
                 <Box
                   sx={{
-                    backgroundColor: 'var(--ls-color-bg-container)',
-                    borderRadius: '12px',
+                    backgroundColor: 'var(--ls-color-bg-card)',
+                    borderRadius: '16px',
                     border: '1px solid var(--ls-color-muted-border)',
                     overflow: 'hidden',
                   }}

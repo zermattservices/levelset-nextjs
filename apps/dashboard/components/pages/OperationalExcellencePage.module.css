@@ -459,16 +459,22 @@
 
 .detailPositionCell {
   flex: 1;
-  min-width: 180px;
-  padding: 6px 12px 6px 100px;
+  min-width: 0;
+  padding: 6px 10px;
+  box-sizing: border-box;
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: var(--ls-color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .detailPillarCell {
   width: 155px;
+  box-sizing: border-box;
+  flex-shrink: 0;
   padding: 6px 10px;
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
@@ -478,10 +484,14 @@
 
 .detailChangeCell {
   width: 90px;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .detailRatingsCell {
   width: 80px;
+  box-sizing: border-box;
+  flex-shrink: 0;
   padding: 6px 10px;
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
@@ -557,7 +567,7 @@
 
 @media (max-width: 768px) {
   .detailPositionCell {
-    padding-left: 48px;
+    padding: 6px 10px;
   }
 
   .chartCard {

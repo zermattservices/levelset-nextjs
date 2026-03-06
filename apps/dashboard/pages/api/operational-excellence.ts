@@ -72,9 +72,11 @@ interface EmployeeScore {
   change: number | null;
   pillarScores: Record<string, number>;
   priorPillarScores: Record<string, number>;
+  pillarHasData: Record<string, boolean>;
   positions: EmployeePositionDetail[];
   ratingCount: number;
   priorRatingCount: number;
+  totalRatings: number;
 }
 
 interface TrendPoint {
@@ -117,7 +119,10 @@ interface PillarAccumulator {
   totalWeight: number;
 }
 
-/** Compute pillar scores from weighted contributions */
+/** Compute pillar scores from weighted contributions.
+ *  Overall score only includes pillars that have rating data —
+ *  pillars with no data are excluded from the weighted average
+ *  (divide by the sum of weights with data, not 100%). */
 function computePillarScores(
   contributions: Record<string, PillarAccumulator>,
   pillarDefs: PillarDef[]
@@ -131,11 +136,12 @@ function computePillarScores(
     if (acc && acc.totalWeight > 0) {
       const avg = acc.weightedSum / acc.totalWeight; // still on 1-3 scale
       pillarScores[pillar.id] = normalizeTo100(avg);
+      // Only include this pillar's weight in the overall average
+      overallScore += pillarScores[pillar.id] * (pillar.weight ?? 0);
+      totalPillarWeight += pillar.weight ?? 0;
     } else {
       pillarScores[pillar.id] = 0;
     }
-    overallScore += pillarScores[pillar.id] * (pillar.weight ?? 0);
-    totalPillarWeight += pillar.weight ?? 0;
   }
 
   return {
@@ -412,6 +418,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
       const empScores = computePillarScores(empContributions, pillarDefs);
 
+      // Build pillarHasData map
+      const pillarHasData: Record<string, boolean> = {};
+      for (const pillar of pillarDefs) {
+        const acc = empContributions[pillar.id];
+        pillarHasData[pillar.id] = !!(acc && acc.totalWeight > 0);
+      }
+
       // Prior period contributions
       const priorEmpRatings = priorRatingsByEmployee.get(empId) || [];
       const priorEmpContributions: Record<string, PillarAccumulator> = {};
@@ -479,9 +492,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               Object.entries(priorEmpScores.pillarScores).map(([k, v]) => [k, Math.round(v * 10) / 10])
             )
           : {},
+        pillarHasData,
         positions: positionDetails,
         ratingCount: empRatings.length,
         priorRatingCount: priorEmpRatings.length,
+        totalRatings: empRatings.length,
       });
     }
 

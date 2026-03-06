@@ -236,6 +236,69 @@
   color: var(--ls-color-text-caption);
 }
 
+/* ── Compact layout ── */
+
+/* Compact: score row — score + trend badge inline */
+.compactScoreRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+  flex-wrap: wrap;
+}
+
+/* Compact default (small cards): tighter title */
+.metricItem.compact .title {
+  font-size: 16px;
+  line-height: 22px;
+}
+
+/* Compact default: smaller trend badge */
+.metricItem.compact .trendBadge {
+  font-size: 14px;
+  line-height: 20px;
+  padding: 4px 10px;
+  column-gap: 4px;
+}
+
+.metricItem.compact .trendIcon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Compact default: score text */
+.metricItem.compact .primaryValue {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.metricItem.compact .valueSuffix {
+  font-size: 14px;
+}
+
+/* Compact + large: stacked layout — score then trend below */
+.metricItem.compact.large .title {
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.metricItem.compact.large .compactScoreRow {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.metricItem.compact.large .primaryValue {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.metricItem.compact.large .valueSuffix {
+  font-size: 24px;
+}
+
 .srOnly {
   border: 0;
   clip: rect(0 0 0 0);

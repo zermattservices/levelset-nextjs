@@ -234,7 +234,7 @@ export function RatingsAnalytics({
         }
         delta={
           hasPriorData ? (
-            <span style={{ color: currentMetrics.count >= priorMetrics.count ? '#38A169' : '#E53E3E', fontWeight: 600 }}>
+            <span style={{ color: currentMetrics.count >= priorMetrics.count ? 'var(--ls-color-success-vivid)' : 'var(--ls-color-destructive-vivid)', fontWeight: 600 }}>
               {formatChange(currentMetrics.count, priorMetrics.count)}
             </span>
           ) : (
@@ -269,7 +269,7 @@ export function RatingsAnalytics({
         }
         delta={
           hasPriorData ? (
-            <span style={{ color: currentMetrics.avgRating >= priorMetrics.avgRating ? '#38A169' : '#E53E3E', fontWeight: 600 }}>
+            <span style={{ color: currentMetrics.avgRating >= priorMetrics.avgRating ? 'var(--ls-color-success-vivid)' : 'var(--ls-color-destructive-vivid)', fontWeight: 600 }}>
               {(currentMetrics.avgRating - priorMetrics.avgRating >= 0 ? '+' : '')}{(currentMetrics.avgRating - priorMetrics.avgRating).toFixed(2)}
             </span>
           ) : (
@@ -304,7 +304,7 @@ export function RatingsAnalytics({
         }
         delta={
           hasPriorData ? (
-            <span style={{ color: currentMetrics.ratingsPerDay >= priorMetrics.ratingsPerDay ? '#38A169' : '#E53E3E', fontWeight: 600 }}>
+            <span style={{ color: currentMetrics.ratingsPerDay >= priorMetrics.ratingsPerDay ? 'var(--ls-color-success-vivid)' : 'var(--ls-color-destructive-vivid)', fontWeight: 600 }}>
               {(currentMetrics.ratingsPerDay - priorMetrics.ratingsPerDay >= 0 ? '+' : '')}{(currentMetrics.ratingsPerDay - priorMetrics.ratingsPerDay).toFixed(1)}
             </span>
           ) : (

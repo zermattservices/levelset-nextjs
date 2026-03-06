@@ -2,7 +2,7 @@ import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { styled } from '@mui/material/styles';
-import { Button, Box, Skeleton, TextField, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
+import { Button, Box, Skeleton, TextField, Dialog, DialogTitle, DialogContent, IconButton, Tooltip as MuiTooltip } from '@mui/material';
 import { DataGridPro, type GridColDef, type GridRowParams } from '@mui/x-data-grid-pro';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -460,40 +460,88 @@ export function OperationalExcellencePage() {
       headerName: '#',
       width: 50,
       sortable: false,
-      renderCell: (params) => (
-        <span style={{ fontWeight: 700, color: 'var(--ls-color-text-caption)', fontFamily }}>{params.value}</span>
-      ),
+      colSpan: (_value: any, row: any) => {
+        if (row.__isDivider) return 99; // span all columns — DataGrid clamps to actual count
+        return undefined;
+      },
+      renderCell: (params) => {
+        if (params.row.__isDivider) {
+          return (
+            <span style={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--ls-color-text-caption)',
+              fontStyle: 'italic',
+            }}>
+              {params.row.name}
+            </span>
+          );
+        }
+        if (params.value == null) {
+          return <span style={{ color: 'var(--ls-color-text-caption)', fontFamily }}>—</span>;
+        }
+        return <span style={{ fontWeight: 700, color: 'var(--ls-color-text-caption)', fontFamily }}>{params.value}</span>;
+      },
     },
     {
       field: 'name',
       headerName: 'Team Member',
       flex: 1,
       minWidth: 180,
-      renderCell: (params) => (
-        <span
-          className={sty.employeeNameLink}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleEmployeeClick(params.row.employeeId, params.value);
-          }}
-        >
-          {params.value}
-        </span>
-      ),
+      sortable: false,
+      renderCell: (params) => {
+        if (params.row.__isDivider) {
+          return (
+            <span style={{
+              fontFamily,
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--ls-color-text-caption)',
+              fontStyle: 'italic',
+            }}>
+              {params.value}
+            </span>
+          );
+        }
+        return (
+          <span
+            className={sty.employeeNameLink}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEmployeeClick(params.row.employeeId, params.value);
+            }}
+          >
+            {params.value}
+          </span>
+        );
+      },
     },
     {
       field: 'overallScore',
       headerName: 'OE Score',
       width: 100,
-      renderCell: (params) => (
-        <span style={{ fontWeight: 700, fontFamily, color: 'var(--ls-color-text-primary)' }}>{params.value.toFixed(1)}</span>
-      ),
+      sortable: false,
+      renderCell: (params) => {
+        if (params.row.__isDivider) return null;
+        return <span style={{ fontWeight: 700, fontFamily, color: 'var(--ls-color-text-primary)' }}>{params.value?.toFixed(1)}</span>;
+      },
     },
     ...pillars.map((p) => ({
       field: `pillar_${p.id}`,
       headerName: p.name,
       width: 155,
+      sortable: false,
       renderCell: (params: any) => {
+        if (params.row.__isDivider) return null;
+        const hasData = params.row.pillarHasData?.[p.id];
+        if (!hasData) {
+          return (
+            <MuiTooltip title="This employee doesn't have any ratings in this pillar yet" arrow>
+              <span style={{ display: 'inline-block', width: '100%', cursor: 'default' }}>&nbsp;</span>
+            </MuiTooltip>
+          );
+        }
         const val = params.value as number;
         const isSelected = selectedPillarId === p.id;
         return (
@@ -511,7 +559,9 @@ export function OperationalExcellencePage() {
       field: 'change',
       headerName: 'Change',
       width: 90,
+      sortable: false,
       renderCell: (params) => {
+        if (params.row.__isDivider) return null;
         const val = params.value as number | null;
         if (val === null || val === undefined) {
           return <span style={{ fontFamily, color: 'var(--ls-color-text-caption)' }}>—</span>;
@@ -532,33 +582,67 @@ export function OperationalExcellencePage() {
       field: 'ratingCount',
       headerName: 'Ratings',
       width: 80,
-      renderCell: (params) => (
-        <span style={{ fontFamily, color: 'var(--ls-color-text-caption)' }}>{params.value}</span>
-      ),
+      sortable: false,
+      renderCell: (params) => {
+        if (params.row.__isDivider) return null;
+        return <span style={{ fontFamily, color: 'var(--ls-color-text-caption)' }}>{params.value}</span>;
+      },
     },
   ];
 
-  // Build rows
-  const rows = (data?.employees || []).map((emp, idx) => {
-    const row: any = {
-      id: emp.employeeId,
-      rank: idx + 1,
-      employeeId: emp.employeeId,
-      name: emp.name,
-      overallScore: emp.overallScore,
-      change: emp.change,
-      ratingCount: emp.ratingCount,
+  // Build rows — partition by 5-rating minimum, with divider
+  const rows = (() => {
+    const allEmployees = data?.employees || [];
+    const buildRow = (emp: any, rank: number) => {
+      const row: any = {
+        id: emp.employeeId,
+        rank,
+        employeeId: emp.employeeId,
+        name: emp.name,
+        overallScore: emp.overallScore,
+        change: emp.change,
+        ratingCount: emp.ratingCount,
+        totalRatings: emp.totalRatings ?? emp.ratingCount,
+        pillarHasData: emp.pillarHasData ?? {},
+      };
+      for (const p of pillars) {
+        row[`pillar_${p.id}`] = emp.pillarScores[p.id] ?? null;
+      }
+      return row;
+    };
+
+    const ranked = allEmployees.filter((e: any) => (e.totalRatings ?? e.ratingCount) >= 5);
+    const unranked = allEmployees.filter((e: any) => (e.totalRatings ?? e.ratingCount) < 5);
+
+    const rankedRows = ranked.map((emp: any, idx: number) => buildRow(emp, idx + 1));
+    const unrankedRows = unranked.map((emp: any) => buildRow(emp, null));
+
+    if (unrankedRows.length === 0) return rankedRows;
+
+    const dividerRow: any = {
+      id: '__divider',
+      __isDivider: true,
+      rank: null,
+      employeeId: null,
+      name: 'Employees need at least 5 ratings in the current period to be ranked in this table',
+      overallScore: null,
+      change: null,
+      ratingCount: null,
+      totalRatings: null,
+      pillarHasData: {},
     };
     for (const p of pillars) {
-      row[`pillar_${p.id}`] = emp.pillarScores[p.id] ?? null;
+      dividerRow[`pillar_${p.id}`] = null;
     }
-    return row;
-  });
+
+    return [...rankedRows, dividerRow, ...unrankedRows];
+  })();
 
   // Build detail panel for expandable rows
   const getDetailPanelContent = React.useCallback(
     (params: GridRowParams) => {
-      const emp = data?.employees.find((e) => e.employeeId === params.row.employeeId);
+      if (params.row.__isDivider) return null;
+      const emp = data?.employees.find((e: any) => e.employeeId === params.row.employeeId);
       if (!emp || emp.positions.length === 0) {
         return <div className={sty.detailPanel} style={{ color: 'var(--ls-color-text-caption)', fontFamily }}>No position data available</div>;
       }
@@ -571,7 +655,11 @@ export function OperationalExcellencePage() {
               className={sty.detailRow}
               style={posIdx < emp.positions.length - 1 ? { borderBottom: '1px solid var(--ls-color-muted-border)' } : undefined}
             >
+              {/* Spacers matching DataGrid columns: toggle(40) + rank(50) */}
+              <div style={{ width: 90, flexShrink: 0 }} />
               <div className={sty.detailPositionCell}>{pos.positionName}</div>
+              {/* Spacer matching OE Score column */}
+              <div style={{ width: 100, flexShrink: 0 }} />
               {pillars.map((p) => {
                 const isSelected = selectedPillarId === p.id;
                 return (
@@ -925,12 +1013,11 @@ export function OperationalExcellencePage() {
                           loading={loading}
                           getDetailPanelContent={getDetailPanelContent}
                           getDetailPanelHeight={() => 'auto'}
-                          initialState={{
-                            sorting: { sortModel: [{ field: 'overallScore', sort: 'desc' }] },
-                          }}
+                          sortModel={[]}
                           pageSizeOptions={[25, 50, 100]}
                           disableRowSelectionOnClick
                           autoHeight
+                          getRowClassName={(params) => params.row.__isDivider ? 'oe-divider-row' : ''}
                           sx={{
                             border: 'none',
                             fontFamily,
@@ -954,6 +1041,13 @@ export function OperationalExcellencePage() {
                             },
                             '& .MuiDataGrid-row:hover': {
                               backgroundColor: 'var(--ls-color-bg-surface)',
+                            },
+                            '& .oe-divider-row': {
+                              backgroundColor: 'var(--ls-color-muted-soft)',
+                              pointerEvents: 'none',
+                            },
+                            '& .oe-divider-row .MuiDataGrid-cell': {
+                              borderBottom: 'none',
                             },
                           }}
                         />

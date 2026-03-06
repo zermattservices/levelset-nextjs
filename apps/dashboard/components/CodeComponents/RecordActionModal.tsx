@@ -233,6 +233,7 @@ export function RecordActionModal({
               setNeedsLeaderPicker(false);
             } else {
               // Admin without employee record — fetch leaders at this location for the picker
+              console.log('[RecordActionModal] Admin user without employee record, loading leader picker');
               setActingLeader(null);
               setNeedsLeaderPicker(true);
 
