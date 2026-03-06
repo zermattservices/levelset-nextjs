@@ -154,7 +154,7 @@
   padding: 8px 12px;
   font-family: "Satoshi";
   font-size: 14px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--ls-color-muted-border);
   border-radius: 4px;
   resize: none;
   overflow: hidden;
@@ -235,7 +235,7 @@
 .pillarDescriptionText {
   font-family: "Satoshi";
   font-size: 13px;
-  color: #4b5563;
+  color: var(--ls-color-text-secondary);
   margin: 0;
   line-height: 1.6;
 }

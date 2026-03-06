@@ -116,7 +116,7 @@
 }
 
 .email {
-  color: #4b5563;
+  color: var(--ls-color-text-secondary);
 }
 
 .editEmailRow {

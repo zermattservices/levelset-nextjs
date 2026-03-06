@@ -132,7 +132,7 @@
   height: 28px;
   border-radius: 50%;
   background-color: var(--ls-color-bg-hover);
-  color: #4b5563;
+  color: var(--ls-color-text-secondary);
   font-family: "Satoshi";
   font-size: 13px;
   font-weight: 600;

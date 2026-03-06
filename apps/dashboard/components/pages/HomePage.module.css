@@ -568,7 +568,7 @@
 .pillarDescriptionText {
   font-family: "Satoshi", sans-serif;
   font-size: 13px;
-  color: #4b5563;
+  color: var(--ls-color-text-secondary);
   margin: 0;
   line-height: 1.6;
 }

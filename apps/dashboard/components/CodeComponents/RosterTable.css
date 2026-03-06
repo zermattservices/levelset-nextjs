@@ -183,9 +183,9 @@
 }
 
 .points-badge.points-0-grey {
-  background-color: #f3f4f6;
-  color: #111827;
-  border-color: #d1d5db;
+  background-color: var(--ls-color-neutral-foreground);
+  color: var(--ls-color-text-primary);
+  border-color: var(--ls-color-muted-border);
 }
 
 .points-badge.points-10 {
@@ -220,12 +220,12 @@
 
 /* Arrow Button Styling */
 .arrow-button {
-  color: #6b7280;
+  color: var(--ls-color-muted);
 }
 
 .arrow-button:hover {
-  color: #374151;
-  background-color: #f3f4f6;
+  color: var(--ls-color-text-secondary);
+  background-color: var(--ls-color-neutral-foreground);
 }
 
 /* Centered columns */
