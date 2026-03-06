@@ -23,6 +23,7 @@
   padding: 20px;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
   flex: 1;
+  container-type: inline-size;
 }
 
 .clickable {
@@ -45,6 +46,8 @@
   column-gap: 8px;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .title {
@@ -70,6 +73,8 @@
   font-weight: 700;
   color: var(--ls-color-success-vivid);
   line-height: 28px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .trendBadge.negative {
@@ -215,6 +220,13 @@
   font-weight: 500;
   color: var(--ls-color-text-caption);
   margin-left: 8px;
+}
+
+/* Hide the weight badge when the card is too narrow to fit both badges */
+@container (max-width: 240px) {
+  .titleBadge {
+    display: none;
+  }
 }
 
 .valueSuffix {
