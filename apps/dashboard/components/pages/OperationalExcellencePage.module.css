@@ -294,7 +294,7 @@
 .chartCard {
   background: var(--ls-color-bg-card);
   box-shadow: inset 0 0 0 1px var(--ls-color-muted-border);
-  filter: drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05));
+  filter: drop-shadow(0px 1px 1px var(--ls-color-shadow-lg));
   border-radius: 16px;
   padding: 20px;
   width: 100%;
@@ -328,7 +328,7 @@
 .improversCard {
   background: var(--ls-color-bg-card);
   box-shadow: inset 0 0 0 1px var(--ls-color-muted-border);
-  filter: drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05));
+  filter: drop-shadow(0px 1px 1px var(--ls-color-shadow-lg));
   border-radius: 16px;
   padding: 20px;
   width: 100%;
@@ -421,7 +421,7 @@
 .dataGridCard {
   background: var(--ls-color-bg-card);
   border: 1px solid var(--ls-color-muted-border);
-  filter: drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05));
+  filter: drop-shadow(0px 1px 1px var(--ls-color-shadow-lg));
   border-radius: 16px;
   overflow: hidden;
   width: 100%;

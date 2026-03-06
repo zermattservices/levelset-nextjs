@@ -992,7 +992,7 @@ export function OperationalExcellencePage() {
                                   fontSize: 13,
                                   borderRadius: 8,
                                   border: `1px solid ${chartGridColor}`,
-                                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                                  boxShadow: '0 4px 12px var(--ls-color-shadow-lg)',
                                   backgroundColor: resolvedTheme === 'dark' ? '#161b22' : '#fff',
                                   color: chartLineColor,
                                 }}

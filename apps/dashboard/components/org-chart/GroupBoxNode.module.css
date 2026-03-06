@@ -11,7 +11,7 @@
 }
 
 .box:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px var(--ls-color-shadow-lg);
 }
 
 .bgFill {
@@ -69,7 +69,7 @@
   border: 1px solid var(--ls-color-border);
   border-left: 3px solid transparent;
   border-radius: var(--ls-radius-md);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px var(--ls-color-shadow-lg);
   cursor: pointer;
   transition: box-shadow 0.15s ease, transform 0.15s ease;
   font-family: var(--ls-font-body);
@@ -80,7 +80,7 @@
 }
 
 .memberCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px var(--ls-color-shadow-lg);
   transform: translateY(-1px);
 }
 

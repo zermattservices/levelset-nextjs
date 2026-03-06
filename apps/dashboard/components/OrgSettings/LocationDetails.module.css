@@ -359,7 +359,7 @@
   background: var(--ls-color-bg-container, #fff);
   border: 1px solid var(--ls-color-border, #D1D5DB);
   border-radius: var(--ls-radius-md, 6px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px var(--ls-color-shadow-lg);
   z-index: 100;
   overflow: hidden;
 }

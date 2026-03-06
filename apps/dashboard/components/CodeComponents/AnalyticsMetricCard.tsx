@@ -23,7 +23,7 @@ export function AnalyticsMetricCard({
       sx={{
         backgroundColor: 'var(--ls-color-bg-container)',
         borderRadius: 2,
-        boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.06)',
+        boxShadow: '0 1px 3px var(--ls-color-shadow-lg)',
         padding: 2,
         display: 'flex',
         flexDirection: 'column',

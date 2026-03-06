@@ -707,7 +707,7 @@ export function FullPEAScoreboard({
         border: '1px solid var(--ls-color-muted-border)',
         borderRadius: '8px',
         overflow: 'hidden',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+        boxShadow: '0 1px 3px var(--ls-color-shadow-lg)'
       }}
     >
       <iframe

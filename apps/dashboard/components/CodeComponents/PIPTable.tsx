@@ -13,7 +13,7 @@ const StyledContainer = styled(Box)(() => ({
   border: "1px solid var(--ls-color-muted-border)",
   backgroundColor: "var(--ls-color-bg-container)",
   overflow: "hidden",
-  boxShadow: "0px 2px 6px rgba(15, 23, 42, 0.04)",
+  boxShadow: "0 1px 3px var(--ls-color-shadow-lg)",
   fontFamily,
   width: "100%",
   height: 650,
