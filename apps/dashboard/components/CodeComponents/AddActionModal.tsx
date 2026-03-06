@@ -13,6 +13,7 @@ import {
   FormControl,
   InputLabel,
   Button,
+  Autocomplete,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -136,6 +137,8 @@ export function AddActionModal({
   const [locationOrgId, setLocationOrgId] = React.useState<string | null>(null);
   const [discActionsRubricOptions, setDiscActionsRubricOptions] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
+  const [needsLeaderPicker, setNeedsLeaderPicker] = React.useState(false);
+  const [locationLeaders, setLocationLeaders] = React.useState<Employee[]>([]);
   const supabase = createSupabaseClient();
 
   // Load initial data
@@ -148,6 +151,8 @@ export function AddActionModal({
       setActionType("");
       setActionId("");
       setNotes("");
+      setNeedsLeaderPicker(false);
+      setLocationLeaders([]);
       return;
     }
 
@@ -159,7 +164,7 @@ export function AddActionModal({
           .select('name, org_id')
           .eq('id', locationId)
           .single();
-        
+
         if (!locError && locData) {
           setLocationName(locData.name);
           setLocationOrgId(locData.org_id ?? null);
@@ -167,7 +172,7 @@ export function AddActionModal({
 
         // Fetch disc_actions_rubric options - first try org-level, then fallback to location-level
         let rubricData: any[] | null = null;
-        
+
         // First, try org-level actions (location_id IS NULL)
         if (locData?.org_id) {
           const { data: orgRubricData, error: orgRubricError } = await supabase
@@ -176,12 +181,12 @@ export function AddActionModal({
             .eq('org_id', locData.org_id)
             .is('location_id', null)
             .order('points_threshold', { ascending: true });
-          
+
           if (!orgRubricError && orgRubricData && orgRubricData.length > 0) {
             rubricData = orgRubricData;
           }
         }
-        
+
         // Fallback to location-specific actions
         if (!rubricData || rubricData.length === 0) {
           const { data: locRubricData, error: locRubricError } = await supabase
@@ -189,56 +194,56 @@ export function AddActionModal({
             .select('*')
             .eq('location_id', locationId)
             .order('points_threshold', { ascending: true });
-          
+
           if (!locRubricError && locRubricData) {
             rubricData = locRubricData;
           }
         }
-        
+
         if (rubricData) {
           setDiscActionsRubricOptions(rubricData);
         }
 
         // Fetch acting leader (current user)
+        const resolvedOrgId = locData?.org_id ?? employee?.org_id ?? null;
         if (currentUserId) {
           setLoadingLeader(true);
-          console.log('[AddActionModal] Fetching app_user for auth_user_id:', currentUserId);
-          
-          if (typeof currentUserId === 'string') {
-            const { data: appUserData, error: appUserError } = await supabase
-              .from('app_users')
-              .select('*')
-              .eq('auth_user_id', currentUserId)
-              .maybeSingle();
-            
-            console.log('[AddActionModal] Fetched app_user data:', appUserData);
-            
-            if (!appUserError && appUserData) {
-              // acting_leader must be an employee.id, not an app_user.id
-              if (!appUserData.employee_id) {
-                console.error('[AddActionModal] app_user has no employee_id! Cannot record action.');
-                setActingLeader(null);
-                setLoadingLeader(false);
-                return;
-              }
 
-              // Fetch the actual employee record
-              const { data: employeeData, error: employeeError } = await supabase
+          const { data: appUserData, error: appUserError } = await supabase
+            .from('app_users')
+            .select('*')
+            .eq('auth_user_id', currentUserId)
+            .maybeSingle();
+
+          if (!appUserError && appUserData) {
+            let employeeData: any = null;
+
+            // Try by employee_id link
+            if (appUserData.employee_id) {
+              const { data } = await supabase
                 .from('employees')
                 .select('*')
                 .eq('id', appUserData.employee_id)
                 .maybeSingle();
+              employeeData = data;
+            }
 
-              if (employeeError || !employeeData) {
-                console.error('[AddActionModal] Error fetching employee:', employeeError);
-                setActingLeader(null);
-                setLoadingLeader(false);
-                return;
-              }
+            // Fallback: try matching by email
+            if (!employeeData && appUserData.email && resolvedOrgId) {
+              const { data } = await supabase
+                .from('employees')
+                .select('*')
+                .eq('email', appUserData.email)
+                .eq('org_id', resolvedOrgId)
+                .eq('active', true)
+                .maybeSingle();
+              employeeData = data;
+            }
 
+            if (employeeData) {
               const employeeLike: Employee = {
                 id: employeeData.id,
-                full_name: employeeData.full_name || `${employeeData.first_name || ''} ${employeeData.last_name || ''}`.trim() || appUserData.email || 'Unknown User',
+                full_name: employeeData.full_name || `${employeeData.first_name || ''} ${employeeData.last_name || ''}`.trim() || 'Unknown',
                 role: employeeData.role || 'User',
                 org_id: employeeData.org_id,
                 location_id: employeeData.location_id || locationId,
@@ -246,6 +251,23 @@ export function AddActionModal({
               };
               setActingLeader(employeeLike);
               setActingLeaderId(employeeData.id);
+              setNeedsLeaderPicker(false);
+            } else {
+              // Admin without employee record — show leader picker
+              setActingLeader(null);
+              setNeedsLeaderPicker(true);
+
+              if (resolvedOrgId) {
+                const { data: leaders } = await supabase
+                  .from('employees')
+                  .select('id, full_name, first_name, last_name, role, org_id, location_id, active, is_leader')
+                  .eq('org_id', resolvedOrgId)
+                  .eq('location_id', locationId)
+                  .eq('active', true)
+                  .eq('is_leader', true)
+                  .order('full_name');
+                setLocationLeaders(leaders || []);
+              }
             }
           }
           setLoadingLeader(false);
@@ -376,12 +398,42 @@ export function AddActionModal({
             disabled
           />
 
-          {/* Acting Leader (disabled) */}
-          <CustomTextField
-            label="Acting Leader"
-            value={loadingLeader ? "Loading..." : (actingLeader?.full_name || "Not available")}
-            disabled
-          />
+          {/* Acting Leader — dropdown for admins, disabled field for linked users */}
+          {needsLeaderPicker ? (
+            <Autocomplete
+              options={locationLeaders}
+              getOptionLabel={(option: Employee) => option.full_name || ''}
+              value={actingLeader}
+              onChange={(_e, newValue) => {
+                setActingLeader(newValue);
+                setActingLeaderId(newValue?.id || '');
+              }}
+              isOptionEqualToValue={(option: Employee, value: Employee) => option.id === value.id}
+              renderInput={(params) => (
+                <CustomTextField
+                  {...params}
+                  label="Acting Leader"
+                  placeholder="Select a leader..."
+                />
+              )}
+              size="small"
+              sx={{
+                '& .MuiAutocomplete-popupIndicator': { color: 'var(--ls-color-muted)' },
+                '& .MuiAutocomplete-clearIndicator': { color: 'var(--ls-color-muted)' },
+              }}
+              slotProps={{
+                paper: {
+                  sx: { fontFamily, fontSize: 14 },
+                },
+              }}
+            />
+          ) : (
+            <CustomTextField
+              label="Acting Leader"
+              value={loadingLeader ? "Loading..." : (actingLeader?.full_name || "Not available")}
+              disabled
+            />
+          )}
 
           {/* Action Date */}
           <DatePicker
@@ -587,4 +639,3 @@ export function AddActionModal({
     </LocalizationProvider>
   );
 }
-

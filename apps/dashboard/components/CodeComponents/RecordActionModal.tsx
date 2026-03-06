@@ -9,6 +9,7 @@ import {
   Typography,
   TextField,
   Button,
+  Autocomplete,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -121,6 +122,48 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
   />
 ));
 
+/**
+ * Attempt to resolve the current auth user to an employee record.
+ * Returns the employee if found, or null if the user is an admin without an employee record.
+ */
+async function resolveAuthUserToEmployee(
+  supabase: any,
+  authUserId: string,
+  orgId: string | null,
+): Promise<Employee | null> {
+  const { data: appUserData, error: appUserError } = await supabase
+    .from('app_users')
+    .select('*')
+    .eq('auth_user_id', authUserId)
+    .maybeSingle();
+
+  if (appUserError || !appUserData) return null;
+
+  // Try by employee_id link first
+  if (appUserData.employee_id) {
+    const { data } = await supabase
+      .from('employees')
+      .select('*')
+      .eq('id', appUserData.employee_id)
+      .maybeSingle();
+    if (data) return data;
+  }
+
+  // Fallback: try matching by email within the org
+  if (appUserData.email && orgId) {
+    const { data } = await supabase
+      .from('employees')
+      .select('*')
+      .eq('email', appUserData.email)
+      .eq('org_id', orgId)
+      .eq('active', true)
+      .maybeSingle();
+    if (data) return data;
+  }
+
+  return null;
+}
+
 export function RecordActionModal({
   open,
   employee,
@@ -140,6 +183,9 @@ export function RecordActionModal({
   const [actingLeader, setActingLeader] = React.useState<Employee | null>(null);
   const [loadingLeader, setLoadingLeader] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+  // When the user is an admin without an employee record, show a leader picker
+  const [needsLeaderPicker, setNeedsLeaderPicker] = React.useState(false);
+  const [locationLeaders, setLocationLeaders] = React.useState<Employee[]>([]);
   const supabase = createSupabaseClient();
 
   // Load location name and acting leader
@@ -148,7 +194,7 @@ export function RecordActionModal({
 
     const fetchData = async () => {
       try {
-        // Fetch location name
+        // Fetch location info
         let resolvedOrgId: string | null = locationOrgId;
 
         if (locationId) {
@@ -157,7 +203,7 @@ export function RecordActionModal({
             .select('name, org_id')
             .eq('id', locationId)
             .single();
-          
+
           if (!locError && locData) {
             setLocationName(locData.name);
             setLocationOrgId(locData.org_id ?? null);
@@ -167,151 +213,57 @@ export function RecordActionModal({
 
         resolvedOrgId = resolvedOrgId ?? employee?.org_id ?? null;
 
-        // Fetch acting leader - look up app_users by auth_user_id
-        if (!currentUser && currentUserId) {
+        // Determine the auth user ID to resolve
+        const authId = currentUserId || (typeof currentUser === 'string' ? currentUser : null);
+
+        if (authId) {
           setLoadingLeader(true);
-          console.log('[RecordActionModal] Fetching app_user for auth_user_id:', currentUserId);
           try {
-            
-            // currentUserId is the auth user ID, look it up in app_users
-            const { data: appUserData, error: appUserError } = await supabase
-              .from('app_users')
-              .select('*')
-              .eq('auth_user_id', currentUserId)
-              .maybeSingle();
-            
-            console.log('[RecordActionModal] App user data:', appUserData);
-            console.log('[RecordActionModal] App user error:', appUserError);
-            
-            if (!appUserError && appUserData) {
-              // Check if app_user has an employee_id - this is required for acting_leader
-              if (!appUserData.employee_id) {
-                console.error('[RecordActionModal] app_user has no employee_id! Cannot record action.');
-                alert('Your user account is not linked to an employee record. Please contact an administrator.');
-                setActingLeader(null);
-                setLoadingLeader(false);
-                return;
-              }
+            const resolved = await resolveAuthUserToEmployee(supabase, authId, resolvedOrgId);
 
-              // Fetch the actual employee record
-              const { data: employeeData, error: employeeError } = await supabase
-                .from('employees')
-                .select('*')
-                .eq('id', appUserData.employee_id)
-                .maybeSingle();
-
-              if (employeeError || !employeeData) {
-                console.error('[RecordActionModal] Error fetching employee:', employeeError);
-                alert('Could not find employee record. Please contact an administrator.');
-                setActingLeader(null);
-                setLoadingLeader(false);
-                return;
-              }
-
-              // Use the employee record for acting_leader
-              const employeeLike: Employee = {
-                id: employeeData.id,
-                full_name: employeeData.full_name || `${employeeData.first_name || ''} ${employeeData.last_name || ''}`.trim() || 'Unknown',
-                role: employeeData.role || 'User',
-                org_id: employeeData.org_id,
-                location_id: employeeData.location_id || locationId,
-                active: employeeData.active ?? true,
-              };
-              console.log('[RecordActionModal] Setting acting leader (employee):', employeeLike);
-              setActingLeader(employeeLike);
+            if (resolved) {
+              setActingLeader({
+                id: resolved.id,
+                full_name: resolved.full_name || `${resolved.first_name || ''} ${resolved.last_name || ''}`.trim() || 'Unknown',
+                role: resolved.role || 'User',
+                org_id: resolved.org_id,
+                location_id: resolved.location_id || locationId,
+                active: resolved.active ?? true,
+              } as Employee);
+              setNeedsLeaderPicker(false);
             } else {
-              console.warn('[RecordActionModal] No app_user found for auth_user_id:', currentUserId);
+              // Admin without employee record — fetch leaders at this location for the picker
               setActingLeader(null);
+              setNeedsLeaderPicker(true);
+
+              if (resolvedOrgId) {
+                const { data: leaders } = await supabase
+                  .from('employees')
+                  .select('id, full_name, first_name, last_name, role, org_id, location_id, active, is_leader')
+                  .eq('org_id', resolvedOrgId)
+                  .eq('location_id', locationId)
+                  .eq('active', true)
+                  .eq('is_leader', true)
+                  .order('full_name');
+
+                setLocationLeaders(leaders || []);
+              }
             }
           } catch (err) {
-            console.error('[RecordActionModal] Error fetching app_user:', err);
+            console.error('[RecordActionModal] Error resolving acting leader:', err);
             setActingLeader(null);
+            setNeedsLeaderPicker(true);
           } finally {
             setLoadingLeader(false);
           }
-        } else if (currentUser) {
-          // Check if currentUser is actually an Employee object or just a string ID
-          if (typeof currentUser === 'string') {
-            // It's just an auth UUID string, treat it as currentUserId
-            console.log('[RecordActionModal] currentUser is a string (auth UUID), fetching from app_users:', currentUser);
-            setLoadingLeader(true);
-            try {
-              const { data: appUserData, error: appUserError } = await supabase
-                .from('app_users')
-                .select('*')
-                .eq('auth_user_id', currentUser)
-                .maybeSingle();
-              
-              console.log('[RecordActionModal] Fetched app_user data:', appUserData);
-              
-              if (!appUserError && appUserData) {
-                // Check if app_user has an employee_id
-                if (!appUserData.employee_id) {
-                  console.error('[RecordActionModal] app_user has no employee_id!');
-                  setActingLeader({
-                    id: '',
-                    full_name: 'Not available - No employee record',
-                    role: '',
-                  } as Employee);
-                  setLoadingLeader(false);
-                  return;
-                }
-
-                // Fetch the actual employee record
-                const { data: employeeData, error: employeeError } = await supabase
-                  .from('employees')
-                  .select('*')
-                  .eq('id', appUserData.employee_id)
-                  .maybeSingle();
-
-                if (employeeError || !employeeData) {
-                  console.error('[RecordActionModal] Error fetching employee:', employeeError);
-                  setActingLeader({
-                    id: '',
-                    full_name: 'Not available - Employee not found',
-                    role: '',
-                  } as Employee);
-                  setLoadingLeader(false);
-                  return;
-                }
-
-                // Use the employee record
-                const employeeLike: Employee = {
-                  id: employeeData.id,
-                  full_name: employeeData.full_name || `${employeeData.first_name || ''} ${employeeData.last_name || ''}`.trim() || 'Unknown',
-                  role: employeeData.role || 'User',
-                  org_id: employeeData.org_id,
-                  location_id: employeeData.location_id || locationId,
-                  active: employeeData.active ?? true,
-                };
-                setActingLeader(employeeLike);
-              } else {
-                console.warn('[RecordActionModal] No app_user found for auth UUID:', currentUser);
-                setActingLeader({
-                  id: '',
-                  full_name: 'Not available',
-                  role: '',
-                } as Employee);
-              }
-            } catch (err) {
-              console.error('[RecordActionModal] Error fetching app_user:', err);
-              setActingLeader({
-                id: '',
-                full_name: 'Not available',
-                role: '',
-              } as Employee);
-            } finally {
-              setLoadingLeader(false);
-            }
-          } else {
-            // It's an Employee object
-            console.log('[RecordActionModal] Using currentUser Employee object:', currentUser);
-            setActingLeader(currentUser);
-            setLoadingLeader(false);
-          }
+        } else if (currentUser && typeof currentUser !== 'string') {
+          // Already have an Employee object
+          setActingLeader(currentUser);
+          setNeedsLeaderPicker(false);
+          setLoadingLeader(false);
         } else {
-          console.log('[RecordActionModal] No currentUser or currentUserId provided');
           setActingLeader(null);
+          setNeedsLeaderPicker(false);
           setLoadingLeader(false);
         }
       } catch (err) {
@@ -327,13 +279,16 @@ export function RecordActionModal({
     if (open) {
       setActionDate(new Date());
       setNotes("");
+      setActingLeader(null);
+      setNeedsLeaderPicker(false);
+      setLocationLeaders([]);
     }
   }, [open]);
 
   const handleSubmit = async () => {
-    if (!employee || !actingLeader || !actionDate) {
-      if (!actingLeader) {
-        alert('Unable to identify the acting leader. Your user account may not be linked to an employee record. Please contact an administrator.');
+    if (!employee || !actingLeader?.id || !actionDate) {
+      if (!actingLeader?.id) {
+        alert('Please select an acting leader.');
       } else {
         alert('Missing required information. Please ensure all fields are filled.');
       }
@@ -344,7 +299,6 @@ export function RecordActionModal({
       setSaving(true);
 
       // Create disciplinary action record
-      // acting_leader must be an employee.id, not an app_user.id
       const { data: actionData, error: actionError } = await supabase
         .from('disc_actions')
         .insert({
@@ -354,7 +308,7 @@ export function RecordActionModal({
           action: recommendedAction,
           action_id: recommendedActionId,
           action_date: actionDate.toISOString().split('T')[0],
-          acting_leader: actingLeader.id, // This is now guaranteed to be an employee.id
+          acting_leader: actingLeader.id,
           notes: notes || null,
         })
         .select()
@@ -368,7 +322,7 @@ export function RecordActionModal({
         .update({
           action_taken: 'action_recorded',
           action_taken_at: new Date().toISOString(),
-          action_taken_by: actingLeader.id, // Use employee.id
+          action_taken_by: actingLeader.id,
           disc_action_id: actionData?.id,
         })
         .eq('employee_id', employee.id)
@@ -381,7 +335,6 @@ export function RecordActionModal({
         console.warn('Error updating recommendation:', updateError);
       }
 
-      // Call success callback to open employee modal
       if (onSuccess) {
         onSuccess(employee.id);
       }
@@ -469,12 +422,42 @@ export function RecordActionModal({
             disabled
           />
 
-          {/* Acting Leader (disabled) */}
-          <CustomTextField
-            label="Acting Leader"
-            value={loadingLeader ? "Loading..." : (actingLeader?.full_name || "Not available")}
-            disabled
-          />
+          {/* Acting Leader — dropdown for admins, disabled field for linked users */}
+          {needsLeaderPicker ? (
+            <Autocomplete
+              options={locationLeaders}
+              getOptionLabel={(option: Employee) => option.full_name || ''}
+              value={actingLeader}
+              onChange={(_e, newValue) => setActingLeader(newValue)}
+              isOptionEqualToValue={(option: Employee, value: Employee) => option.id === value.id}
+              renderInput={(params) => (
+                <CustomTextField
+                  {...params}
+                  label="Acting Leader"
+                  placeholder="Select a leader..."
+                />
+              )}
+              size="small"
+              sx={{
+                '& .MuiAutocomplete-popupIndicator': { color: 'var(--ls-color-muted)' },
+                '& .MuiAutocomplete-clearIndicator': { color: 'var(--ls-color-muted)' },
+              }}
+              slotProps={{
+                paper: {
+                  sx: {
+                    fontFamily,
+                    fontSize: 14,
+                  },
+                },
+              }}
+            />
+          ) : (
+            <CustomTextField
+              label="Acting Leader"
+              value={loadingLeader ? "Loading..." : (actingLeader?.full_name || "Not available")}
+              disabled
+            />
+          )}
 
           {/* Action Date */}
           <DatePicker
@@ -641,4 +624,3 @@ export function RecordActionModal({
     </LocalizationProvider>
   );
 }
-
