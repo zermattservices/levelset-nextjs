@@ -1,15 +1,13 @@
 /**
  * Native Form API: My Today
- * GET /api/native/forms/my-today?location_id=<id>&employee_id=<id>
+ * GET /api/native/forms/my-today?location_id=<id>&employee_id=<id>[&date=YYYY-MM-DD]
  *
- * Returns the authenticated user's schedule status for today:
- * - setup_assignments (position assignments within shifts)
- * - shifts (if no setup_assignments cover them)
- * - time_off_requests (if approved and overlapping today)
+ * Returns the authenticated user's schedule status for a given day (defaults to today).
  *
  * Response shape:
  * {
  *   status: 'working' | 'not_scheduled' | 'time_off',
+ *   date: string, // YYYY-MM-DD of the queried day
  *   shifts?: Array<{
  *     id: string,
  *     label: string,
@@ -52,6 +50,7 @@ function timeToMinutes(time: string): number {
 interface SetupAssignmentEntry {
   id: string;
   label: string;
+  label_es?: string | null;
   start_time: string;
   end_time: string;
 }
@@ -59,8 +58,10 @@ interface SetupAssignmentEntry {
 interface TodayShiftEntry {
   id: string;
   label: string;
+  label_es?: string | null;
   start_time: string;
   end_time: string;
+  zone?: 'FOH' | 'BOH' | null;
   setup_assignments: SetupAssignmentEntry[];
 }
 
@@ -73,9 +74,27 @@ export default withPermissionAndContext(
 
     const locationId = req.query.location_id as string;
     const employeeId = req.query.employee_id as string;
+    const dateParam = req.query.date as string | undefined;
 
     if (!locationId || !employeeId) {
       return res.status(400).json({ error: 'location_id and employee_id are required' });
+    }
+
+    // Validate optional date param (YYYY-MM-DD, within ±7 days)
+    let today: string;
+    if (dateParam) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+        return res.status(400).json({ error: 'date must be YYYY-MM-DD format' });
+      }
+      const requested = new Date(dateParam + 'T12:00:00');
+      const now = new Date();
+      const diffDays = Math.round((requested.getTime() - now.getTime()) / (86400000));
+      if (Math.abs(diffDays) > 7) {
+        return res.status(400).json({ error: 'date must be within 7 days of today' });
+      }
+      today = dateParam;
+    } else {
+      today = new Date().toISOString().split('T')[0];
     }
 
     try {
@@ -86,8 +105,7 @@ export default withPermissionAndContext(
       }
 
       const supabase = createServerSupabaseClient();
-      const now = new Date();
-      const today = now.toISOString().split('T')[0]; // YYYY-MM-DD
+      const targetDate = new Date(today + 'T12:00:00');
 
       // ---------------------------------------------------------------
       // 1. Check for approved time off overlapping today
@@ -116,6 +134,7 @@ export default withPermissionAndContext(
         res.setHeader('Vary', 'Authorization');
         return res.status(200).json({
           status: 'time_off',
+          date: today,
           timeOffNote: firstRequest.note || null,
         });
       }
@@ -123,7 +142,7 @@ export default withPermissionAndContext(
       // ---------------------------------------------------------------
       // 2. Get published schedule for this week at this location
       // ---------------------------------------------------------------
-      const thisWeekStart = getWeekStart(now);
+      const thisWeekStart = getWeekStart(targetDate);
 
       const { data: schedules, error: schedError } = await supabase
         .from('schedules')
@@ -142,7 +161,7 @@ export default withPermissionAndContext(
       if (scheduleIds.length === 0) {
         res.setHeader('Cache-Control', 'private, s-maxage=300, stale-while-revalidate=600');
         res.setHeader('Vary', 'Authorization');
-        return res.status(200).json({ status: 'not_scheduled' });
+        return res.status(200).json({ status: 'not_scheduled', date: today });
       }
 
       // ---------------------------------------------------------------
@@ -152,7 +171,7 @@ export default withPermissionAndContext(
         .from('shifts')
         .select(`
           id, schedule_id, shift_date, start_time, end_time, break_minutes, notes,
-          position:org_positions(id, name),
+          position:org_positions(id, name, name_es, zone),
           assignment:shift_assignments!inner(id, employee_id)
         `)
         .in('schedule_id', scheduleIds)
@@ -168,7 +187,7 @@ export default withPermissionAndContext(
       if (!shifts || shifts.length === 0) {
         res.setHeader('Cache-Control', 'private, s-maxage=300, stale-while-revalidate=600');
         res.setHeader('Vary', 'Authorization');
-        return res.status(200).json({ status: 'not_scheduled' });
+        return res.status(200).json({ status: 'not_scheduled', date: today });
       }
 
       // ---------------------------------------------------------------
@@ -180,7 +199,7 @@ export default withPermissionAndContext(
         .from('setup_assignments')
         .select(`
           id, shift_id, start_time, end_time,
-          position:org_positions(id, name)
+          position:org_positions(id, name, name_es)
         `)
         .eq('org_id', context.orgId)
         .eq('employee_id', employeeId)
@@ -211,6 +230,7 @@ export default withPermissionAndContext(
             .map((sa) => ({
               id: sa.id,
               label: sa.position?.name || 'Position',
+              label_es: sa.position?.name_es || null,
               start_time: sa.start_time,
               end_time: sa.end_time,
             }));
@@ -218,8 +238,10 @@ export default withPermissionAndContext(
           return {
             id: shift.id,
             label: shift.position?.name || 'Shift',
+            label_es: shift.position?.name_es || null,
             start_time: shift.start_time,
             end_time: shift.end_time,
+            zone: shift.position?.zone ?? null,
             setup_assignments: shiftAssignments,
           };
         })
@@ -245,6 +267,7 @@ export default withPermissionAndContext(
       res.setHeader('Vary', 'Authorization');
       return res.status(200).json({
         status: 'working',
+        date: today,
         shifts: groupedShifts,
         entries,
       });

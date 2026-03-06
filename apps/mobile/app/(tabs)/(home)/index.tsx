@@ -4,7 +4,7 @@
  * Avatar bubble in top-left opens account modal
  */
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -25,8 +25,7 @@ import { typography, fontWeights, fontSizes } from "../../../src/lib/fonts";
 import { spacing, haptics } from "../../../src/lib/theme";
 import { AppIcon } from "../../../src/components/ui";
 import { TodayCard } from "../../../src/components/today-card";
-import { fetchMyTodayAuth } from "../../../src/lib/api";
-import type { MyTodayResponse } from "../../../src/lib/api";
+import { RecentActivities } from "../../../src/components/RecentActivities";
 import "../../../src/lib/i18n";
 
 export default function HomeScreen() {
@@ -47,45 +46,16 @@ export default function HomeScreen() {
   const greeting = getGreeting(t);
   const singleLocation = !hasMultipleLocations && !!selectedLocation;
 
-  // ---------- Today card state ----------
-  const [todayData, setTodayData] = useState<MyTodayResponse | null>(null);
-  const [todayLoading, setTodayLoading] = useState(true);
-  const [todayError, setTodayError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-
-  const fetchToday = useCallback(async () => {
-    const accessToken = session?.access_token;
-    const locationId = selectedLocation?.id;
-    if (!accessToken || !locationId || !employeeId) {
-      setTodayLoading(false);
-      return;
-    }
-    try {
-      setTodayError(null);
-      const data = await fetchMyTodayAuth(accessToken, locationId, employeeId);
-      setTodayData(data);
-    } catch (err: any) {
-      if (err?.status === 403 || err?.status === 404) {
-        // 403 = no SCHED_VIEW permission, 404 = endpoint not deployed yet
-        setTodayData({ status: "not_scheduled" });
-      } else {
-        setTodayError(err?.message || "Failed to load");
-      }
-    } finally {
-      setTodayLoading(false);
-    }
-  }, [session?.access_token, selectedLocation?.id, employeeId]);
-
-  useEffect(() => {
-    setTodayLoading(true);
-    fetchToday();
-  }, [fetchToday]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchToday();
+    setRefreshKey((k) => k + 1);
+    // Brief delay to give visual feedback
+    await new Promise((r) => setTimeout(r, 600));
     setRefreshing(false);
-  }, [fetchToday]);
+  }, []);
 
   // ---------- Helpers ----------
   const getInitials = (name: string | null | undefined) => {
@@ -243,17 +213,18 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: spacing[5],
-          paddingBottom: spacing[5],
+          paddingBottom: insets.bottom + 100,
           gap: spacing[3],
         }}
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
+        alwaysBounceVertical
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {/* Greeting -- left-aligned */}
-        <Animated.View entering={FadeIn.delay(50).duration(400)}>
+        <Animated.View entering={FadeIn.delay(50).duration(400)} style={{ paddingVertical: 4 }}>
           <Text
             style={{
               ...typography.h2,
@@ -276,9 +247,18 @@ export default function HomeScreen() {
 
         {/* Today's schedule card */}
         <TodayCard
-          data={todayData}
-          isLoading={todayLoading}
-          error={todayError}
+          accessToken={session?.access_token ?? null}
+          locationId={selectedLocation?.id ?? null}
+          employeeId={employeeId ?? null}
+          refreshKey={refreshKey}
+        />
+
+        {/* Recent activities */}
+        <RecentActivities
+          accessToken={session?.access_token ?? null}
+          locationId={selectedLocation?.id ?? null}
+          employeeId={employeeId ?? null}
+          refreshKey={refreshKey}
         />
       </ScrollView>
     </View>

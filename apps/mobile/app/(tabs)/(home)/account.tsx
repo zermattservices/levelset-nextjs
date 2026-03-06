@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../src/context/AuthContext";
 import { useForms } from "../../../src/context/FormsContext";
 import { useColors } from "../../../src/context/ThemeContext";
+import { useGlass } from "../../../src/hooks/useGlass";
 import { typography, fontWeights } from "../../../src/lib/fonts";
 import { spacing, borderRadius, haptics } from "../../../src/lib/theme";
 import { AppIcon } from "../../../src/components/ui";
@@ -32,6 +33,7 @@ export default function AccountModal() {
   const colors = useColors();
   const { fullName, email, profileImage, role, signOut } = useAuth();
   const { language, setLanguage } = useForms();
+  const { GlassView } = useGlass();
 
   const getInitials = (name: string | null | undefined) => {
     if (!name) return email?.charAt(0)?.toUpperCase() || "U";
@@ -84,7 +86,15 @@ export default function AccountModal() {
           }}
           style={styles.closeButton}
         >
-          <AppIcon name="xmark.circle.fill" size={28} tintColor={colors.onSurfaceDisabled} />
+          {GlassView ? (
+            <GlassView style={[styles.closeGlass, { borderWidth: 1, borderColor: "rgba(255,255,255,0.25)" }]} isInteractive>
+              <AppIcon name="xmark" size={12} tintColor={colors.onSurfaceVariant} />
+            </GlassView>
+          ) : (
+            <View style={[styles.closeFallback, { backgroundColor: colors.surfaceVariant, borderWidth: 1, borderColor: colors.outline }]}>
+              <AppIcon name="xmark" size={12} tintColor={colors.onSurfaceVariant} />
+            </View>
+          )}
         </Pressable>
       </View>
 
@@ -171,6 +181,23 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
     padding: spacing[1],
+  },
+  closeGlass: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderCurve: "continuous",
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeFallback: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderCurve: "continuous",
+    alignItems: "center",
+    justifyContent: "center",
   },
   profileRow: {
     flexDirection: "row",

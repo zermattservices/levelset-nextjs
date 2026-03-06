@@ -54,6 +54,7 @@ export default function EditProfileScreen() {
     profileImage,
     nickname,
     position,
+    jobTitle,
     birthDate,
     startDate,
     employeePhone,
@@ -191,8 +192,15 @@ export default function EditProfileScreen() {
         </Text>
         <GlassCard>
           <FieldRow
+            icon="text.badge.star"
+            label="Job Title"
+            value={jobTitle || "-"}
+            colors={colors}
+          />
+          <View style={[styles.fieldDivider, { backgroundColor: colors.outline }]} />
+          <FieldRow
             icon="briefcase"
-            label={t("profile.position")}
+            label="Role"
             value={formatPosition(position)}
             colors={colors}
           />
