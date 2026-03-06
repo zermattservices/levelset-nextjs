@@ -1,0 +1,167 @@
+/* ================================================================== */
+/*  RequestsWeeklyCalendar                                             */
+/* ================================================================== */
+
+.grid {
+  display: grid;
+  grid-template-columns: 200px repeat(7, 1fr);
+  border: 1px solid var(--ls-color-muted-soft);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ls-color-bg-container);
+  margin-top: 12px;
+  width: 100%;
+}
+
+/* ── Header ── */
+
+.cornerCell {
+  grid-column: 1;
+  grid-row: 1;
+  background: var(--ls-color-bg-page, #f8faf9);
+  border-bottom: 1px solid var(--ls-color-muted-soft);
+  border-right: 1px solid var(--ls-color-muted-soft);
+  position: sticky;
+  left: 0;
+  z-index: 3;
+}
+
+.headerCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  background: var(--ls-color-bg-page, #f8faf9);
+  border-bottom: 1px solid var(--ls-color-muted-soft);
+  border-right: 1px solid var(--ls-color-muted-soft);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.headerCell:last-of-type {
+  border-right: none;
+}
+
+.todayHeader {
+  background: var(--ls-color-brand-soft, #e8f4ea);
+}
+
+.headerDay {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-disabled-text);
+  text-transform: uppercase;
+}
+
+.headerDate {
+  font-family: var(--ls-font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+/* ── Row label (employee name) ── */
+
+.rowLabel {
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  min-height: 48px;
+  background: var(--ls-color-bg-container);
+  border-bottom: 1px solid var(--ls-color-muted-soft);
+  border-right: 1px solid var(--ls-color-muted-soft);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.empName {
+  font-family: var(--ls-font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Day cells ── */
+
+.dayCell {
+  min-height: 48px;
+  border-bottom: 1px solid var(--ls-color-muted-soft);
+  border-right: 1px solid var(--ls-color-muted-soft);
+  position: relative;
+}
+.dayCell:nth-child(8n) {
+  border-right: none;
+}
+
+.pastCell {
+  background: var(--ls-color-bg-page, #f8faf9);
+}
+
+.todayCell {
+  background: var(--ls-color-brand-soft, #e8f4ea);
+  opacity: 0.3;
+}
+
+/* ── Request bars ── */
+
+.bar {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  margin: 8px 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 1;
+  min-height: 32px;
+  transition: box-shadow 0.15s ease;
+}
+.bar:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.barPending {
+  background: var(--ls-color-warning-soft);
+  border: 1px solid var(--ls-color-warning-base);
+  border-left: 3px solid var(--ls-color-warning-base);
+  color: #92400e;
+}
+
+.barApproved {
+  background: var(--ls-color-success-soft);
+  border: 1px solid var(--ls-color-success-base);
+  border-left: 3px solid var(--ls-color-success-base);
+  color: var(--ls-color-success-soft-foreground);
+}
+
+.barPast {
+  opacity: 0.45;
+}
+
+.barText {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Empty state ── */
+
+.emptyCalendar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  font-family: var(--ls-font-body);
+  font-size: 14px;
+  color: var(--ls-color-muted);
+}

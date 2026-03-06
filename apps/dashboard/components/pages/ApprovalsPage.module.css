@@ -2,25 +2,64 @@
 /*  ApprovalsPage                                                       */
 /* ================================================================== */
 
-.container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+/* Grid root — matches SchedulePage pattern exactly */
+.root {
+  display: grid;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  align-content: flex-start;
+  justify-items: center;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--ls-color-bg-page, #f8faf9);
+  min-width: 0;
+  grid-template-columns:
+    var(--plsmc-viewport-gap) 1fr minmax(0, var(--plsmc-wide-chunk))
+    min(
+      var(--plsmc-standard-width),
+      calc(100% - var(--plsmc-viewport-gap) - var(--plsmc-viewport-gap))
+    )
+    minmax(0, var(--plsmc-wide-chunk)) 1fr var(--plsmc-viewport-gap);
+  padding: 0px;
 }
 
-.content {
-  max-width: var(--ls-max-content-width);
+.root > * {
+  grid-column: 4;
+}
+
+/* MenuNavigation — full-width spanning all grid columns */
+.menuNavigation:global(.__wab_instance) {
+  max-width: 100%;
   width: 100%;
-  margin: 0 auto;
-  padding: 24px;
+  left: 0px;
+  top: 0px;
+  z-index: 20;
+  position: sticky;
+  grid-column-start: 1 !important;
+  grid-column-end: -1 !important;
+}
+
+/* Content spans full width, centers children horizontally */
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  grid-column-start: 1 !important;
+  grid-column-end: -1 !important;
+  overflow: hidden;
+  padding: 20px 24px 40px;
 }
 
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 16px;
 }
 
 .title {
@@ -32,30 +71,56 @@
 
 /* ── Tabs ── */
 .tabBar {
-  margin-bottom: 20px;
+  width: 100%;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--ls-color-muted-soft);
+  display: flex;
+  justify-content: center;
 }
 
 /* ── Card list ── */
 .cardList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  width: 100%;
+  max-width: 720px;
 }
 
 /* ── Request card base ── */
 .card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px 20px;
   background: var(--ls-color-bg-container);
-  border: 1px solid var(--ls-color-muted-border);
-  border-radius: 12px;
-  transition: box-shadow 0.15s ease;
+  border: 1px solid var(--ls-color-muted-soft);
+  border-left: 3px solid var(--ls-color-neutral-border);
+  border-radius: 0 var(--ls-radius-md, 8px) var(--ls-radius-md, 8px) 0;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+  overflow: hidden;
 }
 
 .card:hover {
   box-shadow: 0 2px 8px var(--ls-color-shadow-lg);
+}
+
+/* ── Status-based left border colors ── */
+.cardPending {
+  border-left-color: var(--ls-color-warning-base, #d97706);
+}
+.cardApproved {
+  border-left-color: var(--ls-color-success-base, #16a34a);
+}
+.cardDenied {
+  border-left-color: var(--ls-color-destructive-base, #e53e3e);
+}
+
+/* ── Card inner layout ── */
+.cardInner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
 }
 
 .cardHeader {
@@ -68,9 +133,16 @@
 .cardHeaderLeft {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
+.cardHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Type badge (e.g. "TIME OFF") ── */
 .cardType {
   display: inline-flex;
   align-items: center;
@@ -79,35 +151,34 @@
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 3px 8px;
-  border-radius: 4px;
-  line-height: 1.2;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  line-height: 1.3;
 }
 
 .cardTypeShiftTrade {
   background: #ede9fe;
   color: #6d28d9;
 }
-
 .cardTypeTimeOff {
   background: #fef3c7;
   color: #92400e;
 }
-
 .cardTypeAvailability {
   background: #dbeafe;
   color: #1e40af;
 }
 
+/* ── Subtype label ── */
 .cardSubtype {
   font-family: var(--ls-font-body);
   font-size: 11px;
-  font-weight: 600;
-  color: var(--ls-color-muted);
-  text-transform: capitalize;
+  font-weight: 500;
+  color: var(--ls-color-disabled-text);
 }
 
+/* ── Timestamp ── */
 .cardTimestamp {
   font-family: var(--ls-font-body);
   font-size: 11px;
@@ -119,61 +190,51 @@
 .cardBody {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .employeeName {
   font-family: var(--ls-font-heading);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--ls-color-neutral-soft-foreground);
 }
 
-.shiftInfo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.dateRange {
   font-family: var(--ls-font-body);
   font-size: 13px;
-  color: var(--ls-color-neutral-soft-foreground);
-}
-
-.shiftDate {
-  font-weight: 600;
-}
-
-.shiftTime {
-  color: var(--ls-color-muted);
-}
-
-.shiftPosition {
   font-weight: 500;
-  color: var(--ls-color-brand);
-}
-
-.swapArrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
   color: var(--ls-color-muted);
 }
 
+.requestNote {
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  font-style: italic;
+  padding: 5px 8px;
+  margin-top: 2px;
+  background: var(--ls-color-bg-page, #f8faf9);
+  border-radius: 4px;
+  border-left: 2px solid var(--ls-color-neutral-border);
+}
+
+/* ── Shift trade / swap layout ── */
 .swapContainer {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 .swapSide {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 8px 12px;
+  gap: 2px;
+  padding: 8px 10px;
   background: var(--ls-color-bg-page, #f8faf9);
-  border-radius: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--ls-color-muted-soft);
 }
 
 .swapLabel {
@@ -185,90 +246,93 @@
   color: var(--ls-color-disabled-text);
 }
 
-.openStatus {
-  font-family: var(--ls-font-body);
-  font-size: 13px;
-  font-style: italic;
-  color: var(--ls-color-warning-base, #d97706);
+.swapArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--ls-color-muted);
+  flex-shrink: 0;
 }
 
-/* ── Time off specific ── */
-.dateRange {
-  font-family: var(--ls-font-body);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ls-color-neutral-soft-foreground);
-}
-
-.requestNote {
+.shiftInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--ls-font-body);
   font-size: 12px;
-  color: var(--ls-color-muted);
-  font-style: italic;
-  padding: 6px 10px;
-  background: var(--ls-color-bg-page, #f8faf9);
-  border-radius: 6px;
+  color: var(--ls-color-neutral-soft-foreground);
+  flex-wrap: wrap;
 }
 
-/* ── Availability diff ── */
+.shiftDate {
+  font-weight: 600;
+}
+.shiftTime {
+  color: var(--ls-color-muted);
+}
+.shiftPosition {
+  font-weight: 600;
+  color: var(--ls-color-brand);
+  font-size: 11px;
+}
+
+/* ── Availability day grid (inline card) ── */
 .availDiff {
   display: grid;
-  grid-template-columns: auto 1fr 1fr;
-  gap: 4px 12px;
+  grid-template-columns: 80px 1fr;
+  gap: 2px 10px;
   font-family: var(--ls-font-body);
   font-size: 12px;
-}
-
-.availDiffHeader {
-  font-weight: 600;
-  color: var(--ls-color-disabled-text);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding-bottom: 4px;
+  padding: 6px 8px;
+  background: var(--ls-color-bg-page, #f8faf9);
+  border-radius: 6px;
+  border: 1px solid var(--ls-color-muted-soft);
+  margin-top: 2px;
 }
 
 .availDay {
   font-weight: 600;
   color: var(--ls-color-neutral-soft-foreground);
+  font-size: 11px;
 }
-
 .availTime {
-  color: var(--ls-color-muted);
+  color: var(--ls-color-disabled-text);
+  font-size: 11px;
 }
-
 .availTimeNew {
   color: var(--ls-color-brand);
   font-weight: 600;
+  font-size: 11px;
 }
 
-/* ── Card footer ── */
+/* ── Card footer (approve/deny) ── */
 .cardFooter {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  padding-top: 4px;
-  border-top: 1px solid var(--ls-color-muted-border);
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--ls-color-bg-page, #f8faf9);
+  border-top: 1px solid var(--ls-color-muted-soft);
 }
 
 .approveBtn {
   font-family: var(--ls-font-heading);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 6px 16px;
+  padding: 5px 14px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
-  background: var(--ls-color-brand);
-  color: var(--ls-color-bg-container);
+  background: var(--ls-color-success-base, #16a34a);
+  color: #fff;
   transition: background-color 0.15s ease;
 }
-
 .approveBtn:hover {
-  background: var(--ls-color-brand-hover);
+  background: var(--ls-color-success-hover, #15803d);
 }
-
 .approveBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -276,52 +340,70 @@
 
 .denyBtn {
   font-family: var(--ls-font-heading);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 6px 16px;
+  padding: 5px 14px;
   border: 1px solid var(--ls-color-destructive-border, #fca5a5);
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
   background: transparent;
   color: var(--ls-color-destructive-base, #e53e3e);
   transition: all 0.15s ease;
 }
-
 .denyBtn:hover {
   background: var(--ls-color-destructive-soft, #fef2f2);
 }
-
 .denyBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* ── Status badges (history tab) ── */
+/* ── Status badges ── */
 .statusBadge {
   display: inline-flex;
   align-items: center;
   font-family: var(--ls-font-heading);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
-  line-height: 1.2;
+  padding: 2px 7px;
+  border-radius: 3px;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
-
 .statusApproved {
   background: var(--ls-color-success-soft, #dcfce7);
   color: var(--ls-color-success-base, #16a34a);
 }
-
 .statusDenied {
   background: var(--ls-color-destructive-soft, #fef2f2);
   color: var(--ls-color-destructive-base, #e53e3e);
 }
+.statusPending {
+  background: var(--ls-color-warning-soft, #fef3c7);
+  color: #92400e;
+}
 
+/* ── Review info line ── */
 .reviewInfo {
   font-family: var(--ls-font-body);
   font-size: 11px;
   color: var(--ls-color-disabled-text);
+  padding: 0 16px 8px;
+}
+
+/* ── Denial display on card ── */
+.denialDisplay {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  color: var(--ls-color-destructive-base, #e53e3e);
+  padding: 0 16px 8px;
+}
+.denialDisplay .denialReasonLabel {
+  font-weight: 600;
 }
 
 /* ── Empty state ── */
@@ -330,26 +412,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 16px;
+  padding: 60px 16px;
   gap: 8px;
 }
-
 .emptyIcon {
   color: var(--ls-color-muted-border);
   margin-bottom: 4px;
 }
-
 .emptyText {
   font-family: var(--ls-font-heading);
   font-size: 15px;
   font-weight: 600;
   color: var(--ls-color-neutral-soft-foreground);
 }
-
 .emptySubText {
   font-family: var(--ls-font-body);
   font-size: 13px;
   color: var(--ls-color-disabled-text);
+  max-width: 360px;
+  text-align: center;
 }
 
 /* ── Loading ── */
@@ -358,4 +439,35 @@
   align-items: center;
   justify-content: center;
   padding: 48px 16px;
+}
+
+/* ── Swap filter bar ── */
+.swapFilterBar {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 0 12px;
+}
+
+.filterChip {
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--ls-radius-xl, 20px);
+  border: 1px solid var(--ls-color-neutral-border);
+  background: var(--ls-color-bg-container);
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.filterChipActive {
+  background: var(--ls-color-brand-soft, #e8f4ea);
+  color: var(--ls-color-brand);
+  border-color: var(--ls-color-brand);
+  font-weight: 600;
+}
+.filterChip:not(.filterChipActive):hover {
+  background: var(--ls-color-muted-soft);
 }

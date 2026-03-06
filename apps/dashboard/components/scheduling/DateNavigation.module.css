@@ -1,0 +1,40 @@
+.navSection {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.navArrow {
+  width: 28px;
+  height: 28px;
+  color: var(--ls-color-muted);
+}
+
+.dateLabel {
+  font-family: var(--ls-font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ls-color-neutral-soft-foreground);
+  min-width: 160px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.todayBtn {
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ls-color-brand);
+  background: none;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 6px;
+}
+.todayBtn:hover {
+  background: var(--ls-color-hover-overlay);
+  border-color: var(--ls-color-brand);
+}

@@ -1,0 +1,137 @@
+/* ================================================================== */
+/*  AddTimeOffModal                                                    */
+/* ================================================================== */
+
+.dialogContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 8px;
+}
+
+/* ── Section labels ── */
+.fieldLabel {
+  font-family: var(--ls-font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ls-color-disabled-text);
+  margin-bottom: 6px;
+}
+
+/* ── Employee autocomplete ── */
+.employeeField {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Date/time row ── */
+.dateTimeRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.dateTimeRow > * {
+  flex: 1;
+}
+
+/* ── All day toggle ── */
+.allDayRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.allDayLabel {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+/* ── Status toggle (Pending / Approved) ── */
+.statusToggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md, 8px);
+  overflow: hidden;
+  width: fit-content;
+}
+
+.statusBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--ls-font-heading);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  background: var(--ls-color-bg-container);
+  border: none;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.statusBtn:not(:last-child) {
+  border-right: 1px solid var(--ls-color-neutral-border);
+}
+.statusBtnActive.statusPending {
+  background: var(--ls-color-warning-soft, #fef3c7);
+  color: #92400e;
+  font-weight: 600;
+}
+.statusBtnActive.statusApproved {
+  background: var(--ls-color-success-soft, #dcfce7);
+  color: var(--ls-color-success-base, #16a34a);
+  font-weight: 600;
+}
+.statusBtn:not(.statusBtnActive):hover {
+  background: var(--ls-color-muted-soft);
+}
+
+/* ── Paid toggle ── */
+.paidRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.paidLabel {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  color: var(--ls-color-neutral-soft-foreground);
+}
+
+/* ── Submit button ── */
+.submitBtn {
+  font-family: var(--ls-font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 24px;
+  border: none;
+  border-radius: var(--ls-radius-md, 8px);
+  cursor: pointer;
+  background: var(--ls-color-brand);
+  color: #fff;
+  transition: background-color 0.15s ease;
+}
+.submitBtn:hover:not(:disabled) {
+  background: var(--ls-color-brand-hover);
+}
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Error message ── */
+.errorMsg {
+  font-family: var(--ls-font-body);
+  font-size: 13px;
+  color: var(--ls-color-destructive-base, #e53e3e);
+  padding: 8px 12px;
+  background: var(--ls-color-destructive-soft, #fef2f2);
+  border-radius: 6px;
+  border-left: 3px solid var(--ls-color-destructive-base, #e53e3e);
+}

@@ -1,0 +1,25 @@
+.dialogContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.reasonsLoading {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+.denyButton {
+  font-family: var(--ls-font-heading);
+  font-weight: 600;
+  background: var(--ls-color-destructive-base, #e53e3e);
+  color: white;
+}
+.denyButton:hover {
+  background: var(--ls-color-destructive-hover, #c53030);
+}
+.denyButton:disabled {
+  opacity: 0.5;
+}

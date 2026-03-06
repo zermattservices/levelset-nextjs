@@ -184,6 +184,8 @@ export interface ResolvedPositionSlots {
   position_id: string;
   position_name: string;
   zone: 'FOH' | 'BOH';
+  /** Template target slot count (the denominator in "filled/target"). */
+  target_count: number;
   slots: {
     index: number;
     is_required: boolean;
@@ -243,6 +245,9 @@ export interface AvailabilityChangeRequest {
   manager_notes: string | null;
   reviewed_by: string | null;
   reviewed_at: string | null;
+  denial_reason_id?: string | null;
+  denial_message?: string | null;
+  denial_reason?: DenialReason;
   created_at?: string;
   updated_at?: string;
   employee?: { id: string; full_name: string };
@@ -262,6 +267,9 @@ export interface TimeOffRequest {
   is_paid: boolean;
   reviewed_by: string | null;
   reviewed_at: string | null;
+  denial_reason_id?: string | null;
+  denial_message?: string | null;
+  denial_reason?: DenialReason;
   hs_id: number | null;
   created_at?: string;
   updated_at?: string;
@@ -287,6 +295,9 @@ export interface ShiftTradeRequest {
   manager_notes: string | null;
   reviewed_by: string | null;
   reviewed_at: string | null;
+  denial_reason_id?: string | null;
+  denial_message?: string | null;
+  denial_reason?: DenialReason;
   hs_id: number | null;
   created_at?: string;
   updated_at?: string;
@@ -311,6 +322,26 @@ export interface PendingCounts {
   availability: number;
   total: number;
 }
+
+// ── Denial Reason Types ─────────────────────────────────────────────
+
+export type DenialReasonRequestType = 'time_off' | 'availability' | 'shift_swap';
+
+export interface DenialReason {
+  id: string;
+  org_id: string;
+  request_type: DenialReasonRequestType;
+  label: string;
+  display_order: number;
+  is_active: boolean;
+}
+
+// ── Approvals Page View Types ───────────────────────────────────────
+
+export type ApprovalsTab = 'requests' | 'shift_swaps';
+export type RequestsViewMode = 'list' | 'weekly' | 'monthly';
+export type RequestTypeFilter = 'time_off' | 'availability';
+export type RequestStatusFilter = 'pending' | 'approved' | 'denied';
 
 // ── Daypart Productivity Types ───────────────────────────────────────
 

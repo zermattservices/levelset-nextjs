@@ -15,12 +15,13 @@ async function handler(
   const supabase = createServerSupabaseClient();
   const { location_id } = req.query;
 
-  // Shift trades: open or pending_approval
+  // Shift trades: open or pending_approval (exclude giveaways)
   const tradesQuery = supabase
     .from('shift_trade_requests')
     .select('id', { count: 'exact', head: true })
     .eq('org_id', orgId)
-    .in('status', ['open', 'pending_approval']);
+    .in('status', ['open', 'pending_approval'])
+    .neq('type', 'giveaway');
 
   // Time off: pending
   let timeOffQuery = supabase
@@ -41,15 +42,25 @@ async function handler(
     timeOffQuery = timeOffQuery.eq('location_id', location_id);
   }
 
-  const [tradesResult, timeOffResult, availResult] = await Promise.all([
-    tradesQuery,
-    timeOffQuery,
-    availQuery,
-  ]);
+  let tradesResult, timeOffResult, availResult;
+  try {
+    [tradesResult, timeOffResult, availResult] = await Promise.all([
+      tradesQuery,
+      timeOffQuery,
+      availQuery,
+    ]);
+  } catch (err) {
+    console.error('Error fetching pending counts:', err);
+    return res.status(500).json({ error: 'Failed to fetch pending counts' });
+  }
 
-  const shiftTrades = tradesResult.count || 0;
-  const timeOff = timeOffResult.count || 0;
-  const availability = availResult.count || 0;
+  if (tradesResult.error) console.error('Trades query error:', tradesResult.error.message);
+  if (timeOffResult.error) console.error('Time off query error:', timeOffResult.error.message);
+  if (availResult.error) console.error('Availability query error:', availResult.error.message);
+
+  const shiftTrades = tradesResult.count ?? 0;
+  const timeOff = timeOffResult.count ?? 0;
+  const availability = availResult.count ?? 0;
 
   res.setHeader('Cache-Control', 'private, s-maxage=30, stale-while-revalidate=60');
 

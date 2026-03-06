@@ -1,0 +1,166 @@
+/* 3-column grid: left | center (always centered) | right */
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  align-self: stretch;
+  padding: 8px 0;
+  gap: 12px;
+}
+
+/* Left: date navigation — hugs left edge */
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+}
+
+/* Center: List/Calendar + Week/Month — always page-centered */
+.toolbarCenter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: center;
+}
+
+/* Right: filter chips — hugs right edge */
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-self: end;
+}
+
+/* ── Primary toggle: List / Calendar ── */
+.toggleGroup {
+  display: flex;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  overflow: hidden;
+}
+
+.toggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--ls-font-heading);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  background: var(--ls-color-bg-container);
+  border: none;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.toggleBtn:not(:last-child) {
+  border-right: 1px solid var(--ls-color-neutral-border);
+}
+.toggleActive {
+  background: var(--ls-color-brand);
+  color: #fff;
+}
+.toggleBtn:not(.toggleActive):hover {
+  background: var(--ls-color-muted-soft);
+}
+
+.toggleIcon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* ── Secondary toggle: Week / Month ── */
+.subToggleGroup {
+  display: flex;
+  border: 1px solid var(--ls-color-neutral-border);
+  border-radius: var(--ls-radius-md);
+  overflow: hidden;
+}
+
+.subToggleBtn {
+  font-family: var(--ls-font-heading);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ls-color-muted);
+  background: var(--ls-color-bg-container);
+  border: none;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.subToggleBtn:not(:last-child) {
+  border-right: 1px solid var(--ls-color-neutral-border);
+}
+.subToggleActive {
+  background: var(--ls-color-brand-soft, #e8f4ea);
+  color: var(--ls-color-brand);
+  font-weight: 600;
+}
+.subToggleBtn:not(.subToggleActive):hover {
+  background: var(--ls-color-muted-soft);
+}
+
+/* ── Filter chips ── */
+.filterGroup {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.filterLabel {
+  font-family: var(--ls-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-disabled-text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.filterChip {
+  font-family: var(--ls-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--ls-radius-xl);
+  border: 1px solid var(--ls-color-neutral-border);
+  background: var(--ls-color-bg-container);
+  color: var(--ls-color-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.filterChipActive {
+  background: var(--ls-color-brand-soft, #e8f4ea);
+  color: var(--ls-color-brand);
+  border-color: var(--ls-color-brand);
+  font-weight: 600;
+}
+.filterChip:not(.filterChipActive):hover {
+  background: var(--ls-color-muted-soft);
+}
+.filterChipDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Add Time Off button ── */
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ls-font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ls-color-brand);
+  border: none;
+  border-radius: var(--ls-radius-md);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
+}
+.addBtn:hover {
+  background: var(--ls-color-brand-hover);
+}

@@ -13,75 +13,113 @@ async function handler(
   if (req.method === 'GET') {
     const {
       location_id,
-      status = 'pending',
-      type = 'all',
+      status,
+      type,
+      start_date,
+      end_date,
     } = req.query as {
       location_id: string;
       status?: string;
       type?: string;
+      start_date?: string;
+      end_date?: string;
     };
 
     if (!location_id) {
       return res.status(400).json({ error: 'location_id is required' });
     }
 
-    const isPending = status === 'pending';
+    const statuses = (status || 'pending').split(',');
+    const types = (type || 'time_off,availability,shift_trade').split(',');
 
-    const tradesQuery = supabase
-      .from('shift_trade_requests')
-      .select(`
-        *,
-        source_shift:shifts!shift_trade_requests_source_shift_id_fkey(
-          id, shift_date, start_time, end_time, break_minutes,
-          position:org_positions(id, name, zone)
-        ),
-        source_employee:employees!shift_trade_requests_source_employee_id_fkey(id, full_name),
-        target_shift:shifts!shift_trade_requests_target_shift_id_fkey(
-          id, shift_date, start_time, end_time, break_minutes,
-          position:org_positions(id, name, zone)
-        ),
-        target_employee:employees!shift_trade_requests_target_employee_id_fkey(id, full_name)
-      `)
-      .eq('org_id', orgId)
-      .order('created_at', { ascending: isPending });
-
-    if (isPending) {
-      tradesQuery.in('status', ['open', 'pending_approval']);
-    } else {
-      tradesQuery.in('status', ['approved', 'denied', 'cancelled', 'expired']);
+    // Map statuses for shift trades: 'pending' maps to 'open' and 'pending_approval'
+    const shiftTradeStatuses: string[] = [];
+    for (const s of statuses) {
+      if (s === 'pending') {
+        shiftTradeStatuses.push('open', 'pending_approval');
+      } else {
+        shiftTradeStatuses.push(s);
+      }
     }
 
-    const timeOffQuery = supabase
-      .from('time_off_requests')
-      .select('*, employee:employees!time_off_requests_employee_id_fkey(id, full_name)')
-      .eq('org_id', orgId)
-      .eq('location_id', location_id);
+    const isPending = statuses.length === 1 && statuses[0] === 'pending';
 
-    if (isPending) {
-      timeOffQuery.eq('status', 'pending');
-    } else {
-      timeOffQuery.in('status', ['approved', 'denied']);
-    }
+    // --- Shift Trades ---
+    const shouldFetchTrades = types.includes('shift_trade');
+    const tradesPromise = shouldFetchTrades
+      ? (() => {
+          const q = supabase
+            .from('shift_trade_requests')
+            .select(`
+              *,
+              source_shift:shifts!shift_trade_requests_source_shift_id_fkey(
+                id, shift_date, start_time, end_time, break_minutes,
+                position:org_positions(id, name, zone)
+              ),
+              source_employee:employees!shift_trade_requests_source_employee_id_fkey(id, full_name),
+              target_shift:shifts!shift_trade_requests_target_shift_id_fkey(
+                id, shift_date, start_time, end_time, break_minutes,
+                position:org_positions(id, name, zone)
+              ),
+              target_employee:employees!shift_trade_requests_target_employee_id_fkey(id, full_name)
+            `)
+            .eq('org_id', orgId)
+            .neq('type', 'giveaway')
+            .in('status', shiftTradeStatuses)
+            .order('created_at', { ascending: isPending });
 
-    const availQuery = supabase
-      .from('availability_change_requests')
-      .select('*, employee:employees!availability_change_requests_employee_id_fkey(id, full_name)')
-      .eq('org_id', orgId);
+          return q;
+        })()
+      : Promise.resolve({ data: [] });
 
-    if (isPending) {
-      availQuery.eq('status', 'pending');
-    } else {
-      availQuery.in('status', ['approved', 'denied']);
-    }
+    // --- Time Off ---
+    const shouldFetchTimeOff = types.includes('time_off');
+    const timeOffPromise = shouldFetchTimeOff
+      ? (() => {
+          const q = supabase
+            .from('time_off_requests')
+            .select(`
+              *,
+              employee:employees!time_off_requests_employee_id_fkey(id, full_name),
+              denial_reason:approval_denial_reasons(id, label)
+            `)
+            .eq('org_id', orgId)
+            .eq('location_id', location_id)
+            .in('status', statuses)
+            .order('created_at', { ascending: isPending });
 
-    const shouldFetchTrades = type === 'all' || type === 'shift_trade';
-    const shouldFetchTimeOff = type === 'all' || type === 'time_off';
-    const shouldFetchAvailability = type === 'all' || type === 'availability';
+          if (start_date && end_date) {
+            q.lte('start_datetime', end_date + 'T23:59:59Z');
+            q.gte('end_datetime', start_date + 'T00:00:00Z');
+          }
+
+          return q;
+        })()
+      : Promise.resolve({ data: [] });
+
+    // --- Availability ---
+    const shouldFetchAvailability = types.includes('availability');
+    const availPromise = shouldFetchAvailability
+      ? (() => {
+          const q = supabase
+            .from('availability_change_requests')
+            .select(`
+              *,
+              employee:employees!availability_change_requests_employee_id_fkey(id, full_name),
+              denial_reason:approval_denial_reasons(id, label)
+            `)
+            .eq('org_id', orgId)
+            .in('status', statuses)
+            .order('created_at', { ascending: isPending });
+
+          return q;
+        })()
+      : Promise.resolve({ data: [] });
 
     const [tradesResult, timeOffResult, availResult] = await Promise.all([
-      shouldFetchTrades ? tradesQuery : Promise.resolve({ data: [] }),
-      shouldFetchTimeOff ? timeOffQuery : Promise.resolve({ data: [] }),
-      shouldFetchAvailability ? availQuery : Promise.resolve({ data: [] }),
+      tradesPromise,
+      timeOffPromise,
+      availPromise,
     ]);
 
     return res.status(200).json({
@@ -177,7 +215,11 @@ async function handler(
     }
 
     if (intent === 'deny_shift_trade') {
-      const { id, manager_notes } = req.body;
+      const { id, manager_notes, denial_reason_id, denial_message } = req.body;
+
+      if (!denial_reason_id) {
+        return res.status(400).json({ error: 'denial_reason_id is required' });
+      }
 
       const { error } = await supabase
         .from('shift_trade_requests')
@@ -186,6 +228,8 @@ async function handler(
           reviewed_by: userId,
           reviewed_at: new Date().toISOString(),
           manager_notes: manager_notes || null,
+          denial_reason_id,
+          denial_message: denial_message || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
@@ -216,7 +260,11 @@ async function handler(
     }
 
     if (intent === 'deny_time_off') {
-      const { id } = req.body;
+      const { id, denial_reason_id, denial_message } = req.body;
+
+      if (!denial_reason_id) {
+        return res.status(400).json({ error: 'denial_reason_id is required' });
+      }
 
       const { error } = await supabase
         .from('time_off_requests')
@@ -224,6 +272,8 @@ async function handler(
           status: 'denied',
           reviewed_by: userId,
           reviewed_at: new Date().toISOString(),
+          denial_reason_id,
+          denial_message: denial_message || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
@@ -285,7 +335,11 @@ async function handler(
     }
 
     if (intent === 'deny_availability') {
-      const { id, manager_notes } = req.body;
+      const { id, manager_notes, denial_reason_id, denial_message } = req.body;
+
+      if (!denial_reason_id) {
+        return res.status(400).json({ error: 'denial_reason_id is required' });
+      }
 
       const { error } = await supabase
         .from('availability_change_requests')
@@ -294,6 +348,8 @@ async function handler(
           reviewed_by: userId,
           reviewed_at: new Date().toISOString(),
           manager_notes: manager_notes || null,
+          denial_reason_id,
+          denial_message: denial_message || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
@@ -302,6 +358,53 @@ async function handler(
       if (error) return res.status(500).json({ error: error.message });
 
       return res.status(200).json({ success: true });
+    }
+
+    if (intent === 'create_time_off') {
+      const { employee_id, location_id, start_datetime, end_datetime, status, note, is_paid } =
+        req.body;
+
+      if (!employee_id || !location_id || !start_datetime || !end_datetime) {
+        return res.status(400).json({
+          error: 'employee_id, location_id, start_datetime, and end_datetime are required',
+        });
+      }
+
+      if (status && !['pending', 'approved'].includes(status)) {
+        return res.status(400).json({ error: 'status must be pending or approved' });
+      }
+
+      const requestStatus = status || 'pending';
+      const now = new Date().toISOString();
+
+      const insertData: any = {
+        org_id: orgId,
+        employee_id,
+        location_id,
+        start_datetime,
+        end_datetime,
+        status: requestStatus,
+        note: note || null,
+        is_paid: is_paid ?? false,
+        created_at: now,
+        updated_at: now,
+      };
+
+      // If created as approved, record who approved it
+      if (requestStatus === 'approved') {
+        insertData.reviewed_by = userId;
+        insertData.reviewed_at = now;
+      }
+
+      const { data: newRequest, error } = await supabase
+        .from('time_off_requests')
+        .insert(insertData)
+        .select('id')
+        .single();
+
+      if (error) return res.status(500).json({ error: error.message });
+
+      return res.status(201).json({ success: true, id: newRequest.id });
     }
 
     return res.status(400).json({ error: `Unknown intent: ${intent}` });
