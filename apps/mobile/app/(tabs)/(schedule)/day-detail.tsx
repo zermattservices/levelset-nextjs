@@ -3,12 +3,10 @@
  * Shows all shifts for a specific day with action menus.
  */
 
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useCallback } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
-import Animated, { FadeIn } from "react-native-reanimated";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { GlassCard } from "../../../src/components/glass";
-import { ShiftActionDrawer } from "../../../src/components/schedule/ShiftActionDrawer";
 import { AppIcon } from "../../../src/components/ui";
 import { useColors } from "../../../src/context/ThemeContext";
 import { typography, fontWeights } from "../../../src/lib/fonts";
@@ -55,6 +53,7 @@ function formatFullDate(dateStr: string): string {
 
 export default function DayDetailScreen() {
   const colors = useColors();
+  const router = useRouter();
   const params = useLocalSearchParams<{ date: string; shifts: string }>();
 
   const date = params.date ?? "";
@@ -66,24 +65,17 @@ export default function DayDetailScreen() {
     }
   }, [params.shifts]);
 
-  const [drawerShift, setDrawerShift] = useState<{
-    positionName: string;
-    startTime: string;
-    endTime: string;
-  } | null>(null);
-
-  const openDrawer = useCallback((shift: ScheduleShift) => {
+  const openActions = useCallback((shift: ScheduleShift) => {
     haptics.medium();
-    setDrawerShift({
-      positionName: shift.position?.name ?? "Shift",
-      startTime: shift.start_time,
-      endTime: shift.end_time,
+    router.push({
+      pathname: "/(tabs)/(schedule)/shift-actions",
+      params: {
+        positionName: shift.position?.name ?? "Shift",
+        startTime: shift.start_time,
+        endTime: shift.end_time,
+      },
     });
-  }, []);
-
-  const closeDrawer = useCallback(() => {
-    setDrawerShift(null);
-  }, []);
+  }, [router]);
 
   const headerTitle = date ? formatFullDate(date) : "Day Detail";
 
@@ -129,10 +121,7 @@ export default function DayDetailScreen() {
           </View>
         ) : (
           shifts.map((shift, index) => (
-            <Animated.View
-              key={shift.id}
-              entering={FadeIn.delay(index * 60).duration(300)}
-            >
+            <View key={shift.id}>
               <GlassCard>
                 <View style={{ gap: spacing[2] }}>
                   {/* Header row: position name + menu button */}
@@ -155,7 +144,7 @@ export default function DayDetailScreen() {
                       {shift.position?.name ?? "Shift"}
                     </Text>
                     <Pressable
-                      onPress={() => openDrawer(shift)}
+                      onPress={() => openActions(shift)}
                       hitSlop={12}
                       style={({ pressed }) => ({
                         width: 36,
@@ -222,16 +211,11 @@ export default function DayDetailScreen() {
                   )}
                 </View>
               </GlassCard>
-            </Animated.View>
+            </View>
           ))
         )}
       </ScrollView>
 
-      <ShiftActionDrawer
-        visible={!!drawerShift}
-        onClose={closeDrawer}
-        shift={drawerShift}
-      />
     </>
   );
 }

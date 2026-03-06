@@ -22,6 +22,16 @@ export default function ScheduleLayout() {
             }}
           />
           <Stack.Screen
+            name="shift-actions"
+            options={{
+              presentation: "formSheet",
+              sheetGrabberVisible: true,
+              sheetAllowedDetents: [0.3],
+              contentStyle: { backgroundColor: "transparent" },
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="location-picker"
             options={{
               presentation: "transparentModal",

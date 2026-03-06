@@ -50,7 +50,8 @@ export interface EmployeeData {
   birth_date?: string;
   hire_date?: string;
   phone?: string;
-  role?: string; // org-specific position (e.g. "Server", "Manager")
+  role?: string; // org-specific role (e.g. "Executive", "Operator")
+  title?: string; // job title (e.g. "General Manager", "Shift Lead")
 }
 
 interface AuthContextType {
@@ -78,6 +79,7 @@ interface AuthContextType {
 
   // Employee data (from employees table)
   position: string;
+  jobTitle: string;
   birthDate: string;
   startDate: string;
   employeePhone: string;
@@ -159,7 +161,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const { data, error: fetchError } = await supabase
         .from("employees")
-        .select("birth_date, hire_date, phone, role")
+        .select("birth_date, hire_date, phone, role, title")
         .eq("id", employeeId)
         .single();
 
@@ -455,7 +457,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Computed properties
   const email = user?.email || "";
-  const fullName = appUser?.full_name || appUser?.first_name || "";
+  const fullName = appUser?.full_name ||
+    [appUser?.first_name, appUser?.last_name].filter(Boolean).join(" ") ||
+    "";
   const firstName = appUser?.first_name || "";
   const lastName = appUser?.last_name || "";
   const nickname = appUser?.nickname || "";
@@ -469,6 +473,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Employee-sourced properties
   const position = employeeData?.role || "";
+  const jobTitle = employeeData?.title || "";
   const birthDate = employeeData?.birth_date || "";
   const startDate = employeeData?.hire_date || "";
   const employeePhone = employeeData?.phone || phone;
@@ -494,6 +499,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       orgId,
       locationId,
       position,
+      jobTitle,
       birthDate,
       startDate,
       employeePhone,
@@ -524,6 +530,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       orgId,
       locationId,
       position,
+      jobTitle,
       birthDate,
       startDate,
       employeePhone,

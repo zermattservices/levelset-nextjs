@@ -1,11 +1,11 @@
 /**
  * SubmissionsList
  * Chronological list of all form submissions at the current location.
- * Shows ratings, infractions, and disciplinary actions in a unified list.
+ * Reuses the ActivityCard component for consistent card rendering.
  * Supports pull-to-refresh and pagination.
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -18,13 +18,14 @@ import { useColors } from "../../context/ThemeContext";
 import { useLocation } from "../../context/LocationContext";
 import { useAuth } from "../../context/AuthContext";
 import { typography, fontWeights } from "../../lib/fonts";
-import { spacing, borderRadius } from "../../lib/theme";
-import { GlassCard } from "../glass/GlassCard";
+import { spacing } from "../../lib/theme";
 import { AppIcon } from "../ui/AppIcon";
+import { ActivityCard } from "../ActivityCard";
 import {
   fetchSubmissionsAuth,
   SubmissionRecord,
   SubmissionsFilters,
+  RecentActivity,
 } from "../../lib/api";
 
 interface SubmissionsListProps {
@@ -32,6 +33,38 @@ interface SubmissionsListProps {
   onFilterPress?: () => void;
   activeFilterCount?: number;
 }
+
+// ---------------------------------------------------------------------------
+// Map SubmissionRecord → RecentActivity so we can reuse ActivityCard
+// ---------------------------------------------------------------------------
+
+function mapToActivity(sub: SubmissionRecord): RecentActivity {
+  const typeMap: Record<SubmissionRecord["form_type"], RecentActivity["type"]> = {
+    ratings: "rating",
+    infractions: "infraction",
+    disc_actions: "disc_action",
+  };
+
+  return {
+    id: sub.id,
+    type: typeMap[sub.form_type],
+    date: sub.created_at,
+    // Rating fields
+    position: sub.position,
+    rating_avg: sub.overall_score ?? undefined,
+    rater_name: sub.form_type === "ratings" ? sub.submitted_by_name : undefined,
+    // Infraction fields
+    infraction_name: sub.infraction_name,
+    points: sub.point_value,
+    leader_name: sub.form_type !== "ratings" ? sub.submitted_by_name : undefined,
+    // Disc action fields
+    action_type: sub.action_name,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function SubmissionsList({
   filters,
@@ -99,52 +132,6 @@ export function SubmissionsList({
     }
   }, [hasMore, isLoading, isRefreshing, page, fetchData]);
 
-  const getFormTypeConfig = (formType: SubmissionRecord["form_type"]) => {
-    switch (formType) {
-      case "ratings":
-        return {
-          icon: "star.fill",
-          iconColor: colors.warning,
-          iconBg: colors.warningTransparent,
-          label: "Rating",
-        };
-      case "infractions":
-        return {
-          icon: "doc.text.fill",
-          iconColor: colors.primary,
-          iconBg: colors.primaryTransparent,
-          label: "Infraction",
-        };
-      case "disc_actions":
-        return {
-          icon: "exclamationmark.shield.fill",
-          iconColor: colors.error,
-          iconBg: colors.errorTransparent,
-          label: "Action",
-        };
-    }
-  };
-
-  const formatRelativeTime = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays}d ago`;
-
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   const renderSubmission = ({
     item,
     index,
@@ -152,113 +139,26 @@ export function SubmissionsList({
     item: SubmissionRecord;
     index: number;
   }) => {
-    const config = getFormTypeConfig(item.form_type);
-
-    // Build detail line based on form type
-    let detailLine = "";
-    if (item.form_type === "ratings") {
-      const parts: string[] = [];
-      if (item.position) parts.push(item.position);
-      if (item.overall_score != null) parts.push(`${item.overall_score}/5.0`);
-      detailLine = parts.join(" • ");
-    } else if (item.form_type === "infractions") {
-      const parts: string[] = [];
-      if (item.infraction_name) parts.push(item.infraction_name);
-      if (item.point_value != null) parts.push(`+${item.point_value} pts`);
-      detailLine = parts.join(" • ");
-    } else if (item.form_type === "disc_actions") {
-      detailLine = item.action_name || "";
-    }
+    const activity = mapToActivity(item);
 
     return (
       <Animated.View entering={FadeIn.delay(Math.min(index * 50, 300))}>
-        <GlassCard>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: spacing[3],
-            }}
-          >
-            {/* Form type icon */}
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: borderRadius.sm,
-                borderCurve: "continuous",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: config.iconBg,
-              }}
-            >
-              <AppIcon
-                name={config.icon}
-                size={20}
-                tintColor={config.iconColor}
-              />
-            </View>
-
-            {/* Content */}
-            <View style={{ flex: 1 }}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                }}
-              >
-                <Text
-                  style={[
-                    typography.labelLarge,
-                    {
-                      color: colors.onSurface,
-                      fontWeight: fontWeights.semibold,
-                      flex: 1,
-                    },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {item.employee_name}
-                </Text>
-                <Text
-                  style={[
-                    typography.bodySmall,
-                    { color: colors.onSurfaceDisabled, marginLeft: spacing[2] },
-                  ]}
-                >
-                  {formatRelativeTime(item.created_at)}
-                </Text>
-              </View>
-
-              {detailLine ? (
-                <Text
-                  style={[
-                    typography.bodySmall,
-                    { color: colors.onSurfaceVariant, marginTop: 2 },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {detailLine}
-                </Text>
-              ) : null}
-
-              <Text
-                style={[
-                  typography.bodySmall,
-                  {
-                    color: colors.onSurfaceDisabled,
-                    marginTop: 2,
-                    fontSize: 11,
-                  },
-                ]}
-                numberOfLines={1}
-              >
-                Submitted by {item.submitted_by_name}
-              </Text>
-            </View>
-          </View>
-        </GlassCard>
+        {/* Employee name label above the card */}
+        <Text
+          style={{
+            ...typography.labelSmall,
+            color: colors.onSurfaceDisabled,
+            marginBottom: 4,
+            marginLeft: spacing[1],
+          }}
+          numberOfLines={1}
+        >
+          {item.employee_name}
+        </Text>
+        <ActivityCard
+          activity={activity}
+          locationId={selectedLocationId!}
+        />
       </Animated.View>
     );
   };

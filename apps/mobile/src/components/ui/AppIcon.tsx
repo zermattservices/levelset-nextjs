@@ -65,6 +65,7 @@ const SYMBOL_MAP: Record<string, string> = {
   "bubble.left.and.bubble.right": "chatbubbles-outline",
   "bubble.left.and.bubble.right.fill": "chatbubbles",
   "line.3.horizontal.decrease": "filter-outline",
+  "line.3.horizontal.decrease.circle": "filter-circle-outline",
   "ellipsis": "ellipsis-horizontal",
   "checklist": "checkbox-outline",
   "bell": "notifications-outline",
@@ -75,6 +76,11 @@ const SYMBOL_MAP: Record<string, string> = {
   "paperplane.fill": "send",
   "microphone": "mic-outline",
   "microphone.fill": "mic",
+  "doc.on.doc": "copy-outline",
+  "flame": "flame-outline",
+  "flame.fill": "flame",
+  "hammer": "hammer-outline",
+  "hammer.fill": "hammer",
 };
 
 interface AppIconProps {

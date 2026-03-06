@@ -8,6 +8,7 @@ import React from "react";
 import { View, Text, ScrollView } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useRouter } from "expo-router";
+import { Rocket, Gavel, ClipboardCheck } from "lucide-react-native";
 import { useColors } from "../../context/ThemeContext";
 import { useForms } from "../../context/FormsContext";
 import { typography } from "../../lib/fonts";
@@ -25,25 +26,25 @@ export function FormsList() {
       key: "ratings",
       title: "Positional Ratings",
       description: "Record Big 5 competency scores for team members",
-      icon: "star.fill",
-      iconColor: colors.warning,
-      iconBg: colors.warningTransparent,
+      renderIcon: (size: number, color: string) => <Rocket size={size} color={color} strokeWidth={1.5} />,
+      iconColor: colors.success,
+      iconBg: colors.successTransparent,
       onPress: () => router.push("/forms/ratings"),
     },
     {
       key: "infractions",
       title: "Discipline Infractions",
       description: "Log infractions and capture acknowledgements",
-      icon: "doc.text.fill",
-      iconColor: colors.primary,
-      iconBg: colors.primaryTransparent,
+      renderIcon: (size: number, color: string) => <Gavel size={size} color={color} strokeWidth={1.5} />,
+      iconColor: colors.error,
+      iconBg: colors.errorTransparent,
       onPress: () => router.push("/forms/infractions"),
     },
     {
       key: "evaluations",
       title: "Evaluations",
       description: "Submit employee performance evaluations",
-      icon: "checkmark.clipboard.fill",
+      renderIcon: (size: number, color: string) => <ClipboardCheck size={size} color={color} strokeWidth={1.5} />,
       iconColor: colors.info,
       iconBg: colors.infoTransparent,
       disabled: true,
@@ -108,7 +109,7 @@ export function FormsList() {
                   backgroundColor: form.iconBg,
                 }}
               >
-                <AppIcon name={form.icon} size={24} tintColor={form.iconColor} />
+                {form.renderIcon(24, form.iconColor)}
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[typography.h4, { color: colors.onSurface, marginBottom: spacing[1] }]}>

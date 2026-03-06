@@ -72,8 +72,11 @@ function RootLayoutNav() {
 
   const isInTabs = segments[0] === "(tabs)";
 
-  // FAB visibility: only on Home and Schedule tabs, only for leaders
-  const showFab = isLeader && isInTabs && (activeTab === "(home)" || activeTab === "(schedule)");
+  // FAB visibility: only on root Home/Schedule screens, only for leaders
+  // Hide on detail pages by checking the last segment against known detail screen names
+  const lastSegment = segments[segments.length - 1];
+  const isOnDetailPage = ['rating-detail', 'infraction-detail', 'review-detail', 'employee-overview', 'todays-setup', 'account', 'edit-profile', 'location-picker', 'day-detail', 'shift-actions'].includes(lastSegment);
+  const showFab = isLeader && isInTabs && !isOnDetailPage && (activeTab === "(home)" || activeTab === "(schedule)");
 
   // Context-aware menu items based on active tab
   const menuItems: ActionMenuItem[] = useMemo(() => {

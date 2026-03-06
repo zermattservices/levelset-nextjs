@@ -56,15 +56,21 @@ export function ActionMenu({ visible, onClose, items }: ActionMenuProps) {
     }
   }, [visible]);
 
+  // Never apply opacity to a GlassView ancestor — it permanently breaks
+  // the glass effect on iOS 26. Scale-only on the outer wrapper; opacity
+  // is applied to the menu content children instead.
   const menuAnimStyle = useAnimatedStyle(() => ({
-    opacity: opacityAnim.value,
     transform: [{ scale: scaleAnim.value }],
+  }));
+
+  const contentFadeStyle = useAnimatedStyle(() => ({
+    opacity: opacityAnim.value,
   }));
 
   if (!visible) return null;
 
   const menuContent = (
-    <View style={styles.menuItems}>
+    <Animated.View style={[styles.menuItems, contentFadeStyle]}>
       {items.map((item, index) => (
         <Pressable
           key={index}
@@ -119,7 +125,7 @@ export function ActionMenu({ visible, onClose, items }: ActionMenuProps) {
           </View>
         </Pressable>
       ))}
-    </View>
+    </Animated.View>
   );
 
   return (

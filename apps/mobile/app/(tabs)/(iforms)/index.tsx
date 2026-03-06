@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
+import { Rocket, Gavel } from "lucide-react-native";
 import { useForms } from "../../../src/context/FormsContext";
 import { useLocation } from "../../../src/context/LocationContext";
 import { useColors } from "../../../src/context/ThemeContext";
@@ -125,8 +126,8 @@ export default function FormsTab() {
             }}
           >
             <View style={styles.formCardContent}>
-              <View style={[styles.iconContainer, { backgroundColor: colors.warningTransparent }]}>
-                <AppIcon name="star.fill" size={24} tintColor={colors.primary} />
+              <View style={[styles.iconContainer, { backgroundColor: colors.successTransparent }]}>
+                <Rocket size={24} color={colors.success} strokeWidth={1.5} />
               </View>
               <View style={styles.formInfo}>
                 <Text style={[styles.formTitle, { color: colors.onSurface }]}>{t("forms.positionalRatings")}</Text>
@@ -148,8 +149,8 @@ export default function FormsTab() {
             }}
           >
             <View style={styles.formCardContent}>
-              <View style={[styles.iconContainer, { backgroundColor: colors.primaryTransparent }]}>
-                <AppIcon name="doc.text.fill" size={24} tintColor={colors.primary} />
+              <View style={[styles.iconContainer, { backgroundColor: colors.errorTransparent }]}>
+                <Gavel size={24} color={colors.error} strokeWidth={1.5} />
               </View>
               <View style={styles.formInfo}>
                 <Text style={[styles.formTitle, { color: colors.onSurface }]}>

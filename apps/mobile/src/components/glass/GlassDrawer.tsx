@@ -89,18 +89,27 @@ export function GlassDrawer({
       {scrollable ? (
         <ScrollView
           style={styles.scrollContent}
-          contentContainerStyle={styles.scrollContentContainer}
+          contentContainerStyle={[
+            styles.scrollContentContainer,
+            !footer && { paddingBottom: spacing[4] + (insets.bottom || 16) },
+          ]}
           showsVerticalScrollIndicator={false}
         >
           {children}
         </ScrollView>
       ) : (
-        <View style={[styles.content, fullScreen && { flex: 1 }]}>{children}</View>
+        <View style={[
+          styles.content,
+          fullScreen && { flex: 1 },
+          !footer && { paddingBottom: spacing[4] + (insets.bottom || 16) },
+        ]}>
+          {children}
+        </View>
       )}
 
       {/* Footer */}
       {footer && (
-        <View style={[styles.footer, { paddingBottom: insets.bottom || 16, borderTopColor: colors.outline }]}>
+        <View style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>
           {footer}
         </View>
       )}
@@ -147,7 +156,7 @@ export function GlassDrawer({
               {drawerContent}
             </GlassView>
           ) : (
-            <View style={[styles.fallbackContainer, { backgroundColor: colors.surface }, containerStyle]}>
+            <View style={[styles.fallbackContainer, { backgroundColor: colors.background }, containerStyle]}>
               {drawerContent}
             </View>
           )}
@@ -167,8 +176,8 @@ const styles = StyleSheet.create({
   },
   animatedContainer: {},
   drawerContainer: {
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     borderCurve: "continuous",
     overflow: "hidden",
   },
@@ -176,8 +185,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   fallbackContainer: {
-    borderTopLeftRadius: borderRadius.lg,
-    borderTopRightRadius: borderRadius.lg,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     borderCurve: "continuous",
   },
   header: {
@@ -198,9 +207,7 @@ const styles = StyleSheet.create({
   closeText: {
     ...typography.labelMedium,
   },
-  scrollContent: {
-    flex: 1,
-  },
+  scrollContent: {},
   scrollContentContainer: {
     padding: spacing[4],
   },
@@ -210,7 +217,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: spacing[4],
     paddingTop: spacing[3],
-    borderTopWidth: 1,
   },
 });
 

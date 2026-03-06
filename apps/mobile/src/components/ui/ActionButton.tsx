@@ -11,8 +11,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  FadeIn,
-  FadeOut,
 } from "react-native-reanimated";
 import { useColors } from "../../context/ThemeContext";
 import { haptics } from "../../lib/theme";
@@ -60,11 +58,7 @@ export function ActionButton({ onPress, isMenuOpen = false }: ActionButtonProps)
   };
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(200)}
-      exiting={FadeOut.duration(150)}
-      style={animatedStyle}
-    >
+    <Animated.View style={animatedStyle}>
       <Pressable
         onPress={handlePress}
         onPressIn={handlePressIn}
