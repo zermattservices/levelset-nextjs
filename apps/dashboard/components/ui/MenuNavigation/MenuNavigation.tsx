@@ -478,7 +478,6 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
 
                   {/* Theme Toggle Switch */}
                   <div className={sty.profileDropdownDivider} />
-<<<<<<< HEAD
                   <div
                     className={sty.profileDropdownItem}
                     style={{ cursor: 'pointer', justifyContent: 'center', gap: 8, padding: '10px 16px' }}
@@ -514,23 +513,6 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
                         transition: 'color 0.2s ease',
                       }}
                     />
-=======
-                  <div className={sty.themeToggleRow}>
-                    <button
-                      className={`${sty.themeToggleBtn} ${resolvedTheme === 'light' ? sty.themeToggleBtnActive : ''}`}
-                      onClick={() => setMode('light')}
-                      aria-label="Light mode"
-                    >
-                      <LightModeOutlinedIcon sx={{ fontSize: 16 }} />
-                    </button>
-                    <button
-                      className={`${sty.themeToggleBtn} ${resolvedTheme === 'dark' ? sty.themeToggleBtnActive : ''}`}
-                      onClick={() => setMode('dark')}
-                      aria-label="Dark mode"
-                    >
-                      <DarkModeOutlinedIcon sx={{ fontSize: 16 }} />
-                    </button>
->>>>>>> f6eb7ed (feat: update OE page, metric cards, leaderboard, nav, and discipline modals)
                   </div>
 
                   {/* Organization Settings - only show if user has access */}
