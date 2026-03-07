@@ -9,9 +9,9 @@ interface SetupPositionCardProps {
 }
 
 export function SetupPositionCard({ positionSlot }: SetupPositionCardProps) {
-  const { position_id, position_name, zone, slots, target_count } = positionSlot;
+  const { position_id, position_name, zone, slots } = positionSlot;
   const filledCount = slots.filter(s => s.assignment).length;
-  const totalCount = target_count;
+  const totalCount = slots.length;
   const accentColor = ZONE_COLORS[zone] || '#999';
 
   return (
