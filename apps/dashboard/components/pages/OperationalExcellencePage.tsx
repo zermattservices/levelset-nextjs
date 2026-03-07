@@ -892,6 +892,7 @@ export function OperationalExcellencePage() {
                       {pillars.map((p) => (
                         <DashboardMetricCard
                           key={p.id}
+                          className={sty.pillarCard}
                           variant="positional-excellence"
                           titleBadge={`${p.weight}%`}
                           selected={selectedPillarId === p.id}

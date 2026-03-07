@@ -360,6 +360,47 @@
   margin: 4px 0;
 }
 
+.themeSwitch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background-color: var(--ls-color-muted-border);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.themeSwitch:hover {
+  opacity: 0.9;
+}
+
+.themeSwitchThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.themeSwitchThumbDark {
+  transform: translateX(18px);
+}
+
+/* When switch is in dark mode (checked), use brand green track */
+.themeSwitch:has(.themeSwitchThumbDark) {
+  background-color: var(--ls-color-brand);
+}
+
+/* Fallback for browsers without :has — use JS-toggled class on parent */
+.themeSwitchActive {
+  background-color: var(--ls-color-brand);
+}
+
 .submenuBackdrop {
   position: fixed;
   top: 57px;

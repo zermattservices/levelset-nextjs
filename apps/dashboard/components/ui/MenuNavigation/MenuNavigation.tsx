@@ -480,18 +480,39 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
                   <div className={sty.profileDropdownDivider} />
                   <div
                     className={sty.profileDropdownItem}
-                    onClick={() => {
-                      const next = mode === 'light' ? 'dark' : mode === 'dark' ? 'system' : 'light';
-                      setMode(next);
-                    }}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: 'pointer', justifyContent: 'center', gap: 8, padding: '10px 16px' }}
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    {resolvedTheme === 'dark' ? (
-                      <DarkModeOutlinedIcon sx={{ fontSize: 18, color: 'var(--ls-color-text-tertiary)' }} />
-                    ) : (
-                      <LightModeOutlinedIcon sx={{ fontSize: 18, color: 'var(--ls-color-text-tertiary)' }} />
-                    )}
-                    <span>{t(`theme.${mode}`)}</span>
+                    <LightModeOutlinedIcon
+                      sx={{
+                        fontSize: 18,
+                        color: resolvedTheme === 'light' ? 'var(--ls-color-brand)' : 'var(--ls-color-text-tertiary)',
+                        transition: 'color 0.2s ease',
+                      }}
+                    />
+                    <div
+                      className={`${sty.themeSwitch} ${resolvedTheme === 'dark' ? sty.themeSwitchActive : ''}`}
+                      onClick={() => setMode(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                      role="switch"
+                      aria-checked={resolvedTheme === 'dark'}
+                      aria-label="Toggle dark mode"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setMode(resolvedTheme === 'dark' ? 'light' : 'dark');
+                        }
+                      }}
+                    >
+                      <div className={`${sty.themeSwitchThumb} ${resolvedTheme === 'dark' ? sty.themeSwitchThumbDark : ''}`} />
+                    </div>
+                    <DarkModeOutlinedIcon
+                      sx={{
+                        fontSize: 18,
+                        color: resolvedTheme === 'dark' ? 'var(--ls-color-brand)' : 'var(--ls-color-text-tertiary)',
+                        transition: 'color 0.2s ease',
+                      }}
+                    />
                   </div>
 
                   {/* Organization Settings - only show if user has access */}

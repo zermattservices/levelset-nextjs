@@ -427,8 +427,8 @@ export function DashboardMetricCard({
   const percent = metricState?.percent ?? 0;
 
   const isOEVariant = ['caring-interactions', 'great-food', 'quick-accurate', 'creating-moments', 'inviting-atmosphere'].includes(variant);
-  const percentRounded = Number.isFinite(percent) ? Math.round(percent) : 0;
-  const percentText = `${percentRounded > 0 ? '+' : percentRounded < 0 ? '' : ''}${percentRounded}%`;
+  const percentRounded = Number.isFinite(percent) ? Number(percent.toFixed(1)) : 0;
+  const percentText = `${percentRounded > 0 ? '+' : percentRounded < 0 ? '' : ''}${percentRounded.toFixed(1)}%`;
   const deltaText = isOEVariant
     ? `${change > 0 ? '+' : ''}${change.toFixed(1)}`
     : `${change > 0 ? '+' : ''}${formatNumber(change)}`;

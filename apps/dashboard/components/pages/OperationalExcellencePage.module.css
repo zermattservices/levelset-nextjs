@@ -165,6 +165,12 @@
   min-width: 0;
 }
 
+/* Pillar cards — match the title size of the large OE card */
+.pillarCard {
+  --metric-card-title-size: 20px;
+  --metric-card-title-lh: 28px;
+}
+
 /* Pillar Descriptions Button — sits inside the score cards grid */
 .pillarDescriptionsBtn {
   display: flex;
