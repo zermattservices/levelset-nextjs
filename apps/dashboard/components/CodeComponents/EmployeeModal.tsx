@@ -544,8 +544,8 @@ export function EmployeeModal({
               sx={{
                 flex: 1,
                 backgroundColor: "var(--ls-color-bg-container)",
-                boxShadow: "inset 0px 0px 0px 1px rgba(233, 234, 235, 1)",
-                filter: "drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05))",
+                boxShadow: "inset 0 0 0 1px var(--ls-color-muted-border)",
+                filter: "drop-shadow(0px 1px 1px var(--ls-color-shadow-lg))",
                 borderRadius: "12px",
                 padding: "16px",
                 display: "flex",
@@ -587,8 +587,8 @@ export function EmployeeModal({
               sx={{
                 flex: 1,
                 backgroundColor: "var(--ls-color-bg-container)",
-                boxShadow: "inset 0px 0px 0px 1px rgba(233, 234, 235, 1)",
-                filter: "drop-shadow(0px 1px 1px rgba(10, 13, 18, 0.05))",
+                boxShadow: "inset 0 0 0 1px var(--ls-color-muted-border)",
+                filter: "drop-shadow(0px 1px 1px var(--ls-color-shadow-lg))",
                 borderRadius: "12px",
                 padding: "16px",
                 display: "flex",

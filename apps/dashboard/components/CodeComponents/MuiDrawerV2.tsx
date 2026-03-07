@@ -191,7 +191,7 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
               alignItems: "center",
               justifyContent: "space-between",
               padding: "16px 24px",
-              borderBottom: "1px solid #e9eaeb",
+              borderBottom: "1px solid var(--ls-color-muted-border)",
               backgroundColor: "var(--ls-color-bg-container)",
               flexShrink: 0,
               ...headerStyle,
@@ -245,7 +245,7 @@ export function MuiDrawerV2(props: MuiDrawerV2Props) {
             className={drawerFooterClassName}
             sx={{
               padding: "10px 16px",
-              borderTop: "1px solid #e9eaeb",
+              borderTop: "1px solid var(--ls-color-muted-border)",
               backgroundColor: "var(--ls-color-bg-container)",
               flexShrink: 0,
               ...footerStyle,

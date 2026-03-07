@@ -49,13 +49,13 @@
   gap: 12px;
   padding: 16px 20px;
   background: var(--ls-color-bg-container);
-  border: 1px solid var(--ls-color-muted-soft);
+  border: 1px solid var(--ls-color-muted-border);
   border-radius: 12px;
   transition: box-shadow 0.15s ease;
 }
 
 .card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--ls-color-shadow-lg);
 }
 
 .cardHeader {
@@ -249,7 +249,7 @@
   justify-content: flex-end;
   gap: 8px;
   padding-top: 4px;
-  border-top: 1px solid var(--ls-color-muted-soft);
+  border-top: 1px solid var(--ls-color-muted-border);
 }
 
 .approveBtn {

@@ -12,7 +12,7 @@
   background: linear-gradient(135deg, var(--ls-color-destructive-base) 0%, var(--ls-color-destructive-dark) 100%);
   color: var(--ls-color-bg-card);
   font-family: "Satoshi", sans-serif;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px var(--ls-color-shadow-lg);
 }
 
 .bannerContent {

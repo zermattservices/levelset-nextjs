@@ -176,7 +176,7 @@
 
 .folderCard:hover {
   border-color: var(--ls-color-brand);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--ls-color-shadow-lg);
 }
 
 .folderCardIcon {

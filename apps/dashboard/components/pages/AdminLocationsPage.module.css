@@ -127,7 +127,7 @@
   border-radius: 8px;
   font-family: "Satoshi";
   font-size: 14px;
-  color: #999;
+  color: var(--ls-color-disabled-text);
 }
 
 /* Compact padding for Task Board */

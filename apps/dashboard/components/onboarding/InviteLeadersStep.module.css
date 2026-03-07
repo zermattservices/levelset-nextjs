@@ -2,7 +2,8 @@
   background-color: var(--ls-color-bg-container);
   border-radius: 12px;
   padding: 32px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--ls-color-muted-border);
+  box-shadow: 0 1px 3px var(--ls-color-shadow-lg);
 }
 
 .sectionTitle {

@@ -10,7 +10,7 @@
 
 .metricItem {
   background: var(--ls-color-bg-card);
-  box-shadow: inset 0 0 0 1px var(--ls-color-border-light);
+  box-shadow: inset 0 0 0 1px var(--ls-color-muted-border);
   filter: drop-shadow(0px 1px 1px var(--ls-color-shadow-lg));
   width: 100%;
   box-sizing: border-box;
@@ -23,6 +23,7 @@
   padding: 20px;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
   flex: 1;
+  container-type: inline-size;
 }
 
 .clickable {
@@ -45,14 +46,16 @@
   column-gap: 8px;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .title {
   font-family: "Satoshi", sans-serif;
-  font-size: 24px;
+  font-size: var(--metric-card-title-size, 24px);
   font-weight: 600;
   color: var(--ls-color-text-primary);
-  line-height: 32px;
+  line-height: var(--metric-card-title-lh, 32px);
   flex: 1;
   min-width: 0;
 }
@@ -70,6 +73,8 @@
   font-weight: 700;
   color: var(--ls-color-success-vivid);
   line-height: 28px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .trendBadge.negative {
@@ -215,6 +220,13 @@
   font-weight: 500;
   color: var(--ls-color-text-caption);
   margin-left: 8px;
+}
+
+/* Hide the weight badge when the card is too narrow to fit both badges */
+@container (max-width: 240px) {
+  .titleBadge {
+    display: none;
+  }
 }
 
 .valueSuffix {

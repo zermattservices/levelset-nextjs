@@ -146,7 +146,7 @@
 
 .card:hover {
   border-color: var(--ls-color-border);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 4px var(--ls-color-shadow-lg);
 }
 
 .cardExpanded {

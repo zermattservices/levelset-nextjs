@@ -15,7 +15,7 @@
   overflow-y: auto;
   background: var(--ls-color-bg-container);
   border-radius: var(--ls-radius-xl);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 40px var(--ls-color-shadow-lg), 0 2px 8px var(--ls-color-shadow-lg);
   border: 1px solid var(--ls-color-border);
 }
 

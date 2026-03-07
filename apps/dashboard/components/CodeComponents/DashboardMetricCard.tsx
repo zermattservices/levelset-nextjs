@@ -466,7 +466,7 @@ export function DashboardMetricCard({
               </div>
               <div className={[styles.trendBadge, customMetric.isNegativeChange ? styles.negative : ''].filter(Boolean).join(' ')} aria-live="polite">
                 <ArrowUpIcon className={[styles.trendIcon, customMetric.percentChange < 0 ? styles.down : ''].filter(Boolean).join(' ')} />
-                <span>{`${customMetric.percentChange > 0 ? '+' : ''}${customMetric.percentChange.toFixed(1)}%`}</span>
+                <span>{`${customMetric.percentChange > 0 ? '+' : ''}${Math.round(customMetric.percentChange)}%`}</span>
               </div>
             </div>
             <div className={styles.supportingMetrics}>

@@ -15,7 +15,7 @@
 
 .chip:hover {
   background: var(--ls-color-brand-soft);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px var(--ls-color-shadow-lg);
 }
 
 .chip:active {
@@ -27,7 +27,7 @@
 }
 
 .chipOverlay {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 4px 16px var(--ls-color-shadow-lg);
   cursor: grabbing;
   width: 220px;
 }

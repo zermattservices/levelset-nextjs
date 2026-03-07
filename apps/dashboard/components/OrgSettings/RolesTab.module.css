@@ -132,7 +132,7 @@
   height: 28px;
   border-radius: 50%;
   background-color: var(--ls-color-bg-hover);
-  color: #4b5563;
+  color: var(--ls-color-text-secondary);
   font-family: "Satoshi";
   font-size: 13px;
   font-weight: 600;
@@ -162,7 +162,7 @@
 
 .colorSwatch:hover {
   transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px var(--ls-color-shadow-lg);
 }
 
 .countCell {

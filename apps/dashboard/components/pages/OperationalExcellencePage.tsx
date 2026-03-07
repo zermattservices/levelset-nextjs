@@ -141,10 +141,12 @@ const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
         fontFamily,
         fontSize: 11,
         padding: '8px 10px',
+        color: 'var(--ls-color-text-primary)',
       },
       '& .MuiInputLabel-root': {
         fontFamily,
         fontSize: 11,
+        color: 'var(--ls-color-text-secondary)',
       },
       '& .MuiOutlinedInput-notchedOutline': {
         borderColor: 'var(--ls-color-muted-border)',
@@ -796,7 +798,7 @@ export function OperationalExcellencePage() {
                           '& .MuiInputLabel-root': {
                             fontFamily: `${fontFamily} !important`,
                             fontSize: '16px !important',
-                            color: 'rgba(0, 0, 0, 0.6) !important',
+                            color: 'var(--ls-color-text-secondary) !important',
                             '&.Mui-focused': { color: `${levelsetGreen} !important` },
                           },
                           '& .MuiOutlinedInput-root': {
@@ -826,7 +828,7 @@ export function OperationalExcellencePage() {
                           '& .MuiInputLabel-root': {
                             fontFamily: `${fontFamily} !important`,
                             fontSize: '16px !important',
-                            color: 'rgba(0, 0, 0, 0.6) !important',
+                            color: 'var(--ls-color-text-secondary) !important',
                             '&.Mui-focused': { color: `${levelsetGreen} !important` },
                           },
                           '& .MuiOutlinedInput-root': {
@@ -890,6 +892,7 @@ export function OperationalExcellencePage() {
                       {pillars.map((p) => (
                         <DashboardMetricCard
                           key={p.id}
+                          className={sty.pillarCard}
                           variant="positional-excellence"
                           titleBadge={`${p.weight}%`}
                           selected={selectedPillarId === p.id}
@@ -990,7 +993,7 @@ export function OperationalExcellencePage() {
                                   fontSize: 13,
                                   borderRadius: 8,
                                   border: `1px solid ${chartGridColor}`,
-                                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                                  boxShadow: '0 4px 12px var(--ls-color-shadow-lg)',
                                   backgroundColor: resolvedTheme === 'dark' ? '#161b22' : '#fff',
                                   color: chartLineColor,
                                 }}

@@ -5,7 +5,7 @@
   border: 1px solid var(--ls-color-muted-border);
   overflow: hidden;
   font-family: "Satoshi", system-ui, -apple-system, sans-serif;
-  box-shadow: 0px 2px 6px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 3px var(--ls-color-shadow-lg);
 }
 
 .roster-table {
@@ -183,9 +183,9 @@
 }
 
 .points-badge.points-0-grey {
-  background-color: #f3f4f6;
-  color: #111827;
-  border-color: #d1d5db;
+  background-color: var(--ls-color-neutral-foreground);
+  color: var(--ls-color-text-primary);
+  border-color: var(--ls-color-muted-border);
 }
 
 .points-badge.points-10 {
@@ -220,12 +220,12 @@
 
 /* Arrow Button Styling */
 .arrow-button {
-  color: #6b7280;
+  color: var(--ls-color-muted);
 }
 
 .arrow-button:hover {
-  color: #374151;
-  background-color: #f3f4f6;
+  color: var(--ls-color-text-secondary);
+  background-color: var(--ls-color-neutral-foreground);
 }
 
 /* Centered columns */

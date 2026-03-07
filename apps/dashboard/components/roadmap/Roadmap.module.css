@@ -522,7 +522,7 @@
 }
 
 .featureCard:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 20px var(--ls-color-shadow-lg);
   transform: translateY(-1px);
   border-color: var(--ls-color-border);
 }
@@ -1217,7 +1217,7 @@
 }
 
 .boardCard:hover {
-  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  box-shadow: 0 6px 16px var(--ls-color-shadow-lg);
   transform: translateY(-1px);
   border-color: var(--ls-color-border);
 }
@@ -1340,7 +1340,7 @@
   overflow-y: auto;
   padding: 32px;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 60px var(--ls-color-shadow-lg);
 }
 
 .modalCloseButton {
