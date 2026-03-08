@@ -9,9 +9,9 @@ export const SlackChannel = {
   LEADS: 'LEADS',
   CONVERSIONS: 'CONVERSIONS',
   BILLING: 'BILLING',
-  PIPELINE: 'PIPELINE',
   BUGS: 'BUGS',
   ALL_LEVELSET: 'ALL_LEVELSET',
+  ANALYTICS: 'ANALYTICS',
 } as const;
 
 export type SlackChannelName = (typeof SlackChannel)[keyof typeof SlackChannel];
@@ -24,9 +24,9 @@ const CHANNEL_NAME_MAP: Record<SlackChannelName, string> = {
   LEADS: 'leads',
   CONVERSIONS: 'conversions',
   BILLING: 'billing',
-  PIPELINE: 'pipeline',
   BUGS: 'bugs',
   ALL_LEVELSET: 'all-levelset',
+  ANALYTICS: 'analytics',
 };
 
 /**

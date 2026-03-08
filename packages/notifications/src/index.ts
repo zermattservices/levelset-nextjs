@@ -20,6 +20,7 @@ export type {
   InvoicePaidEvent,
   InvoiceFailedEvent,
   BugReportedEvent,
+  DailyVisitorReportEvent,
 } from './types';
 
 import { SlackChannel, type SlackChannelName } from './channels';
@@ -32,6 +33,7 @@ import type {
   InvoicePaidEvent,
   InvoiceFailedEvent,
   BugReportedEvent,
+  DailyVisitorReportEvent,
 } from './types';
 import { sendToSlack, sendToMultipleChannels } from './client';
 import {
@@ -42,10 +44,8 @@ import {
   formatInvoicePaid,
   formatInvoiceFailed,
   formatBugReported,
+  formatDailyVisitorReport,
 } from './formatters';
-
-// Conversion stages that also go to #conversions and #all-levelset
-const CONVERSION_STAGES = new Set(['trial', 'onboarded', 'converted']);
 
 /**
  * Route a notification event to the appropriate Slack channel(s).
@@ -62,11 +62,8 @@ export function notify(event: NotificationEvent): void {
 
       case 'pipeline.stage_changed': {
         const msg = formatStageChanged(event);
-        const channels: SlackChannelName[] = [SlackChannel.PIPELINE];
+        const channels: SlackChannelName[] = [SlackChannel.CONVERSIONS];
 
-        if (CONVERSION_STAGES.has(event.newStage)) {
-          channels.push(SlackChannel.CONVERSIONS);
-        }
         if (event.newStage === 'converted') {
           channels.push(SlackChannel.ALL_LEVELSET);
         }
@@ -102,6 +99,12 @@ export function notify(event: NotificationEvent): void {
       case 'bug.reported': {
         const msg = formatBugReported(event);
         await sendToSlack(SlackChannel.BUGS, msg);
+        break;
+      }
+
+      case 'analytics.daily_visitor_report': {
+        const msg = formatDailyVisitorReport(event);
+        await sendToSlack(SlackChannel.ANALYTICS, msg);
         break;
       }
     }
@@ -156,4 +159,10 @@ export function notifyBugReported(
   payload: Omit<BugReportedEvent, 'type'>
 ): void {
   notify({ type: 'bug.reported', ...payload });
+}
+
+export function notifyDailyVisitorReport(
+  payload: Omit<DailyVisitorReportEvent, 'type'>
+): void {
+  notify({ type: 'analytics.daily_visitor_report', ...payload });
 }

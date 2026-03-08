@@ -16,6 +16,7 @@ import { LeadDetailPanel } from '@/components/AdminMode/LeadDetailPanel';
 import { PipelinePage } from '@/components/AdminMode/PipelinePage';
 import { EmailTemplatesPage } from '@/components/AdminMode/EmailTemplatesPage';
 import { EmailSequencesPage } from '@/components/AdminMode/EmailSequencesPage';
+import { VisitorAnalyticsPage } from '@/components/AdminMode/VisitorAnalyticsPage';
 import { ComingSoonPlaceholder } from '@/components/OrgSettings/ComingSoonPlaceholder';
 import styles from './AdminLocationsPage.module.css';
 
@@ -23,7 +24,7 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-const VALID_SECTIONS = ['user-testing', 'organizations', 'feature-requests', 'task-board', 'leads', 'pipeline', 'email-templates', 'email-sequences'];
+const VALID_SECTIONS = ['user-testing', 'organizations', 'feature-requests', 'task-board', 'leads', 'pipeline', 'email-templates', 'email-sequences', 'visitor-analytics'];
 
 export function AdminLocationsPage() {
   const router = useRouter();
@@ -90,6 +91,8 @@ export function AdminLocationsPage() {
         return <EmailTemplatesPage />;
       case 'email-sequences':
         return <EmailSequencesPage />;
+      case 'visitor-analytics':
+        return <VisitorAnalyticsPage />;
       default:
         return <UserTestingPage />;
     }

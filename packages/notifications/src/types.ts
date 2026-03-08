@@ -75,6 +75,22 @@ export interface BugReportedEvent {
   roadmapFeatureId?: string;
 }
 
+export interface DailyVisitorReportEvent {
+  type: 'analytics.daily_visitor_report';
+  date: string; // YYYY-MM-DD
+  uniqueVisitors: number;
+  totalSessions: number;
+  bounceRate: number;
+  avgDwellSeconds: number;
+  topPages: Array<{ url: string; views: number }>;
+  topReferrers: Array<{ source: string; sessions: number }>;
+  comparison: {
+    visitorsChange: number;
+    sessionsChange: number;
+    bounceRateChange: number;
+  };
+}
+
 export type NotificationEvent =
   | LeadSubmittedEvent
   | StageChangedEvent
@@ -82,4 +98,5 @@ export type NotificationEvent =
   | SubscriptionCanceledEvent
   | InvoicePaidEvent
   | InvoiceFailedEvent
-  | BugReportedEvent;
+  | BugReportedEvent
+  | DailyVisitorReportEvent;

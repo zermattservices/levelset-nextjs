@@ -13,6 +13,7 @@ import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import AutoFixHighOutlinedIcon from '@mui/icons-material/AutoFixHighOutlined';
+import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
 import styles from './AdminModeSidebar.module.css';
 
 export interface AdminMenuItem {
@@ -81,6 +82,12 @@ const menuGroups: MenuGroup[] = [
         id: 'email-sequences',
         label: 'Email Sequences',
         icon: <AutoFixHighOutlinedIcon sx={{ fontSize: 18 }} />,
+        status: 'active',
+      },
+      {
+        id: 'visitor-analytics',
+        label: 'Visitor Analytics',
+        icon: <BarChartOutlinedIcon sx={{ fontSize: 18 }} />,
         status: 'active',
       },
     ],

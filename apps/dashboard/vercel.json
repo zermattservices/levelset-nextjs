@@ -11,6 +11,10 @@
     {
       "path": "/api/email-sequences/process",
       "schedule": "0 */4 * * *"
+    },
+    {
+      "path": "/api/cron/daily-visitor-report",
+      "schedule": "0 2 * * *"
     }
   ],
   "rewrites": [

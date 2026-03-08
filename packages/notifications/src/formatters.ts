@@ -13,6 +13,7 @@ import type {
   InvoicePaidEvent,
   InvoiceFailedEvent,
   BugReportedEvent,
+  DailyVisitorReportEvent,
 } from './types';
 
 const DASHBOARD_URL = 'https://app.levelset.io';
@@ -399,6 +400,108 @@ export function formatBugReported(event: BugReportedEvent) {
 
   return {
     text: `Bug report: ${event.featureArea} — ${event.reportedBy.name}`,
+    blocks,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Analytics: daily visitor report
+// ---------------------------------------------------------------------------
+
+function formatDelta(pct: number, inverted = false): string {
+  if (pct === 0 || !isFinite(pct)) return '';
+  const isPositive = pct > 0;
+  const arrow = isPositive ? ':small_red_triangle:' : ':small_red_triangle_down:';
+  const sign = isPositive ? '+' : '';
+  return `${arrow} ${sign}${pct.toFixed(0)}%`;
+}
+
+function formatDuration(seconds: number): string {
+  if (seconds >= 60) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.round(seconds % 60);
+    return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+  }
+  return `${Math.round(seconds)}s`;
+}
+
+export function formatDailyVisitorReport(event: DailyVisitorReportEvent) {
+  const formattedDate = new Date(event.date + 'T12:00:00').toLocaleDateString(
+    'en-US',
+    { weekday: 'long', month: 'long', day: 'numeric' }
+  );
+
+  const avgDwellFormatted = formatDuration(event.avgDwellSeconds);
+  const visitorsDelta = formatDelta(event.comparison.visitorsChange);
+  const sessionsDelta = formatDelta(event.comparison.sessionsChange);
+  const bounceDelta = formatDelta(event.comparison.bounceRateChange, true);
+
+  const topPagesText =
+    event.topPages
+      .slice(0, 5)
+      .map((p, i) => `${i + 1}. \`${p.url}\` — ${p.views} views`)
+      .join('\n') || '_No page views_';
+
+  const topReferrersText =
+    event.topReferrers
+      .slice(0, 5)
+      .map((r, i) => `${i + 1}. ${r.source} — ${r.sessions} sessions`)
+      .join('\n') || '_No referrer data_';
+
+  const blocks: any[] = [
+    {
+      type: 'header',
+      text: { type: 'plain_text', text: ':bar_chart: Daily Visitor Report' },
+    },
+    {
+      type: 'context',
+      elements: [{ type: 'mrkdwn', text: `*${formattedDate}*` }],
+    },
+    { type: 'divider' },
+    {
+      type: 'section',
+      fields: [
+        {
+          type: 'mrkdwn',
+          text: `*Unique Visitors*\n${event.uniqueVisitors} ${visitorsDelta}`,
+        },
+        {
+          type: 'mrkdwn',
+          text: `*Sessions*\n${event.totalSessions} ${sessionsDelta}`,
+        },
+        {
+          type: 'mrkdwn',
+          text: `*Bounce Rate*\n${event.bounceRate.toFixed(1)}% ${bounceDelta}`,
+        },
+        {
+          type: 'mrkdwn',
+          text: `*Avg Time on Site*\n${avgDwellFormatted}`,
+        },
+      ],
+    },
+    { type: 'divider' },
+    {
+      type: 'section',
+      text: { type: 'mrkdwn', text: `*Top Pages*\n${topPagesText}` },
+    },
+    {
+      type: 'section',
+      text: { type: 'mrkdwn', text: `*Top Referrers*\n${topReferrersText}` },
+    },
+    { type: 'divider' },
+    {
+      type: 'context',
+      elements: [
+        {
+          type: 'mrkdwn',
+          text: `Sent by Levi  |  <${DASHBOARD_URL}/admin/locations?tab=visitor-analytics|View Dashboard>`,
+        },
+      ],
+    },
+  ];
+
+  return {
+    text: `Daily Visitor Report: ${event.uniqueVisitors} visitors, ${event.totalSessions} sessions (${formattedDate})`,
     blocks,
   };
 }
