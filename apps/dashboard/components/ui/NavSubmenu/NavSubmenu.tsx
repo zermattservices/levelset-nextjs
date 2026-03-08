@@ -120,7 +120,7 @@ export const menuItems: Record<MenuType, NavMenuItem[]> = {
       description: 'Position templates and settings',
       href: '/schedule?mode=setup',
       icon: <Captions size={22} strokeWidth={1.5} />,
-      requiredFeature: F.SCHEDULING,
+      requiredFeature: F.SETUPS,
     },
     {
       label: 'Approvals',

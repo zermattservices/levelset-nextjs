@@ -27,6 +27,7 @@ export const F = {
   MULTI_UNIT: 'multi_unit',
   OPERATIONAL_EXCELLENCE: 'operational_excellence',
   SCHEDULING: 'scheduling',
+  SETUPS: 'setups',
   FORM_MANAGEMENT: 'form_management',
   LEVI_AI: 'levi_ai',
   DOCUMENTS: 'documents',

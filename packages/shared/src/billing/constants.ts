@@ -40,6 +40,7 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
       { key: 'evaluations', label: 'Evaluations', description: 'Formal evaluations connected to performance data', status: 'coming-soon' },
       { key: 'mobile_app_access', label: 'Mobile App', description: 'Access to Levelset mobile app', status: 'coming-soon' },
       { key: 'organization_settings', label: 'Organization Settings', description: 'Configure organization settings' },
+      { key: 'setups', label: 'Setups', description: 'Consistent shift setup assignments' },
     ],
   },
   {
@@ -47,7 +48,6 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
     tier: 'pro',
     features: [
       { key: 'scheduling', label: 'Scheduling', description: 'Shift scheduling and management' },
-      { key: 'setups', label: 'Setups', description: 'Consistent shift setup assignments' },
       { key: 'form_management', label: 'Forms', description: 'Custom digital forms — trackable and mobile' },
       { key: 'operational_excellence', label: 'OE Pillars', description: 'Operational Excellence pillar analytics and scoring' },
       { key: 'org_chart', label: 'Org Chart', description: 'Team structure visualization' },

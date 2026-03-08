@@ -70,7 +70,7 @@ export const FEATURES: MarketingFeature[] = [
     name: 'Setups',
     shortDescription: 'Consistent shift setup assignments, every time.',
     icon: 'captions',
-    tier: 'pro',
+    tier: 'core',
     screenshotReady: true,
     status: 'live',
   },
