@@ -30,8 +30,8 @@ export interface FieldTypeDefinition {
 export type FieldCategory = 'basic' | 'selection' | 'advanced';
 
 export const FIELD_CATEGORIES: { key: FieldCategory; label: string; labelEs: string }[] = [
-  { key: 'basic', label: 'Basic', labelEs: 'Basico' },
-  { key: 'selection', label: 'Selection', labelEs: 'Seleccion' },
+  { key: 'basic', label: 'Basic', labelEs: 'Básico' },
+  { key: 'selection', label: 'Selection', labelEs: 'Selección' },
   { key: 'advanced', label: 'Advanced', labelEs: 'Avanzado' },
 ];
 
@@ -57,7 +57,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
   number: {
     type: 'number',
     label: 'Number',
-    labelEs: 'Numero',
+    labelEs: 'Número',
     icon: 'PinOutlined',
     category: 'basic',
     schema: { type: 'number' },
@@ -74,7 +74,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
   section: {
     type: 'section',
     label: 'Section Header',
-    labelEs: 'Encabezado de Seccion',
+    labelEs: 'Encabezado de Sección',
     icon: 'ViewAgendaOutlined',
     category: 'basic',
     schema: { type: 'null' },
@@ -134,7 +134,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
   rating_1_3: {
     type: 'rating_1_3',
     label: 'Rating (1-3)',
-    labelEs: 'Calificacion (1-3)',
+    labelEs: 'Calificación (1-3)',
     icon: 'StarHalfOutlined',
     category: 'advanced',
     schema: {
@@ -148,7 +148,7 @@ export const FIELD_TYPES: Record<string, FieldTypeDefinition> = {
   rating_1_5: {
     type: 'rating_1_5',
     label: 'Rating (1-5)',
-    labelEs: 'Calificacion (1-5)',
+    labelEs: 'Calificación (1-5)',
     icon: 'StarOutlined',
     category: 'advanced',
     schema: {
@@ -219,7 +219,7 @@ export const DATA_SOURCE_OPTIONS: DataSourceOption[] = [
   {
     value: 'leaders',
     label: 'Leaders',
-    labelEs: 'Lideres',
+    labelEs: 'Líderes',
     description: 'Filters employees by role hierarchy level.',
   },
   {

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import DOMPurify from 'dompurify';
 import type { FieldProps } from '@rjsf/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -27,7 +28,7 @@ export function TextBlockField(props: FieldProps) {
         color: 'var(--ls-color-text-primary)',
         padding: '8px 0',
       }}
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
     />
   );
 }
