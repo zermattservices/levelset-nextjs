@@ -40,7 +40,8 @@ async function handler(
           id, shift_date, start_time, end_time, break_minutes,
           position:org_positions(id, name, zone)
         ),
-        target_employee:employees!shift_trade_requests_target_employee_id_fkey(id, full_name)
+        target_employee:employees!shift_trade_requests_target_employee_id_fkey(id, full_name),
+        denial_reason:approval_denial_reasons(id, label)
       `)
       .eq('org_id', orgId)
       .order('created_at', { ascending: isPending });
