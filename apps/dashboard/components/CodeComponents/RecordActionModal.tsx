@@ -603,7 +603,7 @@ export function RecordActionModal({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={saving}
+              disabled={saving || (needsLeaderPicker && !actingLeader?.id)}
               variant="contained"
               sx={{
                 fontFamily,

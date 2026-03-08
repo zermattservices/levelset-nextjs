@@ -293,13 +293,18 @@ export function AddActionModal({
   const handleSave = async () => {
     if (!employee) return;
 
+    if (needsLeaderPicker && !actingLeaderId) {
+      alert('Please select an acting leader.');
+      return;
+    }
+
     try {
       setSaving(true);
 
       const newAction: Partial<DisciplinaryAction> = {
         employee_id: employee.id,
         action_date: actionDate ? actionDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-        acting_leader: actingLeaderId,
+        acting_leader: actingLeaderId || null,
         action: actionType,
         action_id: actionId,
         notes: notes,
@@ -614,7 +619,7 @@ export function AddActionModal({
             </Button>
             <Button
               onClick={handleSave}
-              disabled={saving || !actionType}
+              disabled={saving || !actionType || (needsLeaderPicker && !actingLeaderId)}
               variant="contained"
               sx={{
                 fontFamily,
