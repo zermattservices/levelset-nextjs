@@ -335,6 +335,21 @@ export function MenuNavigation({ className, firstName, userRole, fullWidth }: Me
               );
             })}
 
+            {/* Setups - direct link when org has setups but NOT scheduling */}
+            {hasFeature(F.SETUPS) && !hasFeature(F.SCHEDULING) && (
+              <div className={sty.navButtonContainer}>
+                {isRoadmapSubdomain ? (
+                  <a href={getAppLink('/setups')} className={classNames(sty.navButton, sty.navButtonDirect)}>
+                    <span className={sty.navButtonText}>Setups</span>
+                  </a>
+                ) : (
+                  <Link href="/setups" className={classNames(sty.navButton, sty.navButtonDirect)}>
+                    <span className={sty.navButtonText}>Setups</span>
+                  </Link>
+                )}
+              </div>
+            )}
+
             {/* Levi AI - direct link, feature flag gated */}
             {hasFeature(F.LEVI_AI) && (
               <div className={sty.navButtonContainer}>
