@@ -17,7 +17,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { createSupabaseClient } from '@/util/supabase/component';
 import { useLocationContext } from '@/components/CodeComponents/LocationContext';
-import { fetchLeaderboardData, formatTenure } from '@/lib/ratings-data';
+import { fetchLeaderboardData, fetchLeaderLeaderboardData, formatTenure } from '@/lib/ratings-data';
 import type { LeaderboardEntry } from '@/lib/ratings-data';
 import type { Employee } from '@/lib/supabase.types';
 import { EmployeeModal } from './EmployeeModal';
@@ -122,6 +122,40 @@ const StyledSwitch = styled(Switch)({
     opacity: 1,
   },
 });
+
+const ViewSwitch = styled(Switch)({
+  width: 42,
+  height: 24,
+  padding: 0,
+  '& .MuiSwitch-switchBase': {
+    padding: 2,
+    '&.Mui-checked': {
+      transform: 'translateX(18px)',
+      '& + .MuiSwitch-track': {
+        backgroundColor: levelsetGreen,
+        opacity: 1,
+      },
+    },
+  },
+  '& .MuiSwitch-thumb': {
+    width: 20,
+    height: 20,
+    backgroundColor: 'var(--ls-color-bg-container)',
+  },
+  '& .MuiSwitch-track': {
+    borderRadius: 12,
+    backgroundColor: levelsetGreen,
+    opacity: 1,
+  },
+});
+
+const ViewLabel = styled(Typography)<{ active?: boolean }>(({ active }) => ({
+  fontFamily,
+  fontSize: 13,
+  fontWeight: 600,
+  color: active ? levelsetGreen : 'var(--ls-color-disabled-text)',
+  transition: 'color 0.15s ease',
+}));
 
 // Custom DatePicker TextField - identical to PositionalRatings.tsx
 const CustomDateTextField = React.forwardRef((props: any, ref: any) => (
@@ -247,11 +281,12 @@ interface TopCardProps {
   entry: LeaderboardEntry;
   rank: number;
   onEmployeeClick: (employeeId: string) => void;
+  isLeaderView?: boolean;
 }
 
-function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
+function TopCard({ entry, rank, onEmployeeClick, isLeaderView }: TopCardProps) {
   const hasScore = entry.total_ratings >= MIN_RATINGS_FOR_SCORE && entry.overall_rating !== null;
-  
+
   return (
     <Box
       sx={{
@@ -271,7 +306,7 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
       <Box sx={{ flexShrink: 0 }}>
         <RankBadge rank={rank} size={40} />
       </Box>
-      
+
       {/* Middle section - Name, Role, and metrics */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         {/* Employee name */}
@@ -289,46 +324,82 @@ function TopCard({ entry, rank, onEmployeeClick }: TopCardProps) {
         >
           {entry.employee_name}
         </Typography>
-        
+
         {/* Role chip */}
         <Box sx={{ marginBottom: '8px' }}>
           <RoleChip label={entry.role || 'Team Member'} size="small" roletype={entry.role || 'Team Member'} />
         </Box>
-        
-        {/* Total Ratings and Tenure - same margin as name/role */}
+
+        {/* Bottom row metrics */}
         <Box sx={{ display: 'flex', gap: 3 }}>
-          <Box>
-            <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '2px' }}>
-              Total Ratings
-            </Typography>
-            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral)' }}>
-              {entry.total_ratings}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '2px' }}>
-              Tenure
-            </Typography>
-            <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral)' }}>
-              {formatTenure(entry.tenure_months)}
-            </Typography>
-          </Box>
+          {isLeaderView ? (
+            <>
+              <Box>
+                <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                  Overall
+                </Typography>
+                <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral)' }}>
+                  {hasScore ? entry.overall_rating?.toFixed(2) : '—'}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                  Positions
+                </Typography>
+                <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral)' }}>
+                  {entry.positions_count ?? 0}
+                </Typography>
+              </Box>
+            </>
+          ) : (
+            <>
+              <Box>
+                <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                  Total Ratings
+                </Typography>
+                <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral)' }}>
+                  {entry.total_ratings}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                  Tenure
+                </Typography>
+                <Typography sx={{ fontFamily, fontSize: 14, fontWeight: 600, color: 'var(--ls-color-neutral)' }}>
+                  {formatTenure(entry.tenure_months)}
+                </Typography>
+              </Box>
+            </>
+          )}
         </Box>
       </Box>
-      
-      {/* Right section - Overall rating */}
+
+      {/* Right section - Main metric */}
       <Box sx={{ flexShrink: 0, textAlign: 'center', paddingLeft: 2 }}>
-        <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '4px' }}>
-          Overall
-        </Typography>
-        {hasScore ? (
-          <Typography sx={{ fontFamily, fontSize: 28, fontWeight: 700, color: levelsetGreen, lineHeight: 1 }}>
-            {entry.overall_rating?.toFixed(2)}
-          </Typography>
+        {isLeaderView ? (
+          <>
+            <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '4px' }}>
+              Ratings Submitted
+            </Typography>
+            <Typography sx={{ fontFamily, fontSize: 28, fontWeight: 700, color: levelsetGreen, lineHeight: 1 }}>
+              {entry.total_ratings}
+            </Typography>
+          </>
         ) : (
-          <Typography sx={{ fontFamily, fontSize: 11, color: 'var(--ls-color-disabled-text)', fontStyle: 'italic', textAlign: 'center' }}>
-            Needs {Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more
-          </Typography>
+          <>
+            <Typography sx={{ fontFamily, fontSize: 10, color: 'var(--ls-color-disabled-text)', textTransform: 'uppercase', marginBottom: '4px' }}>
+              Overall
+            </Typography>
+            {hasScore ? (
+              <Typography sx={{ fontFamily, fontSize: 28, fontWeight: 700, color: levelsetGreen, lineHeight: 1 }}>
+                {entry.overall_rating?.toFixed(2)}
+              </Typography>
+            ) : (
+              <Typography sx={{ fontFamily, fontSize: 11, color: 'var(--ls-color-disabled-text)', fontStyle: 'italic', textAlign: 'center' }}>
+                Needs {Math.max(0, MIN_RATINGS_FOR_SCORE - entry.total_ratings)} more
+              </Typography>
+            )}
+          </>
         )}
       </Box>
     </Box>
@@ -343,6 +414,7 @@ export function PELeaderboard() {
   const [endDate, setEndDate] = React.useState<Date | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [entries, setEntries] = React.useState<LeaderboardEntry[]>([]);
+  const [viewMode, setViewMode] = React.useState<'team_member' | 'leader'>('team_member');
   const [employeeModalOpen, setEmployeeModalOpen] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
   
@@ -357,11 +429,13 @@ export function PELeaderboard() {
   React.useEffect(() => {
     const fetchData = async () => {
       if (!selectedLocationId || !startDate || !endDate) return;
-      
+
       setLoading(true);
       try {
         const supabase = createSupabaseClient();
-        const data = await fetchLeaderboardData(supabase, selectedLocationId, area, startDate, endDate);
+        const data = viewMode === 'leader'
+          ? await fetchLeaderLeaderboardData(supabase, selectedLocationId, area, startDate, endDate)
+          : await fetchLeaderboardData(supabase, selectedLocationId, area, startDate, endDate);
         setEntries(data);
       } catch (error) {
         console.error('Error fetching leaderboard data:', error);
@@ -369,9 +443,9 @@ export function PELeaderboard() {
         setLoading(false);
       }
     };
-    
+
     fetchData();
-  }, [selectedLocationId, area, startDate, endDate]);
+  }, [selectedLocationId, area, startDate, endDate, viewMode]);
   
   const handleDatePreset = (preset: 'mtd' | 'qtd' | '30d' | '90d') => {
     setDateRange(preset);
@@ -383,6 +457,12 @@ export function PELeaderboard() {
   const handleAreaToggle = () => {
     setArea(prev => prev === 'FOH' ? 'BOH' : 'FOH');
   };
+
+  const handleViewModeToggle = () => {
+    setViewMode(prev => prev === 'team_member' ? 'leader' : 'team_member');
+  };
+
+  const isLeaderView = viewMode === 'leader';
   
   const handleEmployeeClick = async (employeeId: string) => {
     try {
@@ -538,8 +618,14 @@ export function PELeaderboard() {
                 },
               }}
             />
+            {/* Team Member / Leader Toggle */}
+            <AreaToggle>
+              <ViewLabel active={viewMode === 'team_member'}>Team Member</ViewLabel>
+              <ViewSwitch checked={viewMode === 'leader'} onChange={handleViewModeToggle} />
+              <ViewLabel active={viewMode === 'leader'}>Leader</ViewLabel>
+            </AreaToggle>
           </Box>
-          
+
           {/* PDF Export */}
           <Tooltip title="Export to PDF">
             <IconButton
@@ -579,6 +665,7 @@ export function PELeaderboard() {
                       entry={entry}
                       rank={index + 1}
                       onEmployeeClick={handleEmployeeClick}
+                      isLeaderView={isLeaderView}
                     />
                   ))}
                 </Box>
@@ -618,10 +705,10 @@ export function PELeaderboard() {
                       Overall
                     </Typography>
                     <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', textAlign: 'center' }}>
-                      Total Ratings
+                      {isLeaderView ? 'Ratings Submitted' : 'Total Ratings'}
                     </Typography>
                     <Typography sx={{ fontFamily, fontSize: 12, fontWeight: 600, color: 'var(--ls-color-muted)', textTransform: 'uppercase', textAlign: 'center' }}>
-                      Tenure
+                      {isLeaderView ? 'Positions' : 'Tenure'}
                     </Typography>
                   </Box>
                   
@@ -682,9 +769,9 @@ export function PELeaderboard() {
                           {entry.total_ratings}
                         </Typography>
                         
-                        {/* Tenure */}
+                        {/* Tenure / Positions */}
                         <Typography sx={{ fontFamily, fontSize: 14, color: 'var(--ls-color-neutral)', textAlign: 'center' }}>
-                          {formatTenure(entry.tenure_months)}
+                          {isLeaderView ? (entry.positions_count ?? 0) : formatTenure(entry.tenure_months)}
                         </Typography>
                       </Box>
                     );

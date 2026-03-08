@@ -1177,6 +1177,7 @@ export interface LeaderboardEntry {
   total_ratings: number;
   last_rating_date: string | null;
   ratings_needed: number; // 0 if has 1+ ratings, otherwise how many more needed
+  positions_count?: number; // Leader view: distinct positions rated
 }
 
 /**
@@ -1466,3 +1467,353 @@ export async function fetchLeaderboardData(
   return entries;
 }
 
+/**
+ * Get all employee IDs that have PE_SUBMIT_RATINGS permission in the org.
+ *
+ * Checks employees WITH app_users records (explicit or role-default profiles)
+ * AND employees WITHOUT app_users records (fall back to role → org_roles → system default profile).
+ * Accepts rosterEmployees so we can resolve permissions for everyone on the roster.
+ */
+async function getEmployeesWithSubmitPermission(
+  supabase: SupabaseClient,
+  orgId: string,
+  rosterEmployees: { id: string; role: string | null }[]
+): Promise<Set<string>> {
+  // 1. Find all profile_ids that have positional_excellence.submit_ratings enabled
+  const { data: accessData } = await supabase
+    .from('permission_profile_access')
+    .select(`
+      profile_id,
+      is_enabled,
+      permission_sub_items!inner (
+        key,
+        permission_modules!inner (
+          key
+        )
+      )
+    `)
+    .eq('is_enabled', true);
+
+  const allowedProfileIds = new Set<string>();
+  if (accessData) {
+    for (const access of accessData as any[]) {
+      const moduleKey = access.permission_sub_items.permission_modules.key;
+      const subItemKey = access.permission_sub_items.key;
+      if (moduleKey === 'positional_excellence' && subItemKey === 'submit_ratings') {
+        allowedProfileIds.add(access.profile_id);
+      }
+    }
+  }
+
+  // 2. Get all app_users in the org (keyed by employee_id)
+  const { data: appUsers } = await supabase
+    .from('app_users')
+    .select('employee_id, role, permission_profile_id, use_role_default')
+    .eq('org_id', orgId);
+
+  const appUserByEmployeeId = new Map<string, any>();
+  appUsers?.forEach(u => { if (u.employee_id) appUserByEmployeeId.set(u.employee_id, u); });
+
+  // 3. Get org_roles for hierarchy level mapping
+  const { data: orgRoles } = await supabase
+    .from('org_roles')
+    .select('role_name, hierarchy_level')
+    .eq('org_id', orgId);
+
+  const roleToLevel = new Map<string, number>();
+  orgRoles?.forEach((r: any) => roleToLevel.set(r.role_name, r.hierarchy_level));
+
+  // 4. Get system default profiles for the org
+  const { data: systemProfiles } = await supabase
+    .from('permission_profiles')
+    .select('id, hierarchy_level')
+    .eq('org_id', orgId)
+    .eq('is_system_default', true);
+
+  const levelToProfile = new Map<number, string>();
+  systemProfiles?.forEach((p: any) => levelToProfile.set(p.hierarchy_level, p.id));
+
+  // 5. Helper: resolve profile from employee role
+  const resolveProfileFromRole = (role: string | null): string | null => {
+    if (!role) return null;
+    const level = roleToLevel.get(role);
+    if (level === undefined) return null;
+    return levelToProfile.get(level) || null;
+  };
+
+  // 6. Check every roster employee
+  const permittedEmployeeIds = new Set<string>();
+
+  for (const emp of rosterEmployees) {
+    const appUser = appUserByEmployeeId.get(emp.id);
+
+    if (appUser) {
+      // Has an app_users record
+      if (appUser.role === 'Levelset Admin') {
+        permittedEmployeeIds.add(emp.id);
+        continue;
+      }
+
+      let profileId = appUser.permission_profile_id;
+      if (appUser.use_role_default || !profileId) {
+        profileId = resolveProfileFromRole(emp.role);
+      }
+
+      if (profileId && allowedProfileIds.has(profileId)) {
+        permittedEmployeeIds.add(emp.id);
+      }
+    } else {
+      // No app_users record — resolve from employee role's default profile
+      const profileId = resolveProfileFromRole(emp.role);
+      if (profileId && allowedProfileIds.has(profileId)) {
+        permittedEmployeeIds.add(emp.id);
+      }
+    }
+  }
+
+  return permittedEmployeeIds;
+}
+
+/**
+ * Fetch Leader Leaderboard data - employees ranked by ratings SUBMITTED (as raters)
+ *
+ * Only includes employees with PE_SUBMIT_RATINGS permission.
+ * Ranking: by total count of ratings submitted (descending)
+ * Shows: overall avg rating given, positions count instead of tenure
+ */
+export async function fetchLeaderLeaderboardData(
+  supabase: SupabaseClient,
+  locationId: string,
+  area: 'FOH' | 'BOH',
+  startDate: Date,
+  endDate: Date
+): Promise<LeaderboardEntry[]> {
+  // Get org info and all locations for the org
+  const orgInfo = await getOrgLocations(supabase, locationId);
+  if (!orgInfo) {
+    console.error('Could not get org locations');
+    return [];
+  }
+  const { orgId, locationIds } = orgInfo;
+
+  // Get dynamic positions for this location/org
+  const positions = await fetchPositionsList(supabase, locationId, area);
+
+  const fohBohField = area === 'FOH' ? 'is_foh' : 'is_boh';
+
+  // Fetch ALL active employees from the current location's roster
+  const { data: rosterEmployees, error: empError } = await supabase
+    .from('employees')
+    .select('id, full_name, first_name, last_name, consolidated_employee_id, role, hire_date')
+    .eq('location_id', locationId)
+    .eq('active', true)
+    .eq(fohBohField, true)
+    .order('full_name');
+
+  if (empError || !rosterEmployees) {
+    console.error('Error fetching employees for leader leaderboard:', empError);
+    return [];
+  }
+
+  // Get employees with PE_SUBMIT_RATINGS permission (checks app_users AND role-based defaults)
+  const permittedEmployeeIds = await getEmployeesWithSubmitPermission(supabase, orgId, rosterEmployees);
+
+  // Build consolidated employee map — only include permitted employees
+  const consolidatedMap = new Map<string, {
+    primaryId: string;
+    name: string;
+    role: string | null;
+    hire_date: string | null;
+    allIds: string[];
+  }>();
+
+  for (const emp of rosterEmployees) {
+    // Only include employees with PE_SUBMIT_RATINGS permission
+    if (!permittedEmployeeIds.has(emp.id)) continue;
+
+    const consolidatedId = emp.consolidated_employee_id;
+    const primaryId = (consolidatedId && consolidatedId !== emp.id) ? consolidatedId : emp.id;
+
+    if (!consolidatedMap.has(primaryId)) {
+      consolidatedMap.set(primaryId, {
+        primaryId,
+        name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
+        role: emp.role,
+        hire_date: emp.hire_date,
+        allIds: [emp.id]
+      });
+
+      if (consolidatedId && consolidatedId !== emp.id) {
+        consolidatedMap.get(primaryId)!.allIds.push(consolidatedId);
+      }
+    } else {
+      const existing = consolidatedMap.get(primaryId)!;
+      if (!existing.allIds.includes(emp.id)) {
+        existing.allIds.push(emp.id);
+      }
+    }
+  }
+
+  // Fetch all linked employee IDs from ALL locations for each consolidated identity
+  const primaryIds = Array.from(consolidatedMap.keys());
+  for (const primaryId of primaryIds) {
+    const consolidated = consolidatedMap.get(primaryId)!;
+
+    const { data: linkedEmployees } = await supabase
+      .from('employees')
+      .select('id, consolidated_employee_id')
+      .in('location_id', locationIds)
+      .or(`id.eq.${primaryId},consolidated_employee_id.eq.${primaryId}`);
+
+    if (linkedEmployees) {
+      linkedEmployees.forEach(linked => {
+        if (!consolidated.allIds.includes(linked.id)) {
+          consolidated.allIds.push(linked.id);
+        }
+      });
+    }
+  }
+
+  // Build reverse lookup: employee_id → consolidated primary ID
+  const employeeToConsolidated = new Map<string, string>();
+  consolidatedMap.forEach((consolidated, primaryId) => {
+    consolidated.allIds.forEach(empId => {
+      employeeToConsolidated.set(empId, primaryId);
+    });
+  });
+
+  // Format dates for query
+  const startISO = startDate.toISOString();
+  const endISO = endDate.toISOString();
+
+  // Fetch all ratings in the date range from ALL org locations (paginated)
+  let ratings: any[] = [];
+  let offset = 0;
+  const limit = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('ratings')
+      .select('*')
+      .in('location_id', locationIds)
+      .in('position', positions)
+      .gte('created_at', startISO)
+      .lte('created_at', endISO)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Error fetching leader leaderboard ratings:', error);
+      break;
+    }
+
+    if (data && data.length > 0) {
+      ratings = ratings.concat(data);
+      hasMore = data.length === limit;
+      offset += limit;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  // Group ratings by RATER (rater_user_id) → consolidated primary ID
+  const raterRatingsMap = new Map<string, any[]>();
+
+  ratings.forEach((rating: any) => {
+    if (!rating.rater_user_id) return;
+    const consolidatedId = employeeToConsolidated.get(rating.rater_user_id);
+    if (consolidatedId) {
+      if (!raterRatingsMap.has(consolidatedId)) {
+        raterRatingsMap.set(consolidatedId, []);
+      }
+      raterRatingsMap.get(consolidatedId)!.push(rating);
+    }
+  });
+
+  // Sort ratings within each group by date (most recent first)
+  raterRatingsMap.forEach((empRatings) => {
+    empRatings.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  });
+
+  // Calculate leaderboard entries for all permitted employees
+  const entries: LeaderboardEntry[] = [];
+
+  consolidatedMap.forEach((consolidated, primaryId) => {
+    const submittedRatings = raterRatingsMap.get(primaryId) || [];
+    const totalRatingsSubmitted = submittedRatings.length;
+    const ratingsNeeded = Math.max(0, 1 - totalRatingsSubmitted);
+
+    // Count distinct positions rated
+    const positionsSet = new Set<string>();
+    submittedRatings.forEach((r: any) => positionsSet.add(r.position));
+
+    // Calculate overall average rating given (rolling 4 per position, same algorithm)
+    let overallRating: number | null = null;
+
+    if (totalRatingsSubmitted >= 1) {
+      const positionGroups = new Map<string, any[]>();
+      submittedRatings.forEach((r: any) => {
+        if (!positionGroups.has(r.position)) {
+          positionGroups.set(r.position, []);
+        }
+        positionGroups.get(r.position)!.push(r);
+      });
+
+      const positionAverages: number[] = [];
+      positionGroups.forEach((posRatings) => {
+        posRatings.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const last4 = posRatings.slice(0, 4);
+
+        const avgs: number[] = [];
+        last4.forEach((r: any) => {
+          if (r.rating_avg !== null) {
+            avgs.push(r.rating_avg);
+          } else {
+            const individualRatings = [r.rating_1, r.rating_2, r.rating_3, r.rating_4, r.rating_5]
+              .filter((v: number | null) => v !== null) as number[];
+            if (individualRatings.length > 0) {
+              const calculatedAvg = individualRatings.reduce((sum, v) => sum + v, 0) / individualRatings.length;
+              avgs.push(calculatedAvg);
+            }
+          }
+        });
+
+        if (avgs.length > 0) {
+          const posAvg = avgs.reduce((sum, v) => sum + v, 0) / avgs.length;
+          positionAverages.push(posAvg);
+        }
+      });
+
+      if (positionAverages.length > 0) {
+        overallRating = positionAverages.reduce((sum, v) => sum + v, 0) / positionAverages.length;
+      }
+    }
+
+    // Get last rating date (most recent submission)
+    const lastRatingDate = submittedRatings.length > 0 ? submittedRatings[0].created_at : null;
+
+    entries.push({
+      employee_id: primaryId,
+      employee_name: consolidated.name,
+      role: consolidated.role,
+      hire_date: consolidated.hire_date,
+      tenure_months: null, // Not used in leader view
+      overall_rating: overallRating,
+      total_ratings: totalRatingsSubmitted,
+      last_rating_date: lastRatingDate,
+      ratings_needed: ratingsNeeded,
+      positions_count: positionsSet.size,
+    });
+  });
+
+  // Sort: by total ratings submitted descending, then by name
+  entries.sort((a, b) => {
+    if (a.total_ratings !== b.total_ratings) {
+      return b.total_ratings - a.total_ratings;
+    }
+    return a.employee_name.localeCompare(b.employee_name);
+  });
+
+  return entries;
+}
