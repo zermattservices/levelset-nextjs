@@ -9,13 +9,9 @@ import { Button, CircularProgress } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import { createSupabaseClient } from '@/util/supabase/component';
 import {
-  PLAN_TIERS,
-  AI_USAGE,
   formatPrice,
   type PlanTier,
-  type PlanTierConfig,
 } from '@/lib/billing/constants';
 import { PlanComparisonModal } from './PlanComparisonModal';
 import { CancelSubscriptionModal } from './CancelSubscriptionModal';
@@ -83,8 +79,6 @@ export function BillingTab({ orgId }: BillingTabProps) {
   const [portalLoading, setPortalLoading] = React.useState(false);
   const [showPlanModal, setShowPlanModal] = React.useState(false);
   const [showCancelModal, setShowCancelModal] = React.useState(false);
-
-  const supabase = React.useMemo(() => createSupabaseClient(), []);
 
   // Fetch subscription data
   React.useEffect(() => {
@@ -166,6 +160,19 @@ export function BillingTab({ orgId }: BillingTabProps) {
     });
   };
 
+  const sub = subscriptionData?.subscription;
+  const plan = subscriptionData?.plan;
+  const locationCount = subscriptionData?.locationCount || 0;
+
+  // Calculate days remaining in trial (must be before early returns to satisfy Rules of Hooks)
+  const isTrialing = sub?.status === 'trialing';
+  const trialDaysRemaining = React.useMemo(() => {
+    if (!isTrialing || !sub?.trial_end) return 0;
+    const now = new Date();
+    const end = new Date(sub.trial_end);
+    return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  }, [isTrialing, sub?.trial_end]);
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -173,10 +180,6 @@ export function BillingTab({ orgId }: BillingTabProps) {
       </div>
     );
   }
-
-  const sub = subscriptionData?.subscription;
-  const plan = subscriptionData?.plan;
-  const locationCount = subscriptionData?.locationCount || 0;
 
   // No subscription state
   if (!sub || !plan) {
@@ -199,18 +202,8 @@ export function BillingTab({ orgId }: BillingTabProps) {
 
   const statusDisplay = getStatusDisplay(sub.status);
   const monthlyTotal = (plan.monthlyPriceCents * locationCount) / 100;
-  const tierConfig = PLAN_TIERS[plan.tier];
   const hasPro = plan.tier === 'pro';
-  const isTrialing = sub.status === 'trialing';
   const isCancelPending = sub.cancel_at_period_end;
-
-  // Calculate days remaining in trial
-  const trialDaysRemaining = React.useMemo(() => {
-    if (!isTrialing || !sub.trial_end) return 0;
-    const now = new Date();
-    const end = new Date(sub.trial_end);
-    return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-  }, [isTrialing, sub.trial_end]);
 
   return (
     <div className={styles.container}>
