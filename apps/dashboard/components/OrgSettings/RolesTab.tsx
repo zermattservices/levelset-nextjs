@@ -71,6 +71,7 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
   const [colorPickerAnchor, setColorPickerAnchor] = React.useState<HTMLElement | null>(null);
   const [colorPickerRoleId, setColorPickerRoleId] = React.useState<string | null>(null);
   const [locationCount, setLocationCount] = React.useState<number>(0);
+  const [editingRolePreviousName, setEditingRolePreviousName] = React.useState<string>('');
 
   const supabase = React.useMemo(() => createSupabaseClient(), []);
   const { has } = usePermissions();
@@ -162,7 +163,7 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
     ));
   };
 
-  const handleRoleNameBlur = async (roleId: string) => {
+  const handleRoleNameBlur = async (roleId: string, previousName?: string) => {
     const role = roles.find(r => r.id === roleId);
     if (!role || role.isNew) return;
 
@@ -174,6 +175,20 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
         .eq('id', roleId);
 
       if (updateError) throw updateError;
+
+      // Sync permission profile linked_role_name and name
+      if (previousName && previousName !== role.role_name) {
+        await supabase
+          .from('permission_profiles')
+          .update({
+            name: role.role_name,
+            linked_role_name: role.role_name,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('org_id', orgId)
+          .eq('linked_role_name', previousName)
+          .eq('is_system_default', true);
+      }
     } catch (err) {
       console.error('Error updating role name:', err);
       setError('Failed to update role name');
@@ -212,6 +227,15 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
     }
   };
 
+  const getAccessToken = async (): Promise<string | null> => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      return data.session?.access_token || null;
+    } catch {
+      return null;
+    }
+  };
+
   const handleAddRole = async () => {
     if (!orgId) return;
 
@@ -231,31 +255,41 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
 
     setRoles(prev => [...prev, newRole]);
 
-    // Save to database
+    // Save via API route (also creates permission profile)
     setSaving(true);
     try {
-      const { data, error: insertError } = await supabase
-        .from('org_roles')
-        .insert({
+      const token = await getAccessToken();
+      const res = await fetch('/api/roles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          intent: 'add_role',
           org_id: orgId,
           role_name: newRole.role_name,
           hierarchy_level: newRole.hierarchy_level,
           is_leader: newRole.is_leader,
           is_trainer: newRole.is_trainer,
           color: newRole.color,
-        })
-        .select()
-        .single();
+        }),
+      });
 
-      if (insertError) throw insertError;
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to add role');
+      }
+
+      const data = await res.json();
 
       // Update with real ID
-      setRoles(prev => prev.map(r => 
+      setRoles(prev => prev.map(r =>
         r.id === newRole.id ? { ...data, employee_count: 0 } : r
       ));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error adding role:', err);
-      setError('Failed to add role');
+      setError(err.message || 'Failed to add role');
       // Remove the temporary role
       setRoles(prev => prev.filter(r => r.id !== newRole.id));
     } finally {
@@ -309,24 +343,35 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
   };
 
   const reorderRoles = async (newRoles: Role[]) => {
-    // Update hierarchy levels based on position
-    const updates = newRoles.map((role, index) => ({
-      id: role.id,
-      hierarchy_level: index,
-    }));
+    // Send ordered role IDs to API (handles temp offset to avoid unique constraint)
+    const roleIds = newRoles
+      .filter(r => !r.id.startsWith('temp-'))
+      .map(r => r.id);
+
+    if (roleIds.length === 0) return;
 
     try {
-      for (const update of updates) {
-        if (!update.id.startsWith('temp-')) {
-          await supabase
-            .from('org_roles')
-            .update({ hierarchy_level: update.hierarchy_level, updated_at: new Date().toISOString() })
-            .eq('id', update.id);
-        }
+      const token = await getAccessToken();
+      const res = await fetch('/api/roles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          intent: 'reorder_roles',
+          org_id: orgId,
+          role_ids: roleIds,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to reorder roles');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error reordering roles:', err);
-      setError('Failed to reorder roles');
+      setError(err.message || 'Failed to reorder roles');
     }
   };
 
@@ -450,8 +495,9 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
               <div className={sty.nameCell}>
                 <StyledTextField
                   value={role.role_name}
+                  onFocus={() => setEditingRolePreviousName(role.role_name)}
                   onChange={(e) => handleRoleNameChange(role.id, e.target.value)}
-                  onBlur={() => handleRoleNameBlur(role.id)}
+                  onBlur={() => handleRoleNameBlur(role.id, editingRolePreviousName)}
                   size="small"
                   fullWidth
                   disabled={isOperator || disabled}
