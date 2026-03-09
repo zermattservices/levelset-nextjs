@@ -1,11 +1,21 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { TrialCTA } from '@/components/cta/TrialCTA';
+import { solutionPageJsonLd, breadcrumbJsonLd } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'Team Development — Levelset',
   description:
     'From first-day ratings to career advancement — every step of team development, connected.',
+  openGraph: {
+    title: 'Team Development — Levelset',
+    description: 'From first-day ratings to career advancement — every step of team development, connected.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Team Development — Levelset',
+    description: 'From first-day ratings to career advancement — every step of team development, connected.',
+  },
 };
 
 const FEATURES = [
@@ -50,6 +60,22 @@ const FEATURES = [
 export default function DevelopmentPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(solutionPageJsonLd({
+          name: 'Team Development',
+          slug: 'development',
+          description: 'From first-day ratings to career advancement — every step of team development, connected.',
+        })) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd([
+          { name: 'Home', url: 'https://levelset.io' },
+          { name: 'Solutions', url: 'https://levelset.io/solutions' },
+          { name: 'Team Development', url: 'https://levelset.io/solutions/development' },
+        ])) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-[#264D38] pt-32 pb-16 md:pt-44 md:pb-24">
         <div

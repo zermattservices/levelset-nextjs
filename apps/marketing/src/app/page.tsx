@@ -6,7 +6,7 @@ import { Stats } from '@/components/sections/Stats';
 import { FAQ } from '@/components/sections/FAQ';
 import { CTA } from '@/components/sections/CTA';
 import { faqItems } from '@/components/sections/FAQ';
-import { organizationJsonLd, faqJsonLd } from '@/lib/structured-data';
+import { organizationJsonLd, faqJsonLd, websiteJsonLd } from '@/lib/structured-data';
 
 export default function HomePage() {
   return (
@@ -14,6 +14,10 @@ export default function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }}
       />
       <script
         type="application/ld+json"

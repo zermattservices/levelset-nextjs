@@ -2,12 +2,18 @@ import type { Metadata } from 'next';
 import { ArrowLeftRight, Building2, GraduationCap, ShieldCheck } from 'lucide-react';
 import { Stats } from '@/components/sections/Stats';
 import { AboutCTA } from './AboutCTA';
+import { aboutPageJsonLd, breadcrumbJsonLd } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'About',
   description:
     'Levelset is the connected team management platform built exclusively for Chick-fil-A.',
   openGraph: {
+    title: 'About — Levelset',
+    description: 'The connected team management platform built exclusively for Chick-fil-A.',
+  },
+  twitter: {
+    card: 'summary_large_image',
     title: 'About — Levelset',
     description: 'The connected team management platform built exclusively for Chick-fil-A.',
   },
@@ -43,6 +49,17 @@ const VALUES = [
 export default function AboutPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutPageJsonLd()) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd([
+          { name: 'Home', url: 'https://levelset.io' },
+          { name: 'About', url: 'https://levelset.io/about' },
+        ])) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-[#264D38] pt-32 pb-20 md:pt-44 md:pb-28">
         <div

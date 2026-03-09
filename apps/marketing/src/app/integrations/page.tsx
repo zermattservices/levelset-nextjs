@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { INTEGRATIONS } from '@/lib/integrations';
 import { PageViewTracker } from '@/components/analytics/PageViewTracker';
+import { integrationsListJsonLd, breadcrumbJsonLd } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'Integrations',
@@ -33,6 +34,17 @@ export default function IntegrationsPage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(integrationsListJsonLd(INTEGRATIONS)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd([
+          { name: 'Home', url: 'https://levelset.io' },
+          { name: 'Integrations', url: 'https://levelset.io/integrations' },
+        ])) }}
+      />
       <PageViewTracker
         event="ViewContent"
         params={{

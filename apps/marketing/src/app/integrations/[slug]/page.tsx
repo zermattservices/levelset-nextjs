@@ -6,7 +6,7 @@ import { INTEGRATIONS, getIntegration } from '@/lib/integrations';
 import { getIntegrationContent } from '@/lib/integration-content';
 import { FeaturePageCTA } from '@/components/templates/FeaturePageCTA';
 import { PageViewTracker } from '@/components/analytics/PageViewTracker';
-import { breadcrumbJsonLd } from '@/lib/structured-data';
+import { breadcrumbJsonLd, integrationJsonLd } from '@/lib/structured-data';
 
 interface Props {
   params: { slug: string };
@@ -59,6 +59,10 @@ export default function IntegrationDetailPage({ params }: Props) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(integrationJsonLd(integration)) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

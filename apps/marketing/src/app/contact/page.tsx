@@ -1,15 +1,36 @@
 import type { Metadata } from 'next';
 import { ContactForm } from '@/components/forms/ContactForm';
 import { FAQ } from '@/components/sections/FAQ';
+import { contactPageJsonLd, breadcrumbJsonLd } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'Contact',
   description: 'Get in touch with the Levelset team. We\'d love to hear from you.',
+  openGraph: {
+    title: 'Contact — Levelset',
+    description: 'Get in touch with the Levelset team. We\'d love to hear from you.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Contact — Levelset',
+    description: 'Get in touch with the Levelset team. We\'d love to hear from you.',
+  },
 };
 
 export default function ContactPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageJsonLd()) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd([
+          { name: 'Home', url: 'https://levelset.io' },
+          { name: 'Contact', url: 'https://levelset.io/contact' },
+        ])) }}
+      />
       <section className="pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="max-w-content mx-auto px-6">
           <div className="max-w-2xl mx-auto">

@@ -1,11 +1,21 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { TrialCTA } from '@/components/cta/TrialCTA';
+import { solutionPageJsonLd, breadcrumbJsonLd } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'Intelligence — Levelset',
   description:
     'AI-powered insights, retention analytics, and customer feedback — your data, working for you.',
+  openGraph: {
+    title: 'Intelligence — Levelset',
+    description: 'AI-powered insights, retention analytics, and customer feedback — your data, working for you.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Intelligence — Levelset',
+    description: 'AI-powered insights, retention analytics, and customer feedback — your data, working for you.',
+  },
 };
 
 const FEATURES = [
@@ -32,6 +42,22 @@ const FEATURES = [
 export default function IntelligencePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(solutionPageJsonLd({
+          name: 'Intelligence',
+          slug: 'intelligence',
+          description: 'AI-powered insights, retention analytics, and customer feedback — your data, working for you.',
+        })) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd([
+          { name: 'Home', url: 'https://levelset.io' },
+          { name: 'Solutions', url: 'https://levelset.io/solutions' },
+          { name: 'Intelligence', url: 'https://levelset.io/solutions/intelligence' },
+        ])) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-[#264D38] pt-32 pb-16 md:pt-44 md:pb-24">
         <div
