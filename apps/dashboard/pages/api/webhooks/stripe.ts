@@ -179,7 +179,7 @@ async function handleSubscriptionUpsert(
 
   // Only notify on creation (not every update)
   if (eventType === 'customer.subscription.created') {
-    notifySubscriptionCreated({
+    await notifySubscriptionCreated({
       orgId: org.id,
       planTier,
       status: subscription.status,
@@ -221,7 +221,7 @@ async function handleSubscriptionDeleted(
   // Clear features (unless custom pricing)
   await handleSubscriptionStatusChange(supabase, org.id, 'core', 'canceled');
 
-  notifySubscriptionCanceled({
+  await notifySubscriptionCanceled({
     orgId: org.id,
     planTier: 'core',
     canceledAt: new Date().toISOString(),
@@ -275,7 +275,7 @@ async function handleInvoiceEvent(
 
   // Slack notifications for invoice events
   if (invoice.status === 'paid') {
-    notifyInvoicePaid({
+    await notifyInvoicePaid({
       orgId: org.id,
       amountCents: invoice.amount_paid || 0,
       currency: invoice.currency || 'usd',
@@ -283,7 +283,7 @@ async function handleInvoiceEvent(
     });
   }
   if (invoice.status === 'uncollectible' || invoice.status === 'open') {
-    notifyInvoiceFailed({
+    await notifyInvoiceFailed({
       orgId: org.id,
       amountCents: invoice.amount_due || 0,
       currency: invoice.currency || 'usd',

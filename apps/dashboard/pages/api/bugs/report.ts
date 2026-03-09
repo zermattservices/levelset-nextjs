@@ -80,8 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Non-blocking — the roadmap entry was already created
   }
 
-  // Slack notification (fire-and-forget)
-  notifyBugReported({
+  await notifyBugReported({
     featureArea,
     description: trimmedDescription,
     reportedBy: {

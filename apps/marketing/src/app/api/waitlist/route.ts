@@ -133,8 +133,7 @@ export async function POST(request: NextRequest) {
       console.error('Email notification error:', err);
     });
 
-    // Slack notification (fire-and-forget)
-    notifyLead({
+    await notifyLead({
       email: normalizedEmail,
       name: trimmedName || undefined,
       source: source || 'website',

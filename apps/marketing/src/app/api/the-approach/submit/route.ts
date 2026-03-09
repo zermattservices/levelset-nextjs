@@ -90,8 +90,7 @@ export async function POST(request: NextRequest) {
       console.error('Approach internal notification error:', err);
     });
 
-    // Slack notification (fire-and-forget)
-    notifyLead({
+    await notifyLead({
       email: body.email.trim().toLowerCase(),
       name: `${body.first_name.trim()} ${body.last_name.trim()}`,
       source: 'the_approach',

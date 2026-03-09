@@ -105,8 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       );
     }
 
-    // Slack notification (fire-and-forget)
-    notifyStageChange({
+    await notifyStageChange({
       leadId: id as string,
       email: updatedLead.email,
       name: [updatedLead.first_name, updatedLead.last_name].filter(Boolean).join(' ') || undefined,

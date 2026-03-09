@@ -49,70 +49,66 @@ import {
 
 /**
  * Route a notification event to the appropriate Slack channel(s).
- * Fire-and-forget — returns void, never throws.
+ * Returns a promise that resolves when the message is sent.
+ * Callers should `await` this in serverless contexts (crons, webhooks)
+ * to ensure the message is delivered before the function exits.
  */
-export function notify(event: NotificationEvent): void {
-  const run = async () => {
-    switch (event.type) {
-      case 'lead.submitted': {
-        const msg = formatLeadSubmitted(event);
-        await sendToSlack(SlackChannel.LEADS, msg);
-        break;
-      }
-
-      case 'pipeline.stage_changed': {
-        const msg = formatStageChanged(event);
-        const channels: SlackChannelName[] = [SlackChannel.CONVERSIONS];
-
-        if (event.newStage === 'converted') {
-          channels.push(SlackChannel.ALL_LEVELSET);
-        }
-
-        await sendToMultipleChannels(channels, msg);
-        break;
-      }
-
-      case 'billing.subscription_created': {
-        const msg = formatSubscriptionCreated(event);
-        await sendToSlack(SlackChannel.BILLING, msg);
-        break;
-      }
-
-      case 'billing.subscription_canceled': {
-        const msg = formatSubscriptionCanceled(event);
-        await sendToSlack(SlackChannel.BILLING, msg);
-        break;
-      }
-
-      case 'billing.invoice_paid': {
-        const msg = formatInvoicePaid(event);
-        await sendToSlack(SlackChannel.BILLING, msg);
-        break;
-      }
-
-      case 'billing.invoice_failed': {
-        const msg = formatInvoiceFailed(event);
-        await sendToSlack(SlackChannel.BILLING, msg);
-        break;
-      }
-
-      case 'bug.reported': {
-        const msg = formatBugReported(event);
-        await sendToSlack(SlackChannel.BUGS, msg);
-        break;
-      }
-
-      case 'analytics.daily_visitor_report': {
-        const msg = formatDailyVisitorReport(event);
-        await sendToSlack(SlackChannel.ANALYTICS, msg);
-        break;
-      }
+export async function notify(event: NotificationEvent): Promise<void> {
+  switch (event.type) {
+    case 'lead.submitted': {
+      const msg = formatLeadSubmitted(event);
+      await sendToSlack(SlackChannel.LEADS, msg);
+      break;
     }
-  };
 
-  run().catch((err) =>
-    console.error('[notifications] Unhandled error in notify():', err)
-  );
+    case 'pipeline.stage_changed': {
+      const msg = formatStageChanged(event);
+      const channels: SlackChannelName[] = [SlackChannel.CONVERSIONS];
+
+      if (event.newStage === 'converted') {
+        channels.push(SlackChannel.ALL_LEVELSET);
+      }
+
+      await sendToMultipleChannels(channels, msg);
+      break;
+    }
+
+    case 'billing.subscription_created': {
+      const msg = formatSubscriptionCreated(event);
+      await sendToSlack(SlackChannel.BILLING, msg);
+      break;
+    }
+
+    case 'billing.subscription_canceled': {
+      const msg = formatSubscriptionCanceled(event);
+      await sendToSlack(SlackChannel.BILLING, msg);
+      break;
+    }
+
+    case 'billing.invoice_paid': {
+      const msg = formatInvoicePaid(event);
+      await sendToSlack(SlackChannel.BILLING, msg);
+      break;
+    }
+
+    case 'billing.invoice_failed': {
+      const msg = formatInvoiceFailed(event);
+      await sendToSlack(SlackChannel.BILLING, msg);
+      break;
+    }
+
+    case 'bug.reported': {
+      const msg = formatBugReported(event);
+      await sendToSlack(SlackChannel.BUGS, msg);
+      break;
+    }
+
+    case 'analytics.daily_visitor_report': {
+      const msg = formatDailyVisitorReport(event);
+      await sendToSlack(SlackChannel.ANALYTICS, msg);
+      break;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -121,48 +117,48 @@ export function notify(event: NotificationEvent): void {
 
 export function notifyLead(
   payload: Omit<LeadSubmittedEvent, 'type'>
-): void {
-  notify({ type: 'lead.submitted', ...payload });
+): Promise<void> {
+  return notify({ type: 'lead.submitted', ...payload });
 }
 
 export function notifyStageChange(
   payload: Omit<StageChangedEvent, 'type'>
-): void {
-  notify({ type: 'pipeline.stage_changed', ...payload });
+): Promise<void> {
+  return notify({ type: 'pipeline.stage_changed', ...payload });
 }
 
 export function notifySubscriptionCreated(
   payload: Omit<SubscriptionCreatedEvent, 'type'>
-): void {
-  notify({ type: 'billing.subscription_created', ...payload });
+): Promise<void> {
+  return notify({ type: 'billing.subscription_created', ...payload });
 }
 
 export function notifySubscriptionCanceled(
   payload: Omit<SubscriptionCanceledEvent, 'type'>
-): void {
-  notify({ type: 'billing.subscription_canceled', ...payload });
+): Promise<void> {
+  return notify({ type: 'billing.subscription_canceled', ...payload });
 }
 
 export function notifyInvoicePaid(
   payload: Omit<InvoicePaidEvent, 'type'>
-): void {
-  notify({ type: 'billing.invoice_paid', ...payload });
+): Promise<void> {
+  return notify({ type: 'billing.invoice_paid', ...payload });
 }
 
 export function notifyInvoiceFailed(
   payload: Omit<InvoiceFailedEvent, 'type'>
-): void {
-  notify({ type: 'billing.invoice_failed', ...payload });
+): Promise<void> {
+  return notify({ type: 'billing.invoice_failed', ...payload });
 }
 
 export function notifyBugReported(
   payload: Omit<BugReportedEvent, 'type'>
-): void {
-  notify({ type: 'bug.reported', ...payload });
+): Promise<void> {
+  return notify({ type: 'bug.reported', ...payload });
 }
 
 export function notifyDailyVisitorReport(
   payload: Omit<DailyVisitorReportEvent, 'type'>
-): void {
-  notify({ type: 'analytics.daily_visitor_report', ...payload });
+): Promise<void> {
+  return notify({ type: 'analytics.daily_visitor_report', ...payload });
 }

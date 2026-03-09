@@ -79,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       sessions: Number(r.sessions) || 0,
     }));
 
-    notifyDailyVisitorReport({
+    await notifyDailyVisitorReport({
       date: yesterday.toISOString().split('T')[0],
       uniqueVisitors,
       totalSessions,
