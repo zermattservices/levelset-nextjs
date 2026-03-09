@@ -30,7 +30,7 @@ function isRateLimited(visitorId: string): boolean {
 async function handlePageView(body: any) {
   const { visitorId, sessionId, url, referrer, utmSource, utmMedium, utmCampaign } = body;
 
-  if (!visitorId || !url) {
+  if (!visitorId || !url || !sessionId) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
