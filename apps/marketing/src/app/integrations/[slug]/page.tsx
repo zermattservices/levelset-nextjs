@@ -6,6 +6,7 @@ import { INTEGRATIONS, getIntegration } from '@/lib/integrations';
 import { getIntegrationContent } from '@/lib/integration-content';
 import { FeaturePageCTA } from '@/components/templates/FeaturePageCTA';
 import { PageViewTracker } from '@/components/analytics/PageViewTracker';
+import { breadcrumbJsonLd } from '@/lib/structured-data';
 
 interface Props {
   params: { slug: string };
@@ -58,6 +59,18 @@ export default function IntegrationDetailPage({ params }: Props) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: 'Home', url: 'https://levelset.io' },
+              { name: 'Integrations', url: 'https://levelset.io/integrations' },
+              { name: integration.name, url: `https://levelset.io/integrations/${integration.slug}` },
+            ]),
+          ),
+        }}
+      />
       <PageViewTracker
         event="ViewContent"
         params={{

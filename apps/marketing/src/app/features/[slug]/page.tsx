@@ -4,6 +4,7 @@ import { FEATURES, getFeature } from '@/lib/features';
 import { getFeatureContent } from '@/lib/feature-content';
 import { FeaturePageTemplate } from '@/components/templates/FeaturePageTemplate';
 import { PageViewTracker } from '@/components/analytics/PageViewTracker';
+import { featureJsonLd, breadcrumbJsonLd } from '@/lib/structured-data';
 
 interface Props {
   params: { slug: string };
@@ -36,6 +37,22 @@ export default function FeaturePage({ params }: Props) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(featureJsonLd(feature)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: 'Home', url: 'https://levelset.io' },
+              { name: 'Features', url: 'https://levelset.io/features' },
+              { name: feature.name, url: `https://levelset.io/features/${feature.slug}` },
+            ]),
+          ),
+        }}
+      />
       <PageViewTracker
         event="ViewContent"
         params={{ content_name: `feature_${params.slug}`, content_type: 'feature_page' }}
