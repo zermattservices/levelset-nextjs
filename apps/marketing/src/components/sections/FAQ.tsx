@@ -16,6 +16,21 @@ export const faqItems = [
     answer:
       'Levelset offers a 30-day free trial with full access to every feature. Click "Get Started" to choose a plan and set up your organization. No contracts — cancel anytime.',
   },
+  {
+    question: 'What are positional excellence ratings?',
+    answer:
+      'Positional excellence ratings are Levelset\'s core performance measurement system. Leaders rate each team member on a 1.0-3.0 scale across position-specific rating criteria for every position they work — iPOS, Front Counter, Primary, Bagging, and more. Ratings are collected during shifts and aggregated into rolling averages, giving you objective performance data instead of gut-feel evaluations.',
+  },
+  {
+    question: 'Does Levelset integrate with HotSchedules?',
+    answer:
+      'Yes. Levelset integrates with HotSchedules to import your employees, schedules, pay rates, forecasts, and availability. The import takes minutes, so you can get started without re-entering data.',
+  },
+  {
+    question: 'Can my team members see their own ratings?',
+    answer:
+      'Yes. Levelset is designed to be transparent. Team members can see their positional ratings and how their performance connects to pay — giving them a clear picture of what success looks like and how to grow.',
+  },
 ];
 
 export function FAQ() {
