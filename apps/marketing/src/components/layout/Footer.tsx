@@ -78,6 +78,11 @@ export function Footer() {
                   Contact
                 </Link>
               </li>
+              <li>
+                <Link href="/glossary" className="text-sm hover:text-white transition-colors duration-200">
+                  Glossary
+                </Link>
+              </li>
             </ul>
           </div>
 
