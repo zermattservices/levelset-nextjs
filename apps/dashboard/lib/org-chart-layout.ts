@@ -156,6 +156,12 @@ export function computeOrgChartLayout(
 
   // ── 3. Group employees by hierarchy level (tier) ───────────────────────────
   const tierEmployees = new Map<number, OrgChartEmployee[]>();
+
+  // Ensure every defined role has a tier entry (even if empty)
+  sortedRoles.forEach((r) => {
+    if (!tierEmployees.has(r.hierarchy_level)) tierEmployees.set(r.hierarchy_level, []);
+  });
+
   data.employees.forEach((e) => {
     const role = roleMap.get(e.role);
     const level = role?.hierarchy_level ?? 999;
