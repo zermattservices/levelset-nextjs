@@ -35,6 +35,21 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  other: { 'theme-color': '#264D38' },
+  alternates: { canonical: 'https://levelset.io' },
+  keywords: [
+    'Chick-fil-A',
+    'CFA',
+    'team management',
+    'positional excellence',
+    'restaurant management',
+    'employee ratings',
+    'discipline tracking',
+    'Levelset',
+  ],
+  applicationName: 'Levelset',
+  category: 'business',
+  creator: 'Levelset',
 };
 
 export default function RootLayout({
