@@ -165,7 +165,8 @@ export function VisitorAnalyticsPage() {
           <h2 className={styles.cardTitle}>Daily Visitors</h2>
           <div className={styles.barChart}>
             {dailyTrend.map((day) => {
-              const heightPct = Math.max((day.visitors / maxDailyVisitors) * 100, 2);
+              const BAR_AREA_HEIGHT = 120; // px available for bars
+              const barHeight = Math.max(Math.round((day.visitors / maxDailyVisitors) * BAR_AREA_HEIGHT), 2);
               return (
                 <div key={day.date} className={styles.barColumn}>
                   <span className={styles.barCount}>
@@ -173,7 +174,7 @@ export function VisitorAnalyticsPage() {
                   </span>
                   <div
                     className={styles.bar}
-                    style={{ height: `${heightPct}%` }}
+                    style={{ height: `${barHeight}px` }}
                   />
                   <span className={styles.barLabel}>
                     {range === '1d'

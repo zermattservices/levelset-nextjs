@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 
+// IPs to exclude from analytics (internal traffic)
+const EXCLUDED_IPS = [
+  '107.193.220.16', // Levelset office
+  ...(process.env.EXCLUDED_ANALYTICS_IPS || '').split(',').map((ip) => ip.trim()).filter(Boolean),
+];
+
+function getClientIp(request: NextRequest): string | null {
+  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null;
+}
+
 // Simple in-memory rate limiter (per visitor_id, max 60 requests/minute)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
@@ -128,6 +138,12 @@ async function handlePageLeave(body: any) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Skip tracking for excluded IPs (internal traffic)
+    const clientIp = getClientIp(request);
+    if (clientIp && EXCLUDED_IPS.includes(clientIp)) {
+      return NextResponse.json({ success: true, filtered: true });
+    }
+
     const body = await request.json();
 
     if (body.type === 'page_leave') {
