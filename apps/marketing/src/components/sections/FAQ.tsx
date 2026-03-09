@@ -1,6 +1,6 @@
 import { Accordion } from '@/components/ui/Accordion';
 
-const faqItems = [
+export const faqItems = [
   {
     question: 'What is Levelset?',
     answer:
