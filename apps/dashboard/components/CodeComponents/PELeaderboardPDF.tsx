@@ -209,11 +209,16 @@ interface PELeaderboardPDFProps {
   dateRange: { start: string; end: string };
   logoUrl: string;
   minRatings?: number;
+  isLeaderView?: boolean;
 }
 
-export function PELeaderboardPDF({ entries, area, dateRange, logoUrl, minRatings = 1 }: PELeaderboardPDFProps) {
-  const rankedEntries = entries.filter(e => e.total_ratings >= minRatings && e.overall_rating !== null);
-  const unrankedEntries = entries.filter(e => e.total_ratings < minRatings || e.overall_rating === null);
+export function PELeaderboardPDF({ entries, area, dateRange, logoUrl, minRatings = 1, isLeaderView = false }: PELeaderboardPDFProps) {
+  const rankedEntries = isLeaderView
+    ? entries.filter(e => e.total_ratings >= minRatings)
+    : entries.filter(e => e.total_ratings >= minRatings && e.overall_rating !== null);
+  const unrankedEntries = isLeaderView
+    ? entries.filter(e => e.total_ratings < minRatings)
+    : entries.filter(e => e.total_ratings < minRatings || e.overall_rating === null);
   const top3 = rankedEntries.slice(0, 3);
   const rest = [...rankedEntries.slice(3), ...unrankedEntries];
   
@@ -252,7 +257,7 @@ export function PELeaderboardPDF({ entries, area, dateRange, logoUrl, minRatings
         {/* Top 3 Cards */}
         {top3.length > 0 && (
           <View style={styles.topThreeSection}>
-            <Text style={styles.topThreeTitle}>Top Performers</Text>
+            <Text style={styles.topThreeTitle}>{isLeaderView ? 'Top Leaders' : 'Top Performers'}</Text>
             <View style={styles.topThreeCards}>
               {top3.map((entry, index) => (
                 <View key={entry.employee_id} style={styles.topCard}>
@@ -261,12 +266,53 @@ export function PELeaderboardPDF({ entries, area, dateRange, logoUrl, minRatings
                   </Text>
                   <Text style={styles.topCardName}>{entry.employee_name}</Text>
                   <Text style={styles.topCardRole}>{entry.role || 'Team Member'}</Text>
-                  <View style={styles.topCardMetric}>
-                    <Text style={styles.topCardMetricLabel}>Overall Rating</Text>
-                    <Text style={styles.topCardMetricValue}>
-                      {entry.overall_rating?.toFixed(2)}
-                    </Text>
-                  </View>
+                  {isLeaderView ? (
+                    <>
+                      <View style={styles.topCardMetric}>
+                        <Text style={styles.topCardMetricLabel}>Ratings Submitted</Text>
+                        <Text style={styles.topCardMetricValue}>
+                          {entry.total_ratings}
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', gap: 12 }}>
+                        <View style={styles.topCardMetric}>
+                          <Text style={styles.topCardMetricLabel}>Overall</Text>
+                          <Text style={[styles.topCardMetricValue, { fontSize: 11 }]}>
+                            {entry.overall_rating?.toFixed(2) ?? '—'}
+                          </Text>
+                        </View>
+                        <View style={styles.topCardMetric}>
+                          <Text style={styles.topCardMetricLabel}>Positions</Text>
+                          <Text style={[styles.topCardMetricValue, { fontSize: 11 }]}>
+                            {entry.positions_count ?? 0}
+                          </Text>
+                        </View>
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.topCardMetric}>
+                        <Text style={styles.topCardMetricLabel}>Overall Rating</Text>
+                        <Text style={styles.topCardMetricValue}>
+                          {entry.overall_rating?.toFixed(2)}
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', gap: 12 }}>
+                        <View style={styles.topCardMetric}>
+                          <Text style={styles.topCardMetricLabel}>Total Ratings</Text>
+                          <Text style={[styles.topCardMetricValue, { fontSize: 11 }]}>
+                            {entry.total_ratings}
+                          </Text>
+                        </View>
+                        <View style={styles.topCardMetric}>
+                          <Text style={styles.topCardMetricLabel}>Tenure</Text>
+                          <Text style={[styles.topCardMetricValue, { fontSize: 11 }]}>
+                            {formatTenure(entry.tenure_months)}
+                          </Text>
+                        </View>
+                      </View>
+                    </>
+                  )}
                 </View>
               ))}
             </View>
@@ -280,9 +326,9 @@ export function PELeaderboardPDF({ entries, area, dateRange, logoUrl, minRatings
             <Text style={[styles.headerCell, styles.colRank]}>Rank</Text>
             <Text style={[styles.headerCell, styles.colName]}>Name</Text>
             <Text style={[styles.headerCell, styles.colRole]}>Role</Text>
-            <Text style={[styles.headerCell, styles.colRating]}>Rating</Text>
-            <Text style={[styles.headerCell, styles.colRatings]}>Ratings</Text>
-            <Text style={[styles.headerCell, styles.colTenure]}>Tenure</Text>
+            <Text style={[styles.headerCell, styles.colRating]}>{isLeaderView ? 'Overall' : 'Rating'}</Text>
+            <Text style={[styles.headerCell, styles.colRatings]}>{isLeaderView ? 'Submitted' : 'Ratings'}</Text>
+            <Text style={[styles.headerCell, styles.colTenure]}>{isLeaderView ? 'Positions' : 'Tenure'}</Text>
           </View>
           
           {/* Table Rows */}
@@ -303,13 +349,15 @@ export function PELeaderboardPDF({ entries, area, dateRange, logoUrl, minRatings
                   {entry.role || 'Team Member'}
                 </Text>
                 <Text style={[entry.overall_rating ? styles.cellGreen : styles.cellMuted, styles.colRating]}>
-                  {entry.overall_rating ? entry.overall_rating.toFixed(2) : `${entry.ratings_needed} more`}
+                  {isLeaderView
+                    ? (entry.overall_rating ? entry.overall_rating.toFixed(2) : '—')
+                    : (entry.overall_rating ? entry.overall_rating.toFixed(2) : `${entry.ratings_needed} more`)}
                 </Text>
                 <Text style={[styles.cell, styles.colRatings]}>
                   {entry.total_ratings}
                 </Text>
                 <Text style={[styles.cell, styles.colTenure]}>
-                  {formatTenure(entry.tenure_months)}
+                  {isLeaderView ? (entry.positions_count ?? 0) : formatTenure(entry.tenure_months)}
                 </Text>
               </View>
             );

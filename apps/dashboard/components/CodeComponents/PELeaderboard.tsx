@@ -499,6 +499,7 @@ export function PELeaderboard() {
           }}
           logoUrl={logoUrl}
           minRatings={MIN_RATINGS_FOR_SCORE}
+          isLeaderView={viewMode === 'leader'}
         />
       ).toBlob();
       
