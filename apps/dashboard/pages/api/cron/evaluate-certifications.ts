@@ -13,8 +13,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { runMonthlyEvaluation } from '@/lib/evaluate-certifications';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
+  // Only allow GET requests (Vercel crons send GET)
+  if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   
