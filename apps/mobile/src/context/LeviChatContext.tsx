@@ -418,15 +418,22 @@ export function LeviChatProvider({ children }: LeviChatProviderProps) {
         if (!response.ok) {
           const errorBody = await response.text().catch(() => "");
           console.error("[LeviChat] API error:", response.status, errorBody);
+          let errorContent: string;
+          if (response.status === 501) {
+            errorContent = "I'm still being set up. Check back soon!";
+          } else if (response.status === 429) {
+            errorContent = "I'm getting too many requests right now. Please wait a moment.";
+          } else if (response.status === 403) {
+            errorContent = "You don't have access to Levi AI. Please contact your administrator.";
+          } else if (response.status === 401) {
+            errorContent = "Your session has expired. Please sign out and sign back in.";
+          } else {
+            errorContent = "I'm having trouble right now. Please try again.";
+          }
           const errorMessage: ChatMessage = {
             id: assistantId,
             role: "assistant",
-            content:
-              response.status === 501
-                ? "I'm still being set up. Check back soon!"
-                : response.status === 429
-                  ? "I'm getting too many requests right now. Please wait a moment."
-                  : "I'm having trouble right now. Please try again.",
+            content: errorContent,
             created_at: new Date().toISOString(),
           };
           setSessionMessages((prev) => [...prev, errorMessage]);

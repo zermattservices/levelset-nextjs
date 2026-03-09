@@ -391,14 +391,22 @@ export default function MyScheduleScreen() {
 
   if (error) {
     return (
-      <View
-        style={{
-          flex: 1,
+      <ScrollView
+        style={{ flex: 1, backgroundColor: colors.background }}
+        contentContainerStyle={{
+          flexGrow: 1,
           justifyContent: "center",
           alignItems: "center",
           padding: spacing[6],
-          backgroundColor: colors.background,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
       >
         <Text style={{ fontSize: 48, marginBottom: spacing[4] }}>&#x26A0;&#xFE0F;</Text>
         <Text
@@ -415,11 +423,20 @@ export default function MyScheduleScreen() {
             ...typography.bodyMedium,
             color: colors.onSurfaceVariant,
             textAlign: "center",
+            marginBottom: spacing[4],
           }}
         >
           {error}
         </Text>
-      </View>
+        <Text
+          style={{
+            ...typography.bodySmall,
+            color: colors.onSurfaceDisabled,
+          }}
+        >
+          Pull down to refresh
+        </Text>
+      </ScrollView>
     );
   }
 

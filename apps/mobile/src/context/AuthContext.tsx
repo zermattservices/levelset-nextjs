@@ -210,6 +210,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setAppUser(null);
         return;
       }
+      console.log("[Auth] Found app_user:", data.id, "org:", data.org_id);
 
       // If user has a Google profile image and app_user doesn't have one, save it
       const googleAvatar = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture;
@@ -234,13 +235,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [fetchEmployeeData]);
 
-  // Initialize auth and listen for changes
+  // Initialize auth and listen for changes.
+  // IMPORTANT: Do NOT await async work (e.g. Supabase queries) inside
+  // onAuthStateChange — the callback runs while Supabase holds an internal
+  // auth lock, so any query that reads the session will deadlock.
+  // Instead, just update user/session state here and let the separate
+  // useEffect below handle fetching app user data.
   useEffect(() => {
-    let initialized = false;
-
-    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         console.log("[Auth] onAuthStateChange:", event, "hasSession:", !!currentSession);
 
         if (event === "SIGNED_OUT") {
@@ -249,25 +252,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setSession(null);
           setError(null);
           setIsLoading(false);
-          initialized = true;
-        } else if (event === "TOKEN_REFRESHED" && !initialized) {
-          // Skip TOKEN_REFRESHED during initial load — INITIAL_SESSION will handle it.
-          // This prevents double-fetching app user data on startup.
-          setUser(currentSession!.user);
-          setSession(currentSession);
-        } else if (["SIGNED_IN", "INITIAL_SESSION", "TOKEN_REFRESHED"].includes(event) && currentSession) {
+        } else if (currentSession) {
+          // Keep/set isLoading true — the useEffect below will set it
+          // to false once app user data finishes loading.
+          setIsLoading(true);
           setUser(currentSession.user);
           setSession(currentSession);
-          await fetchAppUserData(currentSession.user);
-          setIsLoading(false);
-          initialized = true;
-        } else if (event === "INITIAL_SESSION" && !currentSession) {
-          // No valid session (e.g. expired refresh token) — show login
+        } else {
+          // No session (e.g. INITIAL_SESSION with expired refresh token)
           setUser(null);
           setAppUser(null);
           setSession(null);
           setIsLoading(false);
-          initialized = true;
         }
       }
     );
@@ -283,7 +279,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchAppUserData]);
+  }, []);
+
+  // Fetch app user data when auth user changes (kept outside onAuthStateChange
+  // to avoid Supabase auth lock deadlock).
+  const prevUserIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    const userId = user?.id ?? null;
+    if (userId === prevUserIdRef.current) return;
+    prevUserIdRef.current = userId;
+
+    if (!user) {
+      setAppUser(null);
+      setEmployeeData(null);
+      setIsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    console.log("[Auth] Fetching app user data for:", user.id);
+    fetchAppUserData(user).then(() => {
+      if (!cancelled) {
+        console.log("[Auth] App user data loaded, setting isLoading=false");
+        setIsLoading(false);
+      }
+    });
+
+    return () => { cancelled = true; };
+  }, [user, fetchAppUserData]);
 
   // Handle deep link for OAuth callback
   useEffect(() => {

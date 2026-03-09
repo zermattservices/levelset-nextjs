@@ -16,7 +16,6 @@ import {
 } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
 import Svg, { Path } from "react-native-svg";
 import { useAuth } from "../../src/context/AuthContext";
 import { useColors } from "../../src/context/ThemeContext";
@@ -54,7 +53,6 @@ function GoogleLogo({ size = 20 }: { size?: number }) {
 }
 
 export default function LoginScreen() {
-  const router = useRouter();
   const colors = useColors();
   const { isDark } = useTheme();
   const { signInWithEmail, signInWithGoogle, isLoading, error, clearError } =
@@ -68,23 +66,19 @@ export default function LoginScreen() {
     if (!email.trim() || !password.trim()) return;
 
     haptics.medium();
-    const result = await signInWithEmail(email, password);
-    if (result.success) {
-      router.replace("/(tabs)");
-    }
-  }, [email, password, signInWithEmail, router]);
+    await signInWithEmail(email, password);
+    // Navigation is handled by root layout when isAuthenticated changes
+  }, [email, password, signInWithEmail]);
 
   const handleGoogleSignIn = useCallback(async () => {
     setIsGoogleLoading(true);
     try {
-      const result = await signInWithGoogle();
-      if (result.success) {
-        router.replace("/(tabs)");
-      }
+      await signInWithGoogle();
+      // Navigation is handled by root layout when isAuthenticated changes
     } finally {
       setIsGoogleLoading(false);
     }
-  }, [signInWithGoogle, router]);
+  }, [signInWithGoogle]);
 
   const handleInputChange = useCallback(
     (setter: (value: string) => void) => (text: string) => {
