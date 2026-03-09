@@ -68,6 +68,8 @@ export const DEFAULT_PERMISSIONS: Record<number, Set<PermissionKey>> = {
     // Billing - view and edit
     P.BILLING_VIEW,
     P.BILLING_EDIT,
+    // AI Assistant
+    P.AI_USE,
   ]),
 
   // Level 2 - Supervisor Access (Team Lead)
@@ -90,6 +92,8 @@ export const DEFAULT_PERMISSIONS: Record<number, Set<PermissionKey>> = {
     P.MOBILE_ACCESS,
     // Billing - view only
     P.BILLING_VIEW,
+    // AI Assistant
+    P.AI_USE,
   ]),
 
   // Level 3+ - Standard Access (Team Member)

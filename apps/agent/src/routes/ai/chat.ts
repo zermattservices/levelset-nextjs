@@ -281,6 +281,11 @@ chatRoute.post('/', async (c) => {
       orgId,
       locationId,
       features: orgContext?.features,
+      isAdmin: user.isAdmin,
+      employeeId: user.employeeId,
+      hierarchyLevel: user.hierarchyLevel,
+      permissions: user.permissions,
+      accessibleLocationIds: user.accessibleLocationIds,
     };
 
     // 9. Streaming path (default)
