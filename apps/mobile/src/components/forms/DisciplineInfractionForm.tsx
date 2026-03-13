@@ -337,10 +337,16 @@ export function DisciplineInfractionForm() {
       });
 
       // Upload attached files if any
-      if (result?.infractionId && attachedFiles.length > 0) {
+      if (result?.submissionId && attachedFiles.length > 0) {
         for (const file of attachedFiles) {
           try {
-            await uploadInfractionDocumentAuth(accessToken, locationId, result.infractionId, file);
+            await uploadInfractionDocumentAuth(
+              accessToken,
+              locationId,
+              result.submissionId,
+              file,
+              { isSubmissionId: true }
+            );
           } catch (err) {
             console.warn("[DisciplineInfractionForm] File upload failed:", err);
             // Don't fail the whole submission
