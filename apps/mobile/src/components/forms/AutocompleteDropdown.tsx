@@ -218,15 +218,17 @@ export function AutocompleteDropdown({
 
           {/* Search */}
           <View style={styles.searchWrapper}>
-            <TextInput
-              style={[styles.searchInput, { backgroundColor: colors.surfaceVariant, color: colors.onSurface }]}
-              placeholder="Search..."
-              placeholderTextColor={colors.onSurfaceDisabled}
-              value={searchText}
-              onChangeText={setSearchText}
-              autoFocus
-              returnKeyType="search"
-            />
+            <GlassCard contentStyle={styles.searchCardContent}>
+              <TextInput
+                style={[styles.searchInput, { color: colors.onSurface }]}
+                placeholder="Search..."
+                placeholderTextColor={colors.onSurfaceDisabled}
+                value={searchText}
+                onChangeText={setSearchText}
+                autoFocus
+                returnKeyType="search"
+              />
+            </GlassCard>
           </View>
 
           {/* Options list */}
@@ -307,11 +309,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[5],
     paddingBottom: spacing[3],
   },
+  searchCardContent: {
+    paddingVertical: 0,
+    paddingHorizontal: spacing[4],
+  },
   searchInput: {
     ...typography.bodyMedium,
-    borderRadius: borderRadius.md,
-    borderCurve: "continuous",
-    paddingHorizontal: 16,
     paddingVertical: 12,
   },
   listContent: {
