@@ -3,7 +3,6 @@ import {
   IconButton,
   Button,
   Tooltip,
-  Chip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -18,19 +17,16 @@ interface EvaluationSection {
   name_es?: string;
   order: number;
   is_predefined: boolean;
-  max_role_level?: number;
 }
 
 interface SectionManagerProps {
   sections: EvaluationSection[];
   onSectionsChange: (sections: EvaluationSection[]) => void;
-  roleLevel: number;
 }
 
 export function SectionManager({
   sections,
   onSectionsChange,
-  roleLevel,
 }: SectionManagerProps) {
   const sorted = [...sections].sort((a, b) => a.order - b.order);
 
@@ -77,133 +73,96 @@ export function SectionManager({
     onSectionsChange([...sections, newSection]);
   };
 
-  const isDimmed = (section: EvaluationSection) =>
-    section.max_role_level != null && roleLevel > section.max_role_level;
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {sorted.map((section, index) => {
-        const dimmed = isDimmed(section);
-        return (
+      {sorted.map((section, index) => (
+        <div
+          key={section.id}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+            padding: '10px 12px',
+            borderRadius: 8,
+            border: '1px solid var(--ls-color-muted-border)',
+            background: 'var(--ls-color-bg-container)',
+          }}
+        >
           <div
-            key={section.id}
             style={{
               display: 'flex',
-              flexDirection: 'column',
+              alignItems: 'center',
               gap: 6,
-              padding: '10px 12px',
-              borderRadius: 8,
-              border: `1px solid var(--ls-color-muted-border)`,
-              background: dimmed ? 'var(--ls-color-neutral-foreground)' : 'var(--ls-color-bg-container)',
-              opacity: dimmed ? 0.55 : 1,
-              transition: 'opacity 0.2s',
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-              }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Tooltip title="Move up">
-                  <span>
-                    <IconButton
-                      size="small"
-                      disabled={index === 0}
-                      onClick={() => handleMoveUp(index)}
-                      sx={{ padding: '1px' }}
-                    >
-                      <ArrowUpwardIcon sx={{ fontSize: 14, color: 'var(--ls-color-muted)' }} />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-                <Tooltip title="Move down">
-                  <span>
-                    <IconButton
-                      size="small"
-                      disabled={index === sorted.length - 1}
-                      onClick={() => handleMoveDown(index)}
-                      sx={{ padding: '1px' }}
-                    >
-                      <ArrowDownwardIcon sx={{ fontSize: 14, color: 'var(--ls-color-muted)' }} />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              </div>
-
-              <div style={{ flex: 1, display: 'flex', gap: 8 }}>
-                <StyledTextField
-                  label="Name (EN)"
-                  value={section.name}
-                  onChange={(e) => handleNameChange(section.id, e.target.value)}
-                  size="small"
-                  fullWidth
-                />
-                <StyledTextField
-                  label="Name (ES)"
-                  value={section.name_es || ''}
-                  onChange={(e) => handleNameEsChange(section.id, e.target.value)}
-                  size="small"
-                  fullWidth
-                />
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                {section.is_predefined && (
-                  <Tooltip title="Predefined section">
-                    <LockIcon sx={{ fontSize: 14, color: 'var(--ls-color-muted)' }} />
-                  </Tooltip>
-                )}
-                {section.max_role_level != null && (
-                  <Chip
-                    label={`≤ L${section.max_role_level}`}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Tooltip title="Move up">
+                <span>
+                  <IconButton
                     size="small"
-                    sx={{
-                      fontFamily,
-                      fontSize: 10,
-                      fontWeight: 600,
-                      height: 20,
-                      borderRadius: '4px',
-                      backgroundColor: 'var(--ls-color-neutral-foreground)',
-                      color: 'var(--ls-color-muted)',
-                    }}
-                  />
-                )}
-                {!section.is_predefined && (
-                  <Tooltip title="Delete section">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDelete(section.id)}
-                      sx={{
-                        padding: '2px',
-                        '&:hover': { color: 'var(--ls-color-destructive)' },
-                      }}
-                    >
-                      <DeleteOutlineIcon sx={{ fontSize: 16 }} />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </div>
+                    disabled={index === 0}
+                    onClick={() => handleMoveUp(index)}
+                    sx={{ padding: '1px' }}
+                  >
+                    <ArrowUpwardIcon sx={{ fontSize: 14, color: 'var(--ls-color-muted)' }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <Tooltip title="Move down">
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled={index === sorted.length - 1}
+                    onClick={() => handleMoveDown(index)}
+                    sx={{ padding: '1px' }}
+                  >
+                    <ArrowDownwardIcon sx={{ fontSize: 14, color: 'var(--ls-color-muted)' }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
             </div>
 
-            {dimmed && (
-              <span
-                style={{
-                  fontFamily,
-                  fontSize: 11,
-                  color: 'var(--ls-color-muted)',
-                  fontStyle: 'italic',
-                  paddingLeft: 36,
-                }}
-              >
-                Not applicable at role level {roleLevel} (max level {section.max_role_level})
-              </span>
-            )}
+            <div style={{ flex: 1, display: 'flex', gap: 8 }}>
+              <StyledTextField
+                label="Name (EN)"
+                value={section.name}
+                onChange={(e) => handleNameChange(section.id, e.target.value)}
+                size="small"
+                fullWidth
+              />
+              <StyledTextField
+                label="Name (ES)"
+                value={section.name_es || ''}
+                onChange={(e) => handleNameEsChange(section.id, e.target.value)}
+                size="small"
+                fullWidth
+              />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              {section.is_predefined && (
+                <Tooltip title="Predefined section">
+                  <LockIcon sx={{ fontSize: 14, color: 'var(--ls-color-muted)' }} />
+                </Tooltip>
+              )}
+              {!section.is_predefined && (
+                <Tooltip title="Delete section">
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDelete(section.id)}
+                    sx={{
+                      padding: '2px',
+                      '&:hover': { color: 'var(--ls-color-destructive)' },
+                    }}
+                  >
+                    <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </div>
           </div>
-        );
-      })}
+        </div>
+      ))}
 
       <Button
         size="small"

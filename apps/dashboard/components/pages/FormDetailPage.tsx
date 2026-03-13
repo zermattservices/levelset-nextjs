@@ -1,12 +1,13 @@
 import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { Tab, Tabs, Button, Chip, Snackbar, Alert } from '@mui/material';
+import { Tab, Tabs, Button, IconButton, Chip, Snackbar, Alert } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined';
 import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
+import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import sty from './FormDetailPage.module.css';
 import projectcss from '@/styles/base.module.css';
 import { MenuNavigation } from '@/components/ui/MenuNavigation/MenuNavigation';
@@ -17,6 +18,7 @@ import { FormEditorPanel } from '@/components/forms/editor/FormEditorPanel';
 import { FormPreviewPanel } from '@/components/forms/FormPreviewPanel';
 import { FormSubmissionsTable } from '@/components/forms/FormSubmissionsTable';
 import type { FormTemplate, FormGroup, FormType, FormSubmission } from '@/lib/forms/types';
+import { EvaluationSettingsModal } from '@/components/forms/evaluation/EvaluationSettingsModal';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -49,6 +51,7 @@ export function FormDetailPage() {
   const [saving, setSaving] = React.useState(false);
   const [submissions, setSubmissions] = React.useState<FormSubmission[]>([]);
   const [submissionsLoading, setSubmissionsLoading] = React.useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -404,6 +407,26 @@ export function FormDetailPage() {
                   />
                 </div>
               </div>
+              {template.form_type === 'evaluation' && !isSystem && (
+                <IconButton
+                  onClick={() => setSettingsModalOpen(true)}
+                  aria-label="Evaluation settings"
+                  sx={{
+                    border: '1px solid var(--ls-color-muted-border)',
+                    borderRadius: '8px',
+                    padding: '8px',
+                    color: 'var(--ls-color-muted)',
+                    transition: 'all 200ms ease-out',
+                    '&:hover': {
+                      color: 'var(--ls-color-brand)',
+                      borderColor: 'var(--ls-color-brand)',
+                      backgroundColor: 'var(--ls-color-brand-soft)',
+                    },
+                  }}
+                >
+                  <TuneOutlinedIcon sx={{ fontSize: 20 }} />
+                </IconButton>
+              )}
             </div>
 
             {/* Tabs */}
@@ -495,6 +518,17 @@ export function FormDetailPage() {
           </div>
         </div>
       </div>
+
+      {template.form_type === 'evaluation' && !isSystem && (
+        <EvaluationSettingsModal
+          open={settingsModalOpen}
+          onClose={() => setSettingsModalOpen(false)}
+          evaluationSettings={template.settings?.evaluation || {}}
+          onSave={async (evalSettings) => {
+            await handleSaveEvaluationSettings(evalSettings);
+          }}
+        />
+      )}
 
       <Snackbar
         open={snackbar.open}
