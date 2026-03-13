@@ -48,3 +48,147 @@
   font-size: 13px;
   color: var(--ls-color-muted);
 }
+
+/* ── Evaluation section containers ─────────────────────────── */
+
+.sectionContainer {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ls-color-bg-card);
+  transition: border-color 200ms ease-out;
+}
+
+.sectionContainer:hover {
+  border-color: var(--ls-color-border);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--ls-color-neutral-foreground);
+  border-bottom: 1px solid var(--ls-color-muted-border);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 150ms ease-out;
+}
+
+.sectionHeader:hover {
+  background: var(--ls-color-brand-soft);
+}
+
+.sectionHeaderCollapsed {
+  border-bottom: none;
+}
+
+.sectionName {
+  flex: 1;
+  font-family: "Satoshi", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ls-color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.sectionMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionWeight {
+  font-family: "Satoshi", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  white-space: nowrap;
+}
+
+.sectionFieldCount {
+  font-family: "Satoshi", sans-serif;
+  font-size: 11px;
+  color: var(--ls-color-muted);
+  white-space: nowrap;
+}
+
+.sectionFields {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  min-height: 40px;
+}
+
+.sectionFieldsEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  color: var(--ls-color-muted);
+  font-style: italic;
+  border: 1px dashed var(--ls-color-muted-border);
+  border-radius: 6px;
+  margin: 8px;
+}
+
+.unscoredArea {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.unscoredHeader {
+  font-family: "Satoshi", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ls-color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 0;
+}
+
+.weightTotalBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px 0 2px;
+  border-top: 1px solid var(--ls-color-muted-border);
+  margin-top: 4px;
+}
+
+.weightTotalText {
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.weightBalanced {
+  color: var(--ls-color-success);
+}
+
+.weightUnbalanced {
+  color: var(--ls-color-warning);
+}
+
+/* Collapse/expand animation */
+.sectionFieldsCollapsible {
+  overflow: hidden;
+  transition: max-height 200ms ease-out, opacity 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionFieldsCollapsible {
+    transition: none;
+  }
+  .sectionHeader,
+  .sectionContainer {
+    transition: none;
+  }
+}

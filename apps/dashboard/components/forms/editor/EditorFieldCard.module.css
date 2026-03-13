@@ -86,3 +86,45 @@
   text-overflow: ellipsis;
 }
 
+/* ── Inline evaluation scoring ────────────────────────────── */
+
+.scoringControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.weightInput {
+  width: 48px;
+  height: 24px;
+  border: 1px solid var(--ls-color-muted-border);
+  border-radius: 6px;
+  text-align: center;
+  font-family: "Satoshi", sans-serif;
+  font-size: 12px;
+  color: var(--ls-color-text-primary);
+  background: var(--ls-color-bg-container);
+  outline: none;
+  transition: border-color 150ms ease-out;
+}
+
+.weightInput:focus {
+  border-color: var(--ls-color-brand);
+  box-shadow: 0 0 0 1px var(--ls-color-brand);
+}
+
+.weightInput:hover:not(:focus) {
+  border-color: var(--ls-color-border);
+}
+
+/* Remove spinner arrows on number inputs */
+.weightInput::-webkit-outer-spin-button,
+.weightInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.weightInput[type="number"] {
+  -moz-appearance: textfield;
+}
+

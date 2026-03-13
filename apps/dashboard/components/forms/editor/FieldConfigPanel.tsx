@@ -25,6 +25,12 @@ interface FieldConfigPanelProps {
   onUpdateField: (id: string, updates: Partial<FormField>) => void;
   isEvaluation?: boolean;
   formType?: string;
+  /** Available evaluation sections for section assignment dropdown */
+  evaluationSections?: Array<{ id: string; name: string }>;
+  /** Current evaluation question config for the selected field */
+  evaluationQuestion?: { section_id: string; weight: number; scoring_type: string };
+  /** Callback to assign field to a section */
+  onAssignSection?: (fieldId: string, sectionId: string) => void;
 }
 
 const SCORING_TYPES = [
@@ -39,6 +45,9 @@ export function FieldConfigPanel({
   onUpdateField,
   isEvaluation,
   formType,
+  evaluationSections,
+  evaluationQuestion,
+  onAssignSection,
 }: FieldConfigPanelProps) {
   if (!field) {
     return (
@@ -382,6 +391,33 @@ export function FieldConfigPanel({
               size="small"
               slotProps={{ htmlInput: { min: 1, max: 10 } }}
             />
+          </div>
+        </>
+      )}
+
+      {/* Evaluation section assignment */}
+      {isEvaluation && !isSection && evaluationSections && evaluationSections.length > 0 && (
+        <>
+          <Divider sx={{ margin: '8px 0' }} />
+          <div className={sty.configSection}>
+            <span className={sty.sectionLabel}>Section</span>
+            <FormControl fullWidth size="small">
+              <InputLabel sx={inputLabelSx}>Section</InputLabel>
+              <StyledSelect
+                value={evaluationQuestion?.section_id || ''}
+                onChange={(e) => onAssignSection?.(field.id, e.target.value as string)}
+                label="Section"
+              >
+                <MenuItem value="" sx={{ fontFamily, fontSize: 13 }}>
+                  <em>Unscored</em>
+                </MenuItem>
+                {evaluationSections.map((s) => (
+                  <MenuItem key={s.id} value={s.id} sx={{ fontFamily, fontSize: 13 }}>
+                    {s.name}
+                  </MenuItem>
+                ))}
+              </StyledSelect>
+            </FormControl>
           </div>
         </>
       )}

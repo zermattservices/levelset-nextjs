@@ -25,7 +25,6 @@ import {
   type FormField,
 } from '@/lib/forms/schema-builder';
 import type { FormTemplate } from '@/lib/forms/types';
-import { EvaluationEditorExtension } from '../evaluation/EvaluationEditorExtension';
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -45,6 +44,29 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
   const [saveStatus, setSaveStatus] = React.useState<SaveStatus>('saved');
   const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const fieldsInitialized = React.useRef(false);
+
+  // Evaluation data plumbing
+  const evalSettings = template.settings?.evaluation || {};
+  const evaluationSections = React.useMemo(
+    () => (evalSettings.sections || []).map((s: any) => ({ id: s.id, name: s.name })),
+    [evalSettings.sections]
+  );
+  const evaluationQuestions = evalSettings.questions || {};
+
+  const handleEvalQuestionUpdate = React.useCallback(
+    (fieldId: string, updates: Partial<{ section_id: string; weight: number }>) => {
+      if (!onSaveSettings) return;
+      const currentEval = template.settings?.evaluation || {};
+      const questions = currentEval.questions || {};
+      const current = questions[fieldId] || { section_id: '', weight: 1, scoring_type: 'rating_1_5' };
+      const updatedQuestions = { ...questions, [fieldId]: { ...current, ...updates } };
+      onSaveSettings({
+        ...template.settings,
+        evaluation: { ...currentEval, questions: updatedQuestions },
+      });
+    },
+    [template, onSaveSettings]
+  );
 
   // Initialize fields from template schema
   React.useEffect(() => {
@@ -176,6 +198,14 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
         return arrayMove(prev, oldIndex, newIndex);
       });
     }
+
+    // Evaluation: detect cross-section drops
+    if (template.form_type === 'evaluation' && activeData?.type === 'canvas-field') {
+      const overData = over.data.current;
+      if (overData?.type === 'section-drop' && overData.sectionId !== undefined) {
+        handleEvalQuestionUpdate(active.id as string, { section_id: overData.sectionId });
+      }
+    }
   };
 
   const handleDragCancel = () => {
@@ -231,6 +261,9 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
             onDeleteField={readOnly ? () => {} : handleDeleteField}
             onUpdateField={readOnly ? undefined : handleUpdateField}
             formType={template.form_type}
+            evaluationSections={template.form_type === 'evaluation' ? evaluationSections : undefined}
+            evaluationQuestions={template.form_type === 'evaluation' ? evaluationQuestions : undefined}
+            onUpdateEvaluationQuestion={template.form_type === 'evaluation' ? handleEvalQuestionUpdate : undefined}
           />
 
           {!readOnly && (
@@ -255,18 +288,20 @@ export function FormEditorPanel({ template, onSave, onSaveSettings, readOnly }: 
             onUpdateField={handleUpdateField}
             isEvaluation={template.form_type === 'evaluation'}
             formType={template.form_type}
+            evaluationSections={template.form_type === 'evaluation' ? evaluationSections : undefined}
+            evaluationQuestion={
+              template.form_type === 'evaluation' && selectedField
+                ? evaluationQuestions[selectedField.id]
+                : undefined
+            }
+            onAssignSection={
+              template.form_type === 'evaluation'
+                ? (fieldId, sectionId) => handleEvalQuestionUpdate(fieldId, { section_id: sectionId })
+                : undefined
+            }
           />
         )}
       </div>
-
-      {/* Evaluation-specific extension */}
-      {!readOnly && template.form_type === 'evaluation' && onSaveSettings && (
-        <EvaluationEditorExtension
-          template={template}
-          fields={fields}
-          onUpdateTemplate={(settings) => onSaveSettings(settings)}
-        />
-      )}
     </div>
   );
 }

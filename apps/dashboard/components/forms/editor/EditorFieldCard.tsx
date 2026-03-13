@@ -44,6 +44,13 @@ const TYPE_TAG_ICON_MAP: Record<string, React.ReactNode> = {
 
 const fontFamily = '"Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
+const SCORING_TYPES: Record<string, { label: string; color: string }> = {
+  rating_1_3: { label: '1–3', color: 'var(--ls-color-brand)' },
+  rating_1_5: { label: '1–5', color: 'var(--ls-color-brand)' },
+  true_false: { label: 'T/F', color: '#6366F1' },
+  percentage: { label: '%', color: '#D97706' },
+};
+
 interface EditorFieldCardProps {
   field: FormField;
   isSelected: boolean;
@@ -53,6 +60,10 @@ interface EditorFieldCardProps {
   /** Render as overlay during drag */
   isOverlay?: boolean;
   formType?: string;
+  /** Evaluation scoring info — show inline weight + type chip when present and assigned to a section */
+  evaluationQuestion?: { section_id: string; weight: number; scoring_type: string };
+  /** Callback when weight is changed inline */
+  onUpdateWeight?: (weight: number) => void;
 }
 
 export function EditorFieldCard({
@@ -63,6 +74,8 @@ export function EditorFieldCard({
   onUpdateField,
   isOverlay,
   formType,
+  evaluationQuestion,
+  onUpdateWeight,
 }: EditorFieldCardProps) {
   const {
     attributes,
@@ -161,6 +174,39 @@ export function EditorFieldCard({
           />
         )}
       </div>
+
+      {evaluationQuestion && evaluationQuestion.section_id && (
+        <div className={sty.scoringControls}>
+          <Chip
+            label={SCORING_TYPES[evaluationQuestion.scoring_type]?.label || '?'}
+            size="small"
+            sx={{
+              fontFamily,
+              fontSize: 10,
+              fontWeight: 700,
+              height: 20,
+              minWidth: 32,
+              borderRadius: '4px',
+              backgroundColor: SCORING_TYPES[evaluationQuestion.scoring_type]?.color || 'var(--ls-color-brand)',
+              color: '#fff',
+              '& .MuiChip-label': { padding: '0 5px' },
+            }}
+          />
+          <input
+            type="number"
+            className={sty.weightInput}
+            value={evaluationQuestion.weight}
+            min={0}
+            max={100}
+            aria-label={`Weight for ${field.label}`}
+            onChange={(e) => {
+              const val = Math.max(0, Math.min(100, Number(e.target.value) || 0));
+              onUpdateWeight?.(val);
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       <IconButton
         size="small"
