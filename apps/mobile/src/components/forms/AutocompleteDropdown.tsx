@@ -201,7 +201,7 @@ export function AutocompleteDropdown({
       >
         <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
           {GlassView ? (
-            <GlassView style={[styles.modalHeader, { borderBottomColor: colors.outline }]}>
+            <GlassView style={[styles.modalHeader, styles.glassHeader, { borderBottomColor: colors.outline }]}>
               <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
                 <AppIcon name="xmark.circle.fill" size={24} tintColor={colors.onSurfaceVariant} />
               </TouchableOpacity>
@@ -287,6 +287,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
+  },
+  glassHeader: {
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderCurve: "continuous",
+    overflow: "hidden",
   },
   closeButton: {
     width: 40,
