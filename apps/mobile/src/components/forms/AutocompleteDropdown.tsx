@@ -11,12 +11,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
-  Modal,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppIcon } from "../ui";
 import { useColors } from "../../context/ThemeContext";
-import { useGlass } from "../../hooks/useGlass";
+import { GlassDrawer } from "../glass";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 
@@ -51,8 +49,6 @@ export function AutocompleteDropdown({
   groupBy = false,
 }: AutocompleteDropdownProps) {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
-  const { GlassView } = useGlass();
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
 
@@ -193,61 +189,42 @@ export function AutocompleteDropdown({
 
       {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
 
-      <Modal
+      <GlassDrawer
         visible={isOpen}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={handleClose}
+        onClose={handleClose}
+        title={label}
+        fullScreen
+        scrollable={false}
       >
-        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-          {GlassView ? (
-            <GlassView style={[styles.modalHeader, styles.glassHeader, { borderBottomColor: colors.outline }]}>
-              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                <AppIcon name="xmark.circle.fill" size={24} tintColor={colors.onSurfaceVariant} />
-              </TouchableOpacity>
-              <Text style={[styles.modalTitle, { color: colors.onSurface }]}>{label}</Text>
-              <View style={styles.closeButton} />
-            </GlassView>
-          ) : (
-            <View style={[styles.modalHeader, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
-              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                <AppIcon name="xmark.circle.fill" size={24} tintColor={colors.onSurfaceVariant} />
-              </TouchableOpacity>
-              <Text style={[styles.modalTitle, { color: colors.onSurface }]}>{label}</Text>
-              <View style={styles.closeButton} />
-            </View>
-          )}
-
-          <View style={[styles.searchContainer, { borderBottomColor: colors.outline }]}>
-            <TextInput
-              style={[styles.searchInput, { backgroundColor: colors.surfaceVariant, color: colors.onSurface }]}
-              placeholder="Search..."
-              placeholderTextColor={colors.onSurfaceDisabled}
-              value={searchText}
-              onChangeText={setSearchText}
-              autoFocus
-              returnKeyType="search"
-            />
-          </View>
-
-          {groupBy && groupedOptions ? (
-            renderGroupedList()
-          ) : (
-            <FlatList
-              data={filteredOptions}
-              keyExtractor={(item) => item.value}
-              renderItem={renderOption}
-              contentContainerStyle={styles.listContent}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
-                <View style={styles.emptyContainer}>
-                  <Text style={[styles.emptyText, { color: colors.onSurfaceVariant }]}>No results found</Text>
-                </View>
-              }
-            />
-          )}
+        <View style={[styles.searchContainer, { borderBottomColor: colors.outline }]}>
+          <TextInput
+            style={[styles.searchInput, { backgroundColor: colors.surfaceVariant, color: colors.onSurface }]}
+            placeholder="Search..."
+            placeholderTextColor={colors.onSurfaceDisabled}
+            value={searchText}
+            onChangeText={setSearchText}
+            autoFocus
+            returnKeyType="search"
+          />
         </View>
-      </Modal>
+
+        {groupBy && groupedOptions ? (
+          renderGroupedList()
+        ) : (
+          <FlatList
+            data={filteredOptions}
+            keyExtractor={(item) => item.value}
+            renderItem={renderOption}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={[styles.emptyText, { color: colors.onSurfaceVariant }]}>No results found</Text>
+              </View>
+            }
+          />
+        )}
+      </GlassDrawer>
     </View>
   );
 }
@@ -277,33 +254,6 @@ const styles = StyleSheet.create({
   errorText: {
     ...typography.bodySmall,
     marginTop: 4,
-  },
-  modalContainer: {
-    flex: 1,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  glassHeader: {
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderCurve: "continuous",
-    overflow: "hidden",
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalTitle: {
-    ...typography.h4,
-    flex: 1,
-    textAlign: "center",
   },
   searchContainer: {
     paddingHorizontal: 16,
