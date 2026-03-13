@@ -1,6 +1,7 @@
 /**
  * AutocompleteDropdown Component
  * A searchable dropdown with autocomplete functionality
+ * Uses native formSheet presentation to match the app's modal pattern
  */
 
 import React, { useState, useCallback, useMemo } from "react";
@@ -10,13 +11,17 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Pressable,
   FlatList,
+  Modal,
+  Platform,
 } from "react-native";
 import { AppIcon } from "../ui";
 import { useColors } from "../../context/ThemeContext";
-import { GlassDrawer } from "../glass";
+import { GlassCard } from "../glass";
 import { typography } from "../../lib/fonts";
-import { borderRadius, haptics } from "../../lib/theme";
+import { borderRadius, spacing, haptics } from "../../lib/theme";
+import { fontWeights } from "../../lib/fonts";
 
 export interface DropdownOption {
   value: string;
@@ -189,42 +194,61 @@ export function AutocompleteDropdown({
 
       {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
 
-      <GlassDrawer
+      <Modal
         visible={isOpen}
-        onClose={handleClose}
-        title={label}
-        fullScreen
-        scrollable={false}
+        animationType="slide"
+        presentationStyle="formSheet"
+        onRequestClose={handleClose}
       >
-        <View style={[styles.searchContainer, { borderBottomColor: colors.outline }]}>
-          <TextInput
-            style={[styles.searchInput, { backgroundColor: colors.surfaceVariant, color: colors.onSurface }]}
-            placeholder="Search..."
-            placeholderTextColor={colors.onSurfaceDisabled}
-            value={searchText}
-            onChangeText={setSearchText}
-            autoFocus
-            returnKeyType="search"
-          />
-        </View>
+        <View style={[styles.modalContainer, { backgroundColor: Platform.OS === "ios" ? "transparent" : colors.background }]}>
+          {/* Header — matches edit-profile pattern */}
+          <View style={styles.header}>
+            <Pressable
+              onPress={() => {
+                haptics.light();
+                handleClose();
+              }}
+              style={styles.headerButton}
+            >
+              <Text style={[styles.closeText, { color: colors.primary }]}>Close</Text>
+            </Pressable>
+            <Text style={[styles.headerTitle, { color: colors.onSurface }]}>{label}</Text>
+            <View style={styles.headerButton} />
+          </View>
 
-        {groupBy && groupedOptions ? (
-          renderGroupedList()
-        ) : (
-          <FlatList
-            data={filteredOptions}
-            keyExtractor={(item) => item.value}
-            renderItem={renderOption}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <Text style={[styles.emptyText, { color: colors.onSurfaceVariant }]}>No results found</Text>
-              </View>
-            }
-          />
-        )}
-      </GlassDrawer>
+          {/* Search */}
+          <View style={styles.searchWrapper}>
+            <TextInput
+              style={[styles.searchInput, { backgroundColor: colors.surfaceVariant, color: colors.onSurface }]}
+              placeholder="Search..."
+              placeholderTextColor={colors.onSurfaceDisabled}
+              value={searchText}
+              onChangeText={setSearchText}
+              autoFocus
+              returnKeyType="search"
+            />
+          </View>
+
+          {/* Options list */}
+          {groupBy && groupedOptions ? (
+            renderGroupedList()
+          ) : (
+            <FlatList
+              data={filteredOptions}
+              keyExtractor={(item) => item.value}
+              renderItem={renderOption}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Text style={[styles.emptyText, { color: colors.onSurfaceVariant }]}>No results found</Text>
+                </View>
+              }
+            />
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -255,10 +279,33 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     marginTop: 4,
   },
-  searchContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+  modalContainer: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing[5],
+    paddingTop: spacing[4],
+    paddingBottom: spacing[2],
+  },
+  headerButton: {
+    minWidth: 60,
+    padding: spacing[1],
+  },
+  headerTitle: {
+    ...typography.h4,
+    fontWeight: fontWeights.semibold,
+    textAlign: "center",
+    flex: 1,
+  },
+  closeText: {
+    ...typography.bodyMedium,
+  },
+  searchWrapper: {
+    paddingHorizontal: spacing[5],
+    paddingBottom: spacing[3],
   },
   searchInput: {
     ...typography.bodyMedium,
@@ -268,7 +315,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: spacing[5],
+    paddingBottom: spacing[4],
   },
   option: {
     flexDirection: "row",
