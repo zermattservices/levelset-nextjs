@@ -84,6 +84,9 @@ export function PositionalRatingsForm() {
   const [ratings, setRatings] = useState<(RatingValue | null)[]>([]);
   const [notes, setNotes] = useState("");
 
+  // Auto-fill leader from authenticated user's employee_id
+  const { employeeId: authEmployeeId } = useAuth();
+
   // =============================================================================
   // Data Loading
   // =============================================================================
@@ -97,11 +100,22 @@ export function PositionalRatingsForm() {
     try {
       const data = await fetchPositionalDataAuth(accessToken, locationId);
 
-      setEmployees(data.employees ?? []);
-      setLeaders(data.leaders?.length ? data.leaders : data.employees ?? []);
+      const loadedEmployees = data.employees ?? [];
+      const loadedLeaders = data.leaders?.length ? data.leaders : loadedEmployees;
+
+      setEmployees(loadedEmployees);
+      setLeaders(loadedLeaders);
       setPositions(data.positions ?? []);
       setRolePermissions(data.rolePermissions ?? {});
       setRequireRatingComments(data.requireRatingComments ?? false);
+
+      // Auto-fill leader if the authenticated user is in the leaders list
+      if (authEmployeeId) {
+        const match = loadedLeaders.find((l) => l.id === authEmployeeId);
+        if (match) {
+          setSelectedLeaderId(authEmployeeId);
+        }
+      }
     } catch (err) {
       const message = err instanceof ApiError
         ? err.message
@@ -110,7 +124,7 @@ export function PositionalRatingsForm() {
     } finally {
       setLoading(false);
     }
-  }, [accessToken, locationId]);
+  }, [accessToken, locationId, authEmployeeId]);
 
   useEffect(() => {
     loadData();

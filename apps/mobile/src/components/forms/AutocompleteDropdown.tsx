@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppIcon } from "../ui";
 import { useColors } from "../../context/ThemeContext";
+import { useGlass } from "../../hooks/useGlass";
 import { typography } from "../../lib/fonts";
 import { borderRadius, haptics } from "../../lib/theme";
 
@@ -51,6 +52,7 @@ export function AutocompleteDropdown({
 }: AutocompleteDropdownProps) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { GlassView } = useGlass();
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
 
@@ -197,16 +199,26 @@ export function AutocompleteDropdown({
         presentationStyle="pageSheet"
         onRequestClose={handleClose}
       >
-        <View style={[styles.modalContainer, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-          <View style={[styles.modalHeader, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
-            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-              <AppIcon name="xmark.circle.fill" size={24} tintColor={colors.onSurfaceVariant} />
-            </TouchableOpacity>
-            <Text style={[styles.modalTitle, { color: colors.onSurface }]}>{label}</Text>
-            <View style={styles.closeButton} />
-          </View>
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          {GlassView ? (
+            <GlassView style={[styles.modalHeader, { borderBottomColor: colors.outline }]}>
+              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+                <AppIcon name="xmark.circle.fill" size={24} tintColor={colors.onSurfaceVariant} />
+              </TouchableOpacity>
+              <Text style={[styles.modalTitle, { color: colors.onSurface }]}>{label}</Text>
+              <View style={styles.closeButton} />
+            </GlassView>
+          ) : (
+            <View style={[styles.modalHeader, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
+              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+                <AppIcon name="xmark.circle.fill" size={24} tintColor={colors.onSurfaceVariant} />
+              </TouchableOpacity>
+              <Text style={[styles.modalTitle, { color: colors.onSurface }]}>{label}</Text>
+              <View style={styles.closeButton} />
+            </View>
+          )}
 
-          <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
+          <View style={[styles.searchContainer, { borderBottomColor: colors.outline }]}>
             <TextInput
               style={[styles.searchInput, { backgroundColor: colors.surfaceVariant, color: colors.onSurface }]}
               placeholder="Search..."
