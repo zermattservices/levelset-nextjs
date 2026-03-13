@@ -21,6 +21,7 @@ next-env.d.ts
 *.pdf
 deputy.html
 .claude/worktrees/
+.worktrees/
 .cursor/
 
 # Secrets
