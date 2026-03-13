@@ -4,6 +4,12 @@
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  buildRatingResponseData,
+  buildInfractionResponseData,
+  type SystemTemplate,
+  type FieldMappings,
+} from './form-mapping';
 
 // =============================================================================
 // Configuration
@@ -126,6 +132,22 @@ export interface SubmissionResult {
   points?: number;
   employeeName?: string;
   infractionId?: string; // Returned after infraction submission for document uploads
+  submissionId?: string;  // Form management submission ID
+}
+
+export interface FormSubmissionResult {
+  id: string;
+  org_id: string;
+  location_id: string | null;
+  template_id: string;
+  form_type: string;
+  employee_id: string | null;
+  response_data: Record<string, any>;
+  schema_snapshot: Record<string, any>;
+  score: number | null;
+  status: string;
+  metadata: Record<string, any>;
+  created_at: string;
 }
 
 // =============================================================================
@@ -316,22 +338,50 @@ export async function fetchPositionLabelsAuth(
 }
 
 /**
- * Submit positional ratings (authenticated)
+ * Submit positional ratings via form management system (authenticated).
+ * Fetches the system template, maps form data to field IDs, and submits
+ * to /api/forms/submissions which dual-writes to both form_submissions
+ * and the legacy ratings table.
  */
 export async function submitRatingsAuth(
   accessToken: string,
   locationId: string,
   data: RatingsSubmission
 ): Promise<SubmissionResult> {
+  const template = await fetchSystemTemplate(accessToken, 'positional-excellence-rating');
+  const mappings = template.settings?.field_mappings;
+
+  if (!mappings) {
+    throw new ApiError('Rating template is missing field mappings', 500);
+  }
+
+  const responseData = buildRatingResponseData(mappings, {
+    leaderId: data.leaderId,
+    employeeId: data.employeeId,
+    position: data.position,
+    ratings: data.ratings,
+    notes: data.notes ?? null,
+  });
+
   const response = await fetch(
-    `${API_BASE_URL}/api/native/forms/ratings`,
+    `${API_BASE_URL}/api/forms/submissions`,
     {
-      method: "POST",
+      method: 'POST',
       headers: authHeaders(accessToken),
-      body: JSON.stringify({ ...data, location_id: locationId }),
+      body: JSON.stringify({
+        template_id: template.id,
+        location_id: locationId,
+        employee_id: data.employeeId,
+        response_data: responseData,
+      }),
     }
   );
-  return handleResponse<SubmissionResult>(response);
+
+  await handleResponse<FormSubmissionResult>(response);
+
+  return {
+    success: true,
+  };
 }
 
 /**
@@ -347,49 +397,96 @@ export async function fetchInfractionDataAuth(
 }
 
 /**
- * Submit a discipline infraction (authenticated)
+ * Submit a discipline infraction via form management system (authenticated).
+ * Fetches the system template, maps form data to field IDs, and submits
+ * to /api/forms/submissions which dual-writes to both form_submissions
+ * and the legacy infractions table.
  */
 export async function submitInfractionAuth(
   accessToken: string,
   locationId: string,
   data: InfractionSubmission
 ): Promise<SubmissionResult> {
+  const template = await fetchSystemTemplate(accessToken, 'discipline-infraction');
+  const mappings = template.settings?.field_mappings;
+
+  if (!mappings) {
+    throw new ApiError('Infraction template is missing field mappings', 500);
+  }
+
+  const responseData = buildInfractionResponseData(mappings, {
+    leaderId: data.leaderId,
+    employeeId: data.employeeId,
+    infractionId: data.infractionId,
+    infractionDate: data.infractionDate,
+    acknowledged: data.acknowledged,
+    notes: data.notes ?? null,
+    teamMemberSignature: data.teamMemberSignature ?? null,
+    leaderSignature: data.leaderSignature,
+  });
+
   const response = await fetch(
-    `${API_BASE_URL}/api/native/forms/infractions`,
+    `${API_BASE_URL}/api/forms/submissions`,
     {
-      method: "POST",
+      method: 'POST',
       headers: authHeaders(accessToken),
-      body: JSON.stringify({ ...data, location_id: locationId }),
+      body: JSON.stringify({
+        template_id: template.id,
+        location_id: locationId,
+        employee_id: data.employeeId,
+        response_data: responseData,
+      }),
     }
   );
-  return handleResponse<SubmissionResult>(response);
+
+  const result = await handleResponse<FormSubmissionResult>(response);
+
+  return {
+    success: true,
+    infractionId: result.metadata?.infraction_id || undefined,
+    submissionId: result.id,
+  };
 }
 
 /**
- * Upload a document attachment for an infraction (authenticated)
+ * Upload a document attachment for an infraction via form submission.
+ * Uses the form-management submission-documents endpoint which resolves
+ * the infraction_id from the form submission's metadata.
  */
 export async function uploadInfractionDocumentAuth(
   accessToken: string,
   locationId: string,
-  infractionId: string,
-  file: { uri: string; name: string; type: string }
+  submissionOrInfractionId: string,
+  file: { uri: string; name: string; type: string },
+  options?: { isSubmissionId?: boolean }
 ): Promise<{ id: string; file_name: string }> {
   const formData = new FormData();
-  formData.append("infraction_id", infractionId);
-  formData.append("location_id", locationId);
-  formData.append("file", {
+  formData.append('location_id', locationId);
+  formData.append('file', {
     uri: file.uri,
     name: file.name,
     type: file.type,
   } as any);
 
+  if (options?.isSubmissionId) {
+    formData.append('submission_id', submissionOrInfractionId);
+    const response = await fetch(
+      `${API_BASE_URL}/api/forms/submission-documents`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: formData,
+      }
+    );
+    return handleResponse<{ id: string; file_name: string }>(response);
+  }
+
+  formData.append('infraction_id', submissionOrInfractionId);
   const response = await fetch(
     `${API_BASE_URL}/api/native/forms/infraction-documents`,
     {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}` },
       body: formData,
     }
   );
@@ -865,6 +962,34 @@ export function clearApiCache(): void {
 }
 
 // =============================================================================
+// System Template Cache (longer TTL - templates rarely change)
+// =============================================================================
+
+const TEMPLATE_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+/**
+ * Fetch a system form template by slug for the current user's org.
+ * Cached for 10 minutes since templates rarely change.
+ */
+export async function fetchSystemTemplate(
+  accessToken: string,
+  slug: string
+): Promise<SystemTemplate> {
+  const cacheKey = `system-template:${slug}`;
+  const entry = cache.get(cacheKey);
+
+  if (entry && Date.now() - entry.timestamp <= TEMPLATE_CACHE_TTL) {
+    return entry.data as SystemTemplate;
+  }
+
+  const url = `${API_BASE_URL}/api/forms/template-by-slug?slug=${encodeURIComponent(slug)}`;
+  const response = await fetch(url, { headers: authHeaders(accessToken) });
+  const data = await handleResponse<SystemTemplate>(response);
+  setCache(cacheKey, data);
+  return data;
+}
+
+// =============================================================================
 // Recent Activities API Functions (JWT-based, authenticated)
 // =============================================================================
 
@@ -1122,6 +1247,8 @@ export default {
   fetchInfractionDataAuth,
   submitInfractionAuth,
   uploadInfractionDocumentAuth,
+  // Form Management API
+  fetchSystemTemplate,
   // Submissions API (JWT-based, authenticated)
   fetchSubmissionsAuth,
   // Schedule API (JWT-based, authenticated)
