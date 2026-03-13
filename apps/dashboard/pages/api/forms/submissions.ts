@@ -2,6 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { calculateEvaluationScore } from '@/lib/forms/scoring';
 import { resolveConnectedQuestions } from '@/lib/forms/connectors-resolver';
+import { checkPermission } from '@/lib/permissions/service';
+import { P } from '@/lib/permissions/constants';
+import { validateLocationAccess } from '@/lib/native-auth';
 
 export default async function handler(
   req: NextApiRequest,
@@ -138,6 +141,33 @@ export default async function handler(
 
     if (templateError || !template) {
       return res.status(404).json({ error: 'Form template not found' });
+    }
+
+    // Permission check for system form types (rating/discipline)
+    if (template.form_type === 'rating' || template.form_type === 'discipline') {
+      const locationId = location_id || req.body?.location_id;
+      if (!locationId) {
+        return res.status(400).json({ error: 'location_id is required for system form submissions' });
+      }
+
+      // Validate location access (user.id here is auth_user_id from getUser())
+      const location = await validateLocationAccess(user.id, orgId, locationId);
+      if (!location) {
+        return res.status(403).json({ error: 'No access to this location' });
+      }
+
+      // Levelset Admin bypasses permission checks
+      const isAdmin = appUser.role === 'Levelset Admin';
+      if (!isAdmin) {
+        const permissionKey = template.form_type === 'rating'
+          ? P.PE_SUBMIT_RATINGS
+          : P.DISC_SUBMIT_INFRACTIONS;
+
+        const hasPermission = await checkPermission(supabase, user.id, orgId, permissionKey);
+        if (!hasPermission) {
+          return res.status(403).json({ error: 'Permission denied' });
+        }
+      }
     }
 
     // Calculate evaluation score if applicable
