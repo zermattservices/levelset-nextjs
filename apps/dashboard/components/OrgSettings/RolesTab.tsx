@@ -176,8 +176,9 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
 
       if (updateError) throw updateError;
 
-      // Sync permission profile linked_role_name and name
+      // Cascade rename to related tables
       if (previousName && previousName !== role.role_name) {
+        // Sync permission profile linked_role_name and name
         await supabase
           .from('permission_profiles')
           .update({
@@ -188,6 +189,9 @@ export function RolesTab({ orgId, disabled = false }: RolesTabProps) {
           .eq('org_id', orgId)
           .eq('linked_role_name', previousName)
           .eq('is_system_default', true);
+
+        // Note: employees.role and position_role_permissions.role_name
+        // are cascaded automatically by the DB trigger on org_roles.
       }
     } catch (err) {
       console.error('Error updating role name:', err);
